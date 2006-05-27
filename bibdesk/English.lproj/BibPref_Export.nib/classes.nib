@@ -5,6 +5,7 @@
         {
             ACTIONS = {
                 addNode = id; 
+                changePrefList = id; 
                 editFile = id; 
                 openFile = id; 
                 removeNode = id; 
@@ -12,7 +13,12 @@
             }; 
             CLASS = "BibPref_Export"; 
             LANGUAGE = ObjC; 
-            OUTLETS = {addButton = NSButton; deleteButton = NSButton; outlineView = NSOutlineView; }; 
+            OUTLETS = {
+                addButton = NSButton; 
+                deleteButton = NSButton; 
+                outlineView = NSOutlineView; 
+                prefListRadio = NSMatrix; 
+            }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
         {

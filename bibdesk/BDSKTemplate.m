@@ -114,7 +114,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 + (NSArray *)setupDefaultServiceTemplates
 {
-    NSMutableArray *itemNodes = [[NSMutableDictionary alloc] initWithCapacity:2];
+    NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:2];
     NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
     BDSKTemplate *template = nil;
     NSURL *fileURL = nil;

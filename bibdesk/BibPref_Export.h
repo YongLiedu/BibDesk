@@ -43,9 +43,13 @@
     NSMutableArray *itemNodes;
     NSMutableArray *roles;    
     NSArray *fileTypes;    
+    int templatePrefList;
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *deleteButton;
+    IBOutlet NSMatrix *prefListRadio;
 }
+
+- (IBAction)changePrefList:(id)sender;
 
 - (IBAction)addNode:(id)sender;
 - (IBAction)removeNode:(id)sender;

@@ -46,30 +46,39 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 @implementation BibPref_Export
 
+- (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
+	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
+        
+        NSData *data = [defaults objectForKey:BDSKExportTemplateTree];
+        if([data length])
+            itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
+        else 
+            itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
+        
+        fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"rtf", @"doc", nil];
+        
+        roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateMainPageString, BDSKTemplateDefaultItemString, BDSKTemplateAccessoryString, nil];
+        [roles addObjectsFromArray:[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
+        
+        templatePrefList = 0;
+	}
+	return self;
+}
+
 - (void)restoreDefaultsNoPrompt;
 {
     [super restoreDefaultsNoPrompt];
     [itemNodes release];
-    itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
+    if (templatePrefList == 0)
+        itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
+    else    
+        itemNodes = [[BDSKTemplate setupDefaultServiceTemplates] mutableCopy];
     [self updateUI];
 }
 
 - (void)awakeFromNib
 {    
-        
     [super awakeFromNib];
-    
-    NSData *data = [defaults objectForKey:BDSKExportTemplateTree];
-    if([data length]){
-        itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
-    } else {
-        itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
-    }
-
-    fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"rtf", @"doc", nil];
-    
-    roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateMainPageString, BDSKTemplateDefaultItemString, BDSKTemplateAccessoryString, nil];
-    [roles addObjectsFromArray:[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
 
     [outlineView setAutosaveExpandedItems:YES];
     
@@ -94,15 +103,29 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 {
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
     if(nil != data)
-        [defaults setObject:data forKey:BDSKExportTemplateTree];
+        [defaults setObject:data forKey:(templatePrefList == 0) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
     else
         NSLog(@"Unable to archive %@", itemNodes);
 }
 
 - (void)updateUI
 {
+    [prefListRadio selectCellWithTag:templatePrefList];
     [outlineView reloadData];
     [self synchronizePrefs];
+}
+
+- (IBAction)changePrefList:(id)sender{
+    templatePrefList = [[sender selectedCell] tag];
+    [itemNodes release];
+    NSData *data = [defaults objectForKey:(templatePrefList == 0) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
+    if([data length])
+        itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
+    else if (templatePrefList == 0)
+        itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
+    else
+        itemNodes = [[BDSKTemplate setupDefaultServiceTemplates] mutableCopy];
+    [outlineView reloadData];
 }
 
 - (IBAction)addNode:(id)sender;
@@ -118,6 +141,9 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         // add as a child of the selected node
         [selectedNode addChild:newNode];
     } else {
+        if (templatePrefList == 1)
+            return;
+        
         // add as a non-leaf node
         [itemNodes addObject:newNode];
         
@@ -228,9 +254,13 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             // bypass the normal editing mechanism, or it'll reset the value
             return NO;
         } else if([identifier isEqualToString:BDSKTemplateRoleString]){
+            if(templatePrefList == 1)
+                return NO;
             if([[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
                 return NO;
         } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", identifier];
+    }else if(templatePrefList == 1){
+        return NO;
     }
     return YES;
 }
@@ -262,7 +292,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (BOOL)canDeleteSelectedItem
 {
     BDSKTreeNode *selItem = [outlineView selectedItem];
-    return ([selItem isLeaf] == NO || [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO);
+    return ((templatePrefList == 0 && [selItem isLeaf] == NO) || [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO);
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
@@ -503,24 +533,24 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 - (NSCell *)tableView:(NSTableView *)tableView column:(OADataSourceTableColumn *)tableColumn dataCellForRow:(int)row;
 {
+    static NSComboBoxCell *disabledCell = nil;
+    
     id cell = [tableColumn dataCell];
     id item = [(NSOutlineView *)tableView itemAtRow:row];
     
-    // setting an NSComboBoxCell to disabled in outlineView:willDisplayCell:... results in a non-editable cell with black text instead of disabled text; creating a new cell works around that problem
-    if([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]){
-        cell = [[[NSComboBoxCell alloc] initTextCell:@""] autorelease];
-        [cell setButtonBordered:NO];
-        [cell setBordered:NO];
-        [cell setControlSize:NSSmallControlSize];
-        [cell setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]]];
-        [cell setEnabled:NO];
+    if(([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) || (templatePrefList == 1)){
+        // setting an NSComboBoxCell to disabled in outlineView:willDisplayCell:... results in a non-editable cell with black text instead of disabled text; creating a new cell works around that problem
+        if (disabledCell == nil) {
+            disabledCell = [[NSComboBoxCell alloc] initTextCell:@""];
+            [disabledCell setButtonBordered:NO];
+            [disabledCell setBordered:NO];
+            [disabledCell setControlSize:NSSmallControlSize];
+            [disabledCell setFont:[cell font]];
+            [disabledCell setEnabled:NO];
+        }
+        cell = disabledCell;
     }
-    
     return cell;
 }
-
-- (id)comboBoxCell:(NSComboBoxCell *)aComboBoxCell objectValueForItemAtIndex:(int)index { return [roles objectAtIndex:index]; }
-
-- (int)numberOfItemsInComboBoxCell:(NSComboBoxCell *)aComboBoxCell { return [roles count]; }
 
 @end
