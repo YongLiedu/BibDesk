@@ -709,6 +709,11 @@ static int MAX_RATING = 5;
     return [orArray autorelease];
 }
 
+- (NSAttributedString *)linkedText {
+    NSURL *url = [NSURL URLWithStringByNormalizingPercentEscapes:self];
+    return [[[NSAttributedString alloc] initWithString:self attributeName:NSLinkAttributeName attributeValue:url] autorelease];
+}
+
 @end
 
 

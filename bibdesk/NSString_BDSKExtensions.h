@@ -377,6 +377,8 @@ An inline buffer is used for speed in accessing each character.
 - (NSArray *)andSearchComponents;
 - (NSArray *)orSearchComponents;
 
+- (NSAttributedString *)linkedText;
+
 @end
 
 @interface NSMutableString (BDSKExtensions)

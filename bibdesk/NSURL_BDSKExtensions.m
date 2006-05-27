@@ -203,4 +203,8 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return charSet;
 }
 
+- (NSAttributedString *)linkedText {
+    return [[[NSAttributedString alloc] initWithString:[self absoluteString] attributeName:NSLinkAttributeName attributeValue:self] autorelease];
+}
+
 @end
