@@ -72,6 +72,8 @@
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPreferenceController.h"
+#import "BDSKTemplateParser.h"
+#import "BDSKTemplate.h"
 
 @implementation BibAppController
 
@@ -1256,6 +1258,104 @@
         [pboard declareTypes:types owner:nil];
 
         yn = [pboard setString:keys forType:NSStringPboardType];
+    }
+    return;
+}
+
+- (void)completeTextCitationFromSelection:(NSPasteboard *)pboard
+                                 userData:(NSString *)userData
+                                    error:(NSString **)error{
+    NSString *pboardString;
+    NSArray *types;
+    NSSet *items;
+    BDSKTemplate *template = [BDSKTemplate templateForRTFService];
+    OBPRECONDITION(nil != template && [template templateFormat] == BDSKTextTemplateFormat);
+    NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
+    OBPRECONDITION(nil != fileTemplate);
+    NSDictionary *docAttributes = nil;
+    
+    types = [pboard types];
+    if (![types containsObject:NSStringPboardType]) {
+        *error = NSLocalizedString(@"Error: couldn't complete text.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+    pboardString = [pboard stringForType:NSStringPboardType];
+    if (!pboardString) {
+        *error = NSLocalizedString(@"Error: couldn't complete text.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+
+    NSDictionary *searchConstraints = [self constraintsFromString:pboardString];
+    
+    if(searchConstraints == nil){
+        *error = NSLocalizedString(@"Error: invalid search constraints.",
+                                   @"search constraints not valid.");
+        return;
+    }        
+
+    items = [self itemsMatchingSearchConstraints:searchConstraints];
+    
+    if([items count] > 0){
+        BDSKTemplateObjectProxy *objectProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:[items allObjects] template:template];
+        fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:objectProxy delegate:objectProxy];
+        [objectProxy release];
+        
+        types = [NSArray arrayWithObject:NSStringPboardType];
+        [pboard declareTypes:types owner:nil];
+
+        [pboard setString:fileTemplate forType:NSStringPboardType];
+    }
+    return;
+}
+
+- (void)completeRichCitationFromSelection:(NSPasteboard *)pboard
+                                 userData:(NSString *)userData
+                                    error:(NSString **)error{
+    NSString *pboardString;
+    NSData *pboardData;
+    NSArray *types;
+    NSSet *items;
+    BDSKTemplate *template = [BDSKTemplate templateForRTFService];
+    OBPRECONDITION(nil != template && [template templateFormat] == BDSKRTFTemplateFormat);
+    NSDictionary *docAttributes = nil;
+    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    OBPRECONDITION(nil != fileTemplate);
+    
+    types = [pboard types];
+    if (![types containsObject:NSStringPboardType]) {
+        *error = NSLocalizedString(@"Error: couldn't complete text.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+    pboardString = [pboard stringForType:NSStringPboardType];
+    if (!pboardString) {
+        *error = NSLocalizedString(@"Error: couldn't complete text.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+
+    NSDictionary *searchConstraints = [self constraintsFromString:pboardString];
+    
+    if(searchConstraints == nil){
+        *error = NSLocalizedString(@"Error: invalid search constraints.",
+                                   @"search constraints not valid.");
+        return;
+    }        
+
+    items = [self itemsMatchingSearchConstraints:searchConstraints];
+    
+    if([items count] > 0){
+        BDSKTemplateObjectProxy *objectProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:[items allObjects] template:template];
+        fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:objectProxy delegate:objectProxy];
+        pboardData = [fileTemplate RTFFromRange:NSMakeRange(0, [fileTemplate length]) documentAttributes:docAttributes];
+        [objectProxy release];
+        
+        types = [NSArray arrayWithObject:NSRTFPboardType];
+        [pboard declareTypes:types owner:nil];
+
+        [pboard setData:pboardData forType:NSRTFPboardType];
     }
     return;
 }

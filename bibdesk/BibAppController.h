@@ -207,6 +207,10 @@
 */
 - (void)completeCitationFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
+- (void)completeRichCitationFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+
+- (void)completeTextCitationFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
+
 - (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
 - (void)showPubWithKey:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
