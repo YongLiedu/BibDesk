@@ -1022,6 +1022,12 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return ([document citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
 }
 
+- (NSString *)citation{
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    return [NSString stringWithFormat:@"\\%@%@", [pw stringForKey:BDSKCiteStringKey], 
+            [pw stringForKey:BDSKCiteStartBracketKey], citeKey, [pw stringForKey:BDSKCiteEndBracketKey]]; 
+}
+
 #pragma mark Pub Fields
 
 - (NSDictionary *)pubFields{
