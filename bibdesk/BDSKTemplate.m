@@ -112,9 +112,9 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return [itemNodes autorelease];
 }
 
-+ (NSDictionary *)setupDefaultServiceTemplates
++ (NSArray *)setupDefaultServiceTemplates
 {
-    NSMutableDictionary *itemNodes = [[NSMutableDictionary alloc] initWithCapacity:2];
+    NSMutableArray *itemNodes = [[NSMutableDictionary alloc] initWithCapacity:2];
     NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
     BDSKTemplate *template = nil;
     NSURL *fileURL = nil;
@@ -123,7 +123,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     template = [[BDSKTemplate alloc] init];
     [template setValue:@"Text Service template" forKey:BDSKTemplateNameString];
     [template setValue:@"text" forKey:BDSKTemplateRoleString];
-    [itemNodes setObject:template forKey:@"text"];
+    [itemNodes addObject:template];
     [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"textServiceTemplate"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
@@ -132,7 +132,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     template = [[BDSKTemplate alloc] init];
     [template setValue:@"RTF Service template" forKey:BDSKTemplateNameString];
     [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
-    [itemNodes setObject:template forKey:@"rtf"];
+    [itemNodes addObject:template];
     [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"rtfServiceTemplate"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
@@ -237,24 +237,24 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 + (BDSKTemplate *)templateForTextService;
 {
-    NSDictionary *nodes = nil;
+    NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
     if (prefData == nil)
         nodes = [BDSKTemplate setupDefaultServiceTemplates];
     else 
         nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    return [nodes objectForKey:@"text"];
+    return [nodes objectAtIndex:0];
 }
 
 + (BDSKTemplate *)templateForRTFService;
 {
-    NSDictionary *nodes = nil;
+    NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
     if (prefData == nil)
         nodes = [BDSKTemplate setupDefaultServiceTemplates];
     else 
         nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    return [nodes objectForKey:@"rtf"];
+    return [nodes objectAtIndex:1];
 }
 
 - (BDSKTemplateFormat)templateFormat;

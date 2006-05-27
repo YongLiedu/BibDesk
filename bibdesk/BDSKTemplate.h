@@ -62,7 +62,7 @@ extern NSString *BDSKTemplateDefaultItemString;
 }
 
 + (NSArray *)setupDefaultExportTemplates;
-+ (NSDictionary *)setupDefaultServiceTemplates;
++ (NSArray *)setupDefaultServiceTemplates;
 
 + (NSArray *)allStyleNames;
 + (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
