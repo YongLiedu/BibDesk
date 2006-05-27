@@ -295,7 +295,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (BOOL)canDeleteSelectedItem
 {
     BDSKTreeNode *selItem = [outlineView selectedItem];
-    return ((templatePrefList == 0 && [selItem isLeaf] == NO) || [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO);
+    return ((templatePrefList == 0 && [selItem isLeaf] == NO) || 
+            ([selItem isLeaf]  && [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO));
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
