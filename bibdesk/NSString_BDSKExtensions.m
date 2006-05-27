@@ -43,6 +43,7 @@
 #import "BibPrefController.h"
 #import "CFString_BDSKExtensions.h"
 #import "OFCharacterSet_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 static AGRegex *tipRegex = nil;
 static AGRegex *andRegex = nil;
