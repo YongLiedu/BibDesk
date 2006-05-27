@@ -1270,7 +1270,7 @@
     NSString *pboardString;
     NSArray *types;
     NSSet *items;
-    BDSKTemplate *template = [BDSKTemplate templateForRTFService];
+    BDSKTemplate *template = [BDSKTemplate templateForTextService];
     OBPRECONDITION(nil != template && [template templateFormat] == BDSKTextTemplateFormat);
     NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
     OBPRECONDITION(nil != fileTemplate);
