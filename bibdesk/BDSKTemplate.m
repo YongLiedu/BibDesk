@@ -44,6 +44,7 @@ NSString *BDSKTemplateRoleString = @"role";
 NSString *BDSKTemplateNameString = @"name";
 NSString *BDSKTemplateFileURLString = @"representedFileURL";
 NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
+NSString *BDSKServiceTemplateTree = @"BDSKServiceTemplateTree";
 
 NSString *BDSKTemplateAccessoryString = @"Accessory File";
 NSString *BDSKTemplateMainPageString = @"Main Page";
@@ -53,10 +54,109 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 #pragma mark API for templates
 
++ (NSArray *)setupDefaultExportTemplates
+{
+    NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:4];
+    NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    BDSKTemplate *template = nil;
+    NSURL *fileURL = nil;
+    
+    // HTML template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default HTML template" forKey:BDSKTemplateNameString];
+    [template setValue:@"html" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+            
+    // main page template
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    
+    // a user could potentially have templates for multiple BibTeX types; we could add all of those, as well
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
+    
+    // RTF template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default RTF template" forKey:BDSKTemplateNameString];
+    [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+        
+    // RSS template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default RSS template" forKey:BDSKTemplateNameString];
+    [template setValue:@"rss" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"rssExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
+        
+    // Doc template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default Doc template" forKey:BDSKTemplateNameString];
+    [template setValue:@"doc" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"docExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];  
+    
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
+    if(nil != data)
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:data forKey:BDSKExportTemplateTree];
+    else
+        NSLog(@"Unable to archive %@", itemNodes);
+        
+    return [itemNodes autorelease];
+}
+
++ (NSDictionary *)setupDefaultServiceTemplates
+{
+    NSMutableDictionary *itemNodes = [[NSMutableDictionary alloc] initWithCapacity:2];
+    NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    BDSKTemplate *template = nil;
+    NSURL *fileURL = nil;
+    
+    // HTML template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Text Service template" forKey:BDSKTemplateNameString];
+    [template setValue:@"text" forKey:BDSKTemplateRoleString];
+    [itemNodes setObject:template forKey:@"text"];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"textServiceTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    
+    // RTF template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"RTF Service template" forKey:BDSKTemplateNameString];
+    [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
+    [itemNodes setObject:template forKey:@"rtf"];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"rtfServiceTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
+    if(nil != data)
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:data forKey:BDSKServiceTemplateTree];
+    else
+        NSLog(@"Unable to archive %@", itemNodes);
+        
+    return [itemNodes autorelease];
+}
+
 + (NSArray *)allStyleNames;
 {
+    NSArray *nodes = nil;
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
+    if (prefData == nil)
+        nodes = [BDSKTemplate setupDefaultExportTemplates];
+    else 
+        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    
     NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
+    NSEnumerator *nodeE = [nodes objectEnumerator];
     id aNode;
     NSString *name;
     while(aNode = [nodeE nextObject]){
@@ -71,8 +171,15 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 + (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
 {
+    NSArray *nodes = nil;
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
+    if (prefData == nil)
+        nodes = [BDSKTemplate setupDefaultExportTemplates];
+    else 
+        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    
     NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
+    NSEnumerator *nodeE = [nodes objectEnumerator];
     id aNode;
     NSString *name;
     while(aNode = [nodeE nextObject]){
@@ -87,8 +194,15 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 + (NSArray *)allFileTypesForFormat:(BDSKTemplateFormat)formatType;
 {
+    NSArray *nodes = nil;
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
+    if (prefData == nil)
+        nodes = [BDSKTemplate setupDefaultExportTemplates];
+    else 
+        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    
     NSMutableArray *fileTypes = [NSMutableArray array];
-    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
+    NSEnumerator *nodeE = [nodes objectEnumerator];
     id aNode;
     NSString *fileType;
     while(aNode = [nodeE nextObject]){
@@ -104,7 +218,14 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 // accesses the node array in prefs
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 {
-    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
+    NSArray *nodes = nil;
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
+    if (prefData == nil)
+        nodes = [BDSKTemplate setupDefaultExportTemplates];
+    else 
+        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    
+    NSEnumerator *nodeE = [nodes objectEnumerator];
     id aNode = nil;
     
     while(aNode = [nodeE nextObject]){
@@ -112,6 +233,28 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
             break;
     }
     return aNode;
+}
+
++ (BDSKTemplate *)templateForTextService;
+{
+    NSDictionary *nodes = nil;
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
+    if (prefData == nil)
+        nodes = [BDSKTemplate setupDefaultServiceTemplates];
+    else 
+        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    return [nodes objectForKey:@"text"];
+}
+
++ (BDSKTemplate *)templateForRTFService;
+{
+    NSDictionary *nodes = nil;
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
+    if (prefData == nil)
+        nodes = [BDSKTemplate setupDefaultServiceTemplates];
+    else 
+        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    return [nodes objectForKey:@"rtf"];
 }
 
 - (BDSKTemplateFormat)templateFormat;

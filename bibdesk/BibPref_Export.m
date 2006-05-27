@@ -46,62 +46,11 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 @implementation BibPref_Export
 
-- (void)doInitialSetup
-{
-    if(nil == itemNodes)
-        itemNodes = [[NSMutableArray alloc] initWithCapacity:5];
-    else
-        [itemNodes removeAllObjects];
-    
-    BDSKTemplate *template = nil;
-    
-    // HTML template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default HTML template" forKey:BDSKTemplateNameString];
-    [template setValue:@"html" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
-            
-    // main page template
-    NSURL *fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"htmlExportTemplate"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
-    
-    // a user could potentially have templates for multiple BibTeX types; we could add all of those, as well
-    fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
-    
-    // RTF template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default RTF template" forKey:BDSKTemplateNameString];
-    [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
-    fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"rtfExportTemplate"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
-        
-    // RSS template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default RSS template" forKey:BDSKTemplateNameString];
-    [template setValue:@"rss" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
-    fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"rssExportTemplate"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
-        
-    // Doc template
-    template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default Doc template" forKey:BDSKTemplateNameString];
-    [template setValue:@"doc" forKey:BDSKTemplateRoleString];
-    [itemNodes addObject:template];
-    [template release];
-    fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"docExportTemplate"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
-}
-
 - (void)restoreDefaultsNoPrompt;
 {
     [super restoreDefaultsNoPrompt];
-    [self doInitialSetup];
+    [itemNodes release];
+    itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
     [self updateUI];
 }
 
@@ -114,7 +63,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     if([data length]){
         itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
     } else {
-        [self doInitialSetup];
+        itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
     }
 
     fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"rtf", @"doc", nil];

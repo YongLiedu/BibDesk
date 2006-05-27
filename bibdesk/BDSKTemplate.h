@@ -50,6 +50,7 @@ extern NSString *BDSKTemplateRoleString;
 extern NSString *BDSKTemplateNameString;
 extern NSString *BDSKTemplateFileURLString;
 extern NSString *BDSKExportTemplateTree;
+extern NSString *BDSKServiceTemplateTree;
 
 extern NSString *BDSKTemplateAccessoryString;
 extern NSString *BDSKTemplateMainPageString;
@@ -60,10 +61,15 @@ extern NSString *BDSKTemplateDefaultItemString;
 {
 }
 
++ (NSArray *)setupDefaultExportTemplates;
++ (NSDictionary *)setupDefaultServiceTemplates;
+
 + (NSArray *)allStyleNames;
 + (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
 + (NSArray *)allFileTypesForFormat:(BDSKTemplateFormat)formatType;
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
++ (BDSKTemplate *)templateForTextService;
++ (BDSKTemplate *)templateForRTFService;
 
 - (BDSKTemplateFormat)templateFormat;
 - (NSString *)fileExtension;
