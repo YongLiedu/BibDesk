@@ -241,7 +241,7 @@ typedef struct WLDragMapEntryStruct
 
 - (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
     NSString *targetPath = [[self currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:fileName];
-    NSString *sourcePath = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension] ofType:[fileName pathExtension]];
+    NSString *sourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:fileName];
     BOOL isDir = NO;
     if ([self fileExistsAtPath:targetPath]) {
         if (overwrite == NO)

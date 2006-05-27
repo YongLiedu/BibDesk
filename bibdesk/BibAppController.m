@@ -95,15 +95,26 @@
     [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
 #endif
     
+    NSString *applicationSupport = [fileManager currentApplicationSupportPathForCurrentUser];
+    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:@"Templates"];
+    BOOL success = NO;
+    
+    if ([fileManager fileExistsAtPath:templatesPath isDirectory:&success] == NO) {
+        success = [fileManager createDirectoryAtPath:templatesPath attributes:nil];
+    }
+    
     [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
     [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlExportTemplate" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlItemExportTemplate" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rssExportTemplate" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfExportTemplate" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"docExportTemplate" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"textServiceTemplate" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate" overwrite:NO];
+    if (success) {
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportTemplate.html" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlItemExportTemplate.html" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rss" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:NO];
+    }
     
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];

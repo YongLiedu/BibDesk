@@ -55,7 +55,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         else 
             itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
         
-        fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"rtf", @"doc", nil];
+        fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", nil];
         
         roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateMainPageString, BDSKTemplateDefaultItemString, BDSKTemplateAccessoryString, nil];
         [roles addObjectsFromArray:[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
@@ -134,13 +134,14 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (IBAction)resetDeafultFiles:(id)sender;
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlExportTemplate" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlItemExportTemplate" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rssExportTemplate" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfExportTemplate" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"docExportTemplate" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"textServiceTemplate" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportTemplate.html" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlItemExportTemplate.html" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:YES];
 }
 
 - (IBAction)addNode:(id)sender;

@@ -69,11 +69,14 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template release];
             
     // main page template
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/htmlExportTemplate.html"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
     
     // a user could potentially have templates for multiple BibTeX types; we could add all of those, as well
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/htmlItemExportTemplate.html"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
+    
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/htmlExportStyleSheet.css"]];
     [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
     
     // RTF template
@@ -82,7 +85,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"]];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfExportTemplate.rtf"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
         
     // RSS template
@@ -91,7 +94,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"rss" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"rssExportTemplate"]];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rssExportTemplate.rss"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
         
     // Doc template
@@ -100,7 +103,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"doc" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"docExportTemplate"]];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/docExportTemplate.doc"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];  
     
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
@@ -122,10 +125,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     // HTML template
     template = [[BDSKTemplate alloc] init];
     [template setValue:@"Text Service template" forKey:BDSKTemplateNameString];
-    [template setValue:@"text" forKey:BDSKTemplateRoleString];
+    [template setValue:@"txt" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"textServiceTemplate"]];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/textServiceTemplate.txt"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
     
     // RTF template
@@ -134,7 +137,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"rtfServiceTemplate"]];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate.rtf"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
     
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
