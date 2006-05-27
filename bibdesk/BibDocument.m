@@ -733,11 +733,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         case 3: fileType = @"ltb"; break;
         case 4: fileType = @"text"; break;
         case 5: fileType = @"rtf"; break;
-        case 6: fileType = @"doc"; break;
-        case 7: fileType = @"mods"; break;
-        case 8: fileType = @"xml"; break;
-        case 9: fileType = @"atom"; break;
-        case 10: fileType = @"rss"; break;
+        case 6: fileType = @"rtfd"; break;
+        case 7: fileType = @"doc"; break;
+        case 8: fileType = @"mods"; break;
+        case 9: fileType = @"xml"; break;
+        case 10: fileType = @"atom"; break;
+        case 11: fileType = @"rss"; break;
     }
     [self exportAsFileType:fileType selected:NO droppingInternal:([sender tag] == 1)];
 }
@@ -751,11 +752,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         case 3: fileType = @"ltb"; break;
         case 4: fileType = @"text"; break;
         case 5: fileType = @"rtf"; break;
-        case 6: fileType = @"doc"; break;
-        case 7: fileType = @"mods"; break;
-        case 8: fileType = @"xml"; break;
-        case 9: fileType = @"atom"; break;
-        case 10: fileType = @"rss"; break;
+        case 6: fileType = @"rtfd"; break;
+        case 7: fileType = @"doc"; break;
+        case 8: fileType = @"mods"; break;
+        case 9: fileType = @"xml"; break;
+        case 10: fileType = @"atom"; break;
+        case 11: fileType = @"rss"; break;
     }
     [self exportAsFileType:fileType selected:YES droppingInternal:([sender tag] == 1)];
 }
@@ -805,6 +807,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     } else if([fileType isEqualToString:@"rtf"]){
         [self prepareExportPanel:sp forTemplateFormat:BDSKRTFTemplateFormat];
+        
+    } else if([fileType isEqualToString:@"rtfd"]){
+        [self prepareExportPanel:sp forTemplateFormat:BDSKRTFDTemplateFormat];
         
     } else if([fileType isEqualToString:@"doc"]){
         [self prepareExportPanel:sp forTemplateFormat:BDSKDocTemplateFormat];
@@ -865,6 +870,18 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             while(accessoryURL = [accessoryFileEnum nextObject]){
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
+        }else if([fileType isEqualToString:@"rtfd"]){
+            BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+            OBASSERT([selectedTemplate templateFormat] == BDSKRTFDTemplateFormat);
+            fileData = nil;
+            NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
+            NSURL *accessoryURL = nil;
+            NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
+            while(accessoryURL = [accessoryFileEnum nextObject]){
+                [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+            }
+            NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
+            [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
         }else if([fileType isEqualToString:@"doc"]){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
             OBASSERT([selectedTemplate templateFormat] == BDSKDocTemplateFormat);
@@ -1175,7 +1192,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
     OBPRECONDITION(nil != selectedTemplate);
     BDSKTemplateFormat format = [selectedTemplate templateFormat];
-    OBPRECONDITION(format == BDSKRTFTemplateFormat || format == BDSKDocTemplateFormat);
+    OBPRECONDITION(format == BDSKRTFDTemplateFormat || format == BDSKDocTemplateFormat);
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
     OBPRECONDITION(nil != fileTemplate);
@@ -1189,6 +1206,23 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
     else
         return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
+}
+
+- (NSFileWrapper *)templatedFileWrapperForPublications:(NSArray *)items{
+    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+    OBPRECONDITION(nil != selectedTemplate);
+    BDSKTemplateFormat format = [selectedTemplate templateFormat];
+    OBPRECONDITION(format == BDSKRTFDTemplateFormat);
+    NSDictionary *docAttributes = nil;
+    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    OBPRECONDITION(nil != fileTemplate);
+    
+    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:selectedTemplate];
+    
+    fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:documentProxy delegate:documentProxy];
+    [documentProxy release];
+    
+    return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
 }
 
 #pragma mark -
@@ -3854,7 +3888,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         return s;
         
-    } else if (format == BDSKRTFTemplateFormat || format == BDSKDocTemplateFormat) {
+    } else if (format == BDSKRTFTemplateFormat || format == BDSKRTFDTemplateFormat || format == BDSKDocTemplateFormat) {
         
         NSMutableAttributedString *as = [[[NSMutableAttributedString alloc] init] autorelease];
         NSAttributedString *defaultItemTemplate = [[[NSAttributedString alloc] initWithURL:[template defaultItemTemplateURL] documentAttributes:NULL] autorelease];

@@ -43,6 +43,7 @@ typedef enum _BDSKTemplateFormat {
     BDSKUnknownTemplateFormat = -1,
     BDSKTextTemplateFormat,
     BDSKRTFTemplateFormat,
+    BDSKRTFDTemplateFormat,
     BDSKDocTemplateFormat
 } BDSKTemplateFormat;
 

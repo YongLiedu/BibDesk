@@ -265,6 +265,8 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
         return BDSKUnknownTemplateFormat;
     else if ([extension caseInsensitiveCompare:@"rtf"] == NSOrderedSame)
         return BDSKRTFTemplateFormat;
+    else if ([extension caseInsensitiveCompare:@"rtfd"] == NSOrderedSame)
+        return BDSKRTFDTemplateFormat;
     else if ([extension caseInsensitiveCompare:@"doc"] == NSOrderedSame)
         return BDSKDocTemplateFormat;
     else
