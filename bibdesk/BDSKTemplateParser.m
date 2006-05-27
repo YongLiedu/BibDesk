@@ -170,7 +170,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
         NSAttributedString *tmpAttrStr = nil;
         id keyValue = nil;
         int start;
-        NSRange wsRange;
+        NSRange range, wsRange;
         
         start = [scanner scanLocation];
                 
@@ -247,6 +247,8 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
             }
         } // scan START_DELIM
     } // while
+    
+    [result fixAttributesInRange:NSMakeRange(0, [result length])];
     
     return [result autorelease];    
 }
