@@ -51,6 +51,8 @@
 
 - (IBAction)changePrefList:(id)sender;
 
+- (IBAction)resetDeafultFiles:(id)sender;
+
 - (IBAction)addNode:(id)sender;
 - (IBAction)removeNode:(id)sender;
 - (IBAction)revealInFinder:(id)sender;

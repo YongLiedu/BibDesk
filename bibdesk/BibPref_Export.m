@@ -131,6 +131,18 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [outlineView reloadData];
 }
 
+- (IBAction)resetDeafultFiles:(id)sender;
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlExportTemplate" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlItemExportTemplate" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rssExportTemplate" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfExportTemplate" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"docExportTemplate" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"textServiceTemplate" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate" overwrite:YES];
+}
+
 - (IBAction)addNode:(id)sender;
 {
     // may be nil
