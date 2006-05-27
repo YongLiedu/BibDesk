@@ -239,10 +239,16 @@ typedef struct WLDragMapEntryStruct
     return [(id)pathURL autorelease];
 }
 
-- (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName{
+- (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
     NSString *targetPath = [[self currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:fileName];
     NSString *sourcePath = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension] ofType:[fileName pathExtension]];
-    return ([self fileExistsAtPath:targetPath] == NO && [self copyPath:sourcePath toPath:targetPath handler:nil]);
+    BOOL isDir = NO;
+    if ([self fileExistsAtPath:targetPath]) {
+        if (overwrite == NO)
+            return NO;
+        [self removeFileAtPath:targetPath handler:nil];
+    }
+    return [self copyPath:sourcePath toPath:targetPath handler:nil];
 }
 
 #pragma mark Thread safe methods

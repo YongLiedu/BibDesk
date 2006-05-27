@@ -47,7 +47,7 @@
 - (NSString *)applicationsDirectory;
 - (NSURL *)internetConfigDownloadURL;
 
-- (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName;
+- (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 
 /*!
     @method     createWeblocFileAtPath:withURL:

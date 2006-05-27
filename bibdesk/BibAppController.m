@@ -95,15 +95,15 @@
     [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
 #endif
     
-    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlExportTemplate"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlItemExportTemplate"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rssExportTemplate"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfExportTemplate"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"docExportTemplate"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"textServiceTemplate"];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlExportTemplate" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlItemExportTemplate" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rssExportTemplate" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfExportTemplate" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"docExportTemplate" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"textServiceTemplate" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate" overwrite:NO];
     
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
