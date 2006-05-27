@@ -69,10 +69,13 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 {
     [super restoreDefaultsNoPrompt];
     [itemNodes release];
-    if (templatePrefList == 0)
+    if (templatePrefList == 0) {
         itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
-    else    
+        [BDSKTemplate setupDefaultServiceTemplates];
+    } else {
         itemNodes = [[BDSKTemplate setupDefaultServiceTemplates] mutableCopy];
+        [BDSKTemplate setupDefaultExportTemplates];
+    }
     [self updateUI];
 }
 
