@@ -216,6 +216,44 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
+				<string>BibDesk/Complete Text Citation</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>completeTextCitationFromSelection</string>
+			<key>NSPortName</key>
+			<string>BibDesk</string>
+			<key>NSReturnTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+			</array>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>BibDesk/Complete Rich Text Citation</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>completeRichCitationFromSelection</string>
+			<key>NSPortName</key>
+			<string>BibDesk</string>
+			<key>NSReturnTypes</key>
+			<array>
+				<string>NSRTFPboardType</string>
+			</array>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
 				<string>BibDesk/Show Matching Reference</string>
 			</dict>
 			<key>NSMessage</key>
