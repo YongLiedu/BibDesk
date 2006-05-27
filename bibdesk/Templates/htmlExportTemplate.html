@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="htmlExportStyleSheet.css" />
+
+<title><$fileName.lastPathComponent/></title> 
+</head>
+
+<body>
+<div class="content">
+<h1><$fileName.lastPathComponent/></h1>
+<dl>
+<$publications>
+	<dt class="Key" id="<$citeKey/>"><$citeKey/><dt />
+	<dd class="Pub">
+	<span class="Title"><$fields.Title/></span><br />
+	<span class="Author"><$pubAuthorsForDisplay/></span><br />
+	<span class="Journal"><$fields.Journal/></span>&nbsp;
+	<span class="Volume"><$fields.Volume/></span>&nbsp;
+	<span class="Pages"><$fields.Pages/></span>&nbsp;
+	(<span class="Date"><$fields.Year/></span>)<br />
+	<span class="Url"><a href="<$fields.Url/>"><$fields.Url/></a></span><br />
+	<div class="Abstract"><$fields.Abstract/>"</div>
+	<dd />
+</$publications>
+</dl>
+</div>
+</body>
+</html>
