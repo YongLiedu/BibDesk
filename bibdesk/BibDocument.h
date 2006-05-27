@@ -63,6 +63,7 @@
 @class BDSKMacroResolver;
 @class BDSKSplitView;
 @class BDSKCollapsibleView;
+@class BDSKTemplate;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -94,7 +95,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate>
+@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView>
 {
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
@@ -287,12 +288,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (NSData *)rssDataForPublications:(NSArray *)items;
 
-- (NSData *)templatedStringDataForSelection:(BOOL)selected;
-- (NSData *)templatedAttributedStringDataForSelection:(BOOL)selected;
-
-- (id)publicationsUsingTemplate;
-- (id)selectionUsingTemplate;
-- (id)templateStringForPublications:(NSArray *)items;
+- (NSData *)templatedStringDataForPublications:(NSArray *)items;
+- (NSData *)templatedAttributedStringDataForPublications:(NSArray *)items;
 
 - (NSData *)atomDataForPublications:(NSArray *)items;
 - (NSData *)MODSDataForPublications:(NSArray *)items;
@@ -839,5 +836,21 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion (comprehensive description)
 */
 - (void)saveSortOrder;
+
+@end
+
+
+@interface BDSKTemplateObjectProxy : NSObject <BDSKTemplateParserDelegate> {
+    id object;
+    NSArray *publications;
+    BDSKTemplate *template;
+}
+
+- (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate;
+
+- (NSArray *)publications;
+- (id)publicationsUsingTemplate;
+
+- (NSCalendarDate *)currentDate;
 
 @end
