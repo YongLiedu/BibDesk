@@ -646,7 +646,6 @@ static NSString *BDSKLastImportLocalizedString = nil;
 // this exists so we can use valueForKey: in the BDSKGroupCell
 @implementation NSString (BDSKGroup)
 - (NSString *)stringValue { return self; }
-- (id)icon { return nil; }
 // OmniFoundation implements numberValue for us
 - (int)count { return [[self numberValue] intValue]; }
 @end

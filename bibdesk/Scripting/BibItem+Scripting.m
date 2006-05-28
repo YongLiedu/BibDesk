@@ -194,12 +194,12 @@ Extra wrapping of the created and modified date methods to
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (NSString*) localURL {
+- (NSString*) localURLString {
 	NSString *localURL = [self localUrlPath];
 	return localURL ? localURL : @"";
 }
 
-- (void) setLocalURL:(NSString*) newPath {
+- (void) setLocalURLString:(NSString*) newPath {
 	if ([newPath hasPrefix:@"file://"])
 		[self setField:BDSKLocalUrlString toValue:newPath];
 	NSString *newURL = [[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]] absoluteString];

@@ -46,6 +46,8 @@
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
 + (NSCharacterSet *)illegalURLCharacterSet;
 - (NSAttributedString *)linkedText;
+- (NSAttributedString *)icon;
+- (NSAttributedString *)smallIcon;
 @end
 
 CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL);

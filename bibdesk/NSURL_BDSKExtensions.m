@@ -38,6 +38,7 @@
 
 #import "NSURL_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
+#import "NSImage+Toolbox.h"
 
 static NSString *BDSKAliasResolutionException = @"BDSKAliasResolutionException";
 
@@ -205,6 +206,40 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 
 - (NSAttributedString *)linkedText {
     return [[[NSAttributedString alloc] initWithString:[self absoluteString] attributeName:NSLinkAttributeName attributeValue:self] autorelease];
+}
+
+- (NSAttributedString *)icon {
+    NSImage *image = [NSImage imageForURL:self];
+    NSString *name = ([self isFileURL]) ? [self path] : [self relativeString];
+    name = [[[name lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"tiff"];
+    
+    NSFileWrapper *wrapper = [[NSFileWrapper alloc] initRegularFileWithContents:[image TIFFRepresentation]];
+    [wrapper setFilename:name];
+    [wrapper setPreferredFilename:name];
+
+    NSTextAttachment *attachment = [[NSTextAttachment alloc] initWithFileWrapper:wrapper];
+    [wrapper release];
+    NSAttributedString *attrString = [NSAttributedString attributedStringWithAttachment:attachment];
+    [attachment release];
+    
+    return attrString;
+}
+
+- (NSAttributedString *)smallIcon {
+    NSImage *image = [NSImage smallImageForURL:self];
+    NSString *name = ([self isFileURL]) ? [self path] : [self relativeString];
+    name = [[[name lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"tiff"];
+    
+    NSFileWrapper *wrapper = [[NSFileWrapper alloc] initRegularFileWithContents:[image TIFFRepresentation]];
+    [wrapper setFilename:name];
+    [wrapper setPreferredFilename:name];
+
+    NSTextAttachment *attachment = [[NSTextAttachment alloc] initWithFileWrapper:wrapper];
+    [wrapper release];
+    NSAttributedString *attrString = [NSAttributedString attributedStringWithAttachment:attachment];
+    [attachment release];
+    
+    return attrString;
 }
 
 @end

@@ -377,7 +377,10 @@ An inline buffer is used for speed in accessing each character.
 - (NSArray *)andSearchComponents;
 - (NSArray *)orSearchComponents;
 
+- (NSURL *)url;
 - (NSAttributedString *)linkedText;
+- (NSAttributedString *)icon;
+- (NSAttributedString *)smallIcon;
 
 @end
 

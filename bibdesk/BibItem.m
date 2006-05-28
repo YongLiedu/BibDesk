@@ -2057,6 +2057,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
 
+- (NSURL *)localURL{
+	return [self localFileURLForField:BDSKLocalUrlString];
+}
+
 - (NSString *)localUrlPath{
 	return [self localUrlPathInheriting:YES];
 }

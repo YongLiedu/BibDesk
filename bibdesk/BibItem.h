@@ -729,6 +729,14 @@
 - (NSURL *)remoteURLForField:(NSString *)field;
 
 /*!
+    @method     localUrlURL
+    @abstract   Calls localFileURLForField: with the Local-Url field.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSURL *)localURL;
+
+/*!
     @method     localUrlPath
     @abstract   Calls localUrlPathInheriting: with inherit set to YES. 
     @discussion -
