@@ -865,7 +865,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             }
         } else if(exportFileType == BDSKRichTextExportFileType){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
-            OBASSERT([selectedTemplate templateFormat] & BDSKRichTextTemplateFormat);
+            BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
+            OBASSERT(templateFormat & BDSKRichTextTemplateFormat);
             NSString *extension = [selectedTemplate fileExtension];
             fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
             NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
@@ -874,7 +875,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             while(accessoryURL = [accessoryFileEnum nextObject]){
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
-            if (exportFileType == BDSKRTFDExportFileType) {
+            if (templateFormat == BDSKRTFDTemplateFormat) {
                 NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
                 [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
                 fileData = nil;
