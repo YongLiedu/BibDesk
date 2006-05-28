@@ -64,8 +64,8 @@
 - (NSString*)remoteURLString;
 - (void)setRemoteURL:(NSString*) newURL;
 
-- (NSString*)localURL;
-- (void)setLocalURL:(NSString*) newURL;
+- (NSString*)localURLString;
+- (void)setLocalURLString:(NSString*) newURL;
 
 - (NSString*)abstract;
 - (void)setAbstract:(NSString*) newAbstract;

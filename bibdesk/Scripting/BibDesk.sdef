@@ -610,7 +610,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>
             <property name="local file" code="lURL" type="text"
                 description="Location of a file containing the publication. This is a POSIX path.">
-                <cocoa key="localURL"/>
+                <cocoa key="localURLString"/>
             </property>  
             <property name="URL" code="rURL" type="text"
                 description="URL pointing to the publication.">
