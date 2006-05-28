@@ -2861,12 +2861,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if (modifierFlags & NSAlternateKeyMask) {
         [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
         [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAddSmart_Pressed"]];
-        [groupAddButton setAction:@selector(addSmartGroupAction:)];
         [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"")];
     } else {
         [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
         [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAdd_Pressed"]];
-        [groupAddButton setAction:@selector(addStaticGroupAction:)];
         [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"")];
     }
 }

@@ -693,17 +693,17 @@ The groupedPublications array is a subset of the publications array, developed b
 	return nil;
 }
 
-- (void)sortGroupsByGroup:(id)sender{
+- (IBAction)sortGroupsByGroup:(id)sender{
 	if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey]) return;
 	[self sortGroupsByKey:BDSKGroupCellStringKey];
 }
 
-- (void)sortGroupsByCount:(id)sender{
+- (IBAction)sortGroupsByCount:(id)sender{
 	if ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) return;
 	[self sortGroupsByKey:BDSKGroupCellCountKey];
 }
 
-- (void)changeGroupFieldAction:(id)sender{
+- (IBAction)changeGroupFieldAction:(id)sender{
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
 	NSString *field = ([headerCell indexOfSelectedItem] == 0) ? @"" : [headerCell titleOfSelectedItem];
@@ -720,7 +720,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 // for adding/removing groups, we use the searchfield sheets
 
-- (void)addGroupFieldAction:(id)sender{
+- (IBAction)addGroupFieldAction:(id)sender{
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
 	
@@ -769,7 +769,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [array release];
 }    
 
-- (void)removeGroupFieldAction:(id)sender{
+- (IBAction)removeGroupFieldAction:(id)sender{
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
 	
@@ -833,7 +833,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
-- (void)addSmartGroupAction:(id)sender {
+- (IBAction)addSmartGroupAction:(id)sender {
 	BDSKFilterController *filterController = [[BDSKFilterController alloc] init];
 	[NSApp beginSheet:[filterController window]
        modalForWindow:documentWindow
@@ -842,7 +842,7 @@ The groupedPublications array is a subset of the publications array, developed b
           contextInfo:filterController];
 }
 
-- (void)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (IBAction)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	BDSKFilterController *filterController = (BDSKFilterController *)contextInfo;
 	
 	if(returnCode == NSOKButton){
@@ -861,7 +861,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	[filterController release];
 }
 
-- (void)addStaticGroupAction:(id)sender {
+- (IBAction)addStaticGroupAction:(id)sender {
     BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
     unsigned int insertIndex = NSMaxRange([self rangeOfStaticGroups]);
     [self addStaticGroup:group];
@@ -874,7 +874,14 @@ The groupedPublications array is a subset of the publications array, developed b
     // updating of the tables is done when finishing the edit of the name
 }
 
-- (void)removeSelectedGroups:(id)sender {
+- (IBAction)addGroupButtonAction:(id)sender {
+    if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask)
+        [self addSmartGroupAction:sender];
+    else
+        [self addStaticGroupAction:sender];
+}
+
+- (IBAction)removeSelectedGroups:(id)sender {
 	NSIndexSet *rowIndexes = [groupTableView selectedRowIndexes];
     unsigned int rowIndex = [rowIndexes firstIndex];
 	BDSKGroup *group;
@@ -899,7 +906,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 }
 
-- (void)editGroupAction:(id)sender {
+- (IBAction)editGroupAction:(id)sender {
 	if ([groupTableView numberOfSelectedRows] != 1) {
 		NSBeep();
 		return;
@@ -932,7 +939,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 }
 
-- (void)renameGroupAction:(id)sender {
+- (IBAction)renameGroupAction:(id)sender {
 	if ([groupTableView numberOfSelectedRows] != 1) {
 		NSBeep();
 		return;

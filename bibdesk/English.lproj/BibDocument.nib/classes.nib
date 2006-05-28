@@ -33,6 +33,7 @@
         {
             ACTIONS = {
                 addCustomCiteString = id; 
+                addGroupButtonAction = id; 
                 addGroupFieldAction = id; 
                 addSmartGroupAction = id; 
                 addStaticGroupAction = id; 

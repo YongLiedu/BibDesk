@@ -82,9 +82,9 @@
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName;
 - (NSMenu *)groupFieldsMenu;
 
-- (void)changeGroupFieldAction:(id)sender;
-- (void)addGroupFieldAction:(id)sender;
-- (void)removeGroupFieldAction:(id)sender;
+- (IBAction)changeGroupFieldAction:(id)sender;
+- (IBAction)addGroupFieldAction:(id)sender;
+- (IBAction)removeGroupFieldAction:(id)sender;
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
@@ -95,11 +95,12 @@
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
-- (void)addSmartGroupAction:(id)sender;
-- (void)addStaticGroupAction:(id)sender;
-- (void)removeSelectedGroups:(id)sender;
-- (void)editGroupAction:(id)sender;
-- (void)renameGroupAction:(id)sender;
+- (IBAction)addSmartGroupAction:(id)sender;
+- (IBAction)addStaticGroupAction:(id)sender;
+- (IBAction)addGroupButtonAction:(id)sender;
+- (IBAction)removeSelectedGroups:(id)sender;
+- (IBAction)editGroupAction:(id)sender;
+- (IBAction)renameGroupAction:(id)sender;
 - (IBAction)selectAllPublicationsGroup:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (void)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
