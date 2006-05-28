@@ -77,7 +77,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
     
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/htmlExportStyleSheet.css"]];
-    [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
+    [template addChildWithURL:fileURL role:BDSKTemplateAccessoryString];
     
     // RTF template
     template = [[BDSKTemplate alloc] init];
@@ -320,18 +320,14 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     BOOL retVal;
     retVal = [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL];
-    if(retVal){
-        BDSKTemplate *newChild = [[BDSKTemplate alloc] init];
-        
-        [newChild setValue:fileURL forKey:BDSKTemplateFileURLString];
-        [newChild setValue:role forKey:BDSKTemplateRoleString];
-        // don't add it if the alias fails
-        if([newChild representedFileURL] != nil)
-            [self addChild:newChild];
-        else
-            retVal = NO;
-        [newChild release];
-    }        
+    BDSKTemplate *newChild = [[BDSKTemplate alloc] init];
+    
+    [newChild setValue:fileURL forKey:BDSKTemplateFileURLString];
+    [newChild setValue:role forKey:BDSKTemplateRoleString];
+    [self addChild:newChild];
+    [newChild release];
+    if([newChild representedFileURL] == nil)
+        retVal = NO;
     return retVal;
 }
 
