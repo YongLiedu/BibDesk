@@ -40,11 +40,12 @@
 #import "BDSKTreeNode.h"
 
 typedef enum _BDSKTemplateFormat {
-    BDSKUnknownTemplateFormat = -1,
-    BDSKTextTemplateFormat,
-    BDSKRTFTemplateFormat,
-    BDSKRTFDTemplateFormat,
-    BDSKDocTemplateFormat
+    BDSKUnknownTemplateFormat = 0,
+    BDSKTextTemplateFormat = 1,
+    BDSKRTFTemplateFormat = 2,
+    BDSKRTFDTemplateFormat = 4,
+    BDSKDocTemplateFormat = 8,
+    BDSKRichTextTemplateFormat = 14 // RTF or RTFD or Doc
 } BDSKTemplateFormat;
 
 extern NSString *BDSKTemplateRoleString;

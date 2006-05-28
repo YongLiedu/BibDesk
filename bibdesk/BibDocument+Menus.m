@@ -202,25 +202,21 @@
 }
 
 - (BOOL)validateExportMenuItem:(NSMenuItem *)menuItem{
-    if ([menuItem tag] == 4 && [[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat] count] == 0)
-        return NO;
-    if ([menuItem tag] == 5 && [[BDSKTemplate allStyleNamesForFormat:BDSKRTFTemplateFormat] count] == 0)
-        return NO;
-    if ([menuItem tag] == 6 && [[BDSKTemplate allStyleNamesForFormat:BDSKDocTemplateFormat] count] == 0)
-        return NO;
-	return YES;
+    switch ([menuItem tag]) {
+        case BDSKTextExportFileType: return ([[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat] count] != 0);
+        case BDSKRichTextExportFileType: return ([[BDSKTemplate allStyleNamesForFormat:BDSKRichTextTemplateFormat] count] != 0);
+        case BDSKRTFExportFileType: return ([[BDSKTemplate allStyleNamesForFormat:BDSKRTFTemplateFormat] count] != 0);
+        case BDSKRTFDExportFileType: return ([[BDSKTemplate allStyleNamesForFormat:BDSKRTFDTemplateFormat] count] != 0);
+        case BDSKDOCExportFileType: return ([[BDSKTemplate allStyleNamesForFormat:BDSKDocTemplateFormat] count] != 0);
+        default: return YES;
+    }
 }
 
 - (BOOL)validateExportSelectionMenuItem:(NSMenuItem *)menuItem{
     if ([self numberOfSelectedPubs] == 0)
         return NO;
-    if ([menuItem tag] == 4 && [[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat] count] == 0)
-        return NO;
-    if ([menuItem tag] == 5 && [[BDSKTemplate allStyleNamesForFormat:BDSKRTFTemplateFormat] count] == 0)
-        return NO;
-    if ([menuItem tag] == 6 && [[BDSKTemplate allStyleNamesForFormat:BDSKDocTemplateFormat] count] == 0)
-        return NO;
-	return YES;
+    else
+        return [self validateExportMenuItem:menuItem];
 }
 
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{

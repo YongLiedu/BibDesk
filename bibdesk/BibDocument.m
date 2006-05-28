@@ -715,7 +715,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)saveDocument:(id)sender{
     [super saveDocument:sender];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState && ![[self fileType] isEqualToString:@"Rich Site Summary file"])
-        [self exportAsFileType:@"rss" selected:NO droppingInternal:NO];
+        [self exportAsFileType:BDSKRSSExportFileType selected:NO];
 }
 
 - (void)clearChangeCount{
@@ -725,41 +725,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark Document Exporting
 
 - (IBAction)exportAsAction:(id)sender{
-    NSString *fileType = @"bib";
-    switch([sender tag]){
-        case 0: fileType = @"bib"; break;
-        case 1: fileType = @"bib"; break;
-        case 2: fileType = @"ris"; break;
-        case 3: fileType = @"ltb"; break;
-        case 4: fileType = @"text"; break;
-        case 5: fileType = @"rtf"; break;
-        case 6: fileType = @"rtfd"; break;
-        case 7: fileType = @"doc"; break;
-        case 8: fileType = @"mods"; break;
-        case 9: fileType = @"xml"; break;
-        case 10: fileType = @"atom"; break;
-        case 11: fileType = @"rss"; break;
-    }
-    [self exportAsFileType:fileType selected:NO droppingInternal:([sender tag] == 1)];
+    [self exportAsFileType:[sender tag] selected:NO];
 }
 
 - (IBAction)exportSelectionAsAction:(id)sender{
-    NSString *fileType = @"bib";
-    switch([sender tag]){
-        case 0: fileType = @"bib"; break;
-        case 1: fileType = @"bib"; break;
-        case 2: fileType = @"ris"; break;
-        case 3: fileType = @"ltb"; break;
-        case 4: fileType = @"text"; break;
-        case 5: fileType = @"rtf"; break;
-        case 6: fileType = @"rtfd"; break;
-        case 7: fileType = @"doc"; break;
-        case 8: fileType = @"mods"; break;
-        case 9: fileType = @"xml"; break;
-        case 10: fileType = @"atom"; break;
-        case 11: fileType = @"rss"; break;
-    }
-    [self exportAsFileType:fileType selected:YES droppingInternal:([sender tag] == 1)];
+    [self exportAsFileType:[sender tag] selected:YES];
 }
 
 - (IBAction)changeCurrentExportTemplateStyle:(id)sender{
@@ -767,13 +737,27 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     currentExportTemplateStyle = [[sender titleOfSelectedItem] copy];
 }
 
-- (void)prepareExportPanel:(NSSavePanel *)savePanel forTemplateFormat:(BDSKTemplateFormat)templateFormat{
+- (BOOL)prepareExportPanel:(NSSavePanel *)savePanel forExportFileType:(int)exportFileType{
+    BDSKTemplateFormat templateFormat = BDSKUnknownTemplateFormat;
+    switch(exportFileType){
+        case BDSKTextExportFileType: templateFormat = BDSKTextTemplateFormat; break;
+        case BDSKRichTextExportFileType: templateFormat = BDSKRichTextTemplateFormat; break;
+        case BDSKRTFExportFileType: templateFormat = BDSKRTFTemplateFormat; break;
+        case BDSKRTFDExportFileType: templateFormat = BDSKRTFDTemplateFormat; break;
+        case BDSKDOCExportFileType: templateFormat = BDSKDocTemplateFormat; break;
+    }
     NSArray *styles = [BDSKTemplate allStyleNamesForFormat:templateFormat];
+    NSArray *fileTypes = [BDSKTemplate allFileTypesForFormat:BDSKTextTemplateFormat];
     OBASSERT([styles count] != 0);
     if ([styles count] == 0) {
         [currentExportTemplateStyle release];
         currentExportTemplateStyle = nil;
-        return;
+        return NO;
+    }
+    if ([fileTypes count] == 1) {
+        [savePanel setRequiredFileType:[fileTypes lastObject]];
+    } else if ([fileTypes count] > 1) {
+        [savePanel setAllowedFileTypes:fileTypes];
     }
     // @@ save last selection in prefs?  names can change, though...
     if(currentExportTemplateStyle == nil || [styles containsObject:currentExportTemplateStyle] == NO){
@@ -788,38 +772,57 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [templateStylePopUpButton selectItemWithTitle:currentExportTemplateStyle];
     
     [savePanel setAccessoryView:templateExportAccessoryView];
+    
+    return YES;
 }
 
-- (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop{
+- (void)exportAsFileType:(int)exportFileType selected:(BOOL)selected{
     NSSavePanel *sp = [NSSavePanel savePanel];
-    if ([fileType isEqualToString:@"text"]) {
-        [sp setAllowedFileTypes:[BDSKTemplate allFileTypesForFormat:BDSKTextTemplateFormat]];
-    } else {
-        [sp setRequiredFileType:fileType];
+    NSString *fileType = nil;
+    switch(exportFileType){
+        case BDSKBibTeXExportFileType:
+        case BDSKMinimalBibTeXExportFileType: fileType = @"bib"; break;
+        case BDSKRISExportFileType: fileType = @"ris"; break;
+        case BDSKLTBExportFileType: fileType = @"ltb"; break;
+        case BDSKTextExportFileType:
+        case BDSKRichTextExportFileType:
+        case BDSKRTFExportFileType:
+        case BDSKRTFDExportFileType:
+        case BDSKDOCExportFileType: break;
+        case BDSKMODSExportFileType: fileType = @"mods"; break;
+        case BDSKXMLExportFileType: fileType = @"xml"; break;
+        case BDSKATOMExportFileType: fileType = @"atom"; break;
+        case BDSKRSSExportFileType: fileType = @"rss"; break;
+        default: fileType = @"bib";
     }
+    [sp setRequiredFileType:fileType];
     [sp setDelegate:self];
-    if([fileType isEqualToString:@"rss"]){
-        [sp setAccessoryView:rssExportAccessoryView];
-        // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
-        // or use templates?
-    } else if([fileType isEqualToString:@"text"]){
-        [self prepareExportPanel:sp forTemplateFormat:BDSKTextTemplateFormat];
-        
-    } else if([fileType isEqualToString:@"rtf"]){
-        [self prepareExportPanel:sp forTemplateFormat:BDSKRTFTemplateFormat];
-        
-    } else if([fileType isEqualToString:@"rtfd"]){
-        [self prepareExportPanel:sp forTemplateFormat:BDSKRTFDTemplateFormat];
-        
-    } else if([fileType isEqualToString:@"doc"]){
-        [self prepareExportPanel:sp forTemplateFormat:BDSKDocTemplateFormat];
-        
-    } else if([fileType isEqualToString:@"bib"] || [fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"ltb"]){ // this is for exporting bib files with alternate text encodings
-        [sp setAccessoryView:saveEncodingAccessoryView];
-        [saveTextEncodingPopupButton selectItemWithTitle:[[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]];
+    switch (exportFileType) {
+        case BDSKTextExportFileType:
+        case BDSKRichTextExportFileType:
+        case BDSKRTFExportFileType:
+        case BDSKRTFDExportFileType:
+        case BDSKDOCExportFileType:
+            if ([self prepareExportPanel:sp forExportFileType:exportFileType] == NO) {
+                NSBeep();
+                return;
+            }
+            break;
+        case BDSKRSSExportFileType:
+            [sp setAccessoryView:rssExportAccessoryView];
+            // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
+            // or use templates?
+            break;
+        case BDSKBibTeXExportFileType:
+        case BDSKMinimalBibTeXExportFileType:
+        case BDSKRISExportFileType:
+        case BDSKLTBExportFileType:
+            [sp setAccessoryView:saveEncodingAccessoryView];
+            [saveTextEncodingPopupButton selectItemWithTitle:[[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]];
+            break;
     }
-    NSDictionary *contextInfo = [[NSDictionary dictionaryWithObjectsAndKeys:
-		fileType, @"fileType", [NSNumber numberWithBool:drop], @"dropInternal", [NSNumber numberWithBool:selected], @"selected", nil] retain];
+    NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
+		[NSNumber numberWithInt:exportFileType], @"exportFileType", [NSNumber numberWithBool:selected], @"selected", nil];
 	[sp beginSheetForDirectory:nil
                           file:( [self fileName] == nil ? nil : [[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent])
                 modalForWindow:documentWindow
@@ -835,8 +838,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
     NSDictionary *dict = (NSDictionary *)contextInfo;
-	NSString *fileType = [dict objectForKey:@"fileType"];
-    BOOL drop = [[dict objectForKey:@"dropInternal"] boolValue];
+    int exportFileType = [[dict objectForKey:@"exportFileType"] intValue];
     BOOL selected = [[dict objectForKey:@"selected"] boolValue];
     NSArray *items = (selected ? [self selectedPublications] : publications);
 	
@@ -847,10 +849,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
     if(returnCode == NSOKButton){
         fileName = [sp filename];
-        if([fileType isEqualToString:@"rss"]){
+        if(exportFileType == BDSKRSSExportFileType){
             fileData = [self rssDataForPublications:items];
-        }else if([fileType isEqualToString:@"text"]){
+        } else if(exportFileType == BDSKTextExportFileType){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+            OBASSERT([selectedTemplate templateFormat] & BDSKTextTemplateFormat);
             NSString *extension = [selectedTemplate fileExtension];
             fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
             fileData = [self templatedStringDataForPublications:items];
@@ -860,7 +863,25 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             while(accessoryURL = [accessoryFileEnum nextObject]){
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
-        }else if([fileType isEqualToString:@"rtf"]){
+        } else if(exportFileType == BDSKRichTextExportFileType){
+            BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+            OBASSERT([selectedTemplate templateFormat] & BDSKRichTextTemplateFormat);
+            NSString *extension = [selectedTemplate fileExtension];
+            fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
+            NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
+            NSURL *accessoryURL = nil;
+            NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
+            while(accessoryURL = [accessoryFileEnum nextObject]){
+                [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+            }
+            if (exportFileType == BDSKRTFDExportFileType) {
+                NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
+                [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
+                fileData = nil;
+            } else {
+                fileData = [self templatedAttributedStringDataForPublications:items];
+            }
+        } else if(exportFileType == BDSKRTFExportFileType){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
             OBASSERT([selectedTemplate templateFormat] == BDSKRTFTemplateFormat);
             fileData = [self templatedAttributedStringDataForPublications:items];
@@ -870,7 +891,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             while(accessoryURL = [accessoryFileEnum nextObject]){
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
-        }else if([fileType isEqualToString:@"rtfd"]){
+        } else if(exportFileType == BDSKRTFDExportFileType){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
             OBASSERT([selectedTemplate templateFormat] == BDSKRTFDTemplateFormat);
             fileData = nil;
@@ -882,7 +903,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             }
             NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
             [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
-        }else if([fileType isEqualToString:@"doc"]){
+        } else if (exportFileType == BDSKDOCExportFileType){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
             OBASSERT([selectedTemplate templateFormat] == BDSKDocTemplateFormat);
             fileData = [self templatedAttributedStringDataForPublications:items];
@@ -892,23 +913,23 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             while(accessoryURL = [accessoryFileEnum nextObject]){
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
-        }else if([fileType isEqualToString:@"mods"]){
+        } else if(exportFileType == BDSKMODSExportFileType){
             fileData = [self MODSDataForPublications:items];
-        }else if([fileType isEqualToString:@"xml"]){
+        } else if(exportFileType == BDSKXMLExportFileType){
             fileData = [self endNoteDataForPublications:items];
-        }else if([fileType isEqualToString:@"atom"]){
+        } else if(exportFileType == BDSKATOMExportFileType){
             fileData = [self atomDataForPublications:items];
-        }else if([fileType isEqualToString:@"bib"]){            
+        } else if(exportFileType == BDSKBibTeXExportFileType || exportFileType == BDSKMinimalBibTeXExportFileType){
             NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
 			if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey]){
 				[self performSortForCrossrefs];
 				items = (selected ? [self selectedPublications] : publications);
 			}
-            fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:drop];
-        }else if([fileType isEqualToString:@"ris"]){
+            fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:(exportFileType == BDSKMinimalBibTeXExportFileType)];
+        } else if (exportFileType == BDSKRISExportFileType){
             NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
             fileData = [self RISDataForPublications:items encoding:encoding];
-        }else if([fileType isEqualToString:@"ltb"]){
+        } else if (exportFileType == BDSKLTBExportFileType){
             NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
             fileData = [self LTBDataForPublications:items encoding:encoding];
         }
@@ -1176,7 +1197,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
     OBPRECONDITION(nil != selectedTemplate);
-    OBPRECONDITION([selectedTemplate templateFormat] == BDSKTextTemplateFormat);
+    OBPRECONDITION([selectedTemplate templateFormat] & BDSKTextTemplateFormat);
     NSString *fileTemplate = [NSString stringWithContentsOfURL:[selectedTemplate mainPageTemplateURL]];
     OBPRECONDITION(nil != fileTemplate);
     
@@ -1192,7 +1213,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
     OBPRECONDITION(nil != selectedTemplate);
     BDSKTemplateFormat format = [selectedTemplate templateFormat];
-    OBPRECONDITION(format == BDSKRTFDTemplateFormat || format == BDSKDocTemplateFormat);
+    OBPRECONDITION(format & BDSKRichTextTemplateFormat);
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
     OBPRECONDITION(nil != fileTemplate);
@@ -3867,7 +3888,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
     
-    if (format == BDSKTextTemplateFormat) {
+    if (format & BDSKTextTemplateFormat) {
         
         NSMutableString *s = [NSMutableString stringWithString:@""];
         NSString *defaultItemTemplate = [NSString stringWithContentsOfURL:[template defaultItemTemplateURL]];
@@ -3888,7 +3909,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         return s;
         
-    } else if (format == BDSKRTFTemplateFormat || format == BDSKRTFDTemplateFormat || format == BDSKDocTemplateFormat) {
+    } else if (format & BDSKRichTextTemplateFormat) {
         
         NSMutableAttributedString *as = [[[NSMutableAttributedString alloc] init] autorelease];
         NSAttributedString *defaultItemTemplate = [[[NSAttributedString alloc] initWithURL:[template defaultItemTemplateURL] documentAttributes:NULL] autorelease];

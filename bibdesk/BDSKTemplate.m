@@ -186,7 +186,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     id aNode;
     NSString *name;
     while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && [aNode templateFormat] == formatType){
+        if(NO == [aNode isLeaf] && ([aNode templateFormat] & formatType)){
             name = [aNode valueForKey:BDSKTemplateNameString];
             if(name != nil)
                 [names addObject:name];
@@ -209,7 +209,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     id aNode;
     NSString *fileType;
     while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && [aNode templateFormat] == formatType){
+        if(NO == [aNode isLeaf] && ([aNode templateFormat] & formatType)){
             fileType = [aNode valueForKey:BDSKTemplateRoleString];
             if(fileType != nil)
                 [fileTypes addObject:fileType];

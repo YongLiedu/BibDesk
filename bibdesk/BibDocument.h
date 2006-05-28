@@ -84,6 +84,23 @@ enum {
 	BDSKRISDragCopyType
 };
 
+// these should correspond to the tags of export menu items
+enum {
+	BDSKBibTeXExportFileType = 0, 
+	BDSKMinimalBibTeXExportFileType = 1, 
+	BDSKTextExportFileType = 2, 
+	BDSKRichTextExportFileType = 3, 
+	BDSKRTFExportFileType = 4, 
+	BDSKRTFDExportFileType = 5, 
+	BDSKDOCExportFileType = 6, 
+	BDSKRISExportFileType = 7, 
+	BDSKLTBExportFileType = 8, 
+	BDSKMODSExportFileType = 9, 
+	BDSKXMLExportFileType = 10, 
+	BDSKATOMExportFileType = 11, 
+	BDSKRSSExportFileType = 12
+};
+
 // Some pasteboard types used by the document for dragging and copying.
 extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Reference Miner, determined using Pasteboard Peeker
 extern NSString *BDSKBibItemPboardType;
@@ -242,7 +259,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 /*!
     @method     exportAsAction:
     @abstract   Action method to export in a particular format.
-    @discussion  This calls exportAsFileType:selected:droppingInternal:. The fileType is determined by the sender's tag.
+    @discussion  This calls exportAsFileType:selected:. The fileType is determined by the sender's tag.
     @param      sender anything
 */
 - (IBAction)exportAsAction:(id)sender;
@@ -250,22 +267,21 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 /*!
     @method     exportSelectionAsAction:
     @abstract   Action method to export the selection in a particular format.
-    @discussion  This calls exportAsFileType:selected:droppingInternal:. The fileType is determined by the sender's tag.
+    @discussion  This calls exportAsFileType:selected:. The fileType is determined by the sender's tag.
     @param      sender anything
 */
 - (IBAction)exportSelectionAsAction:(id)sender;
 
 /*!
-    @method     exportAsFileType:droppingInternal:
+    @method     exportAsFileType:selected:
     @abstract   Export the document's contents.
     @discussion Exports the entire document to one of many file types. 
  This method just opens a save panel, with the appropriate accessory view.
  On return from the save panel, Cocoa calls our method savePanelDidEnd:returnCode:contextInfo:
- @param      fileType A string representing the type to export.
+ @param      fileType An enum representing the type to export.
  @param      selected A boolean specifying whether to use the selection or all the publications. 
- @param      drop A boolean specifying whether internal fields should be dropped. 
 */
-- (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop;
+- (void)exportAsFileType:(int)exportFileType selected:(BOOL)selected;
 
 /*!
     @method     exportPanelDidEnd:returnCode:contextInfo:
