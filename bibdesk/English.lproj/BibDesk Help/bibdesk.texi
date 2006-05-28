@@ -3229,6 +3229,19 @@ The @code{item template} that is written between the start and end tag is used a
 to the items of the collection. Keys in template tags appearing in the @code{item template} will be interpreted 
 as names of properties of those items. 
 
+You can also include a template that is used as a separator between items, which will be ignored after the last item of the collection. 
+For this you need to insert a third template tag between the start and end template tags as follows. 
+@example
+<$collectionKey>
+item template
+<?$collectionKey>
+separator template
+</$collectionKey>
+@end example
+
+If a collection template tag appears by itself on a further empty line, this whole line will 
+be ignored (but of course not the tag itself), including the newline at the end of the line. 
+
 As we noted earlier, key paths for collection properties modify the @emph{items} of the collection. 
 As they return a collection, we can use them again for a collection tag, as in the following example. 
 @example
@@ -3312,6 +3325,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @item type
 @tab 
 @item citeKey
+@tab 
+@item citation
 @tab 
 @item title
 @tab 
@@ -3471,6 +3486,18 @@ Below are lists of colection keys that could be used in BibDesk export templates
 @tab 
 @end multitable
 
+
+@subheading URLs and paths
+
+@multitable {smallIcon} {}
+@headitem Key @tab Description
+@item linkText
+@tab 
+@item icon
+@tab 
+@item smallIcon
+@tab 
+@end multitable
 
 @heading Collection modifier keys
 
