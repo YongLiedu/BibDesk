@@ -43,6 +43,7 @@
 #define CLOSE_END_DELIM @"/>"
 #define CLOSE_DELIM @"/"
 #define START_CLOSE_DELIM @"</$"
+#define START_MID_DELIM @"<?$"
 #define NEWLINE @"\n"
 #define RETURN @"\n"
 #define RETURN_NEWLINE @"\r\n"
@@ -76,7 +77,11 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
         NSString *beforeText = nil;
         NSString *tag = nil;
         NSString *itemTemplate = nil;
+        NSString *lastItemTemplate;
         NSString *endTag = nil;
+        NSString *sepTag = nil;
+        NSRange sepTagRange;
+        NSMutableString *tmpString;
         id keyValue = nil;
         int start;
         NSRange wsRange;
@@ -108,6 +113,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                     [result deleteCharactersInRange:wsRange];
                 
                 endTag = [NSString stringWithFormat:@"%@%@%@", START_CLOSE_DELIM, tag, END_DELIM];
+                sepTag = [NSString stringWithFormat:@"%@%@%@", START_MID_DELIM, tag, END_DELIM];
                 // ignore the rest of an empty line after the tag
                 [scanner scanWhitespaceAndSingleNewline];
                 if ([scanner scanString:endTag intoString:nil])
@@ -118,17 +124,37 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                     if (wsRange.location != NSNotFound)
                         itemTemplate = [itemTemplate substringToIndex:wsRange.location];
                     
+                    lastItemTemplate = nil;
+                    sepTagRange = [itemTemplate rangeOfString:sepTag];
+                    if (sepTagRange.location != NSNotFound) {
+                        // ignore whitespaces before and after the tag, including a trailing newline 
+                        wsRange = [itemTemplate rangeOfTrailingWhitespaceLineInRange:NSMakeRange(0, sepTagRange.location)];
+                        if (wsRange.location != NSNotFound) 
+                            sepTagRange = NSMakeRange(wsRange.location, NSMaxRange(sepTagRange) - wsRange.location);
+                        wsRange = [itemTemplate rangeOfLeadingWhitespaceLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [itemTemplate length] - NSMaxRange(sepTagRange))];
+                        if (wsRange.location != NSNotFound)
+                            sepTagRange.length = NSMaxRange(wsRange) - sepTagRange.location;
+                        lastItemTemplate = [itemTemplate substringToIndex:sepTagRange.location];
+                        tmpString = [itemTemplate mutableCopy];
+                        [tmpString deleteCharactersInRange:sepTagRange];
+                        itemTemplate = [tmpString autorelease];
+                    }
+                    
                     @try{ keyValue = [object valueForKeyPath:tag]; }
                     @catch (id exception) { keyValue = nil; }
                     if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
                         NSEnumerator *itemE = [keyValue objectEnumerator];
-                        id item;
-                        while (item = [itemE nextObject]) {
+                        id nextItem, item = [itemE nextObject];
+                        while (item) {
+                            nextItem = [itemE nextObject];
+                            if (lastItemTemplate != nil && nextItem == nil)
+                                itemTemplate = lastItemTemplate;
                             [delegate templateParserWillParseTemplate:itemTemplate usingObject:item isAttributed:NO];
                             keyValue = [self stringByParsingTemplate:itemTemplate usingObject:item delegate:delegate];
                             [delegate templateParserDidParseTemplate:itemTemplate usingObject:item isAttributed:NO];
                             if (keyValue != nil)
                                 [result appendString:keyValue];
+                            item = nextItem;
                         }
                     }
                     // ignore the the rest of an empty line after the tag
@@ -165,7 +191,10 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
         NSString *tag = nil;
         NSString *itemTemplateString = nil;
         NSAttributedString *itemTemplate = nil;
+        NSAttributedString *lastItemTemplate = nil;
         NSString *endTag = nil;
+        NSString *sepTag = nil;
+        NSRange sepTagRange;
         NSDictionary *attr = nil;
         NSAttributedString *tmpAttrStr = nil;
         id keyValue = nil;
@@ -220,17 +249,37 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                     wsRange = [itemTemplateString rangeOfTrailingWhitespaceLine];
                     itemTemplate = [template attributedSubstringFromRange:NSMakeRange(start, [itemTemplateString length] - wsRange.length)];
                     
+                    lastItemTemplate = nil;
+                    sepTagRange = [[itemTemplate string] rangeOfString:sepTag];
+                    if (sepTagRange.location != NSNotFound) {
+                        // ignore whitespaces before and after the tag, including a trailing newline 
+                        wsRange = [[itemTemplate string] rangeOfTrailingWhitespaceLineInRange:NSMakeRange(0, sepTagRange.location)];
+                        if (wsRange.location != NSNotFound) 
+                            sepTagRange = NSMakeRange(wsRange.location, NSMaxRange(sepTagRange) - wsRange.location);
+                        wsRange = [[itemTemplate string] rangeOfLeadingWhitespaceLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [itemTemplate length] - NSMaxRange(sepTagRange))];
+                        if (wsRange.location != NSNotFound)
+                            sepTagRange.length = NSMaxRange(wsRange) - sepTagRange.location;
+                        lastItemTemplate = [itemTemplate attributedSubstringFromRange:NSMakeRange(0, sepTagRange.location)];
+                        tmpAttrStr = [itemTemplate mutableCopy];
+                        [(NSMutableAttributedString *)tmpAttrStr deleteCharactersInRange:sepTagRange];
+                        itemTemplate = [tmpAttrStr autorelease];
+                    }
+                    
                     @try{ keyValue = [object valueForKeyPath:tag]; }
                     @catch (id exception) { keyValue = nil; }
                     if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
                         NSEnumerator *itemE = [keyValue objectEnumerator];
-                        id item;
-                        while (item = [itemE nextObject]) {
+                        id nextItem, item = [itemE nextObject];
+                        while (item) {
+                            nextItem = [itemE nextObject];
+                            if (lastItemTemplate != nil && nextItem == nil)
+                                itemTemplate = lastItemTemplate;
                             [delegate templateParserWillParseTemplate:itemTemplate usingObject:item isAttributed:YES];
                             tmpAttrStr = [self attributedStringByParsingTemplate:itemTemplate usingObject:item delegate:delegate];
                             [delegate templateParserDidParseTemplate:itemTemplate usingObject:item isAttributed:YES];
                             if (tmpAttrStr != nil)
                                 [result appendAttributedString:tmpAttrStr];
+                            item = nextItem;
                         }
                     }
                     // ignore the the rest of an empty line after the tag
@@ -289,20 +338,54 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
 
 @implementation NSString (BDSKTemplateParser)
 
-- (NSRange)rangeOfTrailingWhitespaceLine {
+// whitespace at the beginning of the string up to the end or until (and including) a newline
+- (NSRange)rangeOfLeadingWhitespaceLine {
+    return [self rangeOfLeadingWhitespaceLineInRange:NSMakeRange(0, [self length])];
+}
+
+- (NSRange)rangeOfLeadingWhitespaceLineInRange:(NSRange)range {
     static NSCharacterSet *nonWhitespace = nil;
     if (nonWhitespace == nil) 
         nonWhitespace = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
-    NSRange lastCharRange = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch];
+    NSRange firstCharRange = [self rangeOfCharacterFromSet:nonWhitespace options:0 range:range];
     NSRange wsRange = NSMakeRange(NSNotFound, 0);
-    unsigned int length = [self length];
+    unsigned int start = range.location;
+    if (firstCharRange.location == NSNotFound) {
+        wsRange = range;
+    } else {
+        unichar firstChar = [self characterAtIndex:firstCharRange.location];
+        unsigned int rangeEnd = NSMaxRange(firstCharRange);
+        if (firstChar == '\r') {
+            if (rangeEnd < NSMaxRange(range) && [self characterAtIndex:rangeEnd] == '\n')
+                wsRange = NSMakeRange(start, rangeEnd + 1 - start);
+            else 
+                wsRange = NSMakeRange(start, rangeEnd - start);
+        } else if(firstChar == '\n') {
+            wsRange = NSMakeRange(start, rangeEnd - start);
+        }
+    }
+    return wsRange;
+}
+
+// whitespace at the end of the string from the beginning or after a newline
+- (NSRange)rangeOfTrailingWhitespaceLine {
+    return [self rangeOfTrailingWhitespaceLineInRange:NSMakeRange(0, [self length])];
+}
+
+- (NSRange)rangeOfTrailingWhitespaceLineInRange:(NSRange)range {
+    static NSCharacterSet *nonWhitespace = nil;
+    if (nonWhitespace == nil) 
+        nonWhitespace = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
+    NSRange lastCharRange = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch range:range];
+    NSRange wsRange = NSMakeRange(NSNotFound, 0);
+    unsigned int end = NSMaxRange(range);
     if (lastCharRange.location == NSNotFound) {
-        wsRange = NSMakeRange(0, length);
+        wsRange = range;
     } else {
         unichar lastChar = [self characterAtIndex:lastCharRange.location];
         unsigned int rangeEnd = NSMaxRange(lastCharRange);
-        if (rangeEnd < length && (lastChar == '\r' || lastChar == '\n')) 
-            wsRange = NSMakeRange(rangeEnd, length - rangeEnd);
+        if (rangeEnd < end && (lastChar == '\r' || lastChar == '\n')) 
+            wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
     }
     return wsRange;
 }
