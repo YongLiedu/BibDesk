@@ -1286,7 +1286,6 @@
     OBPRECONDITION(nil != template && [template templateFormat] == BDSKTextTemplateFormat);
     NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
     OBPRECONDITION(nil != fileTemplate);
-    NSDictionary *docAttributes = nil;
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {

@@ -170,7 +170,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
         NSAttributedString *tmpAttrStr = nil;
         id keyValue = nil;
         int start;
-        NSRange range, wsRange;
+        NSRange wsRange;
         
         start = [scanner scanLocation];
                 

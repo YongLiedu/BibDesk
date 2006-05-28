@@ -1196,8 +1196,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
-    OBPRECONDITION(nil != selectedTemplate);
-    OBPRECONDITION([selectedTemplate templateFormat] & BDSKTextTemplateFormat);
+    OBPRECONDITION(nil != selectedTemplate && ([selectedTemplate templateFormat] & BDSKTextTemplateFormat));
     NSString *fileTemplate = [NSString stringWithContentsOfURL:[selectedTemplate mainPageTemplateURL]];
     OBPRECONDITION(nil != fileTemplate);
     
@@ -1213,7 +1212,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
     OBPRECONDITION(nil != selectedTemplate);
     BDSKTemplateFormat format = [selectedTemplate templateFormat];
-    OBPRECONDITION(format & BDSKRichTextTemplateFormat);
+    OBPRECONDITION(format == BDSKRTFTemplateFormat || format == BDSKDocTemplateFormat);
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
     OBPRECONDITION(nil != fileTemplate);
@@ -1231,9 +1230,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (NSFileWrapper *)templatedFileWrapperForPublications:(NSArray *)items{
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
-    OBPRECONDITION(nil != selectedTemplate);
-    BDSKTemplateFormat format = [selectedTemplate templateFormat];
-    OBPRECONDITION(format == BDSKRTFDTemplateFormat);
+    OBPRECONDITION(nil != selectedTemplate && [selectedTemplate templateFormat] == BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
     OBPRECONDITION(nil != fileTemplate);
