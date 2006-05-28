@@ -46,6 +46,8 @@ NSString *BibEditorToolbarViewLocalItemIdentifier = @"BibEditorToolbarViewLocalI
 NSString *BibEditorToolbarViewRemoteItemIdentifier = @"BibEditorToolbarViewRemoteItemIdentifier";
 NSString *BibEditorToolbarSnoopDrawerItemIdentifier = @"BibEditorToolbarSnoopDrawerItemIdentifier";
 NSString *BibEditorToolbarAuthorTableItemIdentifier = @"BibEditorToolbarAuthorTableItemIdentifier";
+NSString *BibEditorToolbarDeleteItemIdentifier = @"BibEditorToolbarDeleteItemIdentifier";
+NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddWithCrossrefItemIdentifier";
 
 @implementation BibEditor (Toolbar)
 
@@ -145,6 +147,37 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   authorScrollView,
 				   NULL,
                    menuItem);
+
+	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"Delete",@"Delete") 
+											 action:@selector(deletePub:)
+									  keyEquivalent:@""] autorelease];
+    [menuItem setDelegate:self];
+    addToolbarItem(toolbarItems, BibEditorToolbarDeleteItemIdentifier,
+                   NSLocalizedString(@"Delete",@"Delete"), 
+				   NSLocalizedString(@"Delete Publication",@"Delete Publication"),
+                   NSLocalizedString(@"Delete Publication",@"Delete Publication"),
+                   nil, @selector(setImage:),
+				   [NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon],
+				   @selector(deletePub:),
+                   menuItem);
+
+	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"New",@"New") 
+											 action:@selector(createNewPubUsingCrossrefAction:)
+									  keyEquivalent:@""] autorelease];
+    [menuItem setDelegate:self];
+    NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(32, 32)] autorelease];
+    [image lockFocus];
+	[[NSImage imageNamed: @"newdoc"] compositeToPoint:NSZeroPoint operation:NSCompositeSourceOver]; 
+    [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
+    [image unlockFocus];
+    addToolbarItem(toolbarItems, BibEditorToolbarAddWithCrossrefItemIdentifier,
+                   NSLocalizedString(@"New",@"New"), 
+				   NSLocalizedString(@"New with Crossref",@"New with Crossref"),
+                   NSLocalizedString(@"New Publication with Crossref",@"New Publication with Crossref"),
+                   nil, @selector(setImage:),
+				   image, 
+				   @selector(createNewPubUsingCrossrefAction:),
+                   menuItem);
     
     // Attach the toolbar to the document window
     [[self window] setToolbar: toolbar];
@@ -205,6 +238,8 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 		BibEditorToolbarViewRemoteItemIdentifier,
 		BibEditorToolbarSnoopDrawerItemIdentifier,
 		BibEditorToolbarAuthorTableItemIdentifier,
+		BibEditorToolbarDeleteItemIdentifier,
+		BibEditorToolbarAddWithCrossrefItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
 		NSToolbarSpaceItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 

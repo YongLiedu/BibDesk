@@ -2027,6 +2027,36 @@ static int numberOfOpenEditors = 0;
     [[self document] createNewPubUsingCrossrefForItem:theBib];
 }
 
+- (IBAction)deletePub:(id)sender{
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
+		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Delete Publication", @"Delete Publication")
+											 defaultButton:NSLocalizedString(@"OK", @"OK")
+										   alternateButton:nil
+											   otherButton:NSLocalizedString(@"Cancel", @"Cancel")
+								 informativeTextWithFormat:NSLocalizedString(@"Are you sure you want to delete the current item?", @"")];
+		[alert setHasCheckButton:YES];
+		[alert setCheckValue:NO];
+		int rv = [alert runSheetModalForWindow:[self window]
+								 modalDelegate:self 
+								didEndSelector:@selector(disableWarningAlertDidEnd:returnCode:contextInfo:) 
+							didDismissSelector:NULL 
+								   contextInfo:BDSKWarnOnDeleteKey];
+		if (rv == NSAlertOtherReturn)
+			return;
+	}
+    
+	[[[self document] undoManager] setActionName:NSLocalizedString(@"Delete Publication", @"Delete Publication")];
+    [[self document] setStatus:NSLocalizedString(@"Deleted 1 publication",@"Deleted 1 publication") immediate:NO];
+	[[self document] removePublication:theBib];
+}
+
+- (void)disableWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if ([alert checkValue] == YES) {
+		NSString *showWarningKey = (NSString *)contextInfo;
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:showWarningKey];
+	}
+}
+
 #pragma mark BDSKForm delegate methods
 
 - (void)arrowClickedInFormCell:(id)cell{

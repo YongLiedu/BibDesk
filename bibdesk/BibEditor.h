@@ -433,6 +433,8 @@
 - (IBAction)selectCrossrefParentAction:(id)sender;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
+- (IBAction)deletePub:(id)sender;
+
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 #pragma mark Person controller

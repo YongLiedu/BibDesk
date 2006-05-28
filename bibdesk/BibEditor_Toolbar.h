@@ -46,6 +46,8 @@ extern NSString*	BibEditorToolbarViewLocalItemIdentifier;
 extern NSString*	BibEditorToolbarViewRemoteItemIdentifier;
 extern NSString*	BibEditorToolbarSnoopDrawerItemIdentifier;
 extern NSString*	BibEditorToolbarAuthorTableItemIdentifier;
+extern NSString*	BibEditorToolbarDeleteItemIdentifier;
+extern NSString*	BibEditorToolbarAddWithCrossrefItemIdentifier;
 
 @interface BibEditor (Toolbar)
 
