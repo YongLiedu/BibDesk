@@ -139,6 +139,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:YES];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfdExportTemplate.rtfd" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:YES];

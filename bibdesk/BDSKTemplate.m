@@ -87,6 +87,15 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfExportTemplate.rtf"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    
+    // RTFD template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default RTFD template" forKey:BDSKTemplateNameString];
+    [template setValue:@"rtfd" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfdExportTemplate.rtfd"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
         
     // RSS template
     template = [[BDSKTemplate alloc] init];

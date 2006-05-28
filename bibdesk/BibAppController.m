@@ -111,6 +111,7 @@
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:NO];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:NO];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:NO];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfdExportTemplate.rtfd" overwrite:NO];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:NO];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:NO];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:NO];
