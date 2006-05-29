@@ -3899,7 +3899,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 itemTemplate = [NSString stringWithContentsOfURL:templateFileURL];
             else
                 itemTemplate = defaultItemTemplate;
-            [s appendString:[NSString stringWithString:@"\n\n"]];
             [s appendString:[pub stringValueUsingTemplate:itemTemplate]];
         }
         
@@ -3920,7 +3919,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 itemTemplate = [[[NSAttributedString alloc] initWithURL:templateFileURL documentAttributes:NULL] autorelease];
             else
                 itemTemplate = defaultItemTemplate;
-            [as appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n\n"] autorelease]];
             [as appendAttributedString:[pub attributedStringValueUsingTemplate:itemTemplate]];
         }
         
