@@ -239,6 +239,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                     [result deleteCharactersInRange:wsRange];
                 
                 endTag = [NSString stringWithFormat:@"%@%@%@", START_CLOSE_DELIM, tag, END_DELIM];
+                sepTag = [NSString stringWithFormat:@"%@%@%@", START_MID_DELIM, tag, END_DELIM];
                 // ignore the rest of an empty line after the tag
                 [scanner scanWhitespaceAndSingleNewline];
                 if ([scanner scanString:endTag intoString:nil])
