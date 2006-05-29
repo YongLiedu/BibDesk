@@ -133,6 +133,9 @@
         string = [string stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
         string = [string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     }
+    // remove control and other non-characters (mainly for paste/drag text, BUG #1481675)
+    string = [string stringByReplacingCharactersInSet:[NSCharacterSet controlCharacterSet] withString:@""];
+    string = [string stringByReplacingCharactersInSet:[NSCharacterSet illegalCharacterSet] withString:@""];
     
     @try{
         if (editAsComplexString) {
