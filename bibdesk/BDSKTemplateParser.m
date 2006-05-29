@@ -38,28 +38,30 @@
 
 #import "BDSKTemplateParser.h"
 
-#define START_DELIM @"<$"
-#define END_DELIM @">"
-#define CLOSE_END_DELIM @"/>"
-#define CLOSE_DELIM @"/"
-#define START_CLOSE_DELIM @"</$"
-#define START_MID_DELIM @"<?$"
-#define NEWLINE @"\n"
-#define RETURN @"\n"
-#define RETURN_NEWLINE @"\r\n"
+#define STARTTAG_OPEN_DELIM @"<$"
+#define ENDTAG_OPEN_DELIM @"</$"
+#define SEPTAG_OPEN_DELIM @"<?$"
+#define SINGLETAG_CLOSE_DELIM @"/>"
+#define MULTITAG_CLOSE_DELIM @">"
+
+/*
+    single tag: <$key/>
+     multi tag: <$key> </$key> 
+            or: <$key> <?$key> </$key>
+*/
 
 @implementation BDSKTemplateParser
 
 
-static NSCharacterSet *letterAndDotCharacterSet = nil;
+static NSCharacterSet *keyCharacterSet = nil;
 
 + (void)initialize {
     
     OBINITIALIZE;
     
-    NSMutableCharacterSet *tmpSet = [[NSCharacterSet letterCharacterSet] mutableCopy];
-    [tmpSet addCharactersInString:@".-0123456789:;@"];
-    letterAndDotCharacterSet = [tmpSet copy];
+    NSMutableCharacterSet *tmpSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+    [tmpSet addCharactersInString:@".-:;@"];
+    keyCharacterSet = [tmpSet copy];
     [tmpSet release];
 }
 
@@ -86,17 +88,17 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
         int start;
         NSRange wsRange;
                 
-        if ([scanner scanUpToString:START_DELIM intoString:&beforeText])
+        if ([scanner scanUpToString:STARTTAG_OPEN_DELIM intoString:&beforeText])
             [result appendString:beforeText];
         
-        if ([scanner scanString:START_DELIM intoString:nil]) {
+        if ([scanner scanString:STARTTAG_OPEN_DELIM intoString:nil]) {
             
             start = [scanner scanLocation];
             
             // scan the key, must be letters and dots. We don't allow extra spaces
-            [scanner scanCharactersFromSet:letterAndDotCharacterSet intoString:&tag];
+            [scanner scanCharactersFromSet:keyCharacterSet intoString:&tag];
             
-            if ([scanner scanString:CLOSE_END_DELIM intoString:nil]) {
+            if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
                 
                 // simple template tag
                 @try{ keyValue = [object valueForKeyPath:tag]; }
@@ -104,7 +106,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                 if (keyValue != nil) 
                     [result appendString:[keyValue stringDescription]];
                 
-            } else if ([scanner scanString:END_DELIM intoString:nil]) {
+            } else if ([scanner scanString:MULTITAG_CLOSE_DELIM intoString:nil]) {
                 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
@@ -112,8 +114,8 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
-                endTag = [NSString stringWithFormat:@"%@%@%@", START_CLOSE_DELIM, tag, END_DELIM];
-                sepTag = [NSString stringWithFormat:@"%@%@%@", START_MID_DELIM, tag, END_DELIM];
+                endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
+                sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
                 // ignore the rest of an empty line after the tag
                 [scanner scanWhitespaceAndSingleNewline];
                 if ([scanner scanString:endTag intoString:nil])
@@ -164,12 +166,12 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                 
             } else {
                 
-                // a START_DELIM without END_DELIM, so no template tag. Rewind
-                [result appendString:START_DELIM];
+                // an open delimiter without a close delimiter, so no template tag. Rewind
+                [result appendString:STARTTAG_OPEN_DELIM];
                 [scanner setScanLocation:start];
                 
             }
-        } // scan START_DELIM
+        } // scan STARTTAG_OPEN_DELIM
     } // while
     
     return [result autorelease];    
@@ -203,18 +205,18 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
         
         start = [scanner scanLocation];
                 
-        if ([scanner scanUpToString:START_DELIM intoString:&beforeText])
+        if ([scanner scanUpToString:STARTTAG_OPEN_DELIM intoString:&beforeText])
             [result appendAttributedString:[template attributedSubstringFromRange:NSMakeRange(start, [beforeText length])]];
         
-        if ([scanner scanString:START_DELIM intoString:nil]) {
+        if ([scanner scanString:STARTTAG_OPEN_DELIM intoString:nil]) {
             
             attr = [template attributesAtIndex:[scanner scanLocation] - 1 effectiveRange:NULL];
             start = [scanner scanLocation];
             
             // scan the key, must be letters and dots. We don't allow extra spaces
-            [scanner scanCharactersFromSet:letterAndDotCharacterSet intoString:&tag];
+            [scanner scanCharactersFromSet:keyCharacterSet intoString:&tag];
             
-            if ([scanner scanString:CLOSE_END_DELIM intoString:nil]) {
+            if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
                 
                 // simple template tag
                 @try{ keyValue = [object valueForKeyPath:tag]; }
@@ -230,7 +232,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                     [tmpAttrStr release];
                 }
                 
-            } else if ([scanner scanString:END_DELIM intoString:nil]) {
+            } else if ([scanner scanString:MULTITAG_CLOSE_DELIM intoString:nil]) {
                 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
@@ -238,8 +240,8 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
-                endTag = [NSString stringWithFormat:@"%@%@%@", START_CLOSE_DELIM, tag, END_DELIM];
-                sepTag = [NSString stringWithFormat:@"%@%@%@", START_MID_DELIM, tag, END_DELIM];
+                endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
+                sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
                 // ignore the rest of an empty line after the tag
                 [scanner scanWhitespaceAndSingleNewline];
                 if ([scanner scanString:endTag intoString:nil])
@@ -290,12 +292,12 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
                 
             } else {
                 
-                // a START_DELIM without END_DELIM, so no template tag. Rewind
-                [result appendAttributedString:[template attributedSubstringFromRange:NSMakeRange(start - [START_DELIM length], [START_DELIM length])]];
+                // a STARTTAG_OPEN_DELIM without MULTITAG_CLOSE_DELIM, so no template tag. Rewind
+                [result appendAttributedString:[template attributedSubstringFromRange:NSMakeRange(start - [STARTTAG_OPEN_DELIM length], [STARTTAG_OPEN_DELIM length])]];
                 [scanner setScanLocation:start];
                 
             }
-        } // scan START_DELIM
+        } // scan STARTTAG_OPEN_DELIM
     } // while
     
     [result fixAttributesInRange:NSMakeRange(0, [result length])];
@@ -328,7 +330,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
     BOOL foundWhitepace = NO;
     int startLoc = [self scanLocation];
     foundWhitepace = [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
-    foundNewline = [self scanString:RETURN_NEWLINE intoString:nil] || [self scanString:NEWLINE intoString:nil] || [self scanString:RETURN intoString:nil];
+    foundNewline = [self scanString:@"\r\n" intoString:nil] || [self scanString:@"\n" intoString:nil] || [self scanString:@"\r" intoString:nil];
     if (foundNewline == NO && foundWhitepace == YES)
         [self setScanLocation:startLoc];
     return foundNewline;
