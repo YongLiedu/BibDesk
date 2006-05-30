@@ -172,7 +172,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     id aNode;
     NSString *name;
     while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf]){
+        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
             name = [aNode valueForKey:BDSKTemplateNameString];
             if(name != nil)
                 [names addObject:name];
@@ -181,30 +181,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return names;
 }
 
-+ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
-{
-    NSArray *nodes = nil;
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
-    if (prefData == nil)
-        nodes = [BDSKTemplate setupDefaultExportTemplates];
-    else 
-        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    
-    NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [nodes objectEnumerator];
-    id aNode;
-    NSString *name;
-    while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && ([aNode templateFormat] & formatType)){
-            name = [aNode valueForKey:BDSKTemplateNameString];
-            if(name != nil)
-                [names addObject:name];
-        }
-    }
-    return names;
-}
-
-+ (NSArray *)allFileTypesForFormat:(BDSKTemplateFormat)formatType;
++ (NSArray *)allFileTypes;
 {
     NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
@@ -218,7 +195,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     id aNode;
     NSString *fileType;
     while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && ([aNode templateFormat] & formatType)){
+        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
             fileType = [aNode valueForKey:BDSKTemplateRoleString];
             if(fileType != nil)
                 [fileTypes addObject:fileType];
@@ -273,16 +250,29 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     OBASSERT([self isLeaf] == NO);
     NSString *extension = [[self valueForKey:BDSKTemplateRoleString] lowercaseString];
-    if (extension == nil)
-        return BDSKUnknownTemplateFormat;
-    else if ([extension caseInsensitiveCompare:@"rtf"] == NSOrderedSame)
-        return BDSKRTFTemplateFormat;
-    else if ([extension caseInsensitiveCompare:@"rtfd"] == NSOrderedSame)
-        return BDSKRTFDTemplateFormat;
-    else if ([extension caseInsensitiveCompare:@"doc"] == NSOrderedSame)
-        return BDSKDocTemplateFormat;
-    else
-        return BDSKTextTemplateFormat;
+    NSURL *url = [self mainPageTemplateURL];
+    BDSKTemplateFormat format = BDSKUnknownTemplateFormat;
+    
+    if (extension == nil || url == nil) {
+        format = BDSKUnknownTemplateFormat;
+    } else if ([extension isEqualToString:@"rtf"]) {
+        format = BDSKRTFTemplateFormat;
+    } else if ([extension isEqualToString:@"rtfd"]) {
+        format = BDSKRTFDTemplateFormat;
+    } else if ([extension isEqualToString:@"doc"]) {
+        format = BDSKDocTemplateFormat;
+    } else if ([extension isEqualToString:@"html"] || [extension isEqualToString:@"htm"]) {
+        NSString *htmlString = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL];
+        if (htmlString == nil)
+            format = BDSKUnknownTemplateFormat;
+        else if ([htmlString rangeOfString:@"<$"].location != NSNotFound)
+            format = BDSKTextTemplateFormat;
+        else
+            format = BDSKRichHTMLTemplateFormat;
+    } else {
+        format = BDSKTextTemplateFormat;
+    }
+    return format;
 }
 
 - (NSString *)fileExtension;

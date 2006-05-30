@@ -41,11 +41,12 @@
 
 typedef enum _BDSKTemplateFormat {
     BDSKUnknownTemplateFormat = 0,
-    BDSKTextTemplateFormat = 1,
-    BDSKRTFTemplateFormat = 2,
-    BDSKRTFDTemplateFormat = 4,
-    BDSKDocTemplateFormat = 8,
-    BDSKRichTextTemplateFormat = 14 // RTF or RTFD or Doc
+    BDSKTextTemplateFormat = 1, // any plain text template
+    BDSKRichHTMLTemplateFormat = 2, // HTML template edited as wysiwyg
+    BDSKRTFTemplateFormat = 4,
+    BDSKRTFDTemplateFormat = 8,
+    BDSKDocTemplateFormat = 16,
+    BDSKRichTextTemplateFormat = 30 // Rich HTML, RTF, RTFD or Doc
 } BDSKTemplateFormat;
 
 extern NSString *BDSKTemplateRoleString;
@@ -67,8 +68,7 @@ extern NSString *BDSKTemplateDefaultItemString;
 + (NSArray *)setupDefaultServiceTemplates;
 
 + (NSArray *)allStyleNames;
-+ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
-+ (NSArray *)allFileTypesForFormat:(BDSKTemplateFormat)formatType;
++ (NSArray *)allFileTypes;
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 + (BDSKTemplate *)templateForTextService;
 + (BDSKTemplate *)templateForRTFService;
