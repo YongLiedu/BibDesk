@@ -87,18 +87,13 @@ enum {
 // these should correspond to the tags of export menu items
 enum {
 	BDSKBibTeXExportFileType = 0, 
-	BDSKMinimalBibTeXExportFileType = 1, 
-	BDSKTextExportFileType = 2, 
-	BDSKRichTextExportFileType = 3, 
-	BDSKRTFExportFileType = 4, 
-	BDSKRTFDExportFileType = 5, 
-	BDSKDOCExportFileType = 6, 
-	BDSKRISExportFileType = 7, 
-	BDSKLTBExportFileType = 8, 
-	BDSKMODSExportFileType = 9, 
-	BDSKXMLExportFileType = 10, 
-	BDSKATOMExportFileType = 11, 
-	BDSKRSSExportFileType = 12
+	BDSKTemplateExportFileType = 1, 
+	BDSKRISExportFileType = 2, 
+	BDSKLTBExportFileType = 3, 
+	BDSKMODSExportFileType = 4, 
+	BDSKEndNoteExportFileType = 5, 
+	BDSKATOMExportFileType = 6, 
+	BDSKRSSExportFileType = 7
 };
 
 // Some pasteboard types used by the document for dragging and copying.
@@ -178,6 +173,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSTextField* rssExportTextField;
     IBOutlet NSView *templateExportAccessoryView;
     IBOutlet NSPopUpButton *templateStylePopUpButton;
+    IBOutlet NSView *dropInternalAccessoryView;
+    IBOutlet NSButton *dropInternalCheckButton;
     NSString *currentExportTemplateStyle;
     
     IBOutlet NSView *saveEncodingAccessoryView;

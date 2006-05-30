@@ -126,6 +126,8 @@
                 ctxCopyTex = NSMenuItem; 
                 customCiteDrawer = NSDrawer; 
                 documentWindow = NSWindow; 
+                dropInternalAccessoryView = NSView; 
+                dropInternalCheckButton = NSButton; 
                 fileMenu = NSMenu; 
                 fileSearchController = id; 
                 groupActionButton = BDSKImagePopUpButton; 
