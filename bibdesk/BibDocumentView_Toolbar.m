@@ -102,7 +102,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, BibDocumentToolbarNewItemIdentifier,
                    NSLocalizedString(@"New",@""), 
 				   NSLocalizedString(@"New Publication",@""),
-                   NSLocalizedString(@"Create New Publication",@""),
+                   NSLocalizedString(@"Create new publication",@""),
                    self, @selector(setImage:),
 				   [NSImage imageNamed: @"newdoc"], 
 				   @selector(newPub:),
@@ -111,7 +111,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, BibDocumentToolbarDeleteItemIdentifier,
                    NSLocalizedString(@"Delete",@""), 
 				   NSLocalizedString(@"Delete Publication",@""),
-                   NSLocalizedString(@"Delete Selected Publication(s)",@""),
+                   NSLocalizedString(@"Delete selected publication(s)",@""),
                    self, @selector(setImage:),  
 				   [NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon],
 				   @selector(deleteSelectedPubs:),
@@ -120,7 +120,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, BibDocumentToolbarEditItemIdentifier,
                    NSLocalizedString(@"Edit",@""),
                    NSLocalizedString(@"Edit Publication",@""),
-                   NSLocalizedString(@"Edit Selected Publication(s)",@""),
+                   NSLocalizedString(@"Edit selected publication(s)",@""),
                    self, @selector(setImage:), 
 				   [NSImage imageNamed: @"editdoc"],
                    @selector(editPubCmd:), 
@@ -129,7 +129,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 	addToolbarItem(toolbarItems, BibDocumentToolbarPreviewItemIdentifier,
                    NSLocalizedString(@"Preview",@""),
                    NSLocalizedString(@"Show/Hide Preview",@""),
-                   NSLocalizedString(@"Show/Hide Preview Panel",@""),
+                   NSLocalizedString(@"Show/Hide preview panel",@""),
                    nil, @selector(setImage:),
                    [NSImage imageNamed: @"preview"],
                    @selector(toggleShowingPreviewPanel:), NULL);
@@ -137,7 +137,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, BibDocumentToolbarCiteDrawerItemIdentifier,
                    NSLocalizedString(@"Cite Drawer",@""),
                    NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
-                   NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
+                   NSLocalizedString(@"Toggle custom citations drawer",@""),
                    self, @selector(setImage:),
                    [NSImage imageNamed: @"drawerToolbarImage"],
                    @selector(toggleShowingCustomCiteDrawer:), nil);
@@ -151,7 +151,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, BibDocumentToolbarSearchItemIdentifier,
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search using Boolean '+' and '|', see Help for details",@""),
+                   NSLocalizedString(@"Search using boolean '+' and '|', see Help for details",@""),
                    self, @selector(setView:),
                    searchField,
                    @selector(searchFieldAction:), 
@@ -165,7 +165,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, BibDocumentToolbarActionItemIdentifier,
                    NSLocalizedString(@"Action",@""),
                    NSLocalizedString(@"Action",@""),
-                   NSLocalizedString(@"Action for Selection",@""),
+                   NSLocalizedString(@"Action for selected publications",@""),
                    self, @selector(setView:),
                    actionMenuButton,
                    NULL, 
@@ -179,7 +179,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, BibDocumentToolbarGroupActionItemIdentifier,
                    NSLocalizedString(@"Group Action",@""),
                    NSLocalizedString(@"Group Action",@""),
-                   NSLocalizedString(@"Group Action",@""),
+                   NSLocalizedString(@"Action for groups list",@""),
                    self, @selector(setView:),
                    groupActionMenuButton,
                    NULL, 
@@ -215,6 +215,17 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
         } 
     } else {
         [newItem setImage:[item image]];
+        if([itemIdent isEqualToString: BibDocumentToolbarNewItemIdentifier]) {
+            NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(32, 32)] autorelease];
+            [image lockFocus];
+            [[item image] compositeToPoint:NSZeroPoint operation:NSCompositeSourceOver]; 
+            [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
+            [image unlockFocus];
+            [newItem setOptionKeyImage:image];
+            [newItem setOptionKeyLabel:NSLocalizedString(@"New with Crossref", @"")];
+            [newItem setOptionKeyToolTip:NSLocalizedString(@"Create new publication with crossref", @"")];
+            [newItem setOptionKeyAction:@selector(createNewPubUsingCrossrefAction:)];
+        }
     }
     [newItem setToolTip:[item toolTip]];
     [newItem setTarget:[item target]];
@@ -293,8 +304,9 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
         if([self numberOfSelectedPubs] == 0) enable = NO;
     }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarDeleteItemIdentifier]){
         if([self numberOfSelectedPubs] == 0 || [documentWindow isKeyWindow] == NO) enable = NO;  // disable click-through
+    }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarNewItemIdentifier]){
+        if(([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask) && [self numberOfSelectedPubs] != 1) enable = NO;
     }
-
     return enable;
 }
 
