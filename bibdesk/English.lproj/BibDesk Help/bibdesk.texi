@@ -1057,6 +1057,7 @@ keys when adding references.
 
 @cindex crossref
 @cindex crossref, drag-and-drop
+@kindex Option-Cmd N
 @kindex Option-Cmd drag
 
 You can create a crossreferenced item using the BibTeX @samp{Crossref} field in
@@ -1066,8 +1067,10 @@ As an alternative, you can hold down the command and option keys and drag the
 parent item from the main publication list into the editor window of the child item.
 
 To create a new crossreferenced item based on an existing item, you can also select the
-parent item in the publication list and use @menutitle{New Publication With Crossref}
-from the Publication menu or contextual menu.
+parent item in the publication list and use @menutitle{New Publication With Crossref} 
+(keyboard shortcut @optcmd{N}) from the @menutitle{Publication} menu or contextual menu. 
+Alternatively, you can press the @buttontitle{New Publication} toolbar button while 
+holding the Option key down.
 
 Crossreferenced fields which are inherited from the parent publication are shown as
 gray text in the editor, or light blue if they are macro values.  Inherited fields can
