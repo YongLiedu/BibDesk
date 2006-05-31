@@ -330,7 +330,14 @@ static NSCharacterSet *keyCharacterSet = nil;
     BOOL foundWhitepace = NO;
     int startLoc = [self scanLocation];
     foundWhitepace = [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
-    foundNewline = [self scanString:@"\r\n" intoString:nil] || [self scanString:@"\n" intoString:nil] || [self scanString:@"\r" intoString:nil];
+    if ([self isAtEnd] == NO) {
+        foundNewline = [self scanString:@"\r\n" intoString:nil];
+        if (foundNewline == NO) {
+            unichar nextChar = [[self string] characterAtIndex:[self scanLocation]];
+            if (foundNewline = [[NSCharacterSet newlineCharacterSet] characterIsMember:nextChar])
+                [scanner setScanLocation:[scanner scanLocation] + 1];
+        }
+    }
     if (foundNewline == NO && foundWhitepace == YES)
         [self setScanLocation:startLoc];
     return foundNewline;
@@ -358,13 +365,11 @@ static NSCharacterSet *keyCharacterSet = nil;
     } else {
         unichar firstChar = [self characterAtIndex:firstCharRange.location];
         unsigned int rangeEnd = NSMaxRange(firstCharRange);
-        if (firstChar == '\r') {
-            if (rangeEnd < NSMaxRange(range) && [self characterAtIndex:rangeEnd] == '\n')
+        if([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
+            if (firstChar == '\r' && rangeEnd < NSMaxRange(range) && [self characterAtIndex:rangeEnd] == '\n')
                 wsRange = NSMakeRange(start, rangeEnd + 1 - start);
             else 
                 wsRange = NSMakeRange(start, rangeEnd - start);
-        } else if(firstChar == '\n') {
-            wsRange = NSMakeRange(start, rangeEnd - start);
         }
     }
     return wsRange;
@@ -387,7 +392,7 @@ static NSCharacterSet *keyCharacterSet = nil;
     } else {
         unichar lastChar = [self characterAtIndex:lastCharRange.location];
         unsigned int rangeEnd = NSMaxRange(lastCharRange);
-        if (rangeEnd < end && (lastChar == '\r' || lastChar == '\n')) 
+        if (rangeEnd < end && [[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar]) 
             wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
     }
     return wsRange;
