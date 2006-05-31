@@ -48,7 +48,7 @@
 */
 
 
-@interface BibAppController : NSDocumentController {
+@interface BibAppController : NSObject {
 	
     // global auto-completion dictionary:
     NSMutableDictionary *autoCompletionDict;
@@ -57,22 +57,11 @@
 	NSArray *requiredFieldsForCiteKey;
 	NSArray *requiredFieldsForLocalUrl;
 	
-    // ----------------------------------------------------------------------------------------
-    // stuff for the accessory view for openUsingFilter
-    IBOutlet NSView* openUsingFilterAccessoryView;
-    IBOutlet NSComboBox *openUsingFilterComboBox;
-	
-	// stuff for the accessory view for open text encoding 
-	IBOutlet NSView *openTextEncodingAccessoryView;
-	IBOutlet NSPopUpButton *openTextEncodingPopupButton;
-    
     IBOutlet NSTextView* readmeTextView;
     IBOutlet NSWindow* readmeWindow;
 	
 	IBOutlet NSMenuItem * columnsMenuItem;
 	IBOutlet NSMenuItem * groupSortMenuItem;
-	
-	IBOutlet NSMenuItem* showHideCustomCiteStringsMenuItem;
 
     NSLock *metadataCacheLock;
     volatile BOOL canWriteMetadata;
@@ -89,54 +78,8 @@
 	
 - (void)updateColumnsMenu;
 
-
-#pragma mark Overridden NSDocumentController methods
-
-/*!
-    @method     openDocument:
-    @abstract   responds to the Open menu item in File
-    @discussion (description)
-    @param      sender (description)
-    @result     (description)
-*/
-- (IBAction)openDocument:(id)sender;
-
-
-/*!
-    @method openUsingFilter
-    @abstract Lets user specify a command-line to read from stdin and give us stdout.
-    @discussion «discussion»
-    
-*/
-- (IBAction)openUsingFilter:(id)sender;
-
-/*!
-    @method openBibTeXFile:withEncoding:
-    @abstract Imports a bibtex file with a specific encoding.  Useful if there are non-ASCII characters in the file.
-    @discussion
- */
-- (id)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
-
-/*!
-    @method     openRISFile:withEncoding:
-    @abstract   Creates a new document with given RIS file and string encoding.
-    @discussion (comprehensive description)
-    @param      filePath (description)
-    @param      encoding (description)
-*/
-- (id)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
-
-/*!
-    @method     openBibTeXFileUsingPhonyCiteKeys:withEncoding:
-    @abstract   Generates temporary cite keys in order to keep btparse from choking on files exported from Endnote or BookEnds.
-    @discussion Uses a regular expression to find and replace empty cite keys, according to a fairly limited pattern.
-                A new, untitled document is created, and a warning about the invalid temporary keys is shown after opening.
-    @param      filePath The file to open
-    @param      encoding File's character encoding
-*/
-- (id)openBibTeXFileUsingPhonyCiteKeys:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
-
 - (void)handleTableColumnsChangedNotification:(NSNotification *)notification;
+
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (NSArray *)requiredFieldsForLocalUrl;
