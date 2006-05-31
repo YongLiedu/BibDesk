@@ -59,10 +59,13 @@ static NSCharacterSet *newlineCharacterSet = nil;
     NSString *upAndDownArrowString = [NSString stringWithCharacters: upAndDownArrowCharacters  length: 2];
     upAndDownArrowCharacterSet = [[NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString] retain];
     
-    // character set with all newline characters (including the weird Unicode ones)
+    // This will be a character set with all newline characters (including the weird Unicode ones)
     CFMutableCharacterSetRef newlineCFCharacterSet = NULL;
+    // get all whitespace characters (does not include newlines)
     newlineCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-    CFCharacterSetInvert(newlineCFCharacterSet); // no whitespace in this one, but it also has all letters...
+    // invert the whitespace-only set to get all non-whitespace chars (the inverted set will include newlines)
+    CFCharacterSetInvert(newlineCFCharacterSet);
+    // now get only the characters that are common to kCFCharacterSetWhitespaceAndNewline and our non-whitespace set
     CFCharacterSetIntersect(newlineCFCharacterSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
     newlineCharacterSet = [(id)newlineCFCharacterSet copy];
     CFRelease(newlineCFCharacterSet);
