@@ -211,7 +211,7 @@
                 
                 // @@ REFACTOR:
                 // I suppose in the future, bibTeX database won't be the default? 
-                bibDoc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
+                bibDoc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
                 
                 // the shell task object returns data as UTF-8, so we'll force the document to open as UTF-8
                 [bibDoc loadBibTeXDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] fromURL:nil encoding:NSUTF8StringEncoding error:NULL];
@@ -230,9 +230,9 @@
 	BibDocument *doc = nil;
 	
     // make a fresh document, and don't display it until we can set its name.
-    doc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
+    doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
     [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
-    [doc setFileType:@"bibTeX database"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     [doc loadBibTeXDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
     return doc;
 }
@@ -243,9 +243,9 @@
 	BibDocument *doc = nil;
 	
     // make a fresh document, and don't display it until we can set its name.
-    doc = [self openUntitledDocumentOfType:@"RIS/Medline File" display:NO];
+    doc = [self openUntitledDocumentOfType:BDSKRISDocumentType display:NO];
     [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
-    [doc setFileType:@"RIS/Medline File"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    [doc setFileType:BDSKRISDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     [doc loadRISDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
     return doc;
 }
@@ -302,9 +302,9 @@
 	BibDocument *doc = nil;
 	
     // make a fresh document, and don't display it until we can set its name.
-    doc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
+    doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
     [doc setFileName:filePath]; // required for error handling; mark it dirty, so it's obviously modified
-    [doc setFileType:@"bibTeX database"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     [doc loadBibTeXDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
     [doc showWindows];
     

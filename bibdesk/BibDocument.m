@@ -100,6 +100,10 @@
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
 
+// these are the same as in Info.plist
+NSString *BDSKBibTeXDocumentType = @"bibTeX database";
+NSString *BDSKRISDocumentType = @"RIS/Medline File";
+
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
@@ -624,7 +628,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 // to set the document's encoding before writing to the file
 - (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
     if([super prepareSavePanel:savePanel]){
-        if([[self fileType] isEqualToString:@"bibTeX database"] || [[self fileType] isEqualToString:@"RIS/Medline File"]){
+        if([[self fileType] isEqualToString:BDSKBibTeXDocumentType] || [[self fileType] isEqualToString:BDSKRISDocumentType]){
             NSRect sevFrame, ignored, avFrame = [[savePanel accessoryView] frame];
             float height = NSHeight([saveEncodingAccessoryView frame]);
             avFrame.size.height += height - SAVE_ENCODING_VIEW_OFFSET;
@@ -655,7 +659,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
    didSaveSelector:(SEL)didSaveSelector 
        contextInfo:(void *)contextInfo{
     // set the string encoding according to the popup if it's a plain text type
-    if([[self fileType] isEqualToString:@"bibTeX database"] || [[self fileType] isEqualToString:@"RIS/Medline File"])
+    if([[self fileType] isEqualToString:BDSKBibTeXDocumentType] || [[self fileType] isEqualToString:BDSKRISDocumentType])
         [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] 
                                             stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
     [super saveToFile:fileName saveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
@@ -901,13 +905,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                       userInfo:[NSDictionary dictionary]];
     NSData *data = nil;
     
-    if ([aType isEqualToString:@"bibTeX database"]){
+    if ([aType isEqualToString:BDSKBibTeXDocumentType]){
         if([self documentStringEncoding] == 0)
             [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
         data = [self bibTeXDataForPublications:publications encoding:[self documentStringEncoding] droppingInternal:NO];
-    }else if ([aType isEqualToString:@"RIS/Medline File"]){
+    }else if ([aType isEqualToString:BDSKRISDocumentType]){
         data = [self RISDataForPublications:publications];
     }
 
@@ -1224,15 +1228,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
 	
 	// for types we only view, we set the file type to BibTeX as that retains the complete information in the file
-	if([aType isEqualToString:@"RIS/Medline File"] == NO)
-        [self setFileType:@"bibTeX database"];
+	if([aType isEqualToString:BDSKRISDocumentType] == NO)
+        [self setFileType:BDSKBibTeXDocumentType];
     BOOL success;
     NSData *data = [NSData dataWithContentsOfURL:absoluteURL];
     
     NSError *error = nil;
-	if ([aType isEqualToString:@"bibTeX database"]){
+	if ([aType isEqualToString:BDSKBibTeXDocumentType]){
         success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
-    }else if([aType isEqualToString:@"RIS/Medline File"]){
+    }else if([aType isEqualToString:BDSKRISDocumentType]){
 		success = [self loadRISDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
     }else{
 		// sniff the string to see what format we got

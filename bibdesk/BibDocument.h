@@ -96,6 +96,10 @@ enum {
 	BDSKRSSExportFileType = 7
 };
 
+// our main document types
+extern NSString *BDSKBibTeXDocumentType;
+extern NSString *BDSKRISDocumentType;
+
 // Some pasteboard types used by the document for dragging and copying.
 extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Reference Miner, determined using Pasteboard Peeker
 extern NSString *BDSKBibItemPboardType;
