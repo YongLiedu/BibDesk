@@ -711,9 +711,11 @@ static int MAX_RATING = 5;
 }
 
 - (NSURL *)url {
-    NSURL *url = [NSURL fileURLWithPath:[self stringByExpandingTildeInPath]];
-    if (url == nil)
+    NSURL *url = nil;
+    if ([self rangeOfString:@"://"].location != NSNotFound)
         url = [NSURL URLWithStringByNormalizingPercentEscapes:self];
+    else
+        url = [NSURL fileURLWithPath:[self stringByExpandingTildeInPath]];
     return url;
 }
 
