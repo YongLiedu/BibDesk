@@ -1,14 +1,25 @@
 {
     IBClasses = (
         {
+            ACTIONS = {openDocumentUsingFilter = id; }; 
+            CLASS = BDSKDocumentController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                openTextEncodingAccessoryView = NSView; 
+                openTextEncodingPopupButton = NSPopUpButton; 
+                openUsingFilterAccessoryView = NSView; 
+                openUsingFilterComboBox = NSComboBox; 
+            }; 
+            SUPERCLASS = NSDocumentController; 
+        }, 
+        {
             ACTIONS = {
                 checkForUpdates = id; 
-                newBDSKLibrary = id; 
-                openDocument = id; 
-                openUsingFilter = id; 
                 showPreferencePanel = id; 
                 showReadMeFile = id; 
                 showRelNotes = id; 
+                toggleShowingErrorPanel = id; 
+                toggleShowingPreviewPanel = id; 
                 visitWebSite = id; 
             }; 
             CLASS = BibAppController; 
@@ -16,15 +27,10 @@
             OUTLETS = {
                 columnsMenuItem = NSMenuItem; 
                 groupSortMenuItem = NSMenuItem; 
-                openTextEncodingAccessoryView = NSView; 
-                openTextEncodingPopupButton = NSPopUpButton; 
-                openUsingFilterAccessoryView = NSView; 
-                openUsingFilterComboBox = NSComboBox; 
                 readmeTextView = NSTextView; 
                 readmeWindow = NSWindow; 
-                showHideCustomCiteStringsMenuItem = NSMenuItem; 
             }; 
-            SUPERCLASS = NSDocumentController; 
+            SUPERCLASS = NSObject; 
         }, 
         {
             ACTIONS = {
@@ -126,6 +132,7 @@
                 mergeInSharedPublications = id; 
                 newBDSKLibrary = id; 
                 newPub = id; 
+                openDocumentUsingFilter = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 
                 removeSelectedPubs = id; 
