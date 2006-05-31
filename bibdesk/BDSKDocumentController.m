@@ -384,15 +384,11 @@
 {
     id firstResponder = [self firstResponder];
     // this is likely a field editor, but we have to make sure
-    if([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor] && [firstResponder respondsToSelector:@selector(superview)]){
-        // if it's our custom view, the control will be a combo box (superview of the field editor)
-        NSView *superview = [firstResponder superview];
-        NSEnumerator *viewE = [[[self accessoryView] subviews] objectEnumerator];
-        NSView *aView;
-        while(aView = [viewE nextObject]){
-            if([superview isDescendantOf:aView])
-                return NO;
-        }
+    if([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor]){
+        // if it's our custom view, the control will be a combo box (delegate of the field editor)
+        NSView *accessoryView = [self accessoryView];
+        if (accessoryView != nil && [accessoryView ancestorSharedWithView:[firstResponder delegate]] == accessoryView)
+            return NO;
     }
     return [super _canShowGoto];
 }
