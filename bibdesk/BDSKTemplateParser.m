@@ -335,7 +335,7 @@ static NSCharacterSet *keyCharacterSet = nil;
         if (foundNewline == NO) {
             unichar nextChar = [[self string] characterAtIndex:[self scanLocation]];
             if (foundNewline = [[NSCharacterSet newlineCharacterSet] characterIsMember:nextChar])
-                [scanner setScanLocation:[scanner scanLocation] + 1];
+                [self setScanLocation:[self scanLocation] + 1];
         }
     }
     if (foundNewline == NO && foundWhitepace == YES)
