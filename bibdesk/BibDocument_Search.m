@@ -96,11 +96,11 @@ static NSString *BDSKFileContentLocalizedString = nil;
 	[cellMenu insertItem:anItem atIndex:curIndex++];
 	[anItem release];
 	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field",@"Add Field... menu item") stringByAppendingString:[NSString horizontalEllipsisString]] action:@selector(quickSearchAddField:) keyEquivalent:@""];
+	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field",@"Add Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchAddField:) keyEquivalent:@""];
 	[cellMenu insertItem:anItem atIndex:curIndex++];
 	[anItem release];
 	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field",@"Remove Field... menu item") stringByAppendingString:[NSString horizontalEllipsisString]] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
+	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field",@"Remove Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
 	[cellMenu insertItem:anItem atIndex:curIndex++];
 	[anItem release];
 	

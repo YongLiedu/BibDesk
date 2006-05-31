@@ -669,14 +669,14 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [menu addItem:[NSMenuItem separatorItem]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Add Field", @""), [NSString horizontalEllipsisString]]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field", @"") stringByAppendingEllipsis]
 										  action:@selector(addGroupFieldAction:)
 								   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menu addItem:menuItem];
     [menuItem release];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Remove Field", @""), [NSString horizontalEllipsisString]]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field", @"") stringByAppendingEllipsis]
 										  action:@selector(removeGroupFieldAction:)
 								   keyEquivalent:@""];
 	[menuItem setTarget:self];

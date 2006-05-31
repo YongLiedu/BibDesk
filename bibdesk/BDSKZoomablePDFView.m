@@ -40,6 +40,7 @@
 #import <OmniAppKit/NSView-OAExtensions.h>
 #import <OmniBase/OBUtilities.h>
 #import "BDSKHeaderPopUpButton.h"
+#import "NSString_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 
 @interface NSScrollView (BDSKZoomablePDFViewExtensions)
@@ -194,7 +195,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     [menu addItem:item];
     [item release];
     
-    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Save As", @""), [NSString horizontalEllipsisString]] action:@selector(saveDocumentAs:) keyEquivalent:@""];
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save As", @"") stringByAppendingEllipsis] action:@selector(saveDocumentAs:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
 

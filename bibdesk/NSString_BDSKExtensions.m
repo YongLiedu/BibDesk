@@ -591,6 +591,10 @@ static int MAX_RATING = 5;
     return result;
 }
 
+- (NSString *)stringByAppendingEllipsis{
+    return [self stringByAppendingString:[NSString horizontalEllipsisString]];
+}
+
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks{

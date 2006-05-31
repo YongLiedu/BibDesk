@@ -476,7 +476,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         }
         
         // add the choose... item
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Choose",@""), [NSString horizontalEllipsisString]] action:@selector(editFile:) keyEquivalent:@""];
+        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"") stringByAppendingEllipsis] action:@selector(editFile:) keyEquivalent:@""];
         [item setTarget:self];
         [item setRepresentedObject:nil];
         [submenu addItem:item];
