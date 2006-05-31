@@ -41,7 +41,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache, BDSKFieldCollection;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache, BDSKFieldCollection, BDSKTemplate;
 @protocol BDSKParseableItem;
 
 /*!
@@ -687,8 +687,8 @@
 */
 - (NSString *)allFieldsString; 
 
-- (NSString *)stringValueUsingTemplate:(NSString *)templateString;
-- (NSAttributedString *)attributedStringValueUsingTemplate:(NSAttributedString *)templateAttributedString;
+- (NSString *)stringValueUsingTemplate:(BDSKTemplate *)template;
+- (NSAttributedString *)attributedStringValueUsingTemplate:(BDSKTemplate *)template;
 
 - (void)prepareForTemplateParsing;
 - (void)cleanupAfterTemplateParsing;

@@ -275,6 +275,28 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return format;
 }
 
+- (NSString *)stringForType:(NSString *)type;
+{
+    NSURL *theURL = nil;
+    if(nil != type)
+        theURL = [self templateURLForType:type];
+    // return default template string if no type or no type-specific template
+    if(nil == theURL)
+        theURL = [self defaultItemTemplateURL];
+    return [NSString stringWithContentsOfURL:theURL];
+}
+
+- (NSAttributedString *)attributedStringForType:(NSString *)type;
+{
+    NSURL *theURL = nil;
+    if(nil != type)
+        theURL = [self templateURLForType:type];
+    // return default template string if no type or no type-specific template
+    if(nil == theURL)
+        theURL = [self defaultItemTemplateURL];
+    return [[[NSAttributedString alloc] initWithURL:theURL documentAttributes:NULL] autorelease];
+}
+
 - (NSString *)fileExtension;
 {
     OBASSERT([self isLeaf] == NO);

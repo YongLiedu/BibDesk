@@ -60,6 +60,7 @@
 #import "OFCharacterSet_BDSKExtensions.h"
 #import "PDFMetadata.h"
 #import "BibField.h"
+#import "BDSKTemplate.h"
 
 @interface BDSKBibItemStringCache : NSObject {
     BibItem *item;
@@ -1886,18 +1887,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return s;
 }
 
-- (NSString *)stringValueUsingTemplate:(NSString *)templateString{
+- (NSString *)stringValueUsingTemplate:(BDSKTemplate *)template{
+    NSParameterAssert(nil != template);
     NSString *string = nil;
     [self prepareForTemplateParsing];
-    string = [BDSKTemplateParser stringByParsingTemplate:templateString usingObject:self];
+    string = [BDSKTemplateParser stringByParsingTemplate:[template stringForType:[self type]] usingObject:self];
     [self cleanupAfterTemplateParsing];
     return string;
 }
 
-- (NSAttributedString *)attributedStringValueUsingTemplate:(NSAttributedString *)templateAttributedString{
+- (NSAttributedString *)attributedStringValueUsingTemplate:(BDSKTemplate *)template{
+    NSParameterAssert(nil != template);
     NSAttributedString *string = nil;
     [self prepareForTemplateParsing];
-    string = [BDSKTemplateParser attributedStringByParsingTemplate:templateAttributedString usingObject:self];
+    string = [BDSKTemplateParser attributedStringByParsingTemplate:[template attributedStringForType:[self type]] usingObject:self];
     [self cleanupAfterTemplateParsing];
     return string;
 }

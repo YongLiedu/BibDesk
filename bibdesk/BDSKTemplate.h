@@ -76,6 +76,13 @@ extern NSString *BDSKTemplateDefaultItemString;
 - (BDSKTemplateFormat)templateFormat;
 - (NSString *)fileExtension;
 
+// returns the contents of a child for the given type or of the default template
+// (pass nil for the type if you explicitly desire the default template content)
+// encoding should be either Unicode, UTF-8, or defaultCStringEncoding
+- (NSString *)stringForType:(NSString *)type;
+
+- (NSAttributedString *)attributedStringForType:(NSString *)type;
+
 - (NSURL *)mainPageTemplateURL;
 - (NSURL *)defaultItemTemplateURL;
 - (NSURL *)templateURLForType:(NSString *)pubType;

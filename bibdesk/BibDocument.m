@@ -3829,50 +3829,25 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
+    id returnString = nil;
+    BDSKTemplate *subTemplate = nil;
     
     if (format & BDSKTextTemplateFormat) {
         
-        NSMutableString *s = [NSMutableString stringWithString:@""];
-        NSString *defaultItemTemplate = [NSString stringWithContentsOfURL:[template defaultItemTemplateURL]];
-        OBPRECONDITION(nil != defaultItemTemplate);
-        NSURL *templateFileURL = nil;
-        NSString *itemTemplate;
-        
+        returnString = [NSMutableString stringWithString:@""];        
         while(pub = [e nextObject]){
-
-            templateFileURL = [template templateURLForType:[pub type]];
-            if(nil != templateFileURL && [[NSFileManager defaultManager] objectExistsAtFileURL:templateFileURL] == NO)
-                itemTemplate = [NSString stringWithContentsOfURL:templateFileURL];
-            else
-                itemTemplate = defaultItemTemplate;
-            [s appendString:[pub stringValueUsingTemplate:itemTemplate]];
+            [returnString appendString:[pub stringValueUsingTemplate:template]];
         }
-        
-        return s;
         
     } else if (format & BDSKRichTextTemplateFormat) {
         
-        NSMutableAttributedString *as = [[[NSMutableAttributedString alloc] init] autorelease];
-        NSAttributedString *defaultItemTemplate = [[[NSAttributedString alloc] initWithURL:[template defaultItemTemplateURL] documentAttributes:NULL] autorelease];
-        OBPRECONDITION(nil != defaultItemTemplate);
-        NSURL *templateFileURL = nil;
-        NSAttributedString *itemTemplate;
-        
+        returnString = [[[NSMutableAttributedString alloc] init] autorelease];
         while(pub = [e nextObject]){
-
-            templateFileURL = [template templateURLForType:[pub type]];
-            if(nil != templateFileURL && [[NSFileManager defaultManager] objectExistsAtFileURL:templateFileURL] == NO)
-                itemTemplate = [[[NSAttributedString alloc] initWithURL:templateFileURL documentAttributes:NULL] autorelease];
-            else
-                itemTemplate = defaultItemTemplate;
-            [as appendAttributedString:[pub attributedStringValueUsingTemplate:itemTemplate]];
+            [returnString appendAttributedString:[pub attributedStringValueUsingTemplate:template]];
         }
-        
-        return as;
-    
     }
     
-    return nil;
+    return returnString;
 }
 
 // legacy method, as it may appear as a key in older templates
