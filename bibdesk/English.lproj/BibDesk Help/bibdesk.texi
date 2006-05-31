@@ -3165,7 +3165,7 @@ valueKey.propertyKey
 
 @subheading Collection keys
 
-A property can sometimes describe a collection of objets. For example the key @code{publications} describes 
+A property can sometimes describe a collection of objects. For example the key @code{publications} describes 
 the collection of publication objects of a document. These @emph{collection keys} are handled slightly 
 different from keys describing single values, both inn key value coding and in BibDesk temnplates. 
 
@@ -3178,7 +3178,7 @@ not of the collection itself. For example if @code{collectionKey} describes some
 will describe another collection, which is made from all the properties named @code{valueKey} of the original items. 
 For example, the key path @code{publication.title} will give the collection of all the @emph{titles} of the publications. 
 
-When you want to get a propery of the @emph{collection} rather than the items, you need to insert an 
+When you want to get a property of the @emph{collection} rather than the items, you need to insert an 
 @code{@@} at the beginning of the key. A collection can have two types of properties. 
 
 The first type of property for a collection is a property that modifies the whole collection, returning a new collection. 
