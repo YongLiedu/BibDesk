@@ -319,6 +319,21 @@
     }
 }
 
+- (void)openRecentItemFromDock:(id)sender{
+    OBASSERT([sender isKindOfClass:[NSMenuItem class]]);
+    NSURL *url = [sender representedObject];
+    if(url == nil) 
+        return NSBeep();
+    
+    // open... methods automatically call addDocument, so we don't have to
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES];
+    } else {
+        NSError *error;
+        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error];
+    }
+}    
+
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender{
     NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""] autorelease];
     NSMenu *submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@""] autorelease];
@@ -361,21 +376,6 @@
     
     return menu;
 }
-
-- (void)openRecentItemFromDock:(id)sender{
-    OBASSERT([sender isKindOfClass:[NSMenuItem class]]);
-    NSURL *url = [sender representedObject];
-    if(url == nil) 
-        return NSBeep();
-    
-    // open... methods automatically call addDocument, so we don't have to
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES];
-    } else {
-        NSError *error;
-        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error];
-    }
-}    
 
 #pragma mark Temporary files and directories
 

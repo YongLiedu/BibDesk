@@ -41,6 +41,8 @@
 #import "BDSKStringEncodingManager.h"
 #import "BibAppController.h"
 #import "BibDocument.h"
+#import "BibDocument_Groups.h"
+#import "BibDocument_Search.h"
 #import "BDSKShellTask.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDAlias.h"

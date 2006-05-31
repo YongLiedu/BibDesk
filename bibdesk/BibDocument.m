@@ -3834,7 +3834,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
     id returnString = nil;
-    BDSKTemplate *subTemplate = nil;
     
     if (format & BDSKTextTemplateFormat) {
         
