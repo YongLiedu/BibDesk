@@ -285,8 +285,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             // bypass the normal editing mechanism, or it'll reset the value
             return NO;
         } else if([identifier isEqualToString:BDSKTemplateRoleString]){
-            if(templatePrefList == 1)
-                return NO;
             if([[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
                 return NO;
         } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", identifier];
@@ -570,7 +568,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     id cell = [tableColumn dataCell];
     id item = [(NSOutlineView *)tableView itemAtRow:row];
     
-    if(([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) || (templatePrefList == 1)){
+    if(([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) || 
+       ([item isLeaf] == NO && templatePrefList == 1)){
         // setting an NSComboBoxCell to disabled in outlineView:willDisplayCell:... results in a non-editable cell with black text instead of disabled text; creating a new cell works around that problem
         if (disabledCell == nil) {
             disabledCell = [[NSComboBoxCell alloc] initTextCell:@""];
