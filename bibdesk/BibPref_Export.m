@@ -133,6 +133,20 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 - (IBAction)resetDeafultFiles:(id)sender;
 {
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset default template files to their original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+									   otherButton:nil 
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset Default Files will restore the original content of all the standard export and service template files.",@"")];
+	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+					  modalDelegate:self
+					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
+						contextInfo:NULL];
+}
+
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSAlertAlternateReturn)
+        return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportTemplate.html" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlItemExportTemplate.html" overwrite:YES];
