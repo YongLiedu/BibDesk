@@ -174,7 +174,9 @@
         NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[BDSKPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @""));
 }
 
-- (IBAction)resetTeXPreviewFile:(id)sender{
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSAlertAlternateReturn)
+        return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
     NSString *previewTemplatePath = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
@@ -183,6 +185,18 @@
     // copy previewtemplate.tex file from the bundle
     [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"previewtemplate" ofType:@"tex"]
                    toPath:previewTemplatePath handler:nil];
+}
+
+- (IBAction)resetTeXPreviewFile:(id)sender{
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset TeX template to its original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+									   otherButton:nil 
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.",@"")];
+	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+					  modalDelegate:self
+					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
+						contextInfo:NULL];
 }
 
 - (IBAction)downloadTeX:(id)sender {

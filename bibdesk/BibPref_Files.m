@@ -132,7 +132,9 @@
             NSBeep();
 }
 
-- (IBAction)resetTemplateFile:(id)sender{
+- (void)templateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSAlertAlternateReturn)
+        return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *templateFilePath = [[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath];
     if([fileManager fileExistsAtPath:templateFilePath])
@@ -140,6 +142,18 @@
     // copy template.txt file from the bundle
     [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"template" ofType:@"txt"]
                    toPath:templateFilePath handler:nil];
+}
+
+- (IBAction)resetTemplateFile:(id)sender{
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset the default template file to its original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+									   otherButton:nil 
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.",@"")];
+	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+					  modalDelegate:self
+					 didEndSelector:@selector(templateAlertDidEnd:returnCode:contextInfo:) 
+						contextInfo:NULL];
 }
 
 - (IBAction)showConversionEditor:(id)sender{
@@ -150,13 +164,27 @@
           contextInfo:nil];
 }
 
-- (IBAction)resetConversions:(id)sender{
+- (void)conversionsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSAlertAlternateReturn)
+        return;
     NSFileManager *fileManager = [NSFileManager defaultManager];
 	NSString *conversionsFilePath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
     if([fileManager fileExistsAtPath:conversionsFilePath])
         [fileManager removeFileAtPath:conversionsFilePath handler:nil];
 	// tell the converter to reload its dictionaries
 	[[BDSKConverter sharedConverter] loadDict];
+}
+
+- (IBAction)resetConversions:(id)sender{
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset character conversions to their original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+									   otherButton:nil 
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.",@"")];
+	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+					  modalDelegate:self
+					 didEndSelector:@selector(conversionsAlertDidEnd:returnCode:contextInfo:) 
+						contextInfo:NULL];
 }
 
 - (IBAction)setAutosaveTime:(id)sender;
