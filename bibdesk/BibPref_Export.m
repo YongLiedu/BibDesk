@@ -131,19 +131,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [outlineView reloadData];
 }
 
-- (IBAction)resetDeafultFiles:(id)sender;
-{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset default template files to their original value?",@"") 
-									 defaultButton:NSLocalizedString(@"OK",@"OK") 
-								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
-									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset Default Files will restore the original content of all the standard export and service template files.",@"")];
-	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
-					  modalDelegate:self
-					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
-						contextInfo:NULL];
-}
-
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if (returnCode == NSAlertAlternateReturn)
         return;
@@ -157,6 +144,19 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:YES];
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:YES];
+}
+
+- (IBAction)resetDeafultFiles:(id)sender;
+{
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset default template files to their original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+									   otherButton:nil 
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset Default Files will restore the original content of all the standard export and service template files.",@"")];
+	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+					  modalDelegate:self
+					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
+						contextInfo:NULL];
 }
 
 - (IBAction)addNode:(id)sender;
