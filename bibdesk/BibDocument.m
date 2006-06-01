@@ -629,21 +629,23 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
     if([super prepareSavePanel:savePanel]){
         if([[self fileType] isEqualToString:BDSKBibTeXDocumentType] || [[self fileType] isEqualToString:BDSKRISDocumentType]){
-            NSRect sevFrame, ignored, avFrame = [[savePanel accessoryView] frame];
-            float height = NSHeight([saveEncodingAccessoryView frame]);
-            avFrame.size.height += height - SAVE_ENCODING_VIEW_OFFSET;
-            NSView *accessoryView = [[NSView alloc] initWithFrame:avFrame];
-            NSDivideRect([accessoryView bounds], &sevFrame, &ignored, height, NSMaxYEdge);
-            [saveEncodingAccessoryView setFrame:sevFrame];
-            [accessoryView addSubview:saveEncodingAccessoryView];
-            // this should give us the file types popup from super and its label text field
-            NSEnumerator *e = [[[savePanel accessoryView] subviews] objectEnumerator];
-            NSView *aView = nil;
-            while(aView = [e nextObject]){ // now add in the subviews to our new view
-                [accessoryView addSubview:aView];
+            NSView *oldAccessoryView = [[savePanel accessoryView] retain];
+            if(oldAccessoryView == nil){
+                [savePanel setAccessoryView:saveEncodingAccessoryView];
+            }else{
+                NSRect sevFrame, ignored, avFrame = [oldAccessoryView frame];
+                float height = NSHeight([saveEncodingAccessoryView frame]);
+                avFrame.size.height += height - SAVE_ENCODING_VIEW_OFFSET;
+                NSView *accessoryView = [[NSView alloc] initWithFrame:avFrame];
+                NSDivideRect([accessoryView bounds], &sevFrame, &ignored, height, NSMaxYEdge);
+                [saveEncodingAccessoryView setFrame:sevFrame];
+                [accessoryView addSubview:saveEncodingAccessoryView];
+                [savePanel setAccessoryView:accessoryView];
+                [oldAccessoryView setFrameOrigin:NSZeroPoint];
+                [accessoryView addSubview:oldAccessoryView];
+                [oldAccessoryView release];
+                [accessoryView release];
             }
-            [savePanel setAccessoryView:accessoryView];
-            [accessoryView release];
             // set the popup to reflect the document's present string encoding
             NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
             [saveTextEncodingPopupButton selectItemWithTitle:defaultEncName];
@@ -795,13 +797,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             fileType = @"bib";
             break;
         case BDSKRISExportFileType:
-            [sp setAccessoryView:saveEncodingAccessoryView];
-            [saveTextEncodingPopupButton selectItemWithTitle:[[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]];
+            [self prepareSavePanel:sp]; // adds the encoding popup
             fileType = @"ris";
             break;
         case BDSKLTBExportFileType:
-            [sp setAccessoryView:saveEncodingAccessoryView];
-            [saveTextEncodingPopupButton selectItemWithTitle:[[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]];
+            [self prepareSavePanel:sp]; // adds the encoding popup
             fileType = @"ltb";
             break;
         case BDSKMODSExportFileType:
