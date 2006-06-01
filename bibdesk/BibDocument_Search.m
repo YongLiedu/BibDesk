@@ -236,7 +236,7 @@ static NSString *BDSKFileContentLocalizedString = nil;
 	NSString *newSearchKey = [addFieldController runSheetModalForWindow:documentWindow];
     [addFieldController release];
 	
-    if(newSearchKey == nil)
+    if([NSString isEmptyString:newSearchKey])
         return;
     
     newSearchKey = [newSearchKey capitalizedString];
