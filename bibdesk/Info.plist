@@ -880,7 +880,7 @@
                     <data></data>
                 </dict>
                 <key>helpURL</key>
-                <string>Export-Preferences</string>
+                <string>Template-Preferences</string>
                 <key>icon</key>
                 <string>exportPrefs.tiff</string>
                 <key>identifier</key>
@@ -890,9 +890,9 @@
                 <key>ordering</key>
                 <string>5</string>
                 <key>shortTitle</key>
-                <string>Export</string>
+                <string>Templates</string>
                 <key>title</key>
-                <string>Exporting Files</string>
+                <string>Template Files</string>
             </dict>
         </dict>
 	</dict>
