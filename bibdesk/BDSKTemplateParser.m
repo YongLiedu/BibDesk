@@ -100,7 +100,6 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
             
             // scan the key, must be letters and dots. We don't allow extra spaces
             // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
-            [scanner scanUpToCharactersFromSet:keyCharacterSet intoString:nil];
             [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
             
             if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
@@ -220,7 +219,6 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
             
             // scan the key, must be letters and dots. We don't allow extra spaces
             // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
-            [scanner scanUpToCharactersFromSet:keyCharacterSet intoString:nil];
             [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
 
             if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
