@@ -64,8 +64,8 @@ extern NSString *BDSKTemplateDefaultItemString;
 {
 }
 
-+ (NSArray *)setupDefaultExportTemplates;
-+ (NSArray *)setupDefaultServiceTemplates;
++ (NSArray *)defaultExportTemplates;
++ (NSArray *)defaultServiceTemplates;
 
 + (NSArray *)allStyleNames;
 + (NSArray *)allFileTypes;

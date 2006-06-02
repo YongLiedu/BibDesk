@@ -54,7 +54,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 #pragma mark API for templates
 
-+ (NSArray *)setupDefaultExportTemplates
++ (NSArray *)defaultExportTemplates
 {
     NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:4];
     NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
@@ -114,17 +114,11 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/docExportTemplate.doc"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];  
-    
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
-    if(nil != data)
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:data forKey:BDSKExportTemplateTree];
-    else
-        NSLog(@"Unable to archive %@", itemNodes);
-        
+            
     return [itemNodes autorelease];
 }
 
-+ (NSArray *)setupDefaultServiceTemplates
++ (NSArray *)defaultServiceTemplates
 {
     NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:2];
     NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
@@ -152,13 +146,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate book.rtf"]];
     [template addChildWithURL:fileURL role:@"book"];
-    
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
-    if(nil != data)
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:data forKey:BDSKServiceTemplateTree];
-    else
-        NSLog(@"Unable to archive %@", itemNodes);
-        
+            
     return [itemNodes autorelease];
 }
 
@@ -166,11 +154,11 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
-    if (prefData == nil)
-        nodes = [BDSKTemplate setupDefaultExportTemplates];
-    else 
+    if ([prefData length])
         nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    
+    else 
+        nodes = [BDSKTemplate defaultExportTemplates];
+
     NSMutableArray *names = [NSMutableArray array];
     NSEnumerator *nodeE = [nodes objectEnumerator];
     id aNode;
@@ -189,10 +177,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
-    if (prefData == nil)
-        nodes = [BDSKTemplate setupDefaultExportTemplates];
-    else 
+    if ([prefData length])
         nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    else 
+        nodes = [BDSKTemplate defaultExportTemplates];
     
     NSMutableArray *fileTypes = [NSMutableArray array];
     NSEnumerator *nodeE = [nodes objectEnumerator];
@@ -213,10 +201,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
-    if (prefData == nil)
-        nodes = [BDSKTemplate setupDefaultExportTemplates];
-    else 
+    if ([prefData length])
         nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    else 
+        nodes = [BDSKTemplate defaultExportTemplates];
     
     NSEnumerator *nodeE = [nodes objectEnumerator];
     id aNode = nil;
@@ -232,10 +220,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
-    if (prefData == nil)
-        nodes = [BDSKTemplate setupDefaultServiceTemplates];
-    else 
+    if ([prefData length])
         nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    else 
+        nodes = [BDSKTemplate defaultServiceTemplates];
     return [nodes objectAtIndex:0];
 }
 
@@ -243,10 +231,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     NSArray *nodes = nil;
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
-    if (prefData == nil)
-        nodes = [BDSKTemplate setupDefaultServiceTemplates];
-    else 
+    if ([prefData length])
         nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    else 
+        nodes = [BDSKTemplate defaultServiceTemplates];
     return [nodes objectAtIndex:1];
 }
 
