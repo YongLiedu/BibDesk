@@ -9,7 +9,7 @@
                 editFile = id; 
                 openFile = id; 
                 removeNode = id; 
-                resetDeafultFiles = id; 
+                resetDefaultFiles = id; 
                 revealInFinder = id; 
             }; 
             CLASS = "BibPref_Export"; 

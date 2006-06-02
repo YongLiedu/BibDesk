@@ -146,7 +146,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:YES];
 }
 
-- (IBAction)resetDeafultFiles:(id)sender;
+- (IBAction)resetDefaultFiles:(id)sender;
 {
 	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset default template files to their original value?",@"") 
 									 defaultButton:NSLocalizedString(@"OK",@"OK") 
@@ -479,8 +479,20 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         [menu insertItem:item atIndex:0];
         [item release];
         
+        CFURLRef defaultEditorURL = NULL;
+        OSStatus err = LSGetApplicationForURL((CFURLRef)theURL, kLSRolesEditor | kLSRolesViewer, NULL, &defaultEditorURL);
+        [(id)defaultEditorURL autorelease];
+        
+        NSString *menuTitle;
+        
         while(theURL = [appEnum nextObject]){
-            item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[[theURL path] lastPathComponent] action:@selector(editFile:) keyEquivalent:@""];
+            menuTitle = [[theURL path] lastPathComponent];
+            
+            // mark the default app, if we have one
+            if(noErr == err && [(id)defaultEditorURL isEqual:theURL])
+                menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
+            
+            item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(editFile:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:theURL];
             [submenu insertItem:item atIndex:0];

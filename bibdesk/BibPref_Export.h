@@ -51,7 +51,7 @@
 
 - (IBAction)changePrefList:(id)sender;
 
-- (IBAction)resetDeafultFiles:(id)sender;
+- (IBAction)resetDefaultFiles:(id)sender;
 
 - (IBAction)addNode:(id)sender;
 - (IBAction)removeNode:(id)sender;
