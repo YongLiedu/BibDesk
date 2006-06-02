@@ -223,8 +223,7 @@ static NSCharacterSet *keyCharacterSet = nil;
                 @catch (id exception) { keyValue = nil; }
                 if (keyValue != nil) {
                     if ([keyValue isKindOfClass:[NSAttributedString class]]) {
-                        tmpAttrStr = [keyValue mutableCopy];
-                        [(NSMutableAttributedString *)tmpAttrStr addAttributes:attr range:NSMakeRange(0, [keyValue length])];
+                        tmpAttrStr = [[NSAttributedString alloc] initWithAttributedString:keyValue attributes:attr];
                     } else {
                         tmpAttrStr = [[NSAttributedString alloc] initWithString:[keyValue stringDescription] attributes:attr];
                     }
@@ -396,6 +395,29 @@ static NSCharacterSet *keyCharacterSet = nil;
             wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
     }
     return wsRange;
+}
+
+@end
+
+
+@implementation NSAttributedString (BDSKTemplateParser)
+
+- (id)initWithAttributedString:(NSAttributedString *)attributedString attributes:(NSDictionary *)attributes {
+    [[self init] release];
+    NSMutableAttributedString *tmpStr = [[NSMutableAttributedString alloc] initWithAttributedString:attributedString];
+    unsigned index = 0, length = [attributedString length];
+    NSRange range = NSMakeRange(0, length);
+    NSDictionary *attrs;
+    [tmpStr addAttributes:attributes range:range];
+    while (index < length) {
+        attrs = [attributedString attributesAtIndex:index effectiveRange:&range];
+        if (range.length > 0) {
+            [tmpStr addAttributes:attrs range:range];
+            index = NSMaxRange(range);
+        } else index++;
+    }
+    [tmpStr fixAttributesInRange:NSMakeRange(0, [self length])];
+    return self = tmpStr;
 }
 
 @end
