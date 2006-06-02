@@ -54,6 +54,7 @@
 
 
 static NSCharacterSet *keyCharacterSet = nil;
+static NSCharacterSet *invertedKeyCharacterSet = nil;
 
 + (void)initialize {
     
@@ -63,6 +64,8 @@ static NSCharacterSet *keyCharacterSet = nil;
     [tmpSet addCharactersInString:@".-:;@"];
     keyCharacterSet = [tmpSet copy];
     [tmpSet release];
+    
+    invertedKeyCharacterSet = [[keyCharacterSet invertedSet] copy];
 }
 
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object {
@@ -70,7 +73,7 @@ static NSCharacterSet *keyCharacterSet = nil;
 }
 
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
-    NSScanner *scanner = [NSScanner scannerWithString:template];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:template];
     NSMutableString *result = [[NSMutableString alloc] init];
 
     [scanner setCharactersToBeSkipped:nil];
@@ -96,7 +99,9 @@ static NSCharacterSet *keyCharacterSet = nil;
             start = [scanner scanLocation];
             
             // scan the key, must be letters and dots. We don't allow extra spaces
-            [scanner scanCharactersFromSet:keyCharacterSet intoString:&tag];
+            // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
+            [scanner scanUpToCharactersFromSet:keyCharacterSet intoString:nil];
+            [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
             
             if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
                 
@@ -173,7 +178,7 @@ static NSCharacterSet *keyCharacterSet = nil;
             }
         } // scan STARTTAG_OPEN_DELIM
     } // while
-    
+    [scanner release];
     return [result autorelease];    
 }
 
@@ -183,7 +188,7 @@ static NSCharacterSet *keyCharacterSet = nil;
 
 + (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSString *templateString = [template string];
-    NSScanner *scanner = [NSScanner scannerWithString:templateString];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:templateString];
     NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
 
     [scanner setCharactersToBeSkipped:nil];
@@ -214,8 +219,10 @@ static NSCharacterSet *keyCharacterSet = nil;
             start = [scanner scanLocation];
             
             // scan the key, must be letters and dots. We don't allow extra spaces
-            [scanner scanCharactersFromSet:keyCharacterSet intoString:&tag];
-            
+            // scanUpToCharactersFromSet is used for efficiency instead of scanCharactersFromSet
+            [scanner scanUpToCharactersFromSet:keyCharacterSet intoString:nil];
+            [scanner scanUpToCharactersFromSet:invertedKeyCharacterSet intoString:&tag];
+
             if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
                 
                 // simple template tag
@@ -300,6 +307,7 @@ static NSCharacterSet *keyCharacterSet = nil;
     } // while
     
     [result fixAttributesInRange:NSMakeRange(0, [result length])];
+    [scanner release];
     
     return [result autorelease];    
 }
@@ -326,9 +334,18 @@ static NSCharacterSet *keyCharacterSet = nil;
 
 - (BOOL)scanWhitespaceAndSingleNewline {
     BOOL foundNewline = NO;
-    BOOL foundWhitepace = NO;
+    BOOL foundWhitespace = NO;
     int startLoc = [self scanLocation];
-    foundWhitepace = [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+
+    // [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil] is much more sensible, but NSScanner creates an autoreleased inverted character set every time you use it, so it's pretty inefficient
+    foundWhitespace = [self scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+    if (foundWhitespace){
+        static NSCharacterSet *nonWhitespaceCharacterSet = nil;
+        if(nil == nonWhitespaceCharacterSet)
+            nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] copy];
+        [self scanUpToCharactersFromSet:nonWhitespaceCharacterSet intoString:nil];
+    }
+
     if ([self isAtEnd] == NO) {
         foundNewline = [self scanString:@"\r\n" intoString:nil];
         if (foundNewline == NO) {
@@ -337,7 +354,7 @@ static NSCharacterSet *keyCharacterSet = nil;
                 [self setScanLocation:[self scanLocation] + 1];
         }
     }
-    if (foundNewline == NO && foundWhitepace == YES)
+    if (foundNewline == NO && foundWhitespace == YES)
         [self setScanLocation:startLoc];
     return foundNewline;
 }
