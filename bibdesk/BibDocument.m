@@ -807,6 +807,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             break;
     }
     [sp setRequiredFileType:fileType];
+    [sp setCanCreateDirectories:YES];
+    [sp setCanSelectHiddenExtension:YES];
     [sp setDelegate:self];
     NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
 		[NSNumber numberWithInt:exportFileType], @"exportFileType", [NSNumber numberWithBool:selected], @"selected", nil];
