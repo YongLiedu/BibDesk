@@ -131,7 +131,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     BDSKTemplate *template = nil;
     NSURL *fileURL = nil;
     
-    // HTML template
+    // Text template
     template = [[BDSKTemplate alloc] init];
     [template setValue:@"Text Service template" forKey:BDSKTemplateNameString];
     [template setValue:@"txt" forKey:BDSKTemplateRoleString];
@@ -148,6 +148,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template release];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate.rtf"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate default item.rtf"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate book.rtf"]];
+    [template addChildWithURL:fileURL role:@"book"];
     
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
     if(nil != data)
