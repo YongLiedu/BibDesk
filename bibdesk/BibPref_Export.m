@@ -41,6 +41,7 @@
 #import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplate.h"
+#import "BibAppController.h"
 
 static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
@@ -132,18 +133,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSAlertAlternateReturn)
-        return;
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportTemplate.html" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlItemExportTemplate.html" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfdExportTemplate.rtfd" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:YES];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:YES];
+    if (NSAlertDefaultReturn == returnCode)
+        [[NSApp delegate] copyAllExportTemplatesToApplicationSupportAndOverwrite:YES];
 }
 
 - (IBAction)resetDefaultFiles:(id)sender;

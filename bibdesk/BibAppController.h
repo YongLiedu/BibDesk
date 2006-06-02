@@ -68,6 +68,7 @@
     OFMessageQueue *metadataMessageQueue;
 }
 
+- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
 - (NSString *)temporaryBaseDirectoryCreating:(BOOL)create;
 - (NSString *)temporaryFilePath:(NSString *)fileName createDirectory:(BOOL)create;
 

@@ -77,12 +77,10 @@
 + (void)initialize
 {
     OBINITIALIZE;
-    NSFileManager *fileManager = [NSFileManager defaultManager];
     
     // since Quartz.framework doesn't exist on < 10.4, we can't link against it
     // http://www.cocoabuilder.com/archive/message/cocoa/2004/1/31/99969
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){}
-    else
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
         [[NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"Tiger" ofType:@"bundle"]] load];
     
     // make sure we use Spotlight's plugins on 10.4 and later
@@ -91,45 +89,10 @@
 #ifdef USECRASHREPORTER
     [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
 #endif
-    
-    NSString *applicationSupport = [fileManager currentApplicationSupportPathForCurrentUser];
-    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:@"Templates"];
-    BOOL success = NO;
-    
-    if ([fileManager fileExistsAtPath:templatesPath isDirectory:&success] == NO) {
-        success = [fileManager createDirectoryAtPath:templatesPath attributes:nil];
-    }
-    
-    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];
-    if (success) {
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportTemplate.html" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlItemExportTemplate.html" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfdExportTemplate.rtfd" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate default item.rtf" overwrite:NO];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate book.rtf" overwrite:NO];
-    }
-    
+        
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
-    
-    // register help book
-    const char *bundlePath = [[[NSBundle mainBundle] bundlePath] fileSystemRepresentation];
-    FSRef bundleRef;
-    OSStatus err = FSPathMakeRef((const UInt8 *)bundlePath, &bundleRef, NULL);
-    if(err){
-        NSLog(@"error %d occurred while trying to find bundle %s", err, bundlePath);
-    } else {
-        err = AHRegisterHelpBook(&bundleRef);
-        if(err) NSLog(@"error %d occurred while trying to register help book for %s", err, bundlePath);
-    }
-    	
+        	
 	// register transformer class
 	[NSValueTransformer setValueTransformer:[[[BDSKPathIconTransformer alloc] init] autorelease]
 									forName:@"BDSKPathIconTransformer"];
@@ -248,6 +211,37 @@
 			selector:@selector(handleTableColumnsChangedNotification:)
 			name:BDSKTableColumnChangedNotification
 			object:nil];
+    
+    // copy files to application support
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    [self copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
+    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];    
+}
+
+- (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *applicationSupport = [fileManager currentApplicationSupportPathForCurrentUser];
+    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:@"Templates"];
+    BOOL success = NO;
+    
+    if ([fileManager fileExistsAtPath:templatesPath isDirectory:&success] == NO) {
+        success = [fileManager createDirectoryAtPath:templatesPath attributes:nil];
+    }
+    
+    if (success) {
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportTemplate.html" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlItemExportTemplate.html" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfdExportTemplate.rtfd" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate default item.rtf" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate book.rtf" overwrite:overwrite];
+    }    
 }
 
 #pragma mark Application delegate
