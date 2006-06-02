@@ -38,12 +38,17 @@
 
 #import <Cocoa/Cocoa.h>
 
+typedef enum {
+    BDSKExportTemplateList = 0,
+    BDSKServiceTemplateList = 1
+} BDSKTemplateListType;
+
 @interface BibPref_Export : OAPreferenceClient {
     IBOutlet NSOutlineView *outlineView;
     NSMutableArray *itemNodes;
     NSMutableArray *roles;    
     NSArray *fileTypes;    
-    int templatePrefList;
+    BDSKTemplateListType templatePrefList;
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *deleteButton;
     IBOutlet NSMatrix *prefListRadio;
@@ -53,8 +58,13 @@
 
 - (IBAction)resetDefaultFiles:(id)sender;
 
+- (void)setItemNodes:(NSArray *)array;
+
 - (IBAction)addNode:(id)sender;
 - (IBAction)removeNode:(id)sender;
+- (BOOL)canAddItem;
+- (BOOL)canDeleteSelectedItem;
+
 - (IBAction)revealInFinder:(id)sender;
 - (IBAction)openFile:(id)sender;
 - (IBAction)editFile:(id)sender;

@@ -52,16 +52,16 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         
         NSData *data = [defaults objectForKey:BDSKExportTemplateTree];
         if([data length])
-            itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
+            [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
         else 
-            itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
+            [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
         
         fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", nil];
         
         roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateMainPageString, BDSKTemplateDefaultItemString, BDSKTemplateAccessoryString, nil];
         [roles addObjectsFromArray:[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
         
-        templatePrefList = 0;
+        templatePrefList = BDSKExportTemplateList;
 	}
 	return self;
 }
@@ -69,13 +69,10 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (void)restoreDefaultsNoPrompt;
 {
     [super restoreDefaultsNoPrompt];
-    [itemNodes release];
-    if (templatePrefList == 0) {
-        itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
-        [BDSKTemplate setupDefaultServiceTemplates];
+    if (templatePrefList == BDSKExportTemplateList) {
+        [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
     } else {
-        itemNodes = [[BDSKTemplate setupDefaultServiceTemplates] mutableCopy];
-        [BDSKTemplate setupDefaultExportTemplates];
+        [self setItemNodes:[BDSKTemplate defaultServiceTemplates]];
     }
     [self updateUI];
 }
@@ -107,7 +104,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 {
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:itemNodes];
     if(nil != data)
-        [defaults setObject:data forKey:(templatePrefList == 0) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
+        [defaults setObject:data forKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
     else
         NSLog(@"Unable to archive %@", itemNodes);
 }
@@ -117,19 +114,28 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [prefListRadio selectCellWithTag:templatePrefList];
     [outlineView reloadData];
     [self synchronizePrefs];
+    [addButton setEnabled:(BOOL)[self canAddItem]];
+}
+
+- (void)setItemNodes:(NSArray *)array;
+{
+    if(array != itemNodes){
+        [itemNodes release];
+        itemNodes = [array mutableCopy];
+    }
 }
 
 - (IBAction)changePrefList:(id)sender{
     templatePrefList = [[sender selectedCell] tag];
-    [itemNodes release];
-    NSData *data = [defaults objectForKey:(templatePrefList == 0) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
+    NSData *data = [defaults objectForKey:(templatePrefList == BDSKExportTemplateList) ? BDSKExportTemplateTree : BDSKServiceTemplateTree];
     if([data length])
-        itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
-    else if (templatePrefList == 0)
-        itemNodes = [[BDSKTemplate setupDefaultExportTemplates] mutableCopy];
-    else
-        itemNodes = [[BDSKTemplate setupDefaultServiceTemplates] mutableCopy];
-    [outlineView reloadData];
+        [self setItemNodes:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
+    else if (templatePrefList == BDSKExportTemplateList)
+        [self setItemNodes:[BDSKTemplate defaultExportTemplates]];
+    else if (BDSKServiceTemplateList == templatePrefList)
+        [self setItemNodes:[BDSKTemplate defaultServiceTemplates]];
+    else [NSException raise:NSInternalInconsistencyException format:@"Unrecognized templatePrefList parameter"];
+    [self updateUI];
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -158,14 +164,13 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
     if([selectedNode isLeaf]){
         // add as a sibling of the selected node
+        // we're already expanded, and newNode won't be expandable
         [[selectedNode parent] addChild:newNode];
     } else if(nil != selectedNode && [outlineView isItemExpanded:selectedNode]){
         // add as a child of the selected node
+        // selected node is expanded, so no need to expand
         [selectedNode addChild:newNode];
-    } else {
-        if (templatePrefList == 1)
-            return;
-        
+    } else if(BDSKExportTemplateList == templatePrefList){
         // add as a non-leaf node
         [itemNodes addObject:newNode];
         
@@ -174,10 +179,13 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         [child setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
         [newNode addChild:child];
         [child release];
+        
+        // reload so we can expand this new parent node
+        [outlineView reloadData];
+        [outlineView expandItem:newNode];
     }
     
     [self updateUI];
-    [outlineView expandItem:newNode];
     [newNode release];
 }
 
@@ -279,7 +287,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             if([[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
                 return NO;
         } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", identifier];
-    }else if(templatePrefList == 1){
+    }else if(templatePrefList == BDSKServiceTemplateList){
         return NO;
     }
     return YES;
@@ -312,13 +320,20 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (BOOL)canDeleteSelectedItem
 {
     BDSKTreeNode *selItem = [outlineView selectedItem];
-    return ((templatePrefList == 0 && [selItem isLeaf] == NO) || 
+    return ((templatePrefList == BDSKExportTemplateList && [selItem isLeaf] == NO) || 
             ([selItem isLeaf]  && [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO));
+}
+
+// we can't add items to the services outline view
+- (BOOL)canAddItem
+{
+    return ((templatePrefList == BDSKExportTemplateList) || nil != [outlineView selectedItem]);
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
 {
     [deleteButton setEnabled:[self canDeleteSelectedItem]];
+    [addButton setEnabled:[self canAddItem]];
 }
 
 - (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows;
@@ -572,7 +587,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     id item = [(NSOutlineView *)tableView itemAtRow:row];
     
     if(([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]) || 
-       ([item isLeaf] == NO && templatePrefList == 1)){
+       ([item isLeaf] == NO && templatePrefList == BDSKServiceTemplateList)){
         // setting an NSComboBoxCell to disabled in outlineView:willDisplayCell:... results in a non-editable cell with black text instead of disabled text; creating a new cell works around that problem
         if (disabledCell == nil) {
             disabledCell = [[NSComboBoxCell alloc] initTextCell:@""];
