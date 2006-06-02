@@ -70,6 +70,7 @@
 #import "BDSKPreferenceController.h"
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplate.h"
+#import "NSSet_BDSKExtensions.h"
 
 @implementation BibAppController
 
@@ -910,6 +911,7 @@
     // (we'll use a bunch of handy delimiters, including the first space, so it's flexible.)
     // alternatively we can just type the title, like we used to.
     [scanner setCharactersToBeSkipped:nil];
+    NSSet *citeKeyStrings = [NSSet caseInsensitiveStringSetWithObjects:@"cite key", @"citekey", @"cite-key", @"key", nil];
     
     while(![scanner isAtEnd]){
         // set these to nil explicitly, since we check for that later
@@ -923,6 +925,10 @@
         // lose the whitespace, if any
         queryString = [queryString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         queryKey = [queryKey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        
+        // allow some additional leeway with citekey
+        if([citeKeyStrings containsObject:queryKey])
+            queryKey = BDSKCiteKeyString;
         
         if(queryKey && queryString) // make sure we have both a key and a value
             [searchConstraints setObject:queryString forKey:[queryKey capitalizedString]]; // BibItem field names are capitalized
