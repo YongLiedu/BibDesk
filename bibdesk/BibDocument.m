@@ -1150,7 +1150,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
     NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
+    
     OBPRECONDITION(nil != fileTemplate);
+
+    // create some useful metadata, with an option to disable for the paranoid
+    if((floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3) && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExportAttributesKey"]){
+        [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"") stringByAppendingString:[[self fileName] lastPathComponent]], NSTitleDocumentAttribute, nil]];
+    }
     
     BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:selectedTemplate];
     
@@ -1158,14 +1165,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [documentProxy release];
     
     if (format & BDSKRTFTemplateFormat) {
-        return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
+        return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
     } else if (format & BDSKRichHTMLTemplateFormat) {
-        NSMutableDictionary *docAttrs = (docAttributes) ? [[docAttributes mutableCopy] autorelease] : [NSMutableDictionary dictionary];
-        [docAttrs setObject:NSHTMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
+        [mutableAttributes setObject:NSHTMLTextDocumentType forKey:@"DocumentType"]; /* @@ 10.3: NSDocumentTypeDocumentAttribute */
         NSError *error = nil;
-        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttrs error:&error];
+        return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else if (format & BDSKDocTemplateFormat) {
-        return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
+        return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
     } else return nil;
 }
 
@@ -2369,8 +2375,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"stringCache.Booktitle" ascending:ascend selector:@selector(localizedCompare:)];
         
     }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:tcID] ||
-             [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID]){
+             [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID] ||
+             [[BibTypeManager sharedManager] isURLField:tcID]){
         
+        // use the triStateCompare: for URL fields so the subsort is more useful (this turns the URL comparison into empty/non-empty)
         sortDescriptor = [[NSSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(triStateCompare:)];
         
     }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey] containsObject:tcID]){
