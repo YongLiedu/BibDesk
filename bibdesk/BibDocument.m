@@ -741,22 +741,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)changeCurrentExportTemplateStyle:(id)sender{
     [currentExportTemplateStyle autorelease];
     currentExportTemplateStyle = [[sender titleOfSelectedItem] copy];
+    
+    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+    [(NSSavePanel *)[sender window] setRequiredFileType:[selectedTemplate fileExtension]];
 }
 
 - (BOOL)prepareExportPanel:(NSSavePanel *)savePanel{
     NSArray *styles = [BDSKTemplate allStyleNames];
-    NSArray *fileTypes = [BDSKTemplate allFileTypes];
-    OBASSERT([styles count] != 0);
-    if ([styles count] == 0) {
-        [currentExportTemplateStyle release];
-        currentExportTemplateStyle = nil;
-        return NO;
-    }
-    if ([fileTypes count] == 1) {
-        [savePanel setRequiredFileType:[fileTypes lastObject]];
-    } else if ([fileTypes count] > 1) {
-        [savePanel setAllowedFileTypes:fileTypes];
-    }
     // @@ save last selection in prefs?  names can change, though...
     if(currentExportTemplateStyle == nil || [styles containsObject:currentExportTemplateStyle] == NO){
         [currentExportTemplateStyle release];
@@ -783,6 +774,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 NSBeep();
                 return;
             }
+            fileType = [[BDSKTemplate templateForStyle:currentExportTemplateStyle] fileExtension];
             break;
         case BDSKRSSExportFileType:
             [sp setAccessoryView:rssExportAccessoryView];
@@ -818,7 +810,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [sp setDelegate:self];
     NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
 		[NSNumber numberWithInt:exportFileType], @"exportFileType", [NSNumber numberWithBool:selected], @"selected", nil];
-	[sp beginSheetForDirectory:nil
+    [sp beginSheetForDirectory:nil
                           file:( [self fileName] == nil ? nil : [[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent])
                 modalForWindow:documentWindow
                  modalDelegate:self
