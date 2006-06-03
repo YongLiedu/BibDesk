@@ -45,6 +45,7 @@ static NSCharacterSet *autocompletePunctuationCharacterSet = nil;
 static NSCharacterSet *searchStringSeparatorCharacterSet = nil;
 static NSCharacterSet *upAndDownArrowCharacterSet = nil;
 static NSCharacterSet *newlineCharacterSet = nil;
+static NSCharacterSet *nonWhitespaceCharacterSet = nil;
 
 + (void)didLoad;
 {
@@ -70,6 +71,7 @@ static NSCharacterSet *newlineCharacterSet = nil;
     newlineCharacterSet = [(id)newlineCFCharacterSet copy];
     CFRelease(newlineCFCharacterSet);
     
+    nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
 }
 
 + (NSCharacterSet *)curlyBraceCharacterSet;
@@ -95,6 +97,11 @@ static NSCharacterSet *newlineCharacterSet = nil;
 + (NSCharacterSet *)newlineCharacterSet;
 {
     return newlineCharacterSet;
+}
+
++ (NSCharacterSet *)nonWhitespaceCharacterSet;
+{
+    return nonWhitespaceCharacterSet;
 }
 
 @end

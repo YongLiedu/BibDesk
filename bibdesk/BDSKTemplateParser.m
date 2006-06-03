@@ -334,15 +334,9 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
     BOOL foundNewline = NO;
     BOOL foundWhitespace = NO;
     int startLoc = [self scanLocation];
-
+    
     // [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil] is much more sensible, but NSScanner creates an autoreleased inverted character set every time you use it, so it's pretty inefficient
-    foundWhitespace = [self scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
-    if (foundWhitespace){
-        static NSCharacterSet *nonWhitespaceCharacterSet = nil;
-        if(nil == nonWhitespaceCharacterSet)
-            nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] copy];
-        [self scanUpToCharactersFromSet:nonWhitespaceCharacterSet intoString:nil];
-    }
+    foundWhitespace = [self scanUpToCharactersFromSet:[NSCharacterSet nonWhitespaceCharacterSet] intoString:nil];
 
     if ([self isAtEnd] == NO) {
         foundNewline = [self scanString:@"\r\n" intoString:nil];
@@ -368,10 +362,7 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
 }
 
 - (NSRange)rangeOfLeadingWhitespaceLineInRange:(NSRange)range {
-    static NSCharacterSet *nonWhitespace = nil;
-    if (nonWhitespace == nil) 
-        nonWhitespace = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
-    NSRange firstCharRange = [self rangeOfCharacterFromSet:nonWhitespace options:0 range:range];
+    NSRange firstCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
     NSRange wsRange = NSMakeRange(NSNotFound, 0);
     unsigned int start = range.location;
     if (firstCharRange.location == NSNotFound) {
@@ -395,10 +386,7 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
 }
 
 - (NSRange)rangeOfTrailingWhitespaceLineInRange:(NSRange)range {
-    static NSCharacterSet *nonWhitespace = nil;
-    if (nonWhitespace == nil) 
-        nonWhitespace = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
-    NSRange lastCharRange = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch range:range];
+    NSRange lastCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
     NSRange wsRange = NSMakeRange(NSNotFound, 0);
     unsigned int end = NSMaxRange(range);
     if (lastCharRange.location == NSNotFound) {

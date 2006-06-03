@@ -45,5 +45,6 @@
 + (NSCharacterSet *)searchStringSeparatorCharacterSet;
 + (NSCharacterSet *)upAndDownArrowCharacterSet;
 + (NSCharacterSet *)newlineCharacterSet;
++ (NSCharacterSet *)nonWhitespaceCharacterSet;
 
 @end
