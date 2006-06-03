@@ -69,6 +69,8 @@ extern NSString *BDSKTemplateDefaultItemString;
 
 + (NSArray *)allStyleNames;
 + (NSArray *)allFileTypes;
++ (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
++ (BDSKTemplate *)defaultTemplateForFileType:(NSString *)fileType;
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 + (BDSKTemplate *)templateForTextService;
 + (BDSKTemplate *)templateForRTFService;

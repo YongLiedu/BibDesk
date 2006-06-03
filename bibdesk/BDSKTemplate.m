@@ -196,6 +196,38 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return fileTypes;
 }
 
++ (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
+{
+    NSArray *nodes = nil;
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
+    if ([prefData length])
+        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    else 
+        nodes = [BDSKTemplate defaultExportTemplates];
+    
+    NSMutableArray *names = [NSMutableArray array];
+    NSEnumerator *nodeE = [nodes objectEnumerator];
+    id aNode;
+    NSString *aFileType;
+    while(aNode = [nodeE nextObject]){
+        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
+            aFileType = [aNode valueForKey:BDSKTemplateRoleString];
+            if([aFileType caseInsensitiveCompare:fileType] == NSOrderedSame)
+                [names addObject:fileType];
+        }
+    }
+    return names;
+}
+
++ (BDSKTemplate *)defaultTemplateForFileType:(NSString *)fileType;
+{
+    NSArray *names = [self  allStyleNamesForFileType:fileType];
+    if ([names count] > 0)
+        return [self templateForStyle:[names objectAtIndex:0]];
+    else
+        return nil;
+}
+
 // accesses the node array in prefs
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 {
