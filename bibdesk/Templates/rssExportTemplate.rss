@@ -1,5 +1,5 @@
-<?xml version=\"1.0\" encoding=\"utf-8\"?>
-<rss version=\"0.92\">
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="0.92">
 <channel>
 	<title><$fileName.lastPathComponent/></title>
 	<link><$fileURL/></link>
@@ -7,12 +7,13 @@
 	<language>en</language>
 	<copyright>Copyright 2006</copyright>
 	<editor></editor>
-	<lastBuildDate><$currentDate.shortDateDescription/></lastBuildDate>
+	<lastBuildDate><$currentDate.rssDescription/></lastBuildDate>
 	<$publications>
 	<item>
+		<pubDate><$pubDate.rssDesciption/></pubDate>
 		<title><$fields.Title.xmlString/></title>
 		<description><$fields.Rss-Description.xmlString/></description>
-		<link><$fields.Url/></link>
+		<link><$remoteURL/></link>
 	</item>
 	</$publications>
 </channel>
