@@ -3383,7 +3383,15 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item localUrlPath
 @tab 
+@item localURL
+@tab 
 @item remoteURL
+@tab 
+@item pubDate
+@tab 
+@item dateCreated
+@tab 
+@item dateModified
 @tab 
 @item fields.FieldName
 @tab FieldName can be the name of any field
@@ -3537,16 +3545,31 @@ Below are lists of colection keys that could be used in BibDesk export templates
 @tab 
 @end multitable
 
-
 @subheading URLs and paths
 
-@multitable {smallIcon} {}
+@multitable {fullyEncodeAsIURI} {}
 @headitem Key @tab Description
-@item linkText
+@item linkedText
 @tab 
 @item icon
 @tab 
 @item smallIcon
+@tab 
+@item absoluteString
+@tab 
+@item fullyEncodeAsIURI
+@tab 
+@end multitable
+
+@subheading Dates
+
+@multitable {shortDateDescription} {}
+@headitem Key @tab Description
+@item description
+@tab 
+@item shortDateDescription
+@tab 
+@item rssDescription
 @tab 
 @end multitable
 
