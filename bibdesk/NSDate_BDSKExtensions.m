@@ -311,4 +311,8 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     return [self descriptionWithCalendarFormat:[[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString]];
 }
 
+- (NSString *)rssDescription{
+    return [self descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %z"];
+}
+
 @end
