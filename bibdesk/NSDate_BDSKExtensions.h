@@ -58,5 +58,6 @@
 
 - (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
 - (NSString *)shortDateDescription;
+- (NSString *)rssDescription;
 
 @end
