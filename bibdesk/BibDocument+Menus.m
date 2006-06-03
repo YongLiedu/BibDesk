@@ -202,9 +202,22 @@
 }
 
 - (BOOL)validateExportMenuItem:(NSMenuItem *)menuItem{
-    if ([menuItem tag] ==  BDSKTemplateExportFileType)
-        return ([[BDSKTemplate allStyleNames] count] != 0);
-    return YES;
+    switch ([menuItem tag]) {
+        case BDSKTemplateExportFileType:
+            return ([[BDSKTemplate allStyleNames] count] != 0);
+        case BDSKHTMLExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"html"] count] != 0);
+        case BDSKRSSExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"rss"] count] != 0);
+        case BDSKRTFExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"rtf"] count] != 0);
+        case BDSKRTFDExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"rtfd"] count] != 0);
+        case BDSKDocExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"doc"] count] != 0);
+        default:
+            return YES;
+    }
 }
 
 - (BOOL)validateExportSelectionMenuItem:(NSMenuItem *)menuItem{

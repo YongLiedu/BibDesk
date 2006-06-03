@@ -87,13 +87,17 @@ enum {
 // these should correspond to the tags of export menu items
 enum {
 	BDSKBibTeXExportFileType = 0, 
-	BDSKTemplateExportFileType = 1, 
-	BDSKRISExportFileType = 2, 
-	BDSKLTBExportFileType = 3, 
-	BDSKMODSExportFileType = 4, 
-	BDSKEndNoteExportFileType = 5, 
-	BDSKATOMExportFileType = 6, 
-	BDSKRSSExportFileType = 7
+	BDSKRISExportFileType = 1, 
+	BDSKLTBExportFileType = 2, 
+	BDSKMODSExportFileType = 3, 
+	BDSKEndNoteExportFileType = 4, 
+	BDSKATOMExportFileType = 5, 
+	BDSKHTMLExportFileType = 6,
+	BDSKRSSExportFileType = 7,
+	BDSKRTFExportFileType = 8,
+	BDSKRTFDExportFileType = 9,
+	BDSKDocExportFileType = 10,
+	BDSKTemplateExportFileType = 11
 };
 
 // our main document types

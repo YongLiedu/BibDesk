@@ -776,11 +776,23 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             }
             fileType = [[BDSKTemplate templateForStyle:currentExportTemplateStyle] fileExtension];
             break;
+        case BDSKHTMLExportFileType:
+            fileType = @"html";
+            break;
         case BDSKRSSExportFileType:
-            [sp setAccessoryView:rssExportAccessoryView];
+            //[sp setAccessoryView:rssExportAccessoryView];
             // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
             // or use templates?
             fileType = @"rss";
+            break;
+        case BDSKRTFExportFileType:
+            fileType = @"rtf";
+            break;
+        case BDSKRTFDExportFileType:
+            fileType = @"rtfd";
+            break;
+        case BDSKDocExportFileType:
+            fileType = @"doc";
             break;
         case BDSKBibTeXExportFileType:
             [sp setAccessoryView:dropInternalAccessoryView];
@@ -830,6 +842,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     int exportFileType = [[dict objectForKey:@"exportFileType"] intValue];
     BOOL selected = [[dict objectForKey:@"selected"] boolValue];
     NSArray *items = (selected ? [self selectedPublications] : publications);
+    NSStringEncoding encoding;
 	
 	// first we make sure all edits are committed
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
@@ -838,48 +851,81 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
     if(returnCode == NSOKButton){
         fileName = [sp filename];
-        if(exportFileType == BDSKRSSExportFileType){
-            fileData = [self rssDataForPublications:items];
-        } else if(exportFileType == BDSKTemplateExportFileType){
-            BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
-            BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
-            NSString *extension = [selectedTemplate fileExtension];
-            fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
-            NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
-            NSURL *accessoryURL = nil;
-            NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
-            while(accessoryURL = [accessoryFileEnum nextObject]){
-                [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
-            }
-            if (templateFormat & BDSKRTFDTemplateFormat) {
-                NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
-                [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
-                fileData = nil;
-            } else if (templateFormat & BDSKTextTemplateFormat) {
-                fileData = [self templatedStringDataForPublications:items];
-            } else {
-                fileData = [self templatedAttributedStringDataForPublications:items];
-            }
-        } else if(exportFileType == BDSKMODSExportFileType){
-            fileData = [self MODSDataForPublications:items];
-        } else if(exportFileType == BDSKEndNoteExportFileType){
-            fileData = [self endNoteDataForPublications:items];
-        } else if(exportFileType == BDSKATOMExportFileType){
-            fileData = [self atomDataForPublications:items];
-        } else if(exportFileType == BDSKBibTeXExportFileType){
-            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-			BOOL dropInternal = ([dropInternalCheckButton state] == NSOnState ? YES : NO);
-            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey]){
-				[self performSortForCrossrefs];
-				items = (selected ? [self selectedPublications] : publications);
-			}
-            fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:dropInternal];
-        } else if (exportFileType == BDSKRISExportFileType){
-            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-            fileData = [self RISDataForPublications:items encoding:encoding];
-        } else if (exportFileType == BDSKLTBExportFileType){
-            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-            fileData = [self LTBDataForPublications:items encoding:encoding];
+        switch (exportFileType) {
+            case BDSKHTMLExportFileType:
+            case BDSKRSSExportFileType:
+            case BDSKRTFExportFileType:
+            case BDSKRTFDExportFileType:
+            case BDSKDocExportFileType:
+                do {
+                    NSString *fileType = [sp requiredFileType];
+                    BDSKTemplate *selectedTemplate = [BDSKTemplate defaultTemplateForFileType:fileType];
+                    BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
+                    NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
+                    NSURL *accessoryURL = nil;
+                    NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
+                    while(accessoryURL = [accessoryFileEnum nextObject]){
+                        [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+                    }
+                    if (templateFormat & BDSKRTFDTemplateFormat) {
+                        NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
+                        [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
+                        fileData = nil;
+                    } else if (templateFormat & BDSKTextTemplateFormat) {
+                        fileData = [self templatedStringDataForPublications:items];
+                    } else if (templateFormat) {
+                        fileData = [self templatedAttributedStringDataForPublications:items];
+                    }
+                } while (0);
+                break;
+            case BDSKTemplateExportFileType:
+                do {
+                    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+                    BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
+                    NSString *extension = [selectedTemplate fileExtension];
+                    fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
+                    NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
+                    NSURL *accessoryURL = nil;
+                    NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
+                    while(accessoryURL = [accessoryFileEnum nextObject]){
+                        [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+                    }
+                    if (templateFormat & BDSKRTFDTemplateFormat) {
+                        NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
+                        [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
+                        fileData = nil;
+                    } else if (templateFormat & BDSKTextTemplateFormat) {
+                        fileData = [self templatedStringDataForPublications:items];
+                    } else {
+                        fileData = [self templatedAttributedStringDataForPublications:items];
+                    }
+                } while (0);
+                break;
+            case BDSKMODSExportFileType:
+                fileData = [self MODSDataForPublications:items];
+                break;
+            case BDSKEndNoteExportFileType:
+                fileData = [self endNoteDataForPublications:items];
+                break;
+            case BDSKATOMExportFileType:
+                fileData = [self atomDataForPublications:items];
+                break;
+            case BDSKBibTeXExportFileType:
+                encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
+                if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey]){
+                    [self performSortForCrossrefs];
+                    items = (selected ? [self selectedPublications] : publications);
+                }
+                fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:([dropInternalCheckButton state] == NSOnState)];
+                break;
+            case BDSKRISExportFileType:
+                encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
+                fileData = [self RISDataForPublications:items encoding:encoding];
+                break;
+            case BDSKLTBExportFileType:
+                encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
+                fileData = [self LTBDataForPublications:items encoding:encoding];
+                break;
         }
         [fileData writeToFile:fileName atomically:YES];
     }
