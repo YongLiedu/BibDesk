@@ -76,10 +76,12 @@
     BibItem *item;
     NSMutableSet *usedFields;
     BOOL isPersons;
+    BOOL isURL;
 }
 
 - (id)initWithItem:(BibItem *)anItem;
 - (void)setPersons:(BOOL)flag;
+- (void)setURL:(BOOL)flag;
 - (id)fieldForName:(NSString *)name;
 - (BOOL)isUsedField:(NSString *)name;
 - (BOOL)isEmptyField:(NSString *)name;
@@ -1974,6 +1976,15 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if (templateFields == nil)
         [self prepareForTemplateParsing];
     [templateFields setPersons:NO];
+    [templateFields setURL:NO];
+    return templateFields;
+}
+
+- (id)urls{
+    if (templateFields == nil)
+        [self prepareForTemplateParsing];
+    [templateFields setPersons:NO];
+    [templateFields setURL:YES];
     return templateFields;
 }
 
@@ -1981,6 +1992,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if (templateFields == nil)
         [self prepareForTemplateParsing];
     [templateFields setPersons:YES];
+    [templateFields setURL:NO];
     return templateFields;
 }
 
@@ -2791,6 +2803,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         item = anItem;
         usedFields = [[NSMutableSet alloc] init];
         isPersons = NO;
+        isURL = NO;
     }
     return self;
 }
@@ -2805,11 +2818,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if (key == nil)
         return nil;
     [usedFields addObject:key];
-    return (isPersons == YES) ? (id)[item peopleArrayForField:key] : (id)[item valueOfGenericField:key];
+    if (isPersons)
+        return (id)[item peopleArrayForField:key];
+    else if (isURL)
+        return (id)[item URLForField:key];
+    else 
+        return (id)[item valueOfGenericField:key];
 }
 
 - (void)setPersons:(BOOL)flag{
-    isPersons = NO;
+    isPersons = flag;
+}
+
+- (void)setURL:(BOOL)flag{
+    isURL = flag;
 }
 
 - (BOOL)isUsedField:(NSString *)name{

@@ -3387,6 +3387,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item fields.FieldName
 @tab FieldName can be the name of any field
+@item urls.FieldName
+@tab FieldName can be the name of any local or remote URL field
 @end multitable
 
 @subheading Field
@@ -3396,6 +3398,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @item name
 @tab 
 @item value
+@tab 
+@item bibTeXString
 @tab 
 @end multitable
 

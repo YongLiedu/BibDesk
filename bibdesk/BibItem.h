@@ -697,6 +697,7 @@
 - (id)defaultFields;
 - (id)allFields;
 - (id)fields;
+- (id)urls;
 - (id)persons;
 - (id)authors;
 - (id)editors;
