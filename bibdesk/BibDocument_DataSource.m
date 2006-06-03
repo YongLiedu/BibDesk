@@ -104,10 +104,10 @@
 			return [pub title];
 		}else if([tcID isEqualToString: BDSKContainerString] ){
 			return [pub container];
-        }else if([tcID isEqualToString: BDSKDateCreatedString] ||
+        }else if([tcID isEqualToString: BDSKDateAddedString] ||
 				 [tcID isEqualToString: @"Added"] ||
 				 [tcID isEqualToString: @"Created"] ){
-            return [[pub dateCreated] descriptionWithCalendarFormat:shortDateFormatString];
+            return [[pub dateAdded] descriptionWithCalendarFormat:shortDateFormatString];
         }else if([tcID isEqualToString: BDSKDateModifiedString] ||
 				 [tcID isEqualToString: @"Modified"] ){
 			return [[pub dateModified] descriptionWithCalendarFormat:shortDateFormatString];

@@ -214,7 +214,7 @@ extern NSString *BDSKPagesString;
 extern NSString *BDSKBooktitleString;
 extern NSString *BDSKVolumetitleString;
 extern NSString *BDSKPublisherString;
-extern NSString *BDSKDateCreatedString;
+extern NSString *BDSKDateAddedString;
 extern NSString *BDSKDateModifiedString;
 extern NSString *BDSKDateString;
 extern NSString *BDSKCrossrefString;

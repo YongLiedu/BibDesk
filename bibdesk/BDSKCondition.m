@@ -194,8 +194,8 @@
 	}
 	
 	NSComparisonResult result;
-	if ([key isEqualToString:BDSKDateCreatedString])
-		result = [cachedDate compare:[item dateCreated]];
+	if ([key isEqualToString:BDSKDateAddedString])
+		result = [cachedDate compare:[item dateAdded]];
 	else if ([key isEqualToString:BDSKDateModifiedString])
 		result = [cachedDate compare:[item dateModified]];
 	else
@@ -248,11 +248,11 @@
 }
 
 - (BOOL)isDateCondition {
-    return ([key isEqualToString:BDSKDateCreatedString] || [key isEqualToString:BDSKDateModifiedString]);
+    return ([key isEqualToString:BDSKDateAddedString] || [key isEqualToString:BDSKDateModifiedString]);
 }
 
 - (BOOL)validateKey:(id *)ioValue error:(NSError **)error {
-    if([*ioValue isEqualToString:BDSKDateCreatedString] || [*ioValue isEqualToString:BDSKDateModifiedString]){
+    if([*ioValue isEqualToString:BDSKDateAddedString] || [*ioValue isEqualToString:BDSKDateModifiedString]){
         if([self comparison] != BDSKSmaller || [self comparison] != BDSKLarger)
             [self setComparison:BDSKSmaller];
     }

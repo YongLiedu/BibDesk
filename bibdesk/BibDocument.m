@@ -2081,7 +2081,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
     NSCalendarDate *importDate = [NSCalendarDate date];
-    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateCreatedString withObject:[importDate description]];
+    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
 	
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
 		[self editPubCmd:nil]; // this will ask the user when there are many pubs
@@ -2373,11 +2373,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		
 		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"date" ascending:ascend selector:@selector(compare:)];		
         
-	}else if([tcID isEqualToString:BDSKDateCreatedString] ||
+	}else if([tcID isEqualToString:BDSKDateAddedString] ||
 			 [tcID isEqualToString:@"Added"] ||
 			 [tcID isEqualToString:@"Created"]){
 		
-        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"dateCreated" ascending:ascend selector:@selector(compare:)];
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"dateAdded" ascending:ascend selector:@selector(compare:)];
         
 	}else if([tcID isEqualToString:BDSKDateModifiedString] ||
 			 [tcID isEqualToString:@"Modified"]){

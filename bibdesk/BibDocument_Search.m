@@ -363,10 +363,10 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
 	} else if([field isEqualToString:BDSKDateModifiedString] ||
 			  [field isEqualToString:@"Modified"]){
 		accessor = NSSelectorFromString(@"calendarDateModifiedDescription");
-	} else if([field isEqualToString:BDSKDateCreatedString] ||
+	} else if([field isEqualToString:BDSKDateAddedString] ||
 			  [field isEqualToString:@"Added"] ||
 			  [field isEqualToString:@"Created"]){
-		accessor = NSSelectorFromString(@"calendarDateCreatedDescription");
+		accessor = NSSelectorFromString(@"calendarDateAddedDescription");
 	} else if([field isEqualToString:BDSKAllFieldsString]){
 		accessor = NSSelectorFromString(@"allFieldsString");
 	} else if([field isEqualToString:BDSKTypeString] || 

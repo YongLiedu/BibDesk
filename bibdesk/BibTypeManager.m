@@ -249,7 +249,7 @@ static BibTypeManager *sharedInstance = nil;
     
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
-		BDSKDateModifiedString, BDSKDateCreatedString, BDSKDateString, 
+		BDSKDateModifiedString, BDSKDateAddedString, BDSKDateString, 
 		BDSKTitleString, BDSKBooktitleString, BDSKVolumetitleString, BDSKContainerString, BDSKChapterString, 
 		BDSKVolumeString, BDSKNumberString, BDSKSeriesString, BDSKPagesString, BDSKItemNumberString, 
 		BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil];

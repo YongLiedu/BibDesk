@@ -61,7 +61,7 @@
 		canRemove = [filterController canRemoveCondition];
 		
         BibTypeManager *typeMan = [BibTypeManager sharedManager];
-        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateCreatedString, BDSKDateModifiedString, BDSKAllFieldsString, nil]
+        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, nil]
                                       excluding:nil] mutableCopy];
 		
 		BOOL success = [NSBundle loadNibNamed:@"BDSKCondition" owner:self];
@@ -150,7 +150,7 @@
     OBASSERT(object == condition);
     if(object == condition && [keyPath isEqualToString:@"key"]){
         NSString *key = [change objectForKey:NSKeyValueChangeNewKey];
-        if([key isEqualToString:BDSKDateModifiedString] || [key isEqualToString:BDSKDateCreatedString]){
+        if([key isEqualToString:BDSKDateModifiedString] || [key isEqualToString:BDSKDateAddedString]){
             [valueTextField setFormatter:[BDSKDateStringFormatter shortDateNaturalLanguageFormatter]];
         } else {
             [valueTextField setFormatter:nil];

@@ -57,7 +57,7 @@
 - (void)setAsTitle:(NSString *)newTitle;
 
 // wrapping original methods 
-- (NSDate*)asDateCreated;
+- (NSDate*)asDateAdded;
 - (NSDate*)asDateModified;
 
 // more (pseudo) accessors for key-value coding

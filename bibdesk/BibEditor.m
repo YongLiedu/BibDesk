@@ -235,7 +235,7 @@ static int numberOfOpenEditors = 0;
 	NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
 	NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
 
-	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateCreatedString, BDSKDateModifiedString, nil];
+	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateAddedString, BDSKDateModifiedString, nil];
     [ignoredKeys addObjectsFromArray:ratingFields];
     [ignoredKeys addObjectsFromArray:booleanFields];
     [ignoredKeys addObjectsFromArray:triStateFields];

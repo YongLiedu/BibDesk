@@ -158,8 +158,8 @@ Extra wrapping of the created and modified date methods to
 }
 
 
-- (NSDate*)asDateCreated {
-	NSDate * d = [self dateCreated];
+- (NSDate*)asDateAdded {
+	NSDate * d = [self dateAdded];
 	
 	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
 	else return d;
@@ -302,9 +302,9 @@ Extra wrapping of the created and modified date methods to
 	BibItem * newPub = [newPubs objectAtIndex:0];
 	
 	// a parsed pub has no creation date set, so we need to copy first
-	NSString *createdDate = [self valueOfField:BDSKDateCreatedString inherit:NO];
+	NSString *createdDate = [self valueOfField:BDSKDateAddedString inherit:NO];
 	if (![NSString isEmptyString:createdDate])
-		[newPub setField:BDSKDateCreatedString toValue:createdDate];
+		[newPub setField:BDSKDateAddedString toValue:createdDate];
 	
 	// ... and replace the current record with it.
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	

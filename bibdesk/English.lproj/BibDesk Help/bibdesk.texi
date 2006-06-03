@@ -3389,7 +3389,7 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item pubDate
 @tab 
-@item dateCreated
+@item dateAdded
 @tab 
 @item dateModified
 @tab 

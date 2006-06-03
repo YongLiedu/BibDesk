@@ -54,7 +54,7 @@
     NSString *fileType;
     NSString *citeKey;    /*! @var citeKey the citeKey of the bibItem */
     NSCalendarDate *pubDate;
-	NSCalendarDate *dateCreated;
+	NSCalendarDate *dateAdded;
 	NSCalendarDate *dateModified;
 	NSString *pubType;
     NSMutableDictionary *pubFields;
@@ -340,7 +340,7 @@
 */
 - (NSCalendarDate *)dateInheriting:(BOOL)inherit;
 
-- (NSCalendarDate *)dateCreated;
+- (NSCalendarDate *)dateAdded;
 - (NSCalendarDate *)dateModified;
 
 /*!

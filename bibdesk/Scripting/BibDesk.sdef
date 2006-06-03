@@ -639,7 +639,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>  
             <property name="added date" code="adat" type="date" access="r"
                 description="Date on which the publication's record was added to the bibliography.">
-                <cocoa key="asDateCreated"/>
+                <cocoa key="asDateAdded"/>
             </property>
             <property name="modified date" code="mdat" type="date" access="r"
                 description="Date on which the publication's record was last modified in the bibliography.">

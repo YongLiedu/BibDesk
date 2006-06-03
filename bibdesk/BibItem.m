@@ -103,7 +103,7 @@
 
 @interface BibItem (Private)
 
-- (void)setDateCreated:(NSCalendarDate *)newDateCreated;
+- (void)setDateAdded:(NSCalendarDate *)newDateAdded;
 - (void)setDateModified:(NSCalendarDate *)newDateModified;
 - (void)setDate: (NSCalendarDate *)newDate;
 
@@ -182,7 +182,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		}
 		if (date){
 			NSString *nowStr = [date description];
-			[pubFields setObject:nowStr forKey:BDSKDateCreatedString];
+			[pubFields setObject:nowStr forKey:BDSKDateAddedString];
 			[pubFields setObject:nowStr forKey:BDSKDateModifiedString];
         }
         
@@ -196,7 +196,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [self setDate: nil];
         
         // this date will be nil when loading from a file or it will be the current date when pasting
-        [self setDateCreated: date];
+        [self setDateAdded: date];
         [self setDateModified: date];
         
 		[self setNeedsToBeFiled:NO];
@@ -240,7 +240,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [self setFileType:[coder decodeObjectForKey:@"fileType"]];
         [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
         [self setDate:[coder decodeObjectForKey:@"pubDate"]];
-        [self setDateCreated:[coder decodeObjectForKey:@"dateCreated"]];
+        [self setDateAdded:[coder decodeObjectForKey:@"dateAdded"]];
         [self setPubType:[coder decodeObjectForKey:@"pubType"]];
         [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
         pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
@@ -273,7 +273,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [coder encodeObject:fileType forKey:@"fileType"];
         [coder encodeObject:citeKey forKey:@"citeKey"];
         [coder encodeObject:pubDate forKey:@"pubDate"];
-        [coder encodeObject:dateCreated forKey:@"dateCreated"];
+        [coder encodeObject:dateAdded forKey:@"dateAdded"];
         [coder encodeObject:dateModified forKey:@"dateModified"];
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
@@ -301,7 +301,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [fileType release];
     [citeKey release];
     [pubDate release];
-    [dateCreated release];
+    [dateAdded release];
     [dateModified release];
     [bibLock release];
     [stringCache release];
@@ -856,8 +856,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return pubDate;
 }
 
-- (NSCalendarDate *)dateCreated {
-    return dateCreated;
+- (NSCalendarDate *)dateAdded {
+    return dateAdded;
 }
 
 - (NSCalendarDate *)dateModified {
@@ -873,9 +873,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return [[self dateModified] descriptionWithCalendarFormat:shortDateFormatString];
 }
 
-- (NSString *)calendarDateCreatedDescription{
+- (NSString *)calendarDateAddedDescription{
 	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
-	return [[self dateCreated] descriptionWithCalendarFormat:shortDateFormatString];
+	return [[self dateAdded] descriptionWithCalendarFormat:shortDateFormatString];
 }
 
 - (void)setPubType: (NSString *)newType{
@@ -1455,7 +1455,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 			valueStr = nil;
             stringValue = nil;
 			
-			if([key isEqualToString:BDSKDateCreatedString] && (date = [self dateCreated])){
+			if([key isEqualToString:BDSKDateAddedString] && (date = [self dateAdded])){
                 if((stringValue = [dateFormatter stringForObjectValue:date]))
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
@@ -1587,7 +1587,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSMutableArray *keys = [[pubFields allKeysUsingLock:bibLock] mutableCopy];
 	BOOL hasAU = [keys containsObject:@"AU"];
     [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-    [keys removeObject:BDSKDateCreatedString];
+    [keys removeObject:BDSKDateAddedString];
     [keys removeObject:BDSKDateModifiedString];
     [keys removeObject:BDSKLocalUrlString];
 
@@ -2630,11 +2630,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
 }
 
-- (void)setDateCreated:(NSCalendarDate *)newDateCreated {
+- (void)setDateAdded:(NSCalendarDate *)newDateAdded {
     [bibLock lock];
-    if (dateCreated != newDateCreated) {
-        [dateCreated release];
-        dateCreated = [newDateCreated copy];
+    if (dateAdded != newDateAdded) {
+        [dateAdded release];
+        dateAdded = [newDateAdded copy];
     }
     [bibLock unlock];
 }
@@ -2708,20 +2708,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		}
 	}
 	
-    // setDateCreated: is only called here; it is derived based on pubFields value of BDSKDateCreatedString
-    if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKDateCreatedString isEqualToString:key]) {
-		NSString *dateCreatedValue = [pubFields objectForKey:BDSKDateCreatedString usingLock:bibLock];
-		if (![NSString isEmptyString:dateCreatedValue]) {
-            theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateCreatedValue];
-			[self setDateCreated:theDate];
+    // setDateAdded: is only called here; it is derived based on pubFields value of BDSKDateAddedString
+    if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKDateAddedString isEqualToString:key]) {
+		NSString *dateAddedValue = [pubFields objectForKey:BDSKDateAddedString usingLock:bibLock];
+		if (![NSString isEmptyString:dateAddedValue]) {
+            theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateAddedValue];
+			[self setDateAdded:theDate];
             [theDate release];
 		}else{
-			[self setDateCreated:nil];
+			[self setDateAdded:nil];
 		}
 	}
 	
     // we shouldn't check for the key here, as the DateModified can be set with any key
-    // setDateModified: is only called here; it is derived based on pubFields value of BDSKDateCreatedString
+    // setDateModified: is only called here; it is derived based on pubFields value of BDSKDateAddedString
     NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString usingLock:bibLock];
     if (![NSString isEmptyString:dateModValue]) {
         theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateModValue];
