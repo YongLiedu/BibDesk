@@ -26,6 +26,9 @@ New Features\
   \'a5  Added a search field and spotlight effect to the preferences window (Tiger only)\
   \'a5  New action menu below the group tableview\
   \'a5  Text template export preferences added, so multiple HTML (or other) templates can be saved in named sets (RFE #1488232)\
+  \'a5  Templates for Services added, for flexible reference insertion\
+  \'a5  Added toolbar items to editor for deleting a publication or adding one using a crossref (RFE #1221956)\
+  \'a5  Added alternate action to "New" toolbar item for creating a new item with crossref (use option key)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 \
@@ -56,6 +59,12 @@ Bugs Fixed\
   \'a5  Fixed bug #1489184; empty index set could lead to a beachball\
   \'a5  Revised update checking code to use NSURLConnection, which is hopefully less crash-prone than CFURLCreateDataAndPropertiesFromResource on authenticated network connections (bug #1489057)\
   \'a5  Edit selected field in temporary typeahead mode when using command key modifier\
+  \'a5  Remove control and illegal characters when entering text in the editor (bug #1481675)\
+  \'a5  Empty strings are no longer accepted as quick search fields\
+  \'a5  Conversion of pdf to text now displays a message when it fails, instead of just doing nothing\
+  \'a5  Service lookup now recognizes any of "citekey, cite key, cite-key, or key" case-insensitively\
+  \'a5  Icon columns are now sorted as empty/non-empty instead of alphabetically by URL; this allows subsorting articles that have a URL by year\
+  \'a5  Export save panel now displays show/hide extension checkbox and allows directory creation\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
