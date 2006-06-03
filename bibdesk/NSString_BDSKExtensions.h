@@ -284,6 +284,18 @@ An inline buffer is used for speed in accessing each character.
 - (BOOL)booleanValue;
 
 /*!
+     @method     triStateValue
+     @abstract   Translates from string value to an NSCellStateValue
+     @discussion For compatibility with booleanValue, we accept {Yes,y,1} = checked and {No,n,0,""} = unchecked. Anything else is treated as indeterminate, or "mixed".
+     @result     (description)
+ */
+- (NSCellStateValue)triStateValue;
+
+- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength;
+
+#pragma mark -
+
+/*!
     @method     componentsSeparatedByCharactersInSet:trimWhitespace:
     @abstract   Returns an array composed by splitting the string at any of the characters in charSet, optionally trimming whitespace from each component.
     @discussion (comprehensive description)
@@ -358,16 +370,6 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSString *)stringByTrimmingPrefixCharactersFromSet:(NSCharacterSet *)characterSet;
 
-/*!
-     @method     triStateValue
-     @abstract   Translates from string value to an NSCellStateValue
-     @discussion For compatibility with booleanValue, we accept {Yes,y,1} = checked and {No,n,0,""} = unchecked. Anything else is treated as indeterminate, or "mixed".
-     @result     (description)
- */
-- (NSCellStateValue)triStateValue;
-
-- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength;
-
 - (NSString *)stringByAppendingEllipsis;
 
 #pragma mark HTML/XML
@@ -379,6 +381,15 @@ An inline buffer is used for speed in accessing each character.
 - (NSArray *)allSearchComponents;
 - (NSArray *)andSearchComponents;
 - (NSArray *)orSearchComponents;
+
+#pragma mark Empty lines
+
+- (NSRange)rangeOfLeadingEmptyLine;
+- (NSRange)rangeOfLeadingEmptyLineInRange:(NSRange)range;
+- (NSRange)rangeOfTrailingEmptyLine;
+- (NSRange)rangeOfTrailingEmptyLineInRange:(NSRange)range;
+
+#pragma mark Some convenience keys for templates
 
 - (NSURL *)url;
 - (NSAttributedString *)linkedText;

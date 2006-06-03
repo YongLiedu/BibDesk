@@ -114,19 +114,19 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
                 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
-                wsRange = [result rangeOfTrailingWhitespaceLine];
+                wsRange = [result rangeOfTrailingEmptyLine];
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
                 endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
                 sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
                 // ignore the rest of an empty line after the tag
-                [scanner scanWhitespaceAndSingleNewline];
+                [scanner scanEmptyLine];
                 if ([scanner scanString:endTag intoString:nil])
                     continue;
                 if ([scanner scanUpToString:endTag intoString:&itemTemplate] && [scanner scanString:endTag intoString:nil]) {
                     // ignore whitespace before the tag. Should we also remove a newline?
-                    wsRange = [itemTemplate rangeOfTrailingWhitespaceLine];
+                    wsRange = [itemTemplate rangeOfTrailingEmptyLine];
                     if (wsRange.location != NSNotFound)
                         itemTemplate = [itemTemplate substringToIndex:wsRange.location];
                     
@@ -134,10 +134,10 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
                     sepTagRange = [itemTemplate rangeOfString:sepTag];
                     if (sepTagRange.location != NSNotFound) {
                         // ignore whitespaces before and after the tag, including a trailing newline 
-                        wsRange = [itemTemplate rangeOfTrailingWhitespaceLineInRange:NSMakeRange(0, sepTagRange.location)];
+                        wsRange = [itemTemplate rangeOfTrailingEmptyLineInRange:NSMakeRange(0, sepTagRange.location)];
                         if (wsRange.location != NSNotFound) 
                             sepTagRange = NSMakeRange(wsRange.location, NSMaxRange(sepTagRange) - wsRange.location);
-                        wsRange = [itemTemplate rangeOfLeadingWhitespaceLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [itemTemplate length] - NSMaxRange(sepTagRange))];
+                        wsRange = [itemTemplate rangeOfLeadingEmptyLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [itemTemplate length] - NSMaxRange(sepTagRange))];
                         if (wsRange.location != NSNotFound)
                             sepTagRange.length = NSMaxRange(wsRange) - sepTagRange.location;
                         lastItemTemplate = [itemTemplate substringToIndex:sepTagRange.location];
@@ -164,7 +164,7 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
                         }
                     }
                     // ignore the the rest of an empty line after the tag
-                    [scanner scanWhitespaceAndSingleNewline];
+                    [scanner scanEmptyLine];
                     
                 }
                 
@@ -240,30 +240,30 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
                 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
-                wsRange = [[result string] rangeOfTrailingWhitespaceLine];
+                wsRange = [[result string] rangeOfTrailingEmptyLine];
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
                 endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
                 sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
                 // ignore the rest of an empty line after the tag
-                [scanner scanWhitespaceAndSingleNewline];
+                [scanner scanEmptyLine];
                 if ([scanner scanString:endTag intoString:nil])
                     continue;
                 start = [scanner scanLocation];
                 if ([scanner scanUpToString:endTag intoString:&itemTemplateString] && [scanner scanString:endTag intoString:nil]) {
                     // ignore whitespace before the tag. Should we also remove a newline?
-                    wsRange = [itemTemplateString rangeOfTrailingWhitespaceLine];
+                    wsRange = [itemTemplateString rangeOfTrailingEmptyLine];
                     itemTemplate = [template attributedSubstringFromRange:NSMakeRange(start, [itemTemplateString length] - wsRange.length)];
                     
                     lastItemTemplate = nil;
                     sepTagRange = [[itemTemplate string] rangeOfString:sepTag];
                     if (sepTagRange.location != NSNotFound) {
                         // ignore whitespaces before and after the tag, including a trailing newline 
-                        wsRange = [[itemTemplate string] rangeOfTrailingWhitespaceLineInRange:NSMakeRange(0, sepTagRange.location)];
+                        wsRange = [[itemTemplate string] rangeOfTrailingEmptyLineInRange:NSMakeRange(0, sepTagRange.location)];
                         if (wsRange.location != NSNotFound) 
                             sepTagRange = NSMakeRange(wsRange.location, NSMaxRange(sepTagRange) - wsRange.location);
-                        wsRange = [[itemTemplate string] rangeOfLeadingWhitespaceLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [itemTemplate length] - NSMaxRange(sepTagRange))];
+                        wsRange = [[itemTemplate string] rangeOfLeadingEmptyLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [itemTemplate length] - NSMaxRange(sepTagRange))];
                         if (wsRange.location != NSNotFound)
                             sepTagRange.length = NSMaxRange(wsRange) - sepTagRange.location;
                         lastItemTemplate = [itemTemplate attributedSubstringFromRange:NSMakeRange(0, sepTagRange.location)];
@@ -290,7 +290,7 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
                         }
                     }
                     // ignore the the rest of an empty line after the tag
-                    [scanner scanWhitespaceAndSingleNewline];
+                    [scanner scanEmptyLine];
                     
                 }
                 
@@ -330,7 +330,7 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
 
 @implementation NSScanner (BDSKTemplateParser)
 
-- (BOOL)scanWhitespaceAndSingleNewline {
+- (BOOL)scanEmptyLine {
     BOOL foundNewline = NO;
     BOOL foundWhitespace = NO;
     int startLoc = [self scanLocation];
@@ -349,55 +349,6 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
     if (foundNewline == NO && foundWhitespace == YES)
         [self setScanLocation:startLoc];
     return foundNewline;
-}
-
-@end
-
-
-@implementation NSString (BDSKTemplateParser)
-
-// whitespace at the beginning of the string up to the end or until (and including) a newline
-- (NSRange)rangeOfLeadingWhitespaceLine {
-    return [self rangeOfLeadingWhitespaceLineInRange:NSMakeRange(0, [self length])];
-}
-
-- (NSRange)rangeOfLeadingWhitespaceLineInRange:(NSRange)range {
-    NSRange firstCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
-    NSRange wsRange = NSMakeRange(NSNotFound, 0);
-    unsigned int start = range.location;
-    if (firstCharRange.location == NSNotFound) {
-        wsRange = range;
-    } else {
-        unichar firstChar = [self characterAtIndex:firstCharRange.location];
-        unsigned int rangeEnd = NSMaxRange(firstCharRange);
-        if([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
-            if (firstChar == '\r' && rangeEnd < NSMaxRange(range) && [self characterAtIndex:rangeEnd] == '\n')
-                wsRange = NSMakeRange(start, rangeEnd + 1 - start);
-            else 
-                wsRange = NSMakeRange(start, rangeEnd - start);
-        }
-    }
-    return wsRange;
-}
-
-// whitespace at the end of the string from the beginning or after a newline
-- (NSRange)rangeOfTrailingWhitespaceLine {
-    return [self rangeOfTrailingWhitespaceLineInRange:NSMakeRange(0, [self length])];
-}
-
-- (NSRange)rangeOfTrailingWhitespaceLineInRange:(NSRange)range {
-    NSRange lastCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
-    NSRange wsRange = NSMakeRange(NSNotFound, 0);
-    unsigned int end = NSMaxRange(range);
-    if (lastCharRange.location == NSNotFound) {
-        wsRange = range;
-    } else {
-        unichar lastChar = [self characterAtIndex:lastCharRange.location];
-        unsigned int rangeEnd = NSMaxRange(lastCharRange);
-        if (rangeEnd < end && [[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar]) 
-            wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
-    }
-    return wsRange;
 }
 
 @end

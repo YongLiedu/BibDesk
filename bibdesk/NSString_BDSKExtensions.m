@@ -451,10 +451,42 @@ static int MAX_RATING = 5;
         return NO;
 }
 
-- (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)charSet trimWhitespace:(BOOL)trim;
-{
-    return [(id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)self, (CFCharacterSetRef)charSet, trim) autorelease];
+- (NSCellStateValue)triStateValue{
+    if([self booleanValue] == YES){
+        return NSOnState;
+    }else if([self isEqualToString:@""] ||
+             [self compare:[NSString stringWithBool:NO] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+             [self compare:@"n" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+             [self isEqualToString:@"0"]){
+        return NSOffState;
+    }else{
+        return NSMixedState;
+    }
 }
+
+- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength{
+    NSMutableString *result = [NSMutableString string];
+    NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace
+    NSEnumerator *e = [allComponents objectEnumerator];
+    NSString *component = nil;
+	unsigned int currentIgnoreLength;
+    
+    while(component = [e nextObject]){
+		currentIgnoreLength = ignoreLength;
+        if(![component isEqualToString:@""]) // stringByTrimmingCharactersInSet will choke on an empty string
+            component = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+		if([component length] > 1 && [component characterAtIndex:[component length] - 1] == '.')
+			currentIgnoreLength = 0;
+		if(![component isEqualToString:@""])
+            component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
+		if([component length] > currentIgnoreLength){
+            [result appendString:[[component substringToIndex:1] uppercaseString]];
+        }
+    }
+    return result;
+}
+
+#pragma mark -
 
 - (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange{
     return !searchString || [searchString length] == 0 || [self rangeOfString:searchString options:mask range:aRange].length > 0;
@@ -506,6 +538,22 @@ static int MAX_RATING = 5;
     return YES;
 }
 
+- (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
+{
+    CFIndex length = [prefix length];
+    if(prefix == nil || length > [self length])
+        return NO;
+    
+    return (CFStringCompareWithOptions((CFStringRef)self,(CFStringRef)prefix, CFRangeMake(0, length), kCFCompareCaseInsensitive) == kCFCompareEqualTo ? YES : NO);
+}
+
+#pragma mark -
+
+- (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)charSet trimWhitespace:(BOOL)trim;
+{
+    return [(id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)self, (CFCharacterSetRef)charSet, trim) autorelease];
+}
+
 - (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
 {
     return [(id)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
@@ -514,15 +562,6 @@ static int MAX_RATING = 5;
 - (NSString *)fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines;
 {
     return [(id)BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
-}
-
-- (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
-{
-    CFIndex length = [prefix length];
-    if(prefix == nil || length > [self length])
-        return NO;
-    
-    return (CFStringCompareWithOptions((CFStringRef)self,(CFStringRef)prefix, CFRangeMake(0, length), kCFCompareCaseInsensitive) == kCFCompareEqualTo ? YES : NO);
 }
 
 - (NSString *)stringByNormalizingSpacesAndLineBreaks;
@@ -554,41 +593,6 @@ static int MAX_RATING = 5;
         [mutableCopy release];
     }
     return self;
-}
-
-- (NSCellStateValue)triStateValue{
-    if([self booleanValue] == YES){
-        return NSOnState;
-    }else if([self isEqualToString:@""] ||
-             [self compare:[NSString stringWithBool:NO] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
-             [self compare:@"n" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
-             [self isEqualToString:@"0"]){
-        return NSOffState;
-    }else{
-        return NSMixedState;
-    }
-}
-
-- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength{
-    NSMutableString *result = [NSMutableString string];
-    NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace
-    NSEnumerator *e = [allComponents objectEnumerator];
-    NSString *component = nil;
-	unsigned int currentIgnoreLength;
-    
-    while(component = [e nextObject]){
-		currentIgnoreLength = ignoreLength;
-        if(![component isEqualToString:@""]) // stringByTrimmingCharactersInSet will choke on an empty string
-            component = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-		if([component length] > 1 && [component characterAtIndex:[component length] - 1] == '.')
-			currentIgnoreLength = 0;
-		if(![component isEqualToString:@""])
-            component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
-		if([component length] > currentIgnoreLength){
-            [result appendString:[[component substringToIndex:1] uppercaseString]];
-        }
-    }
-    return result;
 }
 
 - (NSString *)stringByAppendingEllipsis{
@@ -713,6 +717,54 @@ static int MAX_RATING = 5;
     }
     return [orArray autorelease];
 }
+
+#pragma mark Empty lines
+
+// whitespace at the beginning of the string up to the end or until (and including) a newline
+- (NSRange)rangeOfLeadingEmptyLine {
+    return [self rangeOfLeadingEmptyLineInRange:NSMakeRange(0, [self length])];
+}
+
+- (NSRange)rangeOfLeadingEmptyLineInRange:(NSRange)range {
+    NSRange firstCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:0 range:range];
+    NSRange wsRange = NSMakeRange(NSNotFound, 0);
+    unsigned int start = range.location;
+    if (firstCharRange.location == NSNotFound) {
+        wsRange = range;
+    } else {
+        unichar firstChar = [self characterAtIndex:firstCharRange.location];
+        unsigned int rangeEnd = NSMaxRange(firstCharRange);
+        if([[NSCharacterSet newlineCharacterSet] characterIsMember:firstChar]) {
+            if (firstChar == '\r' && rangeEnd < NSMaxRange(range) && [self characterAtIndex:rangeEnd] == '\n')
+                wsRange = NSMakeRange(start, rangeEnd + 1 - start);
+            else 
+                wsRange = NSMakeRange(start, rangeEnd - start);
+        }
+    }
+    return wsRange;
+}
+
+// whitespace at the end of the string from the beginning or after a newline
+- (NSRange)rangeOfTrailingEmptyLine {
+    return [self rangeOfTrailingEmptyLineInRange:NSMakeRange(0, [self length])];
+}
+
+- (NSRange)rangeOfTrailingEmptyLineInRange:(NSRange)range {
+    NSRange lastCharRange = [self rangeOfCharacterFromSet:[NSCharacterSet nonWhitespaceCharacterSet] options:NSBackwardsSearch range:range];
+    NSRange wsRange = NSMakeRange(NSNotFound, 0);
+    unsigned int end = NSMaxRange(range);
+    if (lastCharRange.location == NSNotFound) {
+        wsRange = range;
+    } else {
+        unichar lastChar = [self characterAtIndex:lastCharRange.location];
+        unsigned int rangeEnd = NSMaxRange(lastCharRange);
+        if (rangeEnd < end && [[NSCharacterSet newlineCharacterSet] characterIsMember:lastChar]) 
+            wsRange = NSMakeRange(rangeEnd, end - rangeEnd);
+    }
+    return wsRange;
+}
+
+#pragma mark Some convenience keys for templates
 
 - (NSURL *)url {
     NSURL *url = nil;

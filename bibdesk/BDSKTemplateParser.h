@@ -77,15 +77,7 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 
 
 @interface NSScanner (BDSKTemplateParser)
-- (BOOL)scanWhitespaceAndSingleNewline;
-@end
-
-
-@interface NSString (BDSKTemplateParser)
-- (NSRange)rangeOfLeadingWhitespaceLine;
-- (NSRange)rangeOfLeadingWhitespaceLineInRange:(NSRange)range;
-- (NSRange)rangeOfTrailingWhitespaceLine;
-- (NSRange)rangeOfTrailingWhitespaceLineInRange:(NSRange)range;
+- (BOOL)scanEmptyLine;
 @end
 
 
