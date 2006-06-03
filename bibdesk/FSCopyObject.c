@@ -360,7 +360,7 @@ OSErr FSCopyObject(	const FSRef				*source,
 					tmpObjectName;
 	FSRef			tmpObjectRef,
 					deleteMeRef;
-	Boolean			isDirectory,
+	Boolean			isDirectory = false,
 					isReplacing = false;
 	OSErr			err = ( source != NULL && destDir != NULL ) ? noErr : paramErr;
 
