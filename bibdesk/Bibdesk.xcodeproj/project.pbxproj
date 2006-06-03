@@ -310,7 +310,6 @@
 		CEF94414092668EA00750FFA /* BDSKTableSortDescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF94412092668EA00750FFA /* BDSKTableSortDescriptor.h */; };
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C1C0758013E00C3F701 /* BDAlias.m */; };
-		F9022C250758018600C3F701 /* NSString+Templating.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C240758018600C3F701 /* NSString+Templating.m */; };
 		F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */; };
 		F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
 		F9022C4C0758027800C3F701 /* BDSKCustomCiteTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3D0758027800C3F701 /* BDSKCustomCiteTableView.m */; };
@@ -462,7 +461,6 @@
 		F918103607583A5B00CF822D /* DraggableScrollView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C990758038000C3F701 /* DraggableScrollView.h */; };
 		F918103707583A5B00CF822D /* html2tex.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C9B0758038000C3F701 /* html2tex.h */; };
 		F918103807583A5B00CF822D /* NSImage+Toolbox.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C9C0758038000C3F701 /* NSImage+Toolbox.h */; };
-		F918103907583A5B00CF822D /* NSString+Templating.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C230758018600C3F701 /* NSString+Templating.h */; };
 		F918103B07583A5B00CF822D /* NSString_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C9E0758038000C3F701 /* NSString_BDSKExtensions.h */; };
 		F918103C07583A5B00CF822D /* NSTextView_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA00758038000C3F701 /* NSTextView_BDSKExtensions.h */; };
 		F918103D07583A5B00CF822D /* OATypeAheadSelectionHelper_Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA20758038000C3F701 /* OATypeAheadSelectionHelper_Extensions.h */; };
@@ -1124,8 +1122,6 @@
 		CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTableSortDescriptor.m; sourceTree = "<group>"; };
 		F9022C1B0758013E00C3F701 /* BDAlias.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BDAlias.h; path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.h; sourceTree = "<group>"; };
 		F9022C1C0758013E00C3F701 /* BDAlias.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = BDAlias.m; path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.m; sourceTree = "<group>"; };
-		F9022C230758018600C3F701 /* NSString+Templating.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "NSString+Templating.h"; path = "../bibdesk_vendorsrc/scifihifi/NSString_Templating/NSString+Templating.h"; sourceTree = "<group>"; };
-		F9022C240758018600C3F701 /* NSString+Templating.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = "NSString+Templating.m"; path = "../bibdesk_vendorsrc/scifihifi/NSString_Templating/NSString+Templating.m"; sourceTree = "<group>"; };
 		F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteKeyFormatter.h; sourceTree = "<group>"; };
 		F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteKeyFormatter.m; sourceTree = "<group>"; };
 		F9022C3A0758027800C3F701 /* BDSKConverter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKConverter.h; sourceTree = "<group>"; };
@@ -1622,7 +1618,6 @@
 				F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */,
 				F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */,
 				F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */,
-				F9022C240758018600C3F701 /* NSString+Templating.m */,
 				F9022C1C0758013E00C3F701 /* BDAlias.m */,
 				32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
@@ -2200,7 +2195,6 @@
 				F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */,
 				F916E68A07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.h */,
 				F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */,
-				F9022C230758018600C3F701 /* NSString+Templating.h */,
 				F9022C9E0758038000C3F701 /* NSString_BDSKExtensions.h */,
 				CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */,
 				CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */,
@@ -2382,7 +2376,6 @@
 				F918103607583A5B00CF822D /* DraggableScrollView.h in Headers */,
 				F918103707583A5B00CF822D /* html2tex.h in Headers */,
 				F918103807583A5B00CF822D /* NSImage+Toolbox.h in Headers */,
-				F918103907583A5B00CF822D /* NSString+Templating.h in Headers */,
 				F918103B07583A5B00CF822D /* NSString_BDSKExtensions.h in Headers */,
 				F918103C07583A5B00CF822D /* NSTextView_BDSKExtensions.h in Headers */,
 				F918103D07583A5B00CF822D /* OATypeAheadSelectionHelper_Extensions.h in Headers */,
@@ -3157,7 +3150,6 @@
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */,
-				F9022C250758018600C3F701 /* NSString+Templating.m in Sources */,
 				F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */,
 				F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */,
 				F9022C4C0758027800C3F701 /* BDSKCustomCiteTableView.m in Sources */,
