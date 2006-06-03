@@ -282,6 +282,31 @@
     
 }
 
+- (void)applicationWillTerminate:(NSNotification *)aNotification{
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *tmpDirPath = [self temporaryBaseDirectoryCreating:NO];
+	if(tmpDirPath && [fm fileExistsAtPath:tmpDirPath])
+		[fm removeFileAtPath:tmpDirPath handler:nil];
+	
+    [metadataCacheLock lock];
+    canWriteMetadata = NO;
+    [metadataCacheLock unlock];
+    
+    NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileNames count]];
+    NSEnumerator *fEnum = [fileNames objectEnumerator];
+    NSString *fileName;
+    while(fileName = [fEnum nextObject]){
+        NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
+        if(data)
+            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
+        else
+            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", nil]];
+    }
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKLastOpenFileNamesKey];
+    [[BDSKSharingServer defaultServer] disableSharing];
+}
+
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
     int flag = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue];
@@ -812,6 +837,36 @@
     
 }
 
+#pragma mark | Input manager
+
+- (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current{
+    NSParameterAssert(current != NULL);
+    
+    // someone may be mad enough to install this in NSLocalDomain or NSNetworkDomain, but we don't support that
+    NSString *inputManagerBundlePath = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager/BibDeskInputManager.bundle"];
+
+    NSString *bundlePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager/BibDeskInputManager.bundle"];
+    NSString *bundledVersion = [[[NSBundle bundleWithPath:bundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
+    NSString *installedVersion = [[[NSBundle bundleWithPath:inputManagerBundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
+    
+    *current = [bundledVersion isEqualToString:installedVersion];
+    return installedVersion == nil ? NO : YES;
+}
+
+- (void)showInputManagerUpdateAlert{
+    NSAlert *anAlert = [NSAlert alertWithMessageText:@"Autocomplete Plugin Needs Update"
+                                       defaultButton:[NSLocalizedString(@"Open", @"Open") stringByAppendingString:[NSString horizontalEllipsisString]]
+                                     alternateButton:NSLocalizedString(@"Cancel", @"Cancel the update")
+                                         otherButton:nil
+                           informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?",@"")];
+    int rv = [anAlert runModal];
+    if(rv == NSAlertDefaultReturn){
+        [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
+        [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_InputManager"];
+    }
+    
+}
+
 #pragma mark Panels
 
 - (IBAction)showReadMeFile:(id)sender{
@@ -853,36 +908,6 @@
 
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
     [[BDSKPreviewer sharedPreviewer] toggleShowingPreviewPanel:sender];
-}
-
-#pragma mark Input manager
-
-- (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current{
-    NSParameterAssert(current != NULL);
-    
-    // someone may be mad enough to install this in NSLocalDomain or NSNetworkDomain, but we don't support that
-    NSString *inputManagerBundlePath = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager/BibDeskInputManager.bundle"];
-
-    NSString *bundlePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager/BibDeskInputManager.bundle"];
-    NSString *bundledVersion = [[[NSBundle bundleWithPath:bundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
-    NSString *installedVersion = [[[NSBundle bundleWithPath:inputManagerBundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
-    
-    *current = [bundledVersion isEqualToString:installedVersion];
-    return installedVersion == nil ? NO : YES;
-}
-
-- (void)showInputManagerUpdateAlert{
-    NSAlert *anAlert = [NSAlert alertWithMessageText:@"Autocomplete Plugin Needs Update"
-                                       defaultButton:[NSLocalizedString(@"Open", @"Open") stringByAppendingString:[NSString horizontalEllipsisString]]
-                                     alternateButton:NSLocalizedString(@"Cancel", @"Cancel the update")
-                                         otherButton:nil
-                           informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?",@"")];
-    int rv = [anAlert runModal];
-    if(rv == NSAlertDefaultReturn){
-        [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
-        [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_InputManager"];
-    }
-    
 }
 
 #pragma mark Service code
@@ -1241,31 +1266,6 @@
 #pragma mark Spotlight support
 
 OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
-
-- (void)applicationWillTerminate:(NSNotification *)aNotification{
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *tmpDirPath = [self temporaryBaseDirectoryCreating:NO];
-	if(tmpDirPath && [fm fileExistsAtPath:tmpDirPath])
-		[fm removeFileAtPath:tmpDirPath handler:nil];
-	
-    [metadataCacheLock lock];
-    canWriteMetadata = NO;
-    [metadataCacheLock unlock];
-    
-    NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileNames count]];
-    NSEnumerator *fEnum = [fileNames objectEnumerator];
-    NSString *fileName;
-    while(fileName = [fEnum nextObject]){
-        NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
-        if(data)
-            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
-        else
-            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", nil]];
-    }
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKLastOpenFileNamesKey];
-    [[BDSKSharingServer defaultServer] disableSharing];
-}
 
 - (void)rebuildMetadataCache:(id)userInfo{
         
