@@ -67,10 +67,13 @@ extern NSString *BDSKTemplateDefaultItemString;
 + (NSArray *)defaultExportTemplates;
 + (NSArray *)defaultServiceTemplates;
 
++ (NSArray *)exportTemplates;
++ (NSArray *)serviceTemplates;
+
 + (NSArray *)allStyleNames;
 + (NSArray *)allFileTypes;
 + (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
-+ (BDSKTemplate *)defaultTemplateForFileType:(NSString *)fileType;
++ (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 + (BDSKTemplate *)templateForTextService;
 + (BDSKTemplate *)templateForRTFService;
@@ -95,7 +98,6 @@ extern NSString *BDSKTemplateDefaultItemString;
 - (BOOL)addChildWithURL:(NSURL *)fileURL role:(NSString *)role;
 - (id)childForRole:(NSString *)role;
 - (NSColor *)representedColorForKey:(NSString *)key;
-- (BOOL)hasChildWithRole:(NSString *)aRole;
 
 @end
 

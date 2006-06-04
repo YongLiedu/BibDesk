@@ -52,7 +52,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 @implementation BDSKTemplate
 
-#pragma mark API for templates
+#pragma mark Class methods
 
 + (NSArray *)defaultExportTemplates
 {
@@ -150,17 +150,26 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return [itemNodes autorelease];
 }
 
-+ (NSArray *)allStyleNames;
-{
-    NSArray *nodes = nil;
++ (NSArray *)exportTemplates{
     NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
     if ([prefData length])
-        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+        return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
     else 
-        nodes = [BDSKTemplate defaultExportTemplates];
+        return [BDSKTemplate defaultExportTemplates];
+}
 
++ (NSArray *)serviceTemplates{
+    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
+    if ([prefData length])
+        return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
+    else 
+        return [BDSKTemplate defaultExportTemplates];
+}
+
++ (NSArray *)allStyleNames;
+{
     NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [nodes objectEnumerator];
+    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
     id aNode;
     NSString *name;
     while(aNode = [nodeE nextObject]){
@@ -175,15 +184,8 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 + (NSArray *)allFileTypes;
 {
-    NSArray *nodes = nil;
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
-    if ([prefData length])
-        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    else 
-        nodes = [BDSKTemplate defaultExportTemplates];
-    
     NSMutableArray *fileTypes = [NSMutableArray array];
-    NSEnumerator *nodeE = [nodes objectEnumerator];
+    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
     id aNode;
     NSString *fileType;
     while(aNode = [nodeE nextObject]){
@@ -198,32 +200,27 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 + (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
 {
-    NSArray *nodes = nil;
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
-    if ([prefData length])
-        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    else 
-        nodes = [BDSKTemplate defaultExportTemplates];
-    
     NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [nodes objectEnumerator];
+    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
     id aNode;
     NSString *aFileType;
+    NSString *name;
     while(aNode = [nodeE nextObject]){
         if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
+            name = [aNode valueForKey:BDSKTemplateNameString];
             aFileType = [aNode valueForKey:BDSKTemplateRoleString];
-            if([aFileType caseInsensitiveCompare:fileType] == NSOrderedSame)
-                [names addObject:fileType];
+            if([aFileType caseInsensitiveCompare:fileType] == NSOrderedSame && name != nil)
+                [names addObject:name];
         }
     }
     return names;
 }
 
-+ (BDSKTemplate *)defaultTemplateForFileType:(NSString *)fileType;
++ (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 {
     NSArray *names = [self  allStyleNamesForFileType:fileType];
     if ([names count] > 0)
-        return [self templateForStyle:[names objectAtIndex:0]];
+        return [names objectAtIndex:0];
     else
         return nil;
 }
@@ -231,14 +228,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 // accesses the node array in prefs
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 {
-    NSArray *nodes = nil;
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree];
-    if ([prefData length])
-        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    else 
-        nodes = [BDSKTemplate defaultExportTemplates];
-    
-    NSEnumerator *nodeE = [nodes objectEnumerator];
+    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
     id aNode = nil;
     
     while(aNode = [nodeE nextObject]){
@@ -250,25 +240,15 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 + (BDSKTemplate *)templateForTextService;
 {
-    NSArray *nodes = nil;
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
-    if ([prefData length])
-        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    else 
-        nodes = [BDSKTemplate defaultServiceTemplates];
-    return [nodes objectAtIndex:0];
+    return [[self serviceTemplates] objectAtIndex:0];
 }
 
 + (BDSKTemplate *)templateForRTFService;
 {
-    NSArray *nodes = nil;
-    NSData *prefData = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKServiceTemplateTree];
-    if ([prefData length])
-        nodes = [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
-    else 
-        nodes = [BDSKTemplate defaultServiceTemplates];
-    return [nodes objectAtIndex:1];
+    return [[self serviceTemplates] objectAtIndex:1];
 }
+
+#pragma mark Instance methods
 
 - (BDSKTemplateFormat)templateFormat;
 {
@@ -427,17 +407,6 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
         color = [NSColor redColor];
     }
     return color;
-}
-
-- (BOOL)hasChildWithRole:(NSString *)aRole;
-{
-    NSEnumerator *roleEnum = [[self children] objectEnumerator];
-    id aChild;
-    while(aChild = [roleEnum nextObject]){
-        if([[aChild valueForKey:BDSKTemplateRoleString] isEqualToString:aRole])
-            return YES;
-    }
-    return NO;
 }
 
 @end

@@ -858,26 +858,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             case BDSKRTFDExportFileType:
             case BDSKDocExportFileType:
                 do {
-                    NSString *fileType = [sp requiredFileType];
-                    BDSKTemplate *selectedTemplate = [BDSKTemplate defaultTemplateForFileType:fileType];
-                    BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
-                    NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
-                    NSURL *accessoryURL = nil;
-                    NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
-                    while(accessoryURL = [accessoryFileEnum nextObject]){
-                        [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
-                    }
-                    if (templateFormat & BDSKRTFDTemplateFormat) {
-                        NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
-                        [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
-                        fileData = nil;
-                    } else if (templateFormat & BDSKTextTemplateFormat) {
-                        fileData = [self templatedStringDataForPublications:items];
-                    } else if (templateFormat) {
-                        fileData = [self templatedAttributedStringDataForPublications:items];
-                    }
+                    NSString *templateStyle = [BDSKTemplate defaultStyleNameForFileType:[sp requiredFileType]];
+                    if (templateStyle == nil)   
+                        return;
+                    [currentExportTemplateStyle release];
+                    currentExportTemplateStyle = [templateStyle copy];
                 } while (0);
-                break;
             case BDSKTemplateExportFileType:
                 do {
                     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
