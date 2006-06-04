@@ -47,6 +47,7 @@
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSString *)localFilePathForField:(NSString *)field;
 - (NSString *)documentFileName;
+- (NSString *)documentInfoForKey:(NSString *)key;
 - (BOOL)isValidCiteKey:(NSString *)key;
 - (BOOL)isValidLocalUrlPath:(NSString *)key;
 @end

@@ -1010,6 +1010,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
 				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
 				return NO;
+		} else if ([fieldName hasPrefix:@"Document: "]) {
+			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
+				return NO;
 		} else {
 			if ([NSString isEmptyString:[self valueOfField:fieldName]]) {
 				return NO;
@@ -2183,6 +2186,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
 			if ([NSString isEmptyString:[document fileName]])
 				return NO;
+		} else if ([fieldName hasPrefix:@"Document: "]) {
+			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
+				return NO;
 		} else if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
 				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
@@ -2224,6 +2230,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (NSString *)documentFileName {
     return [document fileName];
+}
+
+- (NSString *)documentInfoForKey:(NSString *)key {
+    return [document documentInfoForKey:key];
 }
 
 #pragma mark -

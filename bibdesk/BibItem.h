@@ -838,6 +838,7 @@
 - (BOOL)autoFilePaper;
 
 - (NSString *)documentFileName;
+- (NSString *)documentInfoForKey:(NSString *)key;
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
 - (void)customFieldsDidChange:(NSNotification *)aNotification;

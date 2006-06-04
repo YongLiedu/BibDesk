@@ -105,6 +105,8 @@
 
 - (NSString *)documentFileName { return NSLocalizedString(@"Document File Name", @"Document filename for preview item in preferences"); }
 
+- (NSString *)documentInfoForKey:(NSString *)key { return key; }
+
 - (BOOL)isValidCiteKey:(NSString *)key { return YES; }
 
 - (BOOL)isValidLocalUrlPath:(NSString *)path { return YES; }

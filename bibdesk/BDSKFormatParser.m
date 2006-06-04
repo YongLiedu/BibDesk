@@ -414,6 +414,27 @@
 						NSLog(@"Missing {'field'} after format specifier %%c in format.");
 					}
 					break;
+				case 'i':
+					// arbitrary document info
+					if ([scanner scanString:@"{" intoString:NULL] &&
+						[scanner scanUpToString:@"}" intoString:&string] &&
+						[scanner scanString:@"}" intoString:NULL]) {
+					
+						if (![scanner scanInt:&number]) number = 0;
+                        string = [pub documentInfoForKey:string];
+						if (string != nil) {
+							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
+							if (number > 0 && [string length] > number) {
+								[parsedStr appendString:[string substringToIndex:number]];
+							} else {
+								[parsedStr appendString:string];
+							}
+						}
+					}
+					else {
+						NSLog(@"Missing {'key'} after format specifier %%i in format.");
+					}
+					break;
 				case 'r':
 					// random lowercase letters
 					if (![scanner scanInt:&number]) number = 1;
@@ -704,11 +725,11 @@
 	static NSDictionary *errorAttr = nil;
 	
 	if (validSpecifierChars == nil) {
-		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfcrRduUn0123456789%[]"] retain];
-		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfcrRduUn"] retain];
+		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfcirRduUn0123456789%[]"] retain];
+		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfcirRduUn"] retain];
 		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
 		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
-		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fc"] retain];
+		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fci"] retain];
 		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPkf"] retain];
 		
 		NSFont *font = [NSFont systemFontOfSize:0];
@@ -887,6 +908,10 @@
 			case 'f':
 			case 'c':
 				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]];
+                break;
+			case 'i':
+				[arr addObject:[NSString stringWithFormat:@"Document: ", [[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]]];
+				break;
 		}
 	}
 	return arr;
