@@ -1865,6 +1865,16 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSString *)RSSValue{
+    // first look if we have an item template for RSS
+    NSString *templateStyle = [BDSKTemplate defaultStyleNameForFileType:@"rss"];
+    if (templateStyle) {
+        BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
+        if ([template defaultItemTemplateURL])
+            return [self stringValueUsingTemplate:template];
+    }
+    
+    // no item template found, so do some custom  stuff
+    
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
 
     NSString *descField = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKRSSDescriptionFieldKey];
@@ -1882,9 +1892,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [s appendString:@"<link>"];
     [s appendString:[self valueOfField:BDSKUrlString]];
     [s appendString:@"</link>\n"];
-    //[s appendString:@"<bt:source><![CDATA[\n"];
-    //    [s appendString:[[self bibTeXString] xmlString]];
-    //    [s appendString:@"]]></bt:source>\n"];
     [s appendString:@"</item>\n"];
     return s;
 }
