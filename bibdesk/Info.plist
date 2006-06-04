@@ -216,10 +216,10 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>BibDesk/Complete Text Citation</string>
+				<string>BibDesk/Complete Text Bibligraphy</string>
 			</dict>
 			<key>NSMessage</key>
-			<string>completeTextCitationFromSelection</string>
+			<string>completeTextBibliographyFromSelection</string>
 			<key>NSPortName</key>
 			<string>BibDesk</string>
 			<key>NSReturnTypes</key>
@@ -235,10 +235,10 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>BibDesk/Complete Rich Text Citation</string>
+				<string>BibDesk/Complete Rich Text Bibligraphy</string>
 			</dict>
 			<key>NSMessage</key>
-			<string>completeRichCitationFromSelection</string>
+			<string>completeRichBibliographyFromSelection</string>
 			<key>NSPortName</key>
 			<string>BibDesk</string>
 			<key>NSReturnTypes</key>

@@ -965,17 +965,11 @@
     NSString *pboardString;
     NSArray *types;
     NSSet *items;
-    NSEnumerator *e;
-    BibItem *key;
-    BOOL yn;
-    NSMutableString *keys = [NSMutableString string];
-    NSMutableString *commentString = [NSMutableString string];
-	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-    NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey];
-    NSString *citeString = [NSString stringWithFormat:@"\\%@%@",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey],
-		startCiteBracket];
-	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
-	
+    BDSKTemplate *template = [BDSKTemplate templateForCiteService];
+    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
+    NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
+    OBPRECONDITION(nil != fileTemplate);
+    
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
@@ -999,39 +993,22 @@
 
     items = [self itemsMatchingSearchConstraints:searchConstraints];
     
-    e = [items objectEnumerator];
     if([items count] > 0){
-        if(key = [e nextObject]){
-            [keys appendString:citeString];
-            [keys appendString:[key citeKey]];
-            [commentString appendString:[key citeKey]];
-            [commentString appendString:@" = "];
-            [commentString appendString:[key displayTitle]];
-        }
-        while(key = [e nextObject]){
-            [keys appendString:@","];
-            [keys appendString:[key citeKey]];
-            [commentString appendString:@"; "];
-            [commentString appendString:[key citeKey]];
-            [commentString appendString:@" = "];
-            [commentString appendString:[key displayTitle]];
-        }
-        [keys appendString:endCiteBracket];
-		[keys appendString:@" "];
-        //        [keys appendString:@"%% "];
-        // @@ commentString in service - let people set this as a pref? 
-        //        [keys appendString:commentString];
+        BDSKTemplateObjectProxy *objectProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:[items allObjects] template:template];
+        fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:objectProxy delegate:objectProxy];
+        [objectProxy release];
+        
         types = [NSArray arrayWithObject:NSStringPboardType];
         [pboard declareTypes:types owner:nil];
 
-        yn = [pboard setString:keys forType:NSStringPboardType];
+        [pboard setString:fileTemplate forType:NSStringPboardType];
     }
     return;
 }
 
-- (void)completeTextCitationFromSelection:(NSPasteboard *)pboard
-                                 userData:(NSString *)userData
-                                    error:(NSString **)error{
+- (void)completeTextBibliographyFromSelection:(NSPasteboard *)pboard
+                                     userData:(NSString *)userData
+                                        error:(NSString **)error{
     NSString *pboardString;
     NSArray *types;
     NSSet *items;
@@ -1076,9 +1053,9 @@
     return;
 }
 
-- (void)completeRichCitationFromSelection:(NSPasteboard *)pboard
-                                 userData:(NSString *)userData
-                                    error:(NSString **)error{
+- (void)completeRichBibliographyFromSelection:(NSPasteboard *)pboard
+                                     userData:(NSString *)userData
+                                        error:(NSString **)error{
     NSString *pboardString;
     NSData *pboardData;
     NSArray *types;
