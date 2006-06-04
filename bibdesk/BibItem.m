@@ -1869,8 +1869,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSString *templateStyle = [BDSKTemplate defaultStyleNameForFileType:@"rss"];
     if (templateStyle) {
         BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
-        if ([template defaultItemTemplateURL])
+        if ([template defaultItemTemplateURL]) {
+            [self setItemIndex:1];
             return [self stringValueUsingTemplate:template];
+        }
     }
     
     // no item template found, so do some custom  stuff
@@ -2010,6 +2012,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (id)editors{
     return [[self persons] valueOfField:BDSKEditorString];
 }
+
+- (void)setItemIndex:(int)index{ currentIndex = index; }
+
+- (int)itemIndex{ return currentIndex; }
 
 #pragma mark -
 #pragma mark URL handling

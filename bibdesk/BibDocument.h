@@ -865,6 +865,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     id object;
     NSArray *publications;
     BDSKTemplate *template;
+    int currentIndex;
 }
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate;

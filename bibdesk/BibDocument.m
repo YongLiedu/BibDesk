@@ -3840,6 +3840,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         object = [anObject retain];
         publications = [items copy];
         template = [aTemplate retain];
+        currentIndex = 0;
     }
     return self;
 }
@@ -3867,6 +3868,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         returnString = [NSMutableString stringWithString:@""];        
         while(pub = [e nextObject]){
+            [pub setItemIndex:++currentIndex];
             [returnString appendString:[pub stringValueUsingTemplate:template]];
         }
         
@@ -3874,6 +3876,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         returnString = [[[NSMutableAttributedString alloc] init] autorelease];
         while(pub = [e nextObject]){
+            [pub setItemIndex:++currentIndex];
             [returnString appendAttributedString:[pub attributedStringValueUsingTemplate:template]];
         }
     }
@@ -3888,8 +3891,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 // BDSKTemplateParserDelegate protocol
 - (void)templateParserWillParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {
-    if ([anObject isKindOfClass:[BibItem class]]) 
+    if ([anObject isKindOfClass:[BibItem class]]) {
+        [(BibItem *)anObject setItemIndex:++currentIndex];
         [(BibItem *)anObject prepareForTemplateParsing];
+    }
 }
 
 - (void)templateParserDidParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {

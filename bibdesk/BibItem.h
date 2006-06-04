@@ -66,6 +66,7 @@
     BOOL hasBeenEdited;
     BDSKBibItemStringCache *stringCache;
     BDSKFieldCollection *templateFields;
+    int currentIndex;
 }
 
 /*!
@@ -701,6 +702,8 @@
 - (id)persons;
 - (id)authors;
 - (id)editors;
+- (int)itemIndex;
+- (void)setItemIndex:(int)index;
 
 /*!
     @method     URLForField:
