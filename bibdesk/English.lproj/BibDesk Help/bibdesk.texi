@@ -3023,6 +3023,8 @@ Keywords must be separated by one of ;:, (semicolon, colon, or comma)
 @tab Arbitrary field, with (optional) maximal length
 @item @specargparam{%c, Field, 3}
 @tab Arbitrary field as initials, e.g. @samp{JCIS} for @samp{J. of Colloid and Interface Science}, with (optional) length of words to ignore
+@item @specargparam{%i, Key, 0 }
+@tab Arbitrary document info key, with (optional) maximal length
 @item @specparam{%r, 1}
 @tab Random lowercase letter, with (optional) number of characters
 @item @specparam{%R, 1}
@@ -3363,6 +3365,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab deprecated
 @item currentDate
 @tab 
+@item InfoKey
+@tab InfoKey can be any key appearing in the document info
 @end multitable
 
 @subheading Publication
