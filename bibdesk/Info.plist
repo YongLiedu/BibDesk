@@ -874,6 +874,8 @@
                 <integer>2</integer>
                 <key>defaultsDictionary</key>
                 <dict>
+                    <key>BDSKExportTemplateStyleKey</key>
+                    <string>Default HTML template</string>
                     <key>BDSKExportTemplateTree</key>
                     <data></data>
                     <key>BDSKServiceTemplateTree</key>

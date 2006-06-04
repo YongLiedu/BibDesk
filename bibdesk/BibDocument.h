@@ -183,7 +183,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSPopUpButton *templateStylePopUpButton;
     IBOutlet NSView *dropInternalAccessoryView;
     IBOutlet NSButton *dropInternalCheckButton;
-    NSString *currentExportTemplateStyle;
     
     IBOutlet NSView *saveEncodingAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;

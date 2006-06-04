@@ -140,6 +140,7 @@ NSString *BDSKOutputTemplateFileKey = @"Output Template File";
 NSString *BDSKCustomCiteStringsKey = @"Custom CiteStrings";
 NSString *BDSKAutoSaveAsRSSKey = @"Auto-save as RSS";
 NSString *BDSKRSSDescriptionFieldKey = @"Field to use as Description in RSS";
+NSString *BDSKExportTemplateStyleKey = @"BDSKExportTemplateStyleKey";
 
 NSString *BDSKPubTypeStringKey = @"Current Publication Type String";
 

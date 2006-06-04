@@ -474,7 +474,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[promisedPboardTypes release];
     [sharedGroups release];
     [sharedGroupSpinners release];
-    [currentExportTemplateStyle release];
     [super dealloc];
 }
 
@@ -739,26 +738,26 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (IBAction)changeCurrentExportTemplateStyle:(id)sender{
-    [currentExportTemplateStyle autorelease];
-    currentExportTemplateStyle = [[sender titleOfSelectedItem] copy];
+    NSString *currentSyle = [sender titleOfSelectedItem];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentSyle forKey:BDSKExportTemplateStyleKey];
     
-    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentSyle];
     [(NSSavePanel *)[sender window] setRequiredFileType:[selectedTemplate fileExtension]];
 }
 
 - (BOOL)prepareExportPanel:(NSSavePanel *)savePanel{
     NSArray *styles = [BDSKTemplate allStyleNames];
-    // @@ save last selection in prefs?  names can change, though...
-    if(currentExportTemplateStyle == nil || [styles containsObject:currentExportTemplateStyle] == NO){
-        [currentExportTemplateStyle release];
-        currentExportTemplateStyle = [[styles objectAtIndex:0] retain];
+    NSString *currentStyle = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKExportTemplateStyleKey];
+    if(currentStyle == nil || [styles containsObject:currentStyle] == NO){
+        currentStyle = [styles objectAtIndex:0];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentStyle forKey:BDSKExportTemplateStyleKey];
     }
     
     [templateStylePopUpButton removeAllItems];
     [templateStylePopUpButton addItemsWithTitles:styles];
     [templateStylePopUpButton setAction:@selector(changeCurrentExportTemplateStyle:)];
     [templateStylePopUpButton setTarget:self];
-    [templateStylePopUpButton selectItemWithTitle:currentExportTemplateStyle];
+    [templateStylePopUpButton selectItemWithTitle:currentStyle];
     
     [savePanel setAccessoryView:templateExportAccessoryView];
     
@@ -774,7 +773,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 NSBeep();
                 return;
             }
-            fileType = [[BDSKTemplate templateForStyle:currentExportTemplateStyle] fileExtension];
+            fileType = [[BDSKTemplate templateForStyle:[templateStylePopUpButton titleOfSelectedItem]] fileExtension];
             break;
         case BDSKRSSExportFileType:
             fileType = @"rss";
@@ -863,7 +862,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             case BDSKTemplateExportFileType:
                 do {
                     if (templateStyle == nil) 
-                        templateStyle = currentExportTemplateStyle;
+                        templateStyle = [templateStylePopUpButton titleOfSelectedItem];
                     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:templateStyle];
                     BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
                     NSString *extension = [selectedTemplate fileExtension];
