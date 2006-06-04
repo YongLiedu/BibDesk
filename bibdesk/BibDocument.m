@@ -848,6 +848,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
     if(returnCode == NSOKButton){
         fileName = [sp filename];
+        NSString *templateStyle = nil;
         switch (exportFileType) {
             case BDSKRSSExportFileType:
             case BDSKHTMLExportFileType:
@@ -855,15 +856,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             case BDSKRTFDExportFileType:
             case BDSKDocExportFileType:
                 do {
-                    NSString *templateStyle = [BDSKTemplate defaultStyleNameForFileType:[sp requiredFileType]];
+                    templateStyle = [BDSKTemplate defaultStyleNameForFileType:[sp requiredFileType]];
                     if (templateStyle == nil)   
-                        return;
-                    [currentExportTemplateStyle release];
-                    currentExportTemplateStyle = [templateStyle copy];
+                        break;
                 } while (0);
             case BDSKTemplateExportFileType:
                 do {
-                    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+                    if (templateStyle == nil) 
+                        templateStyle = currentExportTemplateStyle;
+                    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:templateStyle];
                     BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
                     NSString *extension = [selectedTemplate fileExtension];
                     fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
@@ -874,13 +875,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                         [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
                     }
                     if (templateFormat & BDSKRTFDTemplateFormat) {
-                        NSFileWrapper *fileWrapper = [self templatedFileWrapperForPublications:items];
+                        NSFileWrapper *fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
                         [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
                         fileData = nil;
                     } else if (templateFormat & BDSKTextTemplateFormat) {
-                        fileData = [self templatedStringDataForPublications:items];
+                        fileData = [self stringDataForPublications:items usingTemplate:selectedTemplate];
                     } else {
-                        fileData = [self templatedAttributedStringDataForPublications:items];
+                        fileData = [self attributedStringDataForPublications:items usingTemplate:selectedTemplate];
                     }
                 } while (0);
                 break;
@@ -1156,15 +1157,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
 }
 
-- (NSData *)templatedStringDataForPublications:(NSArray *)items{
+- (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
-    OBPRECONDITION(nil != selectedTemplate && ([selectedTemplate templateFormat] & BDSKTextTemplateFormat));
-    NSString *fileTemplate = [NSString stringWithContentsOfURL:[selectedTemplate mainPageTemplateURL]];
+    OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
+    NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
     OBPRECONDITION(nil != fileTemplate);
     
-    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:selectedTemplate];
+    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
     
     fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:documentProxy delegate:documentProxy];
     [documentProxy release];
@@ -1172,15 +1172,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
 }
 
-- (NSData *)templatedAttributedStringDataForPublications:(NSArray *)items{
+- (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
-    OBPRECONDITION(nil != selectedTemplate);
-    BDSKTemplateFormat format = [selectedTemplate templateFormat];
+    OBPRECONDITION(nil != template);
+    BDSKTemplateFormat format = [template templateFormat];
     OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
     OBPRECONDITION(nil != fileTemplate);
@@ -1190,7 +1189,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"") stringByAppendingString:[[self fileName] lastPathComponent]], NSTitleDocumentAttribute, nil]];
     }
     
-    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:selectedTemplate];
+    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
     
     fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:documentProxy delegate:documentProxy];
     [documentProxy release];
@@ -1206,16 +1205,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     } else return nil;
 }
 
-- (NSFileWrapper *)templatedFileWrapperForPublications:(NSArray *)items{
+- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
-    OBPRECONDITION(nil != selectedTemplate && [selectedTemplate templateFormat] & BDSKRTFDTemplateFormat);
+    OBPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
     OBPRECONDITION(nil != fileTemplate);
     
-    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:selectedTemplate];
+    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
     
     fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:documentProxy delegate:documentProxy];
     [documentProxy release];
