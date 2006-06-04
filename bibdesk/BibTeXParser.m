@@ -304,17 +304,25 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                         
                     }// end while field - process next bt field                    
                     
-                    newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
-                                                 fileType:BDSKBibtexString
-                                                pubFields:dictionary
-                                              createdDate:[filePath isEqualToString:@"Paste/Drag"] ? [NSCalendarDate date] : nil];
-
-                    tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
-                    [newBI setCiteKeyString:tmpStr];
-                    [tmpStr release];
+                    entryType = [entryType lowercaseString];
                     
-                    [returnArray addObject:newBI];
-                    [newBI release];
+                    if([entryType isEqualToString:@"bibdesk_info"]){
+                        if (frontMatter)
+                            [aDocument setDocumentInfo:dictionary];
+                    }else{
+                        
+                        newBI = [[BibItem alloc] initWithType:entryType
+                                                     fileType:BDSKBibtexString
+                                                    pubFields:dictionary
+                                                  createdDate:[filePath isEqualToString:@"Paste/Drag"] ? [NSCalendarDate date] : nil];
+
+                        tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
+                        [newBI setCiteKeyString:tmpStr];
+                        [tmpStr release];
+                        
+                        [returnArray addObject:newBI];
+                        [newBI release];
+                    }
                     
                     [dictionary removeAllObjects];
                 } // end generate BibItem from ENTRY metatype.
