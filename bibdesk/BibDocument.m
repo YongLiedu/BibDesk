@@ -99,6 +99,7 @@
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
+#import "BDSKDocumentInfoWindowController.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"bibTeX database";
@@ -127,6 +128,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 
         frontMatter = [[NSMutableString alloc] initWithString:@""];
 		
+        documentInfo = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+    
         currentGroupField = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentGroupFieldKey] retain];
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
@@ -462,12 +465,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [allPublicationsGroup release];
     [lastImportGroup release];
     [frontMatter release];
+    [documentInfo release];
     [quickSearchKey release];
     [customStringArray release];
     [toolbarItems release];
 	[statusBar release];
 	[texTask release];
     [macroWC release];
+    [infoWC release];
     [promiseDragColumnIdentifier release];
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
@@ -615,6 +620,51 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
     [auths release];
     return anAuthorPubs;
+}
+
+#pragma mark Document Info
+
+- (NSDictionary *)documentInfo{
+    return documentInfo;
+}
+
+- (void)setDocumentInfo:(NSDictionary *)dict{
+    [documentInfo setDictionary:dict];
+}
+
+- (NSString *)documentInfoForKey:(NSString *)key{
+    return [documentInfo valueForKey:key];
+}
+
+- (void)setDocumentInfo:(NSString *)value forKey:(NSString *)key{
+    [[[self undoManager] prepareWithInvocationTarget:self] setDocumentInfo:[self documentInfoForKey:key] forKey:key];
+    [documentInfo setValue:value forKey:key];
+}
+
+- (id)valueForUndefinedKey:(NSString *)key{
+    return [self documentInfoForKey:key];
+}
+
+- (NSString *)documentInfoString{
+    NSMutableString *string = [NSMutableString stringWithString:@"@bibdesk_info{document_info"];
+    NSEnumerator *keyEnum = [documentInfo keyEnumerator];
+    NSString *key;
+    
+    while (key = [keyEnum nextObject]) 
+        [string appendStrings:@",\n\t", key, @" = ", [[self documentInfoForKey:key] stringAsBibTeXString], nil];
+    [string appendString:@"\n}\n"];
+    
+    return string;
+}
+
+- (IBAction)showDocumentInfoWindow:(id)sender{
+    if (!infoWC) {
+        infoWC = [(BDSKDocumentInfoWindowController *)[BDSKDocumentInfoWindowController alloc] initWithDocument:self];
+    }
+    if ([[self windowControllers] containsObject:infoWC] == NO) {
+        [self addWindowController:infoWC];
+    }
+    [infoWC beginSheetModalForWindow:documentWindow];
 }
 
 #pragma mark -
@@ -1082,6 +1132,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [d appendData:[@"\n\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
         
+    if([documentInfo count]){
+        [d appendData:[[self documentInfoString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+    }
     
     // output the document's macros:
 	[d appendData:[[[self macroResolver] bibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];

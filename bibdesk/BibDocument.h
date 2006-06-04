@@ -64,6 +64,7 @@
 @class BDSKSplitView;
 @class BDSKCollapsibleView;
 @class BDSKTemplate;
+@class BDSKDocumentInfoWindowController;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -190,6 +191,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	
     BDSKMacroResolver *macroResolver;
     MacroWindowController *macroWC;
+	
+    NSMutableDictionary *documentInfo;
+    BDSKDocumentInfoWindowController *infoWC;
     
     OFMultiValueDictionary *itemsForCiteKeys;
     
@@ -607,6 +611,14 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)removePublicationsAtIndexes:(NSIndexSet *)indexes;
 - (void)removePublications:(NSArray *)pubs;
 - (void)removePublication:(BibItem *)pub;
+
+- (NSDictionary *)documentInfo;
+- (void)setDocumentInfo:(NSDictionary *)dict;
+- (NSString *)documentInfoForKey:(NSString *)key;
+- (void)setDocumentInfo:(NSString *)value forKey:(NSString *)key;
+- (id)valueForUndefinedKey:(NSString *)key;
+- (NSString *)documentInfoString;
+- (IBAction)showDocumentInfoWindow:(id)sender;
 
 #pragma mark bibtex macro support
 
