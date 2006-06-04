@@ -247,14 +247,19 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return aNode;
 }
 
-+ (BDSKTemplate *)templateForTextService;
++ (BDSKTemplate *)templateForCiteService;
 {
     return [[self serviceTemplates] objectAtIndex:0];
 }
 
-+ (BDSKTemplate *)templateForRTFService;
++ (BDSKTemplate *)templateForTextService;
 {
     return [[self serviceTemplates] objectAtIndex:1];
+}
+
++ (BDSKTemplate *)templateForRTFService;
+{
+    return [[self serviceTemplates] lastObject];
 }
 
 #pragma mark Instance methods
