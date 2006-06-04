@@ -237,6 +237,7 @@
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:overwrite];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfdExportTemplate.rtfd" overwrite:overwrite];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/citeServiceTemplate.txt" overwrite:overwrite];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:overwrite];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:overwrite];
         [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate default item.rtf" overwrite:overwrite];

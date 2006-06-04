@@ -125,6 +125,15 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     BDSKTemplate *template = nil;
     NSURL *fileURL = nil;
     
+    // Citation template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Citation Service template" forKey:BDSKTemplateNameString];
+    [template setValue:@"txt" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/citeServiceTemplate.txt"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+    
     // Text template
     template = [[BDSKTemplate alloc] init];
     [template setValue:@"Text Service template" forKey:BDSKTemplateNameString];
@@ -163,7 +172,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     if ([prefData length])
         return [NSKeyedUnarchiver unarchiveObjectWithData:prefData];
     else 
-        return [BDSKTemplate defaultExportTemplates];
+        return [BDSKTemplate defaultServiceTemplates];
 }
 
 + (NSArray *)allStyleNames;
