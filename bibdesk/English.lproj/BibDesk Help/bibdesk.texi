@@ -3393,6 +3393,10 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item dateModified
 @tab 
+@item itemIndex
+@tab 
+@item fileOrder
+@tab 
 @item fields.FieldName
 @tab FieldName can be the name of any field
 @item urls.FieldName
