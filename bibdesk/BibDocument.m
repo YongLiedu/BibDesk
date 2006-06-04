@@ -776,14 +776,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             }
             fileType = [[BDSKTemplate templateForStyle:currentExportTemplateStyle] fileExtension];
             break;
+        case BDSKRSSExportFileType:
+            fileType = @"rss";
+            break;
         case BDSKHTMLExportFileType:
             fileType = @"html";
-            break;
-        case BDSKRSSExportFileType:
-            //[sp setAccessoryView:rssExportAccessoryView];
-            // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
-            // or use templates?
-            fileType = @"rss";
             break;
         case BDSKRTFExportFileType:
             fileType = @"rtf";
@@ -814,7 +811,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         case BDSKEndNoteExportFileType:
             fileType = @"xml";
             break;
-        case BDSKATOMExportFileType:
+        case BDSKAtomExportFileType:
             fileType = @"atom";
             break;
     }
@@ -852,8 +849,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if(returnCode == NSOKButton){
         fileName = [sp filename];
         switch (exportFileType) {
-            case BDSKHTMLExportFileType:
             case BDSKRSSExportFileType:
+            case BDSKHTMLExportFileType:
             case BDSKRTFExportFileType:
             case BDSKRTFDExportFileType:
             case BDSKDocExportFileType:
@@ -893,7 +890,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             case BDSKEndNoteExportFileType:
                 fileData = [self endNoteDataForPublications:items];
                 break;
-            case BDSKATOMExportFileType:
+            case BDSKAtomExportFileType:
                 fileData = [self atomDataForPublications:items];
                 break;
             case BDSKBibTeXExportFileType:
