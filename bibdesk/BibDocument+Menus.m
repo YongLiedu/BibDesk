@@ -164,6 +164,8 @@
 			else
 				s = [NSString stringWithFormat:NSLocalizedString(@"%i RIS Records", @"%i RIS Records"), n];
 			break;
+        default:
+            return (n > 0);
 	}
 	
 	if (n == 0) {

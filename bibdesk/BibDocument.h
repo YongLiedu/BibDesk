@@ -82,7 +82,8 @@ enum {
 	BDSKLaTeXDragCopyType, 
 	BDSKLTBDragCopyType, 
 	BDSKMinimalBibTeXDragCopyType, 
-	BDSKRISDragCopyType
+	BDSKRISDragCopyType,
+    BDSKTemplateDragCopyType
 };
 
 // these should correspond to the tags of export menu items

@@ -495,6 +495,23 @@
     return [super validateToolbarItem:toolbarItem];
 }
 
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+    NSArray *styles = [BDSKTemplate allStyleNames];
+    int i = [menu numberOfItems];
+    while (i--) {
+        if ([[menu itemAtIndex:i] tag] < BDSKTemplateDragCopyType)
+            break;
+        [menu removeItemAtIndex:i];
+    }
+    
+    NSMenuItem *item;
+    int count = [styles count];
+    for (i = 0; i < count; i++) {
+        item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+        [item setTag:BDSKTemplateDragCopyType + i];
+    }
+}
+
 #pragma mark Auto generation format stuff
 
 - (NSArray *)requiredFieldsForCiteKey{

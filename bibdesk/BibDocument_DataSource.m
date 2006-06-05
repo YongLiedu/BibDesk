@@ -58,6 +58,7 @@
 #import "BibEditor.h"
 #import "BDSKSharedGroup.h"
 #import "NSGeometry_BDSKExtensions.h"
+#import "BDSKTemplate.h"
 
 @implementation BibDocument (DataSource)
 
@@ -599,8 +600,25 @@
 			string = [self RISStringForPublications:pubs];
 			break;
 		default:
-			OBASSERT_NOT_REACHED("unknown drag/copy type");
-			return NO;
+            do{
+                NSString *style = [[BDSKTemplate allStyleNames] objectAtIndex:dragCopyType - BDSKTemplateDragCopyType];
+                BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
+                BDSKTemplateFormat format = [template templateFormat];
+                if (format & BDSKTextTemplateFormat) {
+                    mainType = NSStringPboardType;
+                    string = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:pubs];
+                } else if (format & BDSKRichTextTemplateFormat) {
+                    NSDictionary *docAttributes = nil;
+                    NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:pubs documentAttributes:&docAttributes];
+                    if (format & BDSKRTFDTemplateFormat) {
+                        mainType = NSRTFDPboardType;
+                        data = [templateString RTFDFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
+                    } else {
+                        mainType = NSRTFPboardType;
+                        data = [templateString RTFFromRange:NSMakeRange(0,[templateString length]) documentAttributes:docAttributes];
+                    }
+                }
+            }while(0);
 	}
     
 	[pboard declareTypes:[NSArray arrayWithObjects:mainType, BDSKBibItemPboardType, nil] owner:self];
