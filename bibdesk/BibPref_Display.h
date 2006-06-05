@@ -43,6 +43,7 @@
     // display pref radio matrix
     IBOutlet NSMatrix* displayPrefRadioMatrix;
     IBOutlet NSComboBox *previewMaxNumberComboBox;
+    IBOutlet NSPopUpButton *previewTemplatePopup;
     
     IBOutlet NSPopUpButton *fontElementPopup;
     IBOutlet NSButton *fontButton;
@@ -57,6 +58,7 @@
 
 - (IBAction)changePreviewDisplay:(id)sender;
 - (IBAction)changePreviewMaxNumber:(id)sender;
+- (IBAction)changePreviewTemplate:(id)sender;
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification;
 
 - (IBAction)addTerm:(id)sender;

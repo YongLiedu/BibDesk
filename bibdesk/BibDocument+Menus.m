@@ -766,6 +766,8 @@
 
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     [menuItem setState:([menuItem tag] == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]) ? NSOnState : NSOffState];
+    if ([menuItem tag] == 3 && [[BDSKTemplate allStyleNamesForFileType:@"rtf"] count] == 0)
+        return NO;
     return YES;
 }
 

@@ -125,6 +125,7 @@ NSString *BDSKEditorFontNameKey = @"BDSKEditorFontNameKey";
 NSString *BDSKEditorFontSizeKey = @"BDSKEditorFontSizeKey";
 NSString *BDSKPreviewDisplayKey = @"Preview Pane Displays What?";
 NSString *BDSKPreviewMaxNumberKey = @"Maximum Number of Items in Preview Pane";
+NSString *BDSKPreviewTemplateStyleKey = @"BDSKPreviewTemplateStyleKey";
 
 NSString *BDSKPreviewPDFScaleFactorKey = @"Preview PDF Scale Factor";
 NSString *BDSKPreviewRTFScaleFactorKey = @"Preview RTF Scale Factor";

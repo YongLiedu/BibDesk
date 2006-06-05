@@ -14,6 +14,7 @@
                 changeFontElement = id; 
                 changePreviewDisplay = id; 
                 changePreviewMaxNumber = id; 
+                changePreviewTemplate = id; 
                 removeSelectedTerm = id; 
             }; 
             CLASS = "BibPref_Display"; 
@@ -25,6 +26,7 @@
                 fontButton = NSButton; 
                 fontElementPopup = NSPopUpButton; 
                 previewMaxNumberComboBox = NSComboBox; 
+                previewTemplatePopup = NSPopUpButton; 
                 removeButton = NSButton; 
                 tableView = NSTableView; 
             }; 

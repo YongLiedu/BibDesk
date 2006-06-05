@@ -92,6 +92,7 @@ extern NSString *BDSKEditorFontNameKey;
 extern NSString *BDSKEditorFontSizeKey;
 extern NSString *BDSKPreviewDisplayKey;
 extern NSString *BDSKPreviewMaxNumberKey;
+extern NSString *BDSKPreviewTemplateStyleKey;
 extern NSString *BDSKPreviewPDFScaleFactorKey;
 extern NSString *BDSKPreviewRTFScaleFactorKey;
 extern NSString *BDSKCustomCiteStringsKey;

@@ -2962,7 +2962,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSMutableAttributedString *s;
   
     int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
-    int itemCount = 0;
+    
+    if (maxItems > 0 && [items count] > maxItems)
+        items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
     
     NSTextStorage *textStorage = [previewField textStorage];
 
@@ -2983,24 +2985,23 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [textStorage beginEditing];
     [[textStorage mutableString] setString:@""];
     
-    NSEnumerator *enumerator = [items objectEnumerator];
-    
     unsigned int numberOfSelectedPubs = [items count];
+    NSEnumerator *enumerator = [items objectEnumerator];
     BibItem *pub = nil;
-
-    while((pub = [enumerator nextObject]) && (maxItems == 0 || itemCount < maxItems)){
-                
-		itemCount++;
-        NSString *fieldValue;
-
-        switch(displayType){
-            case 0:                
-                if(itemCount > 1)
-                    [[textStorage mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't display
+    NSString *fieldValue;
+    BOOL isFirst = YES;
+    
+    switch(displayType){
+        case 0:
+            while(pub = [enumerator nextObject]){
+                if (isFirst == YES) isFirst = NO;
+                else [[textStorage mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't display
                 [textStorage appendAttributedString:[pub attributedStringValue]];
-                break;
-            case 1:
-                // special handling for annote-only
+                [textStorage appendAttributedString:noAttrDoubleLineFeed];
+            }
+            break;
+        case 1:
+            while(pub = [enumerator nextObject]){
                 // Write out the title
                 if(numberOfSelectedPubs > 1){
                     s = [[NSMutableAttributedString alloc] initWithString:[pub displayTitle]
@@ -3016,9 +3017,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                            attributes:bodyAttributes];
                 [textStorage appendAttributedString:s];
                 [s release];
-                break;
-            case 2:
-                // special handling for abstract-only
+                [textStorage appendAttributedString:noAttrDoubleLineFeed];
+            }
+            break;
+        case 2:
+            while(pub = [enumerator nextObject]){
                 // Write out the title
                 if(numberOfSelectedPubs > 1){
                     s = [[NSMutableAttributedString alloc] initWithString:[pub displayTitle]
@@ -3034,11 +3037,28 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                            attributes:bodyAttributes];
                 [textStorage appendAttributedString:s];
                 [s release];
-                break;                
-        }
-        [textStorage appendAttributedString:noAttrDoubleLineFeed];
-        
+                [textStorage appendAttributedString:noAttrDoubleLineFeed];
+            }
+            break;
+        case 3:
+            do{
+                NSString *style = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey];
+                BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
+                if (template == nil)
+                    template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
+                NSAttributedString *templateString = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:NULL] autorelease];
+                OBPRECONDITION(nil != templateString);
+                
+                BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
+                
+                templateString = [BDSKTemplateParser attributedStringByParsingTemplate:templateString usingObject:documentProxy delegate:documentProxy];
+                [documentProxy release];
+                
+                [textStorage appendAttributedString:templateString];
+            }while(0);
+            break;
     }
+    
     [textStorage endEditing];
     [textStorage addLayoutManager:layoutManager];
     [layoutManager release];

@@ -37,6 +37,7 @@
  */
 
 #import "BibPref_Display.h"
+#import "BDSKTemplate.h"
 
 
 @implementation BibPref_Display
@@ -61,6 +62,8 @@
 		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"All")];
 	else 
 		[previewMaxNumberComboBox setIntValue:maxNumber];
+    
+    [previewTemplatePopup setEnabled:[defaults integerForKey:BDSKPreviewDisplayKey] == 3];
     
     int tag, tagMax = 2;
     OBPRECONDITION([authorNameMatrix numberOfColumns] == 1);
@@ -88,6 +91,21 @@
     
 }    
 
+- (void)willBecomeCurrentPreferenceClient{
+    NSString *currentStyle = [defaults stringForKey:BDSKPreviewTemplateStyleKey];
+    NSArray *styles = [BDSKTemplate allStyleNamesForFileType:@"rtf"];
+    [previewTemplatePopup removeAllItems];
+    [previewTemplatePopup addItemsWithTitles:styles];
+    if ([styles containsObject:currentStyle]) {
+        [previewTemplatePopup selectItemWithTitle:currentStyle];
+    } else if ([styles count]) {
+        [previewTemplatePopup selectItemAtIndex:0];
+        [defaults setObject:[styles objectAtIndex:0] forKey:BDSKPreviewTemplateStyleKey];
+        if ([defaults integerForKey:BDSKPreviewDisplayKey] == 3)
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+    }
+}
+
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
     [self updateUI];
 }
@@ -105,8 +123,16 @@
     if(maxNumber != [defaults integerForKey:BDSKPreviewMaxNumberKey]){
 		[defaults setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-	}
-	[self updateUI];
+	} else 
+        [self updateUI];
+}
+
+- (IBAction)changePreviewTemplate:(id)sender{
+    NSString *style = [sender title];
+    if ([style isEqualToString:[defaults stringForKey:BDSKPreviewTemplateStyleKey]] == NO) {
+        [defaults setObject:style forKey:BDSKPreviewTemplateStyleKey];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+    }
 }
 
 //

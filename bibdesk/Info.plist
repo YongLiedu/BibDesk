@@ -509,8 +509,12 @@
 					<string>Gill Sans</string>
 					<key>Font size for preview pane in document view</key>
 					<real>12.0</real>
+					<key>Preview Pane Displays What?</key>
+					<integer>1</integer>
 					<key>Maximum Number of Items in Preview Pane</key>
 					<integer>0</integer>
+					<key>BDSKPreviewTemplateStyleKey</key>
+					<string>Default RSS template</string>
 					<key>BDSKMainTableViewFontNameKey</key>
 					<string>LucidaGrande</string>
 					<key>BDSKMainTableViewFontSizeKey</key>
@@ -691,8 +695,6 @@
 					<string></string>
 					<key>Preview PDF Scale Factor</key>
 					<real>1</real>
-					<key>Preview Pane Displays What?</key>
-					<integer>1</integer>
 					<key>Preview RTF Scale Factor</key>
 					<real>1</real>
 					<key>Quick Search Keys</key>
