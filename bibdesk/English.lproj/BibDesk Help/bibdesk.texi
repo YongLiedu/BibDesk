@@ -100,7 +100,7 @@ Option-Cmd-\key\
 @node Top
 @top BibDesk 
 
-@image{gfx/bibDeskIcon}
+@image{gfx/BibDeskIcon}
 @heading About BibDesk
 
 BibDesk @value{VERSION} is a BibTeX editor and reference manager. Because it is a
@@ -1626,7 +1626,7 @@ that is used for the Local-Url.
 If any files can not be moved or renamed for some reason, an error
 dialog will show you what the problems were. 
 
-@image{gfx/consolidateLinkedFilesErrorWindow}
+@image{gfx/ConsolidateLinkedFilesErrorWindow}
 
 @cindex undo, autofile
 @cindex autofile, undo
