@@ -93,7 +93,9 @@
 
 - (void)willBecomeCurrentPreferenceClient{
     NSString *currentStyle = [defaults stringForKey:BDSKPreviewTemplateStyleKey];
-    NSArray *styles = [BDSKTemplate allStyleNamesForFileType:@"rtf"];
+    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
+    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
+    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"doc"]];
     [previewTemplatePopup removeAllItems];
     [previewTemplatePopup addItemsWithTitles:styles];
     if ([styles containsObject:currentStyle]) {
