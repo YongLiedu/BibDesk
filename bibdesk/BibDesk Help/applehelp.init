@@ -36,7 +36,7 @@ sub t2h_html32_heading($)
 	}
     if (($tag_level eq "chapter") || ($tag_level eq "section") || ($tag_level eq "subsection") || ($tag_level eq "appendix"))
     {
-        $text = "<img src=\"gfx/bibDeskIcon.png\" alt=\"BibDesk\"> " . $text;
+        $text = "<img src=\"gfx/BibDeskIcon.png\" alt=\"BibDesk\"> " . $text;
     }
     return "<h$level class=\"$tag_level\"> $text</h$level>$node\n";
 }
