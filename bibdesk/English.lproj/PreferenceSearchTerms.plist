@@ -106,6 +106,10 @@
         <string>Template</string>
         <string>Text file</string>
         <string>Export</string>
+        <string>Service</string>
+        <string>RTF</string>
+        <string>Microsoft Word</string>
+        <string>RSS</string>
     </array>
 </dict>
 </plist>
