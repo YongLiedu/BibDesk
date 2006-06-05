@@ -160,6 +160,15 @@
         
         if([value isEqualToString:object]) return;
         
+        if([value isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO){
+            NSRunAlertPanel(NSLocalizedString(@"Unbalanced Braces", @"Unbalanced Braces"),
+                            NSLocalizedString(@"Braces must be balanced within the value.", @""),
+                            NSLocalizedString(@"OK", @"OK"), nil, nil);
+            
+            [tv reloadData];
+            return;
+		}
+        
         [document setDocumentInfo:object forKey:key];
 		[[document undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"change document info action name for undo")];
     }
