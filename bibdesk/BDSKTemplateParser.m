@@ -37,6 +37,8 @@
  */
 
 #import "BDSKTemplateParser.h"
+#import "NSString_BDSKExtensions.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 #define STARTTAG_OPEN_DELIM @"<$"
 #define ENDTAG_OPEN_DELIM @"</$"
@@ -349,29 +351,6 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
     if (foundNewline == NO && foundWhitespace == YES)
         [self setScanLocation:startLoc];
     return foundNewline;
-}
-
-@end
-
-
-@implementation NSAttributedString (BDSKTemplateParser)
-
-- (id)initWithAttributedString:(NSAttributedString *)attributedString attributes:(NSDictionary *)attributes {
-    [[self init] release];
-    NSMutableAttributedString *tmpStr = [[NSMutableAttributedString alloc] initWithAttributedString:attributedString];
-    unsigned index = 0, length = [attributedString length];
-    NSRange range = NSMakeRange(0, length);
-    NSDictionary *attrs;
-    [tmpStr addAttributes:attributes range:range];
-    while (index < length) {
-        attrs = [attributedString attributesAtIndex:index effectiveRange:&range];
-        if (range.length > 0) {
-            [tmpStr addAttributes:attrs range:range];
-            index = NSMaxRange(range);
-        } else index++;
-    }
-    [tmpStr fixAttributesInRange:NSMakeRange(0, [self length])];
-    return self = tmpStr;
 }
 
 @end

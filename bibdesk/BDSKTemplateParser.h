@@ -79,8 +79,3 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 @interface NSScanner (BDSKTemplateParser)
 - (BOOL)scanEmptyLine;
 @end
-
-
-@interface NSAttributedString (BDSKTemplateParser)
-- (id)initWithAttributedString:(NSAttributedString *)attributedString attributes:(NSDictionary *)attributes;
-@end
