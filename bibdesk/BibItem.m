@@ -1494,7 +1494,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 				int rating = [[self valueOfField:BDSKRatingString inherit:NO] intValue];
 				valueStr = [[NSAttributedString alloc] initWithString:[NSString ratingStringWithInteger:rating]
 														   attributes:bodyAttributes];                
-			}else{
+			}else if([key isEqualToString:BDSKPagesString]){
+                valueStr = [[NSAttributedString alloc] initWithString:[[self valueOfField:BDSKPagesString] stringByConvertingDoubleHyphenToEndash]
+                                                           attributes:bodyAttributes];
+            }else{
                 valueStr = [[NSAttributedString alloc] initWithTeXString:[self valueOfField:key inherit:notNote]
                                                               attributes:bodyAttributes
                                                       collapseWhitespace:notNote];

@@ -126,6 +126,14 @@ enum {
 
 #pragma mark TeX cleaning
 
+/*!
+    @method     stringByConvertingDoubleHyphenToEndash
+    @abstract   Converts "--" to en dash.  See http://en.wikipedia.org/wiki/Dash for info on dashes.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)stringByConvertingDoubleHyphenToEndash;
+
     /*!
     @method     stringByRemovingCurlyBraces
      @abstract   Removes curly braces from a string

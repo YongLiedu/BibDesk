@@ -144,6 +144,15 @@ static int MAX_RATING = 5;
 
 #pragma mark TeX cleaning
 
+- (NSString *)stringByConvertingDoubleHyphenToEndash{
+    NSRange range = [self rangeOfString:@"--"];
+    if(range.length){
+        self = [NSMutableString stringWithString:self];
+        [(NSMutableString *)self replaceCharactersInRange:range withString:[NSString endashString]];
+    }
+    return self;
+}
+
 - (NSString *)stringByRemovingCurlyBraces{
     return [self stringByRemovingCharactersInOFCharacterSet:[OFCharacterSet curlyBraceCharacterSet]];
 }
