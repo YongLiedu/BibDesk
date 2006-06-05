@@ -650,23 +650,6 @@
     @result     (description)
 */
 - (NSAttributedString *)attributedStringValue;
-/*!
-    @method     attributedStringByParsingTeX:inField:defaultStyle:
-    @abstract   Parses a TeX style, e.g. \textit{some text} and returns an attributed string equivalent.
-    @discussion A hairy regular expression is used to deal with nested braces
-    @param      texStr The string to parse, including all braces
-    @param      field The name of the field, used to get the font
-    @param      defaultStyle The paragraph style to use for this field
-    @param      collapse Whether or not to collapse whitespace and remove surrounding whitespace
-    @result     (description)
-*/
-- (NSAttributedString *)attributedStringByParsingTeX:(NSString *)texStr inField:(NSString *)field defaultStyle:(NSParagraphStyle *)defaultStyle collapse:(BOOL)collapse;
-    /*!
-    @method RSSValue
-     @abstract returns an MODS XML string
-     @discussion «discussion»
-     
-     */
 
 - (NSString *)MODSString;
 - (NSString *)endNoteString;

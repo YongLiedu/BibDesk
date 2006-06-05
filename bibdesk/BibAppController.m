@@ -967,7 +967,7 @@
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForCiteService];
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
-    NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
+    NSString *fileTemplate = [template mainPageString];
     OBPRECONDITION(nil != fileTemplate);
     
     types = [pboard types];
@@ -1014,7 +1014,7 @@
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForTextService];
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
-    NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
+    NSString *fileTemplate = [template mainPageString];
     OBPRECONDITION(nil != fileTemplate);
     
     types = [pboard types];
@@ -1063,7 +1063,7 @@
     BDSKTemplate *template = [BDSKTemplate templateForRTFService];
     OBPRECONDITION(nil != template && [template templateFormat] == BDSKRTFTemplateFormat);
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    NSAttributedString *fileTemplate = [template mainPageAttributedStringWithDocumentAttributes:&docAttributes];
     OBPRECONDITION(nil != fileTemplate);
     
     types = [pboard types];

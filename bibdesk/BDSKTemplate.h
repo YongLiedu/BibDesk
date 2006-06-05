@@ -64,39 +64,52 @@ extern NSString *BDSKTemplateDefaultItemString;
 {
 }
 
+// default templates
 + (NSArray *)defaultExportTemplates;
 + (NSArray *)defaultServiceTemplates;
 
+// all templates
 + (NSArray *)exportTemplates;
 + (NSArray *)serviceTemplates;
 
+// known export style names
 + (NSArray *)allStyleNames;
 + (NSArray *)allFileTypes;
 + (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
+
+// export templates
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 
+// service templates
 + (BDSKTemplate *)templateForCiteService;
 + (BDSKTemplate *)templateForTextService;
 + (BDSKTemplate *)templateForRTFService;
 
+// top-level template accessors
+
 - (BDSKTemplateFormat)templateFormat;
 - (NSString *)fileExtension;
+
+- (NSString *)mainPageString;
+- (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;
 
 // returns the contents of a child for the given type or of the default template
 // (pass nil for the type if you explicitly desire the default template content)
 // encoding should be either Unicode, UTF-8, or defaultCStringEncoding
 - (NSString *)stringForType:(NSString *)type;
-
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
 
 - (NSURL *)mainPageTemplateURL;
 - (NSURL *)defaultItemTemplateURL;
 - (NSURL *)templateURLForType:(NSString *)pubType;
 - (NSArray *)accessoryFileURLs;
+
+// child template accessors
 - (NSURL *)representedFileURL;
 - (void)setRepresentedFileURL:(NSURL *)aURL;
 
+// other methods
 - (BOOL)addChildWithURL:(NSURL *)fileURL role:(NSString *)role;
 - (id)childForRole:(NSString *)role;
 - (NSColor *)representedColorForKey:(NSString *)key;

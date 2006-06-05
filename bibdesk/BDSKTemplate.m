@@ -293,8 +293,27 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return format;
 }
 
+- (NSString *)fileExtension;
+{
+    OBASSERT([self isLeaf] == NO);
+    return [self valueForKey:BDSKTemplateRoleString];
+}
+
+- (NSString *)mainPageString;
+{
+    OBASSERT([self isLeaf] == NO);
+    return [NSString stringWithContentsOfURL:[self mainPageTemplateURL]];
+}
+
+- (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;
+{
+    OBASSERT([self isLeaf] == NO);
+    return [[[NSAttributedString alloc] initWithURL:[self mainPageTemplateURL] documentAttributes:docAttributes] autorelease];
+}
+
 - (NSString *)stringForType:(NSString *)type;
 {
+    OBASSERT([self isLeaf] == NO);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -306,6 +325,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
 {
+    OBASSERT([self isLeaf] == NO);
     NSURL *theURL = nil;
     if(nil != type)
         theURL = [self templateURLForType:type];
@@ -315,19 +335,15 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return [[[NSAttributedString alloc] initWithURL:theURL documentAttributes:NULL] autorelease];
 }
 
-- (NSString *)fileExtension;
-{
-    OBASSERT([self isLeaf] == NO);
-    return [self valueForKey:BDSKTemplateRoleString];
-}
-
 - (NSURL *)mainPageTemplateURL;
 {
+    OBASSERT([self isLeaf] == NO);
     return [self templateURLForType:BDSKTemplateMainPageString];
 }
 
 - (NSURL *)defaultItemTemplateURL;
 {
+    OBASSERT([self isLeaf] == NO);
     return [self templateURLForType:BDSKTemplateDefaultItemString];
 }
 
@@ -372,6 +388,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
 - (id)childForRole:(NSString *)role;
 {
+    OBASSERT([self isLeaf] == NO);
     NSParameterAssert(nil != role);
     NSEnumerator *nodeE = [[self children] objectEnumerator];
     id aNode = nil;

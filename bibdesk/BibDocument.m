@@ -1213,7 +1213,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
-    NSString *fileTemplate = [NSString stringWithContentsOfURL:[template mainPageTemplateURL]];
+    NSString *fileTemplate = [template mainPageString];
     OBPRECONDITION(nil != fileTemplate);
     
     BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
@@ -1231,7 +1231,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BDSKTemplateFormat format = [template templateFormat];
     OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    NSAttributedString *fileTemplate = [template mainPageAttributedStringWithDocumentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
     OBPRECONDITION(nil != fileTemplate);
@@ -1262,7 +1262,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     OBPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:&docAttributes] autorelease];
+    NSAttributedString *fileTemplate = [template mainPageAttributedStringWithDocumentAttributes:&docAttributes];
     OBPRECONDITION(nil != fileTemplate);
     
     BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
@@ -3046,7 +3046,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
                 if (template == nil)
                     template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
-                NSAttributedString *templateString = [[[NSAttributedString alloc] initWithURL:[template mainPageTemplateURL] documentAttributes:NULL] autorelease];
+                NSAttributedString *templateString = [template mainPageAttributedStringWithDocumentAttributes:NULL];
                 OBPRECONDITION(nil != templateString);
                 
                 BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
