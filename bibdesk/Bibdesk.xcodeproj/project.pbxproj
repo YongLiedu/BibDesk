@@ -235,6 +235,8 @@
 		CE392ED508D034E4001CEAC8 /* BDSKRatingButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */; };
 		CE392F5D08D04083001CEAC8 /* BDSKRatingButton.h in Headers */ = {isa = PBXBuildFile; fileRef = CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */; };
 		CE392F5E08D04083001CEAC8 /* BDSKRatingButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */; };
+		CE3A32D60A345C2400984DC2 /* NSAttributedString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */; };
+		CE3A32D70A345C2600984DC2 /* NSAttributedString_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */; };
 		CE3B5E7C09CEDE470017D339 /* BDSKMacroResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */; };
 		CE3B5E7D09CEDE470017D339 /* BDSKMacroResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */; };
 		CE3B682A09D1B0190017D339 /* BDSKImagePopUpButton.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */; };
@@ -1002,7 +1004,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1094,6 +1096,8 @@
 		CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFieldEditor.m; sourceTree = "<group>"; };
 		CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKJSTORParser.h; sourceTree = "<group>"; };
 		CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKJSTORParser.m; sourceTree = "<group>"; };
+		CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAttributedString_BDSKExtensions.h; sourceTree = "<group>"; };
+		CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAttributedString_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Font.tiff; path = Images/Font.tiff; sourceTree = "<group>"; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
 		CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptHook.m; sourceTree = "<group>"; };
@@ -1793,6 +1797,7 @@
 			children = (
 				F9025F2F0969D66F008A551C /* CFString_BDSKExtensions.m */,
 				F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */,
+				CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */,
 				F9025DC80969AD2C008A551C /* NSCharacterSet_BDSKExtensions.m */,
 				F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */,
 				F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */,
@@ -2192,6 +2197,7 @@
 				F9A6772B07D2D57F00782ACD /* MultiplePageView.h */,
 				CE67E3D6092B6DF700410758 /* NSAlert_BDSKExtensions.h */,
 				F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */,
+				CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */,
 				F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */,
 				CE28346109176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h */,
 				F9025DC70969AD2C008A551C /* NSCharacterSet_BDSKExtensions.h */,
@@ -2520,6 +2526,7 @@
 				F98DB3170A23C7730040D347 /* BDSKTemplate.h in Headers */,
 				CE56D67C0A2DAB66003CE000 /* BDSKDocumentController.h in Headers */,
 				CE2391610A334890009F3A5B /* BDSKDocumentInfoWindowController.h in Headers */,
+				CE3A32D70A345C2600984DC2 /* NSAttributedString_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3323,6 +3330,7 @@
 				F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */,
 				CE56D6510A2DAB55003CE000 /* BDSKDocumentController.m in Sources */,
 				CE2391620A334890009F3A5B /* BDSKDocumentInfoWindowController.m in Sources */,
+				CE3A32D60A345C2400984DC2 /* NSAttributedString_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
