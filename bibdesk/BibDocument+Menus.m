@@ -305,8 +305,10 @@
     // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
 	if([selIndexes firstIndex] == 0) {
         return [self validateDeleteSelectionMenuItem:menuItem];
-    } else if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO) {
-        m = [self numberOfCategoryGroupsAtIndexes:selIndexes];
+    } else {
+        m = [self numberOfStaticGroupsAtIndexes:selIndexes];
+        if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
+            m += [self numberOfCategoryGroupsAtIndexes:selIndexes];
     }
 	
 	if (n == 0 || m == 0) {
