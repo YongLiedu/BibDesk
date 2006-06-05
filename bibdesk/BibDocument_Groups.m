@@ -1121,6 +1121,8 @@ The groupedPublications array is a subset of the publications array, developed b
             [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Remove from group")];
             count = [pubs count];
             continue;
+        } else if ([group isCategory] && [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[(BDSKCategoryGroup *)group key]]) {
+            continue;
         }
 		
 		NSEnumerator *pubEnum = [pubs objectEnumerator];
