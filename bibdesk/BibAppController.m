@@ -967,8 +967,6 @@
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForCiteService];
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
-    NSString *fileTemplate = [template mainPageString];
-    OBPRECONDITION(nil != fileTemplate);
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
@@ -994,9 +992,7 @@
     items = [self itemsMatchingSearchConstraints:searchConstraints];
     
     if([items count] > 0){
-        BDSKTemplateObjectProxy *objectProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:[items allObjects] template:template];
-        fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:objectProxy delegate:objectProxy];
-        [objectProxy release];
+        NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:[items allObjects]];
         
         types = [NSArray arrayWithObject:NSStringPboardType];
         [pboard declareTypes:types owner:nil];
@@ -1014,8 +1010,6 @@
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForTextService];
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
-    NSString *fileTemplate = [template mainPageString];
-    OBPRECONDITION(nil != fileTemplate);
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
@@ -1041,9 +1035,7 @@
     items = [self itemsMatchingSearchConstraints:searchConstraints];
     
     if([items count] > 0){
-        BDSKTemplateObjectProxy *objectProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:[items allObjects] template:template];
-        fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:objectProxy delegate:objectProxy];
-        [objectProxy release];
+        NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:[items allObjects]];
         
         types = [NSArray arrayWithObject:NSStringPboardType];
         [pboard declareTypes:types owner:nil];
@@ -1057,14 +1049,10 @@
                                      userData:(NSString *)userData
                                         error:(NSString **)error{
     NSString *pboardString;
-    NSData *pboardData;
     NSArray *types;
     NSSet *items;
     BDSKTemplate *template = [BDSKTemplate templateForRTFService];
     OBPRECONDITION(nil != template && [template templateFormat] == BDSKRTFTemplateFormat);
-    NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [template mainPageAttributedStringWithDocumentAttributes:&docAttributes];
-    OBPRECONDITION(nil != fileTemplate);
     
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
@@ -1090,10 +1078,9 @@
     items = [self itemsMatchingSearchConstraints:searchConstraints];
     
     if([items count] > 0){
-        BDSKTemplateObjectProxy *objectProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:[items allObjects] template:template];
-        fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:objectProxy delegate:objectProxy];
-        pboardData = [fileTemplate RTFFromRange:NSMakeRange(0, [fileTemplate length]) documentAttributes:docAttributes];
-        [objectProxy release];
+        NSDictionary *docAttributes = nil;
+        NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:[items allObjects] documentAttributes:&docAttributes];
+        NSData *pboardData = [fileTemplate RTFFromRange:NSMakeRange(0, [fileTemplate length]) documentAttributes:docAttributes];
         
         types = [NSArray arrayWithObject:NSRTFPboardType];
         [pboard declareTypes:types owner:nil];

@@ -880,6 +880,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     int currentIndex;
 }
 
++ (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items;
++ (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items documentAttributes:(NSDictionary **)docAttributes;
+
 - (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate;
 
 - (NSArray *)publications;

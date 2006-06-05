@@ -1213,13 +1213,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
-    NSString *fileTemplate = [template mainPageString];
-    OBPRECONDITION(nil != fileTemplate);
     
-    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
-    
-    fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:documentProxy delegate:documentProxy];
-    [documentProxy release];
+    NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
     
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
 }
@@ -1231,20 +1226,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BDSKTemplateFormat format = [template templateFormat];
     OBPRECONDITION(format & (BDSKRTFTemplateFormat | BDSKDocTemplateFormat | BDSKRichHTMLTemplateFormat));
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [template mainPageAttributedStringWithDocumentAttributes:&docAttributes];
+    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
-    OBPRECONDITION(nil != fileTemplate);
-
     // create some useful metadata, with an option to disable for the paranoid
     if((floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3) && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExportAttributesKey"]){
         [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"") stringByAppendingString:[[self fileName] lastPathComponent]], NSTitleDocumentAttribute, nil]];
     }
-    
-    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
-    
-    fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:documentProxy delegate:documentProxy];
-    [documentProxy release];
     
     if (format & BDSKRTFTemplateFormat) {
         return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
@@ -1262,13 +1250,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     OBPRECONDITION(nil != template && [template templateFormat] & BDSKRTFDTemplateFormat);
     NSDictionary *docAttributes = nil;
-    NSAttributedString *fileTemplate = [template mainPageAttributedStringWithDocumentAttributes:&docAttributes];
-    OBPRECONDITION(nil != fileTemplate);
-    
-    BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
-    
-    fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:documentProxy delegate:documentProxy];
-    [documentProxy release];
+    NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
     
     return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
 }
@@ -3046,14 +3028,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
                 if (template == nil)
                     template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
-                NSAttributedString *templateString = [template mainPageAttributedStringWithDocumentAttributes:NULL];
-                OBPRECONDITION(nil != templateString);
-                
-                BDSKTemplateObjectProxy *documentProxy = [[BDSKTemplateObjectProxy alloc] initWithObject:self publications:items template:template];
-                
-                templateString = [BDSKTemplateParser attributedStringByParsingTemplate:templateString usingObject:documentProxy delegate:documentProxy];
-                [documentProxy release];
-                
+                NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
                 [textStorage appendAttributedString:templateString];
             }while(0);
             break;
@@ -3907,6 +3882,22 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 
 @implementation BDSKTemplateObjectProxy
+
++ (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items {
+    NSString *string = [template mainPageString];
+    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
+    string = [BDSKTemplateParser stringByParsingTemplate:string usingObject:objectProxy delegate:objectProxy];
+    [objectProxy release];
+    return string;
+}
+
++ (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items documentAttributes:(NSDictionary **)docAttributes {
+    NSAttributedString *string = [template mainPageAttributedStringWithDocumentAttributes:docAttributes];
+    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
+    string = [BDSKTemplateParser attributedStringByParsingTemplate:string usingObject:objectProxy delegate:objectProxy];
+    [objectProxy release];
+    return string;
+}
 
 - (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate {
     if (self = [super init]) {
