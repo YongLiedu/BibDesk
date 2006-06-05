@@ -53,6 +53,7 @@
 #import "NSMutableDictionary+ThreadSafety.h"
 #import "BibAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSAttributedString_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
@@ -1428,6 +1429,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSMutableAttributedString* reqStr = [[NSMutableAttributedString alloc] init];
     NSMutableAttributedString* nonReqStr = [[NSMutableAttributedString alloc] init];
 	NSAttributedString *valueStr;
+	NSAttributedString *keyStr;
 
 	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
 
@@ -1436,14 +1438,21 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         dateFormatter = [[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString]
 															 allowNaturalLanguage:NO];
     
-    [reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[self citeKey]]
-                                                                    attributes:typeAttributes] autorelease]];
+    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[self citeKey]]
+                                               attributes:typeAttributes];
+    [reqStr appendAttributedString:valueStr];
+    [valueStr release];
 
-    [reqStr appendAttributedString:[self attributedStringByParsingTeX:[self title] inField:@"Title" defaultStyle:keyParagraphStyle collapse:YES]];
-    
+    valueStr = [[NSAttributedString alloc] initWithTeXString:[self title]
+                                                  attributes:titleAttributes
+                                          collapseWhitespace:YES];
+    [reqStr appendAttributedString:valueStr];
+    [valueStr release];
 
-    [reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" (%@)\n",[self type]] 
-																	attributes:typeAttributes] autorelease]];
+    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" (%@)\n",[self type]]
+                                               attributes:typeAttributes];
+    [reqStr appendAttributedString:valueStr];
+    [valueStr release];
 
     NSCalendarDate *date = nil;
     NSString *stringValue = nil;
@@ -1486,29 +1495,33 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 				valueStr = [[NSAttributedString alloc] initWithString:[NSString ratingStringWithInteger:rating]
 														   attributes:bodyAttributes];                
 			}else{
-				valueStr = [[self attributedStringByParsingTeX:[self valueOfField:key inherit:notNote] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:notNote] retain];
+                valueStr = [[NSAttributedString alloc] initWithTeXString:[self valueOfField:key inherit:notNote]
+                                                              attributes:bodyAttributes
+                                                      collapseWhitespace:notNote];
 			}
 			
+                       
             // the valueStr will be an empty NSConcreteAttributedString if created with a nil argument, so we check for nil before creating it
 			if(valueStr){
-				if([reqKeys containsObject:key]){
+                keyStr = [[NSAttributedString alloc] initWithString:key attributes:keyAttributes];
+				
+                if([reqKeys containsObject:key]){
 					
-					[reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:key
-																					attributes:keyAttributes] autorelease]];
+					[reqStr appendAttributedString:keyStr];
 					[reqStr appendString:@"\n"];
 					[reqStr appendAttributedString:valueStr];
 					[reqStr appendString:@"\n"];
 					
 				}else{
 					
-					[nonReqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:key
-																					   attributes:keyAttributes] autorelease]];
+					[nonReqStr appendAttributedString:keyStr];
 					[nonReqStr appendString:@"\n"];
 					[nonReqStr appendAttributedString:valueStr];
 					[nonReqStr appendString:@"\n"];
 					
-					
 				}
+                
+				[keyStr release];
 				[valueStr release];
 			}
         }
