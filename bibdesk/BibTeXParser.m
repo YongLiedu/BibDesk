@@ -63,7 +63,11 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
 // becomes an autoreleased array of dicts of different types.
-static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *filePath, BibDocument * theDocument, NSStringEncoding parserEncoding);
+static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding);
+
+static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSStringEncoding encoding);
+static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
+static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, BibDocument *document, NSStringEncoding encoding);
 
 @end
 
@@ -147,114 +151,19 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                 entryType = [tmpStr lowercaseString];
                 [tmpStr release];
                 
-                if (bt_entry_metatype (entry) != BTE_REGULAR){
+                if ((bt_entry_metatype (entry) != BTE_REGULAR) && nil != frontMatter){
                     // put preambles etc. into the frontmatter string so we carry them along.
+                    if ([entryType isEqualToString:@"preamble"]){
+                        appendPreambleToFrontmatter(entry, frontMatter, parserEncoding);
+                    }else if([entryType isEqualToString:@"string"]){
+                        addMacroToResolver(entry, macroResolver, filePath, parserEncoding, &error);
+                    }else if([entryType isEqualToString:@"comment"]){
+                        appendCommentToFrontmatterOrAddGroups(entry, frontMatter, aDocument, parserEncoding);
+                    }
                     
-                    if (frontMatter) {
-                        if ([entryType isEqualToString:@"preamble"]){
-                            [frontMatter appendString:@"\n@preamble{\""];
-                            field = NULL;
-                            bt_nodetype type = BTAST_STRING;
-                            BOOL paste = NO;
-                            // bt_get_text() just gives us \\ne for the field, so we'll manually traverse it and poke around in the AST to get what we want.  This is sort of nasty, so if someone finds a better way, go for it.
-                            while(field = bt_next_value(entry, field, &type, NULL)){
-                                char *text = field->text;
-                                if(text){
-                                    if(paste) [frontMatter appendString:@"\" #\n   \""];
-                                    tmpStr = [[NSString alloc] initWithCString:text usingEncoding:parserEncoding];
-                                    if(tmpStr) 
-                                        [frontMatter appendString:tmpStr];
-                                    else
-                                        NSLog(@"Possible encoding error: unable to create NSString from %s", text);
-                                    [tmpStr release];
-                                    paste = YES;
-                                }
-                            }
-                            [frontMatter appendString:@"\"}"];
-                        }else if([entryType isEqualToString:@"string"]){
-                            // get the field name, there can be several macros in a single entry
-                            field = NULL;
-                            while (field = bt_next_field (entry, field, &fieldname)){
-                                NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
-                                NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
-                                if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
-                                    NSString *type = NSLocalizedString(@"Error", @"");
-                                    NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
-
-                                    BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
-                                    [errorObject setValue:filePath forKey:@"fileName"];
-                                    [errorObject setValue:[NSNumber numberWithInt:field->line] forKey:@"lineNumber"];
-                                    [errorObject setValue:type forKey:@"errorClassName"];
-                                    [errorObject setValue:message forKey:@"errorMessage"];
-                                    
-                                    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                                                        object:errorObject];
-                                    [errorObject release];
-                                    // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
-                                    [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
-                                    
-                                    OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
-                                }else{
-                                    [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
-                                }
-                            } // end while field - process next macro
-                        }else if([entryType isEqualToString:@"comment"]){
-                            NSMutableString *commentStr = [[NSMutableString alloc] init];
-                            field = NULL;
-                            char *text = NULL;
-                            
-                            // this is our identifier string for a smart group
-                            const char *smartGroupStr = "BibDesk Smart Groups";
-                            size_t smartGroupStrLength = strlen(smartGroupStr);
-                            Boolean isSmartGroup = FALSE;
-                            const char *staticGroupStr = "BibDesk Static Groups";
-                            size_t staticGroupStrLength = strlen(staticGroupStr);
-                            Boolean isStaticGroup = FALSE;
-                            
-                            while(field = bt_next_value(entry, field, NULL, &text)){
-                                if(text){
-                                    if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
-                                        isSmartGroup = TRUE;
-                                    else if(strlen(text) >= staticGroupStrLength && strncmp(text, staticGroupStr, staticGroupStrLength) == 0)
-                                        isStaticGroup = TRUE;
-                                    
-                                    // encoding will be UTF-8 for the plist, so make sure we use it for each line
-                                    tmpStr = [[NSString alloc] initWithCString:text usingEncoding:((isSmartGroup || isStaticGroup)? NSUTF8StringEncoding : parserEncoding)];
-                                    
-                                    if(tmpStr) 
-                                        [commentStr appendString:tmpStr];
-                                    else
-                                        NSLog(@"Possible encoding error: unable to create NSString from %s", text);
-                                    [tmpStr release];
-                                }
-                            }
-                            if(isSmartGroup == TRUE || isStaticGroup == TRUE){
-                                if(aDocument){
-                                    NSRange range = [commentStr rangeOfString:@"{"];
-                                    if(range.location != NSNotFound){
-                                        [commentStr deleteCharactersInRange:NSMakeRange(0,NSMaxRange(range))];
-                                        range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
-                                        if(range.location != NSNotFound){
-                                            [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
-                                            if (isSmartGroup == TRUE)
-                                                [(BibDocument *)aDocument setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                                            else
-                                                [(BibDocument *)aDocument setStaticGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                                        }
-                                    }
-                                }
-                            }else{
-                                [frontMatter appendString:@"\n@comment{"];
-                                [frontMatter appendString:commentStr];
-                                [frontMatter appendString:@"}"];
-                            }
-                            [commentStr release];
-                        }
-                    } // end if frontMatter
                 }else{
                     // regular field
                     field = NULL;
-                    // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
                         //Get fieldname as a capitalized NSString
@@ -262,6 +171,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                         sFieldName = [tmpStr capitalizedString];
                         [tmpStr release];
                         
+                        // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
                         if([[BibTypeManager sharedManager] isNoteField:sFieldName]){
                             if(field->down){
                                 cidx = field->down->offset;
@@ -294,7 +204,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                                 OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
                             }
                         }else{
-                            complexString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
+                            complexString = stringFromBTField(field, filePath, macroResolver, parserEncoding); // handles TeXification
                         }
                         
                         // add the expanded values to the autocomplete dictionary
@@ -383,7 +293,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
             field = NULL;
             while(field = bt_next_field (entry, field, &fieldName)){
                 macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
-                macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
+                macroString = stringFromBTField(field, @"Paste/Drag", [aDocument macroResolver], NSUTF8StringEncoding); // handles TeXification
                 [retDict setObject:macroString forKey:macroKey];
             }
         }
@@ -417,7 +327,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	entry = bt_parse_entry_s((char *)[entryString UTF8String], NULL, 1, options, &ok);
 	if(ok){
 		field = bt_next_field(entry, NULL, &fieldname);
-		valueString = stringFromBTField(field, nil, nil, aDocument, NSUTF8StringEncoding);
+		valueString = stringFromBTField(field, nil, [aDocument macroResolver], NSUTF8StringEncoding);
 	}else{
         OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
 	}
@@ -718,7 +628,7 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
     return sDeTexified;
 }
 
-static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, BibDocument * document, NSStringEncoding parserEncoding){
+static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){
     NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:5];
     NSString *s = nil;
     BDSKStringNode *sNode = nil;
@@ -771,8 +681,121 @@ static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *fi
 	} // while simple_value
 	
     // This will return a single string-type node as a non-complex string.
-    NSString *returnValue = [NSString stringWithNodes:stringValueArray macroResolver:[document macroResolver]];
+    NSString *returnValue = [NSString stringWithNodes:stringValueArray macroResolver:macroResolver];
     [stringValueArray release];
     
     return returnValue;
+}
+
+static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSStringEncoding encoding)
+{
+    
+    [frontMatter appendString:@"\n@preamble{\""];
+    AST *field = NULL;
+    bt_nodetype type = BTAST_STRING;
+    BOOL paste = NO;
+    NSString *tmpStr = nil;
+    
+    // bt_get_text() just gives us \\ne for the field, so we'll manually traverse it and poke around in the AST to get what we want.  This is sort of nasty, so if someone finds a better way, go for it.
+    while(field = bt_next_value(entry, field, &type, NULL)){
+        char *text = field->text;
+        if(text){
+            if(paste) [frontMatter appendString:@"\" #\n   \""];
+            tmpStr = [[NSString alloc] initWithCString:text usingEncoding:encoding];
+            if(tmpStr) 
+                [frontMatter appendString:tmpStr];
+            else
+                NSLog(@"Possible encoding error: unable to create NSString from %s", text);
+            [tmpStr release];
+            paste = YES;
+        }
+    }
+    [frontMatter appendString:@"\"}"];
+}
+
+static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error)
+{
+    // get the field name, there can be several macros in a single entry
+    AST *field = NULL;
+    char *fieldname = NULL;
+    
+    while (field = bt_next_field (entry, field, &fieldname)){
+        NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:encoding];
+        NSString *macroString = stringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
+        if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
+            NSString *type = NSLocalizedString(@"Error", @"");
+            NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
+            
+            BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
+            [errorObject setValue:filePath forKey:@"fileName"];
+            [errorObject setValue:[NSNumber numberWithInt:field->line] forKey:@"lineNumber"];
+            [errorObject setValue:type forKey:@"errorClassName"];
+            [errorObject setValue:message forKey:@"errorMessage"];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
+                                                                object:errorObject];
+            [errorObject release];
+            // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
+            [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
+            
+            OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
+        }else{
+            [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
+        }
+    } // end while field - process next macro    
+}
+
+static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, BibDocument *document, NSStringEncoding encoding)
+{
+    NSMutableString *commentStr = [[NSMutableString alloc] init];
+    AST *field = NULL;
+    char *text = NULL;
+    NSString *tmpStr = nil;
+    
+    // this is our identifier string for a smart group
+    const char *smartGroupStr = "BibDesk Smart Groups";
+    size_t smartGroupStrLength = strlen(smartGroupStr);
+    Boolean isSmartGroup = FALSE;
+    const char *staticGroupStr = "BibDesk Static Groups";
+    size_t staticGroupStrLength = strlen(staticGroupStr);
+    Boolean isStaticGroup = FALSE;
+    
+    while(field = bt_next_value(entry, field, NULL, &text)){
+        if(text){
+            if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
+                isSmartGroup = TRUE;
+            else if(strlen(text) >= staticGroupStrLength && strncmp(text, staticGroupStr, staticGroupStrLength) == 0)
+                isStaticGroup = TRUE;
+            
+            // encoding will be UTF-8 for the plist, so make sure we use it for each line
+            tmpStr = [[NSString alloc] initWithCString:text usingEncoding:((isSmartGroup || isStaticGroup)? NSUTF8StringEncoding : encoding)];
+            
+            if(tmpStr) 
+                [commentStr appendString:tmpStr];
+            else
+                NSLog(@"Possible encoding error: unable to create NSString from %s", text);
+            [tmpStr release];
+        }
+    }
+    if(isSmartGroup == TRUE || isStaticGroup == TRUE){
+        if(document){
+            NSRange range = [commentStr rangeOfString:@"{"];
+            if(range.location != NSNotFound){
+                [commentStr deleteCharactersInRange:NSMakeRange(0,NSMaxRange(range))];
+                range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
+                if(range.location != NSNotFound){
+                    [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
+                    if (isSmartGroup == TRUE)
+                        [document setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                    else
+                        [document setStaticGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                }
+            }
+        }
+    }else{
+        [frontMatter appendString:@"\n@comment{"];
+        [frontMatter appendString:commentStr];
+        [frontMatter appendString:@"}"];
+    }
+    [commentStr release];    
 }
