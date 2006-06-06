@@ -66,8 +66,8 @@ static BDSKPreviewer *thePreviewer;
 
 - (id)init{
     if(thePreviewer){
-        [self release];
-        return thePreviewer;
+        [[self init] release];
+        return self = thePreviewer;
     }
 	
     if(self = [super init]){

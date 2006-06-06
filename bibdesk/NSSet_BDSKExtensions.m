@@ -95,9 +95,7 @@
 
 - (id)initCaseInsensitiveWithCapacity:(unsigned)numItems
 {
-	// I think this works correctly
-	if ([self class] != [NSClassFromString(@"NSPlaceholderMutableSet") class])
-		[self release];
+	[[self init] release];
 	// ignore capacity, as it will fix the number of items we can use
 	self = (NSMutableSet *)CFSetCreateMutable(kCFAllocatorDefault, 0, &BDSKCaseInsensitiveStringSetCallBacks);
 	return self;

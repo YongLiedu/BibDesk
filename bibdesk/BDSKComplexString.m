@@ -128,8 +128,8 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
 }
 
 - (id)init{
-    [self release];
-	return [@"" retain];
+    [[self init] release];
+	return self = [@"" retain];
 }
 
 /* designated initializer */
@@ -156,7 +156,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     if (self = [super init]) {
 		if (aValue == nil) {
 			[self release];
-			return nil;
+			return self = nil;
 		}
         
         nodes = [[aValue nodes] retain];
@@ -454,17 +454,12 @@ Rather than relying on the same call sequence to be used, I think we should igno
 @implementation NSString (ComplexStringExtensions)
 
 - (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
-    // needed for correct zoning
-	NSZone *theZone = [self zone];
-	// we don't need ourselves, as we return a concrete subclass
-	[self release];
-	
 	btstring = [btstring stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
     if([btstring length] == 0){
         // if the string was whitespace only, it becomes empty.
         // empty strings are a special case, they are not complex.
-        return [[NSString allocWithZone:theZone] initWithString:@""];
+        return self = [@"" retain];
     }
     
 	NSMutableArray *returnNodes = [[NSMutableArray alloc] initWithCapacity:5];
@@ -593,11 +588,11 @@ Rather than relying on the same call sequence to be used, I think we should igno
         }
     }
     
-    id retVal = [[BDSKComplexString allocWithZone:theZone] initWithArray:returnNodes macroResolver:theMacroResolver];
+    self = [[BDSKComplexString allocWithZone:[self zone]] initWithArray:returnNodes macroResolver:theMacroResolver];
     [sc release];
     [returnNodes release];
     
-    return retVal;
+    return self;
 }
 
 + (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
@@ -605,12 +600,10 @@ Rather than relying on the same call sequence to be used, I think we should igno
 }
 
 + (id)complexStringWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
-    [self release]; // we could check to see if([self isKindOfClass:[BDSKComplexString class]]) and then use [self initWith..], but it's easier just to release self (self will usually be NSPlaceholderString anyway) and return the desired object
     return [[[BDSKComplexString alloc] initWithArray:nodesArray macroResolver:theMacroResolver] autorelease];
 }
 
 + (id)stringWithInheritedValue:(NSString *)aValue{
-    [self release];
     return [[[BDSKComplexString alloc] initWithInheritedValue:aValue] autorelease];
 }
 

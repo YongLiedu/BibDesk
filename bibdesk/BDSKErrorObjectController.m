@@ -58,8 +58,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (id)init;
 {
     if(sharedErrorObjectController){
-        [self release];
-        return sharedErrorObjectController;
+        [[self init] release];
+        return self = sharedErrorObjectController;
     }
     
     [NSBundle loadNibNamed:[self windowNibName] owner:self];

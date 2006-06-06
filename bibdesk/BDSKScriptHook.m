@@ -55,17 +55,18 @@ static unsigned long scriptHookID = 0;
 }
 
 - (id)initWithName:(NSString *)aName script:(NSAppleScript *)aScript {
-	if (aScript == nil || aName == nil) {
-		[self release];
-		return (self = nil);
-	}
 	if (self = [super init]) {
-		uniqueID = [[NSNumber alloc] initWithInt:++scriptHookID];
-		name = [aName retain];
-		script = [aScript retain];
-		field = nil;
-		oldValues = nil;
-		newValues = nil;
+        if (aScript == nil || aName == nil) {
+            [self release];
+            self = nil;
+        } else {
+            uniqueID = [[NSNumber alloc] initWithInt:++scriptHookID];
+            name = [aName retain];
+            script = [aScript retain];
+            field = nil;
+            oldValues = nil;
+            newValues = nil;
+        }
 	}
 	return self;
 }

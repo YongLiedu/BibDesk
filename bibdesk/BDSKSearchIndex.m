@@ -72,7 +72,7 @@ void *setupThreading(void *anObject);
 - (id)initWithDocument:(id)aDocument
 {
     if(![super init])
-        return nil;
+        return self = nil;
 
     OBASSERT([NSThread inMainThread]);
    
@@ -99,7 +99,7 @@ void *setupThreading(void *anObject);
 
     if(err != noErr){
         [self release];
-        return nil;
+        return self = nil;
     }
     
     return self;
