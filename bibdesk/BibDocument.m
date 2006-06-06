@@ -1478,7 +1478,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	}else{
 		BOOL canRemove = NO;
         if ([self hasStaticGroupsSelected])
-            canRemove == YES;
+            canRemove = YES;
         else if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
             canRemove = [self hasCategoryGroupsSelected];
 		if(canRemove == NO){
