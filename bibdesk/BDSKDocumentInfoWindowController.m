@@ -38,6 +38,7 @@
 
 #import "BDSKDocumentInfoWindowController.h"
 #import "BibDocument.h"
+#import "NSMutableDictionary+ThreadSafety.h"
 
 
 @implementation BDSKDocumentInfoWindowController
