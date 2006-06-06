@@ -47,143 +47,177 @@
     return self;
 }
 
+// designated initializer
 - (id)initWithDocument:(BibDocument *)aDocument {
     if (self = [super initWithWindowNibName:@"DocumentInfoWindow"]) {
         document = aDocument;
+        info = nil;
         keys = nil;
+        ignoreEdit = NO;
     }
     return self;
 }
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [info release];
     [keys release];
     [super dealloc];
 }
 
-- (void)awakeFromNib{
-    [self refreshKeys];
-}
-
-- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
-    return [document undoManager];
-}
+#pragma mark Resetting
 
 - (void)refreshKeys{
-    [keys release];
-    keys = nil;
+    if (keys == nil)
+        keys = [[NSMutableArray alloc] init];
+    [keys setArray:[info allKeys]];
+    [keys sortUsingSelector:@selector(compare:)];
 }
 
-- (NSArray *)keys{
-    if (keys == nil) {
-        keys = [[NSMutableArray alloc] initWithArray:[[document documentInfo] allKeys]];
-        [keys sortUsingSelector:@selector(compare:)];
-    }
-    return keys;
+- (void)resetInfo{
+    if (info == nil)
+        info = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+    [info setDictionary:[document documentInfo]];
+    [self refreshKeys];
 }
+
+- (void)updateButtons{
+	[removeButton setEnabled:[tableView numberOfSelectedRows] > 0];
+}
+
+- (void)awakeFromNib{
+    [self resetInfo];
+    [self updateButtons];
+}
+
+- (void)finalizeChangesIgnoringEdit:(BOOL)flag {
+	ignoreEdit = flag;
+	if ([[self window] makeFirstResponder:nil] == NO)
+        [[self window] endEditingFor:nil];
+	ignoreEdit = NO;
+}
+
+- (void)windowWillClose:(NSNotification *)notification{
+    [self finalizeChangesIgnoringEdit:YES];
+}
+
+#pragma mark Showing the window
 
 - (void)beginSheetModalForWindow:(NSWindow *)modalWindow{
-    [NSApp beginSheet:[self window] modalForWindow:modalWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
-    
-    [self refreshKeys];
+    [self resetInfo];
     [tableView reloadData];
+    
+    [NSApp beginSheet:[self window] modalForWindow:modalWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
+- (IBAction)showWindow:(id)sender{
+    [self resetInfo];
+    [tableView reloadData];
+    
+    [super showWindow:sender];
+}
+
+#pragma mark Button actions
+
 - (IBAction)done:(id)sender{
-	if(![[self window] makeFirstResponder:[self window]])
-        [[self window] endEditingFor:nil];
+    [self finalizeChangesIgnoringEdit:[sender tag] == NSCancelButton]; // commit edit before reloading
     
-    [self refreshKeys];
+    if ([sender tag] == NSOKButton) {
+        if ([tableView editedRow] != -1) {
+            NSBeep();
+            return;
+        }
+        [document setDocumentInfo:info];
+		[[document undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"change document info action name for undo")];
+    }
     
-    [[self window] orderOut:sender];
-    [NSApp endSheet:[self window] returnCode:[sender tag]];
+    if ([[self window] isSheet]) {
+		[[self window] orderOut:sender];
+		[NSApp endSheet:[self window] returnCode:[sender tag]];
+	} else {
+		[[self window] performClose:sender];
+	}
 }
 
 - (IBAction)addKey:(id)sender{
     // find a unique new key
-    [self keys]; // make sure the keys are loaded
     int i = 0;
-    NSString *newKey = [NSString stringWithString:@"key"];
-    while([keys containsObject:newKey] != nil){
-        newKey = [NSString stringWithFormat:@"key", ++i];
-    }
+    NSString *newKey = @"key";
+    while([info objectForKey:newKey] != nil)
+        newKey = [NSString stringWithFormat:@"key%i", ++i];
     
-    [document setDocumentInfo:@"" forKey:newKey];
+    [info setObject:@"" forKey:newKey];
     [self refreshKeys];
     [tableView reloadData];
-    [[document undoManager] setActionName:NSLocalizedString(@"Add Document Info Key", @"add document info key action name for undo")];
-
-    int row = [[self keys] indexOfObject:newKey];
+    
+    int row = [keys indexOfObject:newKey];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)removeSelectedKeys:(id)sender{
-	NSIndexSet *rowIndexes = [tableView selectedRowIndexes];
-	int row = [rowIndexes firstIndex];
-
-    // used because we modify the keys array during the loop
-    NSArray *shadowOfKeys = [[[self keys] copy] autorelease];
-    
     // in case we're editing the selected field we need to end editing.
     // we don't give it a chance to modify state.
     [[self window] endEditingFor:[tableView selectedCell]];
 
-    while(row != NSNotFound){
-        [document setDocumentInfo:nil forKey:[shadowOfKeys objectAtIndex:row]];
-		row = [rowIndexes indexGreaterThanIndex:row];
-    }
+    [info removeObjectsForKeys:[keys objectsAtIndexes:[tableView selectedRowIndexes]]];
     [self refreshKeys];
     [tableView reloadData];
-    [[document undoManager] setActionName:NSLocalizedString(@"Remove Document Info", @"remove document info action name for undo")];
 }
 
 #pragma mark TableView DataSource methods
 
 - (int)numberOfRowsInTableView:(NSTableView *)tv{
-    return [[self keys] count];
+    return [keys count];
 }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSString *key = [[self keys] objectAtIndex:row];
+    NSString *key = [keys objectAtIndex:row];
     
     if([[tableColumn identifier] isEqualToString:@"key"]){
          return key;
     }else{
-         return [document documentInfoForKey:key];
+         return [info objectForKey:key];
     }
     
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSString *key = [[self keys] objectAtIndex:row];
-    NSString *value = [document documentInfoForKey:key];
+    if (ignoreEdit) return;
+    
+    NSString *key = [keys objectAtIndex:row];
+    NSString *value = [[[info objectForKey:key] retain] autorelease];
     
     if([[tableColumn identifier] isEqualToString:@"key"]){
 		
 		if([object isEqualToString:@""]){
-			NSRunAlertPanel(NSLocalizedString(@"Empty Key", @"Empty Key"),
-							NSLocalizedString(@"The key can not be empty.", @""),
-							NSLocalizedString(@"OK", @"OK"), nil, nil);
+            NSBeginAlertSheet(NSLocalizedString(@"Empty Key", @"Empty Key"),
+                              NSLocalizedString(@"OK", @"OK"),
+                              nil,nil, [self window],self, NULL, NULL, NULL,
+                              NSLocalizedString(@"The key can not be empty.", @""), nil);
 			
 			[tv reloadData];
+            [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:0 row:row withEvent:nil select:YES];
 			return;
 		}
         
-        if([document documentInfoForKey:object]){
+        if([info objectForKey:object]){
             if([key caseInsensitiveCompare:object] != NSOrderedSame){			
-                NSRunAlertPanel(NSLocalizedString(@"Duplicate Key", @"Duplicate Key"),
-                                NSLocalizedString(@"The key must be unique.", @""),
-                                NSLocalizedString(@"OK", @"OK"), nil, nil);
+                NSBeginAlertSheet(NSLocalizedString(@"Duplicate Key", @"Duplicate Key"),
+                                  NSLocalizedString(@"OK", @"OK"),
+                                  nil,nil, [self window],self, NULL, NULL, NULL,
+                                  NSLocalizedString(@"The key must be unique.", @""), nil);
                 
                 [tv reloadData];
+                [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+                [tableView editColumn:0 row:row withEvent:nil select:YES];
 			}
             return;
 		}
         
-        [document setDocumentInfo:value forKey:object];
-        [document setDocumentInfo:nil forKey:key];
-		[[document undoManager] setActionName:NSLocalizedString(@"Change Document Info Key", @"change document info key action name for undo")];
+        [info removeObjectForKey:key];
+        [info setObject:value forKey:object];
         [self refreshKeys];
         
     }else{
@@ -191,17 +225,25 @@
         if([value isEqualToString:object]) return;
         
         if([value isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO){
-            NSRunAlertPanel(NSLocalizedString(@"Unbalanced Braces", @"Unbalanced Braces"),
-                            NSLocalizedString(@"Braces must be balanced within the value.", @""),
-                            NSLocalizedString(@"OK", @"OK"), nil, nil);
+            NSBeginAlertSheet(NSLocalizedString(@"Unbalanced Braces", @"Unbalanced Braces"),
+                              NSLocalizedString(@"OK", @"OK"),
+                              nil, nil, [self window],self, NULL, NULL, NULL,
+                              NSLocalizedString(@"Braces must be balanced within the value.", @""), nil);
             
             [tv reloadData];
+            [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:0 row:row withEvent:nil select:YES];
             return;
 		}
         
-        [document setDocumentInfo:object forKey:key];
-		[[document undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"change document info action name for undo")];
+        [info setObject:object forKey:key];
     }
+}
+
+#pragma mark TableView Delegate methods
+
+- (void)tableViewSelectionDidChange:(NSNotification *)notification{
+    [self updateButtons];
 }
 
 @end

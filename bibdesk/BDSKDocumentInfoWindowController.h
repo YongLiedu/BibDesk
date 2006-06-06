@@ -42,8 +42,12 @@
 
 @interface BDSKDocumentInfoWindowController : NSWindowController {
     IBOutlet NSTableView *tableView;
+    IBOutlet NSButton *addButton;
+    IBOutlet NSButton *removeButton;
+    NSMutableDictionary *info;
     NSMutableArray *keys;
     BibDocument *document;
+    BOOL ignoreEdit;
 }
 
 - (id)initWithDocument:(BibDocument *)aDocument;
@@ -51,6 +55,5 @@
 - (IBAction)addKey:(id)sender;
 - (IBAction)removeSelectedKeys:(id)sender;
 - (void)beginSheetModalForWindow:(NSWindow *)modalWindow;
-- (void)refreshKeys;
 
 @end

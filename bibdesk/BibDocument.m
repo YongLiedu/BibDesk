@@ -628,7 +628,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return documentInfo;
 }
 
+- (void)setDocumentInfoWithoutUndo:(NSDictionary *)dict{
+    [documentInfo setDictionary:dict];
+}
+
 - (void)setDocumentInfo:(NSDictionary *)dict{
+    [[[self undoManager] prepareWithInvocationTarget:self] setDocumentInfo:[[documentInfo copy] autorelease]];
     [documentInfo setDictionary:dict];
 }
 
