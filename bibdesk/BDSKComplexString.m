@@ -133,21 +133,20 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
 }
 
 /* designated initializer */
-- (id)initWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
+- (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
     if (self = [super init]) {
         if ([nodesArray count] == 0) {
             [self release];
-            return nil;
-        }
-        if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BSN_STRING) {
-            NSString *string = [[(BDSKStringNode *)[nodesArray objectAtIndex:0] value] retain];
+            self = nil;
+        } else if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BSN_STRING) {
             [self release];
-            return string;
+            self = [[(BDSKStringNode *)[nodesArray objectAtIndex:0] value] retain];
+        } else {
+            nodes = [nodesArray copyWithZone:[self zone]];
+            // we don't retain, as the macroResolver might retain us as a macro value
+            macroResolver = (theMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
+            complex = YES;
         }
-        nodes = [nodesArray copyWithZone:[self zone]];
-        // we don't retain, as the macroResolver might retain us as a macro value
-        macroResolver = (theMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
-		complex = YES;
 	}		
     return self;
 }
@@ -453,7 +452,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 @implementation NSString (ComplexStringExtensions)
 
-- (id)initWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
+- (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
     [[self init] release];
     self = [[BDSKComplexString alloc] initWithNodes:nodesArray macroResolver:theMacroResolver];
     return self;
