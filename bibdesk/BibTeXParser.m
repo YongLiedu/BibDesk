@@ -303,7 +303,9 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                         [dictionary setObject:complexString forKey:sFieldName];
                         
                     }// end while field - process next bt field                    
-                                        
+                    
+                    entryType = [entryType lowercaseString];
+                    
                     if([entryType isEqualToString:@"bibdesk_info"]){
                         if (frontMatter)
                             [aDocument setDocumentInfo:dictionary];
