@@ -959,7 +959,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)editNewGroupWithSelection:(id)sender{
-    NSArray *names = [[self staticGroups] valueForKeyPath:@"distinctUnionOfObjects.name"];
+    NSArray *names = [[self staticGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     NSString *name = baseName;
