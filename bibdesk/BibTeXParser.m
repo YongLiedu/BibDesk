@@ -68,6 +68,7 @@ static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroReso
 static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSStringEncoding encoding);
 static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
 static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, BibDocument *document, NSStringEncoding encoding);
+static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringEncoding encoding, NSError **error);
 
 @end
 
@@ -92,8 +93,6 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
         return [NSMutableArray array];
 		
     int ok = 1;
-    long cidx = 0; // used to scan through buf for annotes.
-    int braceDepth = 0;
     
     BibItem *newBI = nil;
     
@@ -152,7 +151,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                 [tmpStr release];
                 
                 if ((bt_entry_metatype (entry) != BTE_REGULAR) && nil != frontMatter){
-                    // put preambles etc. into the frontmatter string so we carry them along.
+                    // put @preamble etc. into the frontmatter string so we carry them along.
                     if ([entryType isEqualToString:@"preamble"]){
                         appendPreambleToFrontmatter(entry, frontMatter, parserEncoding);
                     }else if([entryType isEqualToString:@"string"]){
@@ -162,7 +161,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                     }
                     
                 }else{
-                    // regular field
+                    // regular type (@article, @proceedings, etc.)
                     field = NULL;
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
@@ -173,38 +172,16 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                         
                         // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
                         if([[BibTypeManager sharedManager] isNoteField:sFieldName]){
-                            if(field->down){
-                                cidx = field->down->offset;
-                                
-                                // the delimiter is at cidx-1
-                                if(buf[cidx-1] == '{'){
-                                    // scan up to the balanced brace
-                                    for(braceDepth = 1; braceDepth > 0; cidx++){
-                                        if(buf[cidx] == '{') braceDepth++;
-                                        if(buf[cidx] == '}') braceDepth--;
-                                    }
-                                    cidx--;     // just advanced cidx one past the end of the field.
-                                }else if(buf[cidx-1] == '"'){
-                                    // scan up to the next quote.
-                                    for(; buf[cidx] != '"'; cidx++);
-                                }else{ 
-                                    // no brace and no quote => unknown problem
-                                    NSString *errorString = [NSString stringWithFormat:NSLocalizedString(@"Unexpected delimiter \"%@\" encountered at line %d.", @""), [[[NSString alloc] initWithBytes:&buf[cidx-1] length:1 encoding:parserEncoding] autorelease], field->line];
-                                    
-                                    // free the AST, set up the error, then bail out and return partial data
-                                    bt_free_ast(entry);
-                                    OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, errorString, nil);
-                                    
-                                    @throw BibTeXParserInternalException;
-                                }
-                                tmpStr = [[NSString alloc] initWithBytes:&buf[field->down->offset] length:(cidx- (field->down->offset)) encoding:parserEncoding];
-                                complexString = checkAndTranslateString(tmpStr, field->line, filePath, parserEncoding); // check for bad characters, deTeXify
-                                [tmpStr release];
-                            }else{
-                                OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
+                            tmpStr = copyStringFromNoteField(field, buf, parserEncoding, &error);
+                            if(nil == tmpStr){
+                                // this can happen with badly formed annote/abstract fields, and leads to data loss
+                                bt_free_ast(entry);
+                                @throw BibTeXParserInternalException;
                             }
+                            complexString = checkAndTranslateString(tmpStr, field->line, filePath, parserEncoding);
+                            [tmpStr release];
                         }else{
-                            complexString = stringFromBTField(field, filePath, macroResolver, parserEncoding); // handles TeXification
+                            complexString = stringFromBTField(field, filePath, macroResolver, parserEncoding);
                         }
                         
                         // add the expanded values to the autocomplete dictionary
@@ -214,9 +191,8 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                         
                     }// end while field - process next bt field                    
                     
-                    if([entryType isEqualToString:@"bibdesk_info"]){
-                        if (frontMatter)
-                            [aDocument setDocumentInfo:dictionary];
+                    if([entryType isEqualToString:@"bibdesk_info"] && nil != frontMatter){
+                        [aDocument setDocumentInfo:dictionary];
                     }else{
                         
                         newBI = [[BibItem alloc] initWithType:entryType
@@ -798,4 +774,36 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
         [frontMatter appendString:@"}"];
     }
     [commentStr release];    
+}
+
+static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringEncoding encoding, NSError **error)
+{
+    NSString *returnString = nil;
+    long cidx = 0; // used to scan through buf for annotes.
+    int braceDepth = 0;
+    
+    if(field->down){
+        cidx = field->down->offset;
+        
+        // the delimiter is at cidx-1
+        if(data[cidx-1] == '{'){
+            // scan up to the balanced brace
+            for(braceDepth = 1; braceDepth > 0; cidx++){
+                if(data[cidx] == '{') braceDepth++;
+                if(data[cidx] == '}') braceDepth--;
+            }
+            cidx--;     // just advanced cidx one past the end of the field.
+        }else if(data[cidx-1] == '"'){
+            // scan up to the next quote.
+            for(; data[cidx] != '"'; cidx++);
+        }else{ 
+            // no brace and no quote => unknown problem
+            NSString *errorString = [NSString stringWithFormat:NSLocalizedString(@"Unexpected delimiter \"%@\" encountered at line %d.", @""), [[[NSString alloc] initWithBytes:&data[cidx-1] length:1 encoding:encoding] autorelease], field->line];
+            OFError(error, BDSKParserError, NSLocalizedDescriptionKey, errorString, nil);
+        }
+        returnString = [[NSString alloc] initWithBytes:&data[field->down->offset] length:(cidx- (field->down->offset)) encoding:encoding];
+    }else{
+        OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
+    }
+    return returnString;
 }
