@@ -143,7 +143,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
 
 + (NSMutableArray *)itemsFromString:(NSString *)itemString
                               error:(NSError **)outError{
-    return [self itemsFromString:itemString error:outError frontMatter:nil filePath:@"Paste/Drag"];
+    return [self itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
 }
 
 + (NSMutableArray *)itemsFromString:(NSString *)itemString

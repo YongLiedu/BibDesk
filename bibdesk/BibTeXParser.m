@@ -65,9 +65,12 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
 // becomes an autoreleased array of dicts of different types.
 static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding);
 
+// private functions for handling different entry types; these functions do not do any locking around the parser
 static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSStringEncoding encoding);
 static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
 static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, BibDocument *document, NSStringEncoding encoding);
+
+// private function for preserving newlines in annote/abstract fields; does not lock the parser
 static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringEncoding encoding, NSError **error);
 
 @end
@@ -83,7 +86,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(NSError **)outError
 						   document:(BibDocument *)aDocument{
-    return [self itemsFromData:inData error:outError frontMatter:nil filePath:@"Paste/Drag" document:aDocument];
+    return [self itemsFromData:inData error:outError frontMatter:nil filePath:BDSKParserPasteDragString document:aDocument];
 }
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
@@ -116,10 +119,11 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
     
     const char * fs_path = NULL;
     FILE *infile = NULL;
+    BOOL isPasteOrDrag = [filePath isEqualToString:BDSKParserPasteDragString];
     
-    NSStringEncoding parserEncoding = (aDocument == nil || [filePath isEqualToString:@"Paste/Drag"] ? NSUTF8StringEncoding : [(BibDocument *)aDocument documentStringEncoding]);
+    NSStringEncoding parserEncoding = (aDocument == nil || isPasteOrDrag ? NSUTF8StringEncoding : [(BibDocument *)aDocument documentStringEncoding]);
     
-    if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+    if( !(isPasteOrDrag) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
         infile = fopen(fs_path, "r");
     }else{
@@ -198,7 +202,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                         newBI = [[BibItem alloc] initWithType:entryType
                                                      fileType:BDSKBibtexString
                                                     pubFields:dictionary
-                                                  createdDate:[filePath isEqualToString:@"Paste/Drag"] ? [NSCalendarDate date] : nil];
+                                                  createdDate:(isPasteOrDrag ? [NSCalendarDate date] : nil)];
 
                         tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
                         [newBI setCiteKeyString:tmpStr];
@@ -269,7 +273,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
             field = NULL;
             while(field = bt_next_field (entry, field, &fieldName)){
                 macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
-                macroString = stringFromBTField(field, @"Paste/Drag", [aDocument macroResolver], NSUTF8StringEncoding); // handles TeXification
+                macroString = stringFromBTField(field, BDSKParserPasteDragString, [aDocument macroResolver], NSUTF8StringEncoding); // handles TeXification
                 [retDict setObject:macroString forKey:macroKey];
             }
         }

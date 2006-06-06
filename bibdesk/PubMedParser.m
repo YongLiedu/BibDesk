@@ -92,7 +92,7 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
 
 + (NSMutableArray *)itemsFromString:(NSString *)itemString
                               error:(NSError **)outError{
-    return [PubMedParser itemsFromString:itemString error:outError frontMatter:nil filePath:@"Paste/Drag"];
+    return [PubMedParser itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
 }
 
 + (NSMutableArray *)itemsFromString:(NSString *)itemString
