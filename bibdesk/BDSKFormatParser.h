@@ -42,6 +42,7 @@
 - (NSString *)fileType;
 - (NSString *)type;
 - (NSString *)citeKey;
+- (NSString *)title;
 - (NSString *)container;
 - (NSString *)valueOfField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field;

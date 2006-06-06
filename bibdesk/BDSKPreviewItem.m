@@ -90,6 +90,8 @@
 
 - (NSString *)citeKey { return @"citeKey"; }
 
+- (NSString *)title { return [self valueOfField:BDSKTitleString]; }
+
 - (NSString *)container { return [self valueOfField:BDSKJournalString]; }
 
 - (NSString *)valueOfField:(NSString *)field { 
