@@ -902,7 +902,8 @@ The groupedPublications array is a subset of the publications array, developed b
 		NSBeep();
 	} else {
 		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups",@"Remove groups")];
-		[self sortGroupsByKey:sortGroupsKey];
+        [groupTableView reloadData];
+        [self displaySelectedGroups];
 	}
 }
 
