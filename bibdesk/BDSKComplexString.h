@@ -64,25 +64,6 @@
 }
 
 /*!
-    @method     initWithArray:
-    @abstract   Initializes a complex string with an array of string nodes and a macroresolver. This is the designated initializer. 
-    @discussion Returns a non-complex string when the array contains a single string-type node.
-    @param		nodesArray An array of BDSKStringNodes
-    @param		macroResolver The macro resolver used to resolve macros in the complex string.
-    @result     -
-*/
-- (id)initWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver;
-
-/*!
-    @method     initWithInheritedValue:
-    @abstract   Initializes a string with an inherited value.
-    @discussion (description)
-    @param		aValue The string value to inherit.
-    @result     -
-*/
-- (id)initWithInheritedValue:(NSString *)aValue;
-
-/*!
     @method     macroResolver
     @abstract   Returns the object used to resolve macros in the complex string
     @discussion (description)
@@ -99,24 +80,24 @@
 @interface NSString (BDSKComplexStringExtensions)
 
 /*!
-    @method     complexStringWithArray:macroResolver:
+    @method     stringWithNodes:macroResolver:
     @abstract   Returns a newly allocated and initialized complex string build with an array of BDSKStringNodes as its nodes.
     @discussion -
     @param		nodesArray An array of BDSKStringNodes
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     - 
 */
-+ (id)complexStringWithArray:(NSArray *)nodesArray  macroResolver:(BDSKMacroResolver *)macroResolver;
++ (id)stringWithNodes:(NSArray *)nodesArray  macroResolver:(BDSKMacroResolver *)macroResolver;
 
 /*!
-    @method     complexStringWithBibTeXString:macroResolver:
+    @method     stringWithBibTeXString:macroResolver:
     @abstract   Returns a newly allocated and initialized complex or simple string build from the BibTeX string value.
     @discussion -
     @param		btstring A BibTeX string value
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     - 
 */
-+ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver;
++ (id)stringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver;
 
 /*!
     @method     stringWithInheritedValue:
@@ -126,6 +107,36 @@
     @result     - 
 */
 + (id)stringWithInheritedValue:(NSString *)aValue;
+
+/*!
+    @method     initWithNodes:macroResolver:
+    @abstract   Initializes a complex string with an array of string nodes and a macroresolver. 
+                This is the designated initializer for complex strings. 
+    @discussion Returns a non-complex string when the array contains a single string-type node.
+    @param		nodesArray An array of BDSKStringNodes
+    @param		macroResolver The macro resolver used to resolve macros in the complex string.
+    @result     -
+*/
+- (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver;
+
+/*!
+    @method     initWithBibTeXString:macroResolver:
+    @abstract   Initializes a complex string from a BibTeX string representation and a macroresolver. 
+    @discussion Returns a non-complex string when the bibtex string is a single quotd string.
+    @param		btstring A BibTeX string
+    @param		macroResolver The macro resolver used to resolve macros in the complex string.
+    @result     -
+*/
+- (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver;
+
+/*!
+    @method     initWithInheritedValue:
+    @abstract   Initializes a string with an inherited value.
+    @discussion (description)
+    @param		aValue The string value to inherit.
+    @result     -
+*/
+- (id)initWithInheritedValue:(NSString *)aValue;
 
 /*!
     @method     copyUninherited

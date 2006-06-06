@@ -278,7 +278,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	if (inherited == NO) 
         return [self retain];
 	else 
-        return [[BDSKComplexString allocWithZone:zone] initWithArray:nodes macroResolver:macroResolver];
+        return [[BDSKComplexString allocWithZone:zone] initWithNodes:nodes macroResolver:macroResolver];
 }
 
 - (BOOL)isComplex {
@@ -433,7 +433,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	}
 	
 	if (num) {
-        newString = [BDSKComplexString complexStringWithArray:newNodes macroResolver:macroResolver];
+        newString = [BDSKComplexString stringWithNodes:newNodes macroResolver:macroResolver];
 	} else {
 		newString = [[self retain] autorelease];
 	} 
@@ -453,8 +453,25 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 @implementation NSString (ComplexStringExtensions)
 
+- (id)initWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
+    [[self init] release];
+    self = [[BDSKComplexString alloc] initWithNodes:nodesArray macroResolver:theMacroResolver];
+    return self;
+}
+
+- (id)initWithInheritedValue:(NSString *)aValue{
+    [[self init] release];
+    self = [[BDSKComplexString alloc] initWithInheritedValue:aValue];
+    return self;
+}
+
 - (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
 	btstring = [btstring stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    // used for correct zoning
+    NSZone *theZone = [self zone];
+    // we will return another object
+    [[self init] release];
     
     if([btstring length] == 0){
         // if the string was whitespace only, it becomes empty.
@@ -588,19 +605,19 @@ Rather than relying on the same call sequence to be used, I think we should igno
         }
     }
     
-    self = [[BDSKComplexString allocWithZone:[self zone]] initWithArray:returnNodes macroResolver:theMacroResolver];
+    self = [[BDSKComplexString allocWithZone:theZone] initWithNodes:returnNodes macroResolver:theMacroResolver];
     [sc release];
     [returnNodes release];
     
     return self;
 }
 
-+ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
++ (id)stringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
     return [[[self alloc] initWithBibTeXString:btstring macroResolver:theMacroResolver] autorelease];
 }
 
-+ (id)complexStringWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
-    return [[[BDSKComplexString alloc] initWithArray:nodesArray macroResolver:theMacroResolver] autorelease];
++ (id)stringWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
+    return [[[BDSKComplexString alloc] initWithNodes:nodesArray macroResolver:theMacroResolver] autorelease];
 }
 
 + (id)stringWithInheritedValue:(NSString *)aValue{

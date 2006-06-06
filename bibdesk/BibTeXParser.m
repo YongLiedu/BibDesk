@@ -490,7 +490,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         
         key = [key stringByRemovingSurroundingWhitespace];
         @try{
-            value = [NSString complexStringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
+            value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
             [macros setObject:value forKey:key];
         }
         @catch(id exception){
@@ -569,7 +569,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         
         key = [key stringByRemovingSurroundingWhitespace];
         @try{
-            value = [NSString complexStringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
+            value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
             [macros setObject:value forKey:key];
         }
         @catch(id exception){
@@ -771,7 +771,7 @@ static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *fi
 	} // while simple_value
 	
     // This will return a single string-type node as a non-complex string.
-    NSString *returnValue = [NSString complexStringWithArray:stringValueArray macroResolver:[document macroResolver]];
+    NSString *returnValue = [NSString stringWithNodes:stringValueArray macroResolver:[document macroResolver]];
     [stringValueArray release];
     
     return returnValue;

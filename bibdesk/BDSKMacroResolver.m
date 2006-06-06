@@ -352,7 +352,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     
     while (key = [keyEnum nextObject]) {
         // we don't check for circular macros, there shouldn't be any. Or do we want to be paranoid?
-        [macroDefinitions setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
+        [macroDefinitions setObject:[NSString stringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
                              forKey:key];
     }
     if ([oldMacros count]) {

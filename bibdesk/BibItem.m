@@ -2674,11 +2674,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
 		NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
         if([yearValue isComplex])
-            yearValue = [(BDSKStringNode *)[[(BDSKComplexString *)yearValue nodes] objectAtIndex:0] value];
+            yearValue = [(BDSKStringNode *)[[yearValue nodes] objectAtIndex:0] value];
 		if (![NSString isEmptyString:yearValue]) {
 			NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingLock:bibLock];
 			if([monthValue isComplex])
-				monthValue = [(BDSKStringNode *)[[(BDSKComplexString *)monthValue nodes] objectAtIndex:0] value];
+				monthValue = [(BDSKStringNode *)[[monthValue nodes] objectAtIndex:0] value];
 			if (!monthValue) monthValue = @"";
 			NSString *dateStr = [NSString stringWithFormat:@"%@-15-%@", monthValue, yearValue];
             NSDate *date = [[NSDate alloc] initWithMonthDayYearString:dateStr];

@@ -73,7 +73,7 @@
 @implementation TestComplexString
 
 - (void)testLoneMacroFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@"macro1"
+    NSString *cs = [NSString stringWithBibTeXString:@"macro1"
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     
     UKNotNil(cs);
@@ -82,7 +82,7 @@
 }
 
 - (void)testQuotedStringFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@"{quoted string}"
+    NSString *cs = [NSString stringWithBibTeXString:@"{quoted string}"
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
@@ -90,7 +90,7 @@
 }
 
 - (void)testLoneNumberFromBibTeXString{
-     NSString *cs = [NSString complexStringWithBibTeXString:@"14"
+     NSString *cs = [NSString stringWithBibTeXString:@"14"
 											  macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
@@ -98,7 +98,7 @@
 }
 
 - (void)testTwoNumbersFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@"14 # 14"
+    NSString *cs = [NSString stringWithBibTeXString:@"14 # 14"
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
@@ -106,7 +106,7 @@
 }
 
 - (void)testThreeNumbersFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@"14 # 14 # 14"
+    NSString *cs = [NSString stringWithBibTeXString:@"14 # 14 # 14"
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
@@ -114,7 +114,7 @@
 }
 
 - (void)testQuotedNestedStringFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@"{quoted {nested} string}"
+    NSString *cs = [NSString stringWithBibTeXString:@"{quoted {nested} string}"
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
@@ -122,7 +122,7 @@
 }
 
 - (void)testQuotedNestedConcatenatedStringFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@"{A } # {quoted {nested} string} # {dood}"
+    NSString *cs = [NSString stringWithBibTeXString:@"{A } # {quoted {nested} string} # {dood}"
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
@@ -132,7 +132,7 @@
 }
 
 - (void)testEmptyStringFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@""
+    NSString *cs = [NSString stringWithBibTeXString:@""
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
@@ -141,7 +141,7 @@
 }
 
 - (void)testWhitespaceStringFromBibTeXString{
-    NSString *cs = [NSString complexStringWithBibTeXString:@" "
+    NSString *cs = [NSString stringWithBibTeXString:@" "
 											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
@@ -153,7 +153,7 @@
 - (void)testDisplayTwoNumbers{
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], nil];
-    NSString *cs = [NSString complexStringWithArray:a
+    NSString *cs = [NSString stringWithNodes:a
 									  macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
@@ -165,7 +165,7 @@
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], nil];
-    NSString *cs = [NSString complexStringWithArray:a
+    NSString *cs = [NSString stringWithNodes:a
 									  macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
@@ -176,7 +176,7 @@
 - (void)testUnquotedStringError{
     // ERROR Here:
     // not sure what I want to get here. Exception?
-//    NSString *cs = [NSString complexStringWithBibTeXString:@"unquoted string"
+//    NSString *cs = [NSString stringWithBibTeXString:@"unquoted string"
 //                                             macroResolver:[[[ResolverMock alloc] init] autorelease]];
 //    UKFail();    
 }

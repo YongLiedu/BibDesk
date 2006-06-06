@@ -154,7 +154,7 @@
 			[nodes addObject:newNode];
 			[newNode release];
 		}
-		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
+		return [NSString stringWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
     NSString *tmpConv = nil;
@@ -291,7 +291,7 @@
 			[nodes addObject:newNode];
 			[newNode release];
 		}
-		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
+		return [NSString stringWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
     NSString *tmpPass;

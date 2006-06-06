@@ -513,7 +513,7 @@ enum {
     NSString *reason = nil;    
     
     NS_DURING
-        compStr = [BDSKComplexString complexStringWithBibTeXString:btstring macroResolver:nil];
+        compStr = [NSString stringWithBibTeXString:btstring macroResolver:nil];
     NS_HANDLER
         if([[localException name] isEqualToString:BDSKComplexStringException]){
             valid = NO;
@@ -770,7 +770,7 @@ enum {
 	}
 	
 	if(findAsMacro)
-		findStr = [NSString complexStringWithBibTeXString:findStr macroResolver:[theDocument macroResolver]];
+		findStr = [NSString stringWithBibTeXString:findStr macroResolver:[theDocument macroResolver]];
 	
 	// loop through the pubs to replace
     NSMutableArray *arrayOfItems = [NSMutableArray array];
@@ -874,9 +874,9 @@ enum {
 	}
 	
 	if(findAsMacro)
-		findStr = [NSString complexStringWithBibTeXString:findStr macroResolver:[theDocument macroResolver]];
+		findStr = [NSString stringWithBibTeXString:findStr macroResolver:[theDocument macroResolver]];
 	if(replaceAsMacro)
-		replStr = [NSString complexStringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
+		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
 		
 	// loop through the pubs to replace
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
@@ -958,7 +958,7 @@ enum {
 			origStr = [theRegex replaceWithString:replStr inString:origStr];
 			if(replaceAsMacro || findAsMacro){
 				NS_DURING
-					complexStr = [NSString complexStringWithBibTeXString:origStr macroResolver:[theDocument macroResolver]];
+					complexStr = [NSString stringWithBibTeXString:origStr macroResolver:[theDocument macroResolver]];
 					[self setField:field ofItem:bibItem toValue:complexStr withInfos:paperInfos];
 					number++;
 				NS_HANDLER
@@ -986,7 +986,7 @@ enum {
     NSString *field = [self field];
 	
 	if(replaceAsMacro)
-		replStr = [NSString complexStringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
+		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
 		
 	// loop through the pubs to replace
     NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems

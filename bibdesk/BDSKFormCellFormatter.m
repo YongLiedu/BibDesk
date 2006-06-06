@@ -139,7 +139,7 @@
     
     @try{
         if (editAsComplexString) {
-            [self setParsedString:[NSString complexStringWithBibTeXString:string macroResolver:macroResolver]];
+            [self setParsedString:[NSString stringWithBibTeXString:string macroResolver:macroResolver]];
         } else {
             // not complex, but we check for balanced braces anyway
             [self setParsedString:string];
