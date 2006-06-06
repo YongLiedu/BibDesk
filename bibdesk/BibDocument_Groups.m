@@ -160,6 +160,24 @@
     return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&staticRange];
 }
 
+- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange categoryRange = [self rangeOfCategoryGroups];
+    return [indexes intersectsIndexesInRange:categoryRange];
+}
+
+- (BOOL)hasCategoryGroupsSelected{
+    return [self hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
+- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange smartRange = [self rangeOfSmartGroups];
+    return [indexes intersectsIndexesInRange:smartRange];
+}
+
+- (BOOL)hasSmartGroupsSelected{
+    return [self hasSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange sharedRange = [self rangeOfSharedGroups];
     return [indexes intersectsIndexesInRange:sharedRange];
@@ -167,6 +185,15 @@
 
 - (BOOL)hasSharedGroupsSelected{
     return [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
+- (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange staticRange = [self rangeOfStaticGroups];
+    return [indexes intersectsIndexesInRange:staticRange];
+}
+
+- (BOOL)hasStaticGroupsSelected{
+    return [self hasStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 #pragma mark Accessors

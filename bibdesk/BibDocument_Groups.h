@@ -54,8 +54,14 @@
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasCategoryGroupsSelected;
+- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSmartGroupsSelected;
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsSelected;
+- (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasStaticGroupsSelected;
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;

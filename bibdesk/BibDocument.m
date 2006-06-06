@@ -1472,11 +1472,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		[self deleteSelectedPubs:sender];
 	}else{
 		BOOL canRemove = NO;
-        NSIndexSet *selIndexes = [groupTableView selectedRowIndexes];
-        if ([self numberOfStaticGroupsAtIndexes:selIndexes] > 0)
+        if ([self hasStaticGroupsSelected])
             canRemove == YES;
         else if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
-            canRemove = ([self numberOfCategoryGroupsAtIndexes:selIndexes] > 0);
+            canRemove = [self hasCategoryGroupsSelected];
 		if(canRemove == NO){
 			NSBeep();
 			return;
