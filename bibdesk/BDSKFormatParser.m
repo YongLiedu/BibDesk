@@ -199,11 +199,7 @@
 					break;
 				case 't':
 					// title, optional #chars
-					if ([[pub type] isEqualToString:@"inbook"]) {
-						string = [pub valueOfField:BDSKChapterString];
-					} else {
-						string = [pub valueOfField:BDSKTitleString];
-					}
+                    string = [pub title];
 					string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
 					if (isLocalFile) {
 						string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
@@ -217,11 +213,7 @@
 					break;
 				case 'T':
 					// title, optional #words
-					if ([[pub type] isEqualToString:@"inbook"]) {
-						string = [pub valueOfField:BDSKChapterString];
-					} else {
-						string = [pub valueOfField:BDSKTitleString];
-					}
+                    string = [pub title];
 					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
