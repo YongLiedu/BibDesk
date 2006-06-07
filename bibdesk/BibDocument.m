@@ -1487,11 +1487,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		}
         // the items may not belong to the groups that you're trying to remove them from, but we'll warn as if they were
         if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
+            NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
                                                  defaultButton:NSLocalizedString(@"Yes", @"OK")
                                                alternateButton:nil
                                                    otherButton:NSLocalizedString(@"No", @"Cancel")
-                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from the %@ \"%@.\"  Do you want to proceed?", @""), [tableView numberOfSelectedRows], ([tableView numberOfSelectedRows] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item",@"")), ([selectedGroups count] > 1 ? NSLocalizedString(@"groups", @"") : NSLocalizedString(@"group",@"")), [[selectedGroups valueForKey:@"stringValue"] componentsJoinedByCommaAndAnd]];
+                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @""), [tableView numberOfSelectedRows], ([tableView numberOfSelectedRows] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item",@"")), groupName];
             [alert setHasCheckButton:YES];
             [alert setCheckValue:NO];
             int rv = [alert runSheetModalForWindow:documentWindow
