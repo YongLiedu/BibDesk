@@ -322,7 +322,6 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 	return valueString;
 }
 
-// @@ TODO: we should also accept multiple macros in a single entry and brackets IO braces around the entries
 + (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument{
     NSScanner *scanner = [[NSScanner alloc] initWithString:stringContents];
     [scanner setCharactersToBeSkipped:nil];
@@ -330,11 +329,20 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
     NSMutableDictionary *macros = [NSMutableDictionary dictionary];
     NSString *key = nil;
     NSMutableString *value;
+    BOOL endOfValue;
 
 	NSCharacterSet *bracesCharSet = [NSCharacterSet curlyBraceCharacterSet];
 	NSString *s;
 	int nesting;
 	unichar ch;
+    
+    static NSCharacterSet *bracesAndCommaCharSet = nil;
+    if (bracesAndCommaCharSet == nil) {
+        NSMutableCharacterSet *tmpSet = [bracesCharSet mutableCopy];
+        [tmpSet addCharactersInString:@","];
+        bracesAndCommaCharSet = [tmpSet copy];
+        [tmpSet release];
+    }
     
     // NSScanner is case-insensitive by default
     
@@ -347,47 +355,61 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
             break;
         
 		[scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
-
-        // scan the key
-		if(![scanner scanString:@"{" intoString:nil] ||
-           ![scanner scanUpToString:@"=" intoString:&key] ||
-           ![scanner scanString:@"=" intoString:nil])
+		
+        if(![scanner scanString:@"{" intoString:nil])
             continue;
-        
-        value = [NSMutableString string];
+
+        // scan macro=value items up to the closing brace 
         nesting = 1;
         while(nesting > 0 && ![scanner isAtEnd]){
-            if([scanner scanUpToCharactersFromSet:bracesCharSet intoString:&s])
-                [value appendString:s];
-            if([scanner isAtEnd]) break;
-            if([stringContents characterAtIndex:[scanner scanLocation] - 1] != '\\'){
-                // we found an unquoted brace
-                ch = [stringContents characterAtIndex:[scanner scanLocation]];
-                if(ch == '}'){
-                    --nesting;
-                }else{
-                    ++nesting;
+            
+            // scan the key
+            if(![scanner scanUpToString:@"=" intoString:&key] ||
+               ![scanner scanString:@"=" intoString:nil])
+                break;
+            
+            // scan the value, up to the next comma or the closing brace, passing through nested braces
+            endOfValue = NO;
+            value = [NSMutableString string];
+            while(endOfValue == NO && ![scanner isAtEnd]){
+                if([scanner scanUpToCharactersFromSet:bracesAndCommaCharSet intoString:&s])
+                    [value appendString:s];
+                if([scanner isAtEnd]) break;
+                if([stringContents characterAtIndex:[scanner scanLocation] - 1] != '\\'){
+                    // we found an unquoted brace
+                    ch = [stringContents characterAtIndex:[scanner scanLocation]];
+                    if(ch == '{'){
+                        ++nesting;
+                    }else if(ch == '}'){
+                        if(nesting == 1)
+                            endOfValue == YES;
+                        --nesting;
+                    }else if(ch == ','){
+                        if(nesting == 1)
+                            endOfValue == YES;
+                    }
+                    if (endOfValue == NO) // we don't include the outer braces or the separating commas
+                        [value appendCharacter:ch];
                 }
-                if (nesting > 0) // we don't include the outer braces
-                    [value appendFormat:@"%C",ch];
+                [scanner setScanLocation:[scanner scanLocation] + 1];
             }
-            [scanner setScanLocation:[scanner scanLocation] + 1];
-        }
-        if(nesting > 0)
-            continue;
-        
-        [value removeSurroundingWhitespace];
-        
-        key = [key stringByRemovingSurroundingWhitespace];
-        @try{
-            value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
-            [macros setObject:value forKey:key];
-        }
-        @catch(id exception){
-            if([[exception name] isEqualToString:BDSKComplexStringException])
-                NSLog(@"Ignoring invalid complex macro: %@",[exception reason]);
-            else
-                NSLog(@"Ignoring exception %@ while parsing macro: %@", [exception name], [exception reason]);
+            if(endOfValue == NO)
+                break;
+            
+            [value removeSurroundingWhitespace];
+            
+            key = [key stringByRemovingSurroundingWhitespace];
+            @try{
+                value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
+                [macros setObject:value forKey:key];
+            }
+            @catch(id exception){
+                if([[exception name] isEqualToString:BDSKComplexStringException])
+                    NSLog(@"Ignoring invalid complex macro: %@",[exception reason]);
+                else
+                    NSLog(@"Ignoring exception %@ while parsing macro: %@", [exception name], [exception reason]);
+            }
+            
         }
 		
     }
