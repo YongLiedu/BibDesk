@@ -36,34 +36,27 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import <Cocoa/Cocoa.h>
-#import "BDSKComplexString.h" // for BDSKMacroResolver protocol
-#import "BibPrefController.h" // for notification name declarations
-#import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
-#import <OmniFoundation/NSString-OFExtensions.h>
-#import "MacroTextFieldWindowController.h"
 
-@class BDSKFormCellFormatter;
+@class BDSKMacroResolver, BDSKFormCellFormatter, MacroTableViewWindowController;
 
 @interface MacroWindowController : NSWindowController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;
-    id macroDataSource;
+    BDSKMacroResolver *macroResolver;
     NSMutableArray *macros;
 	BDSKFormCellFormatter *tableCellFormatter;
 	MacroTableViewWindowController *macroTextFieldWC;
 }
 
-- (id)initWithMacroDataSource:(BDSKMacroResolver *)aMacroDataSource;
+- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
 
-- (void)setMacroDataSource:(id)newMacroDataSource;
-- (id)macroDataSource;
 - (void)refreshMacros;
 
 - (IBAction)addMacro:(id)sender;
 - (IBAction)removeSelectedMacros:(id)sender;
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString;
 
-- (void)setSheet:(BOOL)flag;
+- (void)beginSheetModalForWindow:(NSWindow *)modalWindow;
 - (IBAction)closeAction:(id)sender;
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;

@@ -449,14 +449,9 @@ enum {
 
 - (IBAction)showMacrosWindow:(id)sender{
 	if (!macroWC){
-		macroWC = [[MacroWindowController alloc] initWithMacroDataSource:[BDSKMacroResolver defaultMacroResolver]];
-        [macroWC setSheet:YES];
+		macroWC = [[MacroWindowController alloc] initWithMacroResolver:[BDSKMacroResolver defaultMacroResolver]];
 	}
-	[NSApp beginSheet:[macroWC window]
-       modalForWindow:[[self controlBox] window]
-        modalDelegate:nil
-       didEndSelector:NULL
-          contextInfo:nil];
+	[macroWC beginSheetModalForWindow:[[self controlBox] window]];
 }
 
 - (IBAction)showMacroFileWindow:(id)sender{

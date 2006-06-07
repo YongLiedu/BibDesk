@@ -3348,7 +3348,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (IBAction)showMacrosWindow:(id)sender{
     if (!macroWC) {
-        macroWC = [[MacroWindowController alloc] initWithMacroDataSource:[self macroResolver]];
+        macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
     }
     if ([[self windowControllers] containsObject:macroWC] == NO) {
         [self addWindowController:macroWC];
