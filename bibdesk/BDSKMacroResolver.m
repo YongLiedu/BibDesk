@@ -366,7 +366,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
     NSString *file;
-    BOOL hadProblems;
     
     fileMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
     
