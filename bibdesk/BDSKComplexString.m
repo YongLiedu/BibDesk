@@ -128,7 +128,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
 }
 
 - (id)init{
-    [[self init] release];
+    [[super init] release];
 	return self = [@"" retain];
 }
 

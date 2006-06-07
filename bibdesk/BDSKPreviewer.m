@@ -65,24 +65,24 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (id)init{
-    if(thePreviewer){
-        [[self init] release];
-        return self = thePreviewer;
-    }
-	
     if(self = [super init]){
-		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
-		[texTask setDelegate:self];
-		
-        messageQueue = [[BDSKPreviewMessageQueue alloc] init];
-        [messageQueue startBackgroundProcessors:1];
-        [messageQueue setSchedulesBasedOnPriority:NO];
-        
-        OFSimpleLockInit(&stateLock);
-        
-		// this reflects the currently expected state, not necessarily the actual state
-		// it corresponds to the last drawing item added to the mainQueue
-		previewState = BDSKUnknownPreviewState;
+        if(thePreviewer){
+            [self release];
+            self = thePreviewer;
+        } else {
+            texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
+            [texTask setDelegate:self];
+            
+            messageQueue = [[BDSKPreviewMessageQueue alloc] init];
+            [messageQueue startBackgroundProcessors:1];
+            [messageQueue setSchedulesBasedOnPriority:NO];
+            
+            OFSimpleLockInit(&stateLock);
+            
+            // this reflects the currently expected state, not necessarily the actual state
+            // it corresponds to the last drawing item added to the mainQueue
+            previewState = BDSKUnknownPreviewState;
+        }
     }
     return self;
 }

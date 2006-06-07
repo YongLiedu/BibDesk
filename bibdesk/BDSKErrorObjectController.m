@@ -57,25 +57,24 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (id)init;
 {
-    if(sharedErrorObjectController){
-        [[self init] release];
-        return self = sharedErrorObjectController;
-    }
-    
-    [NSBundle loadNibNamed:[self windowNibName] owner:self];
     if(self = [super initWithWindowNibName:[self windowNibName]]){
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleErrorNotification:)
-                                                     name:BDSKParserErrorNotification
-                                                   object:nil];
-        errors = [[NSMutableArray alloc] initWithCapacity:10];
-        documents = [[NSMutableArray alloc] initWithCapacity:4];
-		[self insertObject:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem] inDocumentsAtIndex:0];
-		[self insertObject:[BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] inDocumentsAtIndex:1];
-		[errorsController setFilterValue:[self objectInDocumentsAtIndex:0]];
-        
-		enableSyntaxHighlighting = YES;
+        if(sharedErrorObjectController){
+            [self release];
+            self = sharedErrorObjectController;
+        } else {
+            [self window]; // forces the nib to be loaded
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(handleErrorNotification:)
+                                                         name:BDSKParserErrorNotification
+                                                       object:nil];
+            errors = [[NSMutableArray alloc] initWithCapacity:10];
+            documents = [[NSMutableArray alloc] initWithCapacity:4];
+            [self insertObject:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem] inDocumentsAtIndex:0];
+            [self insertObject:[BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] inDocumentsAtIndex:1];
+            [errorsController setFilterValue:[self objectInDocumentsAtIndex:0]];
+            
+            enableSyntaxHighlighting = YES;
+        }
     }
     
     return self;
