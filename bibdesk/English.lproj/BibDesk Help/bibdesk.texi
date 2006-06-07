@@ -3521,14 +3521,6 @@ Below are lists of colection keys that could be used in BibDesk export templates
 @tab 
 @end multitable
 
-@subheading URLs
-
-@multitable {linkedText} {}
-@headitem Key @tab Description
-@item linkedText
-@tab 
-@end multitable
-
 @subheading File paths
 
 @multitable {stringByAbbreviatingWithTildeInPath} {}
@@ -3562,6 +3554,10 @@ Below are lists of colection keys that could be used in BibDesk export templates
 @item icon
 @tab 
 @item smallIcon
+@tab 
+@item linkedIcon
+@tab 
+@item linkedSmallIcon
 @tab 
 @item absoluteString
 @tab 
