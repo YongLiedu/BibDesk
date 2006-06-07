@@ -196,7 +196,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                     }// end while field - process next bt field                    
                     
                     if([entryType isEqualToString:@"bibdesk_info"] && nil != frontMatter){
-                        [aDocument setDocumentInfo:dictionary];
+                        [aDocument setDocumentInfoWithoutUndo:dictionary];
                     }else{
                         
                         newBI = [[BibItem alloc] initWithType:entryType
