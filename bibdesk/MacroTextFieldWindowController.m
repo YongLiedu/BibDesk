@@ -36,7 +36,7 @@
 
 #import "MacroTextFieldWindowController.h"
 #import "BDSKComplexString.h"
-#import "BDSKFormCellFormatter.h"
+#import "BDSKComplexStringFormatter.h"
 #import <OmniBase/assertions.h>
 
 @interface MacroTextFieldWindowController (Private)
@@ -246,8 +246,8 @@
 }
 
 - (void)controlTextDidChange:(NSNotification*)notification { 
-    BDSKFormCellFormatter *formatter = [[self currentCell] formatter];
-	OBASSERT([formatter isKindOfClass:[BDSKFormCellFormatter class]]);
+    BDSKComplexStringFormatter *formatter = [[self currentCell] formatter];
+	OBASSERT([formatter isKindOfClass:[BDSKComplexStringFormatter class]]);
 	NSString *error = [formatter parseError];
 	if (error)
 		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Invalid raw bibtex string error message"),error]];

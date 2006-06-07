@@ -47,7 +47,7 @@
 @class PDFImageView;
 @class BDSKCiteKeyFormatter;
 @class BDSKFieldNameFormatter;
-@class BDSKFormCellFormatter;
+@class BDSKComplexStringFormatter;
 @class MacroFormWindowController;
 @class BDSKImagePopUpButton;
 @class BibItem;
@@ -130,7 +130,7 @@
     BDSKFieldNameFormatter *fieldNameFormatter;
 	
 // form cell formatter
-    BDSKFormCellFormatter *formCellFormatter;
+    BDSKComplexStringFormatter *formCellFormatter;
 	
 // Author tableView
 	IBOutlet NSTableView *authorTableView;

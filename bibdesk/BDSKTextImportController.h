@@ -48,7 +48,7 @@
 @class BDSKEdgeView;
 @class WebView;
 @class WebDownload;
-@class BDSKFormCellFormatter;
+@class BDSKComplexStringFormatter;
 @class BDSKCiteKeyFormatter;
 
 @interface BDSKTextImportController : NSWindowController {
@@ -79,7 +79,7 @@
     NSMutableArray *bookmarks;
 	NSString *webSelection;
     
-	BDSKFormCellFormatter *tableCellFormatter;
+	BDSKComplexStringFormatter *tableCellFormatter;
 	BDSKCiteKeyFormatter *crossrefFormatter;
 	NSTextView *tableFieldEditor;
 	

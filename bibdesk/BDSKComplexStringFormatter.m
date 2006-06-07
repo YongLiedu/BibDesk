@@ -1,4 +1,4 @@
-//  BDSKFormCellFormatter.m
+//  BDSKComplexStringFormatter.m
 
 //  Created by Michael McCracken on Mon Jul 22 2002.
 /*
@@ -34,12 +34,12 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKFormCellFormatter.h"
+#import "BDSKComplexStringFormatter.h"
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
 
-@implementation BDSKFormCellFormatter
+@implementation BDSKComplexStringFormatter
 
 - (id)init {
     return [self initWithDelegate:nil macroResolver:nil];

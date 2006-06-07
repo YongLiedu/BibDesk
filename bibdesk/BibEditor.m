@@ -53,7 +53,7 @@
 #import "BibItem.h"
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
-#import "BDSKFormCellFormatter.h"
+#import "BDSKComplexStringFormatter.h"
 #import "BibAppController.h"
 #import "PDFImageView.h"
 #import "BDSKImagePopUpButton.h"
@@ -117,7 +117,7 @@ static int numberOfOpenEditors = 0;
     fieldNumbers = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
     fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
-    formCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
+    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
 	
     theBib = aBib;
     currentType = [[theBib type] retain];    // do this once in init so it's right at the start.
@@ -1471,7 +1471,7 @@ static int numberOfOpenEditors = 0;
 	return [macroTextFieldWC attachToView:bibFields atRow:[bibFields selectedRow] column:0 withValue:value];
 }
 
-- (BOOL)formatter:(BDSKFormCellFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
+- (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
 	[self editSelectedFormCellAsMacro];
 	return YES;
 }

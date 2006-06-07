@@ -37,14 +37,14 @@
  */
 #import <Cocoa/Cocoa.h>
 
-@class BDSKMacroResolver, BDSKFormCellFormatter, MacroTableViewWindowController;
+@class BDSKMacroResolver, BDSKComplexStringFormatter, MacroTableViewWindowController;
 
 @interface MacroWindowController : NSWindowController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;
     BDSKMacroResolver *macroResolver;
     NSMutableArray *macros;
-	BDSKFormCellFormatter *tableCellFormatter;
+	BDSKComplexStringFormatter *tableCellFormatter;
 	MacroTableViewWindowController *macroTextFieldWC;
 }
 

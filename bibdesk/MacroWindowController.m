@@ -45,7 +45,7 @@
 #import "MacroTextFieldWindowController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibTeXParser.h"
-#import "BDSKFormCellFormatter.h"
+#import "BDSKComplexStringFormatter.h"
 #import "BDSKMacroResolver.h"
 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
@@ -65,7 +65,7 @@
         // a shadow array to keep the macro keys of the document.
         macros = [[NSMutableArray alloc] initWithCapacity:5];
                 
-		tableCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
+		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
 		macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
         
         // register to listen for changes in the macros.
@@ -243,7 +243,7 @@
 
 #pragma mark BDSKMacroFormatter delegate
 
-- (BOOL)formatter:(BDSKFormCellFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
+- (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
 	return [self editSelectedCellAsMacro];
 }
 

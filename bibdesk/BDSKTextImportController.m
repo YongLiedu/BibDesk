@@ -37,7 +37,7 @@
  */
 
 #import "BDSKTextImportController.h"
-#import "BDSKFormCellFormatter.h"
+#import "BDSKComplexStringFormatter.h"
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
@@ -97,7 +97,7 @@
         showingWebView = NO;
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
-		tableCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
+		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
 		crossrefFormatter = [[BDSKCiteKeyFormatter alloc] init];
 		
 		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
@@ -1233,7 +1233,7 @@
 
 #pragma mark BDSKMacroFormatter delegate
 
-- (BOOL)formatter:(BDSKFormCellFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
+- (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
 	return [self editSelectedCellAsMacro];
 }
 
@@ -1339,7 +1339,7 @@
 			formatter = crossrefFormatter;
 		} else {
 			formatter = tableCellFormatter;
-			[(BDSKFormCellFormatter *)formatter setHighlighted:[tv isRowSelected:row]];
+			[(BDSKComplexStringFormatter *)formatter setHighlighted:[tv isRowSelected:row]];
 		}
 		[cell setFormatter:formatter];
 	}

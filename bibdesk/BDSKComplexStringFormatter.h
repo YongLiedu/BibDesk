@@ -1,4 +1,4 @@
-//  BDSKFormCellFormatter.h
+//  BDSKComplexStringFormatter.h
 
 //  Created by Michael McCracken on Mon Jul 22 2002.
 /*
@@ -38,7 +38,7 @@
 
 @class BDSKMacroResolver;
 
-@interface BDSKFormCellFormatter : NSFormatter {
+@interface BDSKComplexStringFormatter : NSFormatter {
 	NSString *parsedString;
 	NSString *parseError;
 	id macroResolver;
@@ -69,6 +69,6 @@
 
 @end
 
-@interface NSObject (BDSKFormCellFormatterDelegate)
-- (BOOL)formatter:(BDSKFormCellFormatter *)formatter shouldEditAsComplexString:(NSString *)object;
+@interface NSObject (BDSKComplexStringFormatterDelegate)
+- (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object;
 @end
