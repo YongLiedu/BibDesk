@@ -382,11 +382,11 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                         ++nesting;
                     }else if(ch == '}'){
                         if(nesting == 1)
-                            endOfValue == YES;
+                            endOfValue = YES;
                         --nesting;
                     }else if(ch == ','){
                         if(nesting == 1)
-                            endOfValue == YES;
+                            endOfValue = YES;
                     }
                     if (endOfValue == NO) // we don't include the outer braces or the separating commas
                         [value appendCharacter:ch];
