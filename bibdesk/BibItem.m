@@ -1430,8 +1430,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSMutableAttributedString* nonReqStr = [[NSMutableAttributedString alloc] init];
 	NSAttributedString *valueStr;
 	NSAttributedString *keyStr;
+    
+    BibTypeManager *btm = [BibTypeManager sharedManager];
 
-	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
+	NSSet *reqKeys = [[NSSet alloc] initWithArray:[btm requiredFieldsForType:[self type]]];
 
     static NSDateFormatter *dateFormatter = nil;
     if(dateFormatter == nil)
@@ -1459,21 +1461,21 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     BOOL notNote = NO;
     
     while(key = [e nextObject]){
-		notNote = ![[BibTypeManager sharedManager] isNoteField:key];
+		notNote = ![btm isNoteField:key];
+        stringValue = [self valueOfField:key inherit:notNote];
         
-        if(![[self valueOfField:key inherit:notNote] isEqualToString:@""] &&
+        if(![stringValue isEqualToString:@""] &&
            ![key isEqualToString:BDSKTitleString]){
 			
 			valueStr = nil;
-            stringValue = nil;
 			
-			if([key isEqualToString:BDSKDateAddedString] && (date = [self dateAdded])){
-                if((stringValue = [dateFormatter stringForObjectValue:date]))
+			if([key isEqualToString:BDSKDateAddedString]){
+                if((date = [self dateAdded]) && (stringValue = [dateFormatter stringForObjectValue:date]))
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
-            }else if([key isEqualToString:BDSKDateModifiedString] && (date = [self dateModified])){
-                if((stringValue = [dateFormatter stringForObjectValue:date]))
+            }else if([key isEqualToString:BDSKDateModifiedString]){
+                if((date = [self dateModified]) && (stringValue = [dateFormatter stringForObjectValue:date]))
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
@@ -1482,23 +1484,23 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
-			}else if([[BibTypeManager sharedManager] isURLField:key]){
+			}else if([btm isURLField:key]){
                 // make this a clickable link if possible, showing an abbreviated path for file URLs
                 NSURL *theURL = [self URLForField:key];
 				if(theURL != nil){
-                    valueStr = [[NSMutableAttributedString alloc] initWithString:([theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : [self valueOfField:key]) attributes:bodyAttributes];
+                    valueStr = [[NSMutableAttributedString alloc] initWithString:([theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : stringValue) attributes:bodyAttributes];
                     [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:theURL range:NSMakeRange(0, [valueStr length])];
                 }
   
 			}else if([key isEqualToString:BDSKRatingString]){
-				int rating = [[self valueOfField:BDSKRatingString inherit:NO] intValue];
+				int rating = [self ratingValueOfField:BDSKRatingString];
 				valueStr = [[NSAttributedString alloc] initWithString:[NSString ratingStringWithInteger:rating]
 														   attributes:bodyAttributes];                
 			}else if([key isEqualToString:BDSKPagesString]){
-                valueStr = [[NSAttributedString alloc] initWithString:[[self valueOfField:BDSKPagesString] stringByConvertingDoubleHyphenToEndash]
+                valueStr = [[NSAttributedString alloc] initWithString:[stringValue stringByConvertingDoubleHyphenToEndash]
                                                            attributes:bodyAttributes];
             }else{
-                valueStr = [[NSAttributedString alloc] initWithTeXString:[self valueOfField:key inherit:notNote]
+                valueStr = [[NSAttributedString alloc] initWithTeXString:stringValue
                                                               attributes:bodyAttributes
                                                       collapseWhitespace:notNote];
 			}
