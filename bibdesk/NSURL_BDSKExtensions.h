@@ -48,6 +48,8 @@
 - (NSAttributedString *)linkedText;
 - (NSAttributedString *)icon;
 - (NSAttributedString *)smallIcon;
+- (NSAttributedString *)linkedIcon;
+- (NSAttributedString *)linkedSmallIcon;
 @end
 
 CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL);

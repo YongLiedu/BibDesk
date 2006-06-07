@@ -796,6 +796,14 @@ static int MAX_RATING = 5;
     return [[self url] smallIcon];
 }
 
+- (NSAttributedString *)linkedIcon {
+    return [[self url] linkedIcon];
+}
+
+- (NSAttributedString *)linkedSmallIcon {
+    return [[self url] linkedSmallIcon];
+}
+
 @end
 
 

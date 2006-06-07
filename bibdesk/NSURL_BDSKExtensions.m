@@ -242,4 +242,40 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return attrString;
 }
 
+- (NSAttributedString *)linkedIcon {
+    NSImage *image = [NSImage imageForURL:self];
+    NSString *name = ([self isFileURL]) ? [self path] : [self relativeString];
+    name = [[[name lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"tiff"];
+    
+    NSFileWrapper *wrapper = [[NSFileWrapper alloc] initRegularFileWithContents:[image TIFFRepresentation]];
+    [wrapper setFilename:name];
+    [wrapper setPreferredFilename:name];
+
+    NSTextAttachment *attachment = [[NSTextAttachment alloc] initWithFileWrapper:wrapper];
+    [wrapper release];
+    NSMutableAttributedString *attrString = [[NSAttributedString attributedStringWithAttachment:attachment] mutableCopy];
+    [attachment release];
+    [attrString addAttribute:NSLinkAttributeName value:self range:NSMakeRange(0, [attrString length])];
+    
+    return [attrString autorelease];
+}
+
+- (NSAttributedString *)linkedSmallIcon {
+    NSImage *image = [NSImage smallImageForURL:self];
+    NSString *name = ([self isFileURL]) ? [self path] : [self relativeString];
+    name = [[[name lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:@"tiff"];
+    
+    NSFileWrapper *wrapper = [[NSFileWrapper alloc] initRegularFileWithContents:[image TIFFRepresentation]];
+    [wrapper setFilename:name];
+    [wrapper setPreferredFilename:name];
+
+    NSTextAttachment *attachment = [[NSTextAttachment alloc] initWithFileWrapper:wrapper];
+    [wrapper release];
+    NSMutableAttributedString *attrString = [[NSAttributedString attributedStringWithAttachment:attachment] mutableCopy];
+    [attachment release];
+    [attrString addAttribute:NSLinkAttributeName value:self range:NSMakeRange(0, [attrString length])];
+    
+    return [attrString autorelease];
+}
+
 @end

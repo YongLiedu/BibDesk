@@ -403,6 +403,8 @@ An inline buffer is used for speed in accessing each character.
 - (NSAttributedString *)linkedText;
 - (NSAttributedString *)icon;
 - (NSAttributedString *)smallIcon;
+- (NSAttributedString *)linkedIcon;
+- (NSAttributedString *)linkedSmallIcon;
 
 @end
 
