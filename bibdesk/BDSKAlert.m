@@ -304,13 +304,15 @@
     
     [layoutManager addTextContainer:textContainer];
     [textStorage addLayoutManager:layoutManager];
+    
+    // drawing in views uses a different typesetting behavior from the current one which leads to a mismatch in line height
+    // see http://www.cocoabuilder.com/archive/message/cocoa/2006/1/3/153669
+    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
     [layoutManager glyphRangeForTextContainer:textContainer];
     
-    int numLines = ceilf(NSHeight([layoutManager usedRectForTextContainer:textContainer]) / 13.0);
+    float extraHeight = NSHeight([layoutManager usedRectForTextContainer:textContainer]) - NSHeight(infoRect);
 
-    if (numLines > 3) {
-        // I don't know why it uses a different lineheight from the layoutManager...
-        float extraHeight = numLines * 14.0 - NSHeight(infoRect);
+    if (extraHeight > 0) {
         frame.size.height += extraHeight;
         infoRect.size.height += extraHeight;
         infoRect.origin.y -= extraHeight;
