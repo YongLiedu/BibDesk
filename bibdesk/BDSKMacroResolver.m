@@ -373,14 +373,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     while (file = [fileE nextObject]) {
         NSString *fileContent = [NSString stringWithContentsOfFile:file];
         NSDictionary *macroDefs = nil;
-        hadProblems = NO;
         if (fileContent == nil) continue;
         if ([[file pathExtension] caseInsensitiveCompare:@"bib"] == NSOrderedSame)
-            macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent hadProblems:&hadProblems document:nil];
+            macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent document:nil];
         else if ([[file pathExtension] caseInsensitiveCompare:@"bst"] == NSOrderedSame)
             macroDefs = [BibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
         else continue;
-        if (macroDefs != nil && hadProblems == NO) {
+        if (macroDefs != nil) {
             NSEnumerator *macroE = [macroDefs keyEnumerator];
             NSString *macroKey;
             NSString *macroString;
