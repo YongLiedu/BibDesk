@@ -314,7 +314,7 @@
 	if (progressIndicator != nil) 
 		rightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
 	
-    NSDivideRect([self bounds], &rect, &ignored, rightMargin, NSMaxXEdge);
+    NSDivideRect([self bounds], &ignored, &rect, rightMargin, NSMaxXEdge);
     
 	NSEnumerator *dictEnum = [icons objectEnumerator];
 	NSDictionary *dict;
