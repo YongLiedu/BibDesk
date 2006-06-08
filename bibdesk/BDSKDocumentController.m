@@ -165,6 +165,8 @@
                                         NSLocalizedString(@"OK",@""),
                                         nil, nil, nil, nil);
             } else {
+                // the original file could be any format, but the ouput is supposed to be bibtex
+                fileToOpen = [[fileToOpen stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
                 
                 // @@ we could also use [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
                 // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
@@ -179,7 +181,7 @@
                 
                 // make a fresh document, and don't display it until we can set its name.
                 doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
-                [doc setFileName:[[fileToOpen stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"]]; // required for error handling; mark it dirty, so it's obviously modified
+                [doc setFileName:fileToOpen]; // required for error handling; mark it dirty, so it's obviously modified
                 [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
                 success = [doc readFromURL:[NSURL fileURLWithPath:tmpFile] ofType:BDSKBibTeXDocumentType encoding:NSUTF8StringEncoding error:NULL];
                 
