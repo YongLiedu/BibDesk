@@ -1291,8 +1291,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
-	NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
-	
+    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
+    return [self readFromURL:absoluteURL ofType:aType encoding:encoding error:outError];
+}
+
+- (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType encoding:(NSStringEncoding)encoding error:(NSError **)outError
+{
 	// for types we only view, we set the file type to BibTeX as that retains the complete information in the file
 	if([aType isEqualToString:BDSKRISDocumentType] == NO)
         [self setFileType:BDSKBibTeXDocumentType];

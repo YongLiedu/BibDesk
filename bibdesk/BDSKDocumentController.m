@@ -47,6 +47,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDAlias.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKAlert.h"
 
 
 @implementation BDSKDocumentController
@@ -228,27 +229,35 @@
 
 - (id)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
 	
-	NSData *data = [NSData dataWithContentsOfFile:filePath];
 	BibDocument *doc = nil;
-	
+	BOOL success;
+    
     // make a fresh document, and don't display it until we can set its name.
     doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
     [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
     [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    [doc loadBibTeXDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
+    success = [doc readFromURL:[NSURL fileURLWithPath:filePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:NULL];
+    if (success == NO) {
+        [self removeDocument:doc];
+        doc = nil;
+    }
     return doc;
 }
 
 - (id)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
 	
-	NSData *data = [NSData dataWithContentsOfFile:filePath];
 	BibDocument *doc = nil;
+	BOOL success;
 	
     // make a fresh document, and don't display it until we can set its name.
     doc = [self openUntitledDocumentOfType:BDSKRISDocumentType display:NO];
     [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
     [doc setFileType:BDSKRISDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    [doc loadRISDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
+    success = [doc readFromURL:[NSURL fileURLWithPath:filePath] ofType:BDSKRISDocumentType encoding:encoding error:NULL];
+    if (success == NO) {
+        [self removeDocument:doc];
+        doc = nil;
+    }
     return doc;
 }
 
@@ -296,36 +305,55 @@
                         
     } while(scannerHasData(scanner));
     
+    // @@ we could also use [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
+    // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
+    // or move aside the original file
+    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
     data = [mutableFileString dataUsingEncoding:encoding];
-    filePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:YES] stringByAppendingPathExtension:@"bib"];
-    if([data writeToFile:filePath atomically:YES] == NO)
-        NSLog(@"Unable to write data to file %@; continuing anyway.", filePath);
+    if([data writeToFile:tmpFilePath atomically:YES] == NO)
+        NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFilePath);
     
 	BibDocument *doc = nil;
+	BOOL success;
 	
     // make a fresh document, and don't display it until we can set its name.
     doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
-    [doc setFileName:filePath]; // required for error handling; mark it dirty, so it's obviously modified
+    [doc setFileName:tmpFilePath]; // required for error handling; mark it dirty, so it's obviously modified
     [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    [doc loadBibTeXDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
-    [doc showWindows];
+    success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:NULL];
     
-    // mark as dirty, since we've changed the cite keys
-    [doc updateChangeCount:NSChangeDone];
-    
-    // search so we only see the ones that have the temporary key; checking success isn't effective here, since it returns NO even if we loaded partial data
-    if([[doc publications] count]){
-        [doc performSelector:@selector(setSelectedSearchFieldKey:) withObject:BDSKCiteKeyString];
-        [doc performSelector:@selector(setFilterField:) withObject:@"FixMe"];
-        NSBeginAlertSheet(NSLocalizedString(@"Temporary Cite Keys.",@""), 
-                          nil, nil, nil, // buttons
-                          [[[doc windowControllers] firstObject] window],
-                          nil,
-                          nil,
-                          nil,
-                          nil,
-                          NSLocalizedString(@"This document was opened using a temporary cite key for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.", @""));
+    if (success == NO) {
+        [self removeDocument:doc];
+        doc = nil;
+    } else {
+        [doc showWindows];
+        
+        // mark as dirty, since we've changed the cite keys
+        [doc updateChangeCount:NSChangeDone];
+        
+        // search so we only see the ones that have the temporary key; checking success isn't effective here, since it returns NO even if we loaded partial data
+        if([[doc publications] count]){
+            [doc setSelectedSearchFieldKey:BDSKCiteKeyString];
+            [doc setFilterField:@"FixMe"];
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
+                                                 defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
+                                               alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"This document was opened using temporary cite keys for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.  Do you want me to do this now?", @"") ];
+
+            int rv = [alert runSheetModalForWindow:[doc windowForSheet]
+                                     modalDelegate:nil
+                                    didEndSelector:NULL
+                                didDismissSelector:NULL
+                                       contextInfo:nil];
+            if (rv == NSAlertDefaultReturn) {
+                [doc selectAllPublications:nil];
+                [doc setFilterField:@""];
+                [doc generateCiteKey:nil];
+            }
+        }
     }
+    
     return doc;
 }
 
