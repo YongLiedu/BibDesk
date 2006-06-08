@@ -471,6 +471,8 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
     // this is required, or else we retain the document and can have problems (potential crash due to endless loop from notifications); if it never had a window, it won't be cleaned up.  maybe better just to clear them immediately?
     if(document == currentDocumentForErrors)
         [self setDocumentForErrors:nil];
+	if ([documents containsObject:document])
+		[self removeObjectFromDocumentsAtIndex:[documents indexOfObject:document]];
 }
 
 - (void)transferErrorsTo:(NSString *)fileName fromDocument:(id)document{
