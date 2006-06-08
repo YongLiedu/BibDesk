@@ -1731,7 +1731,7 @@ static int numberOfOpenEditors = 0;
 	
 	while (field = [fieldEnum nextObject]) {
 		if ([field isEqualToString:BDSKCiteKeyString]) {
-			if ([[theBib citeKey] isEqualToString:@"cite-key"])
+			if ([[theBib citeKey] isEqualToString:BDSKDefaultCiteKey])
 				[missingFields addObject:field];
 		} else if ([field isEqualToString:@"Document Filename"]) {
 			if ([NSString isEmptyString:[[theBib document] fileName]])
@@ -1765,7 +1765,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)updateCiteKeyAutoGenerateStatus{
-	if ([[theBib citeKey] isEqualToString:@"cite-key"] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey]) {
+	if ([[theBib citeKey] isEqualToString:BDSKDefaultCiteKey] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey]) {
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToGenerateCiteKey"] == NO) {
 			NSImage *icon = [NSImage smallImageNamed:@"key"];
 			NSString *tooltip = NSLocalizedString(@"The cite key needs to be generated.", @"");
@@ -2702,7 +2702,7 @@ static int numberOfOpenEditors = 0;
     if(![theBib hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"");
     // case 2: cite key hasn't been set, and paper needs to be filed
-    }else if([[theBib citeKey] isEqualToString:@"cite-key"] && [theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([[theBib citeKey] isEqualToString:BDSKDefaultCiteKey] && [theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 3: only the paper needs to be filed
@@ -2710,7 +2710,7 @@ static int numberOfOpenEditors = 0;
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 4: only the cite key needs to be set
-    }else if([[theBib citeKey] isEqualToString:@"cite-key"]){
+    }else if([[theBib citeKey] isEqualToString:BDSKDefaultCiteKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"");
 	// case 5: good to go
     }else{

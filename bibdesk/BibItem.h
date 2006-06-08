@@ -41,6 +41,8 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
 
+extern NSString *BDSKDefaultCiteKey;
+
 @class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache, BDSKFieldCollection, BDSKTemplate;
 @protocol BDSKParseableItem;
 

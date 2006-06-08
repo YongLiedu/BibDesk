@@ -63,6 +63,8 @@
 #import "BibField.h"
 #import "BDSKTemplate.h"
 
+NSString *BDSKDefaultCiteKey = @"cite-key";
+
 @interface BDSKBibItemStringCache : NSObject {
     BibItem *item;
     NSMutableDictionary *strings;
@@ -193,7 +195,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [bibLock unlock];
         [self setFileType:inFileType];
         [self setPubType:type];
-        [self setCiteKeyString: @"cite-key"];
+        [self setCiteKeyString: BDSKDefaultCiteKey];
         [self setDate: nil];
         
         // this date will be nil when loading from a file or it will be the current date when pasting
@@ -1003,7 +1005,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	NSString *fieldName;
 	NSString *fieldValue = [self citeKey];
 	
-	if (![NSString isEmptyString:fieldValue] && ![fieldValue isEqualToString:@"cite-key"]) {
+	if (![NSString isEmptyString:fieldValue] && ![fieldValue isEqualToString:BDSKDefaultCiteKey]) {
 		return NO;
 	}
 	while (fieldName = [fEnum nextObject]) {
@@ -2143,7 +2145,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	while (fieldName = [fEnum nextObject]) {
 		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 			fieldValue = [self citeKey];
-			if ([NSString isEmptyString:fieldValue] || [fieldValue isEqualToString:@"cite-key"]) 
+			if ([NSString isEmptyString:fieldValue] || [fieldValue isEqualToString:BDSKDefaultCiteKey]) 
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
 			if ([NSString isEmptyString:[document fileName]])
