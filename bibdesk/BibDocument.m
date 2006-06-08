@@ -1470,7 +1470,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark Publication actions
 
 - (IBAction)newPub:(id)sender{
-    [self createNewBlankPubAndEdit:YES];
+    if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask) {
+        [self createNewPubUsingCrossrefAction:sender];
+    } else {
+        [self createNewBlankPubAndEdit:YES];
+    }
 }
 
 // this method is called for the main table; it's a wrapper for delete or remove from group

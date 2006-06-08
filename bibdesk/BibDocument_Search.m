@@ -595,22 +595,30 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
 }
 
 - (IBAction)performFindPanelAction:(id)sender{
-	int actionType = [sender tag];
-	
-	if (actionType != NSFindPanelActionSetFindString)
-		return;
-    
     NSString *selString = nil;
+    NSPasteboard *findPasteboard;
 
-    NSPasteboard *findPasteboard = [NSPasteboard pasteboardWithName:NSFindPboard];
-	if ([findPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]])
-	    selString = [findPasteboard stringForType:NSStringPboardType];    
-        
-	if (actionType == NSFindPanelActionSetFindString) {
-		if (![NSString isEmptyString:selString])
-			[searchField setStringValue:selString];
+	switch ([sender tag]) {
+		case NSFindPanelActionShowFindPanel:
+            if ([[documentWindow toolbar] isVisible] == NO) 
+                [[documentWindow toolbar] setVisible:YES];
+            if ([[documentWindow toolbar] displayMode] == NSToolbarDisplayModeLabelOnly) 
+                [[documentWindow toolbar] setDisplayMode:NSToolbarDisplayModeDefault];
+            [searchField selectText:nil];
+            break;
+		case NSFindPanelActionSetFindString:
+            selString = nil;
+            findPasteboard = [NSPasteboard pasteboardWithName:NSFindPboard];
+            if ([findPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]])
+                selString = [findPasteboard stringForType:NSStringPboardType];    
+            if ([NSString isEmptyString:selString] == NO)
+                [searchField setStringValue:selString];
+            [searchField selectText:nil];
+            break;
+        default:
+            NSBeep();
+            break;
 	}
-	[searchField selectText:nil];
 }
 
 @end
