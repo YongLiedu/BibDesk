@@ -284,9 +284,9 @@
 	NSData *data = [NSData dataWithContentsOfFile:filePath];
     NSString *stringFromFile = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
 
-    // (@[a-z]+{),?([[:cntrl:]]) will grab either "@type{,eol" or "@type{eol", which is what we get
+    // ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get
     // from Bookends and EndNote, respectively.
-    AGRegex *theRegex = [AGRegex regexWithPattern:@"^(@[a-z]+{),?$" options:AGRegexCaseInsensitive];
+    AGRegex *theRegex = [AGRegex regexWithPattern:@"^(@[[:alpha:]]+[ \t]*{)[ \t]*,?$" options:AGRegexCaseInsensitive];
 
     // replace with "@type{FixMe,eol" (add the comma in, since we remove it if present)
     NSCharacterSet *newlineCharacterSet = [NSCharacterSet newlineCharacterSet];
