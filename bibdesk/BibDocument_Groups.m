@@ -51,6 +51,7 @@
 #import "BibTypeManager.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharedGroup.h"
+#import "NSMutableArray+ThreadSafety.h"
 
 @implementation BibDocument (Groups)
 

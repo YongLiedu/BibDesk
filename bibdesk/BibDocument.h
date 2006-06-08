@@ -40,31 +40,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-// for protocols
-#import "BDSKGroupTableView.h"
-#import "BDSKFileContentSearchController.h"
-#import "NSMutableArray+ThreadSafety.h"
-#import "BDSKTemplateParser.h"
+@protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate;
 
-@class BDSKCustomCiteTableView;
-@class BibItem;
-@class BibEditor;
-@class BibAuthor;
-@class BDSKGroup;
-@class BDSKStaticGroup;
-@class BDSKSmartGroup;
-@class AGRegex;
-@class BDSKAlert;
-@class BDSKStatusBar;
-@class BDSKTeXTask;
-@class BDSKImagePopUpButton;
-@class MacroWindowController;
-@class BDSKDragTableView;
-@class BDSKMacroResolver;
-@class BDSKSplitView;
-@class BDSKCollapsibleView;
-@class BDSKTemplate;
-@class BDSKDocumentInfoWindowController;
+@class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate;
+@class AGRegex, BDSKTeXTask, BDSKMacroResolver;
+@class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController;
+@class BDSKAlert, BDSKStatusBar, BDSKDragTableView, BDSKGroupTableView, BDSKCustomCiteTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1

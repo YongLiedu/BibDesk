@@ -43,6 +43,8 @@
 #import "CFString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKSplitView.h"
+#import "BDSKFileContentSearchController.h"
+#import "BDSKGroupTableView.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
 

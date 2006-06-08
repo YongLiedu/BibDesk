@@ -35,7 +35,6 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument+Menus.h"
-#import "NSImage+Toolbox.h"
 
 extern NSString* 	BibDocumentToolbarIdentifier;
 extern NSString*	BibDocumentToolbarNewItemIdentifier;

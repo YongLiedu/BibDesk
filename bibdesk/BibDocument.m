@@ -100,6 +100,10 @@
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
 #import "BDSKDocumentInfoWindowController.h"
+#import "NSMutableArray+ThreadSafety.h"
+#import "BDSKGroupTableView.h"
+#import "BDSKFileContentSearchController.h"
+#import "BDSKTemplateParser.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"bibTeX database";

@@ -62,6 +62,8 @@
 #import "PDFMetadata.h"
 #import "BibField.h"
 #import "BDSKTemplate.h"
+#import "NSMutableArray+ThreadSafety.h"
+#import "BDSKTemplateParser.h"
 
 NSString *BDSKDefaultCiteKey = @"cite-key";
 

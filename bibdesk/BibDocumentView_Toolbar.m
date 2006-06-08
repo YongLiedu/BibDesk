@@ -37,6 +37,7 @@
 #import "BibDocumentView_Toolbar.h"
 #import "BibDocument_Search.h"
 #import "BibAppController.h"
+#import "NSImage+Toolbox.h"
 
 #define TOOLBAR_BUTTON_SIZE NSMakeSize(39.0, 32.0)
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
