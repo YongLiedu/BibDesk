@@ -55,6 +55,14 @@
 - (IBAction)openDocumentUsingFilter:(id)sender;
 
 /*!
+    @method openDocumentUsingPhonyCiteKeys:
+    @abstract First sets cite keys when they are missing, so we can open the file.
+    @discussion «discussion»
+    
+*/
+- (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
+
+/*!
     @method openBibTeXFile:withEncoding:
     @abstract Imports a bibtex file with a specific encoding.  Useful if there are non-ASCII characters in the file.
     @discussion

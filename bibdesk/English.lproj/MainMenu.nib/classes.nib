@@ -1,7 +1,7 @@
 {
     IBClasses = (
         {
-            ACTIONS = {openDocumentUsingFilter = id; }; 
+            ACTIONS = {openDocumentUsingFilter = id; openDocumentUsingPhonyCiteKeys = id; }; 
             CLASS = BDSKDocumentController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
@@ -121,7 +121,6 @@
                 exportSelectionAsAction = id; 
                 find = id; 
                 generateCiteKey = id; 
-                importDocumentUsingPhonyCiteKeys = id; 
                 importFromFileAction = id; 
                 importFromPasteboardAction = id; 
                 importFromWebAction = id; 
@@ -133,6 +132,7 @@
                 newBDSKLibrary = id; 
                 newPub = id; 
                 openDocumentUsingFilter = id; 
+                openDocumentUsingPhonyCiteKeys = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 
                 removeSelectedPubs = id; 

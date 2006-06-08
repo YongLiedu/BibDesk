@@ -87,52 +87,6 @@
     [aDocument release];
 }
 
-- (void)openDocumentUsingPhonyCiteKeys:(BOOL)phony{
-	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAccessoryView:openTextEncodingAccessoryView];
-    NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
-    [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
-		
-	NSArray *types = (phony ? [NSArray arrayWithObject:@"bib"] : [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil]);
-	
-	int result = [oPanel runModalForDirectory:nil
-                                     file:nil
-                                    types:types];
-    id document = nil;
-	if (result == NSOKButton) {
-        NSString *fileToOpen = [oPanel filename];
-        NSString *fileType = [fileToOpen pathExtension];
-        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
-
-        if([fileType isEqualToString:@"bib"] && !phony){
-            document = [self openBibTeXFile:fileToOpen withEncoding:encoding];		
-        } else if([fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"fcgi"]){
-            document = [self openRISFile:fileToOpen withEncoding:encoding];
-        } else if([fileType isEqualToString:@"bib"] && phony){
-            document = [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
-        } else {
-            // handle other types in the usual way 
-            // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
-            // which calls NSDocument (here, most likely BibDocument) initWithContentsOfFile:ofType:
-            OBASSERT_NOT_REACHED("unimplemented file type");
-            document = [self openDocumentWithContentsOfFile:fileToOpen display:YES]; 
-        }
-        [document showWindows];
-        // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
-        if([document respondsToSelector:@selector(updateAllSmartGroups)])
-           [document performSelector:@selector(updateAllSmartGroups)];
-	}
-	
-}
-
-- (IBAction)openDocument:(id)sender{
-    [self openDocumentUsingPhonyCiteKeys:NO];
-}
-
-- (IBAction)importDocumentUsingPhonyCiteKeys:(id)sender{
-    [self openDocumentUsingPhonyCiteKeys:YES];
-}
-
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
     
     if(! [aDocument isKindOfClass:[BibDocument class]]){
@@ -154,7 +108,6 @@
     NSString *fileToOpen = nil;
     NSString *shellCommand = nil;
     NSString *filterOutput = nil;
-    BibDocument *bibDoc = nil;
     NSString *fileInputString = nil;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -212,19 +165,82 @@
                                         nil, nil, nil, nil);
             } else {
                 
-                // @@ REFACTOR:
-                // I suppose in the future, bibTeX database won't be the default? 
-                bibDoc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
+                // @@ we could also use [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
+                // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
+                // or move aside the original file
+                NSString *tmpFile = [[[NSApp delegate] temporaryFilePath:[fileToOpen lastPathComponent] createDirectory:NO] stringByAppendingPathExtension:@"bib"];
+                NSData *data = [filterOutput dataUsingEncoding:NSUTF8StringEncoding];
+                if([data writeToFile:tmpFile atomically:YES] == NO)
+                    NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFile);
                 
-                // the shell task object returns data as UTF-8, so we'll force the document to open as UTF-8
-                [bibDoc loadBibTeXDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] fromURL:nil encoding:NSUTF8StringEncoding error:NULL];
-                [bibDoc updateChangeCount:NSChangeDone]; // imported files are unsaved
-                [bibDoc showWindows];
+                BibDocument *doc = nil;
+                BOOL success;
+                
+                // make a fresh document, and don't display it until we can set its name.
+                doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
+                [doc setFileName:fileToOpen]; // required for error handling; mark it dirty, so it's obviously modified
+                [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+                success = [doc readFromURL:[NSURL fileURLWithPath:tmpFile] ofType:BDSKBibTeXDocumentType encoding:NSUTF8StringEncoding error:NULL];
+                
+                if (success == NO) {
+                    [self removeDocument:doc];
+                    doc = nil;
+                } else {
+                    [doc showWindows];
+                    
+                    // mark as dirty, since we've changed the cite keys
+                    [doc updateChangeCount:NSChangeDone];
+                }
             }
-            
 		}
         [fileInputString release];
     }
+}
+
+- (void)openDocumentCreatingPhonyCiteKeys:(BOOL)phony{
+	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAccessoryView:openTextEncodingAccessoryView];
+    NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
+    [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+		
+	NSArray *types = (phony ? [NSArray arrayWithObject:@"bib"] : [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil]);
+	
+	int result = [oPanel runModalForDirectory:nil
+                                     file:nil
+                                    types:types];
+    id document = nil;
+	if (result == NSOKButton) {
+        NSString *fileToOpen = [oPanel filename];
+        NSString *fileType = [fileToOpen pathExtension];
+        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+
+        if([fileType isEqualToString:@"bib"] && !phony){
+            document = [self openBibTeXFile:fileToOpen withEncoding:encoding];		
+        } else if([fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"fcgi"]){
+            document = [self openRISFile:fileToOpen withEncoding:encoding];
+        } else if([fileType isEqualToString:@"bib"] && phony){
+            document = [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
+        } else {
+            // handle other types in the usual way 
+            // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
+            // which calls NSDocument (here, most likely BibDocument) initWithContentsOfFile:ofType:
+            OBASSERT_NOT_REACHED("unimplemented file type");
+            document = [self openDocumentWithContentsOfFile:fileToOpen display:YES]; 
+        }
+        [document showWindows];
+        // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
+        if([document respondsToSelector:@selector(updateAllSmartGroups)])
+           [document performSelector:@selector(updateAllSmartGroups)];
+	}
+	
+}
+
+- (IBAction)openDocument:(id)sender{
+    [self openDocumentCreatingPhonyCiteKeys:NO];
+}
+
+- (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
+    [self openDocumentCreatingPhonyCiteKeys:YES];
 }
 
 - (id)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
@@ -305,10 +321,10 @@
                         
     } while(scannerHasData(scanner));
     
-    // @@ we could also use [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
+    // @@ we could also use [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
     // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
     // or move aside the original file
-    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
+    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO] stringByAppendingPathExtension:@"bib"];
     data = [mutableFileString dataUsingEncoding:encoding];
     if([data writeToFile:tmpFilePath atomically:YES] == NO)
         NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFilePath);
@@ -318,7 +334,7 @@
 	
     // make a fresh document, and don't display it until we can set its name.
     doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
-    [doc setFileName:tmpFilePath]; // required for error handling; mark it dirty, so it's obviously modified
+    [doc setFileName:filePath]; // required for error handling; mark it dirty, so it's obviously modified
     [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:NULL];
     
