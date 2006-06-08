@@ -91,7 +91,10 @@ enum{
 
 - (void)setupDrawer;
 - (void)setupButtons;
+- (void)setupForm;
+- (void)setupTypePopUp;
 - (void)registerForNotifications;
+- (void)fixURLs;
 - (void)breakTextStorageConnections;
 
 @end
@@ -160,153 +163,6 @@ static int numberOfOpenEditors = 0;
 
 - (BibItem *)currentBib{
     return theBib;
-}
-
-#define AddFormEntries(fields, attrs) \
-    e = [fields objectEnumerator]; \
-    while(tmp = [e nextObject]){ \
-        if ([ignoredKeys containsObject:tmp]) continue; \
-		[ignoredKeys addObject:tmp]; \
-		entry = [bibFields insertEntry:tmp usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[theBib valueOfField:tmp]]; \
-		if ([tmp isEqualToString:BDSKCrossrefString]) \
-			[entry setFormatter:citeKeyFormatter]; \
-		else \
-			[entry setFormatter:formCellFormatter]; \
-		if([editedTitle isEqualToString:tmp]) editedRow = i; \
-		i++; \
-    }
-
-#define AddMatrixEntries(fields, cell) \
-    e = [fields objectEnumerator]; \
-    while(tmp = [e nextObject]){ \
-		if (++j >= nc) { \
-			j = 0; \
-			i++; \
-			[extraBibFields addRow]; \
-		} \
-		NSButtonCell *buttonCell = [cell copy]; \
-		[buttonCell setTitle:tmp]; \
-		[buttonCell setIntValue:[theBib intValueOfField:tmp]]; \
-		[extraBibFields putCell:buttonCell atRow:i column:j]; \
-		[buttonCell release]; \
-		if([editedTitle isEqualToString:tmp]){ \
-			editedRow = i; \
-			editedColumn = j; \
-		} \
-    }
-
-- (void)setupForm{
-    static NSFont *requiredFont = nil;
-    if(!requiredFont){
-        requiredFont = [NSFont systemFontOfSize:13.0];
-        [[NSFontManager sharedFontManager] convertFont:requiredFont
-                                           toHaveTrait:NSBoldFontMask];
-    }
-    
-	// if we were editing in the form, we will restore the selected cell and the selection
-	NSResponder *firstResponder = [[self window] firstResponder];
-	NSText *fieldEditor = nil;
-	NSString *editedTitle = nil;
-	int editedRow = -1;
-	int editedColumn = -1;
-	NSRange selection;
-	if([firstResponder isKindOfClass:[NSText class]] && [(NSText *)firstResponder delegate] == bibFields){
-		fieldEditor = (NSText *)firstResponder;
-		selection = [fieldEditor selectedRange];
-		editedTitle = [(NSFormCell *)[bibFields selectedCell] title];
-		forceEndEditing = YES;
-		if (![[self window] makeFirstResponder:[self window]])
-			[[self window] endEditingFor:nil];
-		forceEndEditing = NO;
-	}else if(firstResponder == extraBibFields){
-		editedTitle = [(NSFormCell *)[extraBibFields selectedCell] title];
-	}
-	
-    NSString *tmp;
-    NSFormCell *entry;
-    NSArray *sKeys;
-    int i=0;
-    NSRect rect = [bibFields frame];
-    NSPoint origin = rect.origin;
-	NSEnumerator *e;
-	
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
-	NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
-	NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
-
-	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateAddedString, BDSKDateModifiedString, nil];
-    [ignoredKeys addObjectsFromArray:ratingFields];
-    [ignoredKeys addObjectsFromArray:booleanFields];
-    [ignoredKeys addObjectsFromArray:triStateFields];
-
-    NSDictionary *reqAtt = [[NSDictionary alloc] initWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
-                                                         forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
-	
-	// set up for adding all items 
-    // remove all items in the NSForm
-    [bibFields removeAllEntries];
-
-    // make two passes to get the required entries at top.
-    i=0;
-    sKeys = [[theBib allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-	
-	// now add the entries to the form
-	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[theBib type]], reqAtt);
-	AddFormEntries([[BibTypeManager sharedManager] optionalFieldsForType:[theBib type]], nil);
-	AddFormEntries(sKeys, nil);
-    
-    [ignoredKeys release];
-    [reqAtt release];
-    
-    [bibFields sizeToFit];
-    
-    [bibFields setFrameOrigin:origin];
-    [bibFields setNeedsDisplay:YES];
-    
-	rect = [extraBibFields frame];
-	origin = rect.origin;
-	
-    while ([extraBibFields numberOfRows])
-		[extraBibFields removeRow:0];
-	
-	int nc = [extraBibFields numberOfColumns];
-	int j = nc;
-	
-	i = -1;
-	AddMatrixEntries(ratingFields, ratingButtonCell);
-	AddMatrixEntries(booleanFields, booleanButtonCell);
-	AddMatrixEntries(triStateFields, triStateButtonCell);
-	
-	[extraBibFields sizeToFit];
-    
-    [extraBibFields setFrameOrigin:origin];
-    [extraBibFields setNeedsDisplay:YES];
-	
-	// restore the edited cell and its selection
-	if(editedRow != -1){
-		if(fieldEditor){
-			[[self window] makeFirstResponder:bibFields];
-			[bibFields selectTextAtRow:editedRow column:0];
-			[fieldEditor setSelectedRange:selection];
-		}else{
-			[[self window] makeFirstResponder:extraBibFields];
-			[extraBibFields selectCellAtRow:editedRow column:editedColumn];
-		}
-	}
-	didSetupForm = YES;
-}
-
-- (void)setupTypePopUp{
-    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[theBib fileType]] objectEnumerator];
-    NSString *typeName = nil;
-
-    [bibTypeButton removeAllItems];
-    while(typeName = [typeNamesE nextObject]){
-        [bibTypeButton addItemWithTitle:typeName];
-    }
-
-    [bibTypeButton selectItemWithTitle:currentType];
 }
 
 - (void)awakeFromNib{
@@ -1262,58 +1118,6 @@ static int numberOfOpenEditors = 0;
     }
     [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Flag",@"")];
 	
-}
-
-- (void)fixURLs{
-    NSURL *lurl = [[theBib URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-    NSString *rurl = [theBib valueOfField:BDSKUrlString];
-    NSImage *icon;
-    BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState ||
-						  [documentSnoopDrawer state] == NSDrawerOpeningState);
-	BOOL drawerShouldReopen = NO;
-	
-	// we need to reopen with the correct content
-    if(drawerWasOpen) [documentSnoopDrawer close];
-    
-    // either missing file or the document icon
-    icon = [theBib imageForURLField:BDSKLocalUrlString];
-    if(icon == nil) // nil for an empty field; we use missing file icon for a placeholder in that case
-        icon = [NSImage missingFileImage];
-    [viewLocalButton setIconImage:icon];
-    
-    if (lurl){
-		[viewLocalButton setIconActionEnabled:YES];
-		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file")];
-		[[self window] setRepresentedFilename:[lurl path]];
-		if([documentSnoopDrawer contentView] != webSnoopContainerView)
-			drawerShouldReopen = drawerWasOpen;
-    }else{
-		[viewLocalButton setIconActionEnabled:NO];
-        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
-        [[self window] setRepresentedFilename:@""];
-    }
-
-    NSURL *remoteURL = [theBib remoteURL];
-    if(remoteURL != nil){
-        icon = [NSImage imageForURL:remoteURL];
-		[viewRemoteButton setIconImage:icon];
-        [viewRemoteButton setIconActionEnabled:YES];
-        [viewRemoteToolbarItem setToolTip:rurl];
-		if([documentSnoopDrawer contentView] == webSnoopContainerView)
-			drawerShouldReopen = drawerWasOpen;
-    }else{
-        [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
-		[viewRemoteButton setIconActionEnabled:NO];
-        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field")];
-    }
-	
-    drawerButtonState = BDSKDrawerUnknownState; // this makes sure the button will be updated
-    if (drawerShouldReopen){
-		// this takes care of updating the button and the drawer content
-		[documentSnoopDrawer open];
-	}else{
-		[self updateDocumentSnoopButton];
-	}
 }
 
 #pragma mark choose local-url or url support
@@ -3023,6 +2827,153 @@ static int numberOfOpenEditors = 0;
 	
 }    
 
+#define AddFormEntries(fields, attrs) \
+    e = [fields objectEnumerator]; \
+    while(tmp = [e nextObject]){ \
+        if ([ignoredKeys containsObject:tmp]) continue; \
+		[ignoredKeys addObject:tmp]; \
+		entry = [bibFields insertEntry:tmp usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[theBib valueOfField:tmp]]; \
+		if ([tmp isEqualToString:BDSKCrossrefString]) \
+			[entry setFormatter:citeKeyFormatter]; \
+		else \
+			[entry setFormatter:formCellFormatter]; \
+		if([editedTitle isEqualToString:tmp]) editedRow = i; \
+		i++; \
+    }
+
+#define AddMatrixEntries(fields, cell) \
+    e = [fields objectEnumerator]; \
+    while(tmp = [e nextObject]){ \
+		if (++j >= nc) { \
+			j = 0; \
+			i++; \
+			[extraBibFields addRow]; \
+		} \
+		NSButtonCell *buttonCell = [cell copy]; \
+		[buttonCell setTitle:tmp]; \
+		[buttonCell setIntValue:[theBib intValueOfField:tmp]]; \
+		[extraBibFields putCell:buttonCell atRow:i column:j]; \
+		[buttonCell release]; \
+		if([editedTitle isEqualToString:tmp]){ \
+			editedRow = i; \
+			editedColumn = j; \
+		} \
+    }
+
+- (void)setupForm{
+    static NSFont *requiredFont = nil;
+    if(!requiredFont){
+        requiredFont = [NSFont systemFontOfSize:13.0];
+        [[NSFontManager sharedFontManager] convertFont:requiredFont
+                                           toHaveTrait:NSBoldFontMask];
+    }
+    
+	// if we were editing in the form, we will restore the selected cell and the selection
+	NSResponder *firstResponder = [[self window] firstResponder];
+	NSText *fieldEditor = nil;
+	NSString *editedTitle = nil;
+	int editedRow = -1;
+	int editedColumn = -1;
+	NSRange selection;
+	if([firstResponder isKindOfClass:[NSText class]] && [(NSText *)firstResponder delegate] == bibFields){
+		fieldEditor = (NSText *)firstResponder;
+		selection = [fieldEditor selectedRange];
+		editedTitle = [(NSFormCell *)[bibFields selectedCell] title];
+		forceEndEditing = YES;
+		if (![[self window] makeFirstResponder:[self window]])
+			[[self window] endEditingFor:nil];
+		forceEndEditing = NO;
+	}else if(firstResponder == extraBibFields){
+		editedTitle = [(NSFormCell *)[extraBibFields selectedCell] title];
+	}
+	
+    NSString *tmp;
+    NSFormCell *entry;
+    NSArray *sKeys;
+    int i=0;
+    NSRect rect = [bibFields frame];
+    NSPoint origin = rect.origin;
+	NSEnumerator *e;
+	
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSArray *ratingFields = [pw stringArrayForKey:BDSKRatingFieldsKey];
+	NSArray *booleanFields = [pw stringArrayForKey:BDSKBooleanFieldsKey];
+	NSArray *triStateFields = [pw stringArrayForKey:BDSKTriStateFieldsKey];
+
+	NSMutableSet *ignoredKeys = [[NSMutableSet alloc] initWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateAddedString, BDSKDateModifiedString, nil];
+    [ignoredKeys addObjectsFromArray:ratingFields];
+    [ignoredKeys addObjectsFromArray:booleanFields];
+    [ignoredKeys addObjectsFromArray:triStateFields];
+
+    NSDictionary *reqAtt = [[NSDictionary alloc] initWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
+                                                         forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
+	
+	// set up for adding all items 
+    // remove all items in the NSForm
+    [bibFields removeAllEntries];
+
+    // make two passes to get the required entries at top.
+    i=0;
+    sKeys = [[theBib allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+	
+	// now add the entries to the form
+	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[theBib type]], reqAtt);
+	AddFormEntries([[BibTypeManager sharedManager] optionalFieldsForType:[theBib type]], nil);
+	AddFormEntries(sKeys, nil);
+    
+    [ignoredKeys release];
+    [reqAtt release];
+    
+    [bibFields sizeToFit];
+    
+    [bibFields setFrameOrigin:origin];
+    [bibFields setNeedsDisplay:YES];
+    
+	rect = [extraBibFields frame];
+	origin = rect.origin;
+	
+    while ([extraBibFields numberOfRows])
+		[extraBibFields removeRow:0];
+	
+	int nc = [extraBibFields numberOfColumns];
+	int j = nc;
+	
+	i = -1;
+	AddMatrixEntries(ratingFields, ratingButtonCell);
+	AddMatrixEntries(booleanFields, booleanButtonCell);
+	AddMatrixEntries(triStateFields, triStateButtonCell);
+	
+	[extraBibFields sizeToFit];
+    
+    [extraBibFields setFrameOrigin:origin];
+    [extraBibFields setNeedsDisplay:YES];
+	
+	// restore the edited cell and its selection
+	if(editedRow != -1){
+		if(fieldEditor){
+			[[self window] makeFirstResponder:bibFields];
+			[bibFields selectTextAtRow:editedRow column:0];
+			[fieldEditor setSelectedRange:selection];
+		}else{
+			[[self window] makeFirstResponder:extraBibFields];
+			[extraBibFields selectCellAtRow:editedRow column:editedColumn];
+		}
+	}
+	didSetupForm = YES;
+}
+
+- (void)setupTypePopUp{
+    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[theBib fileType]] objectEnumerator];
+    NSString *typeName = nil;
+
+    [bibTypeButton removeAllItems];
+    while(typeName = [typeNamesE nextObject]){
+        [bibTypeButton addItemWithTitle:typeName];
+    }
+
+    [bibTypeButton selectItemWithTitle:currentType];
+}
+
 - (void)registerForNotifications {
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -3061,6 +3012,58 @@ static int numberOfOpenEditors = 0;
 											 selector:@selector(macrosDidChange:)
 												 name:BDSKMacroDefinitionChangedNotification
 											   object:nil];
+}
+
+- (void)fixURLs{
+    NSURL *lurl = [[theBib URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
+    NSString *rurl = [theBib valueOfField:BDSKUrlString];
+    NSImage *icon;
+    BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState ||
+						  [documentSnoopDrawer state] == NSDrawerOpeningState);
+	BOOL drawerShouldReopen = NO;
+	
+	// we need to reopen with the correct content
+    if(drawerWasOpen) [documentSnoopDrawer close];
+    
+    // either missing file or the document icon
+    icon = [theBib imageForURLField:BDSKLocalUrlString];
+    if(icon == nil) // nil for an empty field; we use missing file icon for a placeholder in that case
+        icon = [NSImage missingFileImage];
+    [viewLocalButton setIconImage:icon];
+    
+    if (lurl){
+		[viewLocalButton setIconActionEnabled:YES];
+		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file")];
+		[[self window] setRepresentedFilename:[lurl path]];
+		if([documentSnoopDrawer contentView] != webSnoopContainerView)
+			drawerShouldReopen = drawerWasOpen;
+    }else{
+		[viewLocalButton setIconActionEnabled:NO];
+        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
+        [[self window] setRepresentedFilename:@""];
+    }
+
+    NSURL *remoteURL = [theBib remoteURL];
+    if(remoteURL != nil){
+        icon = [NSImage imageForURL:remoteURL];
+		[viewRemoteButton setIconImage:icon];
+        [viewRemoteButton setIconActionEnabled:YES];
+        [viewRemoteToolbarItem setToolTip:rurl];
+		if([documentSnoopDrawer contentView] == webSnoopContainerView)
+			drawerShouldReopen = drawerWasOpen;
+    }else{
+        [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
+		[viewRemoteButton setIconActionEnabled:NO];
+        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field")];
+    }
+	
+    drawerButtonState = BDSKDrawerUnknownState; // this makes sure the button will be updated
+    if (drawerShouldReopen){
+		// this takes care of updating the button and the drawer content
+		[documentSnoopDrawer open];
+	}else{
+		[self updateDocumentSnoopButton];
+	}
 }
 
 - (void)breakTextStorageConnections {

@@ -162,17 +162,6 @@
 
 - (BibItem *)currentBib;
 
-- (void)setupTypePopUp;
-/*!
-    @method setupForm
-    @abstract handles making the NSForm
-    @discussion <ul> <li>This method is kind of hairy.
- <li>could be more efficient, maybe.
- <li>And is probably being called in the wrong place (windowDidBecomeMain).
- </ul>
-    
-*/
-- (void)setupForm;
 - (void)setCurrentType:(NSString *)type;
 /*!
     @method     show
@@ -180,13 +169,6 @@
     @discussion (comprehensive description)
 */
 - (void)show;
-
-/*!
-    @method     fixURLs
-    @abstract   Updates the views for changes in either local or remote URLs. Updates the popup buttons and the drawer contents, if necessary. 
-    @discussion (comprehensive description)
-*/
-- (void)fixURLs;
 
 /*!
     @method     chooseLocalURL:
