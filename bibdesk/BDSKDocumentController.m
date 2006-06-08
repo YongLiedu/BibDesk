@@ -115,6 +115,7 @@
 
     NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
     [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+    [openTextEncodingAccessoryView setFrameOrigin:NSZeroPoint];
     [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
 
