@@ -132,29 +132,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelea
 
 - (void)removeSurroundingWhitespace;
 {
-    static NSCharacterSet *nonWhitespace = nil;
-    NSRange firstValidCharacter, lastValidCharacter;
-
-    if (!nonWhitespace) {
-        nonWhitespace = [[[NSCharacterSet characterSetWithCharactersInString:
-            @" \t\r\n"] invertedSet] retain];
-    }
-    
-    firstValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace];
-    if (firstValidCharacter.length == 0) {
-	[self setString:@""];
-        return;
-    }
-    
-    lastValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch];
-
-    if (firstValidCharacter.location == 0 && lastValidCharacter.location == [self length] - 1)
-	return;
-    else {
-	// Delete tail first.  If we delete the head first, the range for the tail would need to be offset.
-        [self deleteCharactersInRange:NSMakeRange(lastValidCharacter.location + 1, [self length] - lastValidCharacter.location)];
-	[self deleteCharactersInRange:NSMakeRange(0, firstValidCharacter.location)];
-    }
+    // ARM: original Omni implementation used @" \t\r\n" as charset, and had an off-by-one error in trimming @" string"
+    CFStringTrimWhitespace((CFMutableStringRef)self);
 }
 
 @end
