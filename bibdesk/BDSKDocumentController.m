@@ -213,25 +213,16 @@
 	int result = [oPanel runModalForDirectory:nil
                                      file:nil
                                     types:types];
-    id document = nil;
 	if (result == NSOKButton) {
+        id document = nil;
         NSString *fileToOpen = [oPanel filename];
-        NSString *fileType = [fileToOpen pathExtension];
+        NSString *docType = [self typeFromFileExtension:[fileToOpen pathExtension]];
         NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
 
-        if([fileType isEqualToString:@"bb"]) {
-            if(phony)
-                document = [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
-            else
-                document = [self openFile:fileToOpen ofType:BDSKBibTeXDocumentType withEncoding:encoding];		
-        } else if([fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"fcgi"]){
-            document = [self openFile:fileToOpen ofType:BDSKRISDocumentType withEncoding:encoding];
-        } else {
-            // handle other types in the usual way 
-            // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
-            // which calls NSDocument (here, most likely BibDocument) initWithContentsOfFile:ofType:
-            OBASSERT_NOT_REACHED("unimplemented file type");
-            document = [self openDocumentWithContentsOfFile:fileToOpen display:YES]; 
+        if(phony){
+            document = [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
+        }else{
+            document = [self openFile:fileToOpen ofType:docType withEncoding:encoding];		
         }
         [document showWindows];
         // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
