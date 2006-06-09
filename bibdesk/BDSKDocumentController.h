@@ -63,20 +63,14 @@
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
 
 /*!
-    @method openBibTeXFile:withEncoding:
-    @abstract Imports a bibtex file with a specific encoding.  Useful if there are non-ASCII characters in the file.
-    @discussion
- */
-- (id)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
-
-/*!
-    @method     openRISFile:withEncoding:
-    @abstract   Creates a new document with given RIS file and string encoding.
+    @method     openFile:ofType:withEncoding:
+    @abstract   Creates a new document with given file of a givven document type and string encoding.
     @discussion (comprehensive description)
     @param      filePath (description)
+    @param      docType (description)
     @param      encoding (description)
 */
-- (id)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
+- (id)openFile:(NSString *)filePath ofType:(NSString *)docType withEncoding:(NSStringEncoding)encoding;
 
 /*!
     @method     openBibTeXFileUsingPhonyCiteKeys:withEncoding:

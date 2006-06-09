@@ -102,6 +102,34 @@
     }
 }
 
+- (id)openUntitledBibTeXDocumentWithString:(NSString *)fileString encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+    // @@ we could also use [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
+    // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
+    // or move aside the original file
+    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
+    NSData *data = [fileString dataUsingEncoding:encoding];
+    if([data writeToFile:tmpFilePath atomically:YES] == NO)
+        NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFilePath);
+    
+    // make a fresh document, and don't display it until we can set its name.
+    BibDocument *doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
+    [doc setFileName:tmpFilePath]; // required for error handling; mark it dirty, so it's obviously modified
+    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    BOOL success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:outError];
+    
+    if (success == NO) {
+        [self removeDocument:doc];
+        doc = nil;
+    } else {
+        [doc setFileName:nil];
+        [doc showWindows];
+        // mark as dirty, since we've changed the cite keys
+        [doc updateChangeCount:NSChangeDone];
+    }
+    
+    return doc;
+}
+
 - (IBAction)openDocumentUsingFilter:(id)sender
 {
     int result;
@@ -167,33 +195,7 @@
             } else {
                 // the original file could be any format, but the ouput is supposed to be bibtex
                 fileToOpen = [[fileToOpen stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-                
-                // @@ we could also use [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
-                // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
-                // or move aside the original file
-                NSString *tmpFile = [[[NSApp delegate] temporaryFilePath:[fileToOpen lastPathComponent] createDirectory:NO] stringByAppendingPathExtension:@"bib"];
-                NSData *data = [filterOutput dataUsingEncoding:NSUTF8StringEncoding];
-                if([data writeToFile:tmpFile atomically:YES] == NO)
-                    NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFile);
-                
-                BibDocument *doc = nil;
-                BOOL success;
-                
-                // make a fresh document, and don't display it until we can set its name.
-                doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
-                [doc setFileName:fileToOpen]; // required for error handling; mark it dirty, so it's obviously modified
-                [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-                success = [doc readFromURL:[NSURL fileURLWithPath:tmpFile] ofType:BDSKBibTeXDocumentType encoding:NSUTF8StringEncoding error:NULL];
-                
-                if (success == NO) {
-                    [self removeDocument:doc];
-                    doc = nil;
-                } else {
-                    [doc showWindows];
-                    
-                    // mark as dirty, since we've changed the cite keys
-                    [doc updateChangeCount:NSChangeDone];
-                }
+                [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:NULL];
             }
 		}
         [fileInputString release];
@@ -217,12 +219,13 @@
         NSString *fileType = [fileToOpen pathExtension];
         NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
 
-        if([fileType isEqualToString:@"bib"] && !phony){
-            document = [self openBibTeXFile:fileToOpen withEncoding:encoding];		
+        if([fileType isEqualToString:@"bb"]) {
+            if(phony)
+                document = [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
+            else
+                document = [self openFile:fileToOpen ofType:BDSKBibTeXDocumentType withEncoding:encoding];		
         } else if([fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"fcgi"]){
-            document = [self openRISFile:fileToOpen withEncoding:encoding];
-        } else if([fileType isEqualToString:@"bib"] && phony){
-            document = [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
+            document = [self openFile:fileToOpen ofType:BDSKRISDocumentType withEncoding:encoding];
         } else {
             // handle other types in the usual way 
             // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
@@ -246,33 +249,16 @@
     [self openDocumentCreatingPhonyCiteKeys:YES];
 }
 
-- (id)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
+- (id)openFile:(NSString *)filePath ofType:(NSString *)docType withEncoding:(NSStringEncoding)encoding{
 	
 	BibDocument *doc = nil;
 	BOOL success;
     
     // make a fresh document, and don't display it until we can set its name.
-    doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
+    doc = [self openUntitledDocumentOfType:docType display:NO];
     [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
-    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    success = [doc readFromURL:[NSURL fileURLWithPath:filePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:NULL];
-    if (success == NO) {
-        [self removeDocument:doc];
-        doc = nil;
-    }
-    return doc;
-}
-
-- (id)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
-	
-	BibDocument *doc = nil;
-	BOOL success;
-	
-    // make a fresh document, and don't display it until we can set its name.
-    doc = [self openUntitledDocumentOfType:BDSKRISDocumentType display:NO];
-    [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
-    [doc setFileType:BDSKRISDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    success = [doc readFromURL:[NSURL fileURLWithPath:filePath] ofType:BDSKRISDocumentType encoding:encoding error:NULL];
+    [doc setFileType:docType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    success = [doc readFromURL:[NSURL fileURLWithPath:filePath] ofType:docType encoding:encoding error:NULL];
     if (success == NO) {
         [self removeDocument:doc];
         doc = nil;
@@ -317,59 +303,31 @@
                 tmp = [theRegex replaceWithString:@"$1FixMe," inString:tmp];
                 [mutableFileString appendString:tmp]; // guaranteed non-nil result from AGRegex
             }
-            // now append the newline, since the scanner will just ignore it
-            [mutableFileString appendString:@"\n"];
         } else
             scannerReadCharacter(scanner);
                         
     } while(scannerHasData(scanner));
     
-    // @@ we could also use [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
-    // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
-    // or move aside the original file
-    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO] stringByAppendingPathExtension:@"bib"];
-    data = [mutableFileString dataUsingEncoding:encoding];
-    if([data writeToFile:tmpFilePath atomically:YES] == NO)
-        NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFilePath);
+	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:mutableFileString encoding:encoding error:NULL];
     
-	BibDocument *doc = nil;
-	BOOL success;
-	
-    // make a fresh document, and don't display it until we can set its name.
-    doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
-    [doc setFileName:filePath]; // required for error handling; mark it dirty, so it's obviously modified
-    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:NULL];
-    
-    if (success == NO) {
-        [self removeDocument:doc];
-        doc = nil;
-    } else {
-        [doc showWindows];
-        
-        // mark as dirty, since we've changed the cite keys
-        [doc updateChangeCount:NSChangeDone];
-        
-        // search so we only see the ones that have the temporary key; checking success isn't effective here, since it returns NO even if we loaded partial data
-        if([[doc publications] count]){
-            [doc setSelectedSearchFieldKey:BDSKCiteKeyString];
-            [doc setFilterField:@"FixMe"];
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
-                                                 defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
-                                               alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"This document was opened using temporary cite keys for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.  Do you want me to do this now?", @"") ];
+    if ([[doc publications] count]){
+        [doc setSelectedSearchFieldKey:BDSKCiteKeyString];
+        [doc setFilterField:@"FixMe"];
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
+                                             defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
+                                           alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"This document was opened using temporary cite keys for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.  Do you want me to do this now?", @"") ];
 
-            int rv = [alert runSheetModalForWindow:[doc windowForSheet]
-                                     modalDelegate:nil
-                                    didEndSelector:NULL
-                                didDismissSelector:NULL
-                                       contextInfo:nil];
-            if (rv == NSAlertDefaultReturn) {
-                [doc selectAllPublications:nil];
-                [doc setFilterField:@""];
-                [doc generateCiteKey:nil];
-            }
+        int rv = [alert runSheetModalForWindow:[doc windowForSheet]
+                                 modalDelegate:nil
+                                didEndSelector:NULL
+                            didDismissSelector:NULL
+                                   contextInfo:nil];
+        if (rv == NSAlertDefaultReturn) {
+            [doc selectAllPublications:nil];
+            [doc setFilterField:@""];
+            [doc generateCiteKey:nil];
         }
     }
     
