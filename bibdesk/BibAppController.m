@@ -277,6 +277,10 @@
     BOOL inputManagerIsCurrent;
     if([self isInputManagerInstalledAndCurrent:&inputManagerIsCurrent] && inputManagerIsCurrent == NO)
         [self showInputManagerUpdateAlert];
+    
+    // Ensure the previewer and TeX task get created now in order to avoid a spurious "unable to copy helper file" warning when quit->document window closes->first call to [BDSKPreviewer sharedPreviewer]
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey])
+        [BDSKPreviewer sharedPreviewer];
 	
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowingPreviewKey])
 		[[BDSKPreviewer sharedPreviewer] showPreviewPanel:self];
