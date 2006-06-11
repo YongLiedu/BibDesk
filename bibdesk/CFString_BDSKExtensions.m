@@ -554,7 +554,7 @@ static inline CFIndex __BDCharactersTrimmingWhitespace(UniChar *chars, CFIndex l
 #pragma mark API
 
 // Copied from CFString.c (CF368.25) with the addition of a single parameter for specifying comparison options (e.g. case-insensitive).
-CFArrayRef CFStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorRef allocator, CFStringRef string, CFStringRef separatorString, CFOptionFlags compareOptions)
+CFArrayRef BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorRef allocator, CFStringRef string, CFStringRef separatorString, CFOptionFlags compareOptions)
 {
     CFArrayRef separatorRanges;
     CFIndex length = CFStringGetLength(string);

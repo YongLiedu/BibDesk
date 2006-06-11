@@ -566,7 +566,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         return authors;
 
     // This is equivalent to btparse's bt_split_list(str, "and", "BibTex Name", 0, ""), but avoids UTF8String conversion
-    CFArrayRef array = CFStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorGetDefault(), (CFStringRef)aString, CFSTR(" and "), kCFCompareCaseInsensitive);
+    CFArrayRef array = BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorGetDefault(), (CFStringRef)aString, CFSTR(" and "), kCFCompareCaseInsensitive);
     
     // check brace depth; corporate authors such as {Someone and Someone Else, Inc} use braces, so this parsing is BibTeX-specific, rather than general string handling
     CFArrayRef names = __BDCreateArrayOfNamesByCheckingBraceDepth(array);
