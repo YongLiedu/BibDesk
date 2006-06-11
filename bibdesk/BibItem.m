@@ -2230,10 +2230,21 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	}else{
         NSArray *groupArray;   
         NSCharacterSet *acSet = [NSCharacterSet autocompletePunctuationCharacterSet];
-        if([value containsCharacterInSet:acSet])
+        if([value containsCharacterInSet:acSet]){
 			groupArray = [value componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
-        else
-            groupArray = [value componentsSeparatedByString:@" and "];
+        }else if ([value rangeOfString:@" and " options:NSCaseInsensitiveSearch range:NSMakeRange(0,[value length])].location != NSNotFound){
+            NSScanner *wordScanner = [[NSScanner alloc] initWithString:value];
+            NSString *word;
+            NSMutableArray *tmpArray = [NSMutableArray array];
+            [wordScanner setCharactersToBeSkipped:nil];
+            while([wordScanner isAtEnd] == NO){
+                if([wordScanner scanUpToString:@" and " intoString:&word])
+                    [tmpArray addObject:word];
+                [wordScanner scanString:@" and " intoString:nil];
+            }
+            groupArray = tmpArray;
+            [wordScanner release];
+        }
         
 		mutableGroupSet = [[NSMutableSet alloc] initCaseInsensitiveWithCapacity:3];
         [mutableGroupSet addObjectsFromArray:groupArray];
