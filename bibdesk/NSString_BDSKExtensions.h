@@ -314,6 +314,15 @@ An inline buffer is used for speed in accessing each character.
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)charSet trimWhitespace:(BOOL)trim;
 
 /*!
+    @method     componentsSeparatedByStringCaseInsensitive:
+    @abstract   Same as componentsSeparatedByString:, but uses case-insensitive comparison
+    @discussion (comprehensive description)
+    @param      separator (description)
+    @result     (description)
+*/
+- (NSArray *)componentsSeparatedByStringCaseInsensitive:(NSString *)separator;
+
+/*!
     @method     containsString:options:range:
     @abstract   Determine whether a string contains searchString in aRange using mask as search options.
     @discussion (comprehensive description)

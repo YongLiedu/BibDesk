@@ -563,6 +563,11 @@ static int MAX_RATING = 5;
     return [(id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)self, (CFCharacterSetRef)charSet, trim) autorelease];
 }
 
+- (NSArray *)componentsSeparatedByStringCaseInsensitive:(NSString *)separator;
+{
+    return [(id)BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorGetDefault(), (CFStringRef)self, (CFStringRef)separator, kCFCompareCaseInsensitive) autorelease];
+}
+
 - (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
 {
     return [(id)BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
