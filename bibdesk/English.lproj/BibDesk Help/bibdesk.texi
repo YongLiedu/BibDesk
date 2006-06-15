@@ -3444,7 +3444,7 @@ Here are lists of value keys that could be used in BibDesk export templates.
 
 @heading Collection keys
 
-Below are lists of colection keys that could be used in BibDesk export templates. 
+Below are lists of collection keys that could be used in BibDesk export templates. 
 
 @subheading Document
 
@@ -3518,6 +3518,8 @@ Below are lists of colection keys that could be used in BibDesk export templates
 @item stringByRemovingReturns
 @tab 
 @item fullyEncodeAsIURI
+@tab 
+@item stringByConvertingDoubleHyphenToEndash
 @tab 
 @end multitable
 
