@@ -29,6 +29,9 @@ New Features\
   \'a5  Templates for Services added, for flexible reference insertion\
   \'a5  Added toolbar items to editor for deleting a publication or adding one using a crossref (RFE #1221956)\
   \'a5  Added alternate action to "New" toolbar item for creating a new item with crossref (use option key)\
+  \'a5  Document info can be added as a special BibTeX type (accessible to citekey/autofile format strings with %i\{Key\})\
+  \'a5  The title field of the inbook type should be handled better in format strings (RFE #1417581)\
+  \'a5  Crossref items can now be created by holding down the option key\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 \
@@ -65,6 +68,12 @@ Bugs Fixed\
   \'a5  Service lookup now recognizes any of "citekey, cite key, cite-key, or key" case-insensitively\
   \'a5  Icon columns are now sorted as empty/non-empty instead of alphabetically by URL; this allows subsorting articles that have a URL by year\
   \'a5  Export save panel now displays show/hide extension checkbox and allows directory creation\
+  \'a5  Group names are no longer combined in the delete warning, since the sheet had problems when too many groups were selected\
+  \'a5  Fixed text height calculation in alert subclass\
+  \'a5  Changed temporary file behavior of opening with temporary cite keys and open using filter\
+  \'a5  Fixed leak in error handling of documents\
+  \'a5  Fixed warning message to the console when quitting with TeX previewing enabled, but without activating the previewer\
+  \'a5  "And" is now recognized case-insensitively as a group separator (bug #1503662)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
