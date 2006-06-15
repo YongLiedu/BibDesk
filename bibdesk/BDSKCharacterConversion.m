@@ -337,7 +337,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				NSBeginAlertSheet(NSLocalizedString(@"Duplicate Unicode Character", @""),
 								  NSLocalizedString(@"OK", @"OK"),
 								  nil,nil, [self window],self, NULL, NULL, NULL,
-								  [NSString stringWithFormat:NSLocalizedString(@"The character %@ you entered already has a TeX conversion. This could have been defined in the internal data.",@""), object], nil);
+								  [NSString stringWithFormat:NSLocalizedString(@"The character %@ you entered already has a TeX equivalent, possibly defined internally by BibDesk.",@""), object], nil);
 				
 				[tableView reloadData];
 			} else {
@@ -360,7 +360,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				NSBeginAlertSheet(NSLocalizedString(@"Duplicate TeX Conversion", @""),
 								  NSLocalizedString(@"OK", @"OK"),
 								  nil,nil, [self window],self, NULL, NULL, NULL,
-								  [NSString stringWithFormat:NSLocalizedString(@"The TeX conversion %@ you entered already has a Unicode conversion. This could have been defined in the internal data.",@""), object], nil);
+								  [NSString stringWithFormat:NSLocalizedString(@"The TeX conversion %@ you entered already has a Unicode character equivalent, possibly defined internally by BibDesk.",@""), object], nil);
 				
 				[tableView reloadData];
 			} else {
