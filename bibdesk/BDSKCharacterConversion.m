@@ -417,9 +417,14 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error{
-    *partialStringPtr = [*partialStringPtr precomposedStringWithCanonicalMapping];
-    if([*partialStringPtr length] > 1){
-        if(error) *error = NSLocalizedString(@"Only single characters are allowed", @"");
+	NSString *partialString = *partialStringPtr;
+	
+    partialString = [partialString precomposedStringWithCanonicalMapping];
+    if([partialString length] > 1){
+        if([partialString length] > 1)
+            if(error) *error = NSLocalizedString(@"Only single characters are allowed", @"");
+        else
+            *partialStringPtr = partialString;
         return NO;
     }
     return YES;
