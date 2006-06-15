@@ -417,6 +417,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error{
+    *partialStringPtr = [*partialStringPtr precomposedStringWithCanonicalMapping];
     if([*partialStringPtr length] > 1){
         if(error) *error = NSLocalizedString(@"Only single characters are allowed", @"");
         return NO;
