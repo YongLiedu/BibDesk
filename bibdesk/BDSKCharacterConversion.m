@@ -392,6 +392,11 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	[self updateButtons];
 }
 
+- (void)control:(NSControl *)control didFailToValidatePartialString:(NSString *)string errorDescription:(NSString *)error{
+    if(error != nil)
+        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [self window], nil, NULL, NULL, NULL, error);
+}
+
 @end
 
 
@@ -412,7 +417,11 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error{
-    return ([*partialStringPtr length] < 2);
+    if([*partialStringPtr length] < 2){
+        if(error) *error = NSLocalizedString(@"Only strings of length 1 are allowed", @"");
+        return NO;
+    }
+    return YES;
 }
 
 @end
