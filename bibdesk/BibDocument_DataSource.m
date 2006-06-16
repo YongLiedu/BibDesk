@@ -167,6 +167,7 @@
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if(tv == (NSTableView *)ccTableView){
 		[customStringArray replaceObjectAtIndex:row withObject:object];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 	}else if (tv == tableView){
         BibTypeManager *typeManager = [BibTypeManager sharedManager];
 
