@@ -188,6 +188,10 @@
 			[editorBib setField:key toValue:newValue];
 		}
 	}
+    
+    // autogenerate if we aren't overwriting, and it hasn't already been set by the user
+    if((modifier & optionKey) == 0 && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [editorBib canSetCiteKey] && [[editorBib citeKey] isEqualToString:BDSKDefaultCiteKey])
+        [[self windowController] generateCiteKey:nil];
 	
 	[[editorBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 	
