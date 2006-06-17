@@ -1356,14 +1356,27 @@ static int numberOfOpenEditors = 0;
 				return NO;
 			}
 		}
-	} else {
+	} else if (control == citeKeyField) {
         // this may occur if the cite key formatter fails to format
-        if(error != nil)
-            NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [self window], nil, NULL, NULL, NULL, error);
-		else
-            NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
-		return forceEndEditing;
-	}
+        if(error != nil){
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"") 
+                                                 defaultButton:nil
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:@"%@", error];
+            
+            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
+            if(forceEndEditing)
+                [control setStringValue:[theBib citeKey]];
+		}else{
+            NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
+		}
+        return forceEndEditing;
+    } else {
+        // shouldn't get here
+        NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
+        return forceEndEditing;
+    }
 }
 
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
@@ -1387,9 +1400,13 @@ static int numberOfOpenEditors = 0;
 			}
 			
 			if (message) {
-				NSRunAlertPanel(NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value"),
-								message,
-								NSLocalizedString(@"OK", @"OK"), nil, nil);
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
+                                                     defaultButton:NSLocalizedString(@"OK", @"OK")
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:message];
+                
+                [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
 				[cell setStringValue:@""];
 				return NO;
 			}
@@ -1411,10 +1428,13 @@ static int numberOfOpenEditors = 0;
 				cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
 			}
 			
-			int rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
-									 message,
-									 NSLocalizedString(@"OK", @"OK"), 
-									 cancelButton, nil);
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Invalid Value") 
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
+                                               alternateButton:cancelButton
+                                                   otherButton:nil
+                                     informativeTextWithFormat:message];
+            
+            int rv = [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
 			
 			if (forceEndEditing || rv == NSAlertAlternateReturn) {
 				return YES;
