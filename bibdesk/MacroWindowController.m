@@ -46,8 +46,8 @@
 #import "NSString_BDSKExtensions.h"
 #import "BibTeXParser.h"
 #import "BDSKComplexStringFormatter.h"
-#import "BDSKAlert.h"
 #import "BDSKMacroResolver.h"
+#import "BDSKAlert.h"
 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "OATypeAheadSelectionHelper_Extensions.h"
@@ -286,7 +286,7 @@
                 
 		if([object isEqualToString:@""]){
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Empty Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK",@"OK")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
                                                alternateButton:nil
                                                    otherButton:nil
                                      informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"")];
@@ -298,7 +298,7 @@
                 
 		if([macroDefinitions objectForKey:object]){
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Duplicate Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK",@"OK")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
                                                alternateButton:nil
                                                    otherButton:nil
                                      informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"")];
@@ -311,7 +311,7 @@
         NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
 		if([macroResolver macroDefinition:[macroDefinitions objectForKey:key] dependsOnMacro:object]){
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK",@"OK")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
                                                alternateButton:nil
                                                    otherButton:nil
                                      informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
@@ -331,7 +331,7 @@
 		
 		if([macroResolver macroDefinition:object dependsOnMacro:key]){
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK",@"OK")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
                                                alternateButton:nil
                                                    otherButton:nil
                                      informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
@@ -467,7 +467,7 @@
     
     if(hadCircular){
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Circular Macros") 
-                                             defaultButton:NSLocalizedString(@"OK",@"OK")
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
                                            alternateButton:nil
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"")];
