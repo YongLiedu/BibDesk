@@ -168,11 +168,12 @@
 	// we aren't linking, so here we decide which fields to overwrite, and just copy values over
 	NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
 	NSString *key;
-	NSString *oldValue;
-	NSString *newValue;
+	NSString *oldValue = [editorBib citeKey];
+	NSString *newValue = [tempBI citeKey];
 	
-	if(modifier & optionKey){
-		[editorBib setCiteKey:[tempBI citeKey]];
+	if(((modifier & optionKey) != 0 || [NSString isEmptyString:oldValue] == YES || [oldValue isEqualToString:BDSKDefaultCiteKey] == YES) &&
+       ([NSString isEmptyString:newValue] == NO && [newValue isEqualToString:BDSKDefaultCiteKey] == NO)){
+		[editorBib setCiteKey:newValue];
 	}
 	[editorBib setType:[tempBI type]]; // do we want this always?
 	
