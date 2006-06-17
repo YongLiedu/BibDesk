@@ -44,6 +44,7 @@
 #import "PubMedParser.h"
 #import "BDSKJSTORParser.h"
 #import "BDSKWebOfScienceParser.h"
+#import "BDSKAlert.h"
 
 @implementation BDSKDragWindow
 
@@ -154,9 +155,12 @@
 		}
 		
 		if (message) {
-			NSRunAlertPanel(NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value"),
-							message,
-							NSLocalizedString(@"OK", @"OK"), nil, nil);
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
+                                                 defaultButton:NSLocalizedString(@"OK",@"OK")
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:message];
+            [alert runSheetModalForWindow:self modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
 			return NO;
 		}
 		// add the crossref field if it doesn't exist, then set it to the citekey of the drag source's bibitem

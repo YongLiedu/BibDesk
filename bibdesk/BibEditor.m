@@ -1345,9 +1345,13 @@ static int numberOfOpenEditors = 0;
 				cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
 			}
 			
-			int rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
-									 message,
-									 NSLocalizedString(@"OK", @"OK"), cancelButton, nil);
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Invalid Value") 
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
+                                               alternateButton:cancelButton
+                                                   otherButton:nil
+                                     informativeTextWithFormat:message];
+            
+            int rv = [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
 			
 			if (forceEndEditing || rv == NSAlertAlternateReturn) {
 				[cell setStringValue:[theBib valueOfField:[cell title]]];

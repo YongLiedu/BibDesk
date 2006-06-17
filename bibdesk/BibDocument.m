@@ -3772,11 +3772,16 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         return;
     }
     BOOL check = YES;
-    int rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate Linked Files",@""),
-                             NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
-                             NSLocalizedString(@"Move Complete Only",@"Move Complete Only"),
-                             NSLocalizedString(@"Cancel",@"Cancel"), 
-                             NSLocalizedString(@"Move All",@"Move All"));
+    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files",@"")
+                                         defaultButton:NSLocalizedString(@"Move Complete Only",@"Move Complete Only")
+                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
+                                           otherButton:NSLocalizedString(@"Move All",@"Move All")
+                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@"")];
+    int rv = [alert runSheetModalForWindow:documentWindow
+                             modalDelegate:nil
+                            didEndSelector:NULL 
+                        didDismissSelector:NULL 
+                               contextInfo:NULL];
     if(rv == NSAlertOtherReturn){
         check = NO;
     }else if(rv == NSAlertAlternateReturn){
