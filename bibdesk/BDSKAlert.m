@@ -37,6 +37,7 @@
  */
 
 #import "BDSKAlert.h"
+#import "NSImage+Toolbox.h"
 
 
 @interface BDSKAlert (Private)
@@ -345,30 +346,16 @@
 	
 	if (alertStyle == NSCriticalAlertStyle) {
 		NSRect imageRect = NSZeroRect;
-		NSRect badgeRect = NSMakeRect(32.0, 1.0, 32.0, 32.0);
-		CGRect iconRect =  CGRectMake(0.0, 0.0, 64.0, 64.0);
-		IconRef iconRef;
-		OSErr myErr = GetIconRef(kOnSystemDisk, kSystemIconsCreator, kAlertCautionIcon, &iconRef);
+		NSRect badgeRect;
 		
 		imageRect.size = [unbadgedImage size];
-		
-		image = [[NSImage alloc] initWithSize:NSMakeSize(64.0, 64.0)]; 
+        badgeRect = NSMakeRect(floorf(NSMidX(imageRect)), 1.0, ceilf(0.5 * NSWidth(imageRect)), ceilf(0.5 * NSHeight(imageRect)));
+        
+		NSImage *image = [NSImage iconWithSize:imageRect.size forToolboxCode:kAlertCautionIcon];
 		
 		[image lockFocus]; 
-		
-		PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort],
-							 &iconRect,
-							 kAlignAbsoluteCenter, //kAlignNone,
-							 kTransformNone,
-							 NULL /*inLabelColor*/,
-							 kPlotIconRefNormalFlags,
-							 iconRef); 
 		[unbadgedImage drawInRect:badgeRect fromRect:imageRect operation:NSCompositeSourceOver fraction:1.0];
 		[image unlockFocus]; 
-		
-		myErr = ReleaseIconRef(iconRef);
-		
-		[image autorelease];	
 	}
 	
 	[imageView setImage:image];
