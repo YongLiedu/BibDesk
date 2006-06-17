@@ -1316,6 +1316,11 @@ static int numberOfOpenEditors = 0;
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
 }
 
+- (void)control:(NSControl *)control didFailToValidatePartialString:(NSString *)string errorDescription:(NSString *)error{
+    if(error != nil)
+        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [self window], nil, NULL, NULL, NULL, error);
+}
+
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error{
 	if (control == bibFields) {
 		if ([formCellFormatter editAsComplexString]) {
@@ -1352,7 +1357,11 @@ static int numberOfOpenEditors = 0;
 			}
 		}
 	} else {
-		OBASSERT_NOT_REACHED("formatter should not fail");
+        // this may occur if the cite key formatter fails to format
+        if(error != nil)
+            NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [self window], nil, NULL, NULL, NULL, error);
+		else
+            NSLog(@"%@:%d formatter failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__);
 		return forceEndEditing;
 	}
 }
