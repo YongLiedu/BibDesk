@@ -171,14 +171,10 @@
 	
 	// we aren't linking, so here we decide which fields to overwrite, and just copy values over
 	NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
-	NSString *key;
-	NSString *oldValue = [editorBib citeKey];
-	NSString *newValue = [tempBI citeKey];
+	NSString *key = nil;
+	NSString *oldValue = nil;
+	NSString *newValue = nil;
 	
-	if(((modifier & optionKey) != 0 || [NSString isEmptyString:oldValue] == YES || [oldValue isEqualToString:BDSKDefaultCiteKey] == YES) &&
-       ([NSString isEmptyString:newValue] == NO && [newValue isEqualToString:BDSKDefaultCiteKey] == NO)){
-		[editorBib setCiteKey:newValue];
-	}
 	[editorBib setType:[tempBI type]]; // do we want this always?
 	
 	while(key = [newKeyE nextObject]){
@@ -194,10 +190,16 @@
 		}
 	}
     
-    // autogenerate if we aren't overwriting, and it hasn't already been set by the user
-    if((modifier & optionKey) == 0 && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [editorBib canSetCiteKey] && [[editorBib citeKey] isEqualToString:BDSKDefaultCiteKey])
+    // autogenerate cite key if we aren't overwriting, and it hasn't already been set by the user
+    if((modifier & optionKey) == 0 && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [editorBib canGenerateAndSetCiteKey]){
         [[self windowController] generateCiteKey:nil];
-	
+    }
+    
+    // check cite key here in case we didn't autogenerate, or we're supposed to overwrite
+	if(((modifier & optionKey) != 0 || [editorBib hasEmptyOrDefaultCiteKey]) && ([tempBI hasEmptyOrDefaultCiteKey] == NO)){
+		[editorBib setCiteKey:[tempBI citeKey]];
+	}
+    
 	[[editorBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 	
 	return YES;

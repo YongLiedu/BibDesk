@@ -65,7 +65,7 @@
 #import "NSMutableArray+ThreadSafety.h"
 #import "BDSKTemplateParser.h"
 
-NSString *BDSKDefaultCiteKey = @"cite-key";
+static NSString *BDSKDefaultCiteKey = @"cite-key";
 
 @interface BDSKBibItemStringCache : NSObject {
     BibItem *item;
@@ -998,18 +998,23 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return ck;
 }
 
-- (BOOL)canSetCiteKey
+- (BOOL)hasEmptyOrDefaultCiteKey{
+    NSString *key = [self citeKey];
+    return [NSString isEmptyString:key] || [key isEqualToString:BDSKDefaultCiteKey];
+}
+
+- (BOOL)canGenerateAndSetCiteKey
 {
-	if ([[NSApp delegate] requiredFieldsForCiteKey] == nil)
+    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForCiteKey];
+    
+    // see if it needs to be set (hasEmptyOrDefaultCiteKey)
+	if (nil == requiredFields || [self hasEmptyOrDefaultCiteKey] == NO)
 		return NO;
 	
-	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForCiteKey] objectEnumerator];
+	NSEnumerator *fEnum = [requiredFields objectEnumerator];
 	NSString *fieldName;
-	NSString *fieldValue = [self citeKey];
-	
-	if (![NSString isEmptyString:fieldValue] && ![fieldValue isEqualToString:BDSKDefaultCiteKey]) {
-		return NO;
-	}
+    
+    // see if we have enough fields to generate it
 	while (fieldName = [fEnum nextObject]) {
 		if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
@@ -2146,8 +2151,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	
 	while (fieldName = [fEnum nextObject]) {
 		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
-			fieldValue = [self citeKey];
-			if ([NSString isEmptyString:fieldValue] || [fieldValue isEqualToString:BDSKDefaultCiteKey]) 
+            if([self hasEmptyOrDefaultCiteKey])
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
 			if ([NSString isEmptyString:[document fileName]])

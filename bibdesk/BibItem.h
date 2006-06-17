@@ -41,8 +41,6 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
 
-extern NSString *BDSKDefaultCiteKey;
-
 @class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache, BDSKFieldCollection, BDSKTemplate;
 @protocol BDSKParseableItem;
 
@@ -503,13 +501,14 @@ extern NSString *BDSKDefaultCiteKey;
 - (NSString *)suggestedCiteKey;
 
 - (BOOL)isValidCiteKey:(NSString *)proposedCiteKey;
+- (BOOL)hasEmptyOrDefaultCiteKey;
 
 /*
-    @method canSetCiteKey
-    @abstract Returns a boolean indicating whether all fields required for the generated cite key are set
+    @method canGenerateAndSetCiteKey
+    @abstract Returns a boolean indicating whether all fields required for the generated cite key are set and whether the item needs a cite key (checks hasEmptyOrDefaultCiteKey).
     @discussion - 
 */
-- (BOOL)canSetCiteKey;
+- (BOOL)canGenerateAndSetCiteKey;
 
 /*!
 	@method     setCiteKeyString
