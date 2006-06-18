@@ -1317,15 +1317,14 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)control:(NSControl *)control didFailToValidatePartialString:(NSString *)string errorDescription:(NSString *)error{
-    if(error != nil)
-        if(error != nil){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"") 
-                                                 defaultButton:nil
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:@"%@", error];
-            
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
+    if(error != nil){
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"") 
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:@"%@", error];
+        
+        [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
     }
 }
 
