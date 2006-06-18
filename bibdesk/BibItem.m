@@ -2138,16 +2138,15 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (BOOL)canSetLocalUrl
 {
-	if ([[NSApp delegate] requiredFieldsForLocalUrl] == nil) 
+    NSArray *requiredFields = [[NSApp delegate] requiredFieldsForLocalUrl];
+	
+	if (nil == requiredFields || 
+        ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
+		[NSString isEmptyString:[[document fileName] stringByDeletingLastPathComponent]]))
 		return NO;
 	
-	if ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
-		[NSString isEmptyString:[[document fileName] stringByDeletingLastPathComponent]])
-		return NO;
-	
-	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForLocalUrl] objectEnumerator];
+	NSEnumerator *fEnum = [requiredFields objectEnumerator];
 	NSString *fieldName;
-	NSString *fieldValue;
 	
 	while (fieldName = [fEnum nextObject]) {
 		if ([fieldName isEqualToString:BDSKCiteKeyString]) {
