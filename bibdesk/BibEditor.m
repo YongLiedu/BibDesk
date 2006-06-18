@@ -2440,20 +2440,21 @@ static int numberOfOpenEditors = 0;
 	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
 		NSMutableString *path = [[[lurl path] mutableCopy] autorelease];
         
-        // escape single quotes that may be in the path; other characters should be handled by quoting in the command string
-        [path replaceOccurrencesOfString:@"\'" withString:@"\\\'" options:0 range:NSMakeRange(0, [path length])];
-        
-		if ([NSString isEmptyString:path]){
-            [documentSnoopTextView setString:@""];
-            return;
+        // @@ 10.3 should check the file's UTI against com.adobe.pdf, but 10.3 doesn't have a way to get a UTI
+        if([NSString isEmptyString:path] == NO){
+            // escape single quotes that may be in the path; other characters should be handled by quoting in the command string
+            [path replaceOccurrencesOfString:@"\'" withString:@"\\\'" options:0 range:NSMakeRange(0, [path length])];
+            
+            NSString *cmdString = [[NSBundle mainBundle] pathForResource:@"pdftotext" ofType:nil];
+            cmdString = [NSString stringWithFormat:@"%@ -f 1 -l 1 \'%@\' -", cmdString, path];
+            NSString *textSnoopString = [[BDSKShellTask shellTask] runShellCommand:cmdString withInputString:nil];
+            if([NSString isEmptyString:textSnoopString])
+                [documentSnoopTextView setString:NSLocalizedString(@"Unable to convert this file to text.  It may be a scanned image, or perhaps it's not a PDF file.", @"")];
+            else
+                [documentSnoopTextView setString:textSnoopString];
+        } else {
+            [documentSnoopTextView setString:NSLocalizedString(@"This entry does not have a Local-Url.", @"")];
         }
-
-        NSString *cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 \'%@\' -",[[NSBundle mainBundle] resourcePath], path, nil];
-        NSString *textSnoopString = [[BDSKShellTask shellTask] runShellCommand:cmdString withInputString:nil];
-        if([NSString isEmptyString:textSnoopString])
-            [documentSnoopTextView setString:NSLocalizedString(@"Unable to convert this PDF file to text.  Perhaps it is a scanned image?", @"")];
-        else
-            [documentSnoopTextView setString:textSnoopString];
 	}
 	else if ([documentSnoopDrawer contentView] == webSnoopContainerView) {
 		if (!webSnoopViewLoaded) {
