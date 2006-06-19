@@ -889,6 +889,8 @@ enum {
 	
 	if(shouldMove)
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
+    
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
     while(bibItem = [pubE nextObject]){
         // don't touch shared items
@@ -912,11 +914,15 @@ enum {
 				number++;
 			}
 		}
+        [pool release];
+        pool = [NSAutoreleasePool new];
     }
-	
+
 	if([paperInfos count])
 		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
+    [pool release];
+
 	return number;
 }
 
@@ -942,6 +948,8 @@ enum {
 	if(shouldMove)
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 	
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+
     while(bibItem = [pubE nextObject]){
         // don't touch shared items
         if ([bibItem document] != theDocument) 
@@ -970,11 +978,15 @@ enum {
 				number++;
 			}            
         }
+        [pool release];
+        pool = [NSAutoreleasePool new];
     }
 	
 	if([paperInfos count])
 		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
+    [pool release];
+    
 	return number;
 }
 
@@ -998,6 +1010,8 @@ enum {
 	if(shouldMove)
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+
     while(bibItem = [pubE nextObject]){
         // don't touch shared items
         if ([bibItem document] != theDocument) 
@@ -1008,11 +1022,15 @@ enum {
 			[self setField:field ofItem:bibItem toValue:replStr withInfos:paperInfos];
 			number++;
 		}
+        [pool release];
+        pool = [NSAutoreleasePool new];
     }
 	
 	if([paperInfos count])
 		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
+    [pool release];
+    
 	return number;
 }
 
