@@ -88,20 +88,12 @@
 - (NSString *)stringByTeXifyingString:(NSString *)s;
 /*!
     @method     convertedStringWithAccentedString:
-    @abstract   Convenience method that uses unicode decomposition to convert accented characters into a TeX sequence.
+    @abstract   Convenience method that uses unicode decomposition to convert an accented character into a TeX sequence.
     @discussion (comprehensive description)
-    @param      s The string to convert
-    @result     A unicode string consisting of either the proper TeX sequence, or the original string decomposed using canonical mapping if a TeX sequence could not be formed.
+    @param      s The string to convert, should consist of a single accented character
+    @result     A unicode string consisting of either the proper TeX sequence, or nil if a TeX sequence could not be formed.
 */
-- (NSString *)convertedStringWithAccentedString:(NSString *)s;
-/*!
-    @method     convertBunch:usingDict:
-    @abstract   Converts a decomposed accented string
-    @discussion (comprehensive description)
-    @param      s Decomposed string (canonical mapping)
-    @result     TeX sequence representing the character, or the decomposed character.
-*/
-- (NSString*) convertBunch:(NSString*)s;
+- (NSString*)convertedStringWithAccentedString:(NSString*)s;
 /*!
  @method stringByDeTeXifyingString:
  @abstract TeX -> UTF-8
