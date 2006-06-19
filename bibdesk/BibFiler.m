@@ -205,7 +205,7 @@ static BibFiler *sharedFiler = nil;
         }else if(![fm movePath:path toPath:newPath force:force error:&error]){ 
             
             NSDictionary *errorInfo = [error userInfo];
-            NSString *fix = [errorInfo objectForKey:NSLocalizedRecoverySuggestionErrorKey];
+            NSString *fix = [errorInfo objectForKey:@"NSLocalizedRecoverySuggestion"];
             if (fix != nil)
                 [info setObject:fix forKey:@"fix"];
             [info setObject:[errorInfo objectForKey:NSLocalizedDescriptionKey] forKey:@"status"];
@@ -603,8 +603,9 @@ static BibFiler *sharedFiler = nil;
         if(error){
             NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:status, NSLocalizedDescriptionKey, nil];
             if (fix != nil)
-                [userInfo setObject:fix forKey:NSLocalizedRecoverySuggestionErrorKey];
+                [userInfo setObject:fix forKey:@"NSLocalizedRecoverySuggestion"];
             *error = [NSError errorWithDomain:@"BibFilerErrorDomain" code:statusFlag userInfo:userInfo];
+            NSLog(@"error \"%@\" occurred; suggested fix is \"%@\"", *error, fix);
         }
         return NO;
     }else if([NSString isEmptyString:comment] == NO){

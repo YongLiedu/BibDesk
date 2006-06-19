@@ -750,7 +750,7 @@
     
     if(result == NO){
         if(error)
-            OFError(error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Network Unavailable", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"BibDesk is unable to establish a network connection, possibly because your network is down or a firewall is blocking the connection.", @""), nil);
+            OFError(error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Network Unavailable", @""), @"NSLocalizedRecoverySuggestion", NSLocalizedString(@"BibDesk is unable to establish a network connection, possibly because your network is down or a firewall is blocking the connection.", @""), nil);
         else
             NSLog(@"Unable to contact %s, possibly because your network is down or a firewall is prevening the connection.", hostName);
     }
