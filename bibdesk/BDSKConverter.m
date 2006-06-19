@@ -168,7 +168,8 @@
     int offset = 0;
     unsigned index = 0;
     NSString *TEXString = nil;
-    
+    NSString *logString = nil;
+
     OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:s];
     UniChar ch;
     
@@ -177,6 +178,9 @@
 
     while(scannerHasData(scanner)){
     
+        // scan up to an unreadable character; logString can be used for debug logging
+        logString = [scanner readTokenFragmentWithDelimiterOFCharacterSet:finalCharSet];
+        
         index = scannerScanLocation(scanner);
 		if(index >= sLength) // don't go past the end
 			break;
