@@ -208,28 +208,38 @@
 }
 
 - (NSString *)convertedStringWithAccentedString:(NSString *)s{
-    // decompose into D form
-    NSString *str = [s decomposedStringWithCanonicalMapping];
+    
+    NSMutableString *retStr = [[s mutableCopy] autorelease];
+    
+    // decompose to canonical form
+    CFStringNormalize((CFMutableStringRef)retStr, kCFStringNormalizationFormD);
+    unsigned decomposedLength = [retStr length];
+    
     // first check if we can convert this, we should have a base character + an accent we know
-    if ([str length] == 0 || [baseCharacterSetForTeX characterIsMember:[str characterAtIndex:0]] == NO)
+    if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[retStr characterAtIndex:0]] == NO)
         return nil;
-    else if ([str length] == 1)
+    else if (decomposedLength == 1)
         return s;
-    else if ([str length] > 2 || [accentCharSet characterIsMember:[str characterAtIndex:1]] == NO)
+    else if (decomposedLength > 2 || [accentCharSet characterIsMember:[retStr characterAtIndex:1]] == NO)
         return nil;
     
     // isolate accent
-    NSString *accent = [texifyAccents objectForKey:[s substringFromIndex:1]];
+    NSString *accent = [texifyAccents objectForKey:[retStr substringFromIndex:1]];
+    
     // isolate character
-    NSString *character = [s substringToIndex:1];
+    NSString *character = [retStr substringToIndex:1];
+    
     // handle i and j (others as well?)
     if (([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) &&
 		![accent isEqualToString:@"c "] && ![accent isEqualToString:@"d "] && ![accent isEqualToString:@"b "]) {
 	    character = [@"\\" stringByAppendingString:character];
     }
-
-    NSMutableString *retStr = [NSMutableString stringWithCapacity:6];
-    [retStr appendStrings:@"{\\", accent, character, @"}", nil];
+    
+    [retStr replaceCharactersInRange:NSMakeRange(0, decomposedLength) withString:@"{\\"];
+    [retStr appendString:accent];
+    [retStr appendString:character];
+    [retStr appendString:@"}"];
+    
     return retStr;
 }
 
