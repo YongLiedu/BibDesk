@@ -105,10 +105,7 @@
     localThreadConnection = nil;
     
     [serverOnMainThread release];
-    serverOnMainThread = nil;
-    
-    // we need to unblock and allow the thread to clean up
-    CFRunLoopStop( CFRunLoopGetCurrent() );
+    serverOnMainThread = nil;    
 }
 
 - (void)runDOServerForPorts:(NSArray *)ports;
@@ -136,11 +133,15 @@
         // allow subclasses to do some custom setup
         [self serverDidSetup];
         
+        NSRunLoop *rl = [NSRunLoop currentRunLoop];
+        BOOL didRun;
+        
+        // see http://lists.apple.com/archives/cocoa-dev/2006/Jun/msg01054.html for a helpful explanation of NSRunLoop
         do {
             [pool release];
             pool = [NSAutoreleasePool new];
-            CFRunLoopRun();
-        } while (serverFlags.shouldKeepRunning == 1);
+            didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        } while (serverFlags.shouldKeepRunning == 1 && didRun);
     }
     @catch(id exception) {
         NSLog(@"Discarding exception \"%@\" raised in object %@", exception, self);
