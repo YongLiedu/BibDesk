@@ -41,9 +41,6 @@
 #import <OmniAppKit/OAPreferencesIconView.h>
 #import <OmniAppKit/NSToolbar-OAExtensions.h>
 #import <OmniAppKit/OAPreferenceClient.h>
-#import "BDSKTextViewCompletionController.h"
-
-@interface BDSKPrefCompletionController : BDSKTextViewCompletionController @end
 
 @interface NSArray (PreferencesSearch)
 - (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;
@@ -173,6 +170,7 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
         
         for(i = 0; i < numberOfRecords; i++){
             
+            
             NSArray *array = nil;
             identifier = [[records objectAtIndex:i] identifier];
 
@@ -253,7 +251,6 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
         NSSearchField *searchField = [[NSSearchField alloc] initWithFrame:NSMakeRect(0, 0, 30, 22)];
         [searchField setTarget:self];
         [searchField setAction:@selector(search:)];
-        [searchField setDelegate:self];
         
         [tbItem setAction:@selector(search:)];
         [tbItem setTarget:self];
@@ -270,128 +267,6 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
     else tbItem = [super toolbar:tb itemForItemIdentifier:itemIdentifier willBeInsertedIntoToolbar:flag];
     
     return tbItem;
-}
-
-#pragma mark Autocompletion
-
-- (NSArray *)completions
-{
-    NSMutableArray *mutableArray = nil;
-    unsigned idx;
-    
-    // this won't change unless the plist changes
-    static NSArray *allCompletions = nil;
-    if(nil == allCompletions){
-        // array of arrays...
-        NSArray *array = [clientIdentiferSearchTerms allValues];
-        idx = [array count];
-        mutableArray = [NSMutableArray arrayWithCapacity:(idx * 10)];
-        while(idx--)
-            [mutableArray addObjectsFromArray:[array objectAtIndex:idx]];
-        
-        allCompletions = [mutableArray copy];
-    }
-    
-    // now we have an array of strings; remove the non-matching ones
-    idx = [allCompletions count];
-    mutableArray = [allCompletions mutableCopy];
-    while(idx--){
-        if([[mutableArray objectAtIndex:idx] containsString:searchTerm options:NSCaseInsensitiveSearch] == NO)
-            [mutableArray removeObjectAtIndex:idx];
-    }
-    
-    // get rid of duplicates
-    NSSet *aSet = [NSSet setWithArray:mutableArray];
-    [mutableArray release];
-    return [aSet allObjects];
-}
-
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index;
-{
-    *index = -1;
-    return [self completions];
-}
-
-- (void)doAutoCompleteIfPossibleInEditor:(NSTextView *)editor
-{
-    BDSKPrefCompletionController *controller = [BDSKPrefCompletionController sharedController];
-    if([[controller completionWindow] isVisible] == NO)
-        [controller displayCompletions:[self completions] forPartialWordRange:[editor rangeForUserCompletion] originalString:[NSString stringWithString:[editor string]] atPoint:[editor locationForCompletionWindow] forTextView:editor];
-}
-
-- (NSPoint)control:(NSControl *)control locationForCompletionWindowInTextView:(NSTextView *)tv;
-{
-    NSParameterAssert(nil != control);
-    NSPoint pt = [control frame].origin;
-    pt = [control convertPoint:pt toView:nil];
-    return [[control window] convertBaseToScreen:pt];
-}
-
-static int editedIndex = 0;
-
-- (void)controlTextDidBeginEditing:(NSNotification *)aNotification;
-{
-    NSTextView *editor = [[aNotification userInfo] valueForKey:@"NSFieldEditor"];
-    editedIndex = [editor selectedRange].location;
-    [self doAutoCompleteIfPossibleInEditor:editor];
-}
-
-- (void)controlTextDidEndEditing:(NSNotification *)aNotification;
-{
-    NSTextView *editor = [[aNotification userInfo] valueForKey:@"NSFieldEditor"];
-}    
-
-- (void)controlTextDidChange:(NSNotification *)aNotification;
-{
-    NSTextView *editor = [[aNotification userInfo] valueForKey:@"NSFieldEditor"];
-    if([editor selectedRange].location != editedIndex){
-        editedIndex = [editor selectedRange].location;
-        [[BDSKPrefCompletionController sharedController] insertText:nil];
-    }
-    
-    isSearchActive = ([[editor string] isEqualToString:@""]) ? NO : YES;
-    [self setSearchTerm:[editor string]];
-    [[overlay contentView] setNeedsDisplay:YES];
-}
-
-- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView doCommandBySelector:(SEL)commandSelector;
-{
-    BOOL performed = NO;
-    BDSKPrefCompletionController *controller = [BDSKPrefCompletionController sharedController];
-    if([[controller completionWindow] isVisible] && [controller respondsToSelector:commandSelector]){
-        [controller performSelector:commandSelector withObject:nil];
-        performed = YES;
-    }
-    return performed;
-}
-
-@end
-
-@implementation BDSKPrefCompletionController
-
-- (void)moveRight:(id)sender {
-    movement = NSRightTextMovement;
-    [tableView numberOfSelectedRows] > 0 ? [self endDisplay] : [self updateCompletionsAndInsert:NO];
-}
-
-- (void)moveUp:(id)sender {
-    movement = NSUpTextMovement;
-    [tableView moveUp:nil];
-}
-
-- (void)moveDown:(id)sender {
-    movement = NSDownTextMovement;
-    [tableView moveDown:nil];
-}
-
-- (void)insertTab:(id)sender {
-    movement = NSTabTextMovement;
-    [tableView numberOfSelectedRows] > 0 ? [self endDisplay] : [self endDisplayNoComplete];
-}
-
-- (void)insertNewline:(id)sender {
-    movement = NSReturnTextMovement;
-    [self endDisplay];
 }
 
 @end
