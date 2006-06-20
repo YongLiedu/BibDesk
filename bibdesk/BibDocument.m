@@ -2823,6 +2823,29 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self updateAllSmartGroups];
 }
 
+- (void)handlePrivateBibItemChanged:(NSString *)changedKey{
+    // we can be called from a queue after the document was closed
+    if (isDocumentClosed)
+        return;
+
+	[self updateAllSmartGroups];
+    
+    if([[self currentGroupField] isEqualToString:changedKey]){
+        // this handles all UI updates if we call it, so don't bother with any others
+        [self updateGroupsPreservingSelection:YES];
+    } else if(![[searchField stringValue] isEqualToString:@""] && 
+       ([quickSearchKey isEqualToString:changedKey] || [quickSearchKey isEqualToString:BDSKAllFieldsString]) ){
+        // don't perform a search if the search field is empty
+		[self searchFieldAction:searchField];
+	} else { 
+        // groups and quicksearch won't update for us
+        if([[lastSelectedColumnForSort identifier] isEqualToString:changedKey])
+            [self sortPubsByColumn:nil]; // resort if the changed value was in the currently sorted column
+        [self updateUI];
+        [self updatePreviews:nil];
+    }	
+}
+
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 
 	NSDictionary *userInfo = [notification userInfo];
@@ -2844,22 +2867,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 
     [self invalidateGroupsForCrossreffedCiteKey:[[notification object] citeKey]];
-	[self updateAllSmartGroups];
     
-    if([[self currentGroupField] isEqualToString:changedKey]){
-        // this handles all UI updates if we call it, so don't bother with any others
-        [self updateGroupsPreservingSelection:YES];
-    } else if(![[searchField stringValue] isEqualToString:@""] && 
-       ([quickSearchKey isEqualToString:changedKey] || [quickSearchKey isEqualToString:BDSKAllFieldsString]) ){
-        // don't perform a search if the search field is empty
-		[self searchFieldAction:searchField];
-	} else { 
-        // groups and quicksearch won't update for us
-        if([[lastSelectedColumnForSort identifier] isEqualToString:changedKey])
-            [self sortPubsByColumn:nil]; // resort if the changed value was in the currently sorted column
-        [self updateUI];
-        [self updatePreviews:nil];
-    }	
+    // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
+    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged) withObject:changedKey];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
