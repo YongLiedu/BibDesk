@@ -128,6 +128,7 @@ about the BibTeX file format.
 * Citation Keys::       Automatically generating citation keys
 * AutoFile::            Keeping local copies of articles organized
 * Inserting Citations:: Adding citation commands in your favorite editor
+* Templates::           Changing templates for export and services
 * Preferences Guide::   Setting preferences for BibDesk
 * AppleScript::         Automating tasks using AppleScript
 * Getting More Help::   Where to find more answers about BibDesk
@@ -1818,9 +1819,11 @@ the same thing.
 The services also perform some searching functionality which can help
 if you don't have a photographic memory of citation keys.
 
+@heading Complete Citation
+
 In any Services aware app (including: TeXShop, iTeXMac, TextEdit, 
 BBEdit, and TextWrangler, but no Classic or X11 apps) type a
-string, select it, then choose Complete Citation from the BibDesk
+string, select it, then choose @menutitle{Complete Citation} from the BibDesk
 submenu of the Services Menu. This will replace the selected string
 with the citation(s) of any entries in open BibDesk documents (or, if
 BibDesk is not open yet, in the default bibliography set in
@@ -1849,11 +1852,40 @@ author, ``foo'' in the title, and ``Jan'' in the month:
 "Author = Baz & Title = foo & Month = Jan"
 @end example
 
+The @menutitle{Complete Citation} service uses a template for the 
+actual output. If you want to use a different style, you can modify the templates.
+See the @ref{Template Preferences,Template Preferences} to learn how to change the 
+template file to use and @ref{Templates} on how to write templates. 
+
+@heading Complete Bibliography
+
+There are two other services available that can insert a more extensive 
+bibliography description for the items. 
+They work basically the same as the @menutitle{Complete Citation} service. Choose the 
+@menutitle{Complete Text Bibliography} service menu item to get the bibliography 
+as plain text. If you choose the @menutitle{Complete Rich Text Bibliography}, 
+you wil get the biblography as formatted text (RTF). Both these commands also use 
+templates. 
+
+@heading Complete Cite Key
+
 Another service is available, called @menutitle{Complete Cite Key} which allows
 you to highlight a part of a citation key and BibDesk will complete
 the key for you. For instance, in our example , selecting
 ``CasO'' and invoking the @menutitle{Complete Cite Key}
 service would insert ``CasObe00''.
+
+@c ======================================================================================
+
+@node Templates
+@chapter Templates
+@abstract{How to add templates for Export and Services.}
+
+@cindex templates
+@cindex export templates
+@cindex service templates
+
+@i{To be written}
 
 @c ======================================================================================
 
