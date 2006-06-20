@@ -2843,7 +2843,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             [self sortPubsByColumn:nil]; // resort if the changed value was in the currently sorted column
         [self updateUI];
         [self updatePreviews:nil];
-    }	
+    }
 }
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
@@ -2869,7 +2869,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self invalidateGroupsForCrossreffedCiteKey:[[notification object] citeKey]];
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
-    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged) withObject:changedKey];
+    [self queueSelectorOnce:@selector(handlePrivateBibItemChanged:) withObject:changedKey];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
