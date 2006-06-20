@@ -1358,7 +1358,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		if(shouldTeXify && ![urlKeys containsObject:field]){
 			
 			@try{
-				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
+				value = [value stringByTeXifyingString];
 			}
             @catch(id localException){
                 if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){

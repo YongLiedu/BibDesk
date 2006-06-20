@@ -626,8 +626,7 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
     }
     
     //deTeXify it
-    NSString *sDeTexified = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:s];
-    return sDeTexified;
+    return [s stringByDeTeXifyingString];
 }
 
 static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){

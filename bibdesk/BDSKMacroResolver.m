@@ -126,7 +126,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 		if(shouldTeXify){
 			
 			@try{
-				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
+				value = [value stringByTeXifyingString];
 			}
             @catch(id localException){
 				if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){

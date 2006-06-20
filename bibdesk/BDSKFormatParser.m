@@ -587,7 +587,6 @@
 + (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
-	BDSKConverter *converter = [BDSKConverter sharedConverter];
     NSString *newString = nil;
 
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
@@ -595,7 +594,7 @@
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
-		newString = [converter stringByDeTeXifyingString:string];
+		newString = [string stringByDeTeXifyingString];
 		newString = [newString stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
 													 withString:@"-"];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
@@ -607,7 +606,7 @@
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
-		newString = [converter stringByDeTeXifyingString:string];
+		newString = [string stringByDeTeXifyingString];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		
 		return newString;
@@ -617,7 +616,7 @@
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
-		newString = [converter stringByDeTeXifyingString:string];
+		newString = [string stringByDeTeXifyingString];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		
 		return newString;
@@ -631,7 +630,6 @@
 + (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
-	BDSKConverter *converter = [BDSKConverter sharedConverter];
     NSString *newString = nil;
 	int cleanOption = 0;
 
@@ -641,7 +639,7 @@
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
-		newString = [converter stringByDeTeXifyingString:string];
+		newString = [string stringByDeTeXifyingString];
 		if (cleanOption == 1) {
 			newString = [newString stringByRemovingCurlyBraces];
 		} else if (cleanOption == 2) {
@@ -663,7 +661,7 @@
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
-		newString = [converter stringByDeTeXifyingString:string];
+		newString = [string stringByDeTeXifyingString];
 		if (cleanOption == 1) {
 			newString = [newString stringByRemovingCurlyBraces];
 		} else if (cleanOption >= 2) {
@@ -679,7 +677,7 @@
 		if ([NSString isEmptyString:string]) {
 			return @"";
 		}
-		newString = [converter stringByDeTeXifyingString:string];
+		newString = [string stringByDeTeXifyingString];
 		newString = [NSString lossyASCIIStringWithString:newString];
 		newString = [newString stringByRemovingTeX];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];

@@ -396,3 +396,12 @@
 }
 
 @end
+
+@implementation NSString (BDSKConverter)
+
+- (NSString *)stringByTeXifyingString { return [[BDSKConverter sharedConverter] stringByTeXifyingString:self]; }
+
+- (NSString *)stringByDeTeXifyingString { return [[BDSKConverter sharedConverter] stringByDeTeXifyingString:self]; }
+
+@end
+

@@ -114,3 +114,11 @@
 - (NSString *)composedStringFromTeXString:(NSString *)texString;
 
 @end
+
+@interface NSString (BDSKConverter)
+
+- (NSString *)stringByTeXifyingString;
+
+- (NSString *)stringByDeTeXifyingString;
+
+@end
