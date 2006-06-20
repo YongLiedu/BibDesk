@@ -974,8 +974,10 @@
                 return NO;
             
             [pub setField:field toValue:[theURL absoluteString]];
+            
+            // arm: autofile after a delay, assuming the Finder is our drag source.  The Finder blocks our AESendMessage call in NSFileManager to get the file's comment string, likely because it's main event loop is busy trying to process the slide back image or some other part of the drag (getting the comment takes ~20 s in this case vs. the normal < 0.01 s).  A delay of 0.5 s was not sufficient.
             if([field isEqualToString:BDSKLocalUrlString])
-                [pub autoFilePaper];
+                [pub performSelector:@selector(autoFilePaper) withObject:nil afterDelay:0.7];
             
             [self highlightBib:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
