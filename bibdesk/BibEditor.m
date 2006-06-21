@@ -2055,8 +2055,10 @@ static int numberOfOpenEditors = 0;
 			return NO;
 		        
 		[theBib setField:field toValue:[fileURL absoluteString]];
-		if ([field isEqualToString:BDSKLocalUrlString])
-			[self autoFilePaper];
+
+		// perform autofile on delay; see comment in -[BibDocument (DataSource) tableView:acceptDrop:row:dropOperation:] about drags from Finder
+        if ([field isEqualToString:BDSKLocalUrlString])
+            [self performSelector:@selector(autoFilePaper) withObject:nil afterDelay:0.7];
 		[[theBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
         
 		return YES;
