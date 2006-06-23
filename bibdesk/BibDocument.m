@@ -2031,14 +2031,19 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (void)createNewBlankPubAndEdit:(BOOL)yn{
     BibItem *newBI = [[[BibItem alloc] init] autorelease];
     
+    // add the publication; addToGroup:handleInherited: depends on the pub having a document
+    [self addPublication:newBI];
+
 	NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
+    int op;
 	while (group = [groupEnum nextObject]) {
-		if ([group isCategory])
-			[newBI addToGroup:group handleInherited:BDSKOperationSet];
+		if ([group isCategory]){
+			op = [newBI addToGroup:group handleInherited:BDSKOperationSet];
+            NSAssert1(BDSKOperationSet == op, @"Unable to add to group %@", group);
+        }
     }
 	
-    [self addPublication:newBI];
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
     [self highlightBib:newBI];
     if(yn == YES)
