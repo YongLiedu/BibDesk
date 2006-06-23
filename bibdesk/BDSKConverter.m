@@ -208,15 +208,15 @@
 }
 
 - (NSString *)convertedStringWithAccentedString:(NSString *)s{
+    
     NSMutableString *retStr = [[s mutableCopy] autorelease];
     
     // decompose to canonical form
     CFStringNormalize((CFMutableStringRef)retStr, kCFStringNormalizationFormD);
     unsigned decomposedLength = [retStr length];
-    UniChar character = decomposedLength == 0 ? 0 : [retStr characterAtIndex:0];
     
     // first check if we can convert this, we should have a base character + an accent we know
-    if ([baseCharacterSetForTeX characterIsMember:character] == NO)
+    if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[retStr characterAtIndex:0]] == NO)
         return nil;
     else if (decomposedLength == 1)
         return s;
@@ -226,17 +226,20 @@
     // isolate accent
     NSString *accent = [texifyAccents objectForKey:[retStr substringFromIndex:1]];
     
+    // isolate character
+    NSString *character = [retStr substringToIndex:1];
+    
     // handle i and j (others as well?)
-    if ((character == 'i' || character == 'j') &&
+    if (([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) &&
 		![accent isEqualToString:@"c "] && ![accent isEqualToString:@"d "] && ![accent isEqualToString:@"b "]) {
-	    [retStr insertString:@"\\" atIndex:0];
+	    character = [@"\\" stringByAppendingString:character];
     }
     
-    // prepend the TeX accent and the opening brace and slash
-    [retStr insertString:accent atIndex:0];
-    [retStr insertString:@"{\\" atIndex:0];
-    // replace the unicode accent char by the closing brace
-    [retStr replaceCharactersInRange:NSMakeRange(1, decomposedLength - 1) withString:@"}"];
+    // [accent length] == 2 in some cases, and the 'character' may or may not have \\ prepended, so we'll just replace the entire string rather than trying to catch all of those cases by recomputing lengths
+    [retStr replaceCharactersInRange:NSMakeRange(0, decomposedLength) withString:@"{\\"];
+    [retStr appendString:accent];
+    [retStr appendString:character];
+    [retStr appendString:@"}"];
     
     return retStr;
 }
