@@ -238,6 +238,11 @@
 	[button setTag:NSAlertFirstButtonReturn + numButtons];
 	[button setTarget:self];
 	[button setAction:@selector(buttonPressed:)];
+    
+    // buttons created in code use the wrong font
+    id cell = [button cell];
+    [cell setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:[cell controlSize]]]];
+    
 	if (numButtons == 0) {
 		[button setKeyEquivalent:@"\r"];
 	} else if ([aTitle isEqualToString:NSLocalizedString(@"Cancel", @"Cancel")]) {
