@@ -38,6 +38,9 @@
 
 #import "BibEditor_Toolbar.h"
 #import "BDSKMenuItem.h"
+#import <OmniAppKit/OAToolbarItem.h>
+#import "OAToolbarItem_BDSKExtensions.h"
+#import "BDSKImagePopUpButton.h"
 
 #define TOOLBAR_BUTTON_SIZE NSMakeSize(39.0, 32.0)
 
@@ -51,40 +54,14 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
 
 @implementation BibEditor (Toolbar)
 
-// ----------------------------------------------------------------------------------------
-// toolbar stuff
-// ----------------------------------------------------------------------------------------
-
-// label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
-static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
-{
-    // here we create the NSToolbarItem and setup its attributes in line with the parameters
-    NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
-    [item setLabel:label];
-    [item setPaletteLabel:paletteLabel];
-    [item setToolTip:toolTip];
-    [item setTarget:target];
-    // the settingSelector parameter can either be @selector(setView:) or @selector(setImage:).  Pass in the right
-    // one depending upon whether your NSToolbarItem will have a custom view or an image, respectively
-    // (in the itemContent parameter).  Then this next line will do the right thing automatically.
-    [item performSelector:settingSelector withObject:itemContent];
-    [item setAction:action];
-    // The menuItem to be shown in text only mode. Don't reset this when we use the default behavior. 
-	if (menuItem)
-		[item setMenuFormRepresentation:menuItem];
-    // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
-    // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
-    // it (above).
-    [theDict setObject:item forKey:identifier];
-}
-
 // called from WindowControllerDidLoadNib.
 - (void) setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibEditorToolbarIdentifier] autorelease];
+    OAToolbarItem *item;
     BDSKMenuItem *menuItem;
 
-    toolbarItems=[[NSMutableDictionary dictionary] retain];
+    toolbarItems = [[NSMutableDictionary alloc] initWithCapacity:7];
     
     // Set up toolbar properties: Allow customization, give a default display mode, and remember state in user defaults
     [toolbar setAllowsUserCustomization: YES];
@@ -94,90 +71,106 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // We are the delegate
     [toolbar setDelegate: self];
 
-    // add toolbaritems:
-
+    // Add template toolbar items
+    
+    // View File
 	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View File",@"") 
 											 action:NULL
 									  keyEquivalent:@""] autorelease];
     [menuItem setDelegate:self];
-	addToolbarItem(toolbarItems, BibEditorToolbarViewLocalItemIdentifier,
-                   NSLocalizedString(@"View File",@""), 
-				   NSLocalizedString(@"View File",@""),
-                   NSLocalizedString(@"View File",@""),
-                   nil, @selector(setView:),
-				   viewLocalButton, 
-				   NULL,
-                   menuItem);
-
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarViewLocalItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"View File",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"View File",@"")];
+    [item setToolTip:NSLocalizedString(@"View File",@"")];
+    [item setTarget:self];
+    [item setView:viewLocalButton];
+    [item setMinSize:[viewLocalButton bounds].size];
+    [item setMaxSize:[viewLocalButton bounds].size];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibEditorToolbarViewLocalItemIdentifier];
+    [item release];
+    
+    // View Remote
 	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote",@"") 
 										   action:NULL
 									keyEquivalent:@""] autorelease];
     [menuItem setDelegate:self];
-    addToolbarItem(toolbarItems, BibEditorToolbarViewRemoteItemIdentifier,
-                   NSLocalizedString(@"View Remote",@""), 
-				   NSLocalizedString(@"View Remote URL",@""),
-                   NSLocalizedString(@"View in Web Browser",@""),
-                   nil, @selector(setView:),
-				   viewRemoteButton, 
-				   NULL,
-                   menuItem);
-
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarViewRemoteItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"View Remote",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"View Remote URL",@"")];
+    [item setToolTip:NSLocalizedString(@"View in Web Browser",@"")];
+    [item setTarget:self];
+    [item setView:viewRemoteButton];
+    [item setMinSize:[viewRemoteButton bounds].size];
+    [item setMaxSize:[viewRemoteButton bounds].size];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibEditorToolbarViewRemoteItemIdentifier];
+    [item release];
+    
+    // View in Drawer
 	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View in Drawer",@"") 
 											 action:NULL
 									  keyEquivalent:@""] autorelease];
     [menuItem setDelegate:self];
-    addToolbarItem(toolbarItems, BibEditorToolbarSnoopDrawerItemIdentifier,
-                   NSLocalizedString(@"View in Drawer",@""), 
-				   NSLocalizedString(@"View in Drawer",@""),
-                   NSLocalizedString(@"View File in Drawer",@""),
-                   nil, @selector(setView:),
-				   documentSnoopButton, 
-				   NULL,
-                   menuItem);
-
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarSnoopDrawerItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"View in Drawer",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"View in Drawer",@"")];
+    [item setToolTip:NSLocalizedString(@"View File in Drawer",@"")];
+    [item setTarget:self];
+    [item setView:documentSnoopButton];
+    [item setMinSize:[documentSnoopButton bounds].size];
+    [item setMaxSize:[documentSnoopButton bounds].size];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibEditorToolbarSnoopDrawerItemIdentifier];
+    [item release];
+    
+    // Authors
 	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"Authors",@"") 
 											 action:@selector(showPersonDetailCmd:)
 									  keyEquivalent:@""] autorelease];
     [menuItem setTarget:self];
-    addToolbarItem(toolbarItems, BibEditorToolbarAuthorTableItemIdentifier,
-                   NSLocalizedString(@"Authors",@""), 
-				   NSLocalizedString(@"Authors",@""),
-                   NSLocalizedString(@"Authors",@""),
-                   nil, @selector(setView:),  
-				   authorScrollView,
-				   NULL,
-                   menuItem);
-
-	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"Delete",@"Delete") 
-											 action:@selector(deletePub:)
-									  keyEquivalent:@""] autorelease];
-    [menuItem setDelegate:self];
-    addToolbarItem(toolbarItems, BibEditorToolbarDeleteItemIdentifier,
-                   NSLocalizedString(@"Delete",@"Delete"), 
-				   NSLocalizedString(@"Delete Publication",@"Delete Publication"),
-                   NSLocalizedString(@"Delete Publication",@"Delete Publication"),
-                   nil, @selector(setImage:),
-				   [NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon],
-				   @selector(deletePub:),
-                   menuItem);
-
-	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"New",@"New") 
-											 action:@selector(createNewPubUsingCrossrefAction:)
-									  keyEquivalent:@""] autorelease];
-    [menuItem setDelegate:self];
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarAuthorTableItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"Authors",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Authors",@"")];
+    [item setToolTip:NSLocalizedString(@"Authors",@"")];
+    [item setTarget:self];
+    [item setView:authorScrollView];
+    [item setMinSize:[authorScrollView bounds].size];
+    [item setMaxSize:[authorScrollView bounds].size];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibEditorToolbarAuthorTableItemIdentifier];
+    [item release];
+    
+    // Delete
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarDeleteItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Delete",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Delete Publication",@"")];
+    [item setToolTip:NSLocalizedString(@"Delete selected publication",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon]];
+    [item setAction:@selector(deletePub:)];
+    [toolbarItems setObject:item forKey:BibEditorToolbarDeleteItemIdentifier];
+    [item release];
+    
+    // New
     NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(32, 32)] autorelease];
     [image lockFocus];
 	[[NSImage imageNamed: @"newdoc"] compositeToPoint:NSZeroPoint operation:NSCompositeSourceOver]; 
     [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
     [image unlockFocus];
-    addToolbarItem(toolbarItems, BibEditorToolbarAddWithCrossrefItemIdentifier,
-                   NSLocalizedString(@"New",@"New"), 
-				   NSLocalizedString(@"New with Crossref",@"New with Crossref"),
-                   NSLocalizedString(@"New Publication with Crossref",@"New Publication with Crossref"),
-                   nil, @selector(setImage:),
-				   image, 
-				   @selector(createNewPubUsingCrossrefAction:),
-                   menuItem);
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarAddWithCrossrefItemIdentifier];
+    [item setLabel:NSLocalizedString(@"New",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"New with Crossref",@"")];
+    [item setToolTip:NSLocalizedString(@"New Publication with Crossref",@"")];
+    [item setTarget:self];
+    [item setImage:image];
+    [item setAction:@selector(createNewPubUsingCrossrefAction:)];
+    [toolbarItems setObject:item forKey:BibEditorToolbarAddWithCrossrefItemIdentifier];
+    [item release];
     
     // Attach the toolbar to the document window
     [[self window] setToolbar: toolbar];
@@ -189,35 +182,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
       itemForItemIdentifier: (NSString *)itemIdent
   willBeInsertedIntoToolbar:(BOOL) willBeInserted {
 
-    OAToolbarItem *newItem = [[[OAToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
-    NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
-
-    [newItem setLabel:[item label]];
-    [newItem setPaletteLabel:[item paletteLabel]];
-    if ([item view] != nil) {
-        [newItem setView:[item view]];
-		[newItem setDelegate:self];
-        // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
-        // view won't show up at all!  This doesn't affect toolbar items with images, however.
-        if ([itemIdent isEqualToString:BibEditorToolbarAuthorTableItemIdentifier]) {
-            [newItem setMinSize:[[item view] bounds].size];
-            [newItem setMaxSize:[[item view] bounds].size];
-        } else {
-            // This is an BDSKImagePopUpButton
-            // Set the sizes as a regular control size
-            // The actual controlSize might be different, so we shouldn't use [self bounds].size
-            [newItem setMinSize:TOOLBAR_BUTTON_SIZE];
-            [newItem setMaxSize:TOOLBAR_BUTTON_SIZE];
-        }
-    } else {
-        [newItem setImage:[item image]];
-    }
-    [newItem setToolTip:[item toolTip]];
-    [newItem setTarget:[item target]];
-    [newItem setAction:[item action]];
-    [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
-
-    return newItem;
+    return [[[toolbarItems objectForKey:itemIdent] copy] autorelease];
 }
 
 
