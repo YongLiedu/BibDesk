@@ -815,6 +815,13 @@
 - (void)setNeedsToBeFiled:(BOOL)flag;
 
 /*!
+    @method     autoFilePaperAfterDelay
+    @abstract   Workaround for a Finder issue that causes drag-and-drop from the Finder to stall when we use autofile (due to getting/setting the file comment string).
+    @discussion (comprehensive description)
+*/
+- (void)autoFilePaperAfterDelay;
+
+/*!
     @method autoFilePaper
     @abstract Automatically file a paper when all necessary fields are set, otherwise flags to be filed. Does nothing when the preference is set to not file automatically.  
     @discussion - 

@@ -2180,6 +2180,12 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNeedsToBeFiledChangedNotification object:self];
 }
 
+- (void)autoFilePaperAfterDelay
+{
+    // arm: for drag-and-drop operations, autofile after a delay, assuming the Finder is our drag source.  The Finder blocks our AESendMessage call in NSFileManager to get the file's comment string, likely because it's main event loop is busy trying to process the slide back image or some other part of the drag (getting the comment takes ~20 s in this case vs. the normal < 0.01 s).  A delay of 0.5 s was not sufficient.
+    [self performSelector:@selector(autoFilePaper) withObject:nil afterDelay:0.7];
+}
+
 - (BOOL)autoFilePaper
 {
     // we can't autofile if it's disabled or there is nothing to file
