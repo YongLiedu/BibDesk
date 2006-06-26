@@ -68,8 +68,8 @@
 {
     if(self = [self init]){
         [self setChildren:[coder decodeObjectForKey:@"children"]];
-        columnValues = [[coder decodeObjectForKey:@"columnValues"] retain];
-        parent = [coder decodeObjectForKey:@"parent"];
+        [columnValues setDictionary:[coder decodeObjectForKey:@"columnValues"]];
+        [self setParent:[coder decodeObjectForKey:@"parent"]];
     }
     return self;
 }
