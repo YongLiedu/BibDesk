@@ -86,14 +86,8 @@
  @result the string converted into ASCI TeX encoding
 */
 - (NSString *)stringByTeXifyingString:(NSString *)s;
-/*!
-    @method     convertedStringWithAccentedString:
-    @abstract   Convenience method that uses unicode decomposition to convert an accented character into a TeX sequence.
-    @discussion (comprehensive description)
-    @param      s The string to convert, should consist of a single accented character
-    @result     A unicode string consisting of either the proper TeX sequence, or nil if a TeX sequence could not be formed.
-*/
-- (NSString*)convertedStringWithAccentedString:(NSString*)s;
+- (NSString *)copyStringByTeXifyingString:(NSString *)s;
+
 /*!
  @method stringByDeTeXifyingString:
  @abstract TeX -> UTF-8
@@ -102,6 +96,7 @@
  @result the string converted from ASCI TeX encoding
 */
 - (NSString *)stringByDeTeXifyingString:(NSString *)s;
+- (NSString *)copyStringByDeTeXifyingString:(NSString *)s;
 
 /*!
     @method     composedStringFromTeXString:
@@ -118,7 +113,9 @@
 @interface NSString (BDSKConverter)
 
 - (NSString *)stringByTeXifyingString;
+- (NSString *)initTeXifiedStringWithString:(NSString *)aString;
 
 - (NSString *)stringByDeTeXifyingString;
+- (NSString *)initDeTeXifiedStringWithString:(NSString *)aString;
 
 @end

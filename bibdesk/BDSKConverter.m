@@ -49,6 +49,7 @@
 - (void)setFinalCharSet:(NSCharacterSet *)charSet;
 - (void)setTexifyConversions:(NSDictionary *)newConversions;
 - (void)setDeTexifyConversions:(NSDictionary *)newConversions;
+static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharacterSet *baseCharacterSetForTeX, NSCharacterSet *accentCharSet, NSDictionary *texifyAccents);
 @end
 
 @implementation BDSKConverter
@@ -139,6 +140,10 @@
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
+    return [[self copyStringByTeXifyingString:s] autorelease];
+}
+
+- (NSString *)copyStringByTeXifyingString:(NSString *)s{
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
 		BDSKComplexString *cs = (BDSKComplexString *)s;
@@ -154,28 +159,28 @@
 			[nodes addObject:newNode];
 			[newNode release];
 		}
-		return [NSString stringWithNodes:nodes macroResolver:[cs macroResolver]];
+		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
     // we expect to find composed accented characters, this is also what we use in the CharacterConversion plist
-    s = [s precomposedStringWithCanonicalMapping];
+    NSMutableString *precomposedString = [s mutableCopy];
+    CFStringNormalize((CFMutableStringRef)precomposedString, kCFStringNormalizationFormC);
     
-    NSString *tmpConv = nil;
-    NSMutableString *convertedSoFar = [s mutableCopy];
+    NSMutableString *tmpConv = nil;
+    NSMutableString *convertedSoFar = [precomposedString mutableCopy];
 
-    unsigned sLength = [s length];
+    unsigned sLength = [precomposedString length];
     
     int offset = 0;
     unsigned index = 0;
     NSString *TEXString = nil;
     NSString *logString = nil;
 
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:s];
+    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:precomposedString];
+    [precomposedString release];
+    
     UniChar ch;
     
-    // convertedSoFar has s to begin with.
-    // while scanner's not at eof, scan up to characters from that set into tmpOut
-
     while(scannerHasData(scanner)){
     
         // scan up to an unreadable character; logString can be used for debug logging
@@ -186,16 +191,28 @@
 			break;
 		
         ch = scannerReadCharacter(scanner);
-        tmpConv = [[NSString alloc] initWithCharactersNoCopy:&ch length:1 freeWhenDone:NO];
+        tmpConv = [[NSMutableString alloc] initWithCharactersNoCopy:&ch length:1 freeWhenDone:NO];
 
-		if((TEXString = [texifyConversions objectForKey:tmpConv]) || (TEXString = [self convertedStringWithAccentedString:tmpConv])){
+        // try the dictionary first
+		if((TEXString = [texifyConversions objectForKey:tmpConv])){
 			[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
 										  withString:TEXString];
-			offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-		} else if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not convertable by us
+			// we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+            offset += [TEXString length] - 1;
+            
+        // fall back to Unicode decomposition/conversion of the mutable string
+		} else if(convertComposedCharacterToTeX(tmpConv, baseCharacterSetForTeX, accentCharSet, texifyAccents)){
+            [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
+                                          withString:tmpConv];
+			// we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+            offset += [tmpConv length] - 1;
+            
+        // if tmpConv is non-nil and decomposition failed, throw an exception
+        } else if(tmpConv != nil){
             NSString *charString = [NSString unicodeNameOfCharacter:ch];
             NSLog(@"unable to convert \"%@\" (unichar %@)", charString, [NSString hexStringForCharacter:ch]);
-            [NSException raise:BDSKTeXifyException format:@"%@", charString]; // raise exception after moving the scanner past the offending char
+            // raise exception after moving the scanner past the offending char
+            [NSException raise:BDSKTeXifyException format:@"%@", charString]; 
         }
         [tmpConv release];
     }
@@ -204,30 +221,28 @@
     //clean up
     [scanner release];
     
-    return([convertedSoFar autorelease]);
+    return convertedSoFar;
 }
 
-- (NSString *)convertedStringWithAccentedString:(NSString *)s{
-    
-    NSMutableString *retStr = [[s mutableCopy] autorelease];
-    
+static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharacterSet *baseCharacterSetForTeX, NSCharacterSet *accentCharSet, NSDictionary *texifyAccents)
+{        
     // decompose to canonical form
-    CFStringNormalize((CFMutableStringRef)retStr, kCFStringNormalizationFormD);
-    unsigned decomposedLength = [retStr length];
+    CFStringNormalize((CFMutableStringRef)charString, kCFStringNormalizationFormD);
+    unsigned decomposedLength = [charString length];
     
     // first check if we can convert this, we should have a base character + an accent we know
-    if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[retStr characterAtIndex:0]] == NO)
-        return nil;
+    if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[charString characterAtIndex:0]] == NO)
+        return NO;
     else if (decomposedLength == 1)
-        return s;
-    else if (decomposedLength > 2 || [accentCharSet characterIsMember:[retStr characterAtIndex:1]] == NO)
-        return nil;
+        return YES;
+    else if (decomposedLength > 2 || [accentCharSet characterIsMember:[charString characterAtIndex:1]] == NO)
+        return NO;
     
     // isolate accent
-    NSString *accent = [texifyAccents objectForKey:[retStr substringFromIndex:1]];
+    NSString *accent = [texifyAccents objectForKey:[charString substringFromIndex:1]];
     
     // isolate character
-    NSString *character = [retStr substringToIndex:1];
+    NSString *character = [charString substringToIndex:1];
     
     // handle i and j (others as well?)
     if (([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) &&
@@ -236,18 +251,22 @@
     }
     
     // [accent length] == 2 in some cases, and the 'character' may or may not have \\ prepended, so we'll just replace the entire string rather than trying to catch all of those cases by recomputing lengths
-    [retStr replaceCharactersInRange:NSMakeRange(0, decomposedLength) withString:@"{\\"];
-    [retStr appendString:accent];
-    [retStr appendString:character];
-    [retStr appendString:@"}"];
+    [charString replaceCharactersInRange:NSMakeRange(0, decomposedLength) withString:@"{\\"];
+    [charString appendString:accent];
+    [charString appendString:character];
+    [charString appendString:@"}"];
     
-    return retStr;
+    return YES;
 }
 
 - (NSString *)stringByDeTeXifyingString:(NSString *)s{
+    return [[self copyStringByDeTeXifyingString:s] autorelease];
+}
+
+- (NSString *)copyStringByDeTeXifyingString:(NSString *)s{
 
     if([NSString isEmptyString:s]){
-        return @"";
+        return [@"" retain];
     }
     
 	// deTeXify only string nodes of complex strings;
@@ -265,7 +284,7 @@
 			[nodes addObject:newNode];
 			[newNode release];
 		}
-		return [NSString stringWithNodes:nodes macroResolver:[cs macroResolver]];
+		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
     NSString *tmpPass;
@@ -302,7 +321,7 @@
         }
     } while(scannerHasData(scanner));
     [scanner release];
-    return [convertedSoFar autorelease]; 
+    return convertedSoFar; 
 }
 
 - (NSString *)composedStringFromTeXString:(NSString *)texString{
@@ -403,6 +422,10 @@
 - (NSString *)stringByTeXifyingString { return [[BDSKConverter sharedConverter] stringByTeXifyingString:self]; }
 
 - (NSString *)stringByDeTeXifyingString { return [[BDSKConverter sharedConverter] stringByDeTeXifyingString:self]; }
+
+- (NSString *)initTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:aString]; }
+
+- (NSString *)initDeTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByDeTeXifyingString:aString]; }
 
 @end
 
