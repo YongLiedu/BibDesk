@@ -182,7 +182,11 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
       itemForItemIdentifier: (NSString *)itemIdent
   willBeInsertedIntoToolbar:(BOOL) willBeInserted {
 
-    return [[[toolbarItems objectForKey:itemIdent] copy] autorelease];
+    OAToolbarItem *item = [toolbarItems objectForKey:itemIdent];
+    OAToolbarItem *newItem = [[item copy] autorelease];
+    // the view should not be copied
+    if ([item view]) [newItem setView:[item view]];
+    return newItem;
 }
 
 
