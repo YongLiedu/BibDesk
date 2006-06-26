@@ -95,6 +95,17 @@ enum {
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue;
 
 /*!
+    @method     stringWithContentsOfFile:encoding:guessEncoding:
+    @abstract   Tries to load a file with the specified encoding; if guessEncoding is set to YES, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.
+    @discussion (comprehensive description)
+    @param      path (description)
+    @param      encoding (description)
+    @param      try (description)
+    @result     (description)
+*/
++ (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
+
+/*!
     @method     stringWithCString:usingEncoding:
     @abstract   Returns an autoreleased string allocated and initialized with the contents of the input characters (assumes a NULL terminated string).
     @discussion Used to create Unicode string instances from C strings, based on the given string encoding.
@@ -123,6 +134,17 @@ enum {
 */
 
 - (NSString *)initWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding;
+
+/*!
+    @method     initWithContentsOfFile:encoding:guessEncoding:
+    @abstract   Tries to load a file with the specified encoding; if guessEncoding is set to YES, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.
+    @discussion (comprehensive description)
+    @param      path (description)
+    @param      encoding (description)
+    @param      try (description)
+    @result     (description)
+*/
+- (NSString *)initWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 
 #pragma mark TeX cleaning
 

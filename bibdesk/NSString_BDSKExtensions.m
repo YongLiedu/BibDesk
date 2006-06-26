@@ -108,6 +108,11 @@ static int MAX_RATING = 5;
     return byteString == NULL ? nil : [(NSString *)CFStringCreateWithCString(CFAllocatorGetDefault(), byteString, CFStringConvertNSStringEncodingToEncoding(encoding)) autorelease];
 }
 
++ (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
+{
+    return [[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try];
+}
+
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue {
     switch (triStateValue) {
         case NSOffState:
@@ -141,6 +146,47 @@ static int MAX_RATING = 5;
 - (NSString *)initWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding{
     return byteString == NULL ? nil : (NSString *)CFStringCreateWithCString(CFAllocatorGetDefault(), byteString, CFStringConvertNSStringEncodingToEncoding(encoding));
 }
+
+static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
+{
+    unsigned len = [data length];
+    size_t size = sizeof(UniChar);
+    BOOL rv = NO;
+    if(len >= size){
+        const UniChar bigEndianBOM = 0xfeff;
+        const UniChar littleEndianBOM = 0xfffe;
+        
+        UniChar possibleBOM = 0;
+        [data getBytes:&possibleBOM length:size];
+        rv = (possibleBOM == bigEndianBOM || possibleBOM == littleEndianBOM);
+    }
+    return rv;
+}
+
+- (NSString *)initWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
+{
+    if(self = [self init]){
+        NSData *data = [[NSData alloc] initWithContentsOfFile:path];
+
+        NSString *string = nil;
+        if(encoding > 0)
+            string = [[NSString alloc] initWithData:data encoding:encoding];
+        if(nil == string && try && dataHasUnicodeByteOrderMark(data) && encoding != NSUnicodeStringEncoding)
+            string = [[NSString alloc] initWithData:data encoding:NSUnicodeStringEncoding];
+        if(nil == string && try && encoding != NSUTF8StringEncoding)
+            string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        if(nil == string && try && encoding != [NSString defaultCStringEncoding])
+            string = [[NSString alloc] initWithData:data encoding:[NSString defaultCStringEncoding]];
+        if(nil == string && try && encoding != NSISOLatin1StringEncoding)
+            string = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
+
+        [data release];
+        [self release];
+        self = string;
+    }
+    return self;
+}
+
 
 #pragma mark TeX cleaning
 
