@@ -231,7 +231,9 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     [newItem setToolTip:[item toolTip]];
     [newItem setTarget:[item target]];
     [newItem setAction:[item action]];
-    [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
+    // option key alternate titles do not work properly in label-only mode when we set the menuFormRepresentation, even if it is nil
+    if ([item menuFormRepresentation])
+        [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
 
     return newItem;
 }
