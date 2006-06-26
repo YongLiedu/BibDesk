@@ -38,8 +38,10 @@
 #import "BibDocument_Search.h"
 #import "BibAppController.h"
 #import "NSImage+Toolbox.h"
+#import <OmniAppKit/OAToolbarItem.h>
+#import "OAToolbarItem_BDSKExtensions.h"
+#import "BDSKImagePopUpButton.h"
 
-#define TOOLBAR_BUTTON_SIZE NSMakeSize(39.0, 32.0)
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
 #define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)
 
@@ -55,40 +57,14 @@ NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolbarCiteD
 
 @implementation BibDocument (Toolbar)
 
-// ----------------------------------------------------------------------------------------
-// toolbar stuff
-// ----------------------------------------------------------------------------------------
-
-// label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
-static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
-{
-    // here we create the NSToolbarItem and setup its attributes in line with the parameters
-    NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
-    [item setLabel:label];
-    [item setPaletteLabel:paletteLabel];
-    [item setToolTip:toolTip];
-    [item setTarget:target];
-    // the settingSelector parameter can either be @selector(setView:) or @selector(setImage:).  Pass in the right
-    // one depending upon whether your NSToolbarItem will have a custom view or an image, respectively
-    // (in the itemContent parameter).  Then this next line will do the right thing automatically.
-    [item performSelector:settingSelector withObject:itemContent];
-    [item setAction:action];
-    // The menuItem to be shown in text only mode. Don't reset this when we use the default behavior. 
-	if (menuItem)
-		[item setMenuFormRepresentation:menuItem];
-    // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
-    // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
-    // it (above).
-    [theDict setObject:item forKey:identifier];
-}
-
 // called from WindowControllerDidLoadNib.
 - (void) setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibDocumentToolbarIdentifier] autorelease];
+    OAToolbarItem *item;
     NSMenuItem *menuItem;
-
-    toolbarItems=[[NSMutableDictionary dictionary] retain];
+    
+    toolbarItems = [[NSMutableDictionary alloc] initWithCapacity:9];
     
     // Set up toolbar properties: Allow customization, give a default display mode, and remember state in user defaults
     [toolbar setAllowsUserCustomization: YES];
@@ -98,93 +74,127 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // We are the delegate
     [toolbar setDelegate: self];
 
-    // add toolbaritems:
-
-    addToolbarItem(toolbarItems, BibDocumentToolbarNewItemIdentifier,
-                   NSLocalizedString(@"New",@""), 
-				   NSLocalizedString(@"New Publication",@""),
-                   NSLocalizedString(@"Create new publication",@""),
-                   self, @selector(setImage:),
-				   [NSImage imageNamed: @"newdoc"], 
-				   @selector(newPub:),
-                   nil);
-
-    addToolbarItem(toolbarItems, BibDocumentToolbarDeleteItemIdentifier,
-                   NSLocalizedString(@"Delete",@""), 
-				   NSLocalizedString(@"Delete Publication",@""),
-                   NSLocalizedString(@"Delete selected publication(s)",@""),
-                   self, @selector(setImage:),  
-				   [NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon],
-				   @selector(deleteSelectedPubs:),
-                   nil);
-
-    addToolbarItem(toolbarItems, BibDocumentToolbarEditItemIdentifier,
-                   NSLocalizedString(@"Edit",@""),
-                   NSLocalizedString(@"Edit Publication",@""),
-                   NSLocalizedString(@"Edit selected publication(s)",@""),
-                   self, @selector(setImage:), 
-				   [NSImage imageNamed: @"editdoc"],
-                   @selector(editPubCmd:), 
-				   nil);
-
-	addToolbarItem(toolbarItems, BibDocumentToolbarPreviewItemIdentifier,
-                   NSLocalizedString(@"Preview",@""),
-                   NSLocalizedString(@"Show/Hide Preview",@""),
-                   NSLocalizedString(@"Show/Hide preview panel",@""),
-                   nil, @selector(setImage:),
-                   [NSImage imageNamed: @"preview"],
-                   @selector(toggleShowingPreviewPanel:), NULL);
+    // Add template toolbar items
+    
+    // New
+    NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(32, 32)] autorelease];
+    [image lockFocus];
+    [[NSImage imageNamed: @"newdoc"] compositeToPoint:NSZeroPoint operation:NSCompositeSourceOver]; 
+    [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
+    [image unlockFocus];
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarNewItemIdentifier];
+    [item setLabel:NSLocalizedString(@"New",@"")];
+    [item setOptionKeyLabel:NSLocalizedString(@"New with Crossref",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"New Publication",@"")];
+    [item setToolTip:NSLocalizedString(@"Create new publication",@"")];
+    [item setOptionKeyToolTip:NSLocalizedString(@"Create new publication with crossref",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageNamed: @"newdoc"]];
+    [item setOptionKeyImage:image];
+    [item setAction:@selector(newPub:)];
+    [item setOptionKeyAction:@selector(createNewPubUsingCrossrefAction:)];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarNewItemIdentifier];
+    [item release];
+    
+    // Delete
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarDeleteItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Delete",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Delete Publication",@"")];
+    [item setToolTip:NSLocalizedString(@"Delete selected publication(s)",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon]];
+    [item setAction:@selector(deleteSelectedPubs:)];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarDeleteItemIdentifier];
+    [item release];
+    
+    // Edit
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarEditItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Edit",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Edit Publication",@"")];
+    [item setToolTip:NSLocalizedString(@"Edit selected publication(s)",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageNamed: @"editdoc"]];
+    [item setAction:@selector(editPubCmd:)];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarEditItemIdentifier];
+    [item release];
+    
+    // Preview
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarPreviewItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Preview",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Show/Hide Preview",@"")];
+    [item setToolTip:NSLocalizedString(@"Show/Hide preview panel",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageNamed: @"preview"]];
+    [item setAction:@selector(toggleShowingPreviewPanel:)];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarPreviewItemIdentifier];
+    [item release];
+    
+    // Cite Drawer
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarCiteDrawerItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Cite Drawer",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Toggle Custom Citations Drawer",@"")];
+    [item setToolTip:NSLocalizedString(@"Toggle Custom Citations Drawer",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageNamed: @"drawerToolbarImage"]];
+    [item setAction:@selector(toggleShowingCustomCiteDrawer:)];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarCiteDrawerItemIdentifier];
+    [item release];
 	
-    addToolbarItem(toolbarItems, BibDocumentToolbarCiteDrawerItemIdentifier,
-                   NSLocalizedString(@"Cite Drawer",@""),
-                   NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
-                   NSLocalizedString(@"Toggle custom citations drawer",@""),
-                   self, @selector(setImage:),
-                   [NSImage imageNamed: @"drawerToolbarImage"],
-                   @selector(toggleShowingCustomCiteDrawer:), nil);
-	
-	
+	// Search
 	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Search",@"") 
 										   action:@selector(performFindPanelAction:)
 									keyEquivalent:@""] autorelease];
 	[menuItem setTag:NSFindPanelActionShowFindPanel];
 	[menuItem setTarget:self];
-    addToolbarItem(toolbarItems, BibDocumentToolbarSearchItemIdentifier,
-                   NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search using boolean '+' and '|', see Help for details",@""),
-                   self, @selector(setView:),
-                   searchField,
-                   @selector(searchFieldAction:), 
-				   menuItem);
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarSearchItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"Search",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Search",@"")];
+    [item setToolTip:NSLocalizedString(@"Search using boolean '+' and '|', see Help for details",@"")];
+    [item setTarget:self];
+    [item setView:searchField];
+    [item setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
+    [item setMaxSize:TOOLBAR_SEARCHFIELD_MAX_SIZE];
+    [item setAction:@selector(searchFieldAction:)];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarSearchItemIdentifier];
+    [item release];
 	
-	
+	// Action
 	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Action",@"") 
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: actionMenu];
-    addToolbarItem(toolbarItems, BibDocumentToolbarActionItemIdentifier,
-                   NSLocalizedString(@"Action",@""),
-                   NSLocalizedString(@"Action",@""),
-                   NSLocalizedString(@"Action for selected publications",@""),
-                   self, @selector(setView:),
-                   actionMenuButton,
-                   NULL, 
-				   menuItem);
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarActionItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"Action",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Action Publication",@"")];
+    [item setToolTip:NSLocalizedString(@"Action for selected publications",@"")];
+    [item setTarget:self];
+    [item setView:actionMenuButton];
+    [item setMinSize:[actionMenuButton bounds].size];
+    [item setMaxSize:[actionMenuButton bounds].size];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarActionItemIdentifier];
+    [item release];
 	
-	
+	// Group Action
 	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Group Action",@"") 
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: groupMenu];
-    addToolbarItem(toolbarItems, BibDocumentToolbarGroupActionItemIdentifier,
-                   NSLocalizedString(@"Group Action",@""),
-                   NSLocalizedString(@"Group Action",@""),
-                   NSLocalizedString(@"Action for groups list",@""),
-                   self, @selector(setView:),
-                   groupActionMenuButton,
-                   NULL, 
-				   menuItem);
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarGroupActionItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"Group Action",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Group Action",@"")];
+    [item setToolTip:NSLocalizedString(@"Action for groups list",@"")];
+    [item setTarget:self];
+    [item setView:groupActionMenuButton];
+    [item setMinSize:[groupActionMenuButton bounds].size];
+    [item setMaxSize:[groupActionMenuButton bounds].size];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibDocumentToolbarGroupActionItemIdentifier];
+    [item release];
     
     // Attach the toolbar to the document window
     [documentWindow setToolbar: toolbar];
@@ -194,48 +204,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
       itemForItemIdentifier: (NSString *)itemIdent
   willBeInsertedIntoToolbar:(BOOL) willBeInserted {
 
-    OAToolbarItem *newItem = [[[OAToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
-    NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
-
-    [newItem setLabel:[item label]];
-    [newItem setPaletteLabel:[item paletteLabel]];
-    if ([item view] != nil) {
-        [newItem setView:[item view]];
-		[newItem setDelegate:self];
-        // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
-        // view won't show up at all!  This doesn't affect toolbar items with images, however.
-        // Set the sizes as a regular control size
-        // The actual controlSize might be different, so we shouldn't use [self bounds].size
-        if ([itemIdent isEqualToString:BibDocumentToolbarSearchItemIdentifier]) {
-            [newItem setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
-            [newItem setMaxSize:TOOLBAR_SEARCHFIELD_MAX_SIZE];
-        } else {
-            // this is an action button
-            [newItem setMinSize:TOOLBAR_BUTTON_SIZE];
-            [newItem setMaxSize:TOOLBAR_BUTTON_SIZE];
-        } 
-    } else {
-        [newItem setImage:[item image]];
-        if([itemIdent isEqualToString: BibDocumentToolbarNewItemIdentifier]) {
-            NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(32, 32)] autorelease];
-            [image lockFocus];
-            [[item image] compositeToPoint:NSZeroPoint operation:NSCompositeSourceOver]; 
-            [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
-            [image unlockFocus];
-            [newItem setOptionKeyImage:image];
-            [newItem setOptionKeyLabel:NSLocalizedString(@"New with Crossref", @"")];
-            [newItem setOptionKeyToolTip:NSLocalizedString(@"Create new publication with crossref", @"")];
-            [newItem setOptionKeyAction:@selector(createNewPubUsingCrossrefAction:)];
-        }
-    }
-    [newItem setToolTip:[item toolTip]];
-    [newItem setTarget:[item target]];
-    [newItem setAction:[item action]];
-    // option key alternate titles do not work properly in label-only mode when we set the menuFormRepresentation, even if it is nil
-    if ([item menuFormRepresentation])
-        [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
-
-    return newItem;
+    return [[[toolbarItems objectForKey:itemIdent] copy] autorelease];
 }
 
 
