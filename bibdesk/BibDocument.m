@@ -2108,8 +2108,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];    
 	[self addPublications:newPubs];
 	[self highlightBibs:newPubs];
-	if (newFilePubs != nil)
-		[newFilePubs makeObjectsPerformSelector:@selector(autoFilePaper)];
+	if (newFilePubs != nil){
+        if([pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]])
+            [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaperAfterDelay)];
+        else
+            [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaper)];
+    }
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
     NSCalendarDate *importDate = [NSCalendarDate date];
@@ -2213,7 +2217,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     NSEnumerator *e = [filenames objectEnumerator];
     NSString *fileName;
-    NSData *contentData;
     NSString *contentString;
     NSMutableArray *array = [NSMutableArray array];
     int type = -1;
@@ -2230,15 +2233,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             continue;
         }
         
-        contentData = [[NSData alloc] initWithContentsOfFile:fileName];
-        // @@ this is probably a reasonable choice for the encoding, but we could try the same heuristic as used in the MDImporter
-        contentString = [[NSString alloc] initWithData:contentData encoding:[self documentStringEncoding]];
-        // try our fallback encoding, Latin 1
-        if(contentString == nil){
-            NSLog(@"unable to interpret file %@ using encoding %@; trying %@", [fileName lastPathComponent], [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:NSISOLatin1StringEncoding]);
-            contentString = [[NSString alloc] initWithData:contentData encoding:NSISOLatin1StringEncoding];
-        }
-        [contentData release];
+        contentString = [[NSString alloc] initWithContentsOfFile:fileName encoding:[self documentStringEncoding] guessEncoding:YES];
         
         if(contentString != nil){
             type = [contentString contentStringType];

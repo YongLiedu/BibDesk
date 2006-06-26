@@ -975,9 +975,8 @@
             
             [pub setField:field toValue:[theURL absoluteString]];
             
-            // arm: autofile after a delay, assuming the Finder is our drag source.  The Finder blocks our AESendMessage call in NSFileManager to get the file's comment string, likely because it's main event loop is busy trying to process the slide back image or some other part of the drag (getting the comment takes ~20 s in this case vs. the normal < 0.01 s).  A delay of 0.5 s was not sufficient.
             if([field isEqualToString:BDSKLocalUrlString])
-                [pub performSelector:@selector(autoFilePaper) withObject:nil afterDelay:0.7];
+                [pub autoFilePaperAfterDelay];
             
             [self highlightBib:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
@@ -991,7 +990,7 @@
                 if([filenames count] == 1){
                     NSString *file = [filenames lastObject];
                     if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame){
-                        NSString *auxString = [NSString stringWithContentsOfFile:file];
+                        NSString *auxString = [NSString stringWithContentsOfFile:file encoding:[self documentStringEncoding] guessEncoding:YES];
                         
                         if (auxString == nil)
                             return NO;
@@ -1283,13 +1282,7 @@ available from the receiving pastebaord."*/
     if([readableTypes containsObject:[fileName pathExtension]])
         return NO;
     
-    NSData *contentData = [[NSData alloc] initWithContentsOfFile:fileName];
-    NSString *contentString = [[NSString alloc] initWithData:contentData encoding:NSUTF8StringEncoding];
-    if(contentString == nil){
-        NSLog(@"unable to interpret file %@ using encoding %@; trying %@", [fileName lastPathComponent], [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding], [NSString localizedNameOfStringEncoding:NSISOLatin1StringEncoding]);
-        contentString = [[NSString alloc] initWithData:contentData encoding:NSISOLatin1StringEncoding];
-    }
-    [contentData release];
+    NSString *contentString = [[NSString alloc] initWithContentsOfFile:fileName encoding:NSUTF8StringEncoding guessEncoding:YES];
     
     if(contentString == nil)
         return YES;

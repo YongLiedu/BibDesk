@@ -507,11 +507,7 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
         
     if ([dfm fileExistsAtPath:fileName]) {
         if(![currentFileName isEqualToString:fileName]){
-            NSData *fileData = [[NSData alloc] initWithContentsOfFile:fileName];
-            NSString *fileStr = [[NSString alloc] initWithData:fileData encoding:encoding];
-            if(!fileStr)
-                fileStr = [[NSString alloc] initWithData:fileData encoding:NSISOLatin1StringEncoding]; // usually a good guess
-            [fileData release];
+            NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];;
             if(!fileStr)
                 fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"")];
             [sourceEditTextView setString:fileStr];
