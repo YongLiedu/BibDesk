@@ -58,12 +58,11 @@ static NSLock *parserLock = nil;
 @interface BibTeXParser (Private)
 
 // private function to do ASCII checking.
-static NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
+static NSString * copyCheckedAndTranslatedString(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
 
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
-// becomes an autoreleased array of dicts of different types.
-static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding);
+static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding);
 
 // private functions for handling different entry types; these functions do not do any locking around the parser
 static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSStringEncoding encoding);
@@ -182,16 +181,17 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                                 bt_free_ast(entry);
                                 @throw BibTeXParserInternalException;
                             }
-                            complexString = checkAndTranslateString(tmpStr, field->line, filePath, parserEncoding);
+                            complexString = copyCheckedAndTranslatedString(tmpStr, field->line, filePath, parserEncoding);
                             [tmpStr release];
                         }else{
-                            complexString = stringFromBTField(field, filePath, macroResolver, parserEncoding);
+                            complexString = copyStringFromBTField(field, filePath, macroResolver, parserEncoding);
                         }
                         
                         // add the expanded values to the autocomplete dictionary
                         [[NSApp delegate] addString:complexString forCompletionEntry:sFieldName];
                         
                         [dictionary setObject:complexString forKey:sFieldName];
+                        [complexString release];
                         
                     }// end while field - process next bt field                    
                     
@@ -273,8 +273,9 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
             field = NULL;
             while(field = bt_next_field (entry, field, &fieldName)){
                 macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
-                macroString = stringFromBTField(field, BDSKParserPasteDragString, [aDocument macroResolver], NSUTF8StringEncoding); // handles TeXification
+                macroString = copyStringFromBTField(field, BDSKParserPasteDragString, [aDocument macroResolver], NSUTF8StringEncoding); // handles TeXification
                 [retDict setObject:macroString forKey:macroKey];
+                [macroString release];
             }
         }
         bt_free_ast(entry);
@@ -307,7 +308,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 	entry = bt_parse_entry_s((char *)[entryString UTF8String], NULL, 1, options, &ok);
 	if(ok){
 		field = bt_next_field(entry, NULL, &fieldname);
-		valueString = stringFromBTField(field, nil, [aDocument macroResolver], NSUTF8StringEncoding);
+		valueString = copyStringFromBTField(field, nil, [aDocument macroResolver], NSUTF8StringEncoding);
 	}else{
         OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
 	}
@@ -319,7 +320,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 	bt_cleanup();
 	[parserLock unlock];
     
-	return valueString;
+	return [valueString autorelease];
 }
 
 + (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument{
@@ -607,7 +608,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 
 /// private functions used with libbtparse code
 
-static NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
+static NSString * copyCheckedAndTranslatedString(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
     if(![s canBeConvertedToEncoding:parserEncoding]){
         NSString *type = NSLocalizedString(@"Error", @"");
         NSString *message = NSLocalizedString(@"Unable to convert characters to the specified encoding.", @"");
@@ -626,10 +627,10 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
     }
     
     //deTeXify it
-    return [s stringByDeTeXifyingString];
+    return [[NSString alloc] initDeTeXifiedStringWithString:s];
 }
 
-static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){
+static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){
     NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:5];
     NSString *s = nil;
     BDSKStringNode *sNode = nil;
@@ -658,8 +659,9 @@ static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroReso
                     s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
                     if(!s)
                         NSLog(@"possible encoding conversion failure for \"%s\" at line %d", simple_value->text, field->line);
-                    
-                    sNode = [[BDSKStringNode alloc] initWithQuotedString:checkAndTranslateString(s, field->line, filePath, parserEncoding)];
+                    NSString *translatedString = copyCheckedAndTranslatedString(s, field->line, filePath, parserEncoding);
+                    sNode = [[BDSKStringNode alloc] initWithQuotedString:translatedString];
+                    [translatedString release];
 
                     break;
                 case BTAST_NUMBER:
@@ -682,7 +684,7 @@ static NSString *stringFromBTField(AST *field, NSString *filePath, BDSKMacroReso
 	} // while simple_value
 	
     // This will return a single string-type node as a non-complex string.
-    NSString *returnValue = [NSString stringWithNodes:stringValueArray macroResolver:macroResolver];
+    NSString *returnValue = [[NSString alloc] initWithNodes:stringValueArray macroResolver:macroResolver];
     [stringValueArray release];
     
     return returnValue;
@@ -722,7 +724,7 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
     
     while (field = bt_next_field (entry, field, &fieldname)){
         NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:encoding];
-        NSString *macroString = stringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
+        NSString *macroString = [copyStringFromBTField(field, filePath, macroResolver, encoding) autorelease]; // handles TeXification
         if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
             NSString *type = NSLocalizedString(@"Error", @"");
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
