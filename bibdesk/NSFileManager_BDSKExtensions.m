@@ -323,9 +323,10 @@ typedef struct WLDragMapEntryStruct
 
 // Sets a file ref descriptor from a path, without following symlinks
 // Based on OAAppKit's fillAEDescFromPath and an example in http://www.cocoadev.com/index.pl?FSMakeFSSpec
-static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDesc, NSString *path, BOOL isSymLink)
+static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDescPtr, NSString *path, BOOL isSymLink)
 {
     FSRef fileRef;
+    AEDesc fileRefDesc;
     OSErr err;
 
     bzero(&fileRef, sizeof(fileRef));
@@ -353,15 +354,17 @@ static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDesc, NSString *path, BOOL is
     if (err != noErr) 
         return err;
 
-    AEInitializeDesc(fileRefDesc);
-    AEReplaceDescData(typeFSRef, &fileRef, sizeof(fileRef), fileRefDesc);
+    AEInitializeDesc(&fileRefDesc);
+    err = AECreateDesc(typeFSRef, &fileRef, sizeof(fileRef), &fileRefDesc);
 
-    // The Finder isn't very good at coercions, so we have to do this ourselves, however we don't want to loose symlinks
-    if (err == noErr && isSymLink == NO) {
-        err = AECoerceDesc(fileRefDesc, typeAlias, fileRefDesc);
+    // Omni says the Finder isn't very good at coercions, so we have to do this ourselves; however we don't want to lose symlinks
+    if (err == noErr){
+        if(isSymLink == NO)
+            err = AECoerceDesc(&fileRefDesc, typeAlias, fileRefDescPtr);
+        else
+            err = AEDuplicateDesc(&fileRefDesc, fileRefDescPtr);
     }
-    if (err != noErr) 
-        AEDisposeDesc(fileRefDesc);
+    AEDisposeDesc(&fileRefDesc);
     
     return err;
 }
@@ -396,11 +399,12 @@ static OSType finderSignatureBytes = 'MACS';
 
     commentTextDesc = [NSAppleEventDescriptor descriptorWithString:comment];
 
-    err = BDSKFillAEDescFromPath(&fileDesc, path, isSymLink);
     
-    if (err == noErr) {
+    AEInitializeDesc(&builtEvent);
+    
+    err = BDSKFillAEDescFromPath(&fileDesc, path, isSymLink);
 
-        AEInitializeDesc(&builtEvent);
+    if (err == noErr)
         err = AEBuildAppleEvent(kAECoreSuite, kAESetData,
                                 typeApplSignature, &finderSignatureBytes, sizeof(finderSignatureBytes),
                                 kAutoGenerateReturnID, kAnyTransactionID,
@@ -408,13 +412,12 @@ static OSType finderSignatureBytes = 'MACS';
                                 eventFormat,
                                 &fileDesc, [commentTextDesc aeDesc]);
 
-        AEDisposeDesc(&fileDesc);
+    AEDisposeDesc(&fileDesc);
 
-        if (err == noErr)
-            err = AESendMessage(&builtEvent, NULL, kAENoReply, kAEDefaultTimeout);
+    if (err == noErr)
+        err = AESendMessage(&builtEvent, NULL, kAENoReply, kAEDefaultTimeout);
 
-        AEDisposeDesc(&builtEvent);
-    }
+    AEDisposeDesc(&builtEvent);
     
     if (err != noErr) {
         NSLog(@"Unable to set comment for file %@", fileURL);
