@@ -42,8 +42,6 @@
 #import "OAToolbarItem_BDSKExtensions.h"
 #import "BDSKImagePopUpButton.h"
 
-#define TOOLBAR_BUTTON_SIZE NSMakeSize(39.0, 32.0)
-
 NSString *BibEditorToolbarIdentifier = @"BibEditorToolbarIdentifier";
 NSString *BibEditorToolbarViewLocalItemIdentifier = @"BibEditorToolbarViewLocalItemIdentifier";
 NSString *BibEditorToolbarViewRemoteItemIdentifier = @"BibEditorToolbarViewRemoteItemIdentifier";
