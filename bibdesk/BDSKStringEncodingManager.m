@@ -94,6 +94,12 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     [dictionary setObject:[NSNumber numberWithInt:NSShiftJISStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSShiftJISStringEncoding]];
     [dictionary setObject:[NSNumber numberWithInt:NSISO2022JPStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSISO2022JPStringEncoding]];
     
+    // see CFStringEncodingExt.h for less commonly used encodings
+    UInt32 nsEncoding = 0;
+    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingISOLatin9);
+    NSString *name = [NSString localizedNameOfStringEncoding:nsEncoding];
+    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
+    
     return dictionary;
 }
 
