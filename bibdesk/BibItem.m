@@ -178,8 +178,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
     if (self = [super init]){
-		bibLock = [[NSLock alloc] init];
-		[bibLock lock];
+		bibLock = [[OFReadWriteLock alloc] init];
+		[bibLock lockForWriting];
 		if(fieldsDict){
 			pubFields = [fieldsDict mutableCopy];
 		}else{
@@ -194,7 +194,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         people = nil;
         
         document = nil;
-        [bibLock unlock];
+        [bibLock unlockForWriting];
         [self setFileType:inFileType];
         [self setPubType:type];
         [self setCiteKeyString: BDSKDefaultCiteKey];
@@ -253,7 +253,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         // set by the document, which we don't archive
         document = nil;
         hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
-        bibLock = [[NSLock alloc] init]; // not encoded
+        bibLock = [[OFReadWriteLock alloc] init]; // not encoded
         stringCache = [[BDSKBibItemStringCache alloc] initWithItem:self];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -274,7 +274,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         NSDictionary *peopleDict = [self peopleInheriting:NO]; // this uses biblock
-        [bibLock lock];
+        [bibLock lockForReading];
         [coder encodeObject:fileType forKey:@"fileType"];
         [coder encodeObject:citeKey forKey:@"citeKey"];
         [coder encodeObject:pubDate forKey:@"pubDate"];
@@ -284,9 +284,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeObject:peopleDict forKey:@"people"]; // legacy, for sharing with older versions
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
-        [bibLock unlock];
+        [bibLock unlockForReading];
     } else {
+        [bibLock lockForReading];
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
+        [bibLock unlockForReading];
     }        
 }
 
@@ -400,7 +402,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 #pragma mark Type info
 
-#define addkey(s) if([pubFields objectForKey: s usingLock:bibLock] == nil){[pubFields setObject:@"" forKey: s usingLock:bibLock];} [removeKeys removeObject: s usingLock:bibLock];
+#define addkey(s) if([pubFields objectForKey: s usingReadWriteLock:bibLock] == nil){[pubFields setObject:@"" forKey: s usingReadWriteLock:bibLock];} [removeKeys removeObject: s usingReadWriteLock:bibLock];
 
 - (void)makeType{
     NSString *fieldString;
@@ -410,11 +412,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:pubType] objectEnumerator];
   
     NSMutableArray *removeKeys = [NSMutableArray array];
-    NSEnumerator *keyE = [[pubFields allKeysUsingLock:bibLock] objectEnumerator];
+    NSEnumerator *keyE = [[pubFields allKeysUsingReadWriteLock:bibLock] objectEnumerator];
     NSString *key;
     
     while (key = [keyE nextObject]) {
-        if ([[pubFields objectForKey:key usingLock:bibLock] isEqualAsComplexString:@""])
+        if ([[pubFields objectForKey:key usingReadWriteLock:bibLock] isEqualAsComplexString:@""])
             [removeKeys addObject:key];
     }
     
@@ -432,7 +434,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     addkey(BDSKLocalUrlString) addkey(BDSKUrlString) addkey(BDSKAnnoteString) addkey(BDSKAbstractString) addkey(BDSKRssDescriptionString)
 
     // now remove everything that's left in remove keys from pubfields
-    [pubFields removeObjectsForKeys:removeKeys usingLock:bibLock];
+        [pubFields removeObjectsForKeys:removeKeys usingReadWriteLock:bibLock];
     
 }
 
@@ -471,11 +473,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (NSString *)fileType { return fileType; }
 
 - (void)setFileType:(NSString *)someFileType {
-    [bibLock lock];
+    [bibLock lockForWriting];
     [someFileType retain];
     [fileType release];
     fileType = someFileType;
-    [bibLock unlock];
+    [bibLock unlockForWriting];
 }
 
 #pragma mark -
@@ -487,20 +489,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSMutableArray *tmpPeople;
     NSString *personType;
     
-    [bibLock lock];
+    [bibLock lockForWriting];
     if (people == nil)
         people = [[NSMutableDictionary alloc] initWithCapacity:2];
-    [bibLock unlock];
+    [bibLock unlockForWriting];
     
     while(personType = [pEnum nextObject]){
         // get the string representation from pubFields
-        personStr = [pubFields objectForKey:personType usingLock:bibLock];
+        personStr = [pubFields objectForKey:personType usingReadWriteLock:bibLock];
         
         // don't check for an empty string, since that is valid here (we may be deleting authors)
         if(personStr != nil){
             // parse into an array of author objects
             tmpPeople = [[BibTeXParser authorsFromBibtexString:personStr withPublication:self] mutableCopy];
-            [people setObject:tmpPeople forKey:personType usingLock:bibLock];
+            [people setObject:tmpPeople forKey:personType usingReadWriteLock:bibLock];
             [tmpPeople release];
         }
     }
@@ -534,7 +536,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if (people == nil)
         [self rebuildPeople];
     
-    NSArray *peopleArray = [people objectForKey:field usingLock:bibLock];
+    NSArray *peopleArray = [people objectForKey:field usingReadWriteLock:bibLock];
     if([peopleArray count] == 0 && inherit){
         BibItem *parent = [self crossrefParent];
         peopleArray = [parent peopleArrayForField:field inherit:NO];
@@ -554,14 +556,14 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     if(inherit && (parent = [self crossrefParent])){
         NSMutableDictionary *parentCopy = [[[parent peopleInheriting:NO] mutableCopy] autorelease];
-        [bibLock lock];
+        [bibLock lockForReading];
         [parentCopy addEntriesFromDictionary:people]; // replace keys in parent with our keys, but inherit keys we don't have
-        [bibLock unlock];
+        [bibLock unlockForReading];
         return parentCopy;
     } else {
-        [bibLock lock];
+        [bibLock lockForReading];
         NSDictionary *copy = [[people copy] autorelease];
-        [bibLock unlock];
+        [bibLock unlockForReading];
         return copy;
     }
 }
@@ -766,7 +768,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 #pragma mark Accessors
 
 - (BibItem *)crossrefParent{
-	NSString *key = [pubFields objectForKey:BDSKCrossrefString usingLock:bibLock];
+	NSString *key = [pubFields objectForKey:BDSKCrossrefString usingReadWriteLock:bibLock];
 	
 	if ([NSString isEmptyString:key])
 		return nil;
@@ -837,12 +839,12 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite{
-	NSString *title = [pubFields objectForKey:BDSKTitleString usingLock:bibLock];
+	NSString *title = [pubFields objectForKey:BDSKTitleString usingReadWriteLock:bibLock];
 	
 	if([NSString isEmptyString:title])
 		return;
 	
-	NSString *booktitle = [pubFields objectForKey:BDSKBooktitleString usingLock:bibLock];
+	NSString *booktitle = [pubFields objectForKey:BDSKBooktitleString usingReadWriteLock:bibLock];
 	if(![NSString isEmptyString:booktitle] && !overwrite)
 		return;
 	[self setField:BDSKBooktitleString toValue:title];
@@ -887,10 +889,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     newType = [newType lowercaseString];
     OBASSERT(![NSString isEmptyString:newType]);
 	if(![pubType isEqualToString:newType]){
-		[bibLock lock];
+		[bibLock lockForWriting];
 		[pubType release];
 		pubType = [newType copy];
-		[bibLock unlock];
+		[bibLock unlockForWriting];
 		
 		[self makeType];
 	}
@@ -912,9 +914,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	[self setPubType:newType];
 	
 	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	}
 	[self updateMetadataForKey:BDSKTypeString];
 		
@@ -958,9 +960,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	
     [self setCiteKeyString:newCiteKey];
 	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
@@ -977,10 +979,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (void)setCiteKeyString:(NSString *)newCiteKey{
-    [bibLock lock];
+    [bibLock lockForWriting];
     [citeKey autorelease];
     citeKey = [newCiteKey copy];
-    [bibLock unlock];
+    [bibLock unlockForWriting];
 	[[NSApp delegate] addString:newCiteKey forCompletionEntry:BDSKCrossrefString];
 }
 
@@ -1047,22 +1049,22 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 #pragma mark Pub Fields
 
 - (NSDictionary *)pubFields{
-    [bibLock lock];
+    [bibLock lockForReading];
     NSDictionary *copy = [[pubFields copy] autorelease];
-    [bibLock unlock];
+    [bibLock unlockForReading];
     return copy;
 }
 
 - (NSArray *)allFieldNames{
-    return [pubFields allKeysUsingLock:bibLock];
+    return [pubFields allKeysUsingReadWriteLock:bibLock];
 }
 
 - (void)setPubFields: (NSDictionary *)newFields{
     if(newFields != pubFields){
-        [bibLock lock];
+        [bibLock lockForWriting];
         [pubFields release];
         pubFields = [newFields mutableCopy];
-        [bibLock unlock];
+        [bibLock unlockForWriting];
         [self updateMetadataForKey:BDSKAllFieldsString];
     }
 }
@@ -1089,7 +1091,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSCalendarDate *)date{
     OBPRECONDITION(key != nil);
     // use a copy of the old value, since this may be a mutable value
-    NSString *oldValue = [[pubFields objectForKey:key usingLock:bibLock] copy];
+    NSString *oldValue = [[pubFields objectForKey:key usingReadWriteLock:bibLock] copy];
 	if ([self undoManager]) {
 		NSCalendarDate *oldModDate = [self dateModified];
 		
@@ -1099,16 +1101,16 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	}
     	
     if(value != nil){
-		[pubFields setObject:value forKey:key usingLock:bibLock];
+		[pubFields setObject:value forKey:key usingReadWriteLock:bibLock];
 		// to allow autocomplete:
 		[[NSApp delegate] addString:value forCompletionEntry:key];
 	}else{
-		[pubFields removeObjectForKey:key usingLock:bibLock];
+		[pubFields removeObjectForKey:key usingReadWriteLock:bibLock];
 	}
 	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	}
 	[self updateMetadataForKey:key];
 	
@@ -1128,8 +1130,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSParameterAssert(nil != key);
     NSParameterAssert(nil != value);
     // this method is intended as a workaround for a BibEditor issue with using -[NSTextStorage mutableString] to track changes
-    OBPRECONDITION([value isEqualToString:[pubFields objectForKey:key usingLock:bibLock]]);
-    [pubFields setObject:value forKey:key usingLock:bibLock];
+    OBPRECONDITION([value isEqualToString:[pubFields objectForKey:key usingReadWriteLock:bibLock]]);
+    [pubFields setObject:value forKey:key usingReadWriteLock:bibLock];
 }
 
 - (NSString *)valueOfField: (NSString *)key{
@@ -1137,7 +1139,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit{
-    NSString* value = [pubFields objectForKey:key usingLock:bibLock];
+    NSString* value = [pubFields objectForKey:key usingReadWriteLock:bibLock];
 	
 	if (inherit && BDIsEmptyString((CFStringRef)value)) {
 		BibItem *parent = [self crossrefParent];
@@ -1166,9 +1168,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	[self setField:key toValue:msg];
 	
 	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	}
 	[self updateMetadataForKey:key];
 	
@@ -1188,7 +1190,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     OBPRECONDITION(key != nil);
     
 	if ([self undoManager]) {
-        if(![NSString isEmptyString:[pubFields objectForKey:key usingLock:bibLock]])
+        if(![NSString isEmptyString:[pubFields objectForKey:key usingReadWriteLock:bibLock]])
             // this will ensure that the current value can be restored when the user deletes a non-empty field
             [self setField:key toValue:@""];
         
@@ -1196,12 +1198,12 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
                                                             withModDate:[self dateModified]];
 	}
 	
-    [pubFields removeObjectForKey:key usingLock:bibLock];
+    [pubFields removeObjectForKey:key usingReadWriteLock:bibLock];
 	
 	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	} else {
-		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	}
 	[self updateMetadataForKey:key];
 
@@ -1276,7 +1278,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (int)ratingValueOfField:(NSString *)field{
-    return [[pubFields objectForKey:field usingLock:bibLock] intValue];
+    return [[pubFields objectForKey:field usingReadWriteLock:bibLock] intValue];
 }
 
 - (void)setRatingField:(NSString *)field toValue:(unsigned int)rating{
@@ -1287,7 +1289,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (BOOL)boolValueOfField:(NSString *)field{
     // stored as a string
-	return [(NSString *)[pubFields objectForKey:field usingLock:bibLock] booleanValue];
+	return [(NSString *)[pubFields objectForKey:field usingReadWriteLock:bibLock] booleanValue];
 }
 
 - (void)setBooleanField:(NSString *)field toValue:(BOOL)boolValue{
@@ -1295,11 +1297,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSCellStateValue)triStateValueOfField:(NSString *)field{
-	return [(NSString *)[pubFields objectForKey:field usingLock:bibLock] triStateValue];
+	return [(NSString *)[pubFields objectForKey:field usingReadWriteLock:bibLock] triStateValue];
 }
 
 - (void)setTriStateField:(NSString *)field toValue:(NSCellStateValue)triStateValue{
-	if(![[pubFields allKeysUsingLock:bibLock] containsObject:field])
+	if(![[pubFields allKeysUsingReadWriteLock:bibLock] containsObject:field])
 		[self addField:field];
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
 }
@@ -1314,7 +1316,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	NSString *field;
     NSString *value;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSMutableArray *keys = [[pubFields allKeysUsingLock:bibLock] mutableCopy];
+    NSMutableArray *keys = [[pubFields allKeysUsingReadWriteLock:bibLock] mutableCopy];
 	NSEnumerator *e;
     
     BibTypeManager *btm = [BibTypeManager sharedManager];
@@ -1348,7 +1350,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		if (drop && ![knownKeys containsObject:field])
 			continue;
 		
-        value = [pubFields objectForKey:field usingLock:bibLock];
+        value = [pubFields objectForKey:field usingReadWriteLock:bibLock];
         NSString *valString;
         
 		if([field isEqualToString:BDSKAuthorString] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
@@ -1416,7 +1418,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (NSAttributedString *)attributedStringValue{
     NSString *key;
-    NSEnumerator *e = [[[pubFields allKeysUsingLock:bibLock] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
+    NSEnumerator *e = [[[pubFields allKeysUsingReadWriteLock:bibLock] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
     NSDictionary *cachedFonts = [(BDSKFontManager *)[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
 
     NSDictionary *titleAttributes =
@@ -1558,7 +1560,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSMutableArray *keys = [[pubFields allKeysUsingLock:bibLock] mutableCopy];
+    NSMutableArray *keys = [[pubFields allKeysUsingReadWriteLock:bibLock] mutableCopy];
 	BOOL hasAU = [keys containsObject:@"AU"];
     [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
     [keys removeObject:BDSKDateAddedString];
@@ -1570,9 +1572,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
     // since they mark the beginning of each entry
     NSString *risType = nil;
-    if(risType = [pubFields objectForKey:@"TY" usingLock:bibLock])
+    if(risType = [pubFields objectForKey:@"TY" usingReadWriteLock:bibLock])
         [keys removeObject:@"TY"];
-    else if(risType = [pubFields objectForKey:@"PT" usingLock:bibLock]) // Medline RIS
+    else if(risType = [pubFields objectForKey:@"PT" usingReadWriteLock:bibLock]) // Medline RIS
         [keys removeObject:@"PT"];
     else
         risType = [btm RISTypeForBibTeXType:[self type]];
@@ -1592,7 +1594,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     while(k = [e nextObject]){
 		tag = [btm RISTagForBibTeXFieldName:k];
-        v = [pubFields objectForKey:k usingLock:bibLock];
+        v = [pubFields objectForKey:k usingReadWriteLock:bibLock];
         
         if([k isEqualToString:BDSKAuthorString]){
 			// if we also have an AU field, we use the FAU tag, otherwise we use AU
@@ -2036,7 +2038,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSURL *)remoteURLForField:(NSString *)field{
-    NSString *value = [pubFields objectForKey:field usingLock:bibLock];
+    NSString *value = [pubFields objectForKey:field usingReadWriteLock:bibLock];
     NSURL *baseURL = nil;
     
     // resolve DOI fields against a base URL if necessary, so they can be opened directly by NSWorkspace
@@ -2621,29 +2623,29 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 // The date setters should only be used at initialization or from updateMetadata:forKey:.  If you want to change the date, change the value in pubFields, and let updateMetadata handle the ivar.
 - (void)setDate: (NSCalendarDate *)newDate{
-    [bibLock lock];
+    [bibLock lockForWriting];
     [pubDate autorelease];
     pubDate = [newDate copy];
-    [bibLock unlock];
+    [bibLock unlockForWriting];
     
 }
 
 - (void)setDateAdded:(NSCalendarDate *)newDateAdded {
-    [bibLock lock];
+    [bibLock lockForWriting];
     if (dateAdded != newDateAdded) {
         [dateAdded release];
         dateAdded = [newDateAdded copy];
     }
-    [bibLock unlock];
+    [bibLock unlockForWriting];
 }
 
 - (void)setDateModified:(NSCalendarDate *)newDateModified {
-    [bibLock lock];
+    [bibLock lockForWriting];
     if (dateModified != newDateModified) {
         [dateModified release];
         dateModified = [newDateModified copy];
     }
-    [bibLock unlock];
+    [bibLock unlockForWriting];
 }
 
 - (id)stringCache { return stringCache; }
@@ -2687,11 +2689,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     // pubDate is a derived field based on Month and Year fields; we take the 15th day of the month to avoid edge cases
     if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
-		NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
+		NSString *yearValue = [pubFields objectForKey:BDSKYearString usingReadWriteLock:bibLock];
         if([yearValue isComplex])
             yearValue = [(BDSKStringNode *)[[yearValue nodes] objectAtIndex:0] value];
 		if (![NSString isEmptyString:yearValue]) {
-			NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingLock:bibLock];
+			NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingReadWriteLock:bibLock];
 			if([monthValue isComplex])
 				monthValue = [(BDSKStringNode *)[[monthValue nodes] objectAtIndex:0] value];
 			if (!monthValue) monthValue = @"";
@@ -2708,7 +2710,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	
     // setDateAdded: is only called here; it is derived based on pubFields value of BDSKDateAddedString
     if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKDateAddedString isEqualToString:key]) {
-		NSString *dateAddedValue = [pubFields objectForKey:BDSKDateAddedString usingLock:bibLock];
+		NSString *dateAddedValue = [pubFields objectForKey:BDSKDateAddedString usingReadWriteLock:bibLock];
 		if (![NSString isEmptyString:dateAddedValue]) {
             theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateAddedValue];
 			[self setDateAdded:theDate];
@@ -2720,7 +2722,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	
     // we shouldn't check for the key here, as the DateModified can be set with any key
     // setDateModified: is only called here; it is derived based on pubFields value of BDSKDateAddedString
-    NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString usingLock:bibLock];
+    NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
     if (![NSString isEmptyString:dateModValue]) {
         theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateModValue];
         [self setDateModified:theDate];

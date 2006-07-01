@@ -68,5 +68,7 @@
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend usingLock:(NSLock *)aLock;
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors usingLock:(NSLock *)aLock;
 
+- (void)removeObject:(id)obj usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+
 @end
 

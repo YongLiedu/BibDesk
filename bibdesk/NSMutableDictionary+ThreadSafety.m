@@ -116,9 +116,51 @@
     [aLock unlock];
 }
 
+- (NSArray *)allKeysUsingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+{
+    NSArray *keys = nil;
+    [aLock lockForReading];
+    keys = [[[self allKeys] retain] autorelease];
+    [aLock unlockForReading];
+    return keys;
+}
+
+- (id)objectForKey:(id)aKey usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+{
+    id obj = nil;
+    [aLock lockForReading];
+    obj = [[[self objectForKey:aKey] retain] autorelease];
+    [aLock unlockForReading];
+    return obj;
+}
+
+- (void)setObject:(id)obj forKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+{
+    [aLock lockForWriting];
+    [obj retain];
+    [self setObject:obj forKey:key];
+    [obj release];
+    [aLock unlockForWriting];
+}
+
+- (void)removeObjectForKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+{
+    [aLock lockForWriting];
+    [self removeObjectForKey:key];
+    [aLock unlockForWriting];
+}
+
+- (void)removeObjectsForKeys:(NSArray *)keys usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+{
+    [aLock lockForWriting];
+    [self removeObjectsForKeys:keys];
+    [aLock unlockForWriting];
+}
+
 NSMutableDictionary *BDSKCreateCaseInsensitiveKeyMutableDictionary(void)
 {
     return (NSMutableDictionary *)CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFNSObjectDictionaryValueCallbacks);
 }
+
 
 @end

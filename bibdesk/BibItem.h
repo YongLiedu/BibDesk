@@ -62,7 +62,7 @@
 	NSMutableDictionary *groups;
 	BOOL needsToBeFiled;
 	BibDocument *document;
-	NSLock *bibLock;
+	OFReadWriteLock *bibLock;
     BOOL hasBeenEdited;
     BDSKBibItemStringCache *stringCache;
     BDSKFieldCollection *templateFields;

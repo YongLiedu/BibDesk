@@ -259,4 +259,11 @@
     [aLock unlock];
 }
 
+- (void)removeObject:(id)obj usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+{
+    [aLock lockForWriting];
+    [self removeObject:obj];
+    [aLock unlockForWriting];
+}
+
 @end

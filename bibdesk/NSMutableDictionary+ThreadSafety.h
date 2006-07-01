@@ -51,6 +51,12 @@
 - (unsigned)countUsingLock:(NSLock *)aLock;
 - (void)removeAllObjectsUsingLock:(NSLock *)aLock;
 
+- (NSArray *)allKeysUsingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+- (id)objectForKey:(id)aKey usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+- (void)setObject:(id)obj forKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+- (void)removeObjectForKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+- (void)removeObjectsForKeys:(NSArray *)keys usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
+
 @end
 
 extern NSMutableDictionary *BDSKCreateCaseInsensitiveKeyMutableDictionary(void);
