@@ -2109,10 +2109,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[self addPublications:newPubs];
 	[self highlightBibs:newPubs];
 	if (newFilePubs != nil){
-        if([pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]])
-            [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaperAfterDelay)];
-        else
-            [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaper)];
+        // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
+        [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaperAfterDelay)];
     }
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
