@@ -39,65 +39,68 @@
 #import "NSDate_BDSKExtensions.h"
 #import "BibPrefController.h"
 
+static NSDictionary *locale = nil;
+static CFDateFormatterRef dateFormatter = NULL;
+static CFDateFormatterRef numericDateFormatter = NULL;
+
 @implementation NSDate (BDSKExtensions)
 
-- (NSDate *)initWithMonthDayYearString:(NSString *)dateString;
-{    
-    // this strange looking code is here to keep us from leaking an NSCFDate from [NSDate alloc]
-    // since we go into an endless loop if we try to release self without doing [self init]
-    self = [self init];
-    [self release];
-    
-    static NSDictionary *locale = nil;
-    if(locale == nil)
-        locale = [[NSDictionary alloc] initWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
-            [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil], NSMonthNameArray,
-            [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil], NSShortMonthNameArray, nil];
-    
-    if(CFLocaleCreate == NULL){ // headers say this function exists in 10.3, but Tiger docs say it's 10.4-only.  rdar://4198323        
-        return [[NSDate dateWithNaturalLanguageString:dateString locale:locale] retain];
++ (void)didLoad
+{
+    if(nil == locale){
+        NSArray *monthNames = [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil];
+        NSArray *shortMonthNames = [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil];
+        
+        locale = [[NSDictionary alloc] initWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, monthNames, NSMonthNameArray, shortMonthNames, NSShortMonthNameArray, nil];
     }
     
+
+    // NB: CFDateFormatters are fairly expensive beasts to create, so we cache them here
+    
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    
+    // use the en locale, since dates use en short names as keys in BibTeX
+    CFLocaleRef enLocale = CFLocaleCreate(alloc, CFSTR("en"));
+   
     // Create a date formatter that accepts "text month-numeric day-numeric year", which is arguably the most common format in BibTeX
-    // NB: formatters are fairly expensive beasts to create, so we cache them here
-    static CFDateFormatterRef dateFormatter = NULL;
-    if(dateFormatter == NULL){
-        // use the en locale, since dates use en short names as keys in BibTeX
-        CFLocaleRef enLocale = CFLocaleCreate(CFAllocatorGetDefault(), CFSTR("en"));
-        
+    if(NULL == dateFormatter){
+    
         // the formatter styles aren't used here, since we set an explicit format
-        dateFormatter = CFDateFormatterCreate(CFAllocatorGetDefault(), enLocale, kCFDateFormatterLongStyle, kCFDateFormatterLongStyle);
-        if(enLocale) CFRelease(enLocale);
-        if(dateFormatter == NULL)
-            return nil;
-        
-        // CFDateFormatter uses ICU formats: http://icu.sourceforge.net/userguide/formatDateTime.html
-        CFDateFormatterSetFormat(dateFormatter, CFSTR("MMM-dd-yy"));
-        CFDateFormatterSetProperty(dateFormatter, kCFDateFormatterIsLenient, kCFBooleanTrue);            
+        dateFormatter = CFDateFormatterCreate(alloc, enLocale, kCFDateFormatterLongStyle, kCFDateFormatterLongStyle);
+
+        if(NULL != dateFormatter){
+            // CFDateFormatter uses ICU formats: http://icu.sourceforge.net/userguide/formatDateTime.html
+            CFDateFormatterSetFormat(dateFormatter, CFSTR("MMM-dd-yy"));
+            CFDateFormatterSetProperty(dateFormatter, kCFDateFormatterIsLenient, kCFBooleanTrue);    
+        }
     }
-    CFDateRef date = CFDateFormatterCreateDateFromString(CFAllocatorGetDefault(), dateFormatter, (CFStringRef)dateString, NULL);
     
-    if(date != nil)
-        return (NSDate *)date;
-    
-    // If we didn't get a valid date on the first attempt, let's try a purely numeric formatter
-    static CFDateFormatterRef numericDateFormatter = NULL;
-    if(numericDateFormatter == NULL){
-        // use the en locale, since dates use en short names as keys in BibTeX
-        CFLocaleRef enLocale = CFLocaleCreate(CFAllocatorGetDefault(), CFSTR("en"));
+    if(NULL == numericDateFormatter){
         
         // the formatter styles aren't used here, since we set an explicit format
-        numericDateFormatter = CFDateFormatterCreate(CFAllocatorGetDefault(), enLocale, kCFDateFormatterLongStyle, kCFDateFormatterLongStyle);
-        if(enLocale) CFRelease(enLocale);
-        if(numericDateFormatter == NULL)
-            return nil;
+        numericDateFormatter = CFDateFormatterCreate(alloc, enLocale, kCFDateFormatterLongStyle, kCFDateFormatterLongStyle);
         
         // CFDateFormatter uses ICU formats: http://icu.sourceforge.net/userguide/formatDateTime.html
         CFDateFormatterSetFormat(numericDateFormatter, CFSTR("MM-dd-yy"));
         CFDateFormatterSetProperty(dateFormatter, kCFDateFormatterIsLenient, kCFBooleanTrue);            
     }
+    if(enLocale) CFRelease(enLocale);
+}
     
-    date = CFDateFormatterCreateDateFromString(CFAllocatorGetDefault(), numericDateFormatter, (CFStringRef)dateString, NULL);
+- (NSDate *)initWithMonthDayYearString:(NSString *)dateString;
+{    
+   [[self init] release];
+    self = nil;
+
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    
+    CFDateRef date = CFDateFormatterCreateDateFromString(alloc, dateFormatter, (CFStringRef)dateString, NULL);
+    
+    if(date != nil)
+        return (NSDate *)date;
+    
+    // If we didn't get a valid date on the first attempt, let's try a purely numeric formatter    
+    date = CFDateFormatterCreateDateFromString(alloc, numericDateFormatter, (CFStringRef)dateString, NULL);
     
     if(date != nil)
         return (NSDate *)date;
