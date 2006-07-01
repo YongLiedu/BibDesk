@@ -905,7 +905,7 @@
 			return NSDragOperationNone;
 		}
         // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
-        if(row == -1 || op == NSTableViewDropAbove || [[shownPublications objectAtIndex:row] document] == nil){
+        if(row == -1 || op == NSTableViewDropAbove || (row < [shownPublications count] && [[shownPublications objectAtIndex:row] document] == nil)){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
 		}else if(([type isEqualToString:NSFilenamesPboardType] == NO || [[info draggingPasteboard] containsUnparseableFile] == NO) &&
                  [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
