@@ -41,13 +41,48 @@
 #import <OmniBase/OBUtilities.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 
+@interface NSObject (FastKVC)
+
+@end
+
+@implementation NSObject (FastKVC)
+
+// Foundation's implementation of valueForKeyPath: uses substringToIndex: to parse the keypath, which ends up creating a lot of autoreleased objects when called in a loop (as when sorting an array).  Here we should create 2 * N strings per call, where N is the number of dots in the key path, but they are released immediately.  The ugly method name is to avoid current and future conflicts with Apple method names.
+
+- (id)bdsk_valueForKeyPath:(NSString *)aKey
+{
+    Boolean foundDot;
+    CFRange rangeOfDot;
+    CFIndex keyPathLength = CFStringGetLength((CFStringRef)aKey);
+    foundDot = CFStringFindWithOptions((CFStringRef)aKey, CFSTR("."), CFRangeMake(0, keyPathLength), 0, &rangeOfDot);
+    
+    id value = nil;
+    
+    if(foundDot == FALSE){
+        value = [self valueForKey:aKey];
+    } else {
+        CFAllocatorRef alloc = CFAllocatorGetDefault();
+        CFStringRef firstKey = CFStringCreateWithSubstring(alloc, (CFStringRef)aKey, CFRangeMake(0, rangeOfDot.location));
+        CFIndex nextStartingIndex = rangeOfDot.location + rangeOfDot.length;
+        CFStringRef restOfPath = CFStringCreateWithSubstring(alloc, (CFStringRef)aKey, CFRangeMake(nextStartingIndex, keyPathLength - nextStartingIndex));
+        value = [[self valueForKey:(NSString *)firstKey] valueForKeyPath:(NSString *)restOfPath];
+
+        CFRelease(firstKey);
+        CFRelease(restOfPath);
+    }
+    
+    return value;
+}
+
+@end
+
 @implementation BDSKTableSortDescriptor
 
 - (NSComparisonResult)compareObject:(id)object1 toObject:(id)object2 {
     NSString *keyPath = [self key];
     
-	id value1 = [object1 valueForKeyPath:keyPath];
-	id value2 = [object2 valueForKeyPath:keyPath];
+	id value1 = [object1 bdsk_valueForKeyPath:keyPath];
+	id value2 = [object2 bdsk_valueForKeyPath:keyPath];
     BOOL ascending = [self ascending];
     
     // check to see if one of the values is nil
