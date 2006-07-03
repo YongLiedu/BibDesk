@@ -78,13 +78,67 @@
 
 @implementation BDSKTableSortDescriptor
 
+- (void)cacheKeys;
+{
+    // cache the components of the keypath and their count
+    keys = CFArrayCreateCopy(CFAllocatorGetDefault(), (CFArrayRef)[[self key] componentsSeparatedByString:@"."]);
+    keyCount = CFArrayGetCount(keys);
+}
+
+- (id)initWithKey:(NSString *)key ascending:(BOOL)flag selector:(SEL)theSel;
+{
+    if(self = [super initWithKey:key ascending:flag selector:theSel]){
+        [self cacheKeys];
+        
+        // since NSSortDescriptor ivars are declared @private, we have to use @defs to access them directly; use our own instead, since this won't be subclassed
+        selector = theSel;
+        ascending = flag;
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aCoder
+{
+    self = [super initWithCoder:aCoder];
+    [self cacheKeys];
+    selector = [self selector];
+    ascending = [self ascending];
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)aZone
+{
+    return [[[self class] allocWithZone:aZone] initWithKey:[self key] ascending:[self ascending] selector:[self selector]];
+}
+
+- (void)dealloc
+{
+    CFRelease(keys);
+    [super dealloc];
+}
+
+static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id object1, id object2, id *value1, id *value2)
+{
+    CFIndex i;
+    *value1 = object1;
+    *value2 = object2;
+    NSString *key;
+    
+    // storing the array as an NSString ** buffer really didn't help with performance, but using CFArray functions does help cut down on the objc overhead
+    for(i = 0; i < sort->keyCount; i++){
+        key = (NSString *)CFArrayGetValueAtIndex(sort->keys, i);
+        *value1 = [*value1 valueForKey:key];
+        *value2 = [*value2 valueForKey:key];
+    }
+}
+
 - (NSComparisonResult)compareObject:(id)object1 toObject:(id)object2 {
-    NSString *keyPath = [self key];
-    
-	id value1 = [object1 bdsk_valueForKeyPath:keyPath];
-	id value2 = [object2 bdsk_valueForKeyPath:keyPath];
-    BOOL ascending = [self ascending];
-    
+
+    id value1, value2;
+
+    // get the values in bulk; since the same keypath is used for both objects, why compute it twice?
+    __GetValuesUsingCache(self, object1, object2, &value1, &value2);
+        
     // check to see if one of the values is nil
     if(value1 == nil){
         if(value2 == nil)
@@ -106,8 +160,7 @@
         }
     } 	
     
-    // header says keys may be key paths, but it's not working correctly when I pass in a key path; therefore, we'll just ignore super altogether
-    SEL selector = [self selector];
+    // header says keys may be key paths, but super doesn't work correctly when I pass in a key path; therefore, we'll just ignore super altogether
     typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
     comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
     NSComparisonResult result = comparator(value1, selector, value2);

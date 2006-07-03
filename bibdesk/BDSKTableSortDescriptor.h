@@ -40,5 +40,10 @@
 
 
 @interface BDSKTableSortDescriptor : NSSortDescriptor {
+@protected
+    CFArrayRef keys;
+    CFIndex keyCount;
+    SEL selector;
+    BOOL ascending;
 }
 @end
