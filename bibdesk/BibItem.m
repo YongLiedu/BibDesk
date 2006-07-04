@@ -2662,8 +2662,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
        [self rebuildPeople];
 	}
 	
-	if([BDSKLocalUrlString isEqualToString:key])
+	if([BDSKLocalUrlString isEqualToString:key]){
 		[self setNeedsToBeFiled:NO];
+        // If the Finder comment from this file has a useful URL and our BibItem has an empty remote URL field, use the Finder comment as remote URL.  Do this before autofiling the paper, since we know the path to the file now (hidden user default).
+        if(MDItemCreate != NULL && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldUseSpotlightCommentForURL"]){
+            MDItemRef mdItem = NULL;
+            if(mdItem = MDItemCreate(kCFAllocatorDefault, (CFStringRef)[self localFilePathForField:key])){
+                NSString *remoteURLString = (NSString *)MDItemCopyAttribute(mdItem, kMDItemFinderComment);
+                CFRelease(mdItem);
+                if(remoteURLString && [NSURL URLWithString:remoteURLString]!= nil && [self remoteURL] == nil)
+                    [self setField:BDSKUrlString toValue:remoteURLString];
+                [remoteURLString release];
+            }
+        }
+    }
 	
     // see if we need to use the crossref workaround (BibTeX bug)
 	if([BDSKTitleString isEqualToString:key] &&
