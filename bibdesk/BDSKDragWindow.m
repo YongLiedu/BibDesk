@@ -175,7 +175,7 @@
 	NSString *oldValue = nil;
 	NSString *newValue = nil;
 	
-	[editorBib setType:[tempBI type]]; // do we want this always?
+	[editorBib setPubType:[tempBI pubType]]; // do we want this always?
 	
 	while(key = [newKeyE nextObject]){
 		newValue = [tempBI valueOfField:key inherit:NO];

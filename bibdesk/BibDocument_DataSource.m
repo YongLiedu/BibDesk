@@ -150,8 +150,8 @@
             return [NSNumber numberWithBool:[pub boolValueOfField:tcID]];
 		}else if([typeManager isTriStateField:tcID]){
 			return [NSNumber numberWithInt:[pub triStateValueOfField:tcID]];
-		}else if([tcID isEqualToString:BDSKTypeString]){
-			return [pub type];
+		}else if([tcID isEqualToString:BDSKPubTypeString]){
+			return [pub pubType];
         }else{
             // the tableColumn isn't something we handle in a custom way.
             return [pub valueOfField:tcID];

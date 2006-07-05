@@ -123,7 +123,7 @@ static int numberOfOpenEditors = 0;
     formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
 	
     theBib = aBib;
-    currentType = [[theBib type] retain];    // do this once in init so it's right at the start.
+    currentType = [[theBib pubType] retain];    // do this once in init so it's right at the start.
                                     // has to be before we call [self window] because that calls windowDidLoad:.
     theDocument = doc; // don't retain - it retains us.
 	pdfSnoopViewLoaded = NO;
@@ -1038,8 +1038,8 @@ static int numberOfOpenEditors = 0;
         [[self window] endEditingFor:nil];
     }
     [self setCurrentType:[bibTypeButton titleOfSelectedItem]];
-    if(![[theBib type] isEqualToString:currentType]){
-        [theBib setType:currentType];
+    if(![[theBib pubType] isEqualToString:currentType]){
+        [theBib setPubType:currentType];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentType
                                                            forKey:BDSKPubTypeStringKey];
 		
@@ -1048,7 +1048,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)updateTypePopup{ // used to update UI after dragging into the editor
-    [bibTypeButton selectItemWithTitle:[theBib type]];
+    [bibTypeButton selectItemWithTitle:[theBib pubType]];
 }
 
 - (void)setCurrentType:(NSString *)type{
@@ -1664,7 +1664,7 @@ static int numberOfOpenEditors = 0;
 		return;
 	}
 
-	if([changeKey isEqualToString:BDSKTypeString]){
+	if([changeKey isEqualToString:BDSKPubTypeString]){
 		[self setupForm];
 		[self updateTypePopup];
 		return;
@@ -2960,8 +2960,8 @@ static int numberOfOpenEditors = 0;
     sKeys = [[theBib allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 	
 	// now add the entries to the form
-	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[theBib type]], reqAtt);
-	AddFormEntries([[BibTypeManager sharedManager] optionalFieldsForType:[theBib type]], nil);
+	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[theBib pubType]], reqAtt);
+	AddFormEntries([[BibTypeManager sharedManager] optionalFieldsForType:[theBib pubType]], nil);
 	AddFormEntries(sKeys, nil);
     
     [ignoredKeys release];

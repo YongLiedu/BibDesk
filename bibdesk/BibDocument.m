@@ -2435,9 +2435,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"thirdAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
         
-	}else if([tcID isEqualToString:BDSKTypeString]){
-        
-        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"type" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+	}else if([tcID isEqualToString:BDSKPubTypeString]){
+
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"pubType" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
         
     }else if([tcID isEqualToString:BDSKItemNumberString]){
         
@@ -2712,7 +2712,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
                                               excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:",@"")
@@ -3691,17 +3691,17 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)createNewPubUsingCrossrefForItem:(BibItem *)item{
     BibItem *newBI = [[BibItem alloc] init];
-	NSString *parentType = [item type];
+	NSString *parentType = [item pubType];
     
 	[newBI setField:BDSKCrossrefString toValue:[item citeKey]];
 	if ([parentType isEqualToString:@"proceedings"]) {
-		[newBI setType:@"inproceedings"];
+		[newBI setPubType:@"inproceedings"];
 	} else if ([parentType isEqualToString:@"book"] || 
 			   [parentType isEqualToString:@"booklet"] || 
 			   [parentType isEqualToString:@"techreport"] || 
 			   [parentType isEqualToString:@"manual"]) {
 		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:@"inbook"]) 
-			[newBI setType:@"incollection"];
+			[newBI setPubType:@"incollection"];
 	}
     [self addPublication:newBI];
     [newBI release];
@@ -3739,7 +3739,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                       userInfo:[NSDictionary dictionary]];
 	
 	while (aPub = [selEnum nextObject]) {
-		if([parentTypes containsObject:[aPub type]])
+		if([parentTypes containsObject:[aPub pubType]])
 			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
 	}
 	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles",@"") : NSLocalizedString(@"Duplicate Title",@""))];

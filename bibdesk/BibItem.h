@@ -346,28 +346,22 @@
 
 /*!
 	@method     setPubType:
-	@abstract   Basic setter for the publication type, for initialization. Sets up the fields if necessary.
+	@abstract   Basic setter for the publication type, calls setType:withModdate: with the current date.
 	@discussion -
 */
 - (void)setPubType:(NSString *)newType;
 /*!
-	@method     setType:
-	@abstract   Basic setter for the publication type, calls setType:withModdate: with the current date.
-	@discussion -
-*/
-- (void)setType:(NSString *)newType;
-/*!
-	@method     setType:withModDate:
+	@method     setPubType:withModDate:
 	@abstract   Basic setter for the publication type, with undo. Sets up the fields if necessary.
 	@discussion -
 */
-- (void)setType:(NSString *)newType withModDate:(NSCalendarDate *)date;
+- (void)setPubType:(NSString *)newType withModDate:(NSCalendarDate *)date;
 /*!
-	@method     type
+	@method     pubType
 	@abstract   Returns the publication type.
 	@discussion -
 */
-- (NSString *)type;
+- (NSString *)pubType;
 
 /*!
     @method     rating

@@ -40,7 +40,7 @@
 
 @protocol BDSKParseableItem <NSObject>
 - (NSString *)fileType;
-- (NSString *)type;
+- (NSString *)pubType;
 - (NSString *)citeKey;
 - (NSString *)title;
 - (NSString *)container;

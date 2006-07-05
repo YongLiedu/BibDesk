@@ -230,7 +230,7 @@ static NSString *BDSKFileContentLocalizedString = nil;
 - (IBAction)quickSearchAddField:(id)sender{
     // first we fill the popup
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]
+    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]
                                                 excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
@@ -371,9 +371,9 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
 		accessor = NSSelectorFromString(@"calendarDateAddedDescription");
 	} else if([field isEqualToString:BDSKAllFieldsString]){
 		accessor = NSSelectorFromString(@"allFieldsString");
-	} else if([field isEqualToString:BDSKTypeString] || 
-			  [field isEqualToString:@"Pub Type"]){
-		accessor = NSSelectorFromString(@"type");
+	} else if([field isEqualToString:BDSKPubTypeString] || 
+			  [field isEqualToString:@"Pub Type"]){ /* legacy string ? */
+		accessor = NSSelectorFromString(@"pubType");
 	} else if([field isEqualToString:BDSKCiteKeyString]){
 		accessor = NSSelectorFromString(@"citeKey");
 	} else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:field]){

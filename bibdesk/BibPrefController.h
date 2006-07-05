@@ -235,6 +235,7 @@ extern NSString *BDSKTypeString;
 extern NSString *BDSKAddressString;
 extern NSString *BDSKDoiString;
 extern NSString *BDSKCiteseerUrlString;
+extern NSString *BDSKPubTypeString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;

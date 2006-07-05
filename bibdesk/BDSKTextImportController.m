@@ -251,7 +251,7 @@
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d %@ added.", @"format string for pubs added. args: one int for number added, then one string for singular or plural of publication(s)."), numItems, pubSingularPlural]];
 
     item = [[BibItem alloc] init];
-    [itemTypeButton selectItemWithTitle:[item type]];
+    [itemTypeButton selectItemWithTitle:[item pubType]];
     [itemTableView reloadData];
 }
 
@@ -578,7 +578,7 @@
 - (void)setType:(NSString *)type{
     
     [itemTypeButton selectItemWithTitle:type];
-    [item setType:type];
+    [item setPubType:type];
 
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
 

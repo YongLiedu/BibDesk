@@ -111,11 +111,11 @@ Extra wrapping of the created and modified date methods to
 */
 
 - (NSString *)asType {
-	return [self type];
+	return [self pubType];
 }
 
 - (void)setAsType:(NSString *)newType {
-	[self setType:(NSString *)newType];
+	[self setPubType:(NSString *)newType];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
@@ -308,7 +308,7 @@ Extra wrapping of the created and modified date methods to
 	
 	// ... and replace the current record with it.
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	
-	[self setType:[newPub type]];
+	[self setPubType:[newPub pubType]];
 	[self setFileType:[newPub fileType]];
 	[self setCiteKey:[newPub citeKey]];
 	[self setFields:[newPub pubFields]];

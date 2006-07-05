@@ -110,7 +110,8 @@ static NSString *BDSKDefaultCiteKey = @"cite-key";
 
 - (void)setDateAdded:(NSCalendarDate *)newDateAdded;
 - (void)setDateModified:(NSCalendarDate *)newDateModified;
-- (void)setDate: (NSCalendarDate *)newDate;
+- (void)setDate:(NSCalendarDate *)newDate;
+- (void)setPubTypeWithoutUndo:(NSString *)newType;
 
 - (id)stringCache;
 
@@ -196,7 +197,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         document = nil;
         [bibLock unlockForWriting];
         [self setFileType:inFileType];
-        [self setPubType:type];
+        [self setPubTypeWithoutUndo:type];
         [self setCiteKeyString: BDSKDefaultCiteKey];
         [self setDate: nil];
         
@@ -246,7 +247,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
         [self setDate:[coder decodeObjectForKey:@"pubDate"]];
         [self setDateAdded:[coder decodeObjectForKey:@"dateAdded"]];
-        [self setPubType:[coder decodeObjectForKey:@"pubType"]];
+        [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
         [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
         pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
         groups = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -331,14 +332,14 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     // cite key and type should be compared case-insensitively from BibTeX's perspective
 	if ([[self citeKey] caseInsensitiveCompare:[aBI citeKey]] != NSOrderedSame)
 		return NO;
-	if ([[self type] caseInsensitiveCompare:[aBI type]] != NSOrderedSame)
+	if ([[self pubType] caseInsensitiveCompare:[aBI pubType]] != NSOrderedSame)
 		return NO;
 	
 	// compare only the standard fields; are these all we should compare?
 	BibTypeManager *btm = [BibTypeManager sharedManager];
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:14];
-	[keys addObjectsFromArray:[btm requiredFieldsForType:[self type]]];
-	[keys addObjectsFromArray:[btm optionalFieldsForType:[self type]]];
+	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
+	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
     
@@ -364,7 +365,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		return YES;
 	if ([[self citeKey] isEqualToString:[aBI citeKey]] == NO)
 		return NO;
-	if ([[self type] isEqualToString:[aBI type]] == NO)
+	if ([[self pubType] isEqualToString:[aBI pubType]] == NO)
 		return NO;
 	
 	// compare all fields, but compare relevant values as nil might mean 0 for some keys etc.
@@ -780,7 +781,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 // It is used only to have one column to show all these containers.
 - (NSString *)container{
 	NSString *c;
-    NSString *type = [self type];
+    NSString *type = [self pubType];
 	
 	if ( [type isEqualToString:@"inbook"]) {
 	    c = [self valueOfField:BDSKTitleString];
@@ -811,7 +812,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSString *title = [self valueOfField:BDSKTitleString];
 	if (title == nil) 
 		title = @"";
-	if ([[self type] isEqualToString:@"inbook"]) {
+	if ([[self pubType] isEqualToString:@"inbook"]) {
 		NSString *chapter = [self valueOfField:BDSKChapterString];
 		if (![NSString isEmptyString:chapter]) {
 			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter of %@)", @"Chapter of inbook (chapter of Title)"), chapter, title];
@@ -885,48 +886,35 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return [[self dateAdded] descriptionWithCalendarFormat:shortDateFormatString];
 }
 
-- (void)setPubType: (NSString *)newType{
-    newType = [newType lowercaseString];
-    OBASSERT(![NSString isEmptyString:newType]);
-	if(![pubType isEqualToString:newType]){
-		[bibLock lockForWriting];
-		[pubType release];
-		pubType = [newType copy];
-		[bibLock unlockForWriting];
-		
-		[self makeType];
-	}
+- (void)setPubType:(NSString *)newType{
+    [self setPubType:newType withModDate:[NSCalendarDate date]];
 }
 
-- (void)setType:(NSString *)newType{
-    [self setType:newType withModDate:[NSCalendarDate date]];
-}
-
-- (void)setType:(NSString *)newType withModDate:(NSCalendarDate *)date{
+- (void)setPubType:(NSString *)newType withModDate:(NSCalendarDate *)date{
     if (pubType && [pubType isEqualToString:newType])
 		return;
 	
 	if ([self undoManager]) {
-		[[[self undoManager] prepareWithInvocationTarget:self] setType:pubType 
+		[[[self undoManager] prepareWithInvocationTarget:self] setPubType:pubType 
 															  withModDate:[self dateModified]];
     }
 	
-	[self setPubType:newType];
+	[self setPubTypeWithoutUndo:newType];
 	
 	if (date != nil) {
 		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	} else {
 		[pubFields removeObjectForKey:BDSKDateModifiedString usingReadWriteLock:bibLock];
 	}
-	[self updateMetadataForKey:BDSKTypeString];
+	[self updateMetadataForKey:BDSKPubTypeString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubType, @"value", BDSKTypeString, @"key", @"Change", @"type", document, @"document", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", document, @"document", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
 }
 
-- (NSString *)type{
+- (NSString *)pubType{
     return pubType;
 }
 
@@ -1233,8 +1221,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		return [NSString stringWithBool:[self boolValueOfField:field]];
     }else if([typeManager isTriStateField:field]){
 		return [NSString stringWithTriStateValue:[self triStateValueOfField:field]];
-	}else if([field isEqualToString:BDSKTypeString]){
-		return [self type];
+	}else if([field isEqualToString:BDSKPubTypeString]){
+		return [self pubType];
 	}else if([field isEqualToString:BDSKCiteKeyString]){
 		return [self citeKey];
 	}else if([field isEqualToString:BDSKAllFieldsString]){
@@ -1254,8 +1242,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [self setTriStateField:field toValue:[value triStateValue]];
 	}else if([typeManager isRatingField:field]){
 		[self setRatingField:field toValue:[value intValue]];
-	}else if([field isEqualToString:BDSKTypeString]){
-		[self setType:value];
+	}else if([field isEqualToString:BDSKPubTypeString]){
+		[self setPubType:value];
 	}else if([field isEqualToString:BDSKCiteKeyString]){
 		[self setCiteKey:value];
 	}else{
@@ -1320,7 +1308,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	NSEnumerator *e;
     
     BibTypeManager *btm = [BibTypeManager sharedManager];
-    NSString *type = [self type];
+    NSString *type = [self pubType];
     NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
@@ -1444,7 +1432,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     BibTypeManager *btm = [BibTypeManager sharedManager];
 
-	NSSet *reqKeys = [[NSSet alloc] initWithArray:[btm requiredFieldsForType:[self type]]];
+	NSSet *reqKeys = [[NSSet alloc] initWithArray:[btm requiredFieldsForType:[self pubType]]];
 
     static NSDateFormatter *dateFormatter = nil;
     if(dateFormatter == nil)
@@ -1462,7 +1450,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [reqStr appendAttributedString:valueStr];
     [valueStr release];
 
-    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" (%@)\n",[self type]]
+    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" (%@)\n",[self pubType]]
                                                attributes:typeAttributes];
     [reqStr appendAttributedString:valueStr];
     [valueStr release];
@@ -1577,7 +1565,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     else if(risType = [pubFields objectForKey:@"PT" usingReadWriteLock:bibLock]) // Medline RIS
         [keys removeObject:@"PT"];
     else
-        risType = [btm RISTypeForBibTeXType:[self type]];
+        risType = [btm RISTypeForBibTeXType:[self pubType]];
     
     // enumerate the remaining keys
     NSEnumerator *e = [keys objectEnumerator];
@@ -1638,7 +1626,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 #define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>", t, [value stringByEscapingBasicXMLEntitiesUsingUTF8], t]
 
 - (NSString *)MODSString{
-    NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:[self type]];
+    NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:[self pubType]];
     NSMutableString *s = [NSMutableString stringWithString:@"<mods>\n"];
     unsigned i = 0;
     NSString *value;
@@ -1672,10 +1660,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         
         NSString *hostTitle = nil;
         
-        if([[self type] isEqualToString:@"inproceedings"] || 
-           [[self type] isEqualToString:@"incollection"]){
+        if([[self pubType] isEqualToString:@"inproceedings"] || 
+           [[self pubType] isEqualToString:@"incollection"]){
             hostTitle = [self valueOfField:BDSKBooktitleString];
-        }else if([[self type] isEqualToString:@"article"]){
+        }else if([[self pubType] isEqualToString:@"article"]){
             hostTitle = [self valueOfField:BDSKJournalString];
         }
         hostTitle = [hostTitle stringByEscapingBasicXMLEntitiesUsingUTF8];
@@ -1697,7 +1685,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSString *value;
     
     int refTypeID;
-    NSString *entryType = [self type];
+    NSString *entryType = [self pubType];
     NSString *publisherField = BDSKPublisherString;
     NSString *organizationField = @"Organization";
     NSString *authorField = BDSKAuthorString;
@@ -1806,7 +1794,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     AddXMLField(@"pub-location",BDSKAddressString);
     AddXMLField(@"publisher",publisherField);
     AddXMLField(@"isbn",isbnField);
-    AddXMLField(@"work-type",BDSKTypeString);
+    AddXMLField(@"work-type",BDSKPubTypeString);
     
     // dates
     
@@ -1878,7 +1866,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSParameterAssert(nil != template);
     NSString *string = nil;
     [self prepareForTemplateParsing];
-    string = [BDSKTemplateParser stringByParsingTemplate:[template stringForType:[self type]] usingObject:self];
+    string = [BDSKTemplateParser stringByParsingTemplate:[template stringForType:[self pubType]] usingObject:self];
     [self cleanupAfterTemplateParsing];
     return string;
 }
@@ -1887,7 +1875,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSParameterAssert(nil != template);
     NSAttributedString *string = nil;
     [self prepareForTemplateParsing];
-    string = [BDSKTemplateParser attributedStringByParsingTemplate:[template attributedStringForType:[self type]] usingObject:self];
+    string = [BDSKTemplateParser attributedStringByParsingTemplate:[template attributedStringForType:[self pubType]] usingObject:self];
     [self cleanupAfterTemplateParsing];
     return string;
 }
@@ -1937,22 +1925,22 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (id)requiredFields{
-    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
+    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
 }
 
 - (id)optionalFields{
-    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] optionalFieldsForType:[self type]]];
+    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] optionalFieldsForType:[self pubType]]];
 }
 
 - (id)defaultFields{
-    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self type]]];
+    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self pubType]]];
 }
 
 - (id)allFields{
     NSMutableArray *allFields = [NSMutableArray array];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:[self type]]];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self type]]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:[self pubType]]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self pubType]]];
     [allFields addObjectsFromArray:[self allFieldNames]]; // duplicate fields will be dropped
     return [[self fields] fieldsWithNames:allFields];
 }
@@ -2648,6 +2636,19 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [bibLock unlockForWriting];
 }
 
+- (void)setPubTypeWithoutUndo:(NSString *)newType{
+    newType = [newType lowercaseString];
+    OBASSERT(![NSString isEmptyString:newType]);
+	if(![pubType isEqualToString:newType]){
+		[bibLock lockForWriting];
+		[pubType release];
+		pubType = [newType copy];
+		[bibLock unlockForWriting];
+		
+		[self makeType];
+	}
+}
+
 - (id)stringCache { return stringCache; }
 
 - (void)updateMetadataForKey:(NSString *)key{
@@ -2680,7 +2681,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     // see if we need to use the crossref workaround (BibTeX bug)
 	if([BDSKTitleString isEqualToString:key] &&
 	   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDuplicateBooktitleKey] &&
-	   [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey] containsObject:[self type]]){
+	   [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey] containsObject:[self pubType]]){
 		[self duplicateTitleToBooktitleOverwriting:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKForceDuplicateBooktitleKey]];
 	}
  	
