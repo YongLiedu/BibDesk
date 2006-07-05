@@ -168,8 +168,12 @@
 		<string>Pages</string>
 		<key>AU</key>
 		<string>Author</string>
+		<key>ID</key>
+		<string>Keywords</string>
 		<key>IS</key>
 		<string>Number</string>
+		<key>J9</key>
+		<string>Source</string>
 		<key>PD</key>
 		<string>Date</string>
 		<key>PI</key>
@@ -190,10 +194,6 @@
 		<string>Isi</string>
 		<key>VL</key>
 		<string>Volume</string>
-		<key>J9</key>
-		<string>Source</string>
-        <key>ID</key>
-		<string>Keywords</string>
 	</dict>
 	<key>BibTeXTypesForMODSGenres</key>
 	<dict>
@@ -234,8 +234,6 @@
 		<string>incollection</string>
 		<key>UNPB</key>
 		<string>unpublished</string>
-        <key>Journal Article</key>
-        <string>article</string>
 	</dict>
 	<key>BibTeXTypesForWebOfScienceTypes</key>
 	<dict>
@@ -555,6 +553,8 @@
 			<key>optional</key>
 			<array>
 				<string>Editor</string>
+				<string>Author</string>
+				<string>Chapter</string>
 				<string>Number</string>
 				<string>Volume</string>
 				<string>Type</string>
@@ -562,13 +562,11 @@
 				<string>Month</string>
 				<string>Address</string>
 				<string>Edition</string>
+				<string>Pages</string>
 			</array>
 			<key>required</key>
 			<array>
-				<string>Author</string>
 				<string>Title</string>
-				<string>Chapter</string>
-				<string>Pages</string>
 				<string>Publisher</string>
 				<string>Year</string>
 			</array>
@@ -674,9 +672,6 @@
 				<string>Title</string>
 				<string>Howpublished</string>
 				<string>Author</string>
-				<string>Organization</string>
-				<string>Address</string>
-				<string>Edition</string>
 				<string>Month</string>
 				<string>Year</string>
 			</array>
@@ -719,10 +714,12 @@
 			<key>optional</key>
 			<array>
 				<string>Editor</string>
+				<string>Number</string>
 				<string>Publisher</string>
 				<string>Organization</string>
 				<string>Address</string>
 				<string>Month</string>
+				<string>Volume</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -737,6 +734,7 @@
 				<string>Type</string>
 				<string>Number</string>
 				<string>Address</string>
+				<string>Month</string>
 			</array>
 			<key>required</key>
 			<array>
