@@ -492,7 +492,7 @@
 
 - (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
 
-	if ([[toolbarItem itemIdentifier] isEqualToString:BibDocumentToolbarPreviewItemIdentifier]) {
+	if ([toolbarItem action] == @selector(toggleShowingPreviewPanel:)) {
 		return ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]);
 	}
 	

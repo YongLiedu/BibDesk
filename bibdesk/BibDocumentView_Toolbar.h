@@ -36,14 +36,6 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument+Menus.h"
 
-extern NSString* 	BibDocumentToolbarIdentifier;
-extern NSString*	BibDocumentToolbarNewItemIdentifier;
-extern NSString*	BibDocumentToolbarSearchItemIdentifier;
-extern NSString*	BibDocumentToolbarEditItemIdentifier;
-extern NSString*	BibDocumentToolbarDeleteItemIdentifier;
-extern NSString*	BibDocumentToolbarPreviewItemIdentifier;
-extern NSString*	BibDocumentToolbarCiteDrawerItemIdentifier;
-
 @interface BibDocument (Toolbar)
 
 /*!

@@ -45,15 +45,15 @@
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
 #define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)
 
-NSString *BibDocumentToolbarIdentifier = @"BibDocumentToolbarIdentifier";
-NSString *BibDocumentToolbarNewItemIdentifier = @"BibDocumentToolbarNewItemIdentifier";
-NSString *BibDocumentToolbarSearchItemIdentifier = @"BibDocumentToolbarSearchItemIdentifier";
-NSString *BibDocumentToolbarActionItemIdentifier = @"BibDocumentToolbarActionItemIdentifier";
-NSString *BibDocumentToolbarGroupActionItemIdentifier = @"BibDocumentToolbarGroupActionItemIdentifier";
-NSString *BibDocumentToolbarEditItemIdentifier = @"BibDocumentToolbarEditItemIdentifier";
-NSString *BibDocumentToolbarDeleteItemIdentifier = @"BibDocumentToolbarDeleteItemIdentifier";
-NSString *BibDocumentToolbarPreviewItemIdentifier = @"BibDocumentToolbarPreviewItemIdentifier";
-NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolbarCiteDrawerItemIdentifier";
+static NSString *BibDocumentToolbarIdentifier = @"BibDocumentToolbarIdentifier";
+static NSString *BibDocumentToolbarNewItemIdentifier = @"BibDocumentToolbarNewItemIdentifier";
+static NSString *BibDocumentToolbarSearchItemIdentifier = @"BibDocumentToolbarSearchItemIdentifier";
+static NSString *BibDocumentToolbarActionItemIdentifier = @"BibDocumentToolbarActionItemIdentifier";
+static NSString *BibDocumentToolbarGroupActionItemIdentifier = @"BibDocumentToolbarGroupActionItemIdentifier";
+static NSString *BibDocumentToolbarEditItemIdentifier = @"BibDocumentToolbarEditItemIdentifier";
+static NSString *BibDocumentToolbarDeleteItemIdentifier = @"BibDocumentToolbarDeleteItemIdentifier";
+static NSString *BibDocumentToolbarPreviewItemIdentifier = @"BibDocumentToolbarPreviewItemIdentifier";
+static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolbarCiteDrawerItemIdentifier";
 
 @implementation BibDocument (Toolbar)
 
@@ -118,12 +118,12 @@ NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolbarCiteD
     [toolbarItems setObject:item forKey:BibDocumentToolbarEditItemIdentifier];
     [item release];
     
-    // Preview
+    // Preview (nil targeted -> app delegate)
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarPreviewItemIdentifier];
     [item setLabel:NSLocalizedString(@"Preview",@"")];
     [item setPaletteLabel:NSLocalizedString(@"Show/Hide Preview",@"")];
     [item setToolTip:NSLocalizedString(@"Show/Hide preview panel",@"")];
-    [item setTarget:self];
+    [item setTarget:nil];
     [item setImage:[NSImage imageNamed: @"preview"]];
     [item setAction:@selector(toggleShowingPreviewPanel:)];
     [toolbarItems setObject:item forKey:BibDocumentToolbarPreviewItemIdentifier];
