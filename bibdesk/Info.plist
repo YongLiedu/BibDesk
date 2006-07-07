@@ -216,7 +216,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>BibDesk/Complete Text Bibligraphy</string>
+				<string>BibDesk/Complete Text Bibliography</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>completeTextBibliographyFromSelection</string>
@@ -235,7 +235,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>BibDesk/Complete Rich Text Bibligraphy</string>
+				<string>BibDesk/Complete Rich Text Bibliography</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>completeRichBibliographyFromSelection</string>
