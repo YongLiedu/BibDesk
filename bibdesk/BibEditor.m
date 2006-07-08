@@ -362,20 +362,13 @@ static int numberOfOpenEditors = 0;
     if (field == nil)
 		field = BDSKLocalUrlString;
 	
-    volatile BOOL err = NO;
+    BOOL err = NO;
 
-    NS_DURING
-
-        if(![sw openFile:[theBib localFilePathForField:field]]){
-                err = YES;
-        }
-
-        NS_HANDLER
-            err=YES;
-        NS_ENDHANDLER
-        
-        if(err)
-            NSBeginAlertSheet(NSLocalizedString(@"Can't open local file", @"can't open local file"),
+    if(![sw openFile:[theBib localFilePathForField:field]]){
+            err = YES;
+    }
+    if(err)
+        NSBeginAlertSheet(NSLocalizedString(@"Can't Open Local File", @"can't open local file"),
                               NSLocalizedString(@"OK", @"OK"),
                               nil,nil, [self window],self, NULL, NULL, NULL,
                               NSLocalizedString(@"Sorry, the contents of the Local-Url Field are neither a valid file path nor a valid URL.",
@@ -433,6 +426,58 @@ static int numberOfOpenEditors = 0;
 	return nil;
 }
 
+- (NSMenu *)submenuOfApplicationsForURL:(NSURL *)fileURL{
+    NSZone *menuZone = [NSMenu menuZone];
+    NSMenu *submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
+
+    NSMenuItem *item;
+        
+    // if there's no fileURL, just return an empty submenu, since we can't find applications
+    if(nil == fileURL)
+        return submenu;
+    
+    NSArray *applications = (NSArray *)LSCopyApplicationURLsForURL((CFURLRef)fileURL, kLSRolesEditor | kLSRolesViewer);
+    NSSet *uniqueApplications = [NSSet setWithArray:applications];
+    [applications release];
+    
+    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"path.lastPathComponent.stringByDeletingPathExtension" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
+    NSEnumerator *appEnum = [[[uniqueApplications allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] objectEnumerator];
+    
+    CFURLRef defaultEditorURL = NULL;
+    OSStatus err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesEditor | kLSRolesViewer, NULL, &defaultEditorURL);
+    [(id)defaultEditorURL autorelease];
+    
+    NSString *menuTitle;
+    NSDictionary *representedObject;
+    NSURL *applicationURL;
+
+    while(applicationURL = [appEnum nextObject]){
+        menuTitle = [[applicationURL path] lastPathComponent];
+        
+        // mark the default app, if we have one
+        if(noErr == err && [(id)defaultEditorURL isEqual:applicationURL])
+            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
+        
+        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openFileWithApplication:) keyEquivalent:@""];
+        [item setTarget:self];
+        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:fileURL, @"fileURL", applicationURL, @"applicationURL", nil];
+        [item setRepresentedObject:representedObject];
+        [representedObject release];
+        [submenu addItem:item];
+        [item release];
+    }
+    return submenu;
+}
+
+// action for opening a file with a specific application
+- (IBAction)openFileWithApplication:(id)sender{
+    NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
+    NSURL *fileURL = [[sender representedObject] valueForKey:@"fileURL"];
+    
+    if([[NSWorkspace sharedWorkspace] openFile:[fileURL path] withApplication:[applicationURL path]] == NO)
+        NSBeep();
+}
+
 - (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenu *submenu;
@@ -443,25 +488,41 @@ static int numberOfOpenEditors = 0;
 		NSString *field = nil;
 		
 		// the first one has to be view Local-Url file, since it's also the button's action when you're clicking on the icon.
+        int idx = 0;
 		while (field = [e nextObject]) {
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ File",@"View Local-Url file"), field]
-											  action:@selector(openLinkedFile:)
-									   keyEquivalent:@""];
-			[item setRepresentedObject:field];
+            
+            if(idx++ > 0)
+                [menu addItem:[NSMenuItem separatorItem]];
+
+            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@",@"Open Local-Url file"), field]
+                                                                        action:@selector(openLinkedFile:)
+                                                                 keyEquivalent:@""];
+            [item setTarget:self];
+            [item setRepresentedObject:field];
 			[menu addItem:item];
 			[item release];
+            
+            submenu = [self submenuOfApplicationsForURL:[theBib URLForField:field]];
+			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
+											  action:NULL
+									   keyEquivalent:@""];
+            [item setSubmenu:submenu];
+			[menu addItem:item];
+			[item release];
+            
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Reveal Local-Url in finder"), field]
 											  action:@selector(revealLinkedFile:)
 									   keyEquivalent:@""];
 			[item setRepresentedObject:field];
 			[menu addItem:item];
 			[item release];
+            
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Move %@%C",@"Move Local-Url..."), field, 0x2026]
 											  action:@selector(moveLinkedFile:)
 									   keyEquivalent:@""];
 			[item setRepresentedObject:field];
 			[menu addItem:item];
-			[item release];
+			[item release];            
 		}
 		
 		[menu addItem:[NSMenuItem separatorItem]];
@@ -767,32 +828,35 @@ static int numberOfOpenEditors = 0;
 - (void)dummy:(id)obj{}
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
-	if ([menuItem action] == nil ||
-		[menuItem action] == @selector(dummy:)){ // Unused selector for disabled items. Needed to avoid the popupbutton to insert its own
+    
+    SEL theAction = [menuItem action];
+    
+	if (theAction == nil ||
+		theAction == @selector(dummy:)){ // Unused selector for disabled items. Needed to avoid the popupbutton to insert its own
 		return NO;
 	}
-	else if ([menuItem action] == @selector(generateCiteKey:)) {
+	else if (theAction == @selector(generateCiteKey:)) {
 		// need to set the title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
 		return YES;
 	}
-	else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
+	else if (theAction == @selector(consolidateLinkedFiles:)) {
 		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
 		NSString *lurl = [theBib localUrlPath];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
-	else if ([menuItem action] == @selector(duplicateTitleToBooktitle:)) {
+	else if (theAction == @selector(duplicateTitleToBooktitle:)) {
 		// need to set the title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle")];
 		return (![NSString isEmptyString:[theBib valueOfField:BDSKTitleString]]);
 	}
-	else if ([menuItem action] == @selector(selectCrossrefParentAction:)) {
+	else if (theAction == @selector(selectCrossrefParentAction:)) {
         return ([NSString isEmptyString:[theBib valueOfField:BDSKCrossrefString inherit:NO]] == NO);
 	}
-	else if ([menuItem action] == @selector(createNewPubUsingCrossrefAction:)) {
+	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
         return ([NSString isEmptyString:[theBib valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
-	else if ([menuItem action] == @selector(openLinkedFile:)) {
+	else if (theAction == @selector(openLinkedFile:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKLocalUrlString;
@@ -801,7 +865,11 @@ static int numberOfOpenEditors = 0;
 			[menuItem setTitle:NSLocalizedString(@"Open Linked File", @"Open Linked File")];
 		return (lurl == nil ? NO : YES);
 	}
-	else if ([menuItem action] == @selector(revealLinkedFile:)) {
+	else if (theAction == @selector(openFileWithApplication:)) {
+		NSURL *lurl = [[[menuItem representedObject] valueForKey:@"fileURL"] fileURLByResolvingAliases];
+		return (lurl == nil ? NO : YES);
+	}
+	else if (theAction == @selector(revealLinkedFile:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKLocalUrlString;
@@ -810,7 +878,7 @@ static int numberOfOpenEditors = 0;
 			[menuItem setTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Reveal Linked File in Finder")];
 		return (lurl == nil ? NO : YES);
 	}
-	else if ([menuItem action] == @selector(moveLinkedFile:)) {
+	else if (theAction == @selector(moveLinkedFile:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKLocalUrlString;
@@ -819,7 +887,7 @@ static int numberOfOpenEditors = 0;
 			[menuItem setTitle:NSLocalizedString(@"Move Linked File", @"Move Linked File")];
 		return (lurl == nil ? NO : YES);
 	}
-	else if ([menuItem action] == @selector(toggleSnoopDrawer:)) {
+	else if (theAction == @selector(toggleSnoopDrawer:)) {
 		int requiredContent = [menuItem tag];
 		int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
 		BOOL isCloseItem = ((currentContent == requiredContent) && (drawerState & BDSKDrawerStateOpenMask));
@@ -842,7 +910,7 @@ static int numberOfOpenEditors = 0;
             return (lurl == nil ? NO : YES);
 		}
 	}
-	else if ([menuItem action] == @selector(openRemoteURL:)) {
+	else if (theAction == @selector(openRemoteURL:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKUrlString;
@@ -850,18 +918,18 @@ static int numberOfOpenEditors = 0;
 			[menuItem setTitle:NSLocalizedString(@"Open URL in Browser", @"Open URL in Browser")];
 		return ([theBib remoteURLForField:field] != nil);
 	}
-	else if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
+	else if (theAction == @selector(saveFileAsLocalUrl:)) {
 		return ![[[remoteSnoopWebView mainFrame] dataSource] isLoading];
 	}
-	else if ([menuItem action] == @selector(downloadLinkedFileAsLocalUrl:)) {
+	else if (theAction == @selector(downloadLinkedFileAsLocalUrl:)) {
 		return NO;
 	}
-    else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
+    else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         id cell = [bibFields selectedCell];
 		return (cell != nil && [bibFields currentEditor] != nil &&
 				![macroTextFieldWC isEditing] && ![[cell title] isEqualToString:BDSKCrossrefString]);
     }
-    else if ([menuItem action] == @selector(toggleStatusBar:)) {
+    else if (theAction == @selector(toggleStatusBar:)) {
 		if ([statusBar isVisible]) {
 			[menuItem setTitle:NSLocalizedString(@"Hide Status Bar", @"Hide Status Bar")];
 		} else {
