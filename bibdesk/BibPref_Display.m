@@ -96,6 +96,7 @@
     NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
     [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
     [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"doc"]];
+    [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"html"]];
     [previewTemplatePopup removeAllItems];
     [previewTemplatePopup addItemsWithTitles:styles];
     if ([styles containsObject:currentStyle]) {
