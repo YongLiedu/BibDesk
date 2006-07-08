@@ -49,6 +49,8 @@
 - (CFArrayRef)stopWords;
 - (void)handleStopWordsChangedNotification:(NSNotification *)note;
 
+static inline CFArrayRef BDSKStopwordsFromController(BDSKStopWordController *controller);
+
 @end
 
 @implementation BDSKStopWordController
@@ -88,6 +90,12 @@ static id sharedController = nil;
     if(stopWords) CFRelease(stopWords);
     [super dealloc];
 }
+
+static inline CFArrayRef BDSKStopwordsFromController(BDSKStopWordController *controller)
+{
+    return controller->stopWords;
+}
+
 
 @end
 
@@ -319,7 +327,7 @@ void __BDDeleteArticlesForSorting(CFMutableStringRef mutableString)
     // remove certain terms for sorting, according to preferences
     // each one is typically an article, and we only look
     // for these at the beginning of a string   
-    CFArrayRef articlesToRemove = [[BDSKStopWordController sharedController] stopWords];
+    CFArrayRef articlesToRemove = BDSKStopwordsFromController([BDSKStopWordController sharedController]);
     
     CFIndex count = CFArrayGetCount(articlesToRemove);
     if(!count) return;
