@@ -1227,7 +1227,7 @@
         if(error)
             *error = nsError == nil ? NSLocalizedString(@"Unable to interpret text as bibliography data.", @"") : [nsError localizedDescription];
         // @@ 10.3 compatibility
-        if([self respondsToSelector:@selector(presentError:)])
+        if([[NSDocumentController sharedDocumentController] respondsToSelector:@selector(presentError:)])
             [[NSDocumentController sharedDocumentController] presentError:nsError];
     }
 }

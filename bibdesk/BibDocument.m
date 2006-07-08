@@ -3245,7 +3245,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (NSArray *)selectedPublications{
 
-    if([tableView selectedRow] == -1)
+    if(nil == tableView || [tableView selectedRow] == -1)
         return nil;
     
     return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
