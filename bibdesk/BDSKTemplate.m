@@ -422,10 +422,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 - (NSURL *)representedFileURL;
 {
     OBASSERT([self isLeaf]);
-    NSData *aliasData = [self valueForKey:@"_BDAlias"];
-    if (aliasData)
-        return [[BDAlias aliasWithData:aliasData] fileURLNoUI];
-    else return nil;
+    BDAlias *alias = [[BDAlias alloc] initWithData:[self valueForKey:@"_BDAlias"]];
+    NSURL *theURL = [alias fileURLNoUI];
+    [alias release];
+    return theURL;
 }
 
 - (NSColor *)representedColorForKey:(NSString *)key;
