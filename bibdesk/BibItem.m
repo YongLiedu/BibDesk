@@ -2754,7 +2754,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (id)initWithItem:(BibItem *)anItem {
     if(self = [super init]){
         item = anItem;
-        strings = [[NSMutableDictionary alloc] initWithCapacity:5];
+        // case insensitive because updateMetadataForKey: sends us "Title" instead of "title"
+        strings = BDSKCreateCaseInsensitiveKeyMutableDictionary();
     }
     return self;
 }
