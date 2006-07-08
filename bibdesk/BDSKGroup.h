@@ -188,6 +188,14 @@
 */
 - (BOOL)isRetrieving;
 
+/*!
+    @method     isValidDropTarget
+    @abstract   Some subclasses (e.g. BDSKSharedGroup) are never valid drop targets, while others are generally valid.  Returns YES by default.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isValidDropTarget;
+
 @end
 
 

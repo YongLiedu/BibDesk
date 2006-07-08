@@ -254,6 +254,8 @@ static NSImage *unlockedIcon = nil;
     return rv;
 }
 
+- (BOOL)isValidDropTarget { return NO; }
+
 @end
 
 #pragma mark -

@@ -161,6 +161,10 @@
 	return NO;
 }
 
+- (BOOL)isValidDropTarget {
+    return YES;
+}
+
 // custom accessors
 
 - (NSString *)stringValue {
@@ -358,6 +362,10 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 }
 
 - (BOOL)isEditable {
+    return NO;
+}
+
+- (BOOL)isValidDropTarget {
     return NO;
 }
 
@@ -635,6 +643,10 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (BOOL)isEditable {
     return YES;
+}
+
+- (BOOL)isValidDropTarget {
+    return NO;
 }
 
 @end

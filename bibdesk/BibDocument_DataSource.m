@@ -925,8 +925,9 @@
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
+            
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || (NSLocationInRange(row, [self rangeOfCategoryGroups]) == NO && NSLocationInRange(row, [self rangeOfStaticGroups]) == NO && row != 0) || (type == nil && [info draggingSource] != tableView)) 
+        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[self objectInGroupsAtIndex:row]  isValidDropTarget] == NO || (type == nil && [info draggingSource] != tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
@@ -1029,7 +1030,7 @@
 		
 		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
-        } else if([info draggingSource] == groupTableView || (NSLocationInRange(row, [self rangeOfCategoryGroups]) == NO && NSLocationInRange(row, [self rangeOfStaticGroups]) == NO && row != 0)) {
+        } else if([info draggingSource] == groupTableView || [group isValidDropTarget] == NO) {
             return NO;
         } else if([info draggingSource] == tableView){
             // we already have these publications, so we just want to add them to the group, not the document
