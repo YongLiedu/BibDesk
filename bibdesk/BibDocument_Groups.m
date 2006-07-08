@@ -58,7 +58,7 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + [categoryGroups count] + 1 ;
+    return [smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 1 : 0) + 1 /* add 1 for all publications group */ ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
