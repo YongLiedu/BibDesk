@@ -3952,21 +3952,26 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     OBPRECONDITION(nil != template);
     BDSKTemplateFormat format = [template templateFormat];
     id returnString = nil;
+    NSAutoreleasePool *pool = nil;
     
     if (format & BDSKTextTemplateFormat) {
         
         returnString = [NSMutableString stringWithString:@""];        
         while(pub = [e nextObject]){
+            pool = [NSAutoreleasePool new];
             [pub setItemIndex:++currentIndex];
             [returnString appendString:[pub stringValueUsingTemplate:template]];
+            [pool release];
         }
         
     } else if (format & BDSKRichTextTemplateFormat) {
         
         returnString = [[[NSMutableAttributedString alloc] init] autorelease];
         while(pub = [e nextObject]){
+            pool = [NSAutoreleasePool new];
             [pub setItemIndex:++currentIndex];
             [returnString appendAttributedString:[pub attributedStringValueUsingTemplate:template]];
+            [pool release];
         }
     }
     

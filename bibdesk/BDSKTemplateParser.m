@@ -74,6 +74,32 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
     return [self stringByParsingTemplate:template usingObject:object delegate:nil];
 }
 
+static NSMutableDictionary *endDict = nil;
+static inline NSString *endTagWithTag(NSString *tag){
+    if(nil == endDict)
+        endDict = [[NSMutableDictionary alloc] init];
+    
+    NSString *endTag = [endDict objectForKey:tag];
+    if(nil == endTag){
+        endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
+        [endDict setObject:endTag forKey:tag];
+    }
+    return endTag;
+}
+
+static NSMutableDictionary *sepDict = nil;
+static inline NSString *sepTagWithTag(NSString *tag){
+    if(nil == sepDict)
+        sepDict = [[NSMutableDictionary alloc] init];
+    
+    NSString *sepTag = [sepDict objectForKey:tag];
+    if(nil == sepTag){
+        sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
+        [sepDict setObject:sepTag forKey:tag];
+    }
+    return sepTag;
+}
+
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSScanner *scanner = [[NSScanner alloc] initWithString:template];
     NSMutableString *result = [[NSMutableString alloc] init];
@@ -120,8 +146,8 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
-                endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
-                sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
+                endTag = endTagWithTag(tag);
+                sepTag = sepTagWithTag(tag);
                 // ignore the rest of an empty line after the tag
                 [scanner scanEmptyLine];
                 if ([scanner scanString:endTag intoString:nil])
@@ -246,8 +272,8 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
-                endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
-                sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
+                endTag = endTagWithTag(tag);
+                sepTag = sepTagWithTag(tag);
                 // ignore the rest of an empty line after the tag
                 [scanner scanEmptyLine];
                 if ([scanner scanString:endTag intoString:nil])
