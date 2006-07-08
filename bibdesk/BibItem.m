@@ -2573,12 +2573,25 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if(metadata != nil){
         item = [[[self allocWithZone:[self zone]] init] autorelease];
         
-        // setField:toValue: handles nil values correctly, so this should be safe
-        [item setField:BDSKAuthorString toValue:[metadata valueForKey:BDSKPDFDocumentAuthorAttribute]];
-        [item setField:BDSKTitleString toValue:[metadata valueForKey:BDSKPDFDocumentTitleAttribute]];
+        NSString *value = nil;
+        
+        // setting to nil can remove some fields (e.g. keywords), so check first
+        value = [metadata valueForKey:BDSKPDFDocumentAuthorAttribute];
+        if(value)
+            [item setField:BDSKAuthorString toValue:value];
+        
+        value = [metadata valueForKey:BDSKPDFDocumentTitleAttribute];
+        if(value)
+            [item setField:BDSKTitleString toValue:value];
+        
         // @@ this seems to be set by the filesystem, not as metadata?
-        [item setField:BDSKDateString toValue:[[[metadata valueForKey:BDSKPDFDocumentCreationDateAttribute] dateWithCalendarFormat:@"%B %Y" timeZone:[NSTimeZone defaultTimeZone]] description]];
-        [item setField:BDSKKeywordsString toValue:[[metadata valueForKey:BDSKPDFDocumentKeywordsAttribute] componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey]]];
+        value = [[[metadata valueForKey:BDSKPDFDocumentCreationDateAttribute] dateWithCalendarFormat:@"%B %Y" timeZone:[NSTimeZone defaultTimeZone]] description];
+        if(value)
+            [item setField:BDSKDateString toValue:value];
+        
+        value = [[metadata valueForKey:BDSKPDFDocumentKeywordsAttribute] componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
+        if(value)
+            [item setField:BDSKKeywordsString toValue:value];
     }
     return item;
 }
