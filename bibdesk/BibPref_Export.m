@@ -497,6 +497,11 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(editFile:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:theURL];
+            
+            // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
+            NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:[theURL path]];
+            [image setSize:NSMakeSize(16,16)];
+            [item setImage:image];            
             [submenu addItem:item];
             [item release];
         }

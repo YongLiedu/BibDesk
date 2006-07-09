@@ -454,6 +454,11 @@ static int numberOfOpenEditors = 0;
         [item setTarget:self];
         representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:fileURL, @"fileURL", applicationURL, @"applicationURL", nil];
         [item setRepresentedObject:representedObject];
+        
+        // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
+        NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:[applicationURL path]];
+        [image setSize:NSMakeSize(16,16)];
+        [item setImage:image];
         [representedObject release];
         [submenu addItem:item];
         [item release];
