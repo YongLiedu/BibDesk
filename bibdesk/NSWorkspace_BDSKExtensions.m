@@ -178,6 +178,42 @@
     return [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
 }
 
+- (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
+{
+    NSParameterAssert(aURL);
+    
+    NSArray *applications = (NSArray *)LSCopyApplicationURLsForURL((CFURLRef)aURL, kLSRolesEditor | kLSRolesViewer);
+    
+    if(nil != applications){
+        // LS seems to return duplicates (same full path), so we'll remove those to avoid confusion
+        NSSet *uniqueApplications = [[NSSet alloc] initWithArray:applications];
+        [applications release];
+            
+        // sort by application name
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"path.lastPathComponent.stringByDeletingPathExtension" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
+        applications = [[uniqueApplications allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]];
+        [sort release];
+        [uniqueApplications release];
+    }
+    
+    return applications;
+}
+
+- (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
+{
+    NSParameterAssert(aURL);
+    CFURLRef defaultEditorURL = NULL;
+    OSStatus err = LSGetApplicationForURL((CFURLRef)aURL, kLSRolesEditor | kLSRolesViewer, NULL, &defaultEditorURL);
+    
+    // make sure we return nil if there's no application for this URL
+    if(noErr != err && NULL != defaultEditorURL){
+        CFRelease(defaultEditorURL);
+        defaultEditorURL = NULL;
+    }
+    
+    return [(id)defaultEditorURL autorelease];
+}
+
 
 @end
 

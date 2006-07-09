@@ -69,6 +69,9 @@
 */
 - (NSString *)UTIForPathExtension:(NSString *)extension;
 
+- (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
+- (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
+
 @end
 
 @interface NSString (UTIExtensions)

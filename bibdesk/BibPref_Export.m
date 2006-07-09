@@ -42,6 +42,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "BibAppController.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
@@ -474,9 +475,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         NSZone *menuZone = [NSMenu menuZone];
         menu = [[[tv menu] copyWithZone:menuZone] autorelease];
         
-        NSArray *applications = (NSArray *)LSCopyApplicationURLsForURL((CFURLRef)theURL, kLSRolesEditor | kLSRolesViewer);
-        NSEnumerator *appEnum = [applications objectEnumerator];
-        [applications release];
+        NSEnumerator *appEnum = [[[NSWorkspace sharedWorkspace] editorAndViewerURLsForURL:theURL] objectEnumerator];
+        NSURL *defaultEditorURL = [[NSWorkspace sharedWorkspace] defaultEditorOrViewerURLForURL:theURL];
         NSMenuItem *item;
         
         item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Open With", @"") action:NULL keyEquivalent:@""];
@@ -484,24 +484,20 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         [item setSubmenu:submenu];
         [menu insertItem:item atIndex:0];
         [item release];
-        
-        CFURLRef defaultEditorURL = NULL;
-        OSStatus err = LSGetApplicationForURL((CFURLRef)theURL, kLSRolesEditor | kLSRolesViewer, NULL, &defaultEditorURL);
-        [(id)defaultEditorURL autorelease];
-        
+                
         NSString *menuTitle;
         
         while(theURL = [appEnum nextObject]){
             menuTitle = [[theURL path] lastPathComponent];
             
             // mark the default app, if we have one
-            if(noErr == err && [(id)defaultEditorURL isEqual:theURL])
+            if([defaultEditorURL isEqual:theURL])
                 menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
             
             item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(editFile:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:theURL];
-            [submenu insertItem:item atIndex:0];
+            [submenu addItem:item];
             [item release];
         }
         

@@ -436,16 +436,8 @@ static int numberOfOpenEditors = 0;
     if(nil == fileURL)
         return submenu;
     
-    NSArray *applications = (NSArray *)LSCopyApplicationURLsForURL((CFURLRef)fileURL, kLSRolesEditor | kLSRolesViewer);
-    NSSet *uniqueApplications = [NSSet setWithArray:applications];
-    [applications release];
-    
-    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"path.lastPathComponent.stringByDeletingPathExtension" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
-    NSEnumerator *appEnum = [[[uniqueApplications allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] objectEnumerator];
-    
-    CFURLRef defaultEditorURL = NULL;
-    OSStatus err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesEditor | kLSRolesViewer, NULL, &defaultEditorURL);
-    [(id)defaultEditorURL autorelease];
+    NSEnumerator *appEnum = [[[NSWorkspace sharedWorkspace] editorAndViewerURLsForURL:fileURL] objectEnumerator];
+    NSURL *defaultEditorURL = [[NSWorkspace sharedWorkspace] defaultEditorOrViewerURLForURL:fileURL];
     
     NSString *menuTitle;
     NSDictionary *representedObject;
@@ -455,7 +447,7 @@ static int numberOfOpenEditors = 0;
         menuTitle = [[applicationURL path] lastPathComponent];
         
         // mark the default app, if we have one
-        if(noErr == err && [(id)defaultEditorURL isEqual:applicationURL])
+        if([defaultEditorURL isEqual:applicationURL])
             menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
         
         item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openFileWithApplication:) keyEquivalent:@""];
