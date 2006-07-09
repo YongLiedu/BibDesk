@@ -45,6 +45,12 @@
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
 + (NSCharacterSet *)illegalURLCharacterSet;
+- (NSString *)lastPathComponent;
+
+@end
+
+@interface NSURL (Templating)
+
 - (NSAttributedString *)linkedText;
 - (NSAttributedString *)icon;
 - (NSAttributedString *)smallIcon;

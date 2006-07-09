@@ -214,6 +214,29 @@
     return [(id)defaultEditorURL autorelease];
 }
 
+- (NSImage *)iconForFileURL:(NSURL *)fileURL;
+{
+    NSImage *image = nil;
+    if(nil != fileURL){
+        NSString *filePath = (NSString *)CFURLCopyFileSystemPath((CFURLRef)fileURL, kCFURLPOSIXPathStyle);
+        image = [self iconForFile:filePath];
+        [filePath release];
+    }
+    return image;
+}
+
+- (BOOL)openFileURL:(NSURL *)fileURL withApplicationURL:(NSURL *)applicationURL;
+{
+    BOOL rv = NO;
+    if(nil != fileURL && nil != applicationURL){
+        NSString *filePath = (NSString *)CFURLCopyFileSystemPath((CFURLRef)fileURL, kCFURLPOSIXPathStyle);
+        NSString *applicationPath = (NSString *)CFURLCopyFileSystemPath((CFURLRef)applicationURL, kCFURLPOSIXPathStyle);
+        rv = [self openFile:filePath withApplication:applicationPath];
+        [filePath release];
+        [applicationPath release];
+    }
+    return rv;
+}
 
 @end
 

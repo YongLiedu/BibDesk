@@ -204,6 +204,15 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return charSet;
 }
 
+- (NSString *)lastPathComponent;
+{
+    return [(id)CFURLCopyLastPathComponent((CFURLRef)self) autorelease];
+}
+
+@end
+
+@implementation NSURL (Templating)
+
 - (NSAttributedString *)linkedText {
     return [[[NSAttributedString alloc] initWithString:[self absoluteString] attributeName:NSLinkAttributeName attributeValue:self] autorelease];
 }
