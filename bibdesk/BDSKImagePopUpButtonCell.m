@@ -307,11 +307,15 @@
 					}
 					
 				} else if([nextEvent type] == NSLeftMouseDragged) {
-					// NSLog(@"drag event %@" , nextEvent);
+                    // test option key to see if we should drag-copy or show the menu, since the drag-to-copy behavior is inconsistent, particularly in BibEditor (see bug #1519481)
 					shouldSendAction = NO;
-					if ([controlView respondsToSelector:@selector(startDraggingWithEvent:)] == NO ||
-						[controlView performSelector:@selector(startDraggingWithEvent:) withObject:nextEvent] == NO)
-						[self showMenuInView:controlView withEvent:nextEvent];
+					if (([nextEvent modifierFlags] & NSAlternateKeyMask) > 0 &&
+                        [controlView respondsToSelector:@selector(startDraggingWithEvent:)]){ 
+                        if([(id)controlView startDraggingWithEvent:nextEvent] == NO)
+                            [self showMenuInView:controlView withEvent:nextEvent];
+                    } else {
+                        [self showMenuInView:controlView withEvent:nextEvent];
+                    }
 
 				} else {
 					// NSLog(@"periodic event %@", nextEvent);
