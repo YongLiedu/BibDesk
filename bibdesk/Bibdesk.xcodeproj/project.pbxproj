@@ -630,6 +630,8 @@
 		F9F0C95009A95725004BBE5E /* PDFMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = F91F284609A661A700419960 /* PDFMetadata.h */; };
 		F9F78CD407D5320D004B68AF /* BDSKStringEncodingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
+		F9FD63DC0A61B87800F9871B /* NSMenu_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */; };
+		F9FD63DD0A61B87800F9871B /* NSMenu_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */; };
 		F9FEFCB10A0BC14D009193CA /* PreferenceSearchTerms.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9FEFCB00A0BC14D009193CA /* PreferenceSearchTerms.plist */; };
 		F9FF241309E873A300BB1706 /* networkIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9FF241209E873A300BB1706 /* networkIcon.tiff */; };
 /* End PBXBuildFile section */
@@ -1006,7 +1008,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1452,6 +1454,8 @@
 		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = ../bibdeskinputmanager/BibDeskInputManager.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringEncodingManager.h; sourceTree = "<group>"; };
 		F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStringEncodingManager.m; sourceTree = "<group>"; };
+		F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSMenu_BDSKExtensions.h; sourceTree = "<group>"; };
+		F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSMenu_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9FEFCB00A0BC14D009193CA /* PreferenceSearchTerms.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = PreferenceSearchTerms.plist; path = English.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
 		F9FF241209E873A300BB1706 /* networkIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = networkIcon.tiff; path = Images/networkIcon.tiff; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1786,6 +1790,7 @@
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */,
 				F9022C9D0758038000C3F701 /* NSImage+Toolbox.m */,
+				F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */,
 				CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */,
 				CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */,
 				F9022CA10758038000C3F701 /* NSTextView_BDSKExtensions.m */,
@@ -2059,7 +2064,6 @@
 		F918104307583A6E00CF822D /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */,
 				F9022C1B0758013E00C3F701 /* BDAlias.h */,
 				CE2209A5093639B0004D7D92 /* BDSKAlert.h */,
 				F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */,
@@ -2110,6 +2114,7 @@
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				3DE391F007FF260D00BE3AE7 /* BDSKMenuItem.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
+				F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */,
 				F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */,
 				CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */,
 				CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */,
@@ -2212,6 +2217,7 @@
 				CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */,
 				F9022C9C0758038000C3F701 /* NSImage+Toolbox.h */,
 				CE573D2409F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h */,
+				F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */,
 				F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */,
 				F916E68A07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.h */,
 				F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */,
@@ -2534,6 +2540,7 @@
 				CE2391610A334890009F3A5B /* BDSKDocumentInfoWindowController.h in Headers */,
 				CE3A32D70A345C2600984DC2 /* NSAttributedString_BDSKExtensions.h in Headers */,
 				CE6DACC40A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h in Headers */,
+				F9FD63DC0A61B87800F9871B /* NSMenu_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3339,6 +3346,7 @@
 				CE2391620A334890009F3A5B /* BDSKDocumentInfoWindowController.m in Sources */,
 				CE3A32D60A345C2400984DC2 /* NSAttributedString_BDSKExtensions.m in Sources */,
 				CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */,
+				F9FD63DD0A61B87800F9871B /* NSMenu_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
