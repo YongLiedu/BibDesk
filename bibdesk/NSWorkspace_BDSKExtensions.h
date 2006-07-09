@@ -72,7 +72,7 @@
 - (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
 - (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
 - (NSImage *)iconForFileURL:(NSURL *)fileURL;
-- (BOOL)openFileURL:(NSURL *)fileURL withApplicationURL:(NSURL *)applicationURL;
+- (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
 
 @end
 

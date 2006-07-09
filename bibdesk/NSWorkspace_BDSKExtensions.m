@@ -225,17 +225,21 @@
     return image;
 }
 
-- (BOOL)openFileURL:(NSURL *)fileURL withApplicationURL:(NSURL *)applicationURL;
+- (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
 {
-    BOOL rv = NO;
-    if(nil != fileURL && nil != applicationURL){
-        NSString *filePath = (NSString *)CFURLCopyFileSystemPath((CFURLRef)fileURL, kCFURLPOSIXPathStyle);
-        NSString *applicationPath = (NSString *)CFURLCopyFileSystemPath((CFURLRef)applicationURL, kCFURLPOSIXPathStyle);
-        rv = [self openFile:filePath withApplication:applicationPath];
-        [filePath release];
-        [applicationPath release];
+    OSStatus err = kLSUnknownErr;
+    if(nil != aURL){
+        LSLaunchURLSpec launchSpec;
+        memset(&launchSpec, 0, sizeof(LSLaunchURLSpec));
+        launchSpec.appURL = (CFURLRef)applicationURL;
+        launchSpec.itemURLs = (CFArrayRef)[NSArray arrayWithObject:aURL];
+        launchSpec.passThruParams = NULL;
+        launchSpec.launchFlags = kLSLaunchDefaults;
+        launchSpec.asyncRefCon = NULL;
+        
+        err = LSOpenFromURLSpec(&launchSpec, NULL);
     }
-    return rv;
+    return noErr == err ? YES : NO;
 }
 
 @end
