@@ -83,6 +83,16 @@
         [submenu addItem:item];
         [item release];
     }
+    
+    // add the choose... item
+    item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
+    [item setTarget:nil];
+    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, @"targetURL", nil];
+    [item setRepresentedObject:representedObject];
+    [representedObject release];
+    [submenu addItem:item];
+    [item release];
+    
     return submenu;
 }
 
