@@ -71,6 +71,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKPersistentSearch.h"
 #import "BDSKMacroResolver.h"
+#import "NSMenu_BDSKExtensions.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -426,56 +427,6 @@ static int numberOfOpenEditors = 0;
 	return nil;
 }
 
-- (NSMenu *)submenuOfApplicationsForURL:(NSURL *)fileURL{
-    NSZone *menuZone = [NSMenu menuZone];
-    NSMenu *submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
-
-    NSMenuItem *item;
-        
-    // if there's no fileURL, just return an empty submenu, since we can't find applications
-    if(nil == fileURL)
-        return submenu;
-    
-    NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-    NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:fileURL] objectEnumerator];
-    NSURL *defaultEditorURL = [workspace defaultEditorOrViewerURLForURL:fileURL];
-    
-    NSString *menuTitle;
-    NSDictionary *representedObject;
-    NSURL *applicationURL;
-
-    while(applicationURL = [appEnum nextObject]){
-        menuTitle = [applicationURL lastPathComponent];
-        
-        // mark the default app, if we have one
-        if([defaultEditorURL isEqual:applicationURL])
-            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
-        
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openFileWithApplication:) keyEquivalent:@""];
-        [item setTarget:self];
-        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:fileURL, @"fileURL", applicationURL, @"applicationURL", nil];
-        [item setRepresentedObject:representedObject];
-        
-        // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
-        NSImage *image = [workspace iconForFileURL:applicationURL];
-        [image setSize:NSMakeSize(16,16)];
-        [item setImage:image];
-        [representedObject release];
-        [submenu addItem:item];
-        [item release];
-    }
-    return submenu;
-}
-
-// action for opening a file with a specific application
-- (IBAction)openFileWithApplication:(id)sender{
-    NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
-    NSURL *fileURL = [[sender representedObject] valueForKey:@"fileURL"];
-    
-    if([[NSWorkspace sharedWorkspace] openFileURL:fileURL withApplicationURL:applicationURL] == NO)
-        NSBeep();
-}
-
 - (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenu *submenu;
@@ -500,7 +451,7 @@ static int numberOfOpenEditors = 0;
 			[menu addItem:item];
 			[item release];
             
-            submenu = [self submenuOfApplicationsForURL:[theBib URLForField:field]];
+            submenu = [NSMenu submenuOfApplicationsForURL:[theBib URLForField:field]];
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
 											  action:NULL
 									   keyEquivalent:@""];
@@ -567,6 +518,14 @@ static int numberOfOpenEditors = 0;
 											  action:@selector(openRemoteURL:)
 									   keyEquivalent:@""];
 			[item setRepresentedObject:field];
+			[menu addItem:item];
+			[item release];
+            
+            submenu = [NSMenu submenuOfApplicationsForURL:[theBib URLForField:field]];
+			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
+                                                                        action:NULL
+                                                                 keyEquivalent:@""];
+            [item setSubmenu:submenu];
 			[menu addItem:item];
 			[item release];
 		}
@@ -861,10 +820,6 @@ static int numberOfOpenEditors = 0;
 		NSURL *lurl = [[theBib URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Open Linked File", @"Open Linked File")];
-		return (lurl == nil ? NO : YES);
-	}
-	else if (theAction == @selector(openFileWithApplication:)) {
-		NSURL *lurl = [[[menuItem representedObject] valueForKey:@"fileURL"] fileURLByResolvingAliases];
 		return (lurl == nil ? NO : YES);
 	}
 	else if (theAction == @selector(revealLinkedFile:)) {

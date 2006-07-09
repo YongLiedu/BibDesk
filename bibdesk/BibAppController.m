@@ -72,6 +72,7 @@
 #import "BDSKTemplate.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 @implementation BibAppController
 
@@ -485,7 +486,12 @@
 		}
 		return YES;
 	}
-    else
+    else if (act == @selector(openURLWithApplication:)) {
+        NSURL *theURL = [[menuItem representedObject] valueForKey:@"targetURL"];
+        if([theURL isFileURL])
+            theURL = [theURL fileURLByResolvingAliases];
+        return (theURL == nil ? NO : YES);
+    }
 
 	return YES;
 }
@@ -515,6 +521,15 @@
         item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
         [item setTag:BDSKTemplateDragCopyType + i];
     }
+}
+
+// action for opening a file with a specific application
+- (IBAction)openURLWithApplication:(id)sender{
+    NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
+    NSURL *targetURL = [[sender representedObject] valueForKey:@"targetURL"];
+    
+    if([[NSWorkspace sharedWorkspace] openURL:targetURL withApplicationURL:applicationURL] == NO)
+        NSBeep();
 }
 
 #pragma mark Auto generation format stuff

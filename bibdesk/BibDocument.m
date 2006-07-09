@@ -104,6 +104,7 @@
 #import "BDSKGroupTableView.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKTemplateParser.h"
+#import "NSMenu_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"bibTeX database";
@@ -2748,6 +2749,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 */
 - (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column {
 	NSMenu *myMenu = nil;
+    NSMenu *submenu = nil;
+    NSMenuItem *theItem = nil;
     
 	if (column == -1 || row == -1) 
 		return nil;
@@ -2755,26 +2758,46 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	if(tv == tableView){
 		
 		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
-		
+        NSURL *theURL;
+        
 		if([[BibTypeManager sharedManager] isLocalURLField:tcId]){
-			myMenu = [fileMenu copy];
+			myMenu = [[fileMenu copyWithZone:[NSMenu menuZone]] autorelease];
 			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
 			[[myMenu itemAtIndex:1] setRepresentedObject:tcId];
+            theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
+            if(nil != theURL){
+                submenu = [NSMenu submenuOfApplicationsForURL:theURL];
+                theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open With",@"Open Local-Url file") 
+                                                                               action:NULL
+                                                                        keyEquivalent:@""];
+                [theItem setSubmenu:submenu];
+                [myMenu insertItem:theItem atIndex:0];
+                [theItem release];
+            }
 		}else if([[BibTypeManager sharedManager] isRemoteURLField:tcId]){
-			myMenu = [URLMenu copy];
+			myMenu = [[URLMenu copyWithZone:[NSMenu menuZone]] autorelease];
 			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
+            theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
+            if(nil != theURL){
+                submenu = [NSMenu submenuOfApplicationsForURL:theURL];
+                theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open With",@"Open Local-Url file") 
+                                                                               action:NULL
+                                                                        keyEquivalent:@""];
+                [theItem setSubmenu:submenu];
+                [myMenu insertItem:theItem atIndex:0];
+                [theItem release];
+            }            
 		}else{
-			myMenu = [actionMenu copy];
+			myMenu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
 		}
 		
 	}else if (tv == groupTableView){
-		myMenu = [groupMenu copy];
+		myMenu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
 	}else{
 		return nil;
 	}
 	
 	// kick out every item we won't need:
-	NSMenuItem *theItem = nil;
 	int i = [myMenu numberOfItems];
 	
 	while (--i >= 0) {
@@ -2790,7 +2813,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	if([myMenu numberOfItems] == 0)
 		return nil;
 	
-	return [myMenu autorelease];
+	return myMenu;
 }
 
 #pragma mark -
