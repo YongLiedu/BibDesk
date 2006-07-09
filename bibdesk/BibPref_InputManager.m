@@ -44,6 +44,8 @@
 #import "BDSKTextWithIconCell.h"
 #import "BDSKSearchResult.h"
 #import "BibAppController.h"
+#import "NSURL_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 CFStringRef BDSKInputManagerID = CFSTR("net.sourceforge.bibdesk.inputmanager");
 CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles that we recognize");
@@ -96,8 +98,8 @@ static int tableIconSize = 24;
                                                  &theURL );
         
         if(err == noErr){
-            [dictionary setValue:[[[(NSURL *)theURL path] lastPathComponent] stringByDeletingPathExtension] forKey:OATextWithIconCellStringKey];
-            [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFile:[(NSURL *)theURL path]] forKey:OATextWithIconCellImageKey];
+            [dictionary setValue:[[(NSURL *)theURL lastPathComponent] stringByDeletingPathExtension] forKey:OATextWithIconCellStringKey];
+            [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)theURL] forKey:OATextWithIconCellImageKey];
         } else {
             // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
             [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@""), bundleID] forKey:OATextWithIconCellStringKey];

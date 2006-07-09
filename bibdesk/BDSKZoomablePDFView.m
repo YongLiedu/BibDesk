@@ -42,6 +42,7 @@
 #import "BDSKHeaderPopUpButton.h"
 #import "NSString_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
+#import "NSURL_BDSKExtensions.h"
 
 @interface NSScrollView (BDSKZoomablePDFViewExtensions)
 @end
@@ -179,7 +180,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     
 - (void)saveDocumentAs:(id)sender;
 {
-    NSString *name = [[[[self document] documentURL] path] lastPathComponent];
+    NSString *name = [[[self document] documentURL] lastPathComponent];
     [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ? name : NSLocalizedString(@"Untitled.pdf", @"")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 

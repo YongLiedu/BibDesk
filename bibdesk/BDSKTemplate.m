@@ -39,6 +39,7 @@
 #import "BDSKTemplate.h"
 #import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 NSString *BDSKTemplateRoleString = @"role";
 NSString *BDSKTemplateNameString = @"name";
@@ -410,7 +411,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     if(alias){
         [self setValue:[alias aliasData] forKey:@"_BDAlias"];
         
-        [self setValue:[[aURL path] lastPathComponent] forKey:BDSKTemplateNameString];
+        [self setValue:[aURL lastPathComponent] forKey:BDSKTemplateNameString];
         
         NSString *extension = [[aURL path] pathExtension];
         if ([NSString isEmptyString:extension] == NO && [[self parent] valueForKey:BDSKTemplateRoleString] == nil) 

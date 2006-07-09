@@ -43,6 +43,7 @@
 #import "BDSKTemplate.h"
 #import "BibAppController.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
@@ -475,8 +476,9 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         NSZone *menuZone = [NSMenu menuZone];
         menu = [[[tv menu] copyWithZone:menuZone] autorelease];
         
-        NSEnumerator *appEnum = [[[NSWorkspace sharedWorkspace] editorAndViewerURLsForURL:theURL] objectEnumerator];
-        NSURL *defaultEditorURL = [[NSWorkspace sharedWorkspace] defaultEditorOrViewerURLForURL:theURL];
+        NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+        NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:theURL] objectEnumerator];
+        NSURL *defaultEditorURL = [workspace defaultEditorOrViewerURLForURL:theURL];
         NSMenuItem *item;
         
         item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Open With", @"") action:NULL keyEquivalent:@""];
@@ -488,7 +490,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         NSString *menuTitle;
         
         while(theURL = [appEnum nextObject]){
-            menuTitle = [[theURL path] lastPathComponent];
+            menuTitle = [theURL lastPathComponent];
             
             // mark the default app, if we have one
             if([defaultEditorURL isEqual:theURL])
@@ -499,7 +501,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             [item setRepresentedObject:theURL];
             
             // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
-            NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:[theURL path]];
+            NSImage *image = [workspace iconForFileURL:theURL];
             [image setSize:NSMakeSize(16,16)];
             [item setImage:image];            
             [submenu addItem:item];

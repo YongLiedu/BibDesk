@@ -71,6 +71,7 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKTemplate.h"
 #import "NSSet_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 @implementation BibAppController
 
@@ -376,7 +377,7 @@
     [anItem release];
     
     while(url = [urlE nextObject]){
-        anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[[url path] lastPathComponent] action:@selector(openRecentItemFromDock:) keyEquivalent:@""];
+        anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[url lastPathComponent] action:@selector(openRecentItemFromDock:) keyEquivalent:@""];
         [anItem setTarget:self];
         [anItem setRepresentedObject:url];
         

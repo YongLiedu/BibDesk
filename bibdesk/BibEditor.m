@@ -436,15 +436,16 @@ static int numberOfOpenEditors = 0;
     if(nil == fileURL)
         return submenu;
     
-    NSEnumerator *appEnum = [[[NSWorkspace sharedWorkspace] editorAndViewerURLsForURL:fileURL] objectEnumerator];
-    NSURL *defaultEditorURL = [[NSWorkspace sharedWorkspace] defaultEditorOrViewerURLForURL:fileURL];
+    NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+    NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:fileURL] objectEnumerator];
+    NSURL *defaultEditorURL = [workspace defaultEditorOrViewerURLForURL:fileURL];
     
     NSString *menuTitle;
     NSDictionary *representedObject;
     NSURL *applicationURL;
 
     while(applicationURL = [appEnum nextObject]){
-        menuTitle = [[applicationURL path] lastPathComponent];
+        menuTitle = [applicationURL lastPathComponent];
         
         // mark the default app, if we have one
         if([defaultEditorURL isEqual:applicationURL])
@@ -456,7 +457,7 @@ static int numberOfOpenEditors = 0;
         [item setRepresentedObject:representedObject];
         
         // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
-        NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:[applicationURL path]];
+        NSImage *image = [workspace iconForFileURL:applicationURL];
         [image setSize:NSMakeSize(16,16)];
         [item setImage:image];
         [representedObject release];
@@ -471,7 +472,7 @@ static int numberOfOpenEditors = 0;
     NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
     NSURL *fileURL = [[sender representedObject] valueForKey:@"fileURL"];
     
-    if([[NSWorkspace sharedWorkspace] openFile:[fileURL path] withApplication:[applicationURL path]] == NO)
+    if([[NSWorkspace sharedWorkspace] openFileURL:fileURL withApplicationURL:applicationURL] == NO)
         NSBeep();
 }
 
