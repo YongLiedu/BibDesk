@@ -3071,8 +3071,20 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
                 if (template == nil)
                     template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
-                NSAttributedString *templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
-                [textStorage appendAttributedString:templateString];
+                NSAttributedString *templateString;
+                
+                // make sure this is really one of the attributed string types...
+                if([template templateFormat] != BDSKTextTemplateFormat){
+                    templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
+                    [textStorage appendAttributedString:templateString];
+                } else {
+                    // parse as plain text, so the HTML is interpreted properly by NSAttributedString
+                    NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
+                    // we generally assume UTF-8 encoding for all template-related files
+                    templateString = [[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+                    [textStorage appendAttributedString:templateString];
+                    [templateString release];
+                }
             }while(0);
             break;
     }
