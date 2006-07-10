@@ -431,7 +431,8 @@ static int numberOfOpenEditors = 0;
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenu *submenu;
 	NSMenuItem *item;
-	
+	NSURL *theURL;
+    
 	if (view == viewLocalButton) {
 		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
 		NSString *field = nil;
@@ -451,13 +452,16 @@ static int numberOfOpenEditors = 0;
 			[menu addItem:item];
 			[item release];
             
-            submenu = [NSMenu submenuOfApplicationsForURL:[theBib URLForField:field]];
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
-											  action:NULL
-									   keyEquivalent:@""];
-            [item setSubmenu:submenu];
-			[menu addItem:item];
-			[item release];
+            theURL = [theBib URLForField:field];
+            if(nil != theURL){
+                submenu = [NSMenu submenuOfApplicationsForURL:theURL];
+                item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
+                                                  action:NULL
+                                           keyEquivalent:@""];
+                [item setSubmenu:submenu];
+                [menu addItem:item];
+                [item release];
+            }
             
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Reveal Local-Url in finder"), field]
 											  action:@selector(revealLinkedFile:)
@@ -521,13 +525,16 @@ static int numberOfOpenEditors = 0;
 			[menu addItem:item];
 			[item release];
             
-            submenu = [NSMenu submenuOfApplicationsForURL:[theBib URLForField:field]];
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
-                                                                        action:NULL
-                                                                 keyEquivalent:@""];
-            [item setSubmenu:submenu];
-			[menu addItem:item];
-			[item release];
+            theURL = [theBib URLForField:field];
+            if(nil != theURL){
+                submenu = [NSMenu submenuOfApplicationsForURL:[theBib URLForField:field]];
+                item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
+                                                                            action:NULL
+                                                                     keyEquivalent:@""];
+                [item setSubmenu:submenu];
+                [menu addItem:item];
+                [item release];
+            }
 		}
 		
 		// get Safari recent URLs
