@@ -674,6 +674,34 @@ The groupedPublications array is a subset of the publications array, developed b
     
     CFRelease(rowDict);
     
+    // handle smart and static groups separately, since they have a different approach to containment
+    NSMutableIndexSet *staticAndSmartIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:[self rangeOfSmartGroups]];
+    [staticAndSmartIndexes addIndexesInRange:[self rangeOfStaticGroups]];
+    
+    if([staticAndSmartIndexes count]){
+        rowIndexes = [tableView selectedRowIndexes];
+        rowIndex = [rowIndexes firstIndex];
+        
+        int groupIndex;
+        id aGroup;
+        
+        // enumerate selected publication indexes once, since it should be a much longer array than static + smart groups
+        while(rowIndex != NSNotFound){
+            
+            BibItem *pub = [shownPublications objectAtIndex:rowIndex];
+            groupIndex = [staticAndSmartIndexes firstIndex];
+            
+            // may not be worth it to check for visibility...
+            while(groupIndex != NSNotFound && [visibleIndexes containsIndex:groupIndex]){
+                aGroup = [self objectInGroupsAtIndex:groupIndex];
+                if([aGroup containsItem:pub])
+                    [indexSet addIndex:groupIndex];
+                groupIndex = [staticAndSmartIndexes indexGreaterThanIndex:groupIndex];
+            }
+            rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
+        }
+    }
+    
     return indexSet;
 }
 
