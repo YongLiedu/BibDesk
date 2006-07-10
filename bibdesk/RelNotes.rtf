@@ -22,6 +22,8 @@ New Features\
 
 \f1\i0\b0\fs22 \cf0   \'a5  Added ISO Latin 9 to list of supported encodings\
   \'a5  Re-added support for setting an item's URL based on its Spotlight comment as hidden default (RFE #1417089); enable with `defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKShouldUseSpotlightCommentForURL 1`\
+  \'a5  Can now use an HTML template for the document preview pane (accessory files don't work with this)\
+  \'a5  Added context menus in editor buttons and main table to open files/URLs using a particular application (RFE #1519031)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 \
@@ -52,6 +54,10 @@ Bugs Fixed\
   \'a5  Template export should be somewhat more efficient\
   \'a5  The "Last Import" group no longer cause the last category group to be lost\
   \'a5  Title (and other) fields are now resorted properly after changing them in an editor\
+  \'a5  Items created from PDF metadata (via hidden pref) now have the keywords field even if none were available in the PDF (bug #1519062)\
+  \'a5  Fixed service for creating a new document with text selection\
+  \'a5  Enabled drops on the "All Publications" group\
+  \'a5  Dragging a file from the editor's local-file button now requires the option key, so the drop down menu is consistently accessible (bug #1519481)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
