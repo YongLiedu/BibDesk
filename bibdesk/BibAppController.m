@@ -73,6 +73,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSMenu_BDSKExtensions.h"
 
 @implementation BibAppController
 
@@ -538,7 +539,7 @@
 }
 
 // action for opening a file with a specific application
-- (IBAction)openURLWithApplication:(id)sender{
+- (void)openURLWithApplication:(id)sender{
     NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
     NSURL *targetURL = [[sender representedObject] valueForKey:@"targetURL"];
     

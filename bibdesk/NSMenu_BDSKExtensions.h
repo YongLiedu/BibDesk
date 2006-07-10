@@ -38,6 +38,37 @@
 
 #import <Cocoa/Cocoa.h>
 
+// this must be implemented in the responder chain for submenuOfApplicationsForURL:, using the following implementation as reference
+/*
+ - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
+ {
+     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+     [openPanel setCanChooseDirectories:NO];
+     [openPanel setAllowsMultipleSelection:NO];
+     [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"")];
+     
+     int rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
+                                         file:nil 
+                                        types:[NSArray arrayWithObjects:@"app", nil]];
+     if(NSFileHandlingPanelOKButton == rv)
+         [[NSWorkspace sharedWorkspace] openURL:aURL withApplicationURL:[[openPanel URLs] firstObject]];
+ }
+ 
+ // action for opening a file with a specific application
+ - (void)openURLWithApplication:(id)sender{
+     NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
+     NSURL *targetURL = [[sender representedObject] valueForKey:@"targetURL"];
+     
+     if(nil == applicationURL)
+         [self chooseApplicationToOpenURL:targetURL];
+     else if([[NSWorkspace sharedWorkspace] openURL:targetURL withApplicationURL:applicationURL] == NO)
+         NSBeep();
+ }
+*/
+
+@interface NSObject (BDSKMenuExtensions)
+- (void)openURLWithApplication:(id)sender;
+@end
 
 @interface NSMenu (BDSKExtensions)
 
