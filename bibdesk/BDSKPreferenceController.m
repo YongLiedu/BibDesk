@@ -87,7 +87,7 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 {
     if(self = [super init]){
         NSWindow *theWindow = [self window];
-        overlay = [[BDSKOverlay alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
+        overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
         NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:[[theWindow contentView] frame] delegate:self];
         [overlay setContentView:view];
         [view release];

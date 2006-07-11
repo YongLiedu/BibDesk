@@ -154,8 +154,6 @@
 		[self setOpaque:NO];
 		[self setAlphaValue:.999];
 		[self setIgnoresMouseEvents:YES];
-        // NSWindows get a release when they're closed, but NSPanels don't, so we get a mysterious crash by following Cocoa ownership rules unless we set this to NO
-        [self setReleasedWhenClosed:NO];
 	}
 	return self;
 }
@@ -171,20 +169,12 @@
 	
 	viewRect.origin.x += windowOrigin.x;
 	viewRect.origin.y += windowOrigin.y;
-    if([[parentView window] toolbar] != nil){
-        viewRect.size.height += [[[[parentView window] toolbar] toolbarView] frame].size.height;
-    }
 	
 	[self setFrame:viewRect display:YES];
 }
 
 - (void)parentWindowWillClose:(NSNotification *)notification {
 	[self orderOut:nil];
-}
-
-- (void)orderFront:(id)sender{
-    [super orderFront:sender];
-    [self parentViewFrameChanged:nil];
 }
 
 - (void)overlayView:(NSView *)aView {
@@ -233,6 +223,5 @@
 	
 	[self orderOut:nil];
 }
-
 @end
 

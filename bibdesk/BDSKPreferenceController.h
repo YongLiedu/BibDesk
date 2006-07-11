@@ -40,11 +40,11 @@
 #import <OmniAppKit/OAPreferenceController.h>
 #import "BDSKSpotlightView.h"
 
-@class BDSKOverlay;
+@class BDSKOverlayWindow;
 
 @interface BDSKPreferenceController : OAPreferenceController <BDSKSpotlightViewDelegate>
 {
-    BDSKOverlay *overlay;
+    BDSKOverlayWindow *overlay;
     NSString *searchTerm;
     BOOL isSearchActive;
     NSDictionary *clientIdentiferSearchTerms;
