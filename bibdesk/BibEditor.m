@@ -3104,7 +3104,7 @@ static int numberOfOpenEditors = 0;
     
     if (lurl){
 		[viewLocalButton setIconActionEnabled:YES];
-		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file")];
+		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"Open the file or option-drag to copy it",@"View file")];
 		[[self window] setRepresentedFilename:[lurl path]];
 		if([documentSnoopDrawer contentView] != webSnoopContainerView)
 			drawerShouldReopen = drawerWasOpen;
