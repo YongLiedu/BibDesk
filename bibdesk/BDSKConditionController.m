@@ -61,7 +61,7 @@
 		canRemove = [filterController canRemoveCondition];
 		
         BibTypeManager *typeMan = [BibTypeManager sharedManager];
-        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, nil]
+        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, BDSKPubTypeString, nil]
                                       excluding:nil] mutableCopy];
 		
 		BOOL success = [NSBundle loadNibNamed:@"BDSKCondition" owner:self];
