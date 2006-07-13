@@ -38,6 +38,8 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
+extern NSString *BDSKDocumentFormatForSearchingDates;
+
 @interface BibDocument (Search)
 
 /*!

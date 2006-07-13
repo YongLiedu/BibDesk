@@ -64,6 +64,7 @@
 #import "BDSKTemplate.h"
 #import "NSMutableArray+ThreadSafety.h"
 #import "BDSKTemplateParser.h"
+#import "BibDocument_Search.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 
@@ -873,17 +874,16 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSString *)calendarDateDescription{
-	return [[self date] descriptionWithCalendarFormat:@"%B %Y"];
+	return [[self date] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
 }
 
+// These accessors are wrappers used for searching.  Getting this right is tricky; the main tableview datasource uses NSShortDateFormatString, but the attributed preview uses NSDateFormatString.  Hence, we need to parse the date string on search input for comparison.
 - (NSString *)calendarDateModifiedDescription{
-	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
-    return [[self dateModified] descriptionWithCalendarFormat:shortDateFormatString];
+    return [[self dateModified] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
 }
 
 - (NSString *)calendarDateAddedDescription{
-	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
-	return [[self dateAdded] descriptionWithCalendarFormat:shortDateFormatString];
+	return [[self dateAdded] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
 }
 
 - (void)setPubType:(NSString *)newType{

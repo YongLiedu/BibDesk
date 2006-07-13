@@ -47,11 +47,13 @@
 #import "BDSKGroupTableView.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
+NSString *BDSKDocumentFormatForSearchingDates = nil;
 
 @implementation BibDocument (Search)
 
 + (void)didLoad{
     BDSKFileContentLocalizedString = [NSLocalizedString(@"File Content", @"") copy];
+    BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
 }
 
 - (IBAction)makeSearchFieldKey:(id)sender{
@@ -230,7 +232,7 @@ static NSString *BDSKFileContentLocalizedString = nil;
 - (IBAction)quickSearchAddField:(id)sender{
     // first we fill the popup
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]
+    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, @"Added", @"Modified", nil]
                                                 excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
@@ -350,10 +352,15 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
     if(BDStringHasAccentedCharacters((CFStringRef)substring))
         doLossySearch = NO;
     
+    // @@ refactor all of this into BibItem as - (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field lossySearch:(BOOL)flag
+    // @@ use a map table to map field->selector
+    // @@ check IMP caching or use of a function if it's too slow?
+    
     SEL accessor = NULL;
     BOOL isBooleanField = NO;
     BOOL isTriStateValue = NO;
     BOOL substringBoolValue = NO;
+    BOOL isDateField = NO;
     NSCellStateValue substringTriStateValue = NSOffState;
     
     if([field isEqualToString:BDSKTitleString]){
@@ -362,13 +369,16 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
 		accessor = NSSelectorFromString(@"bibTeXAuthorString");
 	} else if([field isEqualToString:BDSKDateString]){
 		accessor = NSSelectorFromString(@"calendarDateDescription");
+        isDateField = YES;
 	} else if([field isEqualToString:BDSKDateModifiedString] ||
 			  [field isEqualToString:@"Modified"]){
 		accessor = NSSelectorFromString(@"calendarDateModifiedDescription");
+        isDateField = YES;
 	} else if([field isEqualToString:BDSKDateAddedString] ||
 			  [field isEqualToString:@"Added"] ||
 			  [field isEqualToString:@"Created"]){
 		accessor = NSSelectorFromString(@"calendarDateAddedDescription");
+        isDateField = YES;
 	} else if([field isEqualToString:BDSKAllFieldsString]){
 		accessor = NSSelectorFromString(@"allFieldsString");
 	} else if([field isEqualToString:BDSKPubTypeString] || 
@@ -384,6 +394,19 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
         accessor = NULL;
         isTriStateValue = YES;
         substringTriStateValue = [substring triStateValue];
+    }
+
+    // if it's a date field, figure out a format string to use based on the given date component(s)
+    // don't convert substring->date->string, though, or it's no longer a substring and will only match exactly
+    if(YES == isDateField){
+        [BDSKDocumentFormatForSearchingDates release];
+        BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
+        NSCalendarDate *date = [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates];
+        if(nil == date){
+            [BDSKDocumentFormatForSearchingDates release];
+            BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString] copy];
+            date = [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates];
+        }
     }
         
     NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
