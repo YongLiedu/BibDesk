@@ -587,6 +587,18 @@
 - (NSArray *)allFieldNames;
 
 /*!
+    @method     matchesSubstring:withOptions:inField:removeDiacritics:
+    @abstract   Used for searching methods; handles various field types.
+    @discussion (comprehensive description)
+    @param      substring The string to search for, which may be a string representation of a boolean or date
+    @param      searchOptions NSString search option (e.g. NSCaseInsensitiveSearch)
+    @param      field The BibItem field
+    @param      flag Whether a lossy search is to be performed (by removing diacritic marks)
+    @result     (description)
+*/
+- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+
+/*!
     @method bibTeXString
  @abstract  returns the bibtex source for this bib item.  Is TeXified based on default preferences for the application.
     @discussion «discussion»

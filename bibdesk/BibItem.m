@@ -147,6 +147,8 @@ const CFSetCallBacks BDSKBibItemEqualityCallBacks = {
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
 
+static CFDictionaryRef selectorTable = NULL;
+
 #pragma mark -
 
 @implementation BibItem
@@ -163,6 +165,26 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [defaultStyle setFirstLineHeadIndent:50];
     [defaultStyle setTailIndent:-30];
     bodyParagraphStyle = [defaultStyle copy];
+    
+    // Create a table of field/SEL pairs used for searching
+    CFMutableDictionaryRef table = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFCopyStringDictionaryKeyCallBacks, &OFNonOwnedPointerDictionaryValueCallbacks);
+    
+    CFDictionaryAddValue(table, (CFStringRef)BDSKTitleString, NSSelectorFromString(@"title"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKAuthorString, NSSelectorFromString(@"bibTeXAuthorString"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKDateString, NSSelectorFromString(@"calendarDateDescription"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKDateModifiedString, NSSelectorFromString(@"calendarDateModifiedDescription"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKDateAddedString, NSSelectorFromString(@"calendarDateAddedDescription"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKAllFieldsString, NSSelectorFromString(@"allFieldsString"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKPubTypeString, NSSelectorFromString(@"pubType"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKCiteKeyString, NSSelectorFromString(@"citeKey"));
+    
+    // legacy field name support
+    CFDictionaryAddValue(table, CFSTR("Modified"), NSSelectorFromString(@"calendarDateModifiedDescription"));
+    CFDictionaryAddValue(table, CFSTR("Added"), NSSelectorFromString(@"calendarDateAddedDescription"));
+    CFDictionaryAddValue(table, CFSTR("Created"), NSSelectorFromString(@"calendarDateAddedDescription"));
+    CFDictionaryAddValue(table, CFSTR("Pub Type"), NSSelectorFromString(@"pubType"));
+    selectorTable = CFDictionaryCreateCopy(CFAllocatorGetDefault(), table);
+    CFRelease(table);
 }
 
 - (id)init
@@ -1292,6 +1314,51 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	if(![[pubFields allKeysUsingReadWriteLock:bibLock] containsObject:field])
 		[self addField:field];
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
+}
+
+#pragma mark Search support
+
+static inline
+NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targetString, unsigned options, BOOL lossy)
+{
+    
+    NSRange range = {NSNotFound, 0};
+    
+    if(BDIsEmptyString((CFStringRef)targetString))
+        return range;
+    
+    NSMutableString *mutableCopy = [targetString mutableCopy];
+    [mutableCopy deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
+    
+    if(lossy){
+        CFStringNormalize((CFMutableStringRef)mutableCopy, kCFStringNormalizationFormD);
+        BDDeleteCharactersInCharacterSet((CFMutableStringRef)mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
+    }
+    
+    range = [mutableCopy rangeOfString:substring options:options];
+    
+    [mutableCopy release];
+    return range;
+}
+
+- (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
+{
+    SEL selector = (void *)CFDictionaryGetValue(selectorTable, (CFStringRef)field);
+    if(NULL == selector){
+        
+        BibTypeManager *typeManager = [BibTypeManager sharedManager];
+
+        if([typeManager isBooleanField:field]){
+            return [self boolValueOfField:field] == [substring booleanValue];
+        } else if([typeManager isTriStateField:field]){
+            return [self triStateValueOfField:field] == [substring triStateValue];
+        }
+    }
+
+    // must be a string of some kind...
+    NSString *value = NULL == selector ? [self valueOfGenericField:field] : [self performSelector:selector];
+    NSRange r = rangeOfStringUsingLossyTargetString(substring, value, searchOptions, flag);
+    return r.location != NSNotFound;
 }
 
 #pragma mark -

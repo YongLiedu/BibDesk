@@ -320,29 +320,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 		[self highlightBibs:pubsToSelect];
 }
         
-static inline
-NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targetString, unsigned options, BOOL lossy)
-{
-    
-    NSRange range = {NSNotFound, 0};
-    
-    if(BDIsEmptyString((CFStringRef)targetString))
-        return range;
-    
-    NSMutableString *mutableCopy = [targetString mutableCopy];
-    [mutableCopy deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
-    
-    if(lossy){
-        CFStringNormalize((CFMutableStringRef)mutableCopy, kCFStringNormalizationFormD);
-        BDDeleteCharactersInCharacterSet((CFMutableStringRef)mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
-    }
-    
-    range = [mutableCopy rangeOfString:substring options:options];
-
-    [mutableCopy release];
-    return range;
-}
-
 - (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
         
     unsigned searchMask = NSCaseInsensitiveSearch;
@@ -352,50 +329,13 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
     if(BDStringHasAccentedCharacters((CFStringRef)substring))
         doLossySearch = NO;
     
-    // @@ refactor all of this into BibItem as - (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field lossySearch:(BOOL)flag
-    // @@ use a map table to map field->selector
-    // @@ check IMP caching or use of a function if it's too slow?
     
-    SEL accessor = NULL;
-    BOOL isBooleanField = NO;
-    BOOL isTriStateValue = NO;
-    BOOL substringBoolValue = NO;
-    BOOL isDateField = NO;
-    NSCellStateValue substringTriStateValue = NSOffState;
+    static NSSet *dateFields = nil;
+    if(nil == dateFields)
+        dateFields = [[NSSet alloc] initWithObjects:BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, @"Added", @"Modified", @"Created", nil];
     
-    if([field isEqualToString:BDSKTitleString]){
-        accessor = NSSelectorFromString(@"title");
-    } else if([field isEqualToString:BDSKAuthorString]){
-		accessor = NSSelectorFromString(@"bibTeXAuthorString");
-	} else if([field isEqualToString:BDSKDateString]){
-		accessor = NSSelectorFromString(@"calendarDateDescription");
-        isDateField = YES;
-	} else if([field isEqualToString:BDSKDateModifiedString] ||
-			  [field isEqualToString:@"Modified"]){
-		accessor = NSSelectorFromString(@"calendarDateModifiedDescription");
-        isDateField = YES;
-	} else if([field isEqualToString:BDSKDateAddedString] ||
-			  [field isEqualToString:@"Added"] ||
-			  [field isEqualToString:@"Created"]){
-		accessor = NSSelectorFromString(@"calendarDateAddedDescription");
-        isDateField = YES;
-	} else if([field isEqualToString:BDSKAllFieldsString]){
-		accessor = NSSelectorFromString(@"allFieldsString");
-	} else if([field isEqualToString:BDSKPubTypeString] || 
-			  [field isEqualToString:@"Pub Type"]){ /* legacy string ? */
-		accessor = NSSelectorFromString(@"pubType");
-	} else if([field isEqualToString:BDSKCiteKeyString]){
-		accessor = NSSelectorFromString(@"citeKey");
-	} else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:field]){
-        accessor = NULL;
-        isBooleanField = YES;
-        substringBoolValue = [substring booleanValue];
-    } else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field]){
-        accessor = NULL;
-        isTriStateValue = YES;
-        substringTriStateValue = [substring triStateValue];
-    }
-
+    BOOL isDateField = [dateFields containsObject:field];
+    
     // if it's a date field, figure out a format string to use based on the given date component(s)
     // don't convert substring->date->string, though, or it's no longer a substring and will only match exactly
     if(YES == isDateField){
@@ -413,37 +353,29 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
     NSEnumerator *andEnum = [[substring andSearchComponents] objectEnumerator];
     NSEnumerator *orEnum = [[substring orSearchComponents] objectEnumerator];
     
-    NSRange r;
     NSString *componentSubstring = nil;
     BibItem *pub = nil;
     NSEnumerator *pubEnum;
     NSMutableArray *andResultsArray = [[NSMutableArray alloc] initWithCapacity:50];
-    NSString *value;
 
     NSSet *copySet;
+
+    // cache the IMP for the BibItem search method, since we're potentially calling it several times per item
+    typedef BOOL (*searchIMP)(id, SEL, id, unsigned int, id, BOOL);
+    SEL matchSelector = @selector(matchesSubstring:withOptions:inField:removeDiacritics:);
+    searchIMP itemMatches = (searchIMP)[BibItem instanceMethodForSelector:matchSelector];
+    OBASSERT(NULL != itemMatches);
     
     // for each AND term, enumerate the entire publications array and search for a match; if we get a match, add it to a mutable set
+        
     while(componentSubstring = [andEnum nextObject]){
         
         pubEnum = [arrayToSearch objectEnumerator];
         while(pub = [pubEnum nextObject]){
             
-            value = (accessor == NULL ? [pub valueOfGenericField:field] : [pub performSelector:accessor withObject:nil]);
-            
-            if(isBooleanField){        
-                if([pub boolValueOfField:field] == substringBoolValue)
-                    [aSet addObject:pub];
-                
-            } else if(isTriStateValue){
-                if([pub triStateValueOfField:field] == substringTriStateValue)
-                    [aSet addObject:pub];
-                
-            } else {
-                r = rangeOfStringUsingLossyTargetString(componentSubstring, value, searchMask, doLossySearch);
+            if(itemMatches(pub, matchSelector, componentSubstring, searchMask, field, doLossySearch))
+                [aSet addObject:pub];
 
-                if(r.location != NSNotFound)
-                    [aSet addObject:pub];
-            }
         }
         copySet = [aSet copy];
         [andResultsArray addObject:copySet];
@@ -459,21 +391,9 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
         pubEnum = [arrayToSearch objectEnumerator];
         while(pub = [pubEnum nextObject]){
             
-            value = (accessor == NULL ? [pub valueOfField:field] : [pub performSelector:accessor withObject:nil]);
+            if(itemMatches(pub, matchSelector, componentSubstring, searchMask, field, doLossySearch))
+                [aSet addObject:pub];
             
-            if(isBooleanField){       
-                if([pub boolValueOfField:field] == substringBoolValue)
-                    [aSet addObject:pub];
-
-            } else if(isTriStateValue){
-                if([pub triStateValueOfField:field] == substringTriStateValue)
-                    [aSet addObject:pub];
-            } else {
-                r = rangeOfStringUsingLossyTargetString(componentSubstring, value, searchMask, doLossySearch);
-
-                if(r.location != NSNotFound)
-                    [aSet addObject:pub];
-            }
         }
         copySet = [aSet copy];
         [orResultsArray addObject:copySet];
