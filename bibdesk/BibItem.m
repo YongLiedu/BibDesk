@@ -895,19 +895,6 @@ static CFDictionaryRef selectorTable = NULL;
     return dateModified;
 }
 
-- (NSString *)calendarDateDescription{
-	return [[self date] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
-}
-
-// These accessors are wrappers used for searching.  Getting this right is tricky; the main tableview datasource uses NSShortDateFormatString, but the attributed preview uses NSDateFormatString.  Hence, we need to parse the date string on search input for comparison.
-- (NSString *)calendarDateModifiedDescription{
-    return [[self dateModified] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
-}
-
-- (NSString *)calendarDateAddedDescription{
-	return [[self dateAdded] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
-}
-
 - (void)setPubType:(NSString *)newType{
     [self setPubType:newType withModDate:[NSCalendarDate date]];
 }
@@ -1318,27 +1305,37 @@ static CFDictionaryRef selectorTable = NULL;
 
 #pragma mark Search support
 
-static inline
-NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targetString, unsigned options, BOOL lossy)
-{
+- (NSString *)calendarDateDescription{
+	return [[self date] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
+}
+
+// These accessors are wrappers used for searching.  Getting this right is tricky; the main tableview datasource uses NSShortDateFormatString, but the attributed preview uses NSDateFormatString.  Hence, we need to parse the date string on search input for comparison.
+- (NSString *)calendarDateModifiedDescription{
+    return [[self dateModified] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
+}
+
+- (NSString *)calendarDateAddedDescription{
+	return [[self dateAdded] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
+}
+
+static inline 
+Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, unsigned options, Boolean lossy)
+{    
+    if(BDIsEmptyString((CFStringRef)theString))
+        return FALSE;
     
-    NSRange range = {NSNotFound, 0};
-    
-    if(BDIsEmptyString((CFStringRef)targetString))
-        return range;
-    
-    NSMutableString *mutableCopy = [targetString mutableCopy];
-    [mutableCopy deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
+    CFMutableStringRef mutableCopy = CFStringCreateMutableCopy(CFAllocatorGetDefault(), 0, (CFStringRef)theString);
+    BDDeleteCharactersInCharacterSet(mutableCopy, (CFCharacterSetRef)[NSCharacterSet curlyBraceCharacterSet]);
     
     if(lossy){
-        CFStringNormalize((CFMutableStringRef)mutableCopy, kCFStringNormalizationFormD);
-        BDDeleteCharactersInCharacterSet((CFMutableStringRef)mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
+        CFStringNormalize(mutableCopy, kCFStringNormalizationFormD);
+        BDDeleteCharactersInCharacterSet(mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
     }
     
-    range = [mutableCopy rangeOfString:substring options:options];
+    Boolean found = CFStringFindWithOptions(mutableCopy, (CFStringRef)stringToFind, CFRangeMake(0, CFStringGetLength(mutableCopy)), options, NULL);
     
-    [mutableCopy release];
-    return range;
+    CFRelease(mutableCopy);
+    return found;
 }
 
 - (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
@@ -1357,8 +1354,7 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
 
     // must be a string of some kind...
     NSString *value = NULL == selector ? [self valueOfGenericField:field] : [self performSelector:selector];
-    NSRange r = rangeOfStringUsingLossyTargetString(substring, value, searchOptions, flag);
-    return r.location != NSNotFound;
+    return stringContainsLossySubstring(value, substring, searchOptions, flag);
 }
 
 #pragma mark -
