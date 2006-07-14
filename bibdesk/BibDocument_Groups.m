@@ -634,9 +634,17 @@ The groupedPublications array is a subset of the publications array, developed b
     NSIndexSet *visibleIndexes = [NSIndexSet indexSetWithIndexesInRange:indexRange];
     unsigned int cnt = [visibleIndexes count];
     NSRange categoryRange = [self rangeOfCategoryGroups];
-    
+    NSString *groupField = [self currentGroupField];
+
     // Mutable dictionary with fixed capacity using NSObjects for keys with ints for values; this gives us a fast lookup of row name->index.  Dictionaries can use any pointer-size element for a key or value; see /Developer/Examples/CoreFoundation/Dictionary.  Keys are retained rather than copied for efficiency.  Shark says that BibAuthors are created with alloc/init when using the copy callbacks, so NSShouldRetainWithZone() must be returning NO?
-    CFMutableDictionaryRef rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &OFNSObjectDictionaryKeyCallbacks, &OFIntegerDictionaryValueCallbacks);
+    CFMutableDictionaryRef rowDict;
+    
+    // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
+    if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField]){
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKFuzzyDictionaryKeyCallBacks, &OFIntegerDictionaryValueCallbacks);
+    } else {
+        rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFIntegerDictionaryValueCallbacks);
+    }
     
     cnt = [visibleIndexes firstIndex];
     
@@ -653,22 +661,44 @@ The groupedPublications array is a subset of the publications array, developed b
     // Unfortunately, we have to check all of the items in the main table, since hidden items may have a visible group
     NSIndexSet *rowIndexes = [tableView selectedRowIndexes];
     unsigned int rowIndex = [rowIndexes firstIndex];
-    NSSet *possibleGroups;
-    id groupName;
-    BOOL rowExists;
-    NSEnumerator *groupEnum;
-    NSString *groupField = [self currentGroupField];
+    CFSetRef possibleGroups;
         
+    id *groupNamePtr;
+    
+    // use a static pointer to a buffer, with initial size of 10
+    static id *groupValues = NULL;
+    static int groupValueMaxSize = 10;
+    if(NULL == groupValues)
+        groupValues = NSZoneMalloc(NSDefaultMallocZone(), groupValueMaxSize * sizeof(id));
+    int groupCount = 0;
+    
+    // we could iterate the dictionary in the outer loop and publications in the inner loop, but there are generally more publications than groups (and we only check visible groups), so this should be more efficient
     while(rowIndexes != nil && rowIndex != NSNotFound){ 
-        // here are all the groups that this item can be a part of
-        possibleGroups = [[shownPublications objectAtIndex:rowIndex] groupsForField:groupField];
-        groupEnum = [possibleGroups objectEnumerator];
         
-        while(groupName = [groupEnum nextObject]){
-            // The dictionary only has visible group rows, so not all of the keys (potential groups) will exist in the dictionary
-            rowExists = CFDictionaryGetValueIfPresent(rowDict, (void *)groupName, (const void **)&cnt);
-            if(rowExists) [indexSet addIndex:cnt];
+        // here are all the groups that this item can be a part of
+        possibleGroups = (CFSetRef)[[shownPublications objectAtIndex:rowIndex] groupsForField:groupField];
+        
+        groupCount = CFSetGetCount(possibleGroups);
+        if(groupCount > groupValueMaxSize){
+            NSAssert1(groupCount < 1024, @"insane number of groups for %@", [[shownPublications objectAtIndex:rowIndex] citeKey]);
+            groupValues = NSZoneRealloc(NSDefaultMallocZone(), groupValues, sizeof(id) * groupCount);
+            groupValueMaxSize = groupCount;
         }
+        
+        // get all the groups (authors or strings)
+        if(groupCount > 0){
+            
+            // this is the only way to enumerate a set with CF, apparently
+            CFSetGetValues(possibleGroups, (const void **)groupValues);
+            groupNamePtr = groupValues;
+            
+            while(groupCount--){
+                // The dictionary only has visible group rows, so not all of the keys (potential groups) will exist in the dictionary
+                if(CFDictionaryGetValueIfPresent(rowDict, (void *)*groupNamePtr++, (const void **)&cnt))
+                    [indexSet addIndex:cnt];
+            }
+        }
+        
         rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
     }
     
