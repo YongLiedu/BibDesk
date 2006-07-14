@@ -195,7 +195,14 @@
             } else {
                 // the original file could be any format, but the ouput is supposed to be bibtex
                 fileToOpen = [[fileToOpen stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-                [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:NULL];
+                id theDocument = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:NULL];
+                
+                // set date-added for imports
+                if(nil != theDocument){
+                    NSCalendarDate *importDate = [NSCalendarDate date];
+                    [[theDocument publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+                }
+
             }
 		}
         [fileInputString release];
@@ -320,6 +327,10 @@
             [doc setFilterField:@""];
             [doc generateCiteKey:nil];
         }
+        
+        // set date-added for imports
+        NSCalendarDate *importDate = [NSCalendarDate date];
+        [[doc publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
     }
     
     return doc;
