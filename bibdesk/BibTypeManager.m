@@ -509,7 +509,10 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSSet *)noteFieldsSet{
-    return [NSSet setWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
+    static NSSet *noteFieldsSet = nil;
+    if(nil == noteFieldsSet)
+        noteFieldsSet = [[NSSet alloc] initWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
+    return noteFieldsSet;
 }
 
 - (BOOL)isRatingField:(NSString *)field{
