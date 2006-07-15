@@ -155,6 +155,14 @@
 	[super dealloc];
 }
 
+- (NSString *)description{
+    NSMutableString *temporaryDescription = [[NSMutableString alloc] initWithString:[super description]];
+    [temporaryDescription appendFormat:@" {\nivars:\n\tdelegate = \"%@\"\n\tfile name = \"%@\"\n\ttemplate = \"%@\"\n\tTeX file = \"%@\"\n\tBibTeX file = \"%@\"\n\tTeX binary path = \"%@\"\n\nenvironment:\n\tSHELL = \"%s\"\n\tBIBINPUTS = \"%s\"\n\tBSTINPUTS = \"%s\"\n\tPATH = \"%s\" }", delegate, fileName, texTemplatePath, texFilePath, bibFilePath, binDirPath, getenv("SHELL"), getenv("BIBINPUTS"), getenv("BSTINPUTS"), getenv("PATH")];
+    NSString *description = [temporaryDescription copy];
+    [temporaryDescription release];
+    return [description autorelease];
+}
+
 - (id)delegate {
     return delegate;
 }
@@ -181,7 +189,7 @@
             OFSimpleUnlock(&currentTaskLock);
             break;
         } else if([referenceDate timeIntervalSinceNow] > -2.1){ // just in case this ever happens
-            NSLog(@"failed to lock for task %@", currentTask);
+            NSLog(@"%@ failed to lock for task %@", self, currentTask);
             [currentTask terminate];
             break;
         }
@@ -199,7 +207,7 @@
     volatile BOOL rv = YES;
 
     if(!OFSimpleLockTry(&processingLock)){
-        NSLog(@"couldn't get processing lock");
+        NSLog(@"%@ couldn't get processing lock", self);
 		[pool release];
         return NO;
     }
@@ -430,14 +438,14 @@
 	[texFile replaceOccurrencesOfString:@"<<Style>>" withString:style options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texFile length])];
 
     // overwrites the old tmpbib.tex file, replacing the previous bibliographystyle
-    if(![[texFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] writeToFile:texFilePath atomically:YES]){
-        NSLog(@"error replacing texfile");
-		[texFile release];
-		return NO;
-	}
+    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey];
+    BOOL didWrite;
+    didWrite = [[texFile dataUsingEncoding:encoding] writeToFile:texFilePath atomically:YES];
+    if(NO == didWrite)
+        NSLog(@"error writing TeX file with encoding %@ for task %@", [NSString localizedNameOfStringEncoding:encoding], self);
 	
 	[texFile release];
-	return YES;
+	return didWrite;
 }
 
 - (BOOL)writeBibTeXFile:(NSString *)bibStr{
@@ -446,14 +454,15 @@
     
 	[bibTemplate appendString:@"\n"];
     [bibTemplate appendString:bibStr];
-    if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] writeToFile:bibFilePath atomically:YES]){
-        NSLog(@"Error replacing bibfile.");
-		[bibTemplate release];
-		return NO;
-	}
+    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey];
+    
+    BOOL didWrite;
+    didWrite = [[bibTemplate dataUsingEncoding:encoding] writeToFile:bibFilePath atomically:YES];
+    if(NO == didWrite)
+        NSLog(@"error writing BibTeX file with encoding %@ for task %@", [NSString localizedNameOfStringEncoding:encoding], self);
 	
 	[bibTemplate release];
-	return YES;
+	return didWrite;
 }
 
 // caller must have acquired wrlock on dataFileLock
