@@ -2539,14 +2539,19 @@ automatically move files.
 
 @image{gfx/autoFilePrefs}
 
+The upper series of checkboxes defines the base path to which the Local-Url format will
+be applied.  This may be an absolute (fixed) or relative path.  Relative paths are
+specified as a POSIX path relative to the document's path.
+
 @prefitem{Papers folder location} Papers that are automatically filed by BibDesk will 
 be moved to this folder or a subfolder. The format string used to generate the location of the 
 moved papers is relative to this folder. When the papers folder is empty, the folder 
 containing the document to which the items belong will be used. To get this behavior, deselect 
 the checkbox.
 
-@prefitem{Use relative path for Local-Url} When this option is selected, the Local-Url will be 
-set to the path relative to the document's location, rather than the full URL. 
+@prefitem{Use relative path for Local-Url} When this option is selected, the Local-Url 
+format will be appended to the BibTeX document's folder path; to modify this, insert a
+relative path as the first part of your Local-Url format.
 This option is only available when the papers folder is empty. When you choose this option, 
 make sure that any document is saved before activating AutoFile. 
 
