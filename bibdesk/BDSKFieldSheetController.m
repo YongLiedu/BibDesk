@@ -47,6 +47,8 @@
         field = nil;
         [self setPrompt:promptString];
         [self setFieldsArray:fields];
+        modalDelegate = nil;
+        didEndSelector = NULL;
     }
     return self;
 }
@@ -101,7 +103,23 @@
     [self fixSizes];
 }
 
+- (void)beginSheetModalForWindow:(NSWindow *)parentWindow modalDelegate:(id)aDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(void *)contextInfo {
+	runAppModal = NO;
+    modalDelegate = aDelegate;
+	didEndSelector = aDidEndSelector;
+	
+	[self retain]; // make sure we stay around long enough
+	
+	[NSApp beginSheet:[self window]
+	   modalForWindow:parentWindow
+		modalDelegate:self
+	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
+		  contextInfo:contextInfo];
+}
+
 - (NSString *)runSheetModalForWindow:(NSWindow *)parentWindow{
+	runAppModal = YES;
+    
 	[NSApp beginSheet:[self window]
 	   modalForWindow:parentWindow
 		modalDelegate:self
@@ -113,9 +131,6 @@
 	[[self window] orderOut:self];
     
     if(returnCode == NSOKButton){
-        // commit edits
-        if ([[self window] makeFirstResponder:[self window]] == NO)
-            [[self window] endEditingFor:nil];
         NSString *newField = [self field];
         return (newField == nil) ? @"" : [[newField copy] autorelease];
     }else{
@@ -124,7 +139,37 @@
 }
 
 - (IBAction)dismiss:(id)sender{
-    [NSApp stopModalWithCode:[sender tag]];
+	int returnCode = [sender tag];
+    if(returnCode == NSOKButton){
+        // commit edits
+        if ([[self window] makeFirstResponder:[self window]] == NO)
+            [[self window] endEditingFor:nil];
+    }
+	if (runAppModal) {
+		[NSApp stopModalWithCode:returnCode];
+	} else {
+		[NSApp endSheet:[self window] returnCode:returnCode];
+	}
+}
+
+- (void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if(modalDelegate != nil && didEndSelector != NULL){
+		NSMethodSignature *signature = [modalDelegate methodSignatureForSelector:didEndSelector];
+		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+		[invocation setSelector:didEndSelector];
+		[invocation setArgument:&self atIndex:2];
+		[invocation setArgument:&returnCode atIndex:3];
+		[invocation setArgument:&contextInfo atIndex:4];
+		[invocation invokeWithTarget:modalDelegate];
+	}
+	
+	if (runAppModal == NO) {
+		modalDelegate = nil;
+		didEndSelector = NULL;
+		
+		[sheet orderOut:self];
+		[self release];
+	}
 }
 
 @end
