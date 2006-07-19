@@ -86,7 +86,6 @@
         buttons = [[NSMutableArray alloc] initWithCapacity:3];
         unbadgedImage = [[NSImage imageNamed:@"NSApplicationIcon"] retain];
         modalDelegate = nil;
-        docWindow = nil;
         didEndSelector = NULL;
         didDismissSelector = NULL;
     }

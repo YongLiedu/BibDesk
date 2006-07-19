@@ -52,7 +52,6 @@
 	NSSize minButtonSize;
 	BOOL runAppModal;
     id modalDelegate;
-    NSWindow *docWindow;
     SEL didEndSelector;
     SEL didDismissSelector;
 }
