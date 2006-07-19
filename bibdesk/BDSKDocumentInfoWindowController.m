@@ -39,7 +39,6 @@
 #import "BDSKDocumentInfoWindowController.h"
 #import "BibDocument.h"
 #import "NSMutableDictionary+ThreadSafety.h"
-#import "BDSKAlert.h"
 
 
 @implementation BDSKDocumentInfoWindowController
@@ -193,31 +192,31 @@
     if([[tableColumn identifier] isEqualToString:@"key"]){
 		
 		if([object isEqualToString:@""]){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Empty Key", @"Empty Key")
-                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"The key can not be empty.",@"")];
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-    		
 			[tv reloadData];
             [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
+    		
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Key", @"Empty Key")
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The key can not be empty.",@"")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
         
         if([info objectForKey:object]){
             if([key caseInsensitiveCompare:object] != NSOrderedSame){			
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Duplicate Key", @"Duplicate Key")
-                                                     defaultButton:NSLocalizedString(@"OK", @"OK")
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:NSLocalizedString(@"The key must be unique.",@"")];
-                [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-                
                 [tv reloadData];
                 [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
                 [tableView editColumn:0 row:row withEvent:nil select:YES];
+                
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Key", @"Duplicate Key")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"The key must be unique.",@"")];
+                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			}
             return;
 		}
@@ -231,12 +230,12 @@
         if([value isEqualToString:object]) return;
         
         if([value isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Unbalanced Braces", @"Unbalanced Braces")
-                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"Braces must be balanced within the value.",@"")];
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unbalanced Braces", @"Unbalanced Braces")
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"Braces must be balanced within the value.",@"")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             
             [tv reloadData];
             [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];

@@ -136,6 +136,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	if ([self listType] == listType)
 		return;
 	if (!validRoman || !validTex) {
+        // NSAlert does not work here for some reason
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Conversion", @"")
                                              defaultButton:NSLocalizedString(@"OK", @"OK")
                                            alternateButton:nil
@@ -339,12 +340,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	if ([[tableColumn identifier] isEqualToString:@"roman"]) {
 		if (!validRoman || ![object isEqualToString:roman]) {
 			if ([romanSet containsObject:object]) {
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Duplicate Unicode Character", @"")
-                                                     defaultButton:NSLocalizedString(@"OK", @"OK")
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:NSLocalizedString(@"The character %@ you entered already has a TeX equivalent, possibly defined internally by BibDesk.",@""), object];
-                [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Unicode Character", @"")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"The character %@ you entered already has a TeX equivalent, possibly defined internally by BibDesk.",@""), object];
+                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 				
 				[tableView reloadData];
 			} else {
@@ -364,12 +365,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	else {
 		if (!validTex || ![object isEqualToString:tex]) {
 			if ([self listType] == 2 && [texSet containsObject:object]) {
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Duplicate TeX Conversion", @"")
-                                                     defaultButton:NSLocalizedString(@"OK", @"OK")
-                                                   alternateButton:nil
-                                                       otherButton:nil
-                                         informativeTextWithFormat:NSLocalizedString(@"The TeX conversion %@ you entered already has a Unicode character, possibly defined internally by BibDesk.",@""), object];
-                [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate TeX Conversion", @"")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"The TeX conversion %@ you entered already has a Unicode character, possibly defined internally by BibDesk.",@""), object];
+                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 				
 				[tableView reloadData];
 			} else {
@@ -403,12 +404,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 - (void)control:(NSControl *)control didFailToValidatePartialString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil){
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
-        [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:@"%@", error];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
 

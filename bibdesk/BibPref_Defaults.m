@@ -38,7 +38,6 @@
 #import "BibTeXParser.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKPathIconTransformer.h"
-#import "BDSKAlert.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -294,12 +293,12 @@ enum {
             error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @""), object];
         }
         if (error) {
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Macro File", @"")
-                                                 defaultButton:nil
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:error];
-            [alert runSheetModalForWindow:globalMacroFileSheet modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Macro File", @"")
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:error];
+            [alert beginSheetModalForWindow:globalMacroFileSheet modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];
             [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];

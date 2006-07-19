@@ -47,7 +47,6 @@
 #import "BibTeXParser.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKMacroResolver.h"
-#import "BDSKAlert.h"
 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "OATypeAheadSelectionHelper_Extensions.h"
@@ -285,39 +284,45 @@
         if([key isEqualToString:object]) return;
                 
 		if([object isEqualToString:@""]){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Empty Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"")];
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-			
-            [tableView reloadData];
+			[tableView reloadData];
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:0 row:row withEvent:nil select:YES];
+    		
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Empty Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
                 
 		if([macroDefinitions objectForKey:object]){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Duplicate Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"")];
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-			
 			[tableView reloadData];
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:0 row:row withEvent:nil select:YES];
+    		
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Duplicate Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
 		
         NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
 		if([macroResolver macroDefinition:[macroDefinitions objectForKey:key] dependsOnMacro:object]){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-			
 			[tableView reloadData];
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:0 row:row withEvent:nil select:YES];
+    		
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
 		
@@ -330,14 +335,16 @@
         if([[macroDefinitions objectForKey:key] isEqualAsComplexString:object]) return;
 		
 		if([macroResolver macroDefinition:object dependsOnMacro:key]){
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-			
 			[tableView reloadData];
+            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+            [tableView editColumn:0 row:row withEvent:nil select:YES];
+    		
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
         
