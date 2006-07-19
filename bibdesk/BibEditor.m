@@ -1544,6 +1544,16 @@ static int numberOfOpenEditors = 0;
 	[formCellFormatter setEditAsComplexString:NO];
 }
 
+- (void)moveFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSDictionary *info = (NSDictionary *)info;
+    if (returnCode == NSAlertDefaultReturn) {
+        NSArray *paperInfos = [NSArray arrayWithObject:info];
+        NSString *fieldName = [info objectForKey:@"fieldName"];
+        [[BibFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:theDocument options:0];
+    }
+    [info release];
+}
+
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     NSString *oldValue = [[[theBib valueOfField:fieldName] copy] autorelease];
     BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalURLField:fieldName];
@@ -1552,27 +1562,6 @@ static int numberOfOpenEditors = 0;
     [theBib setField:fieldName toValue:value];
 	
 	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
-    
-    if (isLocalFile) {
-        NSString *newPath = [theBib localFilePathForField:fieldName];
-        if (oldURL != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move File?", @"Move File?") 
-                                                 defaultButton:NSLocalizedString(@"Yes", @"Yes") 
-                                               alternateButton:NSLocalizedString(@"No", @"No") 
-                                                   otherButton:nil
-                                     informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"") ];
-
-            int rv = [alert runSheetModalForWindow:[self window]
-                                     modalDelegate:self
-                                    didEndSelector:NULL
-                                didDismissSelector:NULL
-                                       contextInfo:nil];
-            if (rv == NSAlertDefaultReturn) {
-                NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:theBib, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", nil]];
-                [[BibFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:theDocument options:0];
-            }
-        }
-    }
     
 	NSMutableString *status = [NSMutableString stringWithString:@""];
 	
@@ -1593,6 +1582,21 @@ static int numberOfOpenEditors = 0;
 			[status appendString:@" "];
 		}
 		[status appendString:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
+    } else if (isLocalFile) {
+        NSString *newPath = [theBib localFilePathForField:fieldName];
+        if (oldURL != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move File?", @"Move File?") 
+                                             defaultButton:NSLocalizedString(@"Yes", @"Yes") 
+                                           alternateButton:NSLocalizedString(@"No", @"No") 
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"") ];
+
+            NSArray *info = [[NSDictionary alloc] initWithObjectsAndKeys:theBib, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", fieldName, @"fieldName", nil];
+            [alert beginSheetModalForWindow:[self window]
+                              modalDelegate:self
+                             didEndSelector:@selector(moveFileAlertDidEnd:returnCode:contextInfo:)
+                                contextInfo:info];
+        }
     }
     
 	if (![status isEqualToString:@""]) {
