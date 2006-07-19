@@ -44,7 +44,6 @@
 #import "BibDocument.h"
 #import "BibAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BDSKAlert.h"
 
 static BibFiler *sharedFiler = nil;
 
@@ -319,16 +318,15 @@ static BibFiler *sharedFiler = nil;
     }
     
     if ([fileInfoDicts count] == 0) {
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Nothing Selected", @"")
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
-                                           alternateButton:nil
-                                               otherButton:nil
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Nothing Selected", @"")
+                                         defaultButton:NSLocalizedString(@"OK", @"OK")
+                                       alternateButton:nil
+                                           otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"Please select the items you want to auto file again or press Done.", @"")];
-        [alert runSheetModalForWindow:window
-                        modalDelegate:nil
-                       didEndSelector:NULL 
-                   didDismissSelector:NULL 
-                          contextInfo:NULL];
+        [alert beginSheetModalForWindow:window
+                          modalDelegate:nil
+                         didEndSelector:NULL 
+                            contextInfo:NULL];
         return;
     }
     

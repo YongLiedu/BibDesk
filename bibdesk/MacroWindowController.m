@@ -466,12 +466,12 @@
     [tableView reloadData];
     
     if(hadCircular){
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Circular Macros") 
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"")];
-        [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Circular Macros") 
+                                         defaultButton:NSLocalizedString(@"OK", @"OK")
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"")];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return YES;
 }

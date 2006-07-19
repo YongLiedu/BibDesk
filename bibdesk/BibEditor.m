@@ -1018,6 +1018,21 @@ static int numberOfOpenEditors = 0;
 	[tabView selectFirstTabViewItem:self];
 }
 
+- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertAlternateReturn){
+        return;
+    }else if(returnCode == NSAlertOtherReturn){
+        [theBib setNeedsToBeFiled:YES];
+        return;
+    }
+    
+	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
+	
+	[tabView selectFirstTabViewItem:self];
+	
+	[[[self window] undoManager] setActionName:NSLocalizedString(@"Move File",@"")];
+}
+
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
@@ -1028,29 +1043,18 @@ static int numberOfOpenEditors = 0;
 			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?",@""),
 			otherButton = NSLocalizedString(@"Wait",@"Wait");
 		}
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning",@"Warning") 
-											 defaultButton:NSLocalizedString(@"File Now",@"File without waiting")
-										   alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
-											   otherButton:otherButton
-								 informativeTextWithFormat:message];
-		int rv = [alert runSheetModalForWindow:[self window]
-								 modalDelegate:nil
-								didEndSelector:NULL 
-							didDismissSelector:NULL 
-								   contextInfo:NULL];
-		if (rv == NSAlertAlternateReturn){
-			return;
-		}else if(rv == NSAlertOtherReturn){
-			[theBib setNeedsToBeFiled:YES];
-			return;
-		}
-	}
-	
-	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
-	
-	[tabView selectFirstTabViewItem:self];
-	
-	[[[self window] undoManager] setActionName:NSLocalizedString(@"Move File",@"")];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning",@"Warning") 
+                                         defaultButton:NSLocalizedString(@"File Now",@"File without waiting")
+                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
+                                           otherButton:otherButton
+                             informativeTextWithFormat:message];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self
+                         didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+	} else {
+        [self consolidateAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+    }
 }
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
@@ -1360,13 +1364,13 @@ static int numberOfOpenEditors = 0;
 
 - (void)control:(NSControl *)control didFailToValidatePartialString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil){
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"") 
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:@"%@", error];
         
-        [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:nil];
     }
 }
 
@@ -1913,6 +1917,18 @@ static int numberOfOpenEditors = 0;
     [[self document] createNewPubUsingCrossrefForItem:theBib];
 }
 
+- (void)deletePubAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if (alert != nil && [alert checkValue] == YES) {
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnDeleteKey];
+	}
+    if (returnCode == NSAlertOtherReturn)
+        return;
+    
+	[[[self document] undoManager] setActionName:NSLocalizedString(@"Delete Publication", @"Delete Publication")];
+    [[self document] setStatus:NSLocalizedString(@"Deleted 1 publication",@"Deleted 1 publication") immediate:NO];
+	[[self document] removePublication:theBib];
+}
+
 - (IBAction)deletePub:(id)sender{
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
 		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Delete Publication", @"Delete Publication")
@@ -1922,25 +1938,13 @@ static int numberOfOpenEditors = 0;
 								 informativeTextWithFormat:NSLocalizedString(@"Are you sure you want to delete the current item?", @"")];
 		[alert setHasCheckButton:YES];
 		[alert setCheckValue:NO];
-		int rv = [alert runSheetModalForWindow:[self window]
-								 modalDelegate:self 
-								didEndSelector:@selector(disableWarningAlertDidEnd:returnCode:contextInfo:) 
-							didDismissSelector:NULL 
-								   contextInfo:BDSKWarnOnDeleteKey];
-		if (rv == NSAlertOtherReturn)
-			return;
-	}
-    
-	[[[self document] undoManager] setActionName:NSLocalizedString(@"Delete Publication", @"Delete Publication")];
-    [[self document] setStatus:NSLocalizedString(@"Deleted 1 publication",@"Deleted 1 publication") immediate:NO];
-	[[self document] removePublication:theBib];
-}
-
-- (void)disableWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if ([alert checkValue] == YES) {
-		NSString *showWarningKey = (NSString *)contextInfo;
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:showWarningKey];
-	}
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self
+                         didEndSelector:@selector(deletePubAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+	} else {
+        [self deletePubAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+    }
 }
 
 #pragma mark BDSKForm delegate methods

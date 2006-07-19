@@ -264,6 +264,16 @@
     return doc;
 }
 
+- (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    BibDocument *doc = (BibDocument *)contextInfo;
+    if (returnCode == NSAlertDefaultReturn) {
+        [doc selectAllPublications:nil];
+        [doc setFilterField:@""];
+        [doc generateCiteKey:nil];
+    }
+    [doc release];
+}
+
 - (id)openBibTeXFileUsingPhonyCiteKeys:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
 	NSData *data = [NSData dataWithContentsOfFile:filePath];
     NSString *stringFromFile = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
@@ -309,28 +319,22 @@
 	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:mutableFileString encoding:encoding error:NULL];
     
     if ([[doc publications] count]){
-        [doc setSelectedSearchFieldKey:BDSKCiteKeyString];
-        [doc setFilterField:@"FixMe"];
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
-                                             defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
-                                           alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"This document was opened using temporary cite keys for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.  Do you want me to do this now?", @"") ];
-
-        int rv = [alert runSheetModalForWindow:[doc windowForSheet]
-                                 modalDelegate:nil
-                                didEndSelector:NULL
-                            didDismissSelector:NULL
-                                   contextInfo:nil];
-        if (rv == NSAlertDefaultReturn) {
-            [doc selectAllPublications:nil];
-            [doc setFilterField:@""];
-            [doc generateCiteKey:nil];
-        }
-        
         // set date-added for imports
         NSCalendarDate *importDate = [NSCalendarDate date];
         [[doc publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+        
+        [doc setSelectedSearchFieldKey:BDSKCiteKeyString];
+        [doc setFilterField:@"FixMe"];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
+                                         defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
+                                       alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"This document was opened using temporary cite keys for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.  Do you want me to do this now?", @"") ];
+
+        [alert beginSheetModalForWindow:[doc windowForSheet]
+                          modalDelegate:nil
+                         didEndSelector:@selector(temporaryCiteKeysAlertDidEnd:returnCode:contextInfo:)
+                            contextInfo:[doc retain]];
     }
     
     return doc;

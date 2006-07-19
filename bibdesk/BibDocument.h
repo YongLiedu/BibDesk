@@ -373,7 +373,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 */
 - (IBAction)deleteSelectedPubs:(id)sender;
-- (void)disableWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 /*!
     @method removeSelectedPubs:
     @abstract Removes the selected publications from the selected groups

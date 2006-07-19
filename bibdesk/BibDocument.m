@@ -1482,6 +1482,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 }
 
+- (void)removePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if ([alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
+    if (returnCode == NSAlertDefaultReturn)
+        [self removePublications:[self selectedPublications] fromGroups:[self selectedGroups]];
+}
+
 // this method is called for the main table; it's a wrapper for delete or remove from group
 - (IBAction)removeSelectedPubs:(id)sender{
 	NSArray *selectedGroups = [self selectedGroups];
@@ -1502,27 +1509,56 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
             NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
-                                                 defaultButton:NSLocalizedString(@"Yes", @"OK")
+                                                 defaultButton:NSLocalizedString(@"Yes", @"Yes")
                                                alternateButton:nil
-                                                   otherButton:NSLocalizedString(@"No", @"Cancel")
+                                                   otherButton:NSLocalizedString(@"No", @"No")
                                      informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @""), [tableView numberOfSelectedRows], ([tableView numberOfSelectedRows] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item",@"")), groupName];
             [alert setHasCheckButton:YES];
             [alert setCheckValue:NO];
-            int rv = [alert runSheetModalForWindow:documentWindow
-                                     modalDelegate:self 
-                                    didEndSelector:@selector(disableWarningAlertDidEnd:returnCode:contextInfo:) 
-                                didDismissSelector:NULL 
-                                       contextInfo:BDSKWarnOnRemovalFromGroupKey];
-            if (rv == NSAlertOtherReturn)
-                return;
+            [alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self 
+                             didEndSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+            return;
+        } else {
+            [self removePublications:[self selectedPublications] fromGroups:selectedGroups];
         }
-		[self removePublications:[self selectedPublications] fromGroups:selectedGroups];
 	}
+}
+
+- (void)deletePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if (alert != nil && [alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnDeleteKey];
+    if (returnCode == NSAlertOtherReturn)
+        return;
+    
+    // deletion changes the scroll position
+    NSPoint scrollLocation = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+    unsigned lastIndex = [[tableView selectedRowIndexes] lastIndex];
+	[self removePublications:[self selectedPublications]];
+    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
+    
+    // should select the publication following the last deleted publication (if any)
+	if(lastIndex >= [tableView numberOfRows])
+        lastIndex = [tableView numberOfRows] - 1;
+    if(lastIndex != -1)
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:lastIndex] byExtendingSelection:NO];
+    
+	int numSelectedPubs = [self numberOfSelectedPubs];
+	NSString * pubSingularPlural;
+	if (numSelectedPubs == 1) {
+		pubSingularPlural = NSLocalizedString(@"publication", @"publication");
+	} else {
+		pubSingularPlural = NSLocalizedString(@"publications", @"publications");
+	}
+	
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Deleted %i %@",@"Deleted %i %@ [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural] immediate:NO];
+	
+	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Delete Publication(s)"),pubSingularPlural]];
 }
 
 - (IBAction)deleteSelectedPubs:(id)sender{
 	int numSelectedPubs = [self numberOfSelectedPubs];
-	
     if (numSelectedPubs == 0 ||
         [self hasSharedGroupsSelected] == YES) {
         return;
@@ -1536,44 +1572,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 								 informativeTextWithFormat:NSLocalizedString(@"You are about to delete %i items. Do you want to proceed?", @""), numSelectedPubs];
 		[alert setHasCheckButton:YES];
 		[alert setCheckValue:NO];
-		int rv = [alert runSheetModalForWindow:documentWindow
-								 modalDelegate:self 
-								didEndSelector:@selector(disableWarningAlertDidEnd:returnCode:contextInfo:) 
-							didDismissSelector:NULL 
-								   contextInfo:BDSKWarnOnDeleteKey];
-		if (rv == NSAlertOtherReturn)
-			return;
-	}
-
-    // deletion changes the scroll position
-    NSPoint scrollLocation = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-    unsigned lastIndex = [[tableView selectedRowIndexes] lastIndex];
-	[self removePublications:[self selectedPublications]];
-    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
-    
-    // should select the publication following the last deleted publication (if any)
-	if(lastIndex >= [tableView numberOfRows])
-        lastIndex = [tableView numberOfRows] - 1;
-    if(lastIndex != -1)
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:lastIndex] byExtendingSelection:NO];
-    
-	NSString * pubSingularPlural;
-	if (numSelectedPubs == 1) {
-		pubSingularPlural = NSLocalizedString(@"publication", @"publication");
+        [alert beginSheetModalForWindow:documentWindow
+                          modalDelegate:self 
+                         didEndSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
 	} else {
-		pubSingularPlural = NSLocalizedString(@"publications", @"publications");
-	}
-	
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Deleted %i %@",@"Deleted %i %@ [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural] immediate:NO];
-	
-	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Delete Publication(s)"),pubSingularPlural]];
-}
-
-- (void)disableWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if ([alert checkValue] == YES) {
-		NSString *showWarningKey = (NSString *)contextInfo;
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:showWarningKey];
-	}
+        [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+    }
 }
 
 - (IBAction)emailPubCmd:(id)sender{
@@ -1615,6 +1620,17 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 }
 
+- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertDefaultReturn)
+        return;
+    
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+    BibItem *pub;
+    while (pub = [e nextObject]) {
+        if ([pub document] == self)
+            [self editPub:pub];
+    }
+}
 
 - (IBAction)editPubCmd:(id)sender{
     NSString *colID = nil;
@@ -1628,28 +1644,20 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		[self openRemoteURLForField:colID];
     }else{
 		int n = [self numberOfSelectedPubs];
-        int rv = NSAlertAlternateReturn;
 		if (n > 6) {
             // Do we really want a gazillion of editor windows?
-			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
-												 defaultButton:NSLocalizedString(@"No", @"No")
-											   alternateButton:NSLocalizedString(@"Yes", @"Yes")
-												   otherButton:nil
-									 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
-			rv = [alert runSheetModalForWindow:documentWindow
-								 modalDelegate:nil
-								didEndSelector:NULL 
-							didDismissSelector:NULL 
-								   contextInfo:NULL];
-		} 
-        if(rv == NSAlertAlternateReturn){
-            NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-            BibItem *pub;
-            while (pub = [e nextObject]) {
-                if ([pub document] == self)
-                    [self editPub:pub];
-            }
-		}
+			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
+                                             defaultButton:NSLocalizedString(@"No", @"No")
+                                          alternateButton:NSLocalizedString(@"Yes", @"Yes")
+                                              otherButton:nil
+                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
+			[alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self
+                             didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+		} else {
+            [self editPubAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
+        }
 	}
 }
 
@@ -1700,24 +1708,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self openLinkedFileForField:field];
 }
 
-- (void)openLinkedFileForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
-    
-    int rv = NSAlertAlternateReturn;
-    if (n > 6) {
-		// Do we really want a gazillion of files open?
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)")
-                                             defaultButton:NSLocalizedString(@"No", @"No")
-                                           alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
-                                               otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n]];
-        rv = [alert runSheetModalForWindow:documentWindow
-                             modalDelegate:nil
-                            didEndSelector:NULL 
-                        didDismissSelector:NULL 
-                               contextInfo:NULL];
-	}
-    if(rv == NSAlertAlternateReturn){
+- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    NSString *field = (NSString *)contextInfo;
+    if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
         BibItem *pub;
         NSURL *fileURL;
@@ -1739,7 +1732,27 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
             }
         }
-	}
+    }
+    [field release];
+}
+
+- (void)openLinkedFileForField:(NSString *)field{
+	int n = [self numberOfSelectedPubs];
+    
+    if (n > 6) {
+		// Do we really want a gazillion of files open?
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)")
+                                         defaultButton:NSLocalizedString(@"No", @"No")
+                                       alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
+                                           otherButton:nil
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n]];
+        [alert beginSheetModalForWindow:documentWindow
+                          modalDelegate:self
+                         didEndSelector:@selector(openLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+	} else {
+        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+    }
 }
 
 - (IBAction)revealLinkedFile:(id)sender{
@@ -1749,31 +1762,36 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self revealLinkedFileForField:field];
 }
 
-- (void)revealLinkedFileForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
-    
-    int rv = NSAlertAlternateReturn;
-    if (n > 6) {
-		// Do we really want a gazillion of Finder windows?
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Reveal Linked Files", @"Reveal Linked Files (multiple reveal warning)")
-                                             defaultButton:NSLocalizedString(@"No", @"No")
-                                           alternateButton:NSLocalizedString(@"Reveal", @"multiple reveal warning Reveal button")
-                                               otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"mulitple reveal linked files question"), n]];
-        rv = [alert runSheetModalForWindow:documentWindow
-                             modalDelegate:nil
-                            didEndSelector:NULL 
-                        didDismissSelector:NULL 
-                               contextInfo:NULL];
-	}
-    if(rv == NSAlertAlternateReturn){
+- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    NSString *field = (NSString *)contextInfo;
+    if (returnCode == NSAlertAlternateReturn) {
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
         BibItem *pub;
         
         while (pub = [e nextObject]) {
             [[NSWorkspace sharedWorkspace]  selectFile:[pub localFilePathForField:field] inFileViewerRootedAtPath:nil];
         }
-	}
+    }
+    [field release];
+}
+
+- (void)revealLinkedFileForField:(NSString *)field{
+	int n = [self numberOfSelectedPubs];
+    
+    if (n > 6) {
+		// Do we really want a gazillion of Finder windows?
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reveal Linked Files", @"Reveal Linked Files (multiple reveal warning)")
+                                         defaultButton:NSLocalizedString(@"No", @"No")
+                                       alternateButton:NSLocalizedString(@"Reveal", @"multiple reveal warning Reveal button")
+                                           otherButton:nil
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"mulitple reveal linked files question"), n]];
+        [alert beginSheetModalForWindow:documentWindow
+                          modalDelegate:self
+                         didEndSelector:@selector(revealLinkedFileAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+	} else {
+        [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+    }
 }
 
 - (IBAction)openRemoteURL:(id)sender{
@@ -1783,24 +1801,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self openRemoteURLForField:field];
 }
 
-- (void)openRemoteURLForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
-    
-    int rv = NSAlertAlternateReturn;
-    if (n > 6) {
-		// Do we really want a gazillion of browser windows?
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)")
-                                             defaultButton:NSLocalizedString(@"No", @"No")
-                                           alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
-                                               otherButton:nil
-                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n]];
-        rv = [alert runSheetModalForWindow:documentWindow
-                             modalDelegate:nil
-                            didEndSelector:NULL 
-                        didDismissSelector:NULL 
-                               contextInfo:NULL];
-	}
-    if(rv == NSAlertAlternateReturn){
+- (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	NSString *field = (NSString *)contextInfo;
+    if(returnCode == NSAlertAlternateReturn){
         NSEnumerator *e = [[self selectedPublications] objectEnumerator];
         BibItem *pub;
         
@@ -1808,6 +1811,26 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 			[[NSWorkspace sharedWorkspace] openURL:[pub remoteURLForField:field]];
 		}
 	}
+    [field release];
+}
+
+- (void)openRemoteURLForField:(NSString *)field{
+	int n = [self numberOfSelectedPubs];
+    
+    if (n > 6) {
+		// Do we really want a gazillion of browser windows?
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)")
+                                         defaultButton:NSLocalizedString(@"No", @"No")
+                                      alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
+                                          otherButton:nil
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n]];
+        [alert beginSheetModalForWindow:documentWindow
+                          modalDelegate:self
+                         didEndSelector:@selector(openRemoteURLAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+	} else {
+        [self openRemoteURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+    }
 }
 
 - (void)editAction:(id)sender {
@@ -3755,21 +3778,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self createNewPubUsingCrossrefForItem:selectedBI];
 }
 
-- (IBAction)duplicateTitleToBooktitle:(id)sender{
-	if ([self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) return;
-	
-	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
-										 defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
-									   alternateButton:NSLocalizedString(@"Overwrite", @"Overwrite")
-										   otherButton:nil
-						 informativeTextWithFormat:NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @"")];
-	int rv = [alert runSheetModalForWindow:documentWindow
-							 modalDelegate:nil
-							didEndSelector:NULL 
-						didDismissSelector:NULL 
-							   contextInfo:NULL];
-	BOOL overwrite = (rv == NSAlertAlternateReturn);
+- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
 	
 	NSSet *parentTypes = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
 	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
@@ -3785,6 +3795,21 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
 	}
 	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles",@"") : NSLocalizedString(@"Duplicate Title",@""))];
+}
+
+- (IBAction)duplicateTitleToBooktitle:(id)sender{
+	if ([self numberOfSelectedPubs] == 0 ||
+        [self hasSharedGroupsSelected] == YES) return;
+	
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
+                                     defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
+                                   alternateButton:NSLocalizedString(@"Overwrite", @"Overwrite")
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @"")];
+	[alert beginSheetModalForWindow:documentWindow
+                      modalDelegate:self
+                     didEndSelector:@selector(dublicateTitleToBooktitleAlertDidEnd:returnCode:contextInfo:) 
+                        contextInfo:NULL];
 }
 
 #pragma mark
@@ -3816,27 +3841,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark 
 #pragma mark AutoFile stuff
 
-- (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([self hasSharedGroupsSelected] == YES) {
-        NSBeep();
+- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    BOOL check = (returnCode == NSAlertDefaultReturn);
+    if (returnCode == NSAlertAlternateReturn)
         return;
-    }
-    BOOL check = YES;
-    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files",@"")
-                                         defaultButton:NSLocalizedString(@"Move Complete Only",@"Move Complete Only")
-                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
-                                           otherButton:NSLocalizedString(@"Move All",@"Move All")
-                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@"")];
-    int rv = [alert runSheetModalForWindow:documentWindow
-                             modalDelegate:nil
-                            didEndSelector:NULL 
-                        didDismissSelector:NULL 
-                               contextInfo:NULL];
-    if(rv == NSAlertOtherReturn){
-        check = NO;
-    }else if(rv == NSAlertAlternateReturn){
-        return;
-    }
 
     // first we make sure all edits are committed
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
@@ -3846,6 +3854,22 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files",@"")];
+}
+
+- (IBAction)consolidateLinkedFiles:(id)sender{
+    if ([self hasSharedGroupsSelected] == YES) {
+        NSBeep();
+        return;
+    }
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files",@"")
+                                     defaultButton:NSLocalizedString(@"Move Complete Only",@"Move Complete Only")
+                                   alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
+                                       otherButton:NSLocalizedString(@"Move All",@"Move All")
+                         informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@"")];
+	[alert beginSheetModalForWindow:documentWindow
+                      modalDelegate:self
+                     didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 
+                        contextInfo:NULL];
 }
 
 #pragma mark blog stuff
