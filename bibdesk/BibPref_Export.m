@@ -303,7 +303,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     NSString *identifier = [tableColumn identifier];
     if([identifier isEqualToString:BDSKTemplateRoleString] && [item isLeaf] && [object isEqualToString:BDSKTemplateAccessoryString] == NO && [(BDSKTemplate *)[item parent] childForRole:object] != nil) {
         [outlineView reloadData];
-    } else {
+    } else if (object != nil) { // object can be nil when a NSComboBoxCell is edited while the options are shown, looks like an AppKit bug
         [item setValue:object forKey:[tableColumn identifier]];
         [self synchronizePrefs];
     }
