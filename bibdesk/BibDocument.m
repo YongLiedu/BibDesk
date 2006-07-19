@@ -2709,17 +2709,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
 														object:self];
 }
-
-- (IBAction)columnsMenuAddTableColumn:(id)sender{
-    // first we fill the popup
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, /* the following two are for legacy support */@"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
-                                              excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:",@"")
-                                                                                              fieldsArray:colNames];
-	NSString *newColumnName = [addFieldController runSheetModalForWindow:documentWindow];
-    [addFieldController release];
+- (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSString *newColumnName = [addFieldController field];
     
     if(newColumnName == nil)
         return;
@@ -2741,6 +2733,21 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self updateUI];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
                                                         object:self];
+}
+
+- (IBAction)columnsMenuAddTableColumn:(id)sender{
+    // first we fill the popup
+	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, /* the following two are for legacy support */@"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
+                                              excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
+    
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:",@"")
+                                                                                              fieldsArray:colNames];
+	[addFieldController beginSheetModalForWindow:documentWindow
+                                   modalDelegate:self
+                                  didEndSelector:@selector(addColumnSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
+    [addFieldController release];
 }
 
 /*

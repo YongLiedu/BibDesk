@@ -805,6 +805,40 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 // for adding/removing groups, we use the searchfield sheets
+    
+- (void)addGroupFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	NSString *newGroupField = [addFieldController field];
+    if(newGroupField == nil)
+        return; // the user canceled
+    
+	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField] || [newGroupField isEqualToString:@""]){
+        NSBeginAlertSheet(NSLocalizedString(@"Invalid Field", @"Invalid Field"),
+                          nil, nil, nil, documentWindow, nil, nil, nil, nil,
+                          [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), newGroupField] );
+		return;
+	}
+	
+	NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+	[array addObject:newGroupField];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupAddRemoveNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
+    
+	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
+	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	
+	[headerCell insertItemWithTitle:newGroupField atIndex:[array count] - 1];
+	[self setCurrentGroupField:newGroupField];
+	[headerCell selectItemWithTitle:currentGroupField];
+	[headerCell setTitle:currentGroupField];
+	
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
+														object:self
+													  userInfo:[NSDictionary dictionary]];
+    [array release];
+}    
 
 - (IBAction)addGroupFieldAction:(id)sender{
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
@@ -823,53 +857,15 @@ The groupedPublications array is a subset of the publications array, developed b
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:",@"")
                                                                                               fieldsArray:colNames];
-	NSString *newGroupField = [addFieldController runSheetModalForWindow:documentWindow];
+	[addFieldController beginSheetModalForWindow:documentWindow
+                                   modalDelegate:self
+                                  didEndSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
     [addFieldController release];
-    
-    if(newGroupField == nil)
-        return; // the user canceled
-    
-	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField] || [newGroupField isEqualToString:@""]){
-        NSBeginAlertSheet(NSLocalizedString(@"Invalid Field", @"Invalid Field"),
-                          nil, nil, nil, documentWindow, nil, nil, nil, nil,
-                          [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), newGroupField] );
-		return;
-	}
-	
-	NSMutableArray *array = [groupFields mutableCopy];
-	[array addObject:newGroupField];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupAddRemoveNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
-    
-	[headerCell insertItemWithTitle:newGroupField atIndex:[groupFields count]];
-	[self setCurrentGroupField:newGroupField];
-	[headerCell selectItemWithTitle:currentGroupField];
-	[headerCell setTitle:currentGroupField];
-	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];
-    [array release];
-}    
+}
 
-- (IBAction)removeGroupFieldAction:(id)sender{
-	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
-	
-	[headerCell setTitle:currentGroupField];
-    if ([currentGroupField isEqualToString:@""])
-        [headerCell selectItemAtIndex:0];
-    else 
-        [headerCell selectItemWithTitle:currentGroupField];
-    
-    BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:",@"")
-                                                            fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
-	NSString *oldGroupField = [removeFieldController runSheetModalForWindow:documentWindow];
-    [removeFieldController release];
-    
+- (void)removeGroupFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	NSString *oldGroupField = [removeFieldController field];
     if([NSString isEmptyString:oldGroupField])
         return;
     
@@ -878,6 +874,9 @@ The groupedPublications array is a subset of the publications array, developed b
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];
     [array release];
     
+	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
+	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	
     [headerCell removeItemWithTitle:oldGroupField];
     if([oldGroupField isEqualToString:currentGroupField]){
         [self setCurrentGroupField:@""];
@@ -893,6 +892,25 @@ The groupedPublications array is a subset of the publications array, developed b
                                                         object:self
                                                       userInfo:[NSDictionary dictionaryWithObjectsAndKeys:oldGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeRemoval], NSKeyValueChangeKindKey, nil]];        
 }
+
+- (IBAction)removeGroupFieldAction:(id)sender{
+	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
+	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	
+	[headerCell setTitle:currentGroupField];
+    if ([currentGroupField isEqualToString:@""])
+        [headerCell selectItemAtIndex:0];
+    else 
+        [headerCell selectItemWithTitle:currentGroupField];
+    
+    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:",@"")
+                                                                                                       fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
+	[removeFieldController beginSheetModalForWindow:documentWindow
+                                      modalDelegate:self
+                                     didEndSelector:@selector(removeGroupFieldSheetDidEnd:returnCode:contextInfo:)
+                                        contextInfo:NULL];
+    [removeFieldController release];
+}    
 
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification{
     // Handle changes to the popup from other documents.  The userInfo for this notification uses key-value observing keys: NSKeyValueChangeNewKey is the affected field (whether add/remove), and NSKeyValueChangeKindKey will be either insert/remove

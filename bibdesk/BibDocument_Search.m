@@ -229,17 +229,8 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 		
 }
 
-- (IBAction)quickSearchAddField:(id)sender{
-    // first we fill the popup
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, @"Added", @"Modified", nil]
-                                                excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-    
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
-                                                                                              fieldsArray:searchKeys];
-	NSString *newSearchKey = [addFieldController runSheetModalForWindow:documentWindow];
-    [addFieldController release];
-	
+- (void)addSearchFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	NSString *newSearchKey = [addFieldController field];
     if([NSString isEmptyString:newSearchKey])
         return;
     
@@ -255,6 +246,38 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [self setSelectedSearchFieldKey:newSearchKey];
 }
 
+- (IBAction)quickSearchAddField:(id)sender{
+    // first we fill the popup
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, @"Added", @"Modified", nil]
+                                                excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+    
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
+                                                                                              fieldsArray:searchKeys];
+	[addFieldController beginSheetModalForWindow:documentWindow
+                                   modalDelegate:self
+                                  didEndSelector:@selector(addSearchFieldSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
+    [addFieldController release];
+}
+
+- (void)removeSearchFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
+    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+
+	NSString *oldSearchKey = [removeFieldController field];
+    if(oldSearchKey == nil || [searchKeys count] == 0)
+        return;
+    
+    [searchKeys removeObject:oldSearchKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
+                                                      forKey:BDSKQuickSearchKeys];
+
+    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+    if([quickSearchKey isEqualToString:oldSearchKey])
+        [self setSelectedSearchFieldKey:BDSKAllFieldsString];
+}
+
 - (IBAction)quickSearchRemoveField:(id)sender{
     NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
     [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
@@ -267,24 +290,13 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 		prompt = NSLocalizedString(@"No search fields to remove",@"");
 	}
     
-    BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
-                                                                                                    fieldsArray:searchKeys];
-	NSString *oldSearchKey = [removeFieldController runSheetModalForWindow:documentWindow];
+    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
+                                                                                                       fieldsArray:searchKeys];
+	[removeFieldController beginSheetModalForWindow:documentWindow
+                                      modalDelegate:self
+                                     didEndSelector:@selector(removeSearchFieldSheetDidEnd:returnCode:contextInfo:)
+                                        contextInfo:NULL];
     [removeFieldController release];
-    
-    if(oldSearchKey == nil || [searchKeys count] == 0)
-        return;
-    
-    searchKeys = [NSMutableArray arrayWithCapacity:10];
-    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-
-    [searchKeys removeObject:oldSearchKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
-                                                      forKey:BDSKQuickSearchKeys];
-
-    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
-    if([quickSearchKey isEqualToString:oldSearchKey])
-        [self setSelectedSearchFieldKey:BDSKAllFieldsString];
 }
 
 - (IBAction)searchFieldAction:(id)sender{

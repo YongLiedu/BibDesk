@@ -351,15 +351,8 @@
 	}
 }
 
-- (IBAction)addField:(id)sender{
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *currentFields = [item allFieldNames];
-    NSArray *fieldNames = [typeMan allFieldNamesIncluding:nil excluding:currentFields];
-    
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
-                                                                                              fieldsArray:fieldNames];
-	NSString *newField = [addFieldController runSheetModalForWindow:[self window]];
-    [addFieldController release];
+- (void)addSearchFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	NSString *newField = [addFieldController field];
     newField = [newField capitalizedString];
     
     if(newField == nil || [fields containsObject:newField])
@@ -373,6 +366,20 @@
     [itemTableView reloadData];
     [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [itemTableView editColumn:2 row:row withEvent:nil select:YES];
+}
+
+- (IBAction)addField:(id)sender{
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *currentFields = [item allFieldNames];
+    NSArray *fieldNames = [typeMan allFieldNamesIncluding:nil excluding:currentFields];
+    
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
+                                                                                              fieldsArray:fieldNames];
+	[addFieldController beginSheetModalForWindow:[self window]
+                                   modalDelegate:self
+                                  didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
+    [addFieldController release];
 }
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
