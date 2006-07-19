@@ -3498,6 +3498,19 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
     while(aPub = [selEnum nextObject]){
 		NSString *newKey = [aPub suggestedCiteKey];
+        NSString *crossref = [aPub valueOfField:BDSKCrossrefString inherit:NO];
+        if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key",@"Could not generate cite key") 
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @""), [aPub citeKey]];
+            [alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:nil
+                             didEndSelector:NULL
+                                contextInfo:NULL];
+            continue;
+        }
         [aPub setCiteKey:newKey];
         		
         if(scriptHook){
