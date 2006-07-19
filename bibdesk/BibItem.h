@@ -687,9 +687,9 @@
 - (id)optionalFields;
 - (id)defaultFields;
 - (id)allFields;
-- (id)fields;
-- (id)urls;
-- (id)persons;
+- (BDSKFieldCollection *)fields;
+- (BDSKFieldCollection *)urls;
+- (BDSKFieldCollection *)persons;
 - (id)authors;
 - (id)editors;
 - (int)itemIndex;

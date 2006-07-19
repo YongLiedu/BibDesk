@@ -2008,7 +2008,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [[self fields] fieldsWithNames:allFields];
 }
 
-- (id)fields{
+- (BDSKFieldCollection *)fields{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
     [templateFields setPersons:NO];
@@ -2016,7 +2016,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return templateFields;
 }
 
-- (id)urls{
+- (BDSKFieldCollection *)urls{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
     [templateFields setPersons:NO];
@@ -2024,7 +2024,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return templateFields;
 }
 
-- (id)persons{
+- (BDSKFieldCollection *)persons{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
     [templateFields setPersons:YES];
@@ -2033,11 +2033,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (id)authors{
-    return [[self persons] valueOfField:BDSKAuthorString];
+    return [[self persons] valueForKey:BDSKAuthorString];
 }
 
 - (id)editors{
-    return [[self persons] valueOfField:BDSKEditorString];
+    return [[self persons] valueForKey:BDSKEditorString];
 }
 
 - (void)setItemIndex:(int)index{ currentIndex = index; }
