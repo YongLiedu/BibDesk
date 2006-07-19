@@ -1483,7 +1483,9 @@
 
 - (void)keyDown:(NSEvent *)event{
     NSString *chars = [event charactersIgnoringModifiers];
-    unichar c = ([chars length]) ? [chars characterAtIndex:0] : 0;
+    if ([chars length] == 0)
+        return;
+    unichar c = [chars characterAtIndex:0];
     unsigned int flags = ([event modifierFlags] & 0xffff0000U);
     
     static NSCharacterSet *fieldNameCharSet = nil;

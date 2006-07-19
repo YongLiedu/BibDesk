@@ -332,7 +332,7 @@
                              informativeTextWithFormat:NSLocalizedString(@"This document was opened using temporary cite keys for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.  Do you want me to do this now?", @"") ];
 
         [alert beginSheetModalForWindow:[doc windowForSheet]
-                          modalDelegate:nil
+                          modalDelegate:self
                          didEndSelector:@selector(temporaryCiteKeysAlertDidEnd:returnCode:contextInfo:)
                             contextInfo:[doc retain]];
     }
