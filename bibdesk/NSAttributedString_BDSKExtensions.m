@@ -104,7 +104,7 @@
 
 - (id)initWithAttributedString:(NSAttributedString *)attributedString attributes:(NSDictionary *)attributes {
     [[self init] release];
-    NSMutableAttributedString *tmpStr = [[NSMutableAttributedString alloc] initWithAttributedString:attributedString];
+    NSMutableAttributedString *tmpStr = [attributedString mutableCopy];
     unsigned index = 0, length = [attributedString length];
     NSRange range = NSMakeRange(0, length);
     NSDictionary *attrs;
@@ -116,8 +116,10 @@
             index = NSMaxRange(range);
         } else index++;
     }
-    [tmpStr fixAttributesInRange:NSMakeRange(0, [self length])];
-    return self = tmpStr;
+    [tmpStr fixAttributesInRange:NSMakeRange(0, length)];
+    self = [tmpStr copy];
+    [tmpStr release];
+    return self;
 }
 
 @end
