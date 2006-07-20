@@ -829,7 +829,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
 	
-	[headerCell insertItemWithTitle:newGroupField atIndex:[array count] - 1];
+	[headerCell insertItemWithTitle:newGroupField atIndex:[array count]];
 	[self setCurrentGroupField:newGroupField];
 	[headerCell selectItemWithTitle:currentGroupField];
 	[headerCell setTitle:currentGroupField];
