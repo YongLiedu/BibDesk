@@ -45,6 +45,7 @@
 
 #define MAX_PREVIEW_WIDTH	501.0
 #define MAX_FORMAT_WIDTH	288.0
+#define USE_DOCUMENT_FOLDER NSLocalizedString(@"Use Document Folder",@"")
 
 @interface BDSKFolderPathFormatter : NSFormatter @end
 
@@ -89,7 +90,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
     [useRelativePathCheckButton setState:[defaults boolForKey:BDSKAutoFileUsesRelativePathKey] ? NSOnState : NSOffState];
 
     if ([NSString isEmptyString:papersFolder]) {
-		[papersFolderLocationTextField setStringValue:NSLocalizedString(@"Use Document Folder",@"")];
+		[papersFolderLocationTextField setStringValue:USE_DOCUMENT_FOLDER];
 		[papersFolderLocationTextField setEnabled:NO];
 		[choosePapersFolderLocationButton setEnabled:NO];
 		[clearPapersFolderLocationButton setState:NSOffState];
@@ -394,6 +395,9 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    if ([string isEqualToString:USE_DOCUMENT_FOLDER])  
+        return YES;
+    
     BOOL isDir;
     // we want to return the original value if it's valid, not the expanded path; the action method should expand it
     NSString *pathString = [string stringByStandardizingPath];
