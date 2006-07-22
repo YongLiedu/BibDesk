@@ -1225,7 +1225,7 @@ static int numberOfOpenEditors = 0;
 // Add field sheet support
 // ----------------------------------------------------------------------------------------
 
-- (void)addSearchFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *newField = [addFieldController field];
     if(newField == nil)
         return;
