@@ -395,8 +395,10 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    if ([string isEqualToString:USE_DOCUMENT_FOLDER])  
+    if ([string isEqualToString:USE_DOCUMENT_FOLDER]) {
+        *obj = string;
         return YES;
+    }
     
     BOOL isDir;
     // we want to return the original value if it's valid, not the expanded path; the action method should expand it
