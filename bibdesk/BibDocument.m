@@ -3854,9 +3854,26 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark 
 #pragma mark AutoFile stuff
 
-- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    BOOL check = (returnCode == NSAlertDefaultReturn);
-    if (returnCode == NSAlertAlternateReturn)
+- (IBAction)consolidateLinkedFiles:(id)sender{
+    if ([self hasSharedGroupsSelected] == YES) {
+        NSBeep();
+        return;
+    }
+    // we run the alert app modal, because the sheet must be removed from the document before we call BibFiler 
+    // as that will use a sheet as well, see bug # 1526145
+    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files",@"")
+                                         defaultButton:NSLocalizedString(@"Move Complete Only",@"Move Complete Only")
+                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
+                                           otherButton:NSLocalizedString(@"Move All",@"Move All")
+                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@"")];
+	int rv = [alert runSheetModalForWindow:documentWindow
+                             modalDelegate:nil
+                            didEndSelector:NULL
+                        didDismissSelector:NULL
+                               contextInfo:NULL];
+    
+    BOOL check = (rv == NSAlertDefaultReturn);
+    if (rv == NSAlertAlternateReturn)
         return;
 
     // first we make sure all edits are committed
@@ -3864,25 +3881,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
 
-	[[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
+    [[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files",@"")];
-}
-
-- (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([self hasSharedGroupsSelected] == YES) {
-        NSBeep();
-        return;
-    }
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files",@"")
-                                     defaultButton:NSLocalizedString(@"Move Complete Only",@"Move Complete Only")
-                                   alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
-                                       otherButton:NSLocalizedString(@"Move All",@"Move All")
-                         informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@"")];
-	[alert beginSheetModalForWindow:documentWindow
-                      modalDelegate:self
-                     didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 
-                        contextInfo:NULL];
 }
 
 #pragma mark blog stuff
