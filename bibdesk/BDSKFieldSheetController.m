@@ -155,6 +155,7 @@
 - (void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if(modalDelegate != nil && didEndSelector != NULL){
 		NSMethodSignature *signature = [modalDelegate methodSignatureForSelector:didEndSelector];
+        NSAssert2(nil != signature, @"%@ does not implement %@", modalDelegate, NSStringFromSelector(didEndSelector));
 		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
 		[invocation setSelector:didEndSelector];
 		[invocation setArgument:&self atIndex:2];
