@@ -380,3 +380,47 @@ static inline NSString *sepTagWithTag(NSString *tag){
 }
 
 @end
+
+@implementation NSString (BDSKTemplateParser)
+
+- (NSString *)stringBySurroundingWithSpacesIfNotEmpty 
+{ 
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@" %@ ", self];
+}
+
+- (NSString *)stringByAppendingSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@" "];
+}
+
+- (NSString *)stringByAppendingDoubleSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@"  "];
+}
+
+- (NSString *)stringByAppendingCommaAndSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@", "];
+}
+
+- (NSString *)stringByPrependingSpaceIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@" %@", self];
+}
+
+- (NSString *)stringByAppendingCommaIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@","];
+}
+
+- (NSString *)stringByAppendingFullStopIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [self stringByAppendingString:@"."];
+}
+
+- (NSString *)parenthesizedStringIfNotEmpty
+{
+    return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"(%@)", self];
+}
+
+@end
