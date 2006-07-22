@@ -48,7 +48,7 @@
 #import "BDAlias.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKAlert.h"
-
+#import "BibItem.h"
 
 @implementation BDSKDocumentController
 
