@@ -435,7 +435,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
     if (newPublications != publications) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setPublications:publications];
         [publications release];
-        publications = [newPublications retain];
+        publications = [newPublications mutableCopy];
         [self setCount:[publications count]];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
     }
