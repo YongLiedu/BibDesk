@@ -68,6 +68,7 @@ enum {
 	
 	IBOutlet NSPanel *progressSheet;
 	IBOutlet NSProgressIndicator *progressIndicator;
+	IBOutlet NSButton *progressCloseButton;
 	
     BibDocument *document;
     NSString *fieldName;
@@ -105,6 +106,13 @@ BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check wil
 BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
 - (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)masks;
+
+/*!
+	@method		closeProgress:
+	@abstract	Action to close the progress sheet
+	@discussion -
+*/
+- (IBAction)closeProgress:(id)sender;
 
 /*!
 	@method		showProblems

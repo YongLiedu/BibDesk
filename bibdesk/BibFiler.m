@@ -126,14 +126,17 @@ static BibFiler *sharedFiler = nil;
 	if (initial && [field isEqualToString:BDSKLocalUrlString] == NO)
         [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for the Local-Url field for initial moves.",NSStringFromSelector(_cmd)];
 	
-	if (numberOfPapers > 1 && [NSBundle loadNibNamed:@"AutoFileProgress" owner:self]) {
+	if (numberOfPapers > 1) {
+        if (progressSheet == nil)
+            [NSBundle loadNibNamed:@"AutoFileProgress" owner:self];
 		[NSApp beginSheet:progressSheet
 		   modalForWindow:[doc windowForSheet]
-			modalDelegate:self
+			modalDelegate:nil
 		   didEndSelector:NULL
 			  contextInfo:nil];
 		[progressIndicator setMaxValue:numberOfPapers];
 		[progressIndicator setDoubleValue:0.0];
+        [progressCloseButton setEnabled:NO];
 		[progressIndicator displayIfNeeded];
 	}
 	
@@ -179,7 +182,7 @@ static BibFiler *sharedFiler = nil;
 			newPath = [paperInfo objectForKey:@"newPath"];
 		}
 		
-		if(progressSheet){
+		if(numberOfPapers > 1){
 			[progressIndicator incrementBy:1.0];
 			[progressIndicator displayIfNeeded];
 		}
@@ -254,9 +257,11 @@ static BibFiler *sharedFiler = nil;
 		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers];
 	}
 	
-	if(progressSheet){
+	if(numberOfPapers > 1){
 		[progressSheet orderOut:nil];
 		[NSApp endSheet:progressSheet returnCode:0];
+        // enable the close button in case the progress sheet was queued in is not attached at this point
+        [progressCloseButton setEnabled:YES];
 	}
 	
 	NSUndoManager *undoManager = [doc undoManager];
@@ -269,6 +274,11 @@ static BibFiler *sharedFiler = nil;
         options = mask;
 		[self showProblems];
     }
+}
+
+- (IBAction)closeProgress:(id)sender{
+    [progressSheet orderOut:nil];
+    [NSApp endSheet:progressSheet returnCode:0];
 }
 
 #pragma mark Error reporting
