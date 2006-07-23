@@ -58,6 +58,8 @@
     [super dealloc];
 }
 
+- (void)awakeFromNib{}
+
 - (NSString *)field{
     return field;
 }
