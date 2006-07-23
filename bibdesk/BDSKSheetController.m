@@ -103,7 +103,7 @@
 	[NSApp beginSheet:[self window]
 	   modalForWindow:window
 		modalDelegate:self
-	   didEndSelector:@selector(didEndAlert:returnCode:contextInfo:)
+	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
 		  contextInfo:NULL];
 	int returnCode = [NSApp runModalForWindow:[self window]];
     [self endSheetWithReturnCode:returnCode];
@@ -127,6 +127,7 @@
 - (void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if(theModalDelegate != nil && theDidEndSelector != NULL){
 		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
+        NSAssert2(nil != signature, @"%@ does not implement %@", theModalDelegate, NSStringFromSelector(theDidEndSelector));
 		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
 		[invocation setSelector:theDidEndSelector];
 		[invocation setArgument:&self atIndex:2];
@@ -142,6 +143,7 @@
     
 	if(theModalDelegate != nil && theDidDismissSelector != NULL){
 		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidDismissSelector];
+        NSAssert2(nil != signature, @"%@ does not implement %@", theModalDelegate, NSStringFromSelector(theDidDismissSelector));
 		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
 		[invocation setSelector:theDidDismissSelector];
 		[invocation setArgument:&self atIndex:2];

@@ -3880,7 +3880,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[alert beginSheetModalForWindow:documentWindow
                       modalDelegate:self
                      didEndSelector:NULL
-                 didDismissSelector:@selector(consolidateSheetDidEnd:returnCode:contextInfo:)
+                 didDismissSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:)
                         contextInfo:NULL];
     
 }
