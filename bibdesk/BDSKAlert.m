@@ -45,6 +45,7 @@
 - (void)prepare;
 - (void)buttonPressed:(id)sender;
 - (void)didEndAlert:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)endSheetWithReturnCode:(int)returnCode;
 
 @end
 
@@ -85,9 +86,9 @@
 		minButtonSize = NSMakeSize(90.0, 32.0);
         buttons = [[NSMutableArray alloc] initWithCapacity:3];
         unbadgedImage = [[NSImage imageNamed:@"NSApplicationIcon"] retain];
-        modalDelegate = nil;
-        didEndSelector = NULL;
-        didDismissSelector = NULL;
+        theModalDelegate = nil;
+        theDidEndSelector = NULL;
+        theDidDismissSelector = NULL;
     }
     return self;
 }
@@ -111,12 +112,22 @@
 	return returnCode;
 }
 
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)aDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(void *)contextInfo {
+- (void)beginSheetModalForWindow:(NSWindow *)window {
+	[self beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+}
+
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
+	[self beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector didDismissSelector:NULL contextInfo:contextInfo];
+}
+
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
 	[self prepare];
 	
 	runAppModal = NO;
-    modalDelegate = aDelegate;
-	didEndSelector = aDidEndSelector;
+    theModalDelegate = delegate;
+	theDidEndSelector = didEndSelector;
+	theDidDismissSelector = didDismissSelector;
+    theContextInfo = contextInfo;
 	
 	[self retain]; // make sure we stay around long enough
 	
@@ -124,41 +135,29 @@
 	   modalForWindow:window
 		modalDelegate:self
 	   didEndSelector:@selector(didEndAlert:returnCode:contextInfo:)
-		  contextInfo:contextInfo];
+		  contextInfo:NULL];
 }
 
-- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)aDelegate didEndSelector:(SEL)aDidEndSelector didDismissSelector:(SEL)aDidDismissSelector contextInfo:(void *)contextInfo {
+- (int)runSheetModalForWindow:(NSWindow *)window {
+	[self runSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
+}
+
+- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
 	[self prepare];
 	
 	runAppModal = YES;
-    modalDelegate = aDelegate;
-	didEndSelector = aDidEndSelector;
-	didDismissSelector = aDidDismissSelector;
+    theModalDelegate = delegate;
+	theDidEndSelector = didEndSelector;
+	theDidDismissSelector = didDismissSelector;
+    theContextInfo = contextInfo;
 	
 	[NSApp beginSheet:panel
 	   modalForWindow:window
 		modalDelegate:self
 	   didEndSelector:@selector(didEndAlert:returnCode:contextInfo:)
-		  contextInfo:contextInfo];
+		  contextInfo:NULL];
 	int returnCode = [NSApp runModalForWindow:panel];
-	
-	[NSApp endSheet:panel returnCode:returnCode];
-	[panel orderOut:self];
-	
-	if(modalDelegate != nil && didDismissSelector != NULL){
-		NSMethodSignature *signature = [modalDelegate methodSignatureForSelector:didDismissSelector];
-		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-		[invocation setSelector:didDismissSelector];
-		[invocation setArgument:&self atIndex:2];
-		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&contextInfo atIndex:4];
-		[invocation invokeWithTarget:modalDelegate];
-	}
-	
-    modalDelegate = nil;
-	didEndSelector = NULL;
-	didDismissSelector = NULL;
-	
+    [self endSheetWithReturnCode:returnCode];
 	return returnCode;
 }
 
@@ -370,28 +369,41 @@
 	if (runAppModal) {
 		[NSApp stopModalWithCode:returnCode];
 	} else {
-		[NSApp endSheet:panel returnCode:returnCode];
+        [self endSheetWithReturnCode:returnCode];
+        [self release];
 	}
 }
 
 - (void)didEndAlert:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if(modalDelegate != nil && didEndSelector != NULL){
-		NSMethodSignature *signature = [modalDelegate methodSignatureForSelector:didEndSelector];
+	if(theModalDelegate != nil && theDidEndSelector != NULL){
+		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
 		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-		[invocation setSelector:didEndSelector];
+		[invocation setSelector:theDidEndSelector];
 		[invocation setArgument:&self atIndex:2];
 		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&contextInfo atIndex:4];
-		[invocation invokeWithTarget:modalDelegate];
+		[invocation setArgument:&theContextInfo atIndex:4];
+		[invocation invokeWithTarget:theModalDelegate];
 	}
-	
-	if (runAppModal == NO) {
-		modalDelegate = nil;
-		didEndSelector = NULL;
-		
-		[sheet orderOut:self];
-		[self release];
+}
+
+- (void)endSheetWithReturnCode:(int)returnCode {
+    [NSApp endSheet:panel returnCode:returnCode];
+    [panel orderOut:self];
+    
+	if(theModalDelegate != nil && theDidDismissSelector != NULL){
+		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidDismissSelector];
+		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+		[invocation setSelector:theDidDismissSelector];
+		[invocation setArgument:&self atIndex:2];
+		[invocation setArgument:&returnCode atIndex:3];
+		[invocation setArgument:&theContextInfo atIndex:4];
+		[invocation invokeWithTarget:theModalDelegate];
 	}
+    
+    theModalDelegate = nil;
+    theDidEndSelector = NULL;
+    theDidDismissSelector = NULL;
+    theContextInfo = NULL;
 }
 
 @end

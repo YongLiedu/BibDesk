@@ -51,16 +51,20 @@
 	BOOL hasCheckButton;
 	NSSize minButtonSize;
 	BOOL runAppModal;
-    id modalDelegate;
-    SEL didEndSelector;
-    SEL didDismissSelector;
+    id theModalDelegate;
+    SEL theDidEndSelector;
+    SEL theDidDismissSelector;
+    void *theContextInfo;
 }
 
 + (BDSKAlert *)alertWithMessageText:(NSString *)messageTitle defaultButton:(NSString *)defaultButtonTitle alternateButton:(NSString *)alternateButtonTitle otherButton:(NSString *)otherButtonTitle informativeTextWithFormat:(NSString *)format, ...;
 
 - (int)runModal;
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)aDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(void *)contextInfo;
-- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)aDelegate didEndSelector:(SEL)aDidEndSelector didDismissSelector:(SEL)aDidDismissSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetModalForWindow:(NSWindow *)window;
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
+- (int)runSheetModalForWindow:(NSWindow *)window;
+- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
 
 - (void)setMessageText:(NSString *)messageText;
 - (NSString *)messageText;
