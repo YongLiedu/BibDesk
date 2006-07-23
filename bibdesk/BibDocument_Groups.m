@@ -808,7 +808,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
 - (void)addGroupFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *newGroupField = [addFieldController field];
-    if(newGroupField == nil)
+    if(returnCode == NSCancelButton || newGroupField == nil)
         return; // the user canceled
     
 	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField] || [newGroupField isEqualToString:@""]){
@@ -866,7 +866,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)removeGroupFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldGroupField = [removeFieldController field];
-    if([NSString isEmptyString:oldGroupField])
+    if(returnCode == NSCancelButton || [NSString isEmptyString:oldGroupField])
         return;
     
     NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];

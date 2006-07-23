@@ -231,7 +231,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 
 - (void)addSearchFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *newSearchKey = [addFieldController field];
-    if([NSString isEmptyString:newSearchKey])
+    if(returnCode == NSCancelButton || [NSString isEmptyString:newSearchKey])
         return;
     
     newSearchKey = [newSearchKey capitalizedString];
@@ -266,7 +266,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
 
 	NSString *oldSearchKey = [removeFieldController field];
-    if(oldSearchKey == nil || [searchKeys count] == 0)
+    if(returnCode == NSCancelButton || oldSearchKey == nil || [searchKeys count] == 0)
         return;
     
     [searchKeys removeObject:oldSearchKey];

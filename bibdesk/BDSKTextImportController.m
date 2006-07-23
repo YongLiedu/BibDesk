@@ -355,7 +355,7 @@
 	NSString *newField = [addFieldController field];
     newField = [newField capitalizedString];
     
-    if(newField == nil || [fields containsObject:newField])
+    if(returnCode == NSCancelButton || newField == nil || [fields containsObject:newField])
         return;
     
     int row = [fields count];

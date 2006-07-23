@@ -1227,7 +1227,7 @@ static int numberOfOpenEditors = 0;
 
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *newField = [addFieldController field];
-    if(newField == nil)
+    if(returnCode == NSCancelButton || newField == nil)
         return;
     
     NSArray *currentFields = [theBib allFieldNames];
@@ -1274,7 +1274,7 @@ static int numberOfOpenEditors = 0;
 - (void)removeFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [removeFieldController field];
     NSArray *removableFields = [removeFieldController fieldsArray];
-    if(oldField == nil || [removableFields count] == 0)
+    if(returnCode == NSCancelButton || oldField == nil || [removableFields count] == 0)
         return;
 	
     [theBib removeField:oldField];
