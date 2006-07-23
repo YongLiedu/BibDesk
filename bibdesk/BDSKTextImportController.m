@@ -58,8 +58,6 @@
 - (void)setupTypeUI;
 - (void)setType:(NSString *)type;
 
-- (void)sheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
@@ -164,19 +162,7 @@
 	NSParameterAssert([self window]); // make sure we loaded the nib
 	[self loadPasteboardData];
 	
-	// remember the arguments to pass in the callback later
-	theDocWindow = docWindow;
-	theModalDelegate = modalDelegate;
-	theDidEndSelector = didEndSelector;
-	theContextInfo = contextInfo;
-	
-	[self retain]; // make sure we stay around till we are done
-	
-	[NSApp beginSheet:[self window]
-	   modalForWindow:docWindow
-		modalDelegate:self
-	   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) 
-		  contextInfo:NULL];
+    [super beginSheetModalForWindow:docWindow modalDelegate:modalDelegate didEndSelector:didEndSelector contextInfo:contextInfo];
 }
 
 - (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
@@ -195,8 +181,8 @@
 	}
 	
 	// remember the arguments to pass in the callback later
-	theDocWindow = [docWindow retain];
-	theModalDelegate = [modalDelegate retain];
+	theDocWindow = docWindow;
+	theModalDelegate = modalDelegate;
 	theDidEndSelector = didEndSelector;
 	theContextInfo = contextInfo;
 	
@@ -258,7 +244,8 @@
 - (IBAction)closeAction:(id)sender{
     // make the tableview stop editing:
     [[self window] makeFirstResponder:[self window]];
-    [NSApp endSheet:[self window] returnCode:[sender tag]]; 
+    [super dismiss:sender];
+    //[NSApp endSheet:[self window] returnCode:[sender tag]]; 
 	// closing the window will be done in the callback
 }
 
@@ -355,7 +342,7 @@
 	NSString *newField = [addFieldController field];
     newField = [newField capitalizedString];
     
-    if(returnCode == NSCancelButton || newField == nil || [fields containsObject:newField])
+    if(newField == nil || [fields containsObject:newField])
         return;
     
     int row = [fields count];
@@ -613,32 +600,17 @@
 
 #pragma mark Sheet callbacks
 
-- (void)sheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)didEndSheet:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	[self retain];
+    [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
 	
-	if (theModalDelegate != nil && theDidEndSelector != NULL) {
-		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
-		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-		[invocation setSelector:theDidEndSelector];
-		[invocation setArgument:&self atIndex:2];
-		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&theContextInfo atIndex:4];
-		[invocation invokeWithTarget:theModalDelegate];
-	}
-	
-	theDocWindow = nil;
-	theModalDelegate = nil;
-	theDidEndSelector = NULL;
-	theContextInfo = NULL;
-	
-	[[self window] orderOut:self];
-	// cleanup
+    // cleanup
     [self cancelDownload];
 	[webView stopLoading:nil];
 	// select the items we just added
 	[document highlightBibs:itemsAdded];
 	[itemsAdded removeAllObjects];
-	
-	[self release]; // we are done, balance retain from beginSheet... methods
+    [self release];
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -651,16 +623,15 @@
 		if (returnCode == NSOKButton) {
 			// show the main window
 			
-			[NSApp beginSheet:[self window]
-			   modalForWindow:theDocWindow
-				modalDelegate:self
-			   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) 
-				  contextInfo:NULL];
+            [super beginSheetModalForWindow:theDocWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
+            theDocWindow = nil;
+			[self release];
 			
 		} else {
 			// the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
 			
-			[self sheetDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+			[self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+            theDocWindow = nil;
 			return;
 		}
 	}
@@ -694,23 +665,18 @@
 	if (initialWebLoad) {
 		// this is the initial web load, the main window is not yet there
 		
-		// we need to release these, as we had retained them
-		[theDocWindow autorelease];
-		[theModalDelegate autorelease];
-		
 		if (returnCode == NSOKButton) {
 			// show the main window
 			
-			[NSApp beginSheet:[self window]
-			   modalForWindow:theDocWindow
-				modalDelegate:self
-			   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) 
-				  contextInfo:NULL];
+            [super beginSheetModalForWindow:theDocWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
+			theDocWindow = nil;
+            [self release];
 			
 		} else {
 			// the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
 			
-			[self sheetDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+			[self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+            theDocWindow = nil;
 			return;
 		}
 	}

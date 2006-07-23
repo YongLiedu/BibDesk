@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSheetController.h"
 #import "BibItem.h"
 #import "BibTypeManager.h"
 #import "MacroTextFieldWindowController.h"
@@ -51,7 +52,7 @@
 @class BDSKComplexStringFormatter;
 @class BDSKCiteKeyFormatter;
 
-@interface BDSKTextImportController : NSWindowController {
+@interface BDSKTextImportController : BDSKSheetController {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* statusLine;
@@ -93,9 +94,6 @@
     int expectedContentLength;
 	
 	NSWindow *theDocWindow;
-	id theModalDelegate;
-	SEL theDidEndSelector;
-	void *theContextInfo;
 	
 	MacroTableViewWindowController *macroTextFieldWC;
     
