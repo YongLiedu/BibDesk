@@ -37,8 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSheetController.h"
 
-@interface BDSKFieldSheetController : NSWindowController
+@interface BDSKFieldSheetController : BDSKSheetController
 {
     IBOutlet NSControl *fieldsControl;
     IBOutlet NSButton *okButton;
@@ -47,9 +48,6 @@
     NSString *prompt;
     NSArray *fieldsArray;
     NSString *field;
-	BOOL runAppModal;
-    id modalDelegate;
-    SEL didEndSelector;
 }
 
 - (id)initWithPrompt:(NSString *)prompt fieldsArray:(NSArray *)fields;
@@ -60,14 +58,6 @@
 - (void)setFieldsArray:(NSArray *)array;
 - (NSString *)prompt;
 - (void)setPrompt:(NSString *)promptString;
-
-- (void)beginSheetModalForWindow:(NSWindow *)parentWindow modalDelegate:(id)aDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(void *)contextInfo;
-- (NSString *)runSheetModalForWindow:(NSWindow *)parentWindow;
-
-- (IBAction)dismiss:(id)sender;
-- (void)fixSizes;
-
-- (void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 @end
 

@@ -6,7 +6,6 @@
             SUPERCLASS = BDSKFieldSheetController; 
         }, 
         {
-            ACTIONS = {dismiss = id; }; 
             CLASS = BDSKFieldSheetController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
@@ -15,12 +14,19 @@
                 okButton = NSButton; 
                 promptField = NSTextField; 
             }; 
-            SUPERCLASS = NSWindowController; 
+            SUPERCLASS = BDSKSheetController; 
         }, 
         {
             CLASS = BDSKRemoveFieldSheetController; 
             LANGUAGE = ObjC; 
             SUPERCLASS = BDSKFieldSheetController; 
+        }, 
+        {
+            ACTIONS = {dismiss = id; }; 
+            CLASS = BDSKSheetController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {}; 
+            SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
     ); 

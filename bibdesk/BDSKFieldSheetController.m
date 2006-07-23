@@ -47,8 +47,6 @@
         field = nil;
         [self setPrompt:promptString];
         [self setFieldsArray:fields];
-        modalDelegate = nil;
-        didEndSelector = NULL;
     }
     return self;
 }
@@ -60,10 +58,40 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib{
+- (NSString *)field{
+    return field;
 }
 
-- (void)fixSizes{
+- (void)setField:(NSString *)newField{
+    if (field != newField) {
+        [field release];
+        field = [newField copy];
+    }
+}
+
+- (NSArray *)fieldsArray{
+    return fieldsArray;
+}
+
+- (void)setFieldsArray:(NSArray *)array{
+    if (fieldsArray != array) {
+        [fieldsArray release];
+        fieldsArray = [array retain];
+    }
+}
+
+- (NSString *)prompt{
+    return prompt;
+}
+
+- (void)setPrompt:(NSString *)promptString{
+    if (prompt != promptString) {
+        [prompt release];
+        prompt = [promptString retain];
+    }
+}
+
+- (void)prepare{
     NSRect fieldsFrame = [fieldsControl frame];
     NSRect oldPromptFrame = [promptField frame];
     [promptField setStringValue:(prompt)? prompt : @""];
@@ -73,104 +101,6 @@
     fieldsFrame.size.width -= dw;
     fieldsFrame.origin.x += dw;
     [fieldsControl setFrame:fieldsFrame];
-}
-
-- (NSString *)field{
-    return field;
-}
-
-- (void)setField:(NSString *)newField{
-    [field release];
-    field = [newField copy];
-}
-
-- (NSArray *)fieldsArray{
-    return fieldsArray;
-}
-
-- (void)setFieldsArray:(NSArray *)array{
-    [fieldsArray release];
-    fieldsArray = [array retain];
-}
-
-- (NSString *)prompt{
-    return prompt;
-}
-
-- (void)setPrompt:(NSString *)promptString{
-    [prompt release];
-    prompt = [promptString retain];
-    [self fixSizes];
-}
-
-- (void)beginSheetModalForWindow:(NSWindow *)parentWindow modalDelegate:(id)aDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(void *)contextInfo {
-	runAppModal = NO;
-    modalDelegate = aDelegate;
-	didEndSelector = aDidEndSelector;
-	
-	[self retain]; // make sure we stay around long enough
-	
-	[NSApp beginSheet:[self window]
-	   modalForWindow:parentWindow
-		modalDelegate:self
-	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
-		  contextInfo:contextInfo];
-}
-
-- (NSString *)runSheetModalForWindow:(NSWindow *)parentWindow{
-	runAppModal = YES;
-    
-	[NSApp beginSheet:[self window]
-	   modalForWindow:parentWindow
-		modalDelegate:self
-	   didEndSelector:NULL
-		  contextInfo:NULL];
-	int returnCode = [NSApp runModalForWindow:[self window]];
-    
-	[NSApp endSheet:[self window] returnCode:returnCode];
-	[[self window] orderOut:self];
-    
-    if(returnCode == NSOKButton){
-        NSString *newField = [self field];
-        return (newField == nil) ? @"" : [[newField copy] autorelease];
-    }else{
-        return nil;
-    }
-}
-
-- (IBAction)dismiss:(id)sender{
-	int returnCode = [sender tag];
-    if(returnCode == NSOKButton){
-        // commit edits
-        if ([[self window] makeFirstResponder:[self window]] == NO)
-            [[self window] endEditingFor:nil];
-    }
-	if (runAppModal) {
-		[NSApp stopModalWithCode:returnCode];
-	} else {
-		[NSApp endSheet:[self window] returnCode:returnCode];
-	}
-}
-
-- (void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if(modalDelegate != nil && didEndSelector != NULL){
-		NSMethodSignature *signature = [modalDelegate methodSignatureForSelector:didEndSelector];
-        NSAssert2(nil != signature, @"%@ does not implement %@", modalDelegate, NSStringFromSelector(didEndSelector));
-		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-		[invocation setSelector:didEndSelector];
-		[invocation setArgument:&self atIndex:2];
-		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&contextInfo atIndex:4];
-		[invocation invokeWithTarget:modalDelegate];
-	}
-	
-	if (runAppModal == NO) {
-		modalDelegate = nil;
-		didEndSelector = NULL;
-		
-		[sheet orderOut:self];
-		[self release];
-	}
 }
 
 @end

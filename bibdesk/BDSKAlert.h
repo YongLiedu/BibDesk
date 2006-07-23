@@ -37,10 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSheetController.h"
 
 
-@interface BDSKAlert : NSObject {
-	IBOutlet NSPanel *panel;
+@interface BDSKAlert : BDSKSheetController {
 	IBOutlet NSTextField *informationField;
 	IBOutlet NSTextField *messageField;
 	IBOutlet NSButton *checkButton;
@@ -50,21 +50,9 @@
     int alertStyle;
 	BOOL hasCheckButton;
 	NSSize minButtonSize;
-	BOOL runAppModal;
-    id theModalDelegate;
-    SEL theDidEndSelector;
-    SEL theDidDismissSelector;
-    void *theContextInfo;
 }
 
 + (BDSKAlert *)alertWithMessageText:(NSString *)messageTitle defaultButton:(NSString *)defaultButtonTitle alternateButton:(NSString *)alternateButtonTitle otherButton:(NSString *)otherButtonTitle informativeTextWithFormat:(NSString *)format, ...;
-
-- (int)runModal;
-- (void)beginSheetModalForWindow:(NSWindow *)window;
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
-- (int)runSheetModalForWindow:(NSWindow *)window;
-- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo;
 
 - (void)setMessageText:(NSString *)messageText;
 - (NSString *)messageText;
@@ -87,7 +75,5 @@
 
 - (void)setAlertStyle:(NSAlertStyle)style;
 - (NSAlertStyle)alertStyle;
-
-- (NSWindow *)window;
 
 @end

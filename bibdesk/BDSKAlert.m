@@ -40,15 +40,6 @@
 #import "NSImage+Toolbox.h"
 
 
-@interface BDSKAlert (Private)
-
-- (void)prepare;
-- (void)buttonPressed:(id)sender;
-- (void)didEndAlert:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)endSheetWithReturnCode:(int)returnCode;
-
-@end
-
 @implementation BDSKAlert
 
 + (BDSKAlert *)alertWithMessageText:(NSString *)messageTitle defaultButton:(NSString *)defaultButtonTitle alternateButton:(NSString *)alternateButtonTitle otherButton:(NSString *)otherButtonTitle informativeTextWithFormat:(NSString *)format, ... {
@@ -76,19 +67,11 @@
 
 - (id)init {
     if (self = [super init]) {
-		BOOL success = [NSBundle loadNibNamed:@"BDSKAlert" owner:self];
-		if (!success) {
-			[self release];
-			return (self = nil);
-		}
 		alertStyle = NSWarningAlertStyle;
 		hasCheckButton = NO;
 		minButtonSize = NSMakeSize(90.0, 32.0);
         buttons = [[NSMutableArray alloc] initWithCapacity:3];
         unbadgedImage = [[NSImage imageNamed:@"NSApplicationIcon"] retain];
-        theModalDelegate = nil;
-        theDidEndSelector = NULL;
-        theDidDismissSelector = NULL;
     }
     return self;
 }
@@ -96,92 +79,40 @@
 - (void)dealloc {
     [buttons release];
     [unbadgedImage release];
-    [panel release];
     [super dealloc];
 }
 
-- (int)runModal {
-	[self prepare];
-	
-	runAppModal = YES;
-	
-	[panel makeKeyAndOrderFront:self];
-	int returnCode = [NSApp runModalForWindow:panel];
-	[panel orderOut:self];
-	
-	return returnCode;
-}
-
-- (void)beginSheetModalForWindow:(NSWindow *)window {
-	[self beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-}
-
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo {
-	[self beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:didEndSelector didDismissSelector:NULL contextInfo:contextInfo];
-}
-
-- (void)beginSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
-	[self prepare];
-	
-	runAppModal = NO;
-    theModalDelegate = delegate;
-	theDidEndSelector = didEndSelector;
-	theDidDismissSelector = didDismissSelector;
-    theContextInfo = contextInfo;
-	
-	[self retain]; // make sure we stay around long enough
-	
-	[NSApp beginSheet:panel
-	   modalForWindow:window
-		modalDelegate:self
-	   didEndSelector:@selector(didEndAlert:returnCode:contextInfo:)
-		  contextInfo:NULL];
-}
-
-- (int)runSheetModalForWindow:(NSWindow *)window {
-	return [self runSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:NULL];
-}
-
-- (int)runSheetModalForWindow:(NSWindow *)window modalDelegate:(id)delegate didEndSelector:(SEL)didEndSelector didDismissSelector:(SEL)didDismissSelector contextInfo:(void *)contextInfo {
-	[self prepare];
-	
-	runAppModal = YES;
-    theModalDelegate = delegate;
-	theDidEndSelector = didEndSelector;
-	theDidDismissSelector = didDismissSelector;
-    theContextInfo = contextInfo;
-	
-	[NSApp beginSheet:panel
-	   modalForWindow:window
-		modalDelegate:self
-	   didEndSelector:@selector(didEndAlert:returnCode:contextInfo:)
-		  contextInfo:NULL];
-	int returnCode = [NSApp runModalForWindow:panel];
-    [self endSheetWithReturnCode:returnCode];
-	return returnCode;
+- (NSString *)windowNibName {
+    return @"BDSKAlert";
 }
 
 - (void)setMessageText:(NSString *)messageText {
+    [self window]; // force the nib to be loaded
 	[messageField setStringValue:messageText];
 }
 
 - (NSString *)messageText {
+    [self window]; // force the nib to be loaded
 	return [messageField stringValue];
 }
 
 - (void)setInformativeText:(NSString *)informativeText {
+    [self window]; // force the nib to be loaded
 	[informationField setStringValue:informativeText];
 }
 
 - (NSString *)informativeText {
+    [self window]; // force the nib to be loaded
 	return [informationField stringValue];
 }
 
 - (void)setCheckText:(NSString *)checkText {
+    [self window]; // force the nib to be loaded
 	[checkButton setTitle:checkText];
 }
 
 - (NSString *)checkText {
+    [self window]; // force the nib to be loaded
 	return [checkButton title];
 }
 
@@ -203,19 +134,17 @@
 }
 
 - (void)setCheckValue:(BOOL)flag {
+    [self window]; // force the nib to be loaded
 	[checkButton setState:flag ? NSOnState : NSOffState];
 }
 
 - (BOOL)checkValue {
+    [self window]; // force the nib to be loaded
 	return ([checkButton state] == NSOnState);
 }
 
 - (NSImage *)icon {
 	return unbadgedImage;
-}
-
-- (NSWindow *)window {
-	return panel;
 }
 
 - (void)setAlertStyle:(NSAlertStyle)style {
@@ -235,7 +164,7 @@
 	[button setTitle:aTitle];
 	[button setTag:NSAlertFirstButtonReturn + numButtons];
 	[button setTarget:self];
-	[button setAction:@selector(buttonPressed:)];
+	[button setAction:@selector(dismiss:)];
     
     // buttons created in code use the wrong font
     id cell = [button cell];
@@ -254,12 +183,12 @@
 	if (NSWidth(buttonRect) < minButtonSize.width) 
 		buttonRect.size.width = minButtonSize.width;
 	if (numButtons == 0)
-		buttonRect.origin.x = NSMaxX([[panel contentView] bounds]) - NSWidth(buttonRect) - 14.0;
+		buttonRect.origin.x = NSMaxX([[[self window] contentView] bounds]) - NSWidth(buttonRect) - 14.0;
 	else
 		buttonRect.origin.x = NSMinX([[buttons lastObject] frame]) - NSWidth(buttonRect);
 	[button setFrame:buttonRect];
 	[button setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin];
-	[[panel contentView] addSubview:button];
+	[[[self window] contentView] addSubview:button];
 	[buttons addObject:button];
 	[button release];
 	return button;
@@ -270,12 +199,9 @@
 }
 
 - (NSButton *)checkButton {
+    [self window]; // force the nib to be loaded
 	return checkButton;
 }
-
-@end
-
-@implementation BDSKAlert (Private)
 
 - (void)prepare {
 	NSString *title;
@@ -296,10 +222,10 @@
 		default:
 			title = NSLocalizedString(@"Alert", @"Alert");
 	}
-	[panel setTitle: title];
+	[[self window] setTitle: title];
 	
     // see if we should resize the message text
-    NSRect frame = [panel frame];
+    NSRect frame = [[self window] frame];
     NSRect infoRect = [informationField frame];
     
     NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithAttributedString:[informationField attributedStringValue]] autorelease];
@@ -321,13 +247,13 @@
         infoRect.size.height += extraHeight;
         infoRect.origin.y -= extraHeight;
         [informationField setFrame:infoRect];
-		[panel setFrame:frame display:NO];
+		[[self window] setFrame:frame display:NO];
     }
     
 	if (hasCheckButton == NO) {
 		frame.size.height -= 22.0;
 		[checkButton removeFromSuperview];
-		[panel setFrame:frame display:NO];
+		[[self window] setFrame:frame display:NO];
 	}
 	
 	if (numButtons == 0)
@@ -362,48 +288,6 @@
 	}
 	
 	[imageView setImage:image];
-}
-
-- (void)buttonPressed:(id)sender {
-	int returnCode = [sender tag];
-	if (runAppModal) {
-		[NSApp stopModalWithCode:returnCode];
-	} else {
-        [self endSheetWithReturnCode:returnCode];
-        [self release];
-	}
-}
-
-- (void)didEndAlert:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if(theModalDelegate != nil && theDidEndSelector != NULL){
-		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
-		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-		[invocation setSelector:theDidEndSelector];
-		[invocation setArgument:&self atIndex:2];
-		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&theContextInfo atIndex:4];
-		[invocation invokeWithTarget:theModalDelegate];
-	}
-}
-
-- (void)endSheetWithReturnCode:(int)returnCode {
-    [NSApp endSheet:panel returnCode:returnCode];
-    [panel orderOut:self];
-    
-	if(theModalDelegate != nil && theDidDismissSelector != NULL){
-		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidDismissSelector];
-		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-		[invocation setSelector:theDidDismissSelector];
-		[invocation setArgument:&self atIndex:2];
-		[invocation setArgument:&returnCode atIndex:3];
-		[invocation setArgument:&theContextInfo atIndex:4];
-		[invocation invokeWithTarget:theModalDelegate];
-	}
-    
-    theModalDelegate = nil;
-    theDidEndSelector = NULL;
-    theDidDismissSelector = NULL;
-    theContextInfo = NULL;
 }
 
 @end

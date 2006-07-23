@@ -8,9 +8,15 @@
                 imageView = NSImageView; 
                 informationField = NSTextField; 
                 messageField = NSTextField; 
-                panel = NSPanel; 
             }; 
-            SUPERCLASS = NSObject; 
+            SUPERCLASS = BDSKSheetController; 
+        }, 
+        {
+            ACTIONS = {dismiss = id; }; 
+            CLASS = BDSKSheetController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {}; 
+            SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
     ); 
