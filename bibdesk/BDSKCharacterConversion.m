@@ -142,7 +142,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
                                            alternateButton:nil
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@"")];
-        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        [alert beginSheetModalForWindow:[self window]];
 		[listButton selectItemAtIndex:[listButton indexOfItemWithTag:[self listType]]];
 		return;
 	}
@@ -208,7 +208,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
                                            alternateButton:nil
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@"")];
-        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        [alert beginSheetModalForWindow:[self window]];
 		return;
 	}
 	

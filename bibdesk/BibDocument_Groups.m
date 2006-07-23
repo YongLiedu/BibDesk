@@ -1187,11 +1187,7 @@ The groupedPublications array is a subset of the publications array, developed b
 											   alternateButton:NSLocalizedString(@"Set", @"Set")
 												   otherButton:otherButton
 									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
-			rv = [alert runSheetModalForWindow:documentWindow
-								 modalDelegate:nil
-								didEndSelector:NULL 
-							didDismissSelector:NULL 
-								   contextInfo:NULL];
+			rv = [alert runSheetModalForWindow:documentWindow];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub addToGroup:group handleInherited:handleInherited];
@@ -1248,11 +1244,7 @@ The groupedPublications array is a subset of the publications array, developed b
 												   alternateButton:nil
 													   otherButton:NSLocalizedString(@"Remove", @"Remove")
 										 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
-				rv = [alert runSheetModalForWindow:documentWindow
-									 modalDelegate:nil
-									didEndSelector:NULL 
-								didDismissSelector:NULL 
-									   contextInfo:NULL];
+				rv = [alert runSheetModalForWindow:documentWindow];
 				handleInherited = rv;
 				if(handleInherited != BDSKOperationIgnore){
 					[pub removeFromGroup:group handleInherited:handleInherited];
@@ -1299,11 +1291,7 @@ The groupedPublications array is a subset of the publications array, developed b
 											   alternateButton:nil
 												   otherButton:NSLocalizedString(@"Remove", @"Remove")
 									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
-			rv = [alert runSheetModalForWindow:documentWindow
-								 modalDelegate:nil
-								didEndSelector:NULL 
-							didDismissSelector:NULL 
-								   contextInfo:NULL];
+			rv = [alert runSheetModalForWindow:documentWindow];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];

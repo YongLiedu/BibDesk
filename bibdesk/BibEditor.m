@@ -1418,7 +1418,7 @@ static int numberOfOpenEditors = 0;
                                                    otherButton:nil
                                      informativeTextWithFormat:message];
             
-            int rv = [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
+            int rv = [alert runSheetModalForWindow:[self window]];
 			
 			if (forceEndEditing || rv == NSAlertAlternateReturn) {
 				[cell setStringValue:[theBib valueOfField:[cell title]]];
@@ -1436,7 +1436,7 @@ static int numberOfOpenEditors = 0;
                                                    otherButton:nil
                                      informativeTextWithFormat:@"%@", error];
             
-            [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
+            [alert runSheetModalForWindow:[self window]];
             if(forceEndEditing)
                 [control setStringValue:[theBib citeKey]];
 		}else{
@@ -1477,7 +1477,7 @@ static int numberOfOpenEditors = 0;
                                                        otherButton:nil
                                          informativeTextWithFormat:message];
                 
-                [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
+                [alert runSheetModalForWindow:[self window]];
 				[cell setStringValue:@""];
 				return NO;
 			}
@@ -1505,7 +1505,7 @@ static int numberOfOpenEditors = 0;
                                                    otherButton:nil
                                      informativeTextWithFormat:message];
             
-            int rv = [alert runSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL didDismissSelector:NULL contextInfo:nil];
+            int rv = [alert runSheetModalForWindow:[self window]];
 			
 			if (forceEndEditing || rv == NSAlertAlternateReturn) {
 				return YES;

@@ -1027,11 +1027,7 @@ enum {
 										   alternateButton:NSLocalizedString(@"Don't Move", @"Don't Move")
 											   otherButton:nil
 								 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked files to the new location?", @"")];
-		int rv = [alert runSheetModalForWindow:[self window]
-								 modalDelegate:nil
-								didEndSelector:NULL 
-							didDismissSelector:NULL 
-								   contextInfo:NULL];
+		int rv = [alert runSheetModalForWindow:[self window]];
 		shouldMove = (rv == NSAlertDefaultReturn) ? NSOnState : NSOffState;
 	}
 	

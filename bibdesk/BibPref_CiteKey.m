@@ -244,11 +244,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to Default Cite Key Format") 
 										   otherButton:otherButton
 							 informativeTextWithFormat:@"%@", error];
-	int rv = [alert runSheetModalForWindow:formatSheet
-							 modalDelegate:nil
-							didEndSelector:NULL 
-						didDismissSelector:NULL 
-							   contextInfo:NULL];
+	int rv = [alert runSheetModalForWindow:formatSheet];
 	
 	if (rv == NSAlertDefaultReturn){
 		[formatSheetField selectText:self];
