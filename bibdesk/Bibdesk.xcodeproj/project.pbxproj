@@ -259,8 +259,6 @@
 		CE59A38109BC80A100AF3935 /* BDSKPreviewTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */; };
 		CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */; };
 		CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE67E314092B569000410758 /* BibEditorDrawer.nib */; };
-		CE67E3D8092B6DF700410758 /* NSAlert_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE67E3D6092B6DF700410758 /* NSAlert_BDSKExtensions.h */; };
-		CE67E3D9092B6DF700410758 /* NSAlert_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE67E3D7092B6DF700410758 /* NSAlert_BDSKExtensions.m */; };
 		CE6DACC40A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */; };
 		CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */; };
 		CE6FB32209DFFCB5005E3E14 /* BDSKSharingBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */; };
@@ -1077,8 +1075,6 @@
 		CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewTextView.h; sourceTree = "<group>"; };
 		CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewTextView.m; sourceTree = "<group>"; };
 		CE67E315092B569000410758 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
-		CE67E3D6092B6DF700410758 /* NSAlert_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSAlert_BDSKExtensions.h; sourceTree = "<group>"; };
-		CE67E3D7092B6DF700410758 /* NSAlert_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSAlert_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAToolbarItem_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAToolbarItem_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingBrowser.h; sourceTree = "<group>"; };
@@ -1786,7 +1782,6 @@
 			isa = PBXGroup;
 			children = (
 				CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */,
-				CE67E3D7092B6DF700410758 /* NSAlert_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */,
 				F9022C9D0758038000C3F701 /* NSImage+Toolbox.m */,
@@ -2205,7 +2200,6 @@
 				2730077907CF20B500F2E485 /* MacroTextFieldWindowController.h */,
 				2730077B07CF20B500F2E485 /* MacroWindowController.h */,
 				F9A6772B07D2D57F00782ACD /* MultiplePageView.h */,
-				CE67E3D6092B6DF700410758 /* NSAlert_BDSKExtensions.h */,
 				F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */,
 				CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */,
 				F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */,
@@ -2487,7 +2481,6 @@
 				CEF942110926458C00750FFA /* BDSKPathColorTransformer.h in Headers */,
 				CEF94341092656BB00750FFA /* BDSKPathIconTransformer.h in Headers */,
 				CEF94414092668EA00750FFA /* BDSKTableSortDescriptor.h in Headers */,
-				CE67E3D8092B6DF700410758 /* NSAlert_BDSKExtensions.h in Headers */,
 				CE969E330931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h in Headers */,
 				CE2209A7093639B0004D7D92 /* BDSKAlert.h in Headers */,
 				CEEC6C54093A411E00A64F54 /* BDSKCollapsibleView.h in Headers */,
@@ -3295,7 +3288,6 @@
 				CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */,
 				CEF94342092656BB00750FFA /* BDSKPathIconTransformer.m in Sources */,
 				CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */,
-				CE67E3D9092B6DF700410758 /* NSAlert_BDSKExtensions.m in Sources */,
 				CE969E340931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m in Sources */,
 				CE2209A8093639B0004D7D92 /* BDSKAlert.m in Sources */,
 				CEEC6C55093A411E00A64F54 /* BDSKCollapsibleView.m in Sources */,
