@@ -939,16 +939,14 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)addSmartGroupAction:(id)sender {
 	BDSKFilterController *filterController = [[BDSKFilterController alloc] init];
-	[NSApp beginSheet:[filterController window]
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(addSmartGroupSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:filterController];
+    [filterController beginSheetModalForWindow:documentWindow
+                                 modalDelegate:self
+                                didEndSelector:@selector(addSmartGroupSheetDidEnd:returnCode:contextInfo:)
+                                   contextInfo:NULL];
+	[filterController release];
 }
 
-- (IBAction)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
-	BDSKFilterController *filterController = (BDSKFilterController *)contextInfo;
-	
+- (IBAction)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
         unsigned int insertIndex = NSMaxRange([self rangeOfSmartGroups]);
@@ -962,7 +960,6 @@ The groupedPublications array is a subset of the publications array, developed b
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
-	[filterController release];
 }
 
 - (IBAction)addStaticGroupAction:(id)sender {
@@ -1030,13 +1027,9 @@ The groupedPublications array is a subset of the publications array, developed b
 	if ([group isSmart]) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
-		
-		[NSApp beginSheet:[filterController window]
-		   modalForWindow:documentWindow
-			modalDelegate:nil
-		   didEndSelector:NULL
-			  contextInfo:nil];
-		[filterController release];
+        
+        [filterController beginSheetModalForWindow:documentWindow];
+        [filterController release];
 	} else if ([group isCategory]) {
         // this must be a person field
         OBASSERT([[group name] isKindOfClass:[BibAuthor class]]);

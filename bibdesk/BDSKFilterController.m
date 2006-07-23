@@ -108,39 +108,26 @@
 	[messageStartTextField sizeToFit];
 }
 
-- (IBAction)set:(id)sender {
-	NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:1];
-	NSEnumerator *cEnum = [conditionControllers objectEnumerator];
-	BDSKConditionController *controller = nil;
-	
-	if (![[self window] makeFirstResponder:[self window]])
-		[[self window] endEditingFor:nil];
-	
-	while (controller = [cEnum nextObject]) {
-		[conditions addObject:[controller condition]];
+- (IBAction)dismiss:(id)sender {
+    if ([sender tag] == NSOKButton) {
+        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:1];
+        NSEnumerator *cEnum = [conditionControllers objectEnumerator];
+        BDSKConditionController *controller = nil;
+        
+        if (![[self window] makeFirstResponder:[self window]])
+            [[self window] endEditingFor:nil];
+        
+        while (controller = [cEnum nextObject]) {
+            [conditions addObject:[controller condition]];
+        }
+        [filter setConditions:conditions];
+        [filter setConjunction:[self conjunction]];
+        
+        [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Edit smart group")];
 	}
-	[filter setConditions:conditions];
-	[filter setConjunction:[self conjunction]];
-	
-	[[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Edit smart group")];
-	
-    if ([[self window] isSheet]) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:NSWindowWillCloseNotification object:[self window]];
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:NSOKButton];
-	} else {
-		[[self window] performClose:sender];
-	}
-}
-
-- (IBAction)cancel:(id)sender {
-    if ([[self window] isSheet]) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:NSWindowWillCloseNotification object:[self window]];
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:NSCancelButton];
-	} else {
-		[[self window] performClose:sender];
-	}
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSWindowWillCloseNotification object:[self window]];
+    [super dismiss:sender];
 }
 
 - (BDSKFilter *)filter {

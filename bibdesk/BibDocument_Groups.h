@@ -109,7 +109,7 @@
 - (IBAction)renameGroupAction:(id)sender;
 - (IBAction)selectAllPublicationsGroup:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
-- (void)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)mergeInSharedGroup:(id)sender;
 - (IBAction)mergeInSharedPublications:(id)sender;

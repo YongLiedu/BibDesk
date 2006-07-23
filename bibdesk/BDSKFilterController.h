@@ -38,11 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKFilter.h"
+#import "BDSKSheetController.h"
 
 @class BDSKConditionController;
 @class BDSKConditionsView;
 
-@interface BDSKFilterController : NSWindowController {
+@interface BDSKFilterController : BDSKSheetController {
 	IBOutlet NSPopUpButton *conjunctionPopUp;
 	IBOutlet BDSKConditionsView *conditionsView;
 	IBOutlet NSTextField *messageStartTextField;
@@ -55,8 +56,6 @@
 
 - (id)initWithFilter:(BDSKFilter *)aFilter;
 - (void)updateUI;
-- (IBAction)set:(id)sender;
-- (IBAction)cancel:(id)sender;
 - (BDSKFilter *)filter;
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController;
 - (void)removeConditionController:(BDSKConditionController *)aConditionController;

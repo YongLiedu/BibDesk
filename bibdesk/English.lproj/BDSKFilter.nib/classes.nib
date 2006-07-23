@@ -2,7 +2,6 @@
     IBClasses = (
         {CLASS = BDSKConditionsView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {
-            ACTIONS = {cancel = id; set = id; }; 
             CLASS = BDSKFilterController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
@@ -12,6 +11,13 @@
                 messageStartTextField = NSTextField; 
                 ownerController = NSObjectController; 
             }; 
+            SUPERCLASS = BDSKSheetController; 
+        }, 
+        {
+            ACTIONS = {dismiss = id; }; 
+            CLASS = BDSKSheetController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {}; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
