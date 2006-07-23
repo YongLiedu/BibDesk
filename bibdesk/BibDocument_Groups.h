@@ -40,6 +40,7 @@
 
 @class BDSKSmartGroup;
 @class BDSKStaticGroup;
+@class BDSKFilterController;
 
 @interface BibDocument (Groups)
 
