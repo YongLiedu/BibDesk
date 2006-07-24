@@ -1,10 +1,17 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addKey = id; done = id; removeSelectedKeys = id; }; 
+            ACTIONS = {addKey = id; removeSelectedKeys = id; }; 
             CLASS = BDSKDocumentInfoWindowController; 
             LANGUAGE = ObjC; 
             OUTLETS = {addButton = NSButton; removeButton = NSButton; tableView = NSTableView; }; 
+            SUPERCLASS = BDSKSheetController; 
+        }, 
+        {
+            ACTIONS = {dismiss = id; }; 
+            CLASS = BDSKSheetController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {}; 
             SUPERCLASS = NSWindowController; 
         }, 
         {

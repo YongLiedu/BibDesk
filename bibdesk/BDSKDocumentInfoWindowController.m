@@ -104,23 +104,15 @@
 
 #pragma mark Showing the window
 
-- (void)beginSheetModalForWindow:(NSWindow *)modalWindow{
+- (void)prepare{
+    [self window]; // make sure the nib is loaded
     [self resetInfo];
     [tableView reloadData];
-    
-    [NSApp beginSheet:[self window] modalForWindow:modalWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
-}
-
-- (IBAction)showWindow:(id)sender{
-    [self resetInfo];
-    [tableView reloadData];
-    
-    [super showWindow:sender];
 }
 
 #pragma mark Button actions
 
-- (IBAction)done:(id)sender{
+- (IBAction)dismiss:(id)sender{
     [self finalizeChangesIgnoringEdit:[sender tag] == NSCancelButton]; // commit edit before reloading
     
     if ([sender tag] == NSOKButton) {
@@ -132,12 +124,7 @@
 		[[document undoManager] setActionName:NSLocalizedString(@"Change Document Info", @"change document info action name for undo")];
     }
     
-    if ([[self window] isSheet]) {
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:[sender tag]];
-	} else {
-		[[self window] performClose:sender];
-	}
+    [super dismiss:sender];
 }
 
 - (IBAction)addKey:(id)sender{

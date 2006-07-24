@@ -37,10 +37,11 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSheetController.h"
 
 @class BibDocument;
 
-@interface BDSKDocumentInfoWindowController : NSWindowController {
+@interface BDSKDocumentInfoWindowController : BDSKSheetController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *removeButton;
@@ -51,9 +52,7 @@
 }
 
 - (id)initWithDocument:(BibDocument *)aDocument;
-- (IBAction)done:(id)sender;
 - (IBAction)addKey:(id)sender;
 - (IBAction)removeSelectedKeys:(id)sender;
-- (void)beginSheetModalForWindow:(NSWindow *)modalWindow;
 
 @end
