@@ -245,8 +245,6 @@
     // make the tableview stop editing:
     [[self window] makeFirstResponder:[self window]];
     [super dismiss:sender];
-    //[NSApp endSheet:[self window] returnCode:[sender tag]]; 
-	// closing the window will be done in the callback
 }
 
 - (IBAction)addItemAndCloseAction:(id)sender{
@@ -1503,6 +1501,33 @@
 - (void)reloadData{
     [super reloadData];
     [typeAheadHelper rebuildTypeAheadSearchCache];
+}
+
+@end
+
+
+@implementation BDSKImportTextView
+
+- (IBAction)makePlainText:(id)sender{
+    NSString *textStorage = [self textStorage];
+    [textStorage setAttributes:nil range:NSMakeRange(0,[textStorage length])];
+}
+
+- (NSMenu *)menuForEvent:(NSEvent *)event{
+    NSMenu *menu = [super menuForEvent:event];
+    int i, count = [menu numberOfItems];
+    
+    for (i = 0; i < count; i++) {
+        if ([[menu itemAtIndex:i] action] == @selector(paste:)) {
+            [menu insertItemWithTitle:NSLocalizedString(@"Paste as Plain Text", @"Paste as plain text") action:@selector(pasteAsPlainText:) keyEquivalent:@"" atIndex:i+1];
+            break;
+        }
+    }
+    
+    [menu addItem:[NSMenuItem separatorItem]];
+    [menu addItemWithTitle:NSLocalizedString(@"Make Plain Text", @"Make plain text") action:@selector(makePlainText:) keyEquivalent:@""];
+    
+    return menu;
 }
 
 @end

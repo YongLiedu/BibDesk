@@ -136,3 +136,8 @@
     OATypeAheadSelectionHelper *typeAheadHelper;
 }
 @end
+
+@interface BDSKImportTextView : NSTextView {}
+- (IBAction)makePlainText:(id)sender;
+@end
+

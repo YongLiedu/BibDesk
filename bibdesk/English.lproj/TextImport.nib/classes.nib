@@ -3,6 +3,19 @@
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
+            ACTIONS = {makePlainText = id; }; 
+            CLASS = BDSKImportTextView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSTextView; 
+        }, 
+        {
+            ACTIONS = {dismiss = id; }; 
+            CLASS = BDSKSheetController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {}; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {
             ACTIONS = {
                 addField = id; 
                 addItemAction = id; 
@@ -29,7 +42,7 @@
             CLASS = BDSKTextImportController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                actionMenuButton = RYZImagePopUpButton; 
+                actionMenuButton = BDSKImagePopUpButton; 
                 addBookmarkSheet = NSPanel; 
                 backButton = NSButton; 
                 bookmarkField = NSTextField; 
@@ -43,14 +56,13 @@
                 splitView = NSSplitView; 
                 statusLine = NSTextField; 
                 stopOrReloadButton = NSButton; 
-                theModalDelegate = id; 
                 urlSheet = NSPanel; 
                 urlTextField = NSTextField; 
                 webView = WebView; 
                 webViewBox = BDSKEdgeView; 
                 webViewView = NSView; 
             }; 
-            SUPERCLASS = NSWindowController; 
+            SUPERCLASS = BDSKSheetController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = TextImportItemTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }
