@@ -172,48 +172,36 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark Actions
 
-- (IBAction)cancel:(id)sender {
-    [[self window] makeFirstResponder:nil]; // commit edit before reloading
-	[self revertTypes];
-    if ([[self window] isSheet]) {
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:[sender tag]];
-	} else {
-		[[self window] performClose:sender];
-	}
-}
-
-- (IBAction)saveChanges:(id)sender {
+- (IBAction)dismiss:(id)sender {
     [[self window] makeFirstResponder:nil]; // commit edit before saving
 	
-	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
-				fieldsForTypesDict, FIELDS_FOR_TYPES_KEY, 
-				[NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
+    if ([sender tag] == NSOKButton) {
+        NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
+                    fieldsForTypesDict, FIELDS_FOR_TYPES_KEY, 
+                    [NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
+        
+        NSString *error = nil;
+        NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+        NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
+                                                                  format:format 
+                                                        errorDescription:&error];
+        if (error) {
+            NSLog(@"Error writing: %@", error);
+            [error release];
+        } else {
+            NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+            NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+            [data writeToFile:typeInfoPath atomically:YES];
+        }
+        
+        [[BibTypeManager sharedManager] reloadTypeInfo];
+        
+        [self setDocumentEdited:NO];
+    } else {
+        [self revertTypes];
+    }
 	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
-															  format:format 
-													errorDescription:&error];
-	if (error) {
-		NSLog(@"Error writing: %@", error);
-        [error release];
-	} else {
-		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-		NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-		[data writeToFile:typeInfoPath atomically:YES];
-	}
-	
-	[[BibTypeManager sharedManager] reloadTypeInfo];
-	
-	[self setDocumentEdited:NO];
-	
-    if ([[self window] isSheet]) {
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:[sender tag]];
-	} else {
-		[[self window] performClose:sender];
-	}
+    [super dismiss:sender];
 }
 
 - (IBAction)addType:(id)sender {

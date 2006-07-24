@@ -37,9 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSheetController.h"
 
 
-@interface BDSKCharacterConversion : NSWindowController {
+@interface BDSKCharacterConversion : BDSKSheetController {
 	IBOutlet NSPopUpButton *listButton;
 	IBOutlet NSTableView *tableView;
 	IBOutlet NSButton *addButton;
@@ -60,8 +61,6 @@
 
 - (void)updateDicts;
 
-- (IBAction)saveChanges:(id)sender;
-- (IBAction)cancel:(id)sender;
 - (IBAction)changeList:(id)sender;
 - (IBAction)add:(id)sender;
 - (IBAction)remove:(id)sender;

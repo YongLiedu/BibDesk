@@ -1,7 +1,7 @@
 {
     IBClasses = (
         {
-            ACTIONS = {add = id; cancel = id; changeList = id; remove = id; saveChanges = id; }; 
+            ACTIONS = {add = id; changeList = id; remove = id; }; 
             CLASS = BDSKCharacterConversion; 
             LANGUAGE = ObjC; 
             OUTLETS = {
@@ -10,12 +10,19 @@
                 removeButton = NSButton; 
                 tableView = NSTableView; 
             }; 
-            SUPERCLASS = NSWindowController; 
+            SUPERCLASS = BDSKSheetController; 
         }, 
         {
             CLASS = BDSKRomanCharacterFormatter; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSFormatter; 
+        }, 
+        {
+            ACTIONS = {dismiss = id; }; 
+            CLASS = BDSKSheetController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {}; 
+            SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = BDSKTeXFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }

@@ -418,11 +418,7 @@ enum {
 
 
 - (IBAction)showTypeInfoEditor:(id)sender{
-	[NSApp beginSheet:[[BDSKTypeInfoEditor sharedTypeInfoEditor] window]
-       modalForWindow:[[self controlBox] window]
-        modalDelegate:nil
-       didEndSelector:NULL
-          contextInfo:nil];
+	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self controlBox] window]];
 }
 
 - (IBAction)RSSDescriptionFieldChanged:(id)sender{

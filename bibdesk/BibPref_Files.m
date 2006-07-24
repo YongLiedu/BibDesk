@@ -157,11 +157,7 @@
 }
 
 - (IBAction)showConversionEditor:(id)sender{
-	[NSApp beginSheet:[[BDSKCharacterConversion sharedConversionEditor] window]
-       modalForWindow:[[self controlBox] window]
-        modalDelegate:nil
-       didEndSelector:NULL
-          contextInfo:nil];
+	[[BDSKCharacterConversion sharedConversionEditor] beginSheetModalForWindow:[[self controlBox] window]];
 }
 
 - (void)conversionsAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{

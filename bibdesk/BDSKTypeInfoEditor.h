@@ -37,9 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSheetController.h"
 
 
-@interface BDSKTypeInfoEditor : NSWindowController {
+@interface BDSKTypeInfoEditor : BDSKSheetController {
 	IBOutlet NSTableView *typeTableView;
 	IBOutlet NSTableView *requiredTableView;
 	IBOutlet NSTableView *optionalTableView;
@@ -69,8 +70,6 @@
 - (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict;
 - (void)setCurrentType:(NSString *)newCurrentType;
 
-- (IBAction)cancel:(id)sender;
-- (IBAction)saveChanges:(id)sender;
 - (IBAction)addType:(id)sender;
 - (IBAction)removeType:(id)sender;
 - (IBAction)addRequired:(id)sender;

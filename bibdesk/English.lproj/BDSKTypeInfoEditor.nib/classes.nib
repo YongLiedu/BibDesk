@@ -1,17 +1,22 @@
 {
     IBClasses = (
         {
+            ACTIONS = {dismiss = id; }; 
+            CLASS = BDSKSheetController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {}; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {
             ACTIONS = {
                 addOptional = id; 
                 addRequired = id; 
                 addType = id; 
-                cancel = id; 
                 removeOptional = id; 
                 removeRequired = id; 
                 removeType = id; 
                 revertAllToDefault = id; 
                 revertCurrentToDefault = id; 
-                saveChanges = id; 
             }; 
             CLASS = BDSKTypeInfoEditor; 
             LANGUAGE = ObjC; 
@@ -28,7 +33,7 @@
                 revertCurrentToDefaultButton = NSButton; 
                 typeTableView = NSTableView; 
             }; 
-            SUPERCLASS = NSWindowController; 
+            SUPERCLASS = BDSKSheetController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSObject; LANGUAGE = ObjC; }, 

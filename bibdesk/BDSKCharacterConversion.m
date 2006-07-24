@@ -187,67 +187,55 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 #pragma mark Actions
 
-- (IBAction)cancel:(id)sender {
-    [self finalizeChangesIgnoringEdit:YES]; // commit edit before reloading
-	[self updateDicts];
-    [tableView reloadData];
-    if ([[self window] isSheet]) {
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:[sender tag]];
-	} else {
-		[[self window] performClose:sender];
-	}
-}
-
-- (IBAction)saveChanges:(id)sender {
+- (IBAction)dismiss:(id)sender {
     [self finalizeChangesIgnoringEdit:NO]; // commit edit before saving
 	
-	if (!validRoman || !validTex) {
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Conversion", @"")
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@"")];
-        [alert beginSheetModalForWindow:[self window]];
-		return;
-	}
-	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	
-	NSMutableDictionary *reverseDict = [NSMutableDictionary dictionaryWithCapacity:[twoWayDict count]];
-	NSEnumerator *rEnum = [twoWayDict keyEnumerator];
-	NSString *roman;
-	while (roman = [rEnum nextObject]) {
-		[reverseDict setObject:roman forKey:[twoWayDict objectForKey:roman]];
-	}
-	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:oneWayDict, ONE_WAY_CONVERSION_KEY, 
-																	twoWayDict, ROMAN_TO_TEX_KEY,
-																	reverseDict, TEX_TO_ROMAN_KEY, nil];
-	
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
-															  format:format 
-													errorDescription:&error];
-	if (error) {
-		NSLog(@"Error writing: %@", error);
-        [error release];
+    if ([sender tag] == NSOKButton) {
+        if (!validRoman || !validTex) {
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Conversion", @"")
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@"")];
+            [alert beginSheetModalForWindow:[self window]];
+            return;
+        }
+        
+        NSString *error = nil;
+        NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+        
+        NSMutableDictionary *reverseDict = [NSMutableDictionary dictionaryWithCapacity:[twoWayDict count]];
+        NSEnumerator *rEnum = [twoWayDict keyEnumerator];
+        NSString *roman;
+        while (roman = [rEnum nextObject]) {
+            [reverseDict setObject:roman forKey:[twoWayDict objectForKey:roman]];
+        }
+        NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:oneWayDict, ONE_WAY_CONVERSION_KEY, 
+                                                                        twoWayDict, ROMAN_TO_TEX_KEY,
+                                                                        reverseDict, TEX_TO_ROMAN_KEY, nil];
+        
+        NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
+                                                                  format:format 
+                                                        errorDescription:&error];
+        if (error) {
+            NSLog(@"Error writing: %@", error);
+            [error release];
+        } else {
+            NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+            NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
+            [data writeToFile:charConvPath atomically:YES];
+        }
+        
+        // tell the converter to reload its dictionaries
+        [[BDSKConverter sharedConverter] loadDict];
+        
+        [self setDocumentEdited:NO];
 	} else {
-		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-		NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
-		[data writeToFile:charConvPath atomically:YES];
-	}
-	
-	// tell the converter to reload its dictionaries
-	[[BDSKConverter sharedConverter] loadDict];
-	
-	[self setDocumentEdited:NO];
-	
-    if ([[self window] isSheet]) {
-		[[self window] orderOut:sender];
-		[NSApp endSheet:[self window] returnCode:[sender tag]];
-	} else {
-		[[self window] performClose:sender];
-	}
+        [self updateDicts];
+        [tableView reloadData];
+    }
+    
+    [super dismiss:sender];
 }
 
 - (IBAction)changeList:(id)sender {
