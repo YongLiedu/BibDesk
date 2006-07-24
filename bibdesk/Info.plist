@@ -670,7 +670,7 @@
 						<real>30</real>
 						<key>Title</key>
 						<real>300</real>
-						<key>Type</key>
+						<key>BibTeX Type</key>
 						<real>55</real>
 						<key>Url</key>
 						<real>23</real>
@@ -720,7 +720,7 @@
 					<array>
 						<string>Local-Url</string>
 						<string>Keywords</string>
-						<string>Type</string>
+						<string>BibTeX Type</string>
 						<string>Cite Key</string>
 						<string>Title</string>
 						<string>Date</string>
