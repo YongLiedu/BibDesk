@@ -129,15 +129,14 @@ static BibFiler *sharedFiler = nil;
 	if (numberOfPapers > 1) {
         if (progressSheet == nil)
             [NSBundle loadNibNamed:@"AutoFileProgress" owner:self];
+		[progressIndicator setMaxValue:numberOfPapers];
+		[progressIndicator setDoubleValue:0.0];
+        [progressCloseButton setEnabled:NO];
 		[NSApp beginSheet:progressSheet
 		   modalForWindow:[doc windowForSheet]
 			modalDelegate:nil
 		   didEndSelector:NULL
 			  contextInfo:nil];
-		[progressIndicator setMaxValue:numberOfPapers];
-		[progressIndicator setDoubleValue:0.0];
-        [progressCloseButton setEnabled:NO];
-		[progressIndicator displayIfNeeded];
 	}
 	
 	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillAutoFileScriptHookName];
@@ -260,7 +259,7 @@ static BibFiler *sharedFiler = nil;
 	if(numberOfPapers > 1){
 		[progressSheet orderOut:nil];
 		[NSApp endSheet:progressSheet returnCode:0];
-        // enable the close button in case the progress sheet was queued in is not attached at this point
+        // enable the close button in case the progress sheet was queued and is not attached at this point
         [progressCloseButton setEnabled:YES];
 	}
 	
@@ -380,13 +379,15 @@ static BibFiler *sharedFiler = nil;
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-	[[self mutableArrayValueForKey:@"errorInfoDicts"] removeAllObjects];
-	[tv reloadData]; // this is necessary to avoid an exception
-    [document release];
-    document = nil;
-    [fieldName release];
-    fieldName = nil;
-    options = 0;
+    if ([notification object] == window) {
+        [[self mutableArrayValueForKey:@"errorInfoDicts"] removeAllObjects];
+        [tv reloadData]; // this is necessary to avoid an exception
+        [document release];
+        document = nil;
+        [fieldName release];
+        fieldName = nil;
+        options = 0;
+    }
 }
 
 #pragma mark Accessors
