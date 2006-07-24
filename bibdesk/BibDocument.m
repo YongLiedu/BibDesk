@@ -1578,13 +1578,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (IBAction)emailPubCmd:(id)sender{
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+    NSArray *selectedPubs = [self selectedPublications];
+    NSEnumerator *e = [selectedPubs objectEnumerator];
     BibItem *pub = nil;
     
     NSFileManager *dfm = [NSFileManager defaultManager];
     NSString *pubPath = nil;
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
+    NSMutableArray *crossrefs = [NSMutableArray array];
     
     while (pub = [e nextObject]) {
         pubPath = [pub localUrlPath];
@@ -1594,6 +1596,16 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         // use the detexified version without internal fields, since TeXification introduces things that 
         // AppleScript can't deal with (OAInternetConfig may end up using AS)
+        [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
+        [body appendString:@"\n\n"];
+        
+        pub = [pub crossrefParent];
+        if (pub != nil && [selectedPubs containsObject:pub] == NO && [crossrefs containsObject:pub] == NO)
+            [crossrefs addObject:pub];
+    }
+    
+    e = [crossrefs objectEnumerator];
+    while (pub = [e nextObject]) {
         [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
         [body appendString:@"\n\n"];
     }
