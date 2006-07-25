@@ -1509,7 +1509,7 @@
 @implementation BDSKImportTextView
 
 - (IBAction)makePlainText:(id)sender{
-    NSString *textStorage = [self textStorage];
+    NSTextStorage *textStorage = [self textStorage];
     [textStorage setAttributes:nil range:NSMakeRange(0,[textStorage length])];
 }
 
