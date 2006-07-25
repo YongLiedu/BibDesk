@@ -108,6 +108,10 @@
 
 }
 
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
+    return [person name];
+}
+
 #pragma mark accessors
 
 - (NSArray *)publications{
