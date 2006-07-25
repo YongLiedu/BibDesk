@@ -938,7 +938,7 @@ static int numberOfOpenEditors = 0;
     NSString *newKey = [sender stringValue];
 	NSString *oldKey = [theBib citeKey];
 	
-   	if(![proposedCiteKey isEqualToString:oldKey]){
+   	if(![newKey isEqualToString:oldKey]){
 		[theBib setCiteKey:newKey];
 		
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
@@ -961,7 +961,7 @@ static int numberOfOpenEditors = 0;
 		BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
 		if (scriptHook) {
 			[scriptHook setField:BDSKCiteKeyString];
-			[scriptHook setOldValues:[NSArray arrayWithObject:prevCiteKey]];
+			[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
 			[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
 			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
 		}
@@ -1502,7 +1502,7 @@ static int numberOfOpenEditors = 0;
                                              defaultButton:NSLocalizedString(@"OK", @"OK")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Empty cite keys are not allowed.", @"");];
+                                 informativeTextWithFormat:NSLocalizedString(@"Empty cite keys are not allowed.", @"")];
             
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
             [control setStringValue:[theBib citeKey]];
