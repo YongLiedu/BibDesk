@@ -776,6 +776,11 @@
     return YES;
 }
 
+- (BOOL)validateChangeIntersectGroupsMenuItem:(NSMenuItem *)menuItem {
+    [menuItem setState: ((BOOL)[menuItem tag] == intersectGroups) ? NSOnState : NSOffState];
+    return YES;
+}
+
 - (BOOL)validateMergeInSharedGroupMenuItem:(NSMenuItem *)menuItem {
     return ([self hasSharedGroupsSelected]);
 }
@@ -940,6 +945,9 @@
     }
     else if (act == @selector(changePreviewDisplay:)){
         return [self validateChangePreviewDisplayMenuItem:menuItem];
+    }
+    else if (act == @selector(changeIntersectGroupsAction:)){
+        return [self validateChangeIntersectGroupsMenuItem:menuItem];
     }
     else if (act == @selector(mergeInSharedGroup:)){
         return [self validateMergeInSharedGroupMenuItem:menuItem];

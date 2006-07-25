@@ -41,6 +41,7 @@
                 alternateDelete = id; 
                 changeGroupFieldAction = id; 
                 changeGroupTableFont = id; 
+                changeIntersectGroupsAction = id; 
                 changeMainTableFont = id; 
                 changePreviewDisplay = id; 
                 clearQuickSearch = id; 

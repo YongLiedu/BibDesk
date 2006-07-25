@@ -117,6 +117,8 @@
 
 }
 
+#pragma mark Index ranges of groups
+
 - (NSRange)rangeOfSharedGroups{
     return NSMakeRange((lastImportGroup == nil) ? 1 : 2, [sharedGroups count]);
 }
@@ -575,38 +577,50 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSArray *)publicationsInCurrentGroups{
     NSArray *selectedGroups = [self selectedGroups];
-    NSArray *filteredArray;
+    NSArray *array;
     
-    // optimize for a common case
-    if ([selectedGroups containsObject:allPublicationsGroup]) {
-        filteredArray = [publications copy];
-    } else if ([self hasSharedGroupsSelected]) {
-        // shared groups should be in a single selection 
-        unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
-        BDSKSharedGroup *group = [self objectInGroupsAtIndex:rowIndex];
-        filteredArray = [[group publications] copy];
+    // optimize for single selections
+    if ([selectedGroups count] == 1) {
+        if ([selectedGroups containsObject:allPublicationsGroup]) {
+            array = publications;
+        } else if ([self hasSharedGroupsSelected] || [self hasStaticGroupsSelected]) {
+            unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
+            BDSKGroup *group = [self objectInGroupsAtIndex:rowIndex];
+            array = [(id)group publications];
+        }
     } else {
-        NSArray *array = [publications copy];
+        // multiple selections are never shared groups, so they are contained in the publications
+        array = [publications copy];
+        
         NSEnumerator *pubEnum = [array objectEnumerator];
         BibItem *pub;
         NSEnumerator *groupEnum;
         BDSKGroup *group;
+        NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[array count]];
         
-        filteredArray = [[NSMutableArray alloc] initWithCapacity:[array count]];
-        [array release];
+        // to take union, we add the items contained in a selected group
+        // to intersect, we remove the items not contained in a selected group
+        if (intersectGroups)
+            [filteredArray setArray:array];
         
         while (pub = [pubEnum nextObject]) {
             groupEnum = [selectedGroups objectEnumerator];
             while (group = [groupEnum nextObject]) {
-                if ([group containsItem:pub]) {
-                    [(NSMutableArray *)filteredArray addObject:pub];
+                if ([group containsItem:pub] == !intersectGroups) {
+                    if (intersectGroups)
+                        [filteredArray removeObject:pub];
+                    else
+                        [filteredArray addObject:pub];
                     break;
                 }
             }
         }
+        
+        [array release];
+        array = filteredArray;
     }
 	
-	return [filteredArray autorelease];
+	return array;
 }
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
@@ -763,6 +777,8 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 	return nil;
 }
+
+#pragma mark Actions
 
 - (IBAction)sortGroupsByGroup:(id)sender{
 	if ([sortGroupsKey isEqualToString:BDSKGroupCellStringKey]) return;
@@ -1041,6 +1057,14 @@ The groupedPublications array is a subset of the publications array, developed b
 	[groupTableView deselectAll:sender];
 }
 
+- (IBAction)changeIntersectGroupsAction:(id)sender {
+    BOOL flag = (BOOL)[sender tag];
+    if (intersectGroups != flag) {
+        intersectGroups = flag;
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupTableSelectionChangedNotification object:self];
+    }
+}
+
 - (IBAction)editNewGroupWithSelection:(id)sender{
     NSArray *names = [[self staticGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
@@ -1089,6 +1113,8 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     [self mergeInPublications:[self selectedPublications]];
 }
+
+#pragma mark Add or remove items
 
 - (NSArray *)mergeInPublications:(NSArray *)items{
     // first construct a set of current items to compare based on BibItem equality callbacks
@@ -1284,6 +1310,8 @@ The groupedPublications array is a subset of the publications array, developed b
     return YES;
 }
 
+#pragma mark Sorting
+
 - (void)sortGroupsByKey:(NSString *)key{
     if (key == nil) {
         // clicked the sort arrow in the table header, change sort order
@@ -1371,6 +1399,8 @@ The groupedPublications array is a subset of the publications array, developed b
     // reset ourself as delegate
     [groupTableView setDelegate:self];
 }
+
+#pragma mark Serializing
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data {
 	NSString *error = nil;
