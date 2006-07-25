@@ -47,15 +47,9 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    if([NSString isEmptyString:string]){
-        if(error) *error = NSLocalizedString(@"Empty cite keys are not allowed.", @"");
-        return NO;
-    }
-    *obj = string; // ? retain?
+    *obj = string;
     return YES;
 }
-
-// also add checking if it's been typed in the doc before...
 
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
