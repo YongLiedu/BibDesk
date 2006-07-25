@@ -329,25 +329,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	return [array autorelease];
 }
 
-- (NSArray *)selectedSharedPublications
-{
-    NSMutableArray *array = [NSMutableArray array];
-    BDSKGroup *group;
-    
-    NSIndexSet *rowIndexes = [groupTableView selectedRowIndexes];
-    unsigned int rowIndex = [rowIndexes firstIndex];
-	
-	while(rowIndexes != nil && rowIndex != NSNotFound){
-        group = [self objectInGroupsAtIndex:rowIndex];
-        if([sharedGroups containsObjectIdenticalTo:group]){
-            [array addObjectsFromArray:[(BDSKSharedGroup *)group publications]];
-        }
-        rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
-	}
-    
-    return array;
-}
-
 #pragma mark Notification handlers
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
@@ -594,11 +575,16 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSArray *)publicationsInCurrentGroups{
     NSArray *selectedGroups = [self selectedGroups];
-    NSMutableArray *filteredArray;
+    NSArray *filteredArray;
     
     // optimize for a common case
     if ([selectedGroups containsObject:allPublicationsGroup]) {
         filteredArray = [publications copy];
+    } else if ([self hasSharedGroupsSelected]) {
+        // shared groups should be in a single selection 
+        unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
+        BDSKSharedGroup *group = [self objectInGroupsAtIndex:rowIndex];
+        filteredArray = [[group publications] copy];
     } else {
         NSArray *array = [publications copy];
         NSEnumerator *pubEnum = [array objectEnumerator];
@@ -613,13 +599,12 @@ The groupedPublications array is a subset of the publications array, developed b
             groupEnum = [selectedGroups objectEnumerator];
             while (group = [groupEnum nextObject]) {
                 if ([group containsItem:pub]) {
-                    [filteredArray addObject:pub];
+                    [(NSMutableArray *)filteredArray addObject:pub];
                     break;
                 }
             }
         }
     }
-    [filteredArray addObjectsFromArray:[self selectedSharedPublications]];
 	
 	return [filteredArray autorelease];
 }
@@ -1093,7 +1078,8 @@ The groupedPublications array is a subset of the publications array, developed b
         NSBeep();
         return;
     }
-    [self mergeInPublications:[self selectedSharedPublications]];
+    // we should have a single shared group selected
+    [self mergeInPublications:[self publicationsInCurrentGroups]];
 }
 
 - (IBAction)mergeInSharedPublications:(id)sender{

@@ -76,7 +76,6 @@
 - (NSMutableArray *)staticGroups;
 
 - (NSArray *)selectedGroups;
-- (NSArray *)selectedSharedPublications;
 - (void)updateGroupsPreservingSelection:(BOOL)preserve;
 - (void)displaySelectedGroups;
 - (void)selectGroup:(BDSKGroup *)aGroup;
