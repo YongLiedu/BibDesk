@@ -478,7 +478,7 @@
 - (void)refreshCachedDate:(NSTimer *)timer {
     NSCalendarDate *startDate = nil;
     NSCalendarDate *endDate = nil;
-    BOOL changed;
+    BOOL changed = NO;
     
 	[self getStartDate:&startDate endDate:&endDate];
     if (startDate != nil && [cachedStartDate compare:startDate] != NSOrderedSame) {
