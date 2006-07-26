@@ -580,14 +580,12 @@ The groupedPublications array is a subset of the publications array, developed b
     NSArray *array;
     
     // optimize for single selections
-    if ([selectedGroups count] == 1) {
-        if ([selectedGroups containsObject:allPublicationsGroup]) {
-            array = publications;
-        } else if ([self hasSharedGroupsSelected] || [self hasStaticGroupsSelected]) {
-            unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
-            BDSKGroup *group = [self objectInGroupsAtIndex:rowIndex];
-            array = [(id)group publications];
-        }
+    if ([selectedGroups count] == 1 && [selectedGroups containsObject:allPublicationsGroup]) {
+        array = publications;
+    } else if ([selectedGroups count] == 1 && ([self hasSharedGroupsSelected] || [self hasStaticGroupsSelected])) {
+        unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
+        BDSKGroup *group = [self objectInGroupsAtIndex:rowIndex];
+        array = [(id)group publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
         array = [publications copy];
