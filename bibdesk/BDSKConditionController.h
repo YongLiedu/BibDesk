@@ -45,7 +45,16 @@
 @interface BDSKConditionController : NSObject {
 	IBOutlet NSComboBox *keyComboBox;
 	IBOutlet NSPopUpButton *comparisonPopUp;
+    IBOutlet NSPopUpButton *dateComparisonPopUp;
 	IBOutlet NSTextField *valueTextField;
+    IBOutlet NSTextField *numberTextField;
+    IBOutlet NSTextField *andNumberTextField;
+    IBOutlet NSTextField *dateTextField;
+    IBOutlet NSTextField *toDateTextField;
+    IBOutlet NSTextField *agoText;
+    IBOutlet NSPopUpButton *periodPopUp;
+    IBOutlet NSBox *comparisonBox;
+    IBOutlet NSBox *valueBox;
 	IBOutlet NSView *view;
 	IBOutlet NSButton *addButton;
 	IBOutlet NSButton *removeButton;
@@ -66,5 +75,7 @@
 - (void)setCanRemove:(BOOL)flag;
 - (NSArray *)keys;
 - (void)setKeys:(NSArray *)newKeys;
+- (void)layoutValueControls;
+- (void)layoutComparisonControls;
 
 @end

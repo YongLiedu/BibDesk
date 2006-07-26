@@ -84,13 +84,36 @@
     [view release];
     view  = nil;
 	[ownerController release];
+    [[dateComparisonPopUp superview] release];
+    [[comparisonPopUp superview] release];
+    [[valueTextField superview] release];
+    [[numberTextField superview] release];
+    [[andNumberTextField superview] release];
+    [[periodPopUp superview] release];
+    [[agoText superview] release];
+    [[dateTextField superview] release];
+    [[toDateTextField superview] release];
     [super dealloc];
 }
 
 - (void)awakeFromNib {
+    // we add/remove these controls, so we need to retain them
+    [[dateComparisonPopUp superview] retain];
+    [[comparisonPopUp superview] retain];
+    [[valueTextField superview] retain];
+    [[numberTextField superview] retain];
+    [[andNumberTextField superview] retain];
+    [[periodPopUp superview] retain];
+    [[agoText superview] retain];
+    [[dateTextField superview] retain];
+    [[toDateTextField superview] retain];
+    
 	[ownerController setContent:self]; // fix for binding-to-nib-owner bug
 	
 	[keyComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+    
+    [self layoutComparisonControls];
+    [self layoutValueControls];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(windowWillClose:)
@@ -98,14 +121,13 @@
 											   object:[filterController window]];
     
     [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
-    if([condition isDateCondition])
-        [valueTextField setFormatter:[BDSKDateStringFormatter shortDateNaturalLanguageFormatter]];
-    
+    [condition addObserver:self forKeyPath:@"dateComparison" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
 	[ownerController setContent:nil]; // fix for binding-to-nib-owner bug
     [condition removeObserver:self forKeyPath:@"key"];
+    [condition removeObserver:self forKeyPath:@"dateComparison"];
 }
 
 - (NSView *)view {
@@ -120,6 +142,7 @@
 	if (![self canRemove]) return;
 	[ownerController setContent:nil]; // fix for binding-to-nib-owner bug
     [condition removeObserver:self forKeyPath:@"key"];
+    [condition removeObserver:self forKeyPath:@"dateComparison"];
 	[filterController removeConditionController:self];
 }
 
@@ -146,14 +169,77 @@
     }
 }
 
+- (void)layoutValueControls {
+    NSArray *controls = nil;
+    if ([condition isDateCondition]) {
+        switch ([condition dateComparison]) {
+            case BDSKExactly: 
+                controls = [NSArray arrayWithObjects:numberTextField, periodPopUp, agoText, nil];
+                break;
+            case BDSKInLast: 
+            case BDSKNotInLast: 
+                controls = [NSArray arrayWithObjects:numberTextField, periodPopUp, nil];
+                break;
+            case BDSKBetween: 
+                controls = [NSArray arrayWithObjects:numberTextField, andNumberTextField, periodPopUp, agoText, nil];
+                break;
+            case BDSKDate: 
+            case BDSKAfterDate: 
+            case BDSKBeforeDate: 
+                controls = [NSArray arrayWithObjects:dateTextField, nil];
+                break;
+            case BDSKInDateRange:
+                controls = [NSArray arrayWithObjects:dateTextField, toDateTextField, nil];
+                break;
+            default:
+                break;
+        }
+    } else {
+        controls = [NSArray arrayWithObjects:valueTextField, nil];
+    }
+    
+    NSRect rect = NSZeroRect;
+    NSEnumerator *viewEnum = [[[valueBox contentView] subviews] objectEnumerator];
+    NSView *aView;
+    
+    while (aView = [viewEnum nextObject]) 
+        [aView removeFromSuperview];
+    
+    viewEnum = [controls objectEnumerator];
+    while (aView = [viewEnum nextObject]) {
+        aView = [aView superview];
+        rect.size = [aView frame].size;
+        [aView setFrameOrigin:rect.origin];
+        [valueBox addSubview:aView];
+        rect.origin.x += NSWidth(rect);
+    }
+}
+
+- (void)layoutComparisonControls {
+    [[[[comparisonBox contentView] subviews] lastObject] removeFromSuperview];
+    if ([condition isDateCondition]) {
+        [[dateComparisonPopUp superview] setFrameOrigin:NSZeroPoint];
+        [comparisonBox addSubview:[dateComparisonPopUp superview]];
+    } else {
+        [[comparisonPopUp superview] setFrameOrigin:NSZeroPoint];
+        [comparisonBox addSubview:[comparisonPopUp superview]];
+        [self layoutValueControls];
+    }
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     OBASSERT(object == condition);
-    if(object == condition && [keyPath isEqualToString:@"key"]){
-        NSString *key = [change objectForKey:NSKeyValueChangeNewKey];
-        if([key isEqualToString:BDSKDateModifiedString] || [key isEqualToString:BDSKDateAddedString]){
-            [valueTextField setFormatter:[BDSKDateStringFormatter shortDateNaturalLanguageFormatter]];
-        } else {
-            [valueTextField setFormatter:nil];
+    if(object == condition) {
+        if ([keyPath isEqualToString:@"key"]){
+            NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
+            NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
+            BOOL wasDate = ([oldKey isEqualToString:BDSKDateModifiedString] || [oldKey isEqualToString:BDSKDateAddedString]);
+            BOOL isDate = ([newKey isEqualToString:BDSKDateModifiedString] || [newKey isEqualToString:BDSKDateAddedString]);
+            if(wasDate != isDate){
+                [self layoutComparisonControls];
+            }
+        } else if ([keyPath isEqualToString:@"dateComparison"]) {
+            [self layoutValueControls];
         }
     }
 }

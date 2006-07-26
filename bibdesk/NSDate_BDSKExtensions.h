@@ -39,6 +39,13 @@
 #import <Cocoa/Cocoa.h>
 
 
+enum {
+    BDSKPeriodDay,
+    BDSKPeriodWeek,
+    BDSKPeriodMonth,
+    BDSKPeriodYear
+};
+
 @interface NSDate (BDSKExtensions)
 
 /*!
@@ -60,5 +67,17 @@
 - (NSString *)dateDescription;
 - (NSString *)shortDateDescription;
 - (NSString *)rssDescription;
+
+- (NSCalendarDate *)startOfDay;
+- (NSCalendarDate *)endOfDay;
+- (NSCalendarDate *)startOfWeek;
+- (NSCalendarDate *)endOfWeek;
+- (NSCalendarDate *)startOfMonth;
+- (NSCalendarDate *)endOfMonth;
+- (NSCalendarDate *)startOfYear;
+- (NSCalendarDate *)endOfYear;
+- (NSCalendarDate *)startOfPeriod:(int)period;
+- (NSCalendarDate *)endOfPeriod:(int)period;
+- (NSCalendarDate *)dateByAddingNumber:(int)number ofPeriod:(int)period;
 
 @end

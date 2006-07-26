@@ -40,7 +40,7 @@
 
 @class BibItem;
 
-// this should correspond to the order of the items in the popup
+// this should correspond to the tags of the items in the popup
 typedef enum {
 	BDSKGroupContain = 0,
 	BDSKGroupNotContain,
@@ -54,11 +54,34 @@ typedef enum {
 	BDSKLarger
 } BDSKComparison;
 
+// this should correspond to the tags of the items in the popup
+typedef enum {
+    BDSKToday = 0, 
+    BDSKYesterday, 
+    BDSKThisWeek, 
+    BDSKLastWeek, 
+    BDSKExactly, 
+    BDSKInLast, 
+    BDSKNotInLast, 
+    BDSKBetween, 
+    BDSKDate, 
+    BDSKAfterDate, 
+    BDSKBeforeDate, 
+    BDSKInDateRange
+} BDSKDateComparison;
+
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
 	NSString *value;
-	BDSKComparison comparison;
-	NSDate *cachedDate;
+	BDSKComparison valueComparison;
+	BDSKDateComparison dateComparison;
+    int numberValue;
+    int andNumberValue;
+    int periodValue;
+    NSCalendarDate *dateValue;
+    NSCalendarDate *toDateValue;
+	NSDate *cachedStartDate;
+	NSDate *cachedEndDate;
 	NSTimer *cacheTimer;
 }
 
@@ -67,12 +90,35 @@ typedef enum {
 - (NSDictionary *)dictionaryValue;
 
 - (BOOL)isSatisfiedByItem:(BibItem *)item;
+
 - (NSString *)key;
 - (void)setKey:(NSString *)newKey;
+
 - (NSString *)value;
 - (void)setValue:(NSString *)newValue;
-- (BDSKComparison)comparison;
-- (void)setComparison:(BDSKComparison)newComparison;
+
+- (int)comparison;
+- (void)setComparison:(int)newComparison;
+
+- (BDSKComparison)valueComparison;
+- (void)setValueComparison:(BDSKComparison)newComparison;
+
+- (BDSKDateComparison)dateComparison;
+- (void)setDateComparison:(BDSKDateComparison)newComparison;
+
+- (int)numberValue;
+- (void)setNumberValue:(int)value;
+- (int)andNumberValue;
+- (void)setAndNumberValue:(int)value;
+- (int)periodValue;
+- (void)setPeriodValue:(int)value;
+- (NSCalendarDate *)dateValue;
+- (void)setDateValue:(NSCalendarDate *)value;
+- (NSCalendarDate *)toDateValue;
+- (void)setToDateValue:(NSCalendarDate *)value;
+
+- (void)setDefaultValue;
+
 - (BOOL)isDateCondition;
 
 @end

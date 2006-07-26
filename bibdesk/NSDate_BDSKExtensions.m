@@ -322,4 +322,98 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     return [self descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %z"];
 }
 
+- (NSCalendarDate *)startOfDay;
+{
+    NSCalendarDate *startDay = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:[self monthOfYear] day:[self dayOfMonth] hour:0 minute:0 second:0 timeZone:[self timeZone]];
+    return [startDay autorelease];
+}
+
+- (NSCalendarDate *)endOfDay;
+{
+    return [[self startOfDay] dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:-1];
+}
+
+- (NSCalendarDate *)startOfWeek;
+{
+    NSCalendarDate *startDay = [self startOfDay];
+    return [startDay dateByAddingYears:0 months:0 days:-[startDay dayOfWeek] hours:0 minutes:0 seconds:0];
+}
+
+- (NSCalendarDate *)endOfWeek;
+{
+    return [[self startOfWeek] dateByAddingYears:0 months:0 days:7 hours:0 minutes:0 seconds:-1];
+}
+
+- (NSCalendarDate *)startOfMonth;
+{
+    NSCalendarDate *startDay = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:[self monthOfYear] day:1 hour:0 minute:0 second:0 timeZone:[self timeZone]];
+    return [startDay autorelease];
+}
+
+- (NSCalendarDate *)endOfMonth;
+{
+    return [[self startOfMonth] dateByAddingYears:0 months:1 days:0 hours:0 minutes:0 seconds:-1];
+}
+
+- (NSCalendarDate *)startOfYear;
+{
+    NSCalendarDate *startDay = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:1 day:1 hour:0 minute:0 second:0 timeZone:[self timeZone]];
+    return [startDay autorelease];
+}
+
+- (NSCalendarDate *)endOfYear;
+{
+    return [[self startOfMonth] dateByAddingYears:1 months:0 days:0 hours:0 minutes:0 seconds:-1];
+}
+
+- (NSCalendarDate *)startOfPeriod:(int)period;
+{
+    switch (period) {
+        case BDSKPeriodDay:
+            return [self startOfDay];
+        case BDSKPeriodWeek:
+            return [self startOfWeek];
+        case BDSKPeriodMonth:
+            return [self startOfMonth];
+        case BDSKPeriodYear:
+            return [self startOfYear];
+        default:
+            NSLog(@"Unknown period %d",period);
+            return self;
+    }
+}
+
+- (NSCalendarDate *)endOfPeriod:(int)period;
+{
+    switch (period) {
+        case BDSKPeriodDay:
+            return [self endOfDay];
+        case BDSKPeriodWeek:
+            return [self endOfWeek];
+        case BDSKPeriodMonth:
+            return [self endOfMonth];
+        case BDSKPeriodYear:
+            return [self endOfYear];
+        default:
+            NSLog(@"Unknown period %d",period);
+            return self;
+    }
+}
+
+- (NSCalendarDate *)dateByAddingNumber:(int)number ofPeriod:(int)period {
+    switch (period) {
+        case BDSKPeriodDay:
+            return [self dateByAddingYears:0 months:0 days:number hours:0 minutes:0 seconds:0];
+        case BDSKPeriodWeek:
+            return [self dateByAddingYears:0 months:0 days:7 * number hours:0 minutes:0 seconds:0];
+        case BDSKPeriodMonth:
+            return [self dateByAddingYears:0 months:number days:0 hours:0 minutes:0 seconds:0];
+        case BDSKPeriodYear:
+            return [self dateByAddingYears:number months:0 days:0 hours:0 minutes:0 seconds:0];
+        default:
+            NSLog(@"Unknown period %d",period);
+            return self;
+    }
+}
+
 @end
