@@ -115,7 +115,7 @@
 		[self setComparison:[decoder decodeIntForKey:@"comparison"]];
 		[self setValue:[decoder decodeObjectForKey:@"value"]];
 		OBASSERT(key != nil);
-		OBASSERT(value != nil);
+		OBASSERT([self value] != nil);
 		cachedStartDate = nil;
 		cachedEndDate = nil;
 		cacheTimer = nil;
@@ -125,8 +125,8 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-	[coder encodeObject:key forKey:@"key"];
-	[coder encodeObject:value forKey:@"value"];
+	[coder encodeObject:[self key] forKey:@"key"];
+	[coder encodeObject:[self value] forKey:@"value"];
 	[coder encodeInt:[self comparison] forKey:@"comparison"];
 }
 
@@ -144,14 +144,14 @@
 - (id)copyWithZone:(NSZone *)aZone {
 	BDSKCondition *copy = [[BDSKCondition allocWithZone:aZone] init];
 	[copy setKey:[self key]];
-	[copy setValue:[self value]];
 	[copy setComparison:[self comparison]];
+	[copy setValue:[self value]];
 	return copy;
 }
 
 - (NSDictionary *)dictionaryValue {
 	NSNumber *comparisonNumber = [NSNumber numberWithInt:[self comparison]];
-	NSMutableString *escapedValue = [value mutableCopy];
+	NSMutableString *escapedValue = [[self value] mutableCopy];
 	// escape braces as they can give problems with btparse
 	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"];
 	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
@@ -175,8 +175,6 @@
 	if ([NSString isEmptyString:key] == YES) 
 		return YES; // empty condition matches anything
 	
-	OBASSERT(value != nil);
-	
     if ([self isDateCondition]) {
         
         NSDate *date = nil;
@@ -188,6 +186,8 @@
                 (cachedEndDate == nil || [date compare:cachedEndDate] == NSOrderedAscending));
         
     } else {
+        
+        OBASSERT(value != nil);
         
         if (valueComparison == BDSKGroupContain) 
             return ([item isContainedInGroupNamed:value forField:key] == YES);
@@ -255,7 +255,26 @@
 }
 
 - (NSString *)value {
-    return [[value retain] autorelease];
+    if ([self isDateCondition]) {
+        switch (dateComparison) {
+            case BDSKExactly: 
+            case BDSKInLast: 
+            case BDSKNotInLast: 
+                return [NSString stringWithFormat:@"%i %i", numberValue, periodValue];
+            case BDSKBetween: 
+                return [NSString stringWithFormat:@"%i %i %i", numberValue, andNumberValue, periodValue];
+            case BDSKDate: 
+            case BDSKAfterDate: 
+            case BDSKBeforeDate: 
+                return [NSString stringWithFormat:@"%@", dateValue];
+            case BDSKInDateRange:
+                return [NSString stringWithFormat:@"%@ to %@", dateValue, toDateValue];
+            default:
+                return @"";
+        }
+    } else {
+        return [[value retain] autorelease];
+    }
 }
 
 - (void)setValue:(NSString *)newValue {
@@ -376,53 +395,15 @@
     return ([key isEqualToString:BDSKDateAddedString] || [key isEqualToString:BDSKDateModifiedString]);
 }
 
-- (void)updateValue {
-    [value release];
-    switch (dateComparison) {
-        case BDSKExactly: 
-        case BDSKInLast: 
-        case BDSKNotInLast: 
-            value = [[NSString stringWithFormat:@"%i %i", numberValue, periodValue] retain];
-            break;
-        case BDSKBetween: 
-            value = [[NSString stringWithFormat:@"%i %i %i", numberValue, andNumberValue, periodValue] retain];
-            break;
-        case BDSKDate: 
-        case BDSKAfterDate: 
-        case BDSKBeforeDate: 
-            value = [[NSString stringWithFormat:@"%@", dateValue] retain];
-            break;
-        case BDSKInDateRange:
-            value = [[NSString stringWithFormat:@"%@ to %@", dateValue, toDateValue] retain];
-            break;
-        default:
-            value = [@"" retain];
-            break;
-    }
-}
-
 - (void)setDefaultValue {
+    // set some default values
     if ([self isDateCondition]) {
-        switch (dateComparison) {
-            case BDSKExactly: 
-            case BDSKInLast: 
-            case BDSKNotInLast: 
-                [self setValue:@"7 0"];
-                break;
-            case BDSKBetween: 
-                [self setValue:@"7 9 0"];
-                break;
-            case BDSKDate: 
-            case BDSKAfterDate: 
-            case BDSKBeforeDate: 
-                [self setValue:@"01/01/06"];
-                break;
-            case BDSKInDateRange:
-                [self setValue:@"01/01/06 to 01/01/06"];
-                break;
-            default:
-                [self setValue:@""];
-        }
+        NSCalendarDate *today = [NSCalendarDate date];
+        [self setNumberValue:7];
+        [self setAndNumberValue:9];
+        [self setPeriodValue:BDSKPeriodDay];
+        [self setDateValue:today];
+        [self setToDateValue:today];
     } else {
         [self setValue:@""];
     }
@@ -466,7 +447,7 @@
     if ([self isDateCondition]) {
         [self getStartDate:&startDate endDate:&endDate];
         if (dateComparison < BDSKDate) {
-            NSTimeInterval refreshInterval = (periodValue == BDSKPeriodDay) ? 21600 : 86400;
+            NSTimeInterval refreshInterval = 21600; // 8 hours
             cacheTimer = [NSTimer scheduledTimerWithTimeInterval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
         }
     }
@@ -500,22 +481,18 @@
     
     switch (dateComparison) {
         case BDSKToday:
-            periodValue = BDSKPeriodDay;
             *startDate = today;
             *endDate = nil;
             break;
         case BDSKYesterday: 
-            periodValue = BDSKPeriodDay;
             *startDate = [today dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0];
             *endDate = today;
             break;
         case BDSKThisWeek: 
-            periodValue = BDSKPeriodWeek;
-            *startDate = today;
+            *startDate = [today startOfWeek];
             *endDate = nil;
             break;
         case BDSKLastWeek: 
-            periodValue = BDSKPeriodWeek;
             *endDate = [today startOfWeek];
             *startDate = [*endDate dateByAddingYears:0 months:0 days:-7 hours:0 minutes:0 seconds:0];
             break;
@@ -557,46 +534,29 @@
 #pragma mark KVO
 
 - (void)startObserving {
-    [self addObserver:self forKeyPath:@"key" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"dateComparison" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"value" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"numberValue" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"andNumberValue" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"periodValue" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"dateValue" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"toDateValue" options:0 context:NULL];
+    [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
 }
 
 - (void)endObserving {
     [self removeObserver:self forKeyPath:@"key"];
-    [self removeObserver:self forKeyPath:@"dateComparison"];
-    [self removeObserver:self forKeyPath:@"value"];
-    [self removeObserver:self forKeyPath:@"numberValue"];
-    [self removeObserver:self forKeyPath:@"andNumberValue"];
-    [self removeObserver:self forKeyPath:@"periodValue"];
-    [self removeObserver:self forKeyPath:@"dateValue"];
-    [self removeObserver:self forKeyPath:@"toDateValue"];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"key"]) {
-        if ([self isDateCondition]) {
-            [self setDateComparison:BDSKToday];
-        } else {
-            [self updateCachedDates]; // remove the cached date and stop the timer
-            [self setValueComparison:BDSKContain];
-            [self setDefaultValue];
+        NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
+        NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
+        BOOL wasDate = ([oldKey isEqualToString:BDSKDateModifiedString] || [oldKey isEqualToString:BDSKDateAddedString]);
+        BOOL isDate = ([newKey isEqualToString:BDSKDateModifiedString] || [newKey isEqualToString:BDSKDateAddedString]);
+        if(wasDate != isDate){
+            if ([self isDateCondition]) {
+                [self setDateComparison:BDSKToday];
+                [self setDefaultValue];
+            } else {
+                [self updateCachedDates]; // remove the cached date and stop the timer
+                [self setValueComparison:BDSKContain];
+                [self setDefaultValue];
+            }
         }
-    } else if ([keyPath isEqualToString:@"dateComparison"]) {
-        [self setDefaultValue];
-    } else if ([keyPath isEqualToString:@"value"]) {
-        [self updateCachedDates];
-    } else if ([keyPath isEqualToString:@"numberValue"] || 
-               [keyPath isEqualToString:@"andNumberValue"] || 
-               [keyPath isEqualToString:@"periodValue"] || 
-               [keyPath isEqualToString:@"dateValue"] || 
-               [keyPath isEqualToString:@"toDateValue"]) {
-        [self updateValue];
     }
 }
 
