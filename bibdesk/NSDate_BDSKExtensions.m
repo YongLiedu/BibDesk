@@ -363,7 +363,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
 
 - (NSCalendarDate *)endOfYear;
 {
-    return [[self startOfMonth] dateByAddingYears:1 months:0 days:0 hours:0 minutes:0 seconds:-1];
+    return [[self startOfYear] dateByAddingYears:1 months:0 days:0 hours:0 minutes:0 seconds:-1];
 }
 
 - (NSCalendarDate *)startOfPeriod:(int)period;
