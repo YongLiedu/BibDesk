@@ -501,16 +501,16 @@
             *endDate = [*startDate dateByAddingNumber:1 ofPeriod:periodValue];
             break;
         case BDSKInLast: 
-            *startDate = [today dateByAddingNumber:-numberValue ofPeriod:periodValue];
+            *startDate = [today dateByAddingNumber:1-numberValue ofPeriod:periodValue];
             *endDate = nil;
             break;
         case BDSKNotInLast: 
             *startDate = nil;
-            *endDate = [today dateByAddingNumber:-numberValue ofPeriod:periodValue];
+            *endDate = [today dateByAddingNumber:1-numberValue ofPeriod:periodValue];
             break;
         case BDSKBetween: 
-            *startDate = [today dateByAddingNumber:-numberValue ofPeriod:periodValue];
-            *endDate = [today dateByAddingNumber:1-andNumberValue ofPeriod:periodValue];
+            *startDate = [today dateByAddingNumber:-MAX(numberValue,andNumberValue) ofPeriod:periodValue];
+            *endDate = [today dateByAddingNumber:1-MIN(numberValue,andNumberValue) ofPeriod:periodValue];
             break;
         case BDSKDate: 
             *startDate = (dateValue == nil) ? nil : [dateValue startOfDay];
