@@ -94,7 +94,7 @@
 		
 		if (comparisonNumber != nil) 
 			[self setComparison:[comparisonNumber intValue]];
-		
+        
 		if (escapedValue != nil) {
 			// we escape braces as they can give problems with btparse
 			[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
@@ -103,23 +103,17 @@
 			[self setValue:escapedValue];
 			[escapedValue release];
         }
-        
-        [self startObserving];
 	}
 	return self;
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super init]) {
+	if (self = [self init]) {
 		[self setKey:[decoder decodeObjectForKey:@"key"]];
 		[self setComparison:[decoder decodeIntForKey:@"comparison"]];
 		[self setValue:[decoder decodeObjectForKey:@"value"]];
 		OBASSERT(key != nil);
 		OBASSERT([self value] != nil);
-		cachedStartDate = nil;
-		cachedEndDate = nil;
-		cacheTimer = nil;
-        [self startObserving];
 	}
 	return self;
 }
@@ -535,10 +529,12 @@
 
 - (void)startObserving {
     [self addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
+    [self addObserver:self forKeyPath:@"value" options:0  context:NULL];
 }
 
 - (void)endObserving {
     [self removeObserver:self forKeyPath:@"key"];
+    [self removeObserver:self forKeyPath:@"value"];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -556,6 +552,10 @@
                 [self setValueComparison:BDSKContain];
                 [self setDefaultValue];
             }
+        }
+    } else if ([keyPath isEqualToString:@"value"]) {
+        if ([self isDateCondition]) {
+            [self updateCachedDates];
         }
     }
 }
