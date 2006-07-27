@@ -60,7 +60,7 @@
 
 + (void)initialize {
     [self setKeys:[NSArray arrayWithObjects:@"valueComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
-    [self setKeys:[NSArray arrayWithObjects:@"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
+    [self setKeys:[NSArray arrayWithObjects:@"dateComparison", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
 }
 
 - (id)init {
