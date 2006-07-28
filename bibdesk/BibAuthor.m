@@ -252,6 +252,26 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     return normalizedName;
 }
 
+- (NSString *)displayName{
+    OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
+    BOOL displayFirst = [prefs boolForKey:BDSKShouldDisplayFirstNamesKey];
+    BOOL displayAbbreviated = [prefs boolForKey:BDSKShouldAbbreviateFirstNamesKey];
+    BOOL displayLastFirst = [prefs boolForKey:BDSKShouldDisplayLastNameFirstKey];
+
+    NSString *theName = nil;
+
+    if(displayFirst == NO){
+        theName = lastName; // and then ignore the other options
+    } else {
+        if(displayLastFirst)
+            theName = displayAbbreviated ? [self abbreviatedNormalizedName] : normalizedName;
+        else
+            theName = displayAbbreviated ? [self abbreviatedName] : name;
+    }
+    return theName;
+}
+
+
 #pragma mark Component Accessors
 
 - (NSString *)normalizedName{

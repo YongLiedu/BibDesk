@@ -136,6 +136,15 @@
 - (NSDictionary *)peopleInheriting:(BOOL)inherit;
 
 /*!
+    @method     peopleStringForDisplayFromField:
+    @abstract   Returns a string of names according to the user's display prefs (using -[BibAuthor displayName]).
+    @discussion (comprehensive description)
+    @param      field (description)
+    @result     (description)
+*/
+- (NSString *)peopleStringForDisplayFromField:(NSString *)field;
+
+/*!
     @method numberOfAuthors
     @abstract Calls numberOfAuthorsInheriting: with inherit set to YES. 
     @discussion (discussion)
@@ -230,6 +239,17 @@
     
 */
 - (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized inherit:(BOOL)inherit;
+
+/*!
+    @method     bibTeXNameStringForField:normalized:inherit:
+    @abstract   Returns a string of BibTeX names, possibly normalized and inherited, for the given field.
+    @discussion (comprehensive description)
+    @param      field (description)
+    @param      normalized (description)
+    @param      inherit (description)
+    @result     (description)
+*/
+- (NSString *)bibTeXNameStringForField:(NSString *)field normalized:(BOOL)normalized inherit:(BOOL)inherit;
 
 /*!
     @method numberOfAuthorsOrEditors

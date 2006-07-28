@@ -96,6 +96,13 @@ typedef struct _BibAuthorFlags {
 */
 - (NSComparisonResult)sortCompare:(BibAuthor *)otherAuth;
 
+/*!
+    @method     displayName
+    @abstract   Displays a name according to user's preferences.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)displayName;
 - (NSString *)normalizedName;
 - (NSString *)sortableName;
 - (NSString *)name;

@@ -125,17 +125,17 @@
             else
                 return [date descriptionWithCalendarFormat:@"%b %Y"];
         }else if([tcID isEqualToString: BDSKFirstAuthorString] ){
-			return [pub authorAtIndex:0];
+			return [[pub authorAtIndex:0] displayName];
         }else if([tcID isEqualToString: BDSKSecondAuthorString] ){
-			return [pub authorAtIndex:1]; 
+			return [[pub authorAtIndex:1] displayName]; 
         }else if([tcID isEqualToString: BDSKThirdAuthorString] ){
-			return [pub authorAtIndex:2];
+			return [[pub authorAtIndex:2] displayName];
         }else if([tcID isEqualToString: BDSKFirstAuthorEditorString] ){
-			return [pub authorOrEditorAtIndex:0];
+			return [[pub authorOrEditorAtIndex:0] displayName];
         }else if([tcID isEqualToString: BDSKSecondAuthorEditorString] ){
-			return [pub authorOrEditorAtIndex:1]; 
+			return [[pub authorOrEditorAtIndex:1] displayName]; 
         }else if([tcID isEqualToString: BDSKThirdAuthorEditorString] ){
-			return [pub authorOrEditorAtIndex:2];
+			return [[pub authorOrEditorAtIndex:2] displayName];
 		} else if([tcID isEqualToString:BDSKAuthorString] ||
 				   [tcID isEqualToString:@"Authors"]) {
 			return [pub pubAuthorsForDisplay];

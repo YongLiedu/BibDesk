@@ -592,6 +592,30 @@ static CFDictionaryRef selectorTable = NULL;
     }
 }
 
+// returns a string similar to bibtexAuthorString, but removes the "and" separator and can optionally abbreviate first names
+- (NSString *)peopleStringForDisplayFromField:(NSString *)field{
+    
+    NSArray *peopleArray = [self peopleArrayForField:field];
+    
+	if([peopleArray count] == 0)
+        return @"";
+    
+    [peopleArray retain];
+    unsigned idx, count = [peopleArray count];
+    BibAuthor *person;
+    NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
+	
+    for(idx = 0; idx < count; idx++){
+        person = [peopleArray objectAtIndex:idx];
+        [names appendString:[person displayName]];
+        if(idx != count - 1)
+            [names appendString:@" and "];
+    }
+    [peopleArray release];
+    
+	return names;
+}
+
 #pragma mark Author Handling code
 
 - (int)numberOfAuthors{
@@ -633,39 +657,8 @@ static CFDictionaryRef selectorTable = NULL;
     return array;
 }
 
-// returns a string similar to bibtexAuthorString, but removes the "and" separator and can optionally abbreviate first names
 - (NSString *)pubAuthorsForDisplay{
-    NSArray *authors = [self pubAuthors];
-    unsigned idx, maxIdx = [authors count];
-    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[authors count]];
-    BibAuthor *author;        
-        
-    OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL displayFirst = [prefs boolForKey:BDSKShouldDisplayFirstNamesKey];
-    BOOL displayAbbreviated = [prefs boolForKey:BDSKShouldAbbreviateFirstNamesKey];
-    BOOL displayLastFirst = [prefs boolForKey:BDSKShouldDisplayLastNameFirstKey];
-    
-    NSString *name = nil;
-    // add all the names as strings
-    for(idx = 0; idx < maxIdx; idx++){
-        author = [authors objectAtIndex:idx];
-        if(displayFirst == NO){
-            name = [author lastName]; // and then ignore the other options
-        } else {
-            if(displayLastFirst)
-                name = displayAbbreviated ? [author abbreviatedNormalizedName] : [author normalizedName];
-            else
-                name = displayAbbreviated ? [author abbreviatedName] : [author name];
-        }
-        OBPOSTCONDITION(name);
-        [array addObject:name];
-        name = nil;
-    }
-    
-    NSString *string = displayLastFirst ? [array componentsJoinedByString:@" and "] : [array componentsJoinedByCommaAndAnd];
-    [array release];
-    
-    return string;
+    return [self peopleStringForDisplayFromField:BDSKAuthorString];
 }
 
 - (BibAuthor *)authorAtIndex:(int)index{ 
@@ -684,28 +677,36 @@ static CFDictionaryRef selectorTable = NULL;
     return [self bibTeXAuthorStringNormalized:NO inherit:YES];
 }
 
-- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized{ // used for save operations; returns names as "von Last, Jr., First" if normalized is YES
+// used for save operations; returns names as "von Last, Jr., First" if normalized is YES
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized{ 
 	return [self bibTeXAuthorStringNormalized:normalized inherit:YES];
 }
 
-- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized inherit:(BOOL)inherit{ // used for save operations; returns names as "von Last, Jr., First" if normalized is YES
-	NSArray *auths = [self pubAuthorsInheriting:inherit];
+// used for save operations; returns names as "von Last, Jr., First" if normalized is YES
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized inherit:(BOOL)inherit{
+    return [self bibTeXNameStringForField:BDSKAuthorString normalized:normalized inherit:inherit];
+}
+
+- (NSString *)bibTeXNameStringForField:(NSString *)field normalized:(BOOL)normalized inherit:(BOOL)inherit{
+	NSArray *peopleArray = [self peopleArrayForField:field inherit:inherit];
     
-	if([auths count] == 0)
+	if([peopleArray count] == 0)
         return @"";
     
-    [auths retain];
-    unsigned idx, authCount = [auths count];
-    BibAuthor *author;
-	NSMutableArray *authNames = [NSMutableArray arrayWithCapacity:[auths count]];
+    [peopleArray retain];
+    unsigned idx, count = [peopleArray count];
+    BibAuthor *person;
+    NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
 	
-    for(idx = 0; idx < authCount; idx++){
-        author = [auths objectAtIndex:idx];
-        [authNames addObject:(normalized ? [author normalizedName] : [author name])];
+    for(idx = 0; idx < count; idx++){
+        person = [peopleArray objectAtIndex:idx];
+        [names appendString:(normalized ? [person normalizedName] : [person name])];
+        if(idx != count - 1)
+            [names appendString:@" and "];
     }
-    [auths release];
+    [peopleArray release];
 
-	return [authNames componentsJoinedByString:@" and "];
+	return names;
 }
 
 #pragma mark Author or Editor Handling code
@@ -743,37 +744,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 // returns a string similar to bibtexAuthorString, but removes the "and" separator and can optionally abbreviate first names
 - (NSString *)pubAuthorsOrEditorsForDisplay{
-    NSArray *authors = [self pubAuthorsOrEditors];
-    unsigned idx, maxIdx = [authors count];
-    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[authors count]];
-    BibAuthor *author;        
-        
-    OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL displayFirst = [prefs boolForKey:BDSKShouldDisplayFirstNamesKey];
-    BOOL displayAbbreviated = [prefs boolForKey:BDSKShouldAbbreviateFirstNamesKey];
-    BOOL displayLastFirst = [prefs boolForKey:BDSKShouldDisplayLastNameFirstKey];
-    
-    NSString *name = nil;
-    // add all the names as strings
-    for(idx = 0; idx < maxIdx; idx++){
-        author = [authors objectAtIndex:idx];
-        if(displayFirst == NO){
-            name = [author lastName]; // and then ignore the other options
-        } else {
-            if(displayLastFirst)
-                name = displayAbbreviated ? [author abbreviatedNormalizedName] : [author normalizedName];
-            else
-                name = displayAbbreviated ? [author abbreviatedName] : [author name];
-        }
-        OBPOSTCONDITION(name);
-        [array addObject:name];
-        name = nil;
-    }
-    
-    NSString *string = displayLastFirst ? [array componentsJoinedByString:@" and "] : [array componentsJoinedByCommaAndAnd];
-    [array release];
-    
-    return string;
+    return [self peopleStringForDisplayFromField:([[self peopleArrayForField:BDSKAuthorString] count] ? BDSKAuthorString : BDSKEditorString)];
 }
 
 - (BibAuthor *)authorOrEditorAtIndex:(int)index{ 
@@ -1366,7 +1337,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	NSSet *urlKeys = nil;
 	NSString *field;
     NSString *value;
-    NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
+    NSMutableString *s = [NSMutableString stringWithCapacity:200];
     NSMutableArray *keys = [[pubFields allKeysUsingReadWriteLock:bibLock] mutableCopy];
 	NSEnumerator *e;
     
@@ -1397,6 +1368,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:type];
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
+    
+    NSSet *personFields = [btm personFieldsSet];
+    
     while(field = [e nextObject]){
 		if (drop && ![knownKeys containsObject:field])
 			continue;
@@ -1404,8 +1378,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         value = [pubFields objectForKey:field usingReadWriteLock:bibLock];
         NSString *valString;
         
-		if([field isEqualToString:BDSKAuthorString] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
-			value = [self bibTeXAuthorStringNormalized:YES inherit:NO];
+		if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
+			value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
 		}
 		
 		if(shouldTeXify && ![urlKeys containsObject:field]){
