@@ -123,14 +123,15 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
 
 */
 
-+ (NSDate *)dateWithColloquialString:(NSString *)string;
++ (id)dateWithColloquialString:(NSString *)string;
 {
     if([NSString isEmptyString:string])
         return nil;
-    NSDate *today = [NSDate date];
+    NSDate *today = [[self class] date];
     NSScanner *scanner = [[NSScanner alloc] initWithString:string];
+    NSCharacterSet *whitespaceSet = [NSCharacterSet whitespaceCharacterSet];
     [scanner setCharactersToBeSkipped:nil];
-    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+    [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
     
     // this is a fairly generic exception that we throw when a parse failure occurs
     NSException *parseException = [NSException exceptionWithName:@"BDSKColloquialDateException" reason:@"Parse failure" userInfo:nil];
@@ -156,7 +157,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     @try{
         NSString *countStr = nil;
         int count;
-        [scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&countStr];
+        [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&countStr];
         
         // we could add an NSString method to look up numbers from a dictionary, say 
         if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"a", @""), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
@@ -171,10 +172,10 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         if(count == 0 || ABS(count) == HUGE_VAL)
             @throw parseException;
         
-        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+        [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
 
         NSString *intervalStr = nil;
-        [scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&intervalStr];
+        [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&intervalStr];
         
         if(intervalStr == nil)
             @throw parseException;
@@ -212,11 +213,11 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         // NSTimeInterval is supposed to give submillisecond precision over a range of 10,000 years.  It's unlikely that we work with publications over that range.
         NSAssert(ABS(interval) < DBL_MAX, @"Time interval overflow.");
                 
-        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+        [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
         
         // now see what direction we're going in time
         NSString *signStr = nil;
-        [scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&signStr];
+        [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&signStr];
         
         NSAssert(interval > 0, @"Interval must be greater than zero.");
         BOOL getBase = NO;
@@ -237,10 +238,10 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         // get the base date if necessary
         if(getBase == YES){
             
-            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+            [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
             
             NSString *baseStr = nil;
-            [scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&baseStr];
+            [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&baseStr];
             
             static CFMutableDictionaryRef days = NULL;
             int delta; // an NSTimeInterval, but we can't store a double in a dictionary, and we don't need the extra precision
@@ -286,9 +287,9 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         // not really necessary; we just ignore stuff after this
         OBASSERT([scanner isAtEnd]);
     }
-    @catch(NSException *exception){
+    @catch(id exception){
         failed = YES;
-        if([[exception name] isEqualToString:@"BDSKColloquialDateException"] == NO)
+        if([exception respondsToSelector:@selector(name)] == NO || [[exception name] isEqualToString:@"BDSKColloquialDateException"] == NO)
             @throw;
     }
     @finally{
