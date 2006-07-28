@@ -709,6 +709,10 @@ static CFDictionaryRef selectorTable = NULL;
 	return names;
 }
 
+- (NSArray *)pubEditors{
+    return [self peopleArrayForField:BDSKEditorString];
+}
+
 #pragma mark Author or Editor Handling code
 
 - (int)numberOfAuthorsOrEditors{

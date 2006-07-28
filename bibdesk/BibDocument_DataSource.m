@@ -142,6 +142,8 @@
 		} else if([tcID isEqualToString:BDSKAuthorEditorString] ||
                    [tcID isEqualToString:@"Authors Or Editors"]) {
 			return [pub pubAuthorsOrEditorsForDisplay];
+        } else if([tcID isEqualToString:BDSKEditorString]) {
+			return [pub peopleStringForDisplayFromField:BDSKEditorString];
         }else if([typeManager isURLField:tcID]){
             return [pub smallImageForURLField:tcID];
 		}else if([typeManager isRatingField:tcID]){
