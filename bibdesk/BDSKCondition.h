@@ -52,7 +52,7 @@ typedef enum {
 	BDSKEndWith,
 	BDSKSmaller,
 	BDSKLarger
-} BDSKComparison;
+} BDSKStringComparison;
 
 // this should correspond to the tags of the items in the popup
 typedef enum {
@@ -72,9 +72,9 @@ typedef enum {
 
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
-	NSString *value;
-	BDSKComparison valueComparison;
+	BDSKStringComparison stringComparison;
 	BDSKDateComparison dateComparison;
+	NSString *stringValue;
     int numberValue;
     int andNumberValue;
     int periodValue;
@@ -91,21 +91,23 @@ typedef enum {
 
 - (BOOL)isSatisfiedByItem:(BibItem *)item;
 
+// Generic accessors
 - (NSString *)key;
 - (void)setKey:(NSString *)newKey;
-
 - (NSString *)value;
 - (void)setValue:(NSString *)newValue;
-
 - (int)comparison;
 - (void)setComparison:(int)newComparison;
 
-- (BDSKComparison)valueComparison;
-- (void)setValueComparison:(BDSKComparison)newComparison;
+// String accessors
+- (BDSKStringComparison)stringComparison;
+- (void)setStringComparison:(BDSKStringComparison)newComparison;
+- (NSString *)stringValue;
+- (void)setStringValue:(NSString *)newValue;
 
+// Date accessors
 - (BDSKDateComparison)dateComparison;
 - (void)setDateComparison:(BDSKDateComparison)newComparison;
-
 - (int)numberValue;
 - (void)setNumberValue:(int)value;
 - (int)andNumberValue;

@@ -59,7 +59,7 @@
 @implementation BDSKCondition
 
 + (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"valueComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
+    [self setKeys:[NSArray arrayWithObjects:@"stringComparison", @"dateComparison", nil] triggerChangeNotificationsForDependentKey:@"comparison"];
     [self setKeys:[NSArray arrayWithObjects:@"dateComparison", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
 }
 
@@ -67,8 +67,8 @@
     self = [super init];
     if (self) {
         key = [@"" retain];
-        value = [@"" retain];
-        valueComparison = BDSKContain;
+        stringValue = [@"" retain];
+        stringComparison = BDSKContain;
         dateComparison = BDSKToday;
         numberValue = 0;
         andNumberValue = 0;
@@ -128,7 +128,7 @@
 	//NSLog(@"dealloc condition");
     [self endObserving];
     [key release], key  = nil;
-    [value release], value  = nil;
+    [stringValue release], stringValue  = nil;
     [cachedStartDate release], cachedStartDate  = nil;
     [cachedEndDate release], cachedEndDate  = nil;
     [cacheTimer invalidate], cacheTimer  = nil;
@@ -181,12 +181,12 @@
         
     } else {
         
-        OBASSERT(value != nil);
+        OBASSERT(stringValue != nil);
         
-        if (valueComparison == BDSKGroupContain) 
-            return ([item isContainedInGroupNamed:value forField:key] == YES);
-        if (valueComparison == BDSKGroupNotContain) 
-            return ([item isContainedInGroupNamed:value forField:key] == NO);
+        if (stringComparison == BDSKGroupContain) 
+            return ([item isContainedInGroupNamed:stringValue forField:key] == YES);
+        if (stringComparison == BDSKGroupNotContain) 
+            return ([item isContainedInGroupNamed:stringValue forField:key] == NO);
         
         NSString *itemValue = [item valueOfGenericField:key];
         // unset values are considered empty strings
@@ -196,19 +196,19 @@
         if ([itemValue isComplex] || [itemValue isInherited])
             itemValue = [NSString stringWithString:itemValue];
         
-        if (valueComparison == BDSKEqual) 
-            return ([value caseInsensitiveCompare:itemValue] == NSOrderedSame);
-        if (valueComparison == BDSKNotEqual) 
-            return ([value caseInsensitiveCompare:itemValue] != NSOrderedSame);
+        if (stringComparison == BDSKEqual) 
+            return ([stringValue caseInsensitiveCompare:itemValue] == NSOrderedSame);
+        if (stringComparison == BDSKNotEqual) 
+            return ([stringValue caseInsensitiveCompare:itemValue] != NSOrderedSame);
         
         // minor optimization: Shark showed -[NSString rangeOfString:options:] as a bottleneck, calling through to CFStringFindWithOptions
         CFOptionFlags options = kCFCompareCaseInsensitive;
-        if (valueComparison == BDSKEndWith)
+        if (stringComparison == BDSKEndWith)
             options = options | kCFCompareBackwards;
         CFRange range;
         CFIndex itemLength = CFStringGetLength((CFStringRef)itemValue);
-        Boolean foundString = CFStringFindWithOptions((CFStringRef)itemValue, (CFStringRef)value, CFRangeMake(0, itemLength), options, &range);
-        switch (valueComparison) {
+        Boolean foundString = CFStringFindWithOptions((CFStringRef)itemValue, (CFStringRef)stringValue, CFRangeMake(0, itemLength), options, &range);
+        switch (stringComparison) {
             case BDSKContain:
                 return foundString;
             case BDSKNotContain:
@@ -221,10 +221,10 @@
                 break; // other enum types are handled before the switch, but the compiler doesn't know that
         }
         
-        NSComparisonResult result = [value localizedCaseInsensitiveNumericCompare:itemValue];
-        if (valueComparison == BDSKSmaller) 
+        NSComparisonResult result = [stringValue localizedCaseInsensitiveNumericCompare:itemValue];
+        if (stringComparison == BDSKSmaller) 
             return (result == NSOrderedDescending);
-        if (valueComparison == BDSKLarger) 
+        if (stringComparison == BDSKLarger) 
             return (result == NSOrderedAscending);
         
     }
@@ -234,6 +234,8 @@
 }
 
 #pragma mark Accessors
+
+#pragma mark | generic
 
 - (NSString *)key {
     return [[key retain] autorelease];
@@ -246,6 +248,17 @@
         [key release];
         key = [newKey copy];
     }
+}
+
+- (int)comparison {
+    return ([self isDateCondition]) ? dateComparison : stringComparison;
+}
+
+- (void)setComparison:(int)newComparison {
+    if ([self isDateCondition])
+        [self setDateComparison:(BDSKDateComparison)newComparison];
+    else
+        [self setStringComparison:(BDSKStringComparison)newComparison];
 }
 
 - (NSString *)value {
@@ -267,7 +280,7 @@
                 return @"";
         }
     } else {
-        return [[value retain] autorelease];
+        return [self stringValue];
     }
 }
 
@@ -306,30 +319,35 @@
             default:
                 break;
         }
-    } else if (![value isEqualToString:newValue]) {
-        [value release];
-        value = [newValue retain];
+    } else {
+        [self setStringValue:newValue];
     }
 }
 
-- (int)comparison {
-    return ([self isDateCondition]) ? dateComparison : valueComparison;
+#pragma mark | strings
+
+- (BDSKStringComparison)stringComparison {
+    return stringComparison;
 }
 
-- (void)setComparison:(int)newComparison {
-    if ([self isDateCondition])
-        [self setDateComparison:(BDSKDateComparison)newComparison];
-    else
-        [self setValueComparison:(BDSKComparison)newComparison];
+- (void)setStringComparison:(BDSKStringComparison)newComparison {
+    stringComparison = newComparison;
 }
 
-- (BDSKComparison)valueComparison {
-    return valueComparison;
+- (NSString *)stringValue {
+    return [[stringValue retain] autorelease];
 }
 
-- (void)setValueComparison:(BDSKComparison)newComparison {
-    valueComparison = newComparison;
+- (void)setStringValue:(NSString *)newValue {
+	// we never want the value to be nil. It is set to nil sometimes by the binding mechanism
+	if (newValue == nil) newValue = @"";
+    if (![stringValue isEqualToString:newValue]) {
+        [stringValue release];
+        stringValue = [newValue retain];
+    }
 }
+
+#pragma mark | dates
 
 - (BDSKDateComparison)dateComparison {
     return dateComparison;
@@ -384,6 +402,8 @@
         toDateValue = [newDate retain];
     }
 }
+
+#pragma mark Other 
 
 - (BOOL)isDateCondition {
     return ([key isEqualToString:BDSKDateAddedString] || [key isEqualToString:BDSKDateModifiedString]);
@@ -553,7 +573,7 @@
                 [self setDefaultValue];
             } else {
                 [self updateCachedDates]; // remove the cached date and stop the timer
-                [self setValueComparison:BDSKContain];
+                [self setStringComparison:BDSKContain];
                 [self setDefaultValue];
             }
         }
