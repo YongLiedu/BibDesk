@@ -441,8 +441,12 @@
     if ([self isDateCondition]) {
         [self getStartDate:&startDate endDate:&endDate];
         if (dateComparison < BDSKDate) {
-            NSTimeInterval refreshInterval = 21600; // 8 hours
-            cacheTimer = [NSTimer scheduledTimerWithTimeInterval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
+            // we fire every day at 1 second past midnight, because the condition changes at midnight
+            NSCalendarDate *fireDate = [[[NSCalendarDate date] startOfDay] dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:1];
+            NSTimeInterval refreshInterval = 24 * 3600;
+            cacheTimer = [[NSTimer alloc] initWithFireDate:fireDate interval:refreshInterval target:self selector:@selector(refreshCachedDate:) userInfo:NULL repeats:YES];
+            [[NSRunLoop currentRunLoop] addTimer:cacheTimer forMode:NSDefaultRunLoopMode];
+            [cacheTimer release];
         }
     }
     
