@@ -108,6 +108,12 @@
     [[dateTextField superview] retain];
     [[toDateTextField superview] retain];
     
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] allowNaturalLanguage:YES]];
+    if ([formatter respondsToSelector:@selector(setGeneratesCalendarDates:)])
+        [formatter setGeneratesCalendarDates:YES];
+    [dateTextField setFormatter:formatter];
+    [toDateTextField setFormatter:formatter];
+
 	[ownerController setContent:self]; // fix for binding-to-nib-owner bug
 	
 	[keyComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
