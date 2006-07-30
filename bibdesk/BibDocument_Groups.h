@@ -108,6 +108,7 @@
 - (IBAction)editGroupAction:(id)sender;
 - (IBAction)renameGroupAction:(id)sender;
 - (IBAction)selectAllPublicationsGroup:(id)sender;
+- (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (void)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
