@@ -2420,11 +2420,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
 	}else if([tcID isEqualToString:BDSKTitleString]){
 		
-		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"title" ascending:ascend selector:@selector(localizedCaseInsensitiveNonTeXNonArticleCompare:)];
+		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"title.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
 		
 	}else if([tcID isEqualToString:BDSKContainerString]){
 		
-        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"container" ascending:ascend selector:@selector(localizedCaseInsensitiveNonTeXNonArticleCompare:)];
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"container.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
         
 	}else if([tcID isEqualToString:BDSKDateString]){
 		
@@ -2481,7 +2481,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     }else if([tcID isEqualToString:BDSKBooktitleString]){
         
-        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"Booktitle" ascending:ascend selector:@selector(localizedCaseInsensitiveNonTeXNonArticleCompare:)];
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"Booktitle.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
         
     }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:tcID] ||
              [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID] ||

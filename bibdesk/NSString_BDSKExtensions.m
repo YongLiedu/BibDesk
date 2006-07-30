@@ -445,6 +445,14 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return CFStringCompare((CFStringRef)self, (CFStringRef)otherString, kCFCompareNumerically);
 }
 
+- (NSString *)stringByRemovingTeXAndStopWords;
+{
+    CFMutableStringRef modifiedSelf = CFStringCreateMutableCopy(CFAllocatorGetDefault(), CFStringGetLength((CFStringRef)self), (CFStringRef)self);
+    BDDeleteTeXForSorting(modifiedSelf);
+    BDDeleteArticlesForSorting(modifiedSelf);
+    return [(id)modifiedSelf autorelease];
+}
+    
 - (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSString *)otherString;
 {
     
@@ -465,7 +473,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     OBASSERT(modifiedOther != nil);
     
     // CFComparisonResult returns same values as NSComparisonResult
-    CFComparisonResult result = CFStringCompare(modifiedSelf, modifiedOther, kCFCompareCaseInsensitive);
+    CFComparisonResult result = CFStringCompare(modifiedSelf, modifiedOther, kCFCompareCaseInsensitive | kCFCompareLocalized);
     CFRelease(modifiedSelf);
     CFRelease(modifiedOther);
     
