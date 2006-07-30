@@ -113,7 +113,215 @@
         [self insertObject:(id)CFArrayGetValueAtIndex((CFArrayRef)objects, idx) inArraySortedUsingDescriptors:sortDescriptors];
 }
 
+- (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
+{
+    [self setArray:[self sortedArrayUsingMergesortWithDescriptors:sortDescriptors]];
+}
+
 @end
+
+@interface NSSortDescriptor (Mergesort)
+
+- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
+
+@end
+
+#pragma mark -
+#pragma mark NSSortDescriptor subclass performance improvements
+
+@implementation NSSortDescriptor (Mergesort)
+
+/* The objects an NSSortDescriptor receives in compareObject:toObject: are not the objects that will be compared; you need to call valueForKeyPath: on them.  Unfortunately, this is really inefficient, and also precludes caching on the data end, since the sort descriptor would then call valueForKeyPath: again.  Hence, we add this method to compare the results of valueForKeyPath:, which expects the objects that will be passed to the comparator selector directly.  This gives subclasses an override point that still allows data-side caching of valueForKeyPath: for efficiency.
+*/
+- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
+{
+    typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
+    
+    SEL theSelector = [self selector];
+    BOOL isAscending = [self ascending];
+    comparatorIMP comparator = (comparatorIMP)[object1 methodForSelector:theSelector];
+    NSComparisonResult result = comparator(object1, theSelector, object2);
+    
+    return isAscending ? result : (result *= -1);
+}
+
+@end
+
+@implementation NSArray (Mergesort)
+
+// statics used to call an Obj-C method from the BSD sort comparator
+static id __sort = nil;
+static SEL __selector = NULL;
+
+typedef NSComparisonResult (*comparatorIMP)(id, SEL, id, id);    
+static comparatorIMP __comparator = NULL;
+
+// structure used for mapping objects to the value which will be passed to -[NSSortDescriptor compareEndObject:toEndObject:]
+typedef struct _SortCacheValue {
+    id sortValue;     // result of valueForKeyPath:
+    id object;        // object in array
+} SortCacheValue;
+
+// this function may be passed to a stdlib mergesort/qsort function
+static inline int __CompareSortCacheValues(const void *a, const void *b)
+{
+    return __comparator(__sort, __selector, ((SortCacheValue *)a)->sortValue, ((SortCacheValue *)b)->sortValue);
+}
+
+// for multiple sort descriptors; finds ranges of objects compare NSOrderedSame (concept from GNUStep's NSSortDescriptor)
+static inline NSRange * __FindEqualRanges(SortCacheValue *buf, NSRange searchRange, NSRange *equalRanges, unsigned int *numRanges, NSZone *zone)
+{
+    unsigned i = searchRange.location, j;
+    unsigned bufLen = NSMaxRange(searchRange);
+    *numRanges = 0;
+    if(bufLen > 1){
+        while(i < bufLen - 1){
+            for(j = i + 1; j < bufLen && __CompareSortCacheValues(&buf[i], &buf[j]) == 0; j++);
+            if(j - i > 1){
+                (*numRanges)++;
+                equalRanges = (NSRange *)NSZoneRealloc(zone, equalRanges, (*numRanges) * sizeof(NSRange));
+                equalRanges[(*numRanges) - 1].location = i;
+                equalRanges[(*numRanges) - 1].length = j - i;
+                //                NSLog(@"equalityRange of %@", NSStringFromRange(NSMakeRange(i, j-i)));
+                //                NSLog(@"objects are %@ and %@", (SortCacheValue *)(&buf[i])->sortValue, (SortCacheValue *)(&buf[j-1])->sortValue);
+                i = j;
+            } else {
+                i++;
+            }
+        }
+    }
+    return equalRanges;
+}
+
+#if defined (OMNI_ASSERTIONS_ON)
+
+// for debugging only; prints a sort cache buffer (#ifdefed to avoid compiler warning)
+static void print_buffer(SortCacheValue *buf, unsigned count, NSString *msg){
+    // print the array before using the second sort descriptor...
+    NSMutableArray *new = [[NSMutableArray alloc] initWithCapacity:count];
+    SortCacheValue value;
+    unsigned i;
+    for(i = 0; i < count; i++){
+        value = buf[i];
+        [new addObject:value.object];
+    }
+    NSLog(@"%@: \n%@", msg, new);
+    [new release];
+}
+#endif
+
+// initialize the static variables
+static inline void __SetupStaticsForDescriptor(NSSortDescriptor *sort)
+{
+    __sort = sort;
+    __selector = @selector(compareEndObject:toEndObject:);
+    __comparator = (comparatorIMP)[__sort methodForSelector:__selector];
+}
+
+// clear the static variables
+static inline void __ClearStatics()
+{
+    __sort = nil;
+    __selector = NULL;
+    __comparator = NULL;
+}
+
+- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)descriptors;
+{
+    OBASSERT([NSThread inMainThread]);
+    
+    NSZone *zone = [self zone];
+    size_t count = [self count];
+    size_t size = sizeof(SortCacheValue);
+    
+    SortCacheValue *cache = (SortCacheValue *)NSZoneMalloc(zone, count * size);
+    SortCacheValue aValue;
+    
+    int i, sortIdx = 0, numberOfDescriptors = [descriptors count];
+    
+    // first "equal range" is considered to be the entire array
+    NSRange *equalRanges = (NSRange *)NSZoneMalloc(zone, 1 * sizeof(NSRange));
+    equalRanges[0].location = 0;
+    equalRanges[0].length = count;
+    unsigned numberOfEqualRanges = 1;
+    
+    for(i = 0; i < count; i++){
+        
+        // we add the actual object to the cache, which is basically a trivial dictionary
+        // mergesort/qsort will sort the array of structures for us, so sortValue and object stay matched up
+        aValue.object = [self objectAtIndex:i];
+        
+        // this is handled later, per-key, so just initialize it
+        aValue.sortValue = nil;
+        
+        // add objects to sort cache in current (unsorted) order
+        cache[i] = aValue;
+    }
+    
+    // for each sort descriptor, cache the valueForKeyPath: result, then determine the ranges of equal (ordered same) objects
+    for(sortIdx = 0; sortIdx < numberOfDescriptors && NULL != equalRanges; sortIdx++){
+        
+        // temporary (local to this loop)
+        unsigned rangeIdx;
+        
+        // setup the statics for this descriptor, so we can use the sort functions
+        __SetupStaticsForDescriptor([descriptors objectAtIndex:sortIdx]);
+        
+        NSString *keyPath = [__sort key];
+        
+        for(rangeIdx = 0; rangeIdx < numberOfEqualRanges; rangeIdx++){
+            
+            // this is a range of the array that needs to be sorted
+            NSRange sortRange = equalRanges[rangeIdx];
+            
+            // update cache for objects in equality range(s)
+            // only the sortValue needs to change, as it's dependent on the key path
+            unsigned maxRange = NSMaxRange(sortRange);
+            for(i = sortRange.location; i < maxRange; i++)
+                ((SortCacheValue *)&cache[i])->sortValue = [cache[i].object valueForKeyPath:keyPath];
+            
+            // mergesort seems faster than qsort for my casual testing with NSString/NSNumber instances
+            mergesort(&cache[sortRange.location], sortRange.length, size, __CompareSortCacheValues);
+        }
+        
+        // find equal ranges based on the current descriptor, if we have another sort descriptor to process
+        if(sortIdx + 1 < numberOfDescriptors){            
+            NSRange *newEqualRanges = NULL;
+            unsigned newNumberOfRanges = 0;
+            
+            // don't check the entire array; only previously equal ranges (of course, for the second sort descriptor, this will still cover the entire array)
+            for(rangeIdx = 0; rangeIdx < numberOfEqualRanges; rangeIdx++)
+                newEqualRanges = __FindEqualRanges(cache, equalRanges[rangeIdx], newEqualRanges, &newNumberOfRanges, zone);
+            
+            NSZoneFree(zone, equalRanges);
+            equalRanges = newEqualRanges;
+            numberOfEqualRanges = newNumberOfRanges;
+        }
+        
+        __ClearStatics();
+    }
+    
+    __ClearStatics();
+    
+    if(equalRanges) NSZoneFree(zone, equalRanges);
+    
+    // our array of structures is now sorted correctly, so we just loop through it and create an array with the contents
+    NSMutableArray *new = [[NSMutableArray alloc] initWithCapacity:count];
+    for(i = 0; i < count; i++){
+        aValue = cache[i];
+        [new addObject:aValue.object];
+    }
+    self = [[new copy] autorelease];
+    [new release];
+    
+    NSZoneFree(zone, cache);
+    return self;
+}
+
+@end
+
+#pragma mark -
+#pragma mark Posing Classes
 
 @interface BDSKArray : NSArray @end
 

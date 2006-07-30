@@ -46,9 +46,14 @@
 
 @end
 
+@interface NSArray (Mergesort)
+- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)descriptors;
+@end
+
 @interface NSMutableArray (BDSKExtensions)
 
 - (void)insertObject:anObject inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
 - (void)insertObjects:(NSArray *)objects inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
+- (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
 
 @end
