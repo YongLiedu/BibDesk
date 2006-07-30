@@ -68,6 +68,7 @@ enum {
 - (NSString *)dateDescription;
 - (NSString *)shortDateDescription;
 - (NSString *)rssDescription;
+- (NSString *)standardDescription;
 
 - (NSCalendarDate *)startOfHour;
 - (NSCalendarDate *)endOfHour;

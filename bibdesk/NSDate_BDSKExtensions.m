@@ -323,6 +323,10 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     return [self descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %z"];
 }
 
+- (NSString *)standardDescription{
+    return [self descriptionWithCalendarFormat:@"%Y-%m-%d %H:%M:%S %z"];
+}
+
 - (NSCalendarDate *)startOfHour;
 {
     NSCalendarDate *startHour = [[NSCalendarDate alloc] initWithYear:[self yearOfCommonEra] month:[self monthOfYear] day:[self dayOfMonth] hour:[self hourOfDay] minute:0 second:0 timeZone:[self timeZone]];

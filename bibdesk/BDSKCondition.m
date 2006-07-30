@@ -92,7 +92,8 @@
 		if (aKey != nil) 
 			[self setKey:aKey];
 		
-		if (comparisonNumber != nil) 
+		// the order is important
+        if (comparisonNumber != nil) 
 			[self setComparison:[comparisonNumber intValue]];
         
 		if (escapedValue != nil) {
@@ -109,6 +110,7 @@
 
 - (id)initWithCoder:(NSCoder *)decoder {
 	if (self = [self init]) {
+		// the order is important
 		[self setKey:[decoder decodeObjectForKey:@"key"]];
 		[self setComparison:[decoder decodeIntForKey:@"comparison"]];
 		[self setValue:[decoder decodeObjectForKey:@"value"]];
@@ -137,6 +139,7 @@
 
 - (id)copyWithZone:(NSZone *)aZone {
 	BDSKCondition *copy = [[BDSKCondition allocWithZone:aZone] init];
+    // the order is important
 	[copy setKey:[self key]];
 	[copy setComparison:[self comparison]];
 	[copy setValue:[self value]];
@@ -273,9 +276,9 @@
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 
-                return [NSString stringWithFormat:@"%@", dateValue];
+                return [dateValue standardDescription];
             case BDSKInDateRange:
-                return [NSString stringWithFormat:@"%@ to %@", dateValue, toDateValue];
+                return [NSString stringWithFormat:@"%@ to %@", [dateValue standardDescription], [toDateValue standardDescription]];
             default:
                 return @"";
         }
