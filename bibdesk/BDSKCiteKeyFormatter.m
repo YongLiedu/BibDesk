@@ -47,6 +47,10 @@
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    if([NSString isEmptyString:string]){
+        if(error) *error = NSLocalizedString(@"Empty cite keys are not allowed.", @"");
+        return NO;
+    }
     *obj = string;
     return YES;
 }
