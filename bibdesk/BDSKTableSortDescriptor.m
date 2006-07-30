@@ -132,13 +132,8 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
     }
 }
 
-- (NSComparisonResult)compareObject:(id)object1 toObject:(id)object2 {
-
-    id value1, value2;
-
-    // get the values in bulk; since the same keypath is used for both objects, why compute it twice?
-    __GetValuesUsingCache(self, object1, object2, &value1, &value2);
-        
+- (NSComparisonResult)compareEndObject:(id)value1 toEndObject:(id)value2;
+{
     // check to see if one of the values is nil
     if(value1 == nil){
         if(value2 == nil)
@@ -147,25 +142,33 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
             return (ascending ? NSOrderedDescending : NSOrderedAscending);
     } else if(value2 == nil){
         return (ascending ? NSOrderedAscending : NSOrderedDescending);
-    // this check only applies to NSString objects
+        // this check only applies to NSString objects
     } else if([value1 isKindOfClass:[NSString class]] && [value2 isKindOfClass:[NSString class]]){
         if ([value1 isEqualToString:@""]) {
-                if ([value2 isEqualToString:@""]) {
-                    return NSOrderedSame;
-                } else {
-                    return (ascending ? NSOrderedDescending : NSOrderedAscending);
-                }
+            if ([value2 isEqualToString:@""]) {
+                return NSOrderedSame;
+            } else {
+                return (ascending ? NSOrderedDescending : NSOrderedAscending);
+            }
         } else if ([value2 isEqualToString:@""]) {
             return (ascending ? NSOrderedAscending : NSOrderedDescending);
         }
     } 	
     
-    // header says keys may be key paths, but super doesn't work correctly when I pass in a key path; therefore, we'll just ignore super altogether
     typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
     comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
     NSComparisonResult result = comparator(value1, selector, value2);
     
     return ascending ? result : (result *= -1);
+}
+
+- (NSComparisonResult)compareObject:(id)object1 toObject:(id)object2 {
+
+    id value1, value2;
+
+    // get the values in bulk; since the same keypath is used for both objects, why compute it twice?
+    __GetValuesUsingCache(self, object1, object2, &value1, &value2);
+    return [self compareEndObject:object1 toEndObject:object2];
 }
 
 @end
