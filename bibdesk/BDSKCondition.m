@@ -63,6 +63,10 @@
     [self setKeys:[NSArray arrayWithObjects:@"dateComparison", @"numberValue", @"andNumberValue", @"periodValue", @"dateValue", @"toDateValue", nil] triggerChangeNotificationsForDependentKey:@"value"];
 }
 
++ (NSString *)dictionaryVersion {
+    return @"1";
+}
+
 - (id)init {
     self = [super init];
     if (self) {
@@ -85,7 +89,7 @@
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
 	if (self = [self init]) {
-		NSString *aKey = [dictionary objectForKey:@"key"];
+        NSString *aKey = [dictionary objectForKey:@"key"];
 		NSMutableString *escapedValue = [[dictionary objectForKey:@"value"] mutableCopy];
 		NSNumber *comparisonNumber = [dictionary objectForKey:@"comparison"];
 		
@@ -104,6 +108,20 @@
 			[self setValue:escapedValue];
 			[escapedValue release];
         }
+        
+        static BOOL didWarn = NO;
+		
+        if (([[dictionary objectForKey:@"version"] intValue] < [[[self class] dictionaryVersion] intValue]) &&
+            [self isDateCondition] && didWarn == NO) {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Smart Groups Need Updating",@"") 
+                                             defaultButton:nil
+                                           alternateButton:nil
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"The format for date conditions in smart groups has been changed. You should manually fix smart groups conditioning on Date-Added or Date-Modified.", @"")];
+            [alert runModal];
+            didWarn = YES;
+        }
+        
 	}
 	return self;
 }
@@ -153,7 +171,7 @@
 	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"];
 	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
 	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
-	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:key, @"key", escapedValue, @"value", comparisonNumber, @"comparison", nil];
+	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:key, @"key", escapedValue, @"value", comparisonNumber, @"comparison", [[self class] dictionaryVersion], @"version", nil];
 	[escapedValue release];
 	return [dict autorelease];
 }

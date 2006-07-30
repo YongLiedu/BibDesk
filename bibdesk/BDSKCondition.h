@@ -85,6 +85,8 @@ typedef enum {
 	NSTimer *cacheTimer;
 }
 
++ (NSString *)dictionaryVersion;
+
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 
 - (NSDictionary *)dictionaryValue;
