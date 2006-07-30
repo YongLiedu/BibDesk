@@ -283,6 +283,8 @@
 		CEAE613F097FF60A000B618C /* BDSKJSTORParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */; };
 		CEBA3F470A73CCAF00588BB7 /* BDSKSheetController.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBA3F450A73CCAF00588BB7 /* BDSKSheetController.h */; };
 		CEBA3F480A73CCAF00588BB7 /* BDSKSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBA3F460A73CCAF00588BB7 /* BDSKSheetController.m */; };
+		CEBA63D70A7CA0B500588BB7 /* BDSKCrossrefFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */; };
+		CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */; };
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CED65AB60906BCC6003EED90 /* BDSKScriptHook.h in Headers */ = {isa = PBXBuildFile; fileRef = CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
@@ -1104,6 +1106,8 @@
 		CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAttributedString_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEBA3F450A73CCAF00588BB7 /* BDSKSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSheetController.h; sourceTree = "<group>"; };
 		CEBA3F460A73CCAF00588BB7 /* BDSKSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSheetController.m; sourceTree = "<group>"; };
+		CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCrossrefFormatter.h; sourceTree = "<group>"; };
+		CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCrossrefFormatter.m; sourceTree = "<group>"; };
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Font.tiff; path = Images/Font.tiff; sourceTree = "<group>"; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
 		CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptHook.m; sourceTree = "<group>"; };
@@ -1885,6 +1889,7 @@
 				F9E7591A0942AE7C00CFB46F /* BDSKDateStringFormatter.m */,
 				F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */,
 				F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */,
+				CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */,
 				F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */,
 				3D7406920849F5430081EC6F /* BDSKTypeNameFormatter.m */,
 				CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */,
@@ -2079,6 +2084,7 @@
 				CE34E9770A03C16B00222942 /* BDSKConditionsView.h */,
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
+				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
 				F9022C3C0758027800C3F701 /* BDSKCustomCiteTableView.h */,
 				F9E759190942AE7C00CFB46F /* BDSKDateStringFormatter.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
@@ -2541,6 +2547,7 @@
 				CE6DACC40A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h in Headers */,
 				F9FD63DC0A61B87800F9871B /* NSMenu_BDSKExtensions.h in Headers */,
 				CEBA3F470A73CCAF00588BB7 /* BDSKSheetController.h in Headers */,
+				CEBA63D70A7CA0B500588BB7 /* BDSKCrossrefFormatter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3347,6 +3354,7 @@
 				CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */,
 				F9FD63DD0A61B87800F9871B /* NSMenu_BDSKExtensions.m in Sources */,
 				CEBA3F480A73CCAF00588BB7 /* BDSKSheetController.m in Sources */,
+				CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
