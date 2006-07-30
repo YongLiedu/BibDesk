@@ -25,6 +25,10 @@ New Features\
   \'a5  Can now use an HTML template for the document preview pane (accessory files don't work with this)\
   \'a5  Added context menus in editor buttons and main table to open files/URLs using a particular application (RFE #1519031)\
   \'a5  Added group highlighting for static and smart groups to indicate containment\
+  \'a5  Crossreferenced items are now included when e-mailing pubs\
+  \'a5  Text import now has optional action/context menu option to paste and convert to plain text (RFE #1490863)\
+  \'a5  Added menu option to show the intersection of selected groups instead of the union (default behavior)\
+  \'a5  Added Mail-like interface for date ranges in smart groups (bug #1518519)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 \
@@ -48,7 +52,7 @@ Bugs Fixed\
   \'a5  Fixed memory leak in template exporting, and a leak in the Finder comment code\
   \'a5  Fixed an exception that could raise when dropping a file on an empty table\
   \'a5  Converted BibItem to use read-write locks instead of a mutex\
-  \'a5  Improved sorting efficiency by ~4x\
+  \'a5  Improved sorting efficiency by ~10x\
   \'a5  Some type defininitions were not conformant with btxdoc (bug #1517088)\
   \'a5  The "Type" field is now handled correctly, and no longer confused with BibTeX type (bug #1517094)\
   \'a5  Fixed spelling of Services items (bug #1518836)\
@@ -67,6 +71,22 @@ Bugs Fixed\
   \'a5  Revised searching code again (now more BibItem-specific code is encapsulated in BibItem)\
   \'a5  Fixed a bug in group table highlighting; checking wasn't done case-insensitively for strings or using fuzzy author comparison\
   \'a5  Files opened using temporary cite keys or via a filter now have Date-Added set to the current date\
+  \'a5  TeX preview failures willl now log a more helpful error message to the console (bug #1522833)\
+  \'a5  "authors" and "editors" keys now work with templates\
+  \'a5  Numerous application-modal sheets were converted to window modal sheets (bug #1522886)\
+  \'a5  Workaround for AppKit bug that tries to set a nil value for an edited combo box cell with menu showing (in Template prefs)\
+  \'a5  Key down events without characters are now ignored in tables (could cause an exception)\
+  \'a5  Cite key will not be generated when the edited key is the same as the crossref (bug #1524216)\
+  \'a5  Editor status message is not changed when we cannot generate a cite key\
+  \'a5  Fixed random crasher in export template code (applicable to RTF templates)\
+  \'a5  Publications of a static group are now properly copied as mutable (fixes an exception/crash)\
+  \'a5  Fixed exception when message is displayed instead of path in AutoFile prefs\
+  \'a5  Run the consolidate alert application-modal so it's removed before the filer starts and displays its own alert (bug #1526145)\
+  \'a5  Added close button to the filer progress sheet\
+  \'a5  Author name is now displayed for person controller window title\
+  \'a5  Name display prefs now affect table as well as attributed preview\
+  \'a5  Saving with normalized names will now convert Editor as well as Author names\
+  \'a5  Editors are now sorted correctly in the main table\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
