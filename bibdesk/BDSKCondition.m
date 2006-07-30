@@ -329,13 +329,13 @@
             case BDSKDate: 
             case BDSKAfterDate: 
             case BDSKBeforeDate: 
-                [self setDateValue:[NSCalendarDate dateWithNaturalLanguageString:newValue]];
+                [self setDateValue:[NSCalendarDate dateWithString:newValue]];
                 break;
             case BDSKInDateRange:
                 values = [newValue componentsSeparatedByString:@" to "];
                 OBASSERT([values count] == 2);
-                [self setDateValue:[NSCalendarDate dateWithNaturalLanguageString:[values objectAtIndex:0]]];
-                [self setToDateValue:[NSCalendarDate dateWithNaturalLanguageString:[values objectAtIndex:1]]];
+                [self setDateValue:[NSCalendarDate dateWithString:[values objectAtIndex:0]]];
+                [self setToDateValue:[NSCalendarDate dateWithString:[values objectAtIndex:1]]];
                 break;
             default:
                 break;
@@ -440,7 +440,7 @@
         [self setDateValue:today];
         [self setToDateValue:today];
     } else {
-        [self setValue:@""];
+        [self setStringValue:@""];
     }
 }
 
