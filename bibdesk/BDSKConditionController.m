@@ -108,7 +108,7 @@
     [[dateTextField superview] retain];
     [[toDateTextField superview] retain];
     
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] allowNaturalLanguage:YES]];
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] allowNaturalLanguage:YES] autorelease];
     if ([formatter respondsToSelector:@selector(setGeneratesCalendarDates:)])
         [formatter setGeneratesCalendarDates:YES];
     [dateTextField setFormatter:formatter];
