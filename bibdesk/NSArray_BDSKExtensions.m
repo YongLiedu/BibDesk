@@ -129,17 +129,19 @@
 #pragma mark -
 #pragma mark NSSortDescriptor subclass performance improvements
 
+
 @implementation NSSortDescriptor (Mergesort)
 
 /* The objects an NSSortDescriptor receives in compareObject:toObject: are not the objects that will be compared; you need to call valueForKeyPath: on them.  Unfortunately, this is really inefficient, and also precludes caching on the data end, since the sort descriptor would then call valueForKeyPath: again.  Hence, we add this method to compare the results of valueForKeyPath:, which expects the objects that will be passed to the comparator selector directly.  This gives subclasses an override point that still allows data-side caching of valueForKeyPath: for efficiency.
 */
 - (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
-{
-    typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
+{    
     
+    typedef NSComparisonResult (*compareIMP)(id, SEL, id);    
+
     SEL theSelector = [self selector];
     BOOL isAscending = [self ascending];
-    comparatorIMP comparator = (comparatorIMP)[object1 methodForSelector:theSelector];
+    compareIMP comparator = (compareIMP)[object1 methodForSelector:theSelector];
     NSComparisonResult result = comparator(object1, theSelector, object2);
     
     return isAscending ? result : (result *= -1);
@@ -153,6 +155,7 @@
 static id __sort = nil;
 static SEL __selector = NULL;
 
+// typedef used for NSArray sorting category
 typedef NSComparisonResult (*comparatorIMP)(id, SEL, id, id);    
 static comparatorIMP __comparator = NULL;
 
@@ -182,8 +185,8 @@ static inline NSRange * __FindEqualRanges(SortCacheValue *buf, NSRange searchRan
                 equalRanges = (NSRange *)NSZoneRealloc(zone, equalRanges, (*numRanges) * sizeof(NSRange));
                 equalRanges[(*numRanges) - 1].location = i;
                 equalRanges[(*numRanges) - 1].length = j - i;
-                //                NSLog(@"equalityRange of %@", NSStringFromRange(NSMakeRange(i, j-i)));
-                //                NSLog(@"objects are %@ and %@", (SortCacheValue *)(&buf[i])->sortValue, (SortCacheValue *)(&buf[j-1])->sortValue);
+//                NSLog(@"equalityRange of %@", NSStringFromRange(NSMakeRange(i, j-i)));
+//                NSLog(@"objects are %@ and %@", (SortCacheValue *)(&buf[i])->sortValue, (SortCacheValue *)(&buf[j-1])->sortValue);
                 i = j;
             } else {
                 i++;
