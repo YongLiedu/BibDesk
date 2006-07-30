@@ -68,16 +68,6 @@
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 
-@interface BDSKBibItemStringCache : NSObject {
-    BibItem *item;
-    NSMutableDictionary *strings;
-}
-
-- (id)initWithItem:(BibItem *)anItem;
-- (void)removeValueForKey:(NSString *)key;
-
-@end
-
 @interface BDSKFieldCollection : NSObject {
     BibItem *item;
     NSMutableSet *usedFields;
@@ -113,8 +103,6 @@ static NSString *BDSKDefaultCiteKey = @"cite-key";
 - (void)setDateModified:(NSCalendarDate *)newDateModified;
 - (void)setDate:(NSCalendarDate *)newDate;
 - (void)setPubTypeWithoutUndo:(NSString *)newType;
-
-- (id)stringCache;
 
 // updates derived info from the dictionary
 - (void)updateMetadataForKey:(NSString *)key;
@@ -232,7 +220,6 @@ static CFDictionaryRef selectorTable = NULL;
 		
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
 		
-        stringCache = [[BDSKBibItemStringCache alloc] initWithItem:self];
         templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
         [self updateMetadataForKey:nil];
@@ -278,7 +265,6 @@ static CFDictionaryRef selectorTable = NULL;
         document = nil;
         hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
         bibLock = [[OFReadWriteLock alloc] init]; // not encoded
-        stringCache = [[BDSKBibItemStringCache alloc] initWithItem:self];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(typeInfoDidChange:)
@@ -335,7 +321,6 @@ static CFDictionaryRef selectorTable = NULL;
     [dateAdded release];
     [dateModified release];
     [bibLock release];
-    [stringCache release];
     [super dealloc];
 }
 
@@ -2703,15 +2688,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 }
 
-- (id)stringCache { return stringCache; }
-
 - (void)updateMetadataForKey:(NSString *)key{
     
 	[self setHasBeenEdited:YES];
-    
-    // if this was a title or other field that was cached in a modified state, it will be re-cached lazily
-    [stringCache removeValueForKey:key];
-    
+        
     // re-parse people (authors, editors, etc.) if necessary
     if (people != nil && ([BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key])) {
        [self rebuildPeople];
@@ -2800,69 +2780,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 @end
-
-#pragma mark -
-
-@implementation BDSKBibItemStringCache
-
-- (id)initWithItem:(BibItem *)anItem {
-    if(self = [super init]){
-        item = anItem;
-        // case insensitive because updateMetadataForKey: sends us "Title" instead of "title"
-        strings = BDSKCreateCaseInsensitiveKeyMutableDictionary();
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [strings release];
-    [super dealloc];
-}
-
-- (NSString *)copySortableStringWithValue:(NSString *)value {
-    NSParameterAssert(value != nil);
-    
-    CFMutableStringRef mutableValue = CFStringCreateMutableCopy(CFAllocatorGetDefault(), CFStringGetLength((CFStringRef)value), (CFStringRef)value);
-    BDDeleteTeXForSorting(mutableValue);
-    BDDeleteArticlesForSorting(mutableValue);
-    CFStringLowercase(mutableValue, NULL);
-    return (id)mutableValue;
-}
-
-- (void)removeValueForKey:(NSString *)key {
-    if(key) [strings removeObjectForKey:key];
-}
-
-- (NSString *)title {
-    NSString *title = [strings objectForKey:@"title"];
-    return title ? title : [self valueForUndefinedKey:@"title"];
-}
-
-- (NSString *)container {
-    NSString *container = [strings objectForKey:@"container"];
-    return container ? container : [self valueForUndefinedKey:@"container"];
-}
-
-- (NSString *)Booktitle {
-    NSString *title = [strings objectForKey:@"Booktitle"];
-    return title ? title : [self valueForUndefinedKey:@"Booktitle"];
-}
-
-- (id)valueForUndefinedKey:(NSString *)key {
-    NSString *value = [strings valueForKey:key];
-    if(value == nil){
-        value = [item valueForKey:key];
-        if(value != nil){ // title and container are guaranteed non-nil, but others are not
-            value = [self copySortableStringWithValue:value];
-            [strings setObject:value forKey:key];
-            [value release];
-        }
-    }
-    return value;
-}
-
-@end
-
 
 @implementation BDSKFieldCollection 
 

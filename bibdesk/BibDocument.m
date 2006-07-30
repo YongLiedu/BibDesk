@@ -2420,7 +2420,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
 	}else if([tcID isEqualToString:BDSKTitleString]){
 		
-		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"stringCache.title" ascending:ascend selector:@selector(localizedCompare:)];
+		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"title" ascending:ascend selector:@selector(localizedCompare:)];
 		
 	}else if([tcID isEqualToString:BDSKContainerString]){
 		
@@ -2481,7 +2481,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     }else if([tcID isEqualToString:BDSKBooktitleString]){
         
-        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"stringCache.Booktitle" ascending:ascend selector:@selector(localizedCompare:)];
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"Booktitle" ascending:ascend selector:@selector(localizedCompare:)];
         
     }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:tcID] ||
              [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID] ||
@@ -2550,7 +2550,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [tableView setDelegate:nil];
     
     // sort by new primary column, subsort with previous primary column
-    [shownPublications sortUsingDescriptors:sortDescriptors];
+    [shownPublications mergeSortUsingDescriptors:sortDescriptors];
 
     // Set the graphic for the new column header
     [tableView setIndicatorImage: (sortDescending ?

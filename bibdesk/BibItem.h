@@ -41,7 +41,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache, BDSKFieldCollection, BDSKTemplate;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate;
 @protocol BDSKParseableItem;
 
 /*!
@@ -64,7 +64,6 @@
 	BibDocument *document;
 	OFReadWriteLock *bibLock;
     BOOL hasBeenEdited;
-    BDSKBibItemStringCache *stringCache;
     BDSKFieldCollection *templateFields;
     int currentIndex;
 }
