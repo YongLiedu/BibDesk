@@ -51,6 +51,7 @@
 @class WebDownload;
 @class BDSKComplexStringFormatter;
 @class BDSKCiteKeyFormatter;
+@class BDSKCrossrefFormatter;
 
 @interface BDSKTextImportController : BDSKSheetController {
     IBOutlet NSTextView* sourceTextView;
@@ -81,7 +82,7 @@
 	NSString *webSelection;
     
 	BDSKComplexStringFormatter *tableCellFormatter;
-	BDSKCiteKeyFormatter *crossrefFormatter;
+	BDSKCrossrefFormatter *crossrefFormatter;
 	NSTextView *tableFieldEditor;
 	
 	BOOL showingWebView;

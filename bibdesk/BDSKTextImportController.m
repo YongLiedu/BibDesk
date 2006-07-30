@@ -38,6 +38,7 @@
 
 #import "BDSKTextImportController.h"
 #import "BDSKComplexStringFormatter.h"
+#import "BDSKCrossrefFormatter.h"
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
@@ -96,7 +97,7 @@
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
-		crossrefFormatter = [[BDSKCiteKeyFormatter alloc] init];
+		crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
 		
 		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
 		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];

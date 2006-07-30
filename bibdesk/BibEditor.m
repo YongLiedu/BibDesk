@@ -54,6 +54,7 @@
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKComplexStringFormatter.h"
+#import "BDSKCrossrefFormatter.h"
 #import "BibAppController.h"
 #import "PDFImageView.h"
 #import "BDSKImagePopUpButton.h"
@@ -122,6 +123,7 @@ static int numberOfOpenEditors = 0;
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
     fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
+    crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
 	
     theBib = aBib;
     currentType = [[theBib pubType] retain];    // do this once in init so it's right at the start.
@@ -290,6 +292,7 @@ static int numberOfOpenEditors = 0;
 	[textSnoopContainerView release];
 	[webSnoopContainerView release];
     [formCellFormatter release];
+    [crossrefFormatter release];
     [super dealloc];
 }
 
@@ -1371,6 +1374,7 @@ static int numberOfOpenEditors = 0;
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnEditInheritedKey];
 }
 
+// send by the formatter when validation failed
 - (void)control:(NSControl *)control didFailToValidatePartialString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Entry", @"") 
@@ -1383,6 +1387,8 @@ static int numberOfOpenEditors = 0;
     }
 }
 
+// send by the formatter when formatting in getObjectValue... failed
+// alert sheets must be app modal because this method returns a value and the editor window ccan close when this method returns
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)aString errorDescription:(NSString *)error{
 	if (control == bibFields) {
         NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
@@ -1390,13 +1396,13 @@ static int numberOfOpenEditors = 0;
 		if ([fieldName isEqualToString:BDSKCrossrefString]) {
             // this may occur if the cite key formatter fails to format
             if(error != nil){
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Key", @"") 
-                                                 defaultButton:nil
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:@"%@", error];
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Key", @"") 
+                                                     defaultButton:nil
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:@"%@", error];
                 
-                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+                [alert runSheetModalForWindow:[self window]];
                 if(forceEndEditing)
                     [cell setStringValue:[theBib valueOfField:fieldName]];
             }else{
@@ -1441,13 +1447,13 @@ static int numberOfOpenEditors = 0;
 	} else if (control == citeKeyField) {
         // this may occur if the cite key formatter fails to format
         if(error != nil){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:@"%@", error];
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key", @"") 
+                                                 defaultButton:nil
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                     informativeTextWithFormat:@"%@", error];
             
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+            [alert runSheetModalForWindow:[self window]];
             if(forceEndEditing)
                 [control setStringValue:[theBib citeKey]];
 		}else{
@@ -1461,6 +1467,8 @@ static int numberOfOpenEditors = 0;
     }
 }
 
+// send when the user wants to end editing
+// alert sheets must be app modal because this method returns a value and the editor window ccan close when this method returns
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
 	if (control == bibFields) {
 		
@@ -1482,13 +1490,13 @@ static int numberOfOpenEditors = 0;
 			}
 			
 			if (message) {
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
-                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                     informativeTextWithFormat:message];
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
+                                                     defaultButton:NSLocalizedString(@"OK", @"OK")
+                                                   alternateButton:nil
+                                                       otherButton:nil
+                                         informativeTextWithFormat:message];
                 
-                [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+                [alert runSheetModalForWindow:[self window]];
 				[cell setStringValue:@""];
 				return forceEndEditing;
 			}
@@ -1496,51 +1504,35 @@ static int numberOfOpenEditors = 0;
         		
 	} else if (control == citeKeyField) {
 		
-        if ([NSString isEmptyString:[control stringValue]]) {
+        NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] fragileCiteKeyCharacterSet];
+        NSRange r = [[control stringValue] rangeOfCharacterFromSet:invalidSet];
+        
+        if (r.location != NSNotFound) {
+            NSString *message = nil;
+            NSString *cancelButton = nil;
             
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Cite Key", @"Empty Cite Key") 
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Empty cite keys are not allowed.", @"")];
-            
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-            [control setStringValue:[theBib citeKey]];
-            return forceEndEditing;
-            
-        } else {
-            
-            NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] fragileCiteKeyCharacterSet];
-            NSRange r = [[control stringValue] rangeOfCharacterFromSet:invalidSet];
-            
-            if (r.location != NSNotFound) {
-                NSString *message = nil;
-                NSString *cancelButton = nil;
-                
-                if (forceEndEditing) {
-                    message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX.", @"");
-                } else {
-                    message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX. Do you want to continue editing with the invalid characters removed?", @"");
-                    cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
-                }
-                
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Invalid Value") 
-                                                     defaultButton:NSLocalizedString(@"OK", @"OK")
-                                                   alternateButton:cancelButton
-                                                       otherButton:nil
-                                         informativeTextWithFormat:message];
-                
-                int rv = [alert runSheetModalForWindow:[self window]];
-                
-                if (forceEndEditing || rv == NSAlertAlternateReturn) {
-                    return YES;
-                 } else {
-                    [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
-                    return NO;
-                }
+            if (forceEndEditing) {
+                message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX.", @"");
+            } else {
+                message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX. Do you want to continue editing with the invalid characters removed?", @"");
+                cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
             }
             
-		}
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Invalid Value") 
+                                                 defaultButton:NSLocalizedString(@"OK", @"OK")
+                                               alternateButton:cancelButton
+                                                   otherButton:nil
+                                     informativeTextWithFormat:message];
+            
+            int rv = [alert runSheetModalForWindow:[self window]];
+            
+            if (forceEndEditing || rv == NSAlertAlternateReturn) {
+                return YES;
+             } else {
+                [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
+                return NO;
+            }
+        }
 		
 	}
 	
@@ -2969,7 +2961,7 @@ static int numberOfOpenEditors = 0;
 		[ignoredKeys addObject:tmp]; \
 		entry = [bibFields insertEntry:tmp usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[theBib valueOfField:tmp]]; \
 		if ([tmp isEqualToString:BDSKCrossrefString]) \
-			[entry setFormatter:citeKeyFormatter]; \
+			[entry setFormatter:crossrefFormatter]; \
 		else \
 			[entry setFormatter:formCellFormatter]; \
 		if([editedTitle isEqualToString:tmp]) editedRow = i; \

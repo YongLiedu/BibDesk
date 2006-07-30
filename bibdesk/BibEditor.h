@@ -48,6 +48,7 @@
 @class BDSKCiteKeyFormatter;
 @class BDSKFieldNameFormatter;
 @class BDSKComplexStringFormatter;
+@class BDSKCrossrefFormatter;
 @class MacroFormWindowController;
 @class BDSKImagePopUpButton;
 @class BibItem;
@@ -131,6 +132,7 @@
 	
 // form cell formatter
     BDSKComplexStringFormatter *formCellFormatter;
+    BDSKCrossrefFormatter *crossrefFormatter;
 	
 // Author tableView
 	IBOutlet NSTableView *authorTableView;
