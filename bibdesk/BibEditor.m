@@ -1564,7 +1564,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)moveFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSDictionary *info = (NSDictionary *)info;
+    NSDictionary *info = (NSDictionary *)contextInfo;
     if (returnCode == NSAlertDefaultReturn) {
         NSArray *paperInfos = [NSArray arrayWithObject:info];
         NSString *fieldName = [info objectForKey:@"fieldName"];
@@ -1603,7 +1603,7 @@ static int numberOfOpenEditors = 0;
 		[status appendString:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
     } else if (isLocalFile) {
         NSString *newPath = [theBib localFilePathForField:fieldName];
-        if (oldURL != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
+        if (oldURL != nil && newPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move File?", @"Move File?") 
                                              defaultButton:NSLocalizedString(@"Yes", @"Yes") 
                                            alternateButton:NSLocalizedString(@"No", @"No") 
