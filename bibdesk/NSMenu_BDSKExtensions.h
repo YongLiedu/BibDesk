@@ -38,6 +38,9 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString *BDSKMenuTargetURL;
+extern NSString *BDSKMenuApplicationURL;
+
 // this must be implemented in the responder chain for submenuOfApplicationsForURL:, using the following implementation as reference
 /*
  - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
@@ -56,8 +59,8 @@
  
  // action for opening a file with a specific application
  - (void)openURLWithApplication:(id)sender{
-     NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
-     NSURL *targetURL = [[sender representedObject] valueForKey:@"targetURL"];
+     NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
+     NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
      
      if(nil == applicationURL)
          [self chooseApplicationToOpenURL:targetURL];

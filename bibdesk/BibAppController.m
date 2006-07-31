@@ -540,8 +540,8 @@
 
 // action for opening a file with a specific application
 - (void)openURLWithApplication:(id)sender{
-    NSURL *applicationURL = [[sender representedObject] valueForKey:@"applicationURL"];
-    NSURL *targetURL = [[sender representedObject] valueForKey:@"targetURL"];
+    NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
+    NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
     
     if(nil == applicationURL)
         [self chooseApplicationToOpenURL:targetURL];

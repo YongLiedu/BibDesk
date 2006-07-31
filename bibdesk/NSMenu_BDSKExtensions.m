@@ -40,6 +40,9 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 
+NSString *BDSKMenuTargetURL = @"BDSKMenuTargetURL";
+NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
+
 @implementation NSMenu (BDSKExtensions)
 
 + (NSMenu *)submenuOfApplicationsForURL:(NSURL *)aURL;
@@ -81,7 +84,7 @@
         
         // -[NSApp delegate] implements this
         [item setTarget:nil];
-        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, @"targetURL", applicationURL, @"applicationURL", nil];
+        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, applicationURL, BDSKMenuApplicationURL, nil];
         [item setRepresentedObject:representedObject];
         
         // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
@@ -89,14 +92,17 @@
         [image setSize:NSMakeSize(16,16)];
         [item setImage:image];
         [representedObject release];
-        [self addItem:item];
+        if([defaultEditorURL isEqual:applicationURL])
+            [self insertItem:item atIndex:0];
+        else
+            [self addItem:item];
         [item release];
     }
     
     // add the choose... item
     item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
     [item setTarget:nil];
-    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, @"targetURL", nil];
+    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, nil];
     [item setRepresentedObject:representedObject];
     [representedObject release];
     [self addItem:item];

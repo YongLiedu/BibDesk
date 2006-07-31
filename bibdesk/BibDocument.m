@@ -2873,7 +2873,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
-    NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] objectForKey:@"targetURL"];
+    NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
     if(theURL != nil)
         [menu fillWithApplicationsForURL:theURL];
 }
