@@ -37,7 +37,6 @@
  */
 
 #import "BibEditor_Toolbar.h"
-#import "BDSKMenuItem.h"
 #import <OmniAppKit/OAToolbarItem.h>
 #import "OAToolbarItem_BDSKExtensions.h"
 #import "BDSKImagePopUpButton.h"
@@ -57,7 +56,9 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibEditorToolbarIdentifier] autorelease];
     OAToolbarItem *item;
-    BDSKMenuItem *menuItem;
+    NSMenuItem *menuItem;
+    NSMenu *submenu;
+    NSZone *menuZone;
 
     toolbarItems = [[NSMutableDictionary alloc] initWithCapacity:7];
     
@@ -72,10 +73,11 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     // Add template toolbar items
     
     // View File
-	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View File",@"") 
-											 action:NULL
-									  keyEquivalent:@""] autorelease];
-    [menuItem setDelegate:self];
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View File",@"") 
+											                action:NULL
+                                                     keyEquivalent:@""] autorelease];
+	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
+    [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarViewLocalItemIdentifier];
     [item setDelegate:self];
     [item setLabel:NSLocalizedString(@"View File",@"")];
@@ -90,10 +92,11 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     [item release];
     
     // View Remote
-	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote",@"") 
-										   action:NULL
-									keyEquivalent:@""] autorelease];
-    [menuItem setDelegate:self];
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View Remote",@"") 
+											                action:NULL
+                                                     keyEquivalent:@""] autorelease];
+	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
+    [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarViewRemoteItemIdentifier];
     [item setDelegate:self];
     [item setLabel:NSLocalizedString(@"View Remote",@"")];
@@ -108,10 +111,11 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     [item release];
     
     // View in Drawer
-	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View in Drawer",@"") 
-											 action:NULL
-									  keyEquivalent:@""] autorelease];
-    [menuItem setDelegate:self];
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View in Drawer",@"") 
+											                action:NULL
+                                                     keyEquivalent:@""] autorelease];
+	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
+    [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarSnoopDrawerItemIdentifier];
     [item setDelegate:self];
     [item setLabel:NSLocalizedString(@"View in Drawer",@"")];
@@ -126,9 +130,9 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     [item release];
     
     // Authors
-	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"Authors",@"") 
-											 action:@selector(showPersonDetailCmd:)
-									  keyEquivalent:@""] autorelease];
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Authors",@"") 
+											                action:@selector(showPersonDetailCmd:)
+                                                     keyEquivalent:@""] autorelease];
     [menuItem setTarget:self];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarAuthorTableItemIdentifier];
     [item setDelegate:self];
@@ -220,18 +224,21 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
 		if (viewLocalToolbarItem != addedItem) {
 			[viewLocalToolbarItem autorelease];
 			viewLocalToolbarItem = [addedItem retain];
+            [[[viewLocalToolbarItem menuFormRepresentation] submenu] setDelegate:self];
 		}
     }
 	else if([[addedItem itemIdentifier] isEqualToString: BibEditorToolbarViewRemoteItemIdentifier]) {
 		if (viewRemoteToolbarItem != addedItem) {
 			[viewRemoteToolbarItem autorelease];
 			viewRemoteToolbarItem = [addedItem retain];
+            [[[viewRemoteToolbarItem menuFormRepresentation] submenu] setDelegate:self];
 		}
     }
 	else if([[addedItem itemIdentifier] isEqualToString: BibEditorToolbarSnoopDrawerItemIdentifier]) {
 		if (documentSnoopToolbarItem != addedItem) {
 			[documentSnoopToolbarItem autorelease];
 			documentSnoopToolbarItem = [addedItem retain];
+            [[[documentSnoopToolbarItem menuFormRepresentation] submenu] setDelegate:self];
 		}
     }
 

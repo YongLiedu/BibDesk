@@ -249,6 +249,8 @@
 - (IBAction)moveLinkedFile:(id)sender;
 - (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
+- (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;
+
 /*!
     @method     getSafariRecentDownloadsMenu
     @abstract   Returns a menu of items for local paths of recent downloads from Safari. Returns nil if there are no valid items.

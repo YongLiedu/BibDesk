@@ -418,29 +418,33 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
-    NSString *field = [menu title];
-    if(field)
-        [menu fillWithApplicationsForURL:[theBib URLForField:field]];
-}
-
-- (NSMenu *)submenuForMenuItem:(NSMenuItem *)menuItem{
-	if (menuItem == [viewLocalToolbarItem menuFormRepresentation]) {
-		return [self menuForImagePopUpButton:viewLocalButton];
-	} 
-	else if (menuItem == [viewRemoteToolbarItem menuFormRepresentation]) {
-		return [self menuForImagePopUpButton:viewRemoteButton];
-	} 
-	else if (menuItem == [documentSnoopToolbarItem menuFormRepresentation]) {
-		return [self menuForImagePopUpButton:documentSnoopButton];
-	} 
-	return nil;
+	if (menu == [[viewLocalToolbarItem menuFormRepresentation] submenu]) {
+		return [self updateMenu:menu forImagePopUpButton:viewLocalButton];
+	} else if (menu == [[viewRemoteToolbarItem menuFormRepresentation] submenu]) {
+		return [self updateMenu:menu forImagePopUpButton:viewRemoteButton];
+	} else if (menu == [[documentSnoopToolbarItem menuFormRepresentation] submenu]) {
+		return [self updateMenu:menu forImagePopUpButton:documentSnoopButton];
+	} else {
+        NSString *field = [menu title];
+        if(field)
+            [menu fillWithApplicationsForURL:[theBib URLForField:field]];
+    }
 }
 
 - (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    [self updateMenu:menu forImagePopUpButton:view];
+    return [menu autorelease];
+}
+
+- (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view{
 	NSMenu *submenu;
 	NSMenuItem *item;
 	NSURL *theURL;
+    
+    int i = [menu numberOfItems];
+    while (i-- > 1)
+        [menu removeItemAtIndex:i];
     
 	if (view == viewLocalButton) {
 		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] objectEnumerator];
@@ -582,8 +586,6 @@ static int numberOfOpenEditors = 0;
 		[menu addItem:item];
 		[item release];
 	}
-	
-	return [menu autorelease];
 }
 
 - (NSMenu *)getSafariRecentDownloadsMenu{
