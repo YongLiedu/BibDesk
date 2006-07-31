@@ -58,7 +58,7 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     OAToolbarItem *item;
     NSMenuItem *menuItem;
     NSMenu *submenu;
-    NSZone *menuZone;
+    NSZone *menuZone = [NSMenu menuZone];
 
     toolbarItems = [[NSMutableDictionary alloc] initWithCapacity:7];
     
