@@ -417,6 +417,12 @@ static int numberOfOpenEditors = 0;
     [field release];
 }
 
+- (void)menuNeedsUpdate:(NSMenu *)menu{
+    NSString *field = [menu title];
+    if(field)
+        [menu fillWithApplicationsForURL:[theBib URLForField:field]];
+}
+
 - (NSMenu *)submenuForMenuItem:(NSMenuItem *)menuItem{
 	if (menuItem == [viewLocalToolbarItem menuFormRepresentation]) {
 		return [self menuForImagePopUpButton:viewLocalButton];
@@ -457,7 +463,8 @@ static int numberOfOpenEditors = 0;
             
             theURL = [theBib URLForField:field];
             if(nil != theURL){
-                submenu = [NSMenu submenuOfApplicationsForURL:theURL];
+                submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:field] autorelease];
+                [submenu setDelegate:self];
                 item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
                                                   action:NULL
                                            keyEquivalent:@""];
@@ -530,7 +537,8 @@ static int numberOfOpenEditors = 0;
             
             theURL = [theBib URLForField:field];
             if(nil != theURL){
-                submenu = [NSMenu submenuOfApplicationsForURL:[theBib URLForField:field]];
+                submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:field] autorelease];
+                [submenu setDelegate:self];
                 item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
                                                                             action:NULL
                                                                      keyEquivalent:@""];
