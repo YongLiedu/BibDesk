@@ -178,8 +178,6 @@
 		3DE3916707FEF5E600BE3AE7 /* BibEditor_Toolbar.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE3916507FEF5E600BE3AE7 /* BibEditor_Toolbar.h */; };
 		3DE3916807FEF5E600BE3AE7 /* BibEditor_Toolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3916607FEF5E600BE3AE7 /* BibEditor_Toolbar.m */; };
 		3DE391BC07FF0EB500BE3AE7 /* BibDeskOpenCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C61075802E300C3F701 /* BibDeskOpenCommand.h */; };
-		3DE391F207FF260D00BE3AE7 /* BDSKMenuItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DE391F007FF260D00BE3AE7 /* BDSKMenuItem.h */; };
-		3DE391F307FF260D00BE3AE7 /* BDSKMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE391F107FF260D00BE3AE7 /* BDSKMenuItem.m */; };
 		3DFF355F0816B5460052F37C /* back_small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3DFF355E0816B5460052F37C /* back_small.tiff */; };
 		3DFF35610816B55B0052F37C /* forward_small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3DFF35600816B55B0052F37C /* forward_small.tiff */; };
 		3DFF35630816B5780052F37C /* reload_small.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 3DFF35620816B5780052F37C /* reload_small.tiff */; };
@@ -1004,8 +1002,6 @@
 		3DD300F5075C054D003FD2D7 /* BibField.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibField.m; sourceTree = "<group>"; };
 		3DE3916507FEF5E600BE3AE7 /* BibEditor_Toolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibEditor_Toolbar.h; sourceTree = "<group>"; };
 		3DE3916607FEF5E600BE3AE7 /* BibEditor_Toolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibEditor_Toolbar.m; sourceTree = "<group>"; };
-		3DE391F007FF260D00BE3AE7 /* BDSKMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMenuItem.h; sourceTree = "<group>"; };
-		3DE391F107FF260D00BE3AE7 /* BDSKMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMenuItem.m; sourceTree = "<group>"; };
 		3DFF355E0816B5460052F37C /* back_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = back_small.tiff; path = Images/back_small.tiff; sourceTree = "<group>"; };
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
@@ -1763,7 +1759,6 @@
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				F9022C54075802E300C3F701 /* BDSKLinkButton.m */,
-				3DE391F107FF260D00BE3AE7 /* BDSKMenuItem.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlay.m */,
 				CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */,
 				F961FA9508C9429700332460 /* BDSKPrintableView.m */,
@@ -2118,7 +2113,6 @@
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
 				F9022C53075802E300C3F701 /* BDSKLinkButton.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
-				3DE391F007FF260D00BE3AE7 /* BDSKMenuItem.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
 				F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */,
 				F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */,
@@ -2437,7 +2431,6 @@
 				F9F78CD407D5320D004B68AF /* BDSKStringEncodingManager.h in Headers */,
 				3DE3916707FEF5E600BE3AE7 /* BibEditor_Toolbar.h in Headers */,
 				3DE391BC07FF0EB500BE3AE7 /* BibDeskOpenCommand.h in Headers */,
-				3DE391F207FF260D00BE3AE7 /* BDSKMenuItem.h in Headers */,
 				3D86633F0802C25800FF1724 /* BDSKTypeInfoEditor.h in Headers */,
 				3D866C2808031CEC00FF1724 /* BDSKCharacterConversion.h in Headers */,
 				27AFAF9C080D1E1B0096F5D2 /* BDSKTextImportController.h in Headers */,
@@ -3247,7 +3240,6 @@
 				F9A6772E07D2D57F00782ACD /* MultiplePageView.m in Sources */,
 				F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */,
 				3DE3916807FEF5E600BE3AE7 /* BibEditor_Toolbar.m in Sources */,
-				3DE391F307FF260D00BE3AE7 /* BDSKMenuItem.m in Sources */,
 				3D8663400802C25800FF1724 /* BDSKTypeInfoEditor.m in Sources */,
 				3D866C2908031CEC00FF1724 /* BDSKCharacterConversion.m in Sources */,
 				27AFAF9D080D1E1B0096F5D2 /* BDSKTextImportController.m in Sources */,
