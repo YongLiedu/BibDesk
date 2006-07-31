@@ -2801,6 +2801,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		
 		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
         NSURL *theURL;
+        NSDictionary *representedObject;
         
 		if([[BibTypeManager sharedManager] isLocalURLField:tcId]){
 			myMenu = [[fileMenu copyWithZone:[NSMenu menuZone]] autorelease];
@@ -2808,12 +2809,19 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 			[[myMenu itemAtIndex:1] setRepresentedObject:tcId];
             theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
             if(nil != theURL){
-                submenu = [NSMenu submenuOfApplicationsForURL:theURL];
+                submenu = [[NSMenu  allocWithZone:[NSMenu menuZone]] init];
+                [submenu setDelegate:self];
+                theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
+                representedObject = [NSDictionary dictionaryWithObjectsAndKeys:theURL, @"targetURL", nil];
+                [theItem setRepresentedObject:representedObject];
+                [submenu addItem:theItem];
                 theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open With",@"Open Local-Url file") 
                                                                                action:NULL
                                                                         keyEquivalent:@""];
                 [theItem setSubmenu:submenu];
+                [theItem setRepresentedObject:representedObject];
                 [myMenu insertItem:theItem atIndex:0];
+                [submenu release];
                 [theItem release];
             }
 		}else if([[BibTypeManager sharedManager] isRemoteURLField:tcId]){
@@ -2821,12 +2829,18 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
             theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
             if(nil != theURL){
-                submenu = [NSMenu submenuOfApplicationsForURL:theURL];
+                submenu = [[NSMenu  allocWithZone:[NSMenu menuZone]] init];
+                [submenu setDelegate:self];
+                theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
+                representedObject = [NSDictionary dictionaryWithObjectsAndKeys:theURL, @"targetURL", nil];
+                [theItem setRepresentedObject:representedObject];
+                [submenu addItem:theItem];
                 theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open With",@"Open Local-Url file") 
                                                                                action:NULL
                                                                         keyEquivalent:@""];
                 [theItem setSubmenu:submenu];
                 [myMenu insertItem:theItem atIndex:0];
+                [submenu release];
                 [theItem release];
             }            
 		}else{
@@ -2856,6 +2870,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		return nil;
 	
 	return myMenu;
+}
+
+- (void)menuNeedsUpdate:(NSMenu *)menu{
+    NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] objectForKey:@"targetURL"];
+    if(theURL != nil)
+        [menu fillWithApplicationsForURL:theURL];
 }
 
 #pragma mark -
