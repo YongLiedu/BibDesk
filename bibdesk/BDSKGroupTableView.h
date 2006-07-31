@@ -53,6 +53,7 @@
 @interface BDSKGroupTableView : OAGradientTableView {
     OATypeAheadSelectionHelper *typeAheadHelper;
 }
+- (NSPopUpButtonCell *)popUpHeaderCell;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 - (void)updateHighlights;
 

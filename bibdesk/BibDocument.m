@@ -352,13 +352,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
 	[cornerViewButton setMenu:[[[NSApp delegate] columnsMenuItem] submenu]];
     
-	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerCell setAction:@selector(changeGroupFieldAction:)];
 	[headerCell setTarget:self];
 	[headerCell setMenu:[self groupFieldsMenu]];
-	[(BDSKHeaderPopUpButtonCell *)headerCell setIndicatorImage:[NSImage imageNamed:sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
-    [(BDSKHeaderPopUpButtonCell *)headerCell setUsesItemFromMenu:NO];
+	[headerCell setIndicatorImage:[NSImage imageNamed:sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+    [headerCell setUsesItemFromMenu:NO];
 	[headerCell setTitle:currentGroupField];
     if([headerCell itemWithTitle:currentGroupField])
         [headerCell selectItemWithTitle:currentGroupField];

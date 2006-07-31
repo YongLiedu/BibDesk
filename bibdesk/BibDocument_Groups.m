@@ -789,8 +789,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)changeGroupFieldAction:(id)sender{
-	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
 	NSString *field = ([headerCell indexOfSelectedItem] == 0) ? @"" : [headerCell titleOfSelectedItem];
     
 	if(![field isEqualToString:currentGroupField]){
@@ -825,8 +824,7 @@ The groupedPublications array is a subset of the publications array, developed b
                                                         object:self
                                                       userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
     
-	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
 	
 	[headerCell insertItemWithTitle:newGroupField atIndex:[array count]];
 	[self setCurrentGroupField:newGroupField];
@@ -840,8 +838,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }    
 
 - (IBAction)addGroupFieldAction:(id)sender{
-	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
 	
 	[headerCell setTitle:currentGroupField];
     if ([currentGroupField isEqualToString:@""])
@@ -873,8 +870,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];
     [array release];
     
-	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
 	
     [headerCell removeItemWithTitle:oldGroupField];
     if([oldGroupField isEqualToString:currentGroupField]){
@@ -893,8 +889,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)removeGroupFieldAction:(id)sender{
-	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+	NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
 	
 	[headerCell setTitle:currentGroupField];
     if ([currentGroupField isEqualToString:@""])
@@ -914,8 +909,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification{
     // Handle changes to the popup from other documents.  The userInfo for this notification uses key-value observing keys: NSKeyValueChangeNewKey is the affected field (whether add/remove), and NSKeyValueChangeKindKey will be either insert/remove
     if([notification object] != self){
-        BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
-        NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
+        NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
         
         id userInfo = [notification userInfo];
         NSParameterAssert(userInfo && [userInfo valueForKey:NSKeyValueChangeKindKey]);
@@ -1374,7 +1368,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     // Set the graphic for the new column header
-	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[(BDSKGroupTableHeaderView *)[groupTableView headerView] popUpHeaderCell];
+	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerPopup setIndicatorImage:[NSImage imageNamed:sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
 
     [groupTableView reloadData];

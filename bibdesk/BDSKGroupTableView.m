@@ -85,6 +85,10 @@
     [typeAheadHelper setCyclesSimilarResults:NO];
 }
 
+- (NSPopUpButtonCell *)popUpHeaderCell{
+	return [(BDSKGroupTableHeaderView *)[self headerView] popUpHeaderCell];
+}
+
 - (void)reloadData{
     [super reloadData];
     [typeAheadHelper rebuildTypeAheadSearchCache]; // if we resorted or searched, the cache is stale
