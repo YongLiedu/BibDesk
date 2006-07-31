@@ -3560,6 +3560,30 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @end multitable
 
+@subheading Appending
+
+@multitable {stringByAppendingCommaAndSpaceIfNotEmpty} {}
+@headitem Key @tab Description
+@item stringBySurroundingWithSpacesIfNotEmpty
+@tab 
+@item stringByAppendingSpaceIfNotEmpty
+@tab 
+@item stringBySurroundingWithSpacesIfNotEmpty
+@tab 
+@item stringByAppendingDoubleSpaceIfNotEmpty
+@tab 
+@item stringByAppendingCommaAndSpaceIfNotEmpty
+@tab 
+@item stringByPrependingSpaceIfNotEmpty
+@tab 
+@item stringByAppendingCommaIfNotEmpty
+@tab 
+@item stringByAppendingFullStopIfNotEmpty
+@tab 
+@item parenthesizedStringIfNotEmpty
+@tab 
+@end multitable
+
 @subheading File paths
 
 @multitable {stringByAbbreviatingWithTildeInPath} {}
