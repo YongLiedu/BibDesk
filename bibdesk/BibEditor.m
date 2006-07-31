@@ -60,7 +60,6 @@
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 #import "MacroTextFieldWindowController.h"
-#import "BDSKMenuItem.h"
 #import "BDSKForm.h"
 #import "BDSKStatusBar.h"
 #import "BibAuthor.h"
