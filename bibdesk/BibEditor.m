@@ -418,11 +418,11 @@ static int numberOfOpenEditors = 0;
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
 	if (menu == [[viewLocalToolbarItem menuFormRepresentation] submenu]) {
-		return [self updateMenu:menu forImagePopUpButton:viewLocalButton];
+        [self updateMenu:menu forImagePopUpButton:viewLocalButton];
 	} else if (menu == [[viewRemoteToolbarItem menuFormRepresentation] submenu]) {
-		return [self updateMenu:menu forImagePopUpButton:viewRemoteButton];
+        [self updateMenu:menu forImagePopUpButton:viewRemoteButton];
 	} else if (menu == [[documentSnoopToolbarItem menuFormRepresentation] submenu]) {
-		return [self updateMenu:menu forImagePopUpButton:documentSnoopButton];
+        [self updateMenu:menu forImagePopUpButton:documentSnoopButton];
 	} else {
         NSString *field = [menu title];
         if(field)
