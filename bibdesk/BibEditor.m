@@ -2820,11 +2820,18 @@ static int numberOfOpenEditors = 0;
 }
 
 - (IBAction)showPersonDetailCmd:(id)sender{
-	int i = [authorTableView clickedRow];
-    if(i != -1)
-		[self showPersonDetail:[[theBib sortedPeople] objectAtIndex:i]];
-    else
-        NSBeep();
+    if ([sender isKindOfClass:[NSMenuItem class]]) {
+        NSEnumerator *personEnum = [[theBib sortedPeople] objectEnumerator];
+        BibAuthor *person;
+        while (person = [personEnum nextObject])
+            [self showPersonDetail:person];
+    } else {
+        int i = [authorTableView clickedRow];
+        if(i != -1)
+            [self showPersonDetail:[[theBib sortedPeople] objectAtIndex:i]];
+        else
+            NSBeep();
+    }
 }
 
 - (void)showPersonDetail:(BibAuthor *)person{
