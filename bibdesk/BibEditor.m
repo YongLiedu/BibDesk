@@ -283,6 +283,7 @@ static int numberOfOpenEditors = 0;
 	[viewLocalToolbarItem release];
 	[viewRemoteToolbarItem release];
 	[documentSnoopToolbarItem release];
+	[authorsToolbarItem release];
 	[statusBar release];
 	[toolbarItems release];
 	[macroTextFieldWC release];
@@ -423,6 +424,8 @@ static int numberOfOpenEditors = 0;
         [self updateMenu:menu forImagePopUpButton:viewRemoteButton];
 	} else if (menu == [[documentSnoopToolbarItem menuFormRepresentation] submenu]) {
         [self updateMenu:menu forImagePopUpButton:documentSnoopButton];
+	} else if (menu == [[authorsToolbarItem menuFormRepresentation] submenu]) {
+        [self updateAuthorsToolbarMenu:menu];
 	} else {
         NSString *field = [menu title];
         if(field)
@@ -799,6 +802,25 @@ static int numberOfOpenEditors = 0;
     }
     
 	return ([menu numberOfItems] > 0) ? menu : nil;
+}
+
+- (void)updateAuthorsToolbarMenu:(NSMenu *)menu{
+    NSArray *thePeople = [theBib sortedPeople];
+    int count = [thePeople count];
+    int i = [menu numberOfItems];
+    BibAuthor *person;
+    NSMenuItem *item;
+    while (i-- > 1)
+        [menu removeItemAtIndex:i];
+    if (count == 0)
+        return;
+    for (i = 0; i < count; i++) {
+        person = [thePeople objectAtIndex:i];
+        item = [menu addItemWithTitle:[person normalizedName] action:@selector(showPersonDetailCmd:) keyEquivalent:@""];
+        [item setTag:i];
+    }
+    item = [menu addItemWithTitle:NSLocalizedString(@"Show All", @"Show all") action:@selector(showPersonDetailCmd:) keyEquivalent:@""];
+    [item setTag:count];
 }
 
 - (void)dummy:(id)obj{}
@@ -2819,17 +2841,22 @@ static int numberOfOpenEditors = 0;
 }
 
 - (IBAction)showPersonDetailCmd:(id)sender{
-    if ([sender isKindOfClass:[NSMenuItem class]]) {
-        NSEnumerator *personEnum = [[theBib sortedPeople] objectEnumerator];
-        BibAuthor *person;
-        while (person = [personEnum nextObject])
-            [self showPersonDetail:person];
-    } else {
-        int i = [authorTableView clickedRow];
-        if(i != -1)
-            [self showPersonDetail:[[theBib sortedPeople] objectAtIndex:i]];
-        else
-            NSBeep();
+    NSArray *thePeople = [theBib sortedPeople];
+    int count = [thePeople count];
+    int i = -1;
+    
+    if([sender isKindOfClass:[NSMenuItem class]])
+        i = [sender tag];
+    else if (sender == authorTableView)
+        i = [authorTableView clickedRow];
+    
+    if(i == -1){
+        NSBeep();
+    }else if (i == count){
+        for(i = 0; i < count; i++)
+            [self showPersonDetail:[thePeople objectAtIndex:i]];
+    }else{
+        [self showPersonDetail:[thePeople objectAtIndex:i]];
     }
 }
 

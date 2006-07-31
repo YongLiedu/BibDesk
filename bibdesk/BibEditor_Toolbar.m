@@ -131,9 +131,10 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     
     // Authors
 	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Authors",@"") 
-											                action:@selector(showPersonDetailCmd:)
+											                action:NULL
                                                      keyEquivalent:@""] autorelease];
-    [menuItem setTarget:self];
+	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
+    [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarAuthorTableItemIdentifier];
     [item setDelegate:self];
     [item setLabel:NSLocalizedString(@"Authors",@"")];
@@ -239,6 +240,13 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
 			[documentSnoopToolbarItem autorelease];
 			documentSnoopToolbarItem = [addedItem retain];
             [[[documentSnoopToolbarItem menuFormRepresentation] submenu] setDelegate:self];
+		}
+    }
+	else if([[addedItem itemIdentifier] isEqualToString: BibEditorToolbarAuthorTableItemIdentifier]) {
+		if (authorsToolbarItem != addedItem) {
+			[authorsToolbarItem autorelease];
+			authorsToolbarItem = [addedItem retain];
+            [[[authorsToolbarItem menuFormRepresentation] submenu] setDelegate:self];
 		}
     }
 

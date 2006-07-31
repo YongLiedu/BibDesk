@@ -92,6 +92,7 @@
 	NSToolbarItem *viewLocalToolbarItem;
 	NSToolbarItem *viewRemoteToolbarItem;
 	NSToolbarItem *documentSnoopToolbarItem;
+	NSToolbarItem *authorsToolbarItem;
     IBOutlet NSScrollView *fieldsScrollView;
 	IBOutlet BDSKImagePopUpButton *actionMenuButton;
     // ----------------------------------------------------------------------------------------
@@ -279,6 +280,8 @@
     @result     (description)
 */
 - (NSMenu *)recentDownloadsMenu;
+
+- (void)updateAuthorsToolbarMenu:(NSMenu *)menu;
 
 /*!
     @method     setLocalURLPathFromMenuItem
