@@ -488,7 +488,7 @@
 		return YES;
 	}
     else if (act == @selector(openURLWithApplication:)) {
-        NSURL *theURL = [[menuItem representedObject] valueForKey:@"targetURL"];
+        NSURL *theURL = [[menuItem representedObject] valueForKey:BDSKMenuTargetURL];
         if([theURL isFileURL])
             theURL = [theURL fileURLByResolvingAliases];
         return (theURL == nil ? NO : YES);

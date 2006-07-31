@@ -2812,7 +2812,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 submenu = [[NSMenu  allocWithZone:[NSMenu menuZone]] init];
                 [submenu setDelegate:self];
                 theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
-                representedObject = [NSDictionary dictionaryWithObjectsAndKeys:theURL, @"targetURL", nil];
+                representedObject = [NSDictionary dictionaryWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
                 [theItem setRepresentedObject:representedObject];
                 [submenu addItem:theItem];
                 theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open With",@"Open Local-Url file") 
@@ -2832,7 +2832,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 submenu = [[NSMenu  allocWithZone:[NSMenu menuZone]] init];
                 [submenu setDelegate:self];
                 theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
-                representedObject = [NSDictionary dictionaryWithObjectsAndKeys:theURL, @"targetURL", nil];
+                representedObject = [NSDictionary dictionaryWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
                 [theItem setRepresentedObject:representedObject];
                 [submenu addItem:theItem];
                 theItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Open With",@"Open Local-Url file") 
