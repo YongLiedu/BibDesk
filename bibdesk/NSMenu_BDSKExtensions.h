@@ -73,5 +73,6 @@
 @interface NSMenu (BDSKExtensions)
 
 + (NSMenu *)submenuOfApplicationsForURL:(NSURL *)aURL;
+- (void)fillWithApplicationsForURL:(NSURL *)aURL;
 
 @end

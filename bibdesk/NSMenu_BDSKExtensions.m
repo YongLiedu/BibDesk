@@ -44,14 +44,23 @@
 
 + (NSMenu *)submenuOfApplicationsForURL:(NSURL *)aURL;
 {
-    NSZone *menuZone = [self menuZone];
-    NSMenu *submenu = [[[self allocWithZone:menuZone] initWithTitle:@""] autorelease];
-    
-    NSMenuItem *item;
+    NSMenu *submenu = [[[self allocWithZone:[self menuZone]] initWithTitle:@""] autorelease];
+    [submenu fillWithApplicationsForURL:aURL];
+    return submenu;
+}
+
+- (void)fillWithApplicationsForURL:(NSURL *)aURL;
+{    
+    int i = [self numberOfItems];
+    while(i--)
+        [self removeItemAtIndex:i];
     
     // if there's no url, just return an empty submenu, since we can't find applications
     if(nil == aURL)
-        return submenu;
+        return;
+    
+    NSZone *menuZone = [NSMenu menuZone];
+    NSMenuItem *item;
     
     NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
     NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:aURL] objectEnumerator];
@@ -80,7 +89,7 @@
         [image setSize:NSMakeSize(16,16)];
         [item setImage:image];
         [representedObject release];
-        [submenu addItem:item];
+        [self addItem:item];
         [item release];
     }
     
@@ -90,10 +99,8 @@
     representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, @"targetURL", nil];
     [item setRepresentedObject:representedObject];
     [representedObject release];
-    [submenu addItem:item];
+    [self addItem:item];
     [item release];
-    
-    return submenu;
 }
 
 
