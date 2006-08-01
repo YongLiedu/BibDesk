@@ -90,16 +90,25 @@
 
 - (NSString *)citeKey { return @"citeKey"; }
 
-- (NSString *)title { return [self valueOfField:BDSKTitleString]; }
+- (NSString *)title { return [pubFields objectForKey:BDSKTitleString]; }
 
-- (NSString *)container { return [self valueOfField:BDSKJournalString]; }
+- (NSString *)container { return [pubFields objectForKey:BDSKJournalString]; }
 
-- (NSString *)valueOfField:(NSString *)field { 
+- (NSString *)valueOfGenericField:(NSString *)field { 
     NSString *value = [pubFields objectForKey:field];
     return (value != nil) ? value : field;
 }
 
-- (NSString *)localFilePathForField:(NSString *)field { return [self valueOfField:field]; }
+- (BOOL)boolValueOfField:(NSString *)field { 
+    return NO;
+}
+
+- (int)triStateValueOfField:(NSString *)field { 
+    NSString *value = [pubFields objectForKey:field];
+    return NSMixedState;
+}
+
+- (NSString *)localFilePathForField:(NSString *)field { return [pubFields objectForKey:field]; }
 
 - (NSArray *)peopleArrayForField:(NSString *)field { 
     return ([field isEqualToString:BDSKAuthorString]) ? pubAuthors : [NSArray array];
@@ -144,12 +153,12 @@
         [authors addObject:[auth abbreviatedName]];
     
     [string appendStrings:[authors componentsJoinedByCommaAndAnd], @",\n", 
-                          [self valueOfField:BDSKTitleString], @",\n", 
-                          [self valueOfField:BDSKJournalString], @", ", 
-                          [self valueOfField:BDSKPagesString], @":", 
-                          [self valueOfField:BDSKVolumeString], @", ", 
-                          [self valueOfField:BDSKMonthString], @", ", 
-                          [self valueOfField:BDSKYearString], @".", nil];
+                          [pubFields objectForKey:BDSKTitleString], @",\n", 
+                          [pubFields objectForKey:BDSKJournalString], @", ", 
+                          [pubFields objectForKey:BDSKPagesString], @":", 
+                          [pubFields objectForKey:BDSKVolumeString], @", ", 
+                          [pubFields objectForKey:BDSKMonthString], @", ", 
+                          [pubFields objectForKey:BDSKYearString], @".", nil];
     return string;
 }
 
