@@ -59,6 +59,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     NSMutableArray *itemNodes = [[NSMutableArray alloc] initWithCapacity:4];
     NSString *appSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    NSString *templatesPath = [appSupportPath stringByAppendingPathComponent:@"Templates"];
     BDSKTemplate *template = nil;
     NSURL *fileURL = nil;
     
@@ -70,14 +71,14 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template release];
             
     // main page template
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/htmlExportTemplate.html"]];
+    fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"htmlExportTemplate.html"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
     
     // a user could potentially have templates for multiple BibTeX types; we could add all of those, as well
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/htmlItemExportTemplate.html"]];
+    fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"htmlItemExportTemplate.html"]];
     [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
     
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/htmlExportStyleSheet.css"]];
+    fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"htmlExportStyleSheet.css"]];
     [template addChildWithURL:fileURL role:BDSKTemplateAccessoryString];
     
     // RTF template
@@ -86,7 +87,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfExportTemplate.rtf"]];
+    fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"rtfExportTemplate.rtf"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
     
     // RTFD template
@@ -95,7 +96,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"rtfd" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfdExportTemplate.rtfd"]];
+    fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"rtfdExportTemplate.rtfd"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
         
     // RSS template
@@ -104,7 +105,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"rss" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rssExportTemplate.rss"]];
+    fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"rssExportTemplate.rss"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
         
     // Doc template
@@ -113,7 +114,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     [template setValue:@"doc" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
-    fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/docExportTemplate.doc"]];
+    fileURL = [NSURL fileURLWithPath:[templatesPath stringByAppendingPathComponent:@"docExportTemplate.doc"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];  
             
     return [itemNodes autorelease];

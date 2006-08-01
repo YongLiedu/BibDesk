@@ -225,7 +225,8 @@
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *applicationSupport = [fileManager currentApplicationSupportPathForCurrentUser];
-    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:@"Templates"];
+    NSString *templates = @"Templates";
+    NSString *templatesPath = [applicationSupport stringByAppendingPathComponent:templates];
     BOOL success = NO;
     
     if ([fileManager fileExistsAtPath:templatesPath isDirectory:&success] == NO) {
@@ -233,18 +234,18 @@
     }
     
     if (success) {
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportTemplate.html" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlItemExportTemplate.html" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/htmlExportStyleSheet.css" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rssExportTemplate.rss" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfExportTemplate.rtf" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfdExportTemplate.rtfd" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/docExportTemplate.doc" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/citeServiceTemplate.txt" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/textServiceTemplate.txt" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate.rtf" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate default item.rtf" overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:@"Templates/rtfServiceTemplate book.rtf" overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportTemplate.html"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlItemExportTemplate.html"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportStyleSheet.css"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rssExportTemplate.rss"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfExportTemplate.rtf"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfdExportTemplate.rtfd"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"docExportTemplate.doc"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"citeServiceTemplate.txt"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"textServiceTemplate.txt"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate.rtf"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate default item.rtf"] overwrite:overwrite];
+        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate book.rtf"] overwrite:overwrite];
     }    
 }
 
