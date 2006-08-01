@@ -594,7 +594,7 @@ static int numberOfOpenEditors = 0;
     if(NULL == downloadPlistURL){
         NSString *downloadPlistFileName = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
         downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Safari"];
-        downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"downloads.plist"];
+        downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Downloads.plist"];
         downloadPlistURL = CFURLCreateWithFileSystemPath(alloc, (CFStringRef)downloadPlistFileName, kCFURLPOSIXPathStyle, FALSE);
     }
     Boolean success;
