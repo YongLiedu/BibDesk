@@ -123,8 +123,8 @@
 		}else{
 			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @""), 
 											 @"%@",
-											 NSLocalizedString(@"Go to Preferences", @""), 
-											 NSLocalizedString(@"Revert to Default", @""), 
+											 NSLocalizedString(@"Go to Preferences", @"Go to preferences"), 
+											 NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format"), 
 											 nil, error, nil);
 			if (button == NSAlertAlternateReturn){
 				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
@@ -145,8 +145,8 @@
 		}else{
 			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @""), 
 											 @"%@",
-											 NSLocalizedString(@"Go to Preferences", @""), 
-											 NSLocalizedString(@"Revert to Default", @""), 
+											 NSLocalizedString(@"Go to Preferences", @"Go to preferences"), 
+											 NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format"), 
 											 nil, error, nil);
 			if (button == NSAlertAlternateReturn){
 				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
@@ -911,7 +911,7 @@
 - (void)showInputManagerUpdateAlert{
     NSAlert *anAlert = [NSAlert alertWithMessageText:@"Autocomplete Plugin Needs Update"
                                        defaultButton:[NSLocalizedString(@"Open", @"Open") stringByAppendingString:[NSString horizontalEllipsisString]]
-                                     alternateButton:NSLocalizedString(@"Cancel", @"Cancel the update")
+                                     alternateButton:NSLocalizedString(@"Cancel", @"Cancel")
                                          otherButton:nil
                            informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?",@"")];
     int rv = [anAlert runModal];

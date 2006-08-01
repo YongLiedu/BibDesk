@@ -98,7 +98,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		[controlBox setNeedsDisplay:YES];
 	} else {
 		[self setCiteKeyFormatInvalidWarning:YES message:error];
-		[citeKeyLine setStringValue:NSLocalizedString(@"Invalid Format", @"Cite key preview for invalid format")];
+		[citeKeyLine setStringValue:NSLocalizedString(@"Invalid Format", @"Preview for invalid autogeneration format")];
 		if (![formatSheet isVisible])
 			[self showFormatSheet:self];
 	}
@@ -236,12 +236,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	formatString = [defaults stringForKey:BDSKCiteKeyFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set cite-key format is valid, so we can keep it 
-		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Cite Key Format");
+		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to last valid autogeneration format");
 	}
 	
 	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format",@"") 
 										 defaultButton:NSLocalizedString(@"Keep Editing", @"Keep Editing") 
-									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to Default Cite Key Format") 
+									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format") 
 										   otherButton:otherButton
 							 informativeTextWithFormat:@"%@", error];
 	int rv = [alert runSheetModalForWindow:formatSheet];
@@ -291,7 +291,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		[formatWarningButton setToolTip:message];
 	}else{
 		[formatWarningButton setImage:nil];
-		[formatWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?
+		[formatWarningButton setToolTip:nil];
 	}
 	[formatWarningButton setEnabled:set];
 	[formatSheetField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?

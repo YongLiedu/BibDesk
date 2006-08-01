@@ -270,7 +270,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             NSOpenPanel *openPanel = [NSOpenPanel openPanel];
             [openPanel setCanChooseDirectories:YES];
             [openPanel setCanCreateDirectories:NO];
-            [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
+            [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
             
             // start the panel in the same directory as the item's existing path, or fall back to app support
             NSString *dirPath = [[[item representedFileURL] path] stringByDeletingLastPathComponent];
@@ -509,7 +509,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         }
         
         // add the choose... item
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"") stringByAppendingEllipsis] action:@selector(editFile:) keyEquivalent:@""];
+        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"Choose") stringByAppendingEllipsis] action:@selector(editFile:) keyEquivalent:@""];
         [item setTarget:self];
         [item setRepresentedObject:nil];
         [submenu addItem:item];

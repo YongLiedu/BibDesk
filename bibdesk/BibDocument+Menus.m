@@ -316,7 +316,7 @@
 	if (n == 0 || m == 0) {
 		// no selection
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove from Group", @"Remove from Group");
+			s = NSLocalizedString(@"Remove from Group", @"Remove from group");
 			[menuItem setTitle:s];
 		}
 		return NO;

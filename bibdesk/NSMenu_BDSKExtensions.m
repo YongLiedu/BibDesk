@@ -112,7 +112,7 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     }
     
     // add the choose... item
-    item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
+    item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
     [item setTarget:nil];
     representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, nil];
     [item setRepresentedObject:representedObject];

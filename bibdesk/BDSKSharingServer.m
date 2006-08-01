@@ -347,35 +347,34 @@ NSString *BDSKComputerName() {
     NSString *errorMessage = nil;
     switch(err){
         case NSNetServicesUnknownError:
-            errorMessage = @"Unknown net services error";
+            errorMessage = NSLocalizedString(@"Unknown net services error", @"");
             break;
         case NSNetServicesCollisionError:
-            errorMessage = @"Net services collision error";
+            errorMessage = NSLocalizedString(@"Net services collision error", @"");
             break;
         case NSNetServicesNotFoundError:
-            errorMessage = @"Net services not found error";
+            errorMessage = NSLocalizedString(@"Net services not found error", @"");
             break;
         case NSNetServicesActivityInProgress:
-            errorMessage = @"Net services reports activity in progress";
+            errorMessage = NSLocalizedString(@"Net services reports activity in progress", @"");
             break;
         case NSNetServicesBadArgumentError:
-            errorMessage = @"Net services bad argument error";
+            errorMessage = NSLocalizedString(@"Net services bad argument error", @"");
             break;
         case NSNetServicesCancelledError:
-            errorMessage = @"Cancelled net service";
+            errorMessage = NSLocalizedString(@"Cancelled net service", @"");
             break;
         case NSNetServicesInvalidError:
-            errorMessage = @"Net services invalid error";
+            errorMessage = NSLocalizedString(@"Net services invalid error", @"");
             break;
         case NSNetServicesTimeoutError:
-            errorMessage = @"Net services timeout error";
+            errorMessage = NSLocalizedString(@"Net services timeout error", @"");
             break;
         default:
-            errorMessage = @"Unrecognized error code from net services";
+            errorMessage = NSLocalizedString(@"Unrecognized error code from net services", @"");
             break;
     }
     
-    errorMessage = NSLocalizedString(errorMessage, @"");
     NSLog(@"-[%@ %@] reports \"%@\"", [self class], NSStringFromSelector(_cmd), errorMessage);
     
     NSString *errorDescription = NSLocalizedString(@"Unable to Share This Document", @"");

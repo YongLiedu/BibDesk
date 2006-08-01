@@ -1023,8 +1023,8 @@ enum {
 	
 	if(shouldMove == NSMixedState){
 		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Linked Files?", @"")
-											 defaultButton:NSLocalizedString(@"Move", @"Move")
-										   alternateButton:NSLocalizedString(@"Don't Move", @"Don't Move")
+											 defaultButton:NSLocalizedString(@"Move", @"Move file")
+										   alternateButton:NSLocalizedString(@"Don't Move", @"Don't move file")
 											   otherButton:nil
 								 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked files to the new location?", @"")];
 		int rv = [alert runSheetModalForWindow:[self window]];

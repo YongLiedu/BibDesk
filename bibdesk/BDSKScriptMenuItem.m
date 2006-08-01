@@ -294,7 +294,7 @@ scriptSort(id script1, id script2, void *context)
         NSString *errorText, *messageText, *okButton;
 
         errorText = [NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"script loading error"), scriptName];
-        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script loading error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
         okButton = NSLocalizedString(@"OK", @"OK");
         NSRunAlertPanel(errorText, messageText, okButton, nil, nil);
         return;
@@ -304,7 +304,7 @@ scriptSort(id script1, id script2, void *context)
         NSString *errorText, *messageText, *okButton, *editButton;
 
         errorText = [NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"script execute error"), scriptName];
-        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script execute error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
         okButton = NSLocalizedString(@"OK", "OK");
         editButton = NSLocalizedString(@"Edit Script", @"Edit Script");
         if (NSRunAlertPanel(errorText, messageText, okButton, editButton, nil) == NSAlertAlternateReturn) {

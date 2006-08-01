@@ -120,7 +120,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		[controlBox setNeedsDisplay:YES];
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];
-		[previewTextField setStringValue:NSLocalizedString(@"Invalid Format", @"Local-url preview for invalid format")];
+		[previewTextField setStringValue:NSLocalizedString(@"Invalid Format", @"Preview for invalid autogeneration format")];
 		if (![formatSheet isVisible])
 			[self showFormatSheet:self];
 	}
@@ -150,7 +150,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	[openPanel setCanChooseDirectories:YES];
 	[openPanel setCanCreateDirectories:YES];
 	[openPanel setResolvesAliases:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose directory")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
     [openPanel beginSheetForDirectory:nil 
 								 file:nil
 								types:nil
@@ -317,12 +317,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set local-url format is valid, so we can keep it 
-		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Local-Url Format");
+		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to last valid autogeneration format");
 	}
 	
 	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format",@"") 
 										 defaultButton:NSLocalizedString(@"Keep Editing", @"Keep Editing") 
-									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to Default Local-Url Format") 
+									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format") 
 										   otherButton:otherButton
 							 informativeTextWithFormat:@"%@", error];
 	int rv = [alert runSheetModalForWindow:formatSheet];
@@ -372,7 +372,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		[formatWarningButton setToolTip:message];
 	}else{
 		[formatWarningButton setImage:nil];
-		[formatWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?
+		[formatWarningButton setToolTip:nil];
 	}
 	[formatWarningButton setEnabled:set];
 	[formatSheetField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?

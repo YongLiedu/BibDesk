@@ -1002,7 +1002,7 @@ static int numberOfOpenEditors = 0;
 		[citeKeyWarningButton setToolTip:NSLocalizedString(@"This cite-key is a duplicate",@"")];
 	}else{
 		[citeKeyWarningButton setImage:nil];
-		[citeKeyWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?
+		[citeKeyWarningButton setToolTip:nil];
 	}
 	[citeKeyWarningButton setEnabled:set];
 	[citeKeyField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])];
@@ -1195,7 +1195,7 @@ static int numberOfOpenEditors = 0;
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:YES];
-    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose file")];
+    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
 	
 	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
 	[fieldsPopUpButton removeAllItems];
@@ -1371,7 +1371,7 @@ static int numberOfOpenEditors = 0;
     
 	if([value isInherited] &&
 	   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnEditInheritedKey]){
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Inherited Value")
+		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
 											 defaultButton:NSLocalizedString(@"OK", @"OK")
 										   alternateButton:NSLocalizedString(@"Cancel", @"Cancel")
 											   otherButton:NSLocalizedString(@"Edit Parent", @"Edit Parent")

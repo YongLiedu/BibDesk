@@ -473,7 +473,7 @@ enum {
     [openPanel setAllowsMultipleSelection:YES];
     [openPanel setResolvesAliases:NO];
     [openPanel setCanChooseDirectories:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose file")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
 
     [openPanel beginSheetForDirectory:@"/usr" 
                                  file:nil 

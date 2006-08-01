@@ -489,8 +489,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
 	if (![self isDocumentEdited]) {
 		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning") 
-											 defaultButton:NSLocalizedString(@"Yes", @"undo the changes") 
-										   alternateButton:NSLocalizedString(@"No", @"don't undo the changes") 
+											 defaultButton:NSLocalizedString(@"Yes", @"Yes") 
+										   alternateButton:NSLocalizedString(@"No", @"No") 
 											   otherButton:nil
 								 informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"") ];
 
@@ -1750,7 +1750,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		// Do we really want a gazillion of files open?
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)")
                                          defaultButton:NSLocalizedString(@"No", @"No")
-                                       alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
+                                       alternateButton:NSLocalizedString(@"Open", @"Open")
                                            otherButton:nil
                              informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n]];
         [alert beginSheetModalForWindow:documentWindow
@@ -1828,7 +1828,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		// Do we really want a gazillion of browser windows?
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)")
                                          defaultButton:NSLocalizedString(@"No", @"No")
-                                      alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
+                                      alternateButton:NSLocalizedString(@"Open", @"Open")
                                           otherButton:nil
                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n]];
         [alert beginSheetModalForWindow:documentWindow
