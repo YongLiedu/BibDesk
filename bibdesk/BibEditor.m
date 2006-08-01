@@ -647,15 +647,17 @@ static int numberOfOpenEditors = 0;
 			NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:filePath];
 			[image setSize: NSMakeSize(16, 16)];
 			
-			NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
-														  action:@selector(setLocalURLPathFromMenuItem:)
-												   keyEquivalent:@""];
+			NSMenuItem *item = [menu addItemWithTitle:fileName
+                                               action:@selector(setLocalURLPathFromMenuItem:)
+                                        keyEquivalent:@""];
 			[item setRepresentedObject:filePath];
 			[item setImage:image];
-			[menu addItem:item];
-			[item release];
 		}
 	}
+    
+    if (numberOfItems == 0) {
+        [menu addItemWithTitle:NSLocalizedString(@"No Recent Downloads",@"") action:NULL keyEquivalent:@""];
+    }
 }
 
 
@@ -680,6 +682,10 @@ static int numberOfOpenEditors = 0;
 			[item setImage:image];
 		}
 	}
+    
+    if (numberOfItems == 0) {
+        [menu addItemWithTitle:NSLocalizedString(@"No Recent Downloads",@"") action:NULL keyEquivalent:@""];
+    }
 }
 
 - (void)updatePreviewRecentDocumentsMenu:(NSMenu *)menu{
@@ -763,6 +769,10 @@ static int numberOfOpenEditors = 0;
             [item setImage:image];
         }
     }  
+    
+    if ([globalRecentPaths count] == 0) {
+        [menu addItemWithTitle:NSLocalizedString(@"No Recent Documents",@"") action:NULL keyEquivalent:@""];
+    }
         
     [globalRecentPaths release];
     [previewRecentPaths release];
