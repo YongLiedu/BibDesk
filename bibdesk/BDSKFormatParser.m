@@ -245,7 +245,7 @@
 					break;
 				case 'y':
 					// year without century
-                    string = [pub valueOfField:BDSKYearString];
+                    string = [pub valueOfGenericField:BDSKYearString];
                     if ([NSString isEmptyString:string] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", string]];
 						string = [date descriptionWithCalendarFormat:@"%y" timeZone:nil locale:nil];
@@ -255,7 +255,7 @@
 					break;
 				case 'Y':
 					// year with century
-                    string = [pub valueOfField:BDSKYearString];
+                    string = [pub valueOfGenericField:BDSKYearString];
                     if ([NSString isEmptyString:string] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", string]];
 						string = [date descriptionWithCalendarFormat:@"%Y" timeZone:nil locale:nil];
@@ -265,7 +265,7 @@
 					break;
 				case 'm':
 					// month
-                    string = [pub valueOfField:BDSKMonthString];
+                    string = [pub valueOfGenericField:BDSKMonthString];
                     if ([NSString isEmptyString:string] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-2000", string]];
 						string = [date descriptionWithCalendarFormat:@"%m" timeZone:nil locale:nil];
@@ -281,7 +281,7 @@
 						if (![scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
 						[scanner scanString:@"]" intoString:NULL];
 					}
-					string = [pub valueOfField:BDSKKeywordsString];
+					string = [pub valueOfGenericField:BDSKKeywordsString];
 					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
@@ -374,7 +374,7 @@
 						} else if ([string isEqualToString:BDSKContainerString]) {
 							string = [pub container];
 						} else {
-							string = [pub valueOfField:string];
+							string = [pub valueOfGenericField:string];
 						}
 						if (string != nil) {
 							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
@@ -398,12 +398,54 @@
 						[scanner scanString:@"}" intoString:NULL]) {
 						if (![scanner scanInt:&number]) number = 3;
 				
-						string = [[pub valueOfField:string] acronymValueIgnoringWordLength:number];
+						string = [[pub valueOfGenericField:string] acronymValueIgnoringWordLength:number];
 						string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
 						[parsedStr appendString:string];
 					}
 					else {
 						NSLog(@"Missing {'field'} after format specifier %%c in format.");
+					}
+					break;
+				case 's':
+					// arbitrary boolean or tri-value field
+					if ([scanner scanString:@"{" intoString:NULL] &&
+						[scanner scanUpToString:@"}" intoString:&string] &&
+						[scanner scanString:@"}" intoString:NULL]) {
+						NSString *yesValue = @"";
+						NSString *noValue = @"";
+						NSString *mixedValue = @"";
+						// look for [yes value]
+						if ([scanner scanString:@"[" intoString:NULL]) {
+							if (![scanner scanUpToString:@"]" intoString:&yesValue]) yesValue = @"";
+							[scanner scanString:@"]" intoString:NULL];
+                            // look for [no value]
+                            if ([scanner scanString:@"[" intoString:NULL]) {
+                                if (![scanner scanUpToString:@"]" intoString:&noValue]) noValue = @"";
+                                [scanner scanString:@"]" intoString:NULL];
+                                // look for [mixed value]
+                                if ([scanner scanString:@"[" intoString:NULL]) {
+                                    if (![scanner scanUpToString:@"]" intoString:&mixedValue]) mixedValue = @"";
+                                    [scanner scanString:@"]" intoString:NULL];
+                                }
+                            }
+                        }
+						if (![scanner scanInt:&number]) number = 0;
+                        if ([[BibTypeManager sharedManager] isBooleanField:string]) {
+                            string = [pub boolValueOfField:string] ? yesValue : noValue;
+                        } else if ([[BibTypeManager sharedManager] isTriStateField:string]) {
+                            i = [pub triStateValueOfField:string];
+                            string = i == NSOnState ? yesValue : (i == NSOffState ? noValue : mixedValue);
+                        } else {
+                            string = [NSString isEmptyString:[pub valueOfGenericField:string]] ? noValue : yesValue;
+                        }
+                        if (number > 0 && [string length] > number) {
+                            [parsedStr appendString:[string substringToIndex:number]];
+                        } else {
+                            [parsedStr appendString:string];
+                        }
+					}
+					else {
+						NSLog(@"Missing {'field'} after format specifier %%s in format.");
 					}
 					break;
 				case 'i':
@@ -715,12 +757,12 @@
 	static NSDictionary *errorAttr = nil;
 	
 	if (validSpecifierChars == nil) {
-		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfcirRduUn0123456789%[]"] retain];
+		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTmyYlLebkfcsirRduUn0123456789%[]"] retain];
 		validParamSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPtTkfcirRduUn"] retain];
 		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
 		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
-		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fci"] retain];
-		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPkf"] retain];
+		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fcsi"] retain];
+		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPkfs"] retain];
 		
 		NSFont *font = [NSFont systemFontOfSize:0];
 		NSFont *boldFont = [NSFont boldSystemFontOfSize:0];
@@ -806,7 +848,7 @@
 		// check optional arguments
 		if ([validOptArgSpecifierChars characterIsMember:specifier]) {
 			if (![scanner isAtEnd]) {
-				int numOpts = ((specifier == 'A' || specifier == 'P')? 3 : ((specifier == 'a' || specifier == 'p')? 2 : 1));
+				int numOpts = ((specifier == 'A' || specifier == 'P' || specifier == 's')? 3 : ((specifier == 'a' || specifier == 'p')? 2 : 1));
 				while (numOpts-- && [scanner scanString:@"[" intoString: NULL]) {
 					if (![scanner scanUpToString:@"]" intoString:&string]) 
 						string = @"";
@@ -897,6 +939,7 @@
                 break;
 			case 'f':
 			case 'c':
+			case 's':
 				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]];
                 break;
 			case 'i':

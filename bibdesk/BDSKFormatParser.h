@@ -44,7 +44,9 @@
 - (NSString *)citeKey;
 - (NSString *)title;
 - (NSString *)container;
-- (NSString *)valueOfField:(NSString *)field;
+- (NSString *)valueOfGenericField:(NSString *)field;
+- (BOOL)boolValueOfField:(NSString *)field;
+- (int)triStateValueOfField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSString *)localFilePathForField:(NSString *)field;
 - (NSString *)documentFileName;
