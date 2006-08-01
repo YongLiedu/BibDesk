@@ -205,6 +205,7 @@
 		CE2837420917D31D006B4C63 /* BDSKEdgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2837400917D31D006B4C63 /* BDSKEdgeView.m */; };
 		CE2941010A7F8F2300A46D05 /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CE2941000A7F8F2300A46D05 /* RelNotes.rtf */; };
 		CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CE2941040A7F8F2900A46D05 /* ReadMe.rtf */; };
+		CE2944010A7F939A00A46D05 /* PreferenceSearchTerms.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE2944000A7F939A00A46D05 /* PreferenceSearchTerms.plist */; };
 		CE2AFE590911425F00E65C87 /* BDSKGroupCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
@@ -632,7 +633,6 @@
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
 		F9FD63DC0A61B87800F9871B /* NSMenu_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */; };
 		F9FD63DD0A61B87800F9871B /* NSMenu_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */; };
-		F9FEFCB10A0BC14D009193CA /* PreferenceSearchTerms.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9FEFCB00A0BC14D009193CA /* PreferenceSearchTerms.plist */; };
 		F9FF241309E873A300BB1706 /* networkIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9FF241209E873A300BB1706 /* networkIcon.tiff */; };
 /* End PBXBuildFile section */
 
@@ -1456,7 +1456,7 @@
 		F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStringEncodingManager.m; sourceTree = "<group>"; };
 		F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSMenu_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9FD63DB0A61B87800F9871B /* NSMenu_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSMenu_BDSKExtensions.m; sourceTree = "<group>"; };
-		F9FEFCB00A0BC14D009193CA /* PreferenceSearchTerms.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = PreferenceSearchTerms.plist; path = English.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
+		F9FEFCB00A0BC14D009193CA /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = English.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
 		F9FF241209E873A300BB1706 /* networkIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = networkIcon.tiff; path = Images/networkIcon.tiff; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1700,7 +1700,7 @@
 				F9022D110758066000C3F701 /* BibDeskSuite.scriptTerminology */,
 				F9022D150758066000C3F701 /* CharacterConversion.plist */,
 				F9022D1B0758066000C3F701 /* TypeInfo.plist */,
-				F9FEFCB00A0BC14D009193CA /* PreferenceSearchTerms.plist */,
+				CE2944000A7F939A00A46D05 /* PreferenceSearchTerms.plist */,
 				F91B5CC7076579830011ED22 /* previewtemplate.tex */,
 				F9022D410758073E00C3F701 /* cfg */,
 				F9022D2C0758069E00C3F701 /* BibDeskInputManager */,
@@ -2966,7 +2966,7 @@
 				CE7E1BB60A0B8EE7009D04C3 /* GroupAdd.tiff in Resources */,
 				CE7E1C3A0A0B9E94009D04C3 /* GroupAction_Pressed.tiff in Resources */,
 				CE7E1C3B0A0B9E94009D04C3 /* GroupAdd_Pressed.tiff in Resources */,
-				F9FEFCB10A0BC14D009193CA /* PreferenceSearchTerms.plist in Resources */,
+				CE2944010A7F939A00A46D05 /* PreferenceSearchTerms.plist in Resources */,
 				CE7E207E0A0BF833009D04C3 /* GroupAddSmart_Pressed.tiff in Resources */,
 				CE7E207F0A0BF833009D04C3 /* GroupAddSmart.tiff in Resources */,
 				F963E4490A1D7E1300695DDC /* BibPref_Export.nib in Resources */,
@@ -3578,6 +3578,14 @@
 				F9022D180758066000C3F701 /* English */,
 			);
 			name = ReadMe.rtf;
+			sourceTree = "<group>";
+		};
+		CE2944000A7F939A00A46D05 /* PreferenceSearchTerms.plist */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F9FEFCB00A0BC14D009193CA /* English */,
+			);
+			name = PreferenceSearchTerms.plist;
 			sourceTree = "<group>";
 		};
 		CE38FB92091D953900BCB69D /* BDSKFilter.nib */ = {
