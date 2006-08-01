@@ -78,7 +78,9 @@ extern NSString *BDSKMenuApplicationURL;
 + (NSMenu *)submenuOfApplicationsForURL:(NSURL *)aURL;
 - (void)fillWithApplicationsForURL:(NSURL *)aURL;
 - (void)addItemsFromMenu:(NSMenu *)other;
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)index;
 - (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu;
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(unsigned int)index;
 - (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate;
 
 @end

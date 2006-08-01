@@ -121,11 +121,28 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     [item release];
 }
 
-- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu;
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)index;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     [item setSubmenu:submenu];
-    [self addItem:item];
+    [self insertItem:item atIndex:index];
+    [submenu release];
+    [item release];
+    return item;
+}
+
+- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu;
+{
+    return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:[self numberOfItems]];
+}
+
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(unsigned int)index;
+{
+    NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
+    NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:submenuTitle];
+    [submenu setDelegate:delegate];
+    [item setSubmenu:submenu];
+    [self insertItem:item atIndex:index];
     [submenu release];
     [item release];
     return item;
@@ -133,14 +150,7 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 - (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate;
 {
-    NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
-    NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:submenuTitle];
-    [submenu setDelegate:delegate];
-    [item setSubmenu:submenu];
-    [self addItem:item];
-    [submenu release];
-    [item release];
-    return item;
+    return [self insertItemWithTitle:itemTitle submenuTitle:submenuTitle submenuDelegate:delegate atIndex:[self numberOfItems]];
 }
 
 @end
