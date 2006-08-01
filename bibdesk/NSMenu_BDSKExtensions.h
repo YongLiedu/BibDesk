@@ -77,5 +77,6 @@ extern NSString *BDSKMenuApplicationURL;
 
 + (NSMenu *)submenuOfApplicationsForURL:(NSURL *)aURL;
 - (void)fillWithApplicationsForURL:(NSURL *)aURL;
+- (void)addItemsFromMenu:(NSMenu *)other;
 
 @end

@@ -52,6 +52,18 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     return submenu;
 }
 
+- (void)addItemsFromMenu:(NSMenu *)other;
+{
+    unsigned i, count = [other numberOfItems];
+    NSMenuItem *anItem;
+    NSZone *zone = [self zone];
+    for(i = 0; i < count; i++){
+        anItem = [[other itemAtIndex:i] copyWithZone:zone];
+        [self addItem:anItem];
+        [anItem release];
+    }
+}
+
 - (void)fillWithApplicationsForURL:(NSURL *)aURL;
 {    
     int i = [self numberOfItems];
