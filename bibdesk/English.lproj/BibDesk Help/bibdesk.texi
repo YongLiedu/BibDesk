@@ -3025,7 +3025,7 @@ Possible format specifiers are given in the table below.
 
 @c End of macro definitions
 
-@multitable {@b{%f\{}\i{Field}\b{\}0}} {Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)}
+@multitable {@b{%s\{}\i{Field}\b{[][][]\}0}} {Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)}
 @headitem Specifier @tab Replaced content description
 @item @specparam{%a, [][]00}
 @tab Author last names, with (optional) maximal number of authors and number of characters
@@ -3060,14 +3060,16 @@ Keywords must be separated by one of ;:, (semicolon, colon, or comma)
 @tab Arbitrary field, with (optional) maximal length
 @item @specargparam{%c, Field, 3}
 @tab Arbitrary field as initials, e.g. @samp{JCIS} for @samp{J. of Colloid and Interface Science}, with (optional) length of words to ignore
+@item @specargparam{%s, Field, [][][]0 }
+@tab Arbitrary boolean or three-value field switch, with (optional) replacement values for Yes, No and Mixed and maximal length
 @item @specargparam{%i, Key, 0 }
 @tab Arbitrary document info key, with (optional) maximal length
 @item @specparam{%r, 1}
-@tab Random lowercase letter, with (optional) number of characters
+@tab Random lowercase letter, with (optional) number of characters (deprecated, use %u)
 @item @specparam{%R, 1}
-@tab Random uppercase letter, with (optional) number of characters
+@tab Random uppercase letter, with (optional) number of characters (deprecated, use %U)
 @item @specparam{%d, 1}
-@tab Random number, with (optional) number of digits
+@tab Random number, with (optional) number of digits (deprecated, use %n)
 @item @specparam{%u, 1}
 @tab Unique lowercase letter, with (optional) number of characters (only once)
 @item @specparam{%U, 1}
