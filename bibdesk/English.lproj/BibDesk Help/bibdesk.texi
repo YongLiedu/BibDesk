@@ -3412,7 +3412,7 @@ Here are lists of value keys that could be used in BibDesk export templates.
 
 @multitable {pubAuthorsForDisplay} {}
 @headitem Key @tab Description
-@item type
+@item pubType
 @tab 
 @item citeKey
 @tab 
