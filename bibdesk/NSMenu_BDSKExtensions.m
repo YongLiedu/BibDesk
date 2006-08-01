@@ -121,5 +121,26 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     [item release];
 }
 
+- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu;
+{
+    NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
+    [item setSubmenu:submenu];
+    [self addItem:item];
+    [submenu release];
+    [item release];
+    return item;
+}
+
+- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate;
+{
+    NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
+    NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:submenuTitle];
+    [submenu setDelegate:delegate];
+    [item setSubmenu:submenu];
+    [self addItem:item];
+    [submenu release];
+    [item release];
+    return item;
+}
 
 @end
