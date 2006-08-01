@@ -417,6 +417,36 @@ static int numberOfOpenEditors = 0;
     [field release];
 }
 
+- (IBAction)openRemoteURL:(id)sender{
+	NSString *field = [sender representedObject];
+	if (field == nil)
+		field = BDSKUrlString;
+    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
+    NSURL *url = [theBib remoteURLForField:field];
+    if(url == nil){
+        NSString *rurl = [theBib valueOfField:field];
+        
+        if([rurl isEqualToString:@""])
+            return;
+    
+        if([rurl rangeOfString:@"://"].location == NSNotFound)
+            rurl = [@"http://" stringByAppendingString:rurl];
+
+        url = [NSURL URLWithString:rurl];
+    }
+    
+    if(url != nil)
+        [sw openURL:url];
+    else
+        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
+                          nil, nil, nil, [self window], nil, nil, nil, nil,
+                          NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please check the URL field and try again.",
+                                            @"Unrecognized URL, edit it and try again.") );
+    
+}
+
+#pragma mark Menus
+
 - (void)menuNeedsUpdate:(NSMenu *)menu{
     NSString *menuTitle = [menu title];
 	if (menu == [[viewLocalToolbarItem menuFormRepresentation] submenu]) {
@@ -428,16 +458,13 @@ static int numberOfOpenEditors = 0;
 	} else if (menu == [[authorsToolbarItem menuFormRepresentation] submenu]) {
         [self updateAuthorsToolbarMenu:menu];
 	} else if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"]){
-        [menu removeAllItems];
-        [menu addItemsFromMenu:[self previewRecentDocumentsMenu]];
+        [self updatePreviewRecentDocumentsMenu:menu];
     } else if([menuTitle isEqualToString:@"safariRecentDownloadsMenu"]){
-        [menu removeAllItems];
-        [menu addItemsFromMenu:[self safariRecentDownloadsMenu]];
+        [self updateSafariRecentDownloadsMenu:menu];
     } else if([menuTitle isEqualToString:@"safariRecentURLsMenu"]){
-        [menu removeAllItems];
-        [menu addItemsFromMenu:[self safariRecentURLsMenu]];
+        [self updateSafariRecentURLsMenu:menu];
     } else {
-        // likely an "Open With..." submenu
+        // should be an "Open With..." submenu
         NSString *field = [menu title];
         if(field)
             [menu fillWithApplicationsForURL:[theBib URLForField:field]];
@@ -470,39 +497,28 @@ static int numberOfOpenEditors = 0;
             if(idx++ > 0)
                 [menu addItem:[NSMenuItem separatorItem]];
 
-            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@",@"Open Local-Url file"), field]
-                                                                        action:@selector(openLinkedFile:)
-                                                                 keyEquivalent:@""];
+            item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@",@"Open Local-Url file"), field]
+                                   action:@selector(openLinkedFile:)
+                            keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:field];
-			[menu addItem:item];
-			[item release];
             
             theURL = [theBib URLForField:field];
             if(nil != theURL){
-                submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:field] autorelease];
-                [submenu setDelegate:self];
-                item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
-                                                  action:NULL
-                                           keyEquivalent:@""];
-                [item setSubmenu:submenu];
-                [menu addItem:item];
-                [item release];
+                [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
+                          submenuTitle:field
+                       submenuDelegate:self];
             }
             
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Reveal Local-Url in finder"), field]
-											  action:@selector(revealLinkedFile:)
-									   keyEquivalent:@""];
+			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Reveal Local-Url in finder"), field]
+                                   action:@selector(revealLinkedFile:)
+                            keyEquivalent:@""];
 			[item setRepresentedObject:field];
-			[menu addItem:item];
-			[item release];
             
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Move %@%C",@"Move Local-Url..."), field, 0x2026]
-											  action:@selector(moveLinkedFile:)
-									   keyEquivalent:@""];
+			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Move %@%C",@"Move Local-Url..."), field, 0x2026]
+                                   action:@selector(moveLinkedFile:)
+                            keyEquivalent:@""];
 			[item setRepresentedObject:field];
-			[menu addItem:item];
-			[item release];            
 		}
 		
 		[menu addItem:[NSMenuItem separatorItem]];
@@ -512,34 +528,21 @@ static int numberOfOpenEditors = 0;
 				 keyEquivalent:@""];
 		
 		// get Safari recent downloads
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Safari Recent Downloads",@"Link to Download URL")
-                                          action:NULL
-                                   keyEquivalent:@""];
-        submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"safariRecentDownloadsMenu"] autorelease];
-        [submenu setDelegate:self];
-        [item setSubmenu:submenu];
-        [menu addItem:item];
-        [item release];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Safari Recent Downloads",@"Link to Download URL")
+                         submenuTitle:@"safariRecentDownloadsMenu"
+                      submenuDelegate:self];
 
         // get recent downloads (Tiger only) by searching the system downloads directory
         // should work for browsers other than Safari, if they use IC to get/set the download directory
         // don't create this in the delegate method; it needs to start working in the background
         if(submenu = [self recentDownloadsMenu]){
-            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recent Download", @"") action:NULL keyEquivalent:@""];
-            [item setSubmenu:submenu];
-            [menu addItem:item];
-            [item release];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Link to Recent Download", @"") submenu:submenu];
         }
 		
 		// get Preview recent documents
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recently Opened File",@"Link to Recently Opened or Modified File")
-                                          action:NULL
-                                   keyEquivalent:@""];
-        submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"previewRecentDocumentsMenu"] autorelease];
-        [submenu setDelegate:self];
-        [item setSubmenu:submenu];
-        [menu addItem:item];
-        [item release];
+        [menu addItemWithTitle:NSLocalizedString(@"Link to Recently Opened File",@"Link to Recently Opened or Modified File")
+                  submenuTitle:@"previewRecentDocumentsMenu"
+               submenuDelegate:self];
 	}
 	else if (view == viewRemoteButton) {
 		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
@@ -547,59 +550,41 @@ static int numberOfOpenEditors = 0;
 		
 		// the first one has to be view Url in web brower, since it's also the button's action when you're clicking on the icon.
 		while (field = [e nextObject]) {
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ in Web Browser",@"View Url in web browser"), field]
-											  action:@selector(openRemoteURL:)
-									   keyEquivalent:@""];
+			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ in Web Browser",@"View Url in web browser"), field]
+                                   action:@selector(openRemoteURL:)
+                            keyEquivalent:@""];
 			[item setRepresentedObject:field];
-			[menu addItem:item];
-			[item release];
             
             theURL = [theBib URLForField:field];
             if(nil != theURL){
-                submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:field] autorelease];
-                [submenu setDelegate:self];
-                item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
-                                                                            action:NULL
-                                                                     keyEquivalent:@""];
-                [item setSubmenu:submenu];
-                [menu addItem:item];
-                [item release];
+                [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
+                          submenuTitle:field
+                       submenuDelegate:self];
             }
 		}
 		
 		// get Safari recent URLs
         [menu addItem:[NSMenuItem separatorItem]];
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Download URL",@"Link to Download URL")
-                                          action:NULL
-                                   keyEquivalent:@""];
-        submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"safariRecentURLsMenu"] autorelease];
-        [submenu setDelegate:self];
-        [item setSubmenu:submenu];
-        [menu addItem:item];
-        [item release];
+        [menu addItemWithTitle:NSLocalizedString(@"Link to Download URL",@"Link to Download URL")
+                  submenuTitle:@"safariRecentURLsMenu"
+               submenuDelegate:self];
 	}
 	else if (view == documentSnoopButton) {
 		
-		item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer")
-										  action:@selector(toggleSnoopDrawer:)
-								   keyEquivalent:@""];
+		item = [menu addItemWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer")
+                               action:@selector(toggleSnoopDrawer:)
+                        keyEquivalent:@""];
 		[item setTag:0];
-		[menu addItem:item];
-		[item release];
 		
-		item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer")
-										  action:@selector(toggleSnoopDrawer:)
-								   keyEquivalent:@""];
+		item = [menu addItemWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer")
+                               action:@selector(toggleSnoopDrawer:)
+                        keyEquivalent:@""];
 		[item setTag:BDSKDrawerStateTextMask];
-		[menu addItem:item];
-		[item release];
 		
-		item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer")
-										  action:@selector(toggleSnoopDrawer:)
-								   keyEquivalent:@""];
+		item = [menu addItemWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer")
+                               action:@selector(toggleSnoopDrawer:)
+                        keyEquivalent:@""];
 		[item setTag:BDSKDrawerStateWebMask];
-		[menu addItem:item];
-		[item release];
 	}
 }
 
@@ -640,13 +625,14 @@ static int numberOfOpenEditors = 0;
 	return [historyArray autorelease];
 }
 
-- (NSMenu *)safariRecentDownloadsMenu{
+- (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
 		
-	NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
 	int i = 0;
 	unsigned numberOfItems = [historyArray count];
     NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    [menu removeAllItems];
     
 	for (i = 0; i < numberOfItems; i ++){
 		NSDictionary *itemDict = [historyArray objectAtIndex:i];
@@ -670,20 +656,15 @@ static int numberOfOpenEditors = 0;
 			[item release];
 		}
 	}
-	
-	return [menu numberOfItems] > 0 ? menu : nil;
-
 }
 
 
-- (NSMenu *)safariRecentURLsMenu{
+- (void)updateSafariRecentURLsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
 	unsigned numberOfItems = [historyArray count];
-	if (!numberOfItems)
-		return nil;
-	
-	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	int i = 0;
+    
+    [menu removeAllItems];
 	
 	for (i = 0; i < numberOfItems; i ++){
 		NSDictionary *itemDict = [historyArray objectAtIndex:i];
@@ -692,24 +673,16 @@ static int numberOfOpenEditors = 0;
 			NSImage *image = [NSImage smallGenericInternetLocationImage];
 			[image setSize: NSMakeSize(16, 16)];
 			
-			NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:URLString
-														  action:@selector(setRemoteURLFromMenuItem:)
-												   keyEquivalent:@""];
+			NSMenuItem *item = [menu addItemWithTitle:URLString
+                                               action:@selector(setRemoteURLFromMenuItem:)
+                                        keyEquivalent:@""];
 			[item setRepresentedObject:URLString];
 			[item setImage:image];
-			[menu addItem:item];
-			[item release];
 		}
 	}
-
-	if ([menu numberOfItems] > 0)
-		return [menu autorelease];
-	
-	[menu release];
-	return nil;
 }
 
-- (NSMenu *)previewRecentDocumentsMenu{
+- (void)updatePreviewRecentDocumentsMenu:(NSMenu *)menu{
     // get all of the items from the Apple menu (works on 10.4, anyway), and build a set of the file paths for easy comparison as strings
     NSMutableSet *globalRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
     CFDictionaryRef globalRecentDictionary = CFPreferencesCopyAppValue(CFSTR("Documents"), CFSTR("com.apple.recentitems"));
@@ -750,11 +723,11 @@ static int numberOfOpenEditors = 0;
 	
 	if(historyArray) CFRelease(historyArray);
     
-    NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
-    
     NSString *fileName;
     NSImage *image;
     NSMenuItem *item;
+    
+    [menu removeAllItems];
 
     // now add all of the items from Preview, which are most likely what we want
     e = [previewRecentPaths objectEnumerator];
@@ -763,13 +736,11 @@ static int numberOfOpenEditors = 0;
             fileName = [filePath lastPathComponent];
             image = [NSImage smallImageForFile:filePath];
             
-            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
-                                                          action:@selector(setLocalURLPathFromMenuItem:)
-                                                   keyEquivalent:@""];
+            item = [menu addItemWithTitle:fileName
+                                   action:@selector(setLocalURLPathFromMenuItem:)
+                            keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImage:image];
-            [menu addItem:item];
-            [item release];
         }
     }
     
@@ -785,23 +756,32 @@ static int numberOfOpenEditors = 0;
             fileName = [filePath lastPathComponent];
             image = [NSImage smallImageForFile:filePath];
             
-            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
-                                                          action:@selector(setLocalURLPathFromMenuItem:)
-                                                   keyEquivalent:@""];
+            item = [menu addItemWithTitle:fileName
+                                   action:@selector(setLocalURLPathFromMenuItem:)
+                            keyEquivalent:@""];
             [item setRepresentedObject:filePath];
             [item setImage:image];
-            [menu addItem:item];
-            [item release];
         }
     }  
         
     [globalRecentPaths release];
     [previewRecentPaths release];
-    
-	return ([menu numberOfItems] > 0) ? menu : nil;
 }
 
 - (NSMenu *)recentDownloadsMenu{
+    NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    
+    [self updateRecentDownloadsMenu:menu]; 
+    
+    if ([menu numberOfItems] == 0) {
+        [menu release];
+        return nil;
+    }
+    
+    return [menu autorelease];
+}
+
+- (void)updateRecentDownloadsMenu:(NSMenu *)menu{
     
     NSArray *paths = nil;
     
@@ -821,21 +801,18 @@ static int numberOfOpenEditors = 0;
     NSString *filePath;
     NSImage *image;
     NSMenuItem *item;
-    NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+    
+    [menu removeAllItems];
     
     while(filePath = [e nextObject]){
         image = [NSImage smallImageForFile:filePath];
         
-        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[filePath lastPathComponent]
-                                                                    action:@selector(setLocalURLPathFromMenuItem:)
-                                                             keyEquivalent:@""];
+        item = [menu addItemWithTitle:[filePath lastPathComponent]
+                               action:@selector(setLocalURLPathFromMenuItem:)
+                        keyEquivalent:@""];
         [item setRepresentedObject:filePath];
         [item setImage:image];
-        [menu addItem:item];
-        [item release];
     }
-    
-	return ([menu numberOfItems] > 0) ? menu : nil;
 }
 
 - (void)updateAuthorsToolbarMenu:(NSMenu *)menu{
@@ -966,34 +943,6 @@ static int numberOfOpenEditors = 0;
 		return YES;
     }
 	return YES;
-}
-
-- (IBAction)openRemoteURL:(id)sender{
-	NSString *field = [sender representedObject];
-	if (field == nil)
-		field = BDSKUrlString;
-    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    NSURL *url = [theBib remoteURLForField:field];
-    if(url == nil){
-        NSString *rurl = [theBib valueOfField:field];
-        
-        if([rurl isEqualToString:@""])
-            return;
-    
-        if([rurl rangeOfString:@"://"].location == NSNotFound)
-            rurl = [@"http://" stringByAppendingString:rurl];
-
-        url = [NSURL URLWithString:rurl];
-    }
-    
-    if(url != nil)
-        [sw openURL:url];
-    else
-        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
-                          nil, nil, nil, [self window], nil, nil, nil, nil,
-                          NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please check the URL field and try again.",
-                                            @"Unrecognized URL, edit it and try again.") );
-    
 }
 
 #pragma mark Cite Key handling methods

@@ -253,34 +253,49 @@
 - (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;
 
 /*!
-    @method     safariRecentDownloadsMenu
-    @abstract   Returns a menu of items for local paths of recent downloads from Safari. Returns nil if there are no valid items.
+    @method     updateSafariRecentDownloadsMenu:
+    @abstract   Updates the menu of items for local paths of recent downloads from Safari.
     @discussion (comprehensive description)
 */
-- (NSMenu *)safariRecentDownloadsMenu;
+- (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu;
 
 /*!
-    @method     safariRecentURLsMenu
-    @abstract   Returns a menu of items for remote URLs of recent downloads from Safari. Returns nil if there are no valid items.
+    @method     updateSafariRecentURLsMenu:
+    @abstract   Updates the menu off items for remote URLs of recent downloads from Safari.
     @discussion (comprehensive description)
 */
-- (NSMenu *)safariRecentURLsMenu;
+- (void)updateSafariRecentURLsMenu:(NSMenu *)menu;
 
 /*!
-    @method     previewRecentDocumentsMenu
-    @abstract   Returns a menu of items for local paths of recent documents from Preview. Returns nil if there are no valid items.
+    @method     updatePreviewRecentDocumentsMenu:
+    @abstract   Updates the menu of items for local paths of recent documents from Preview.
     @discussion (comprehensive description)
 */
-- (NSMenu *)previewRecentDocumentsMenu;
+- (void)updatePreviewRecentDocumentsMenu:(NSMenu *)menu;
 
 /*!
     @method     recentDownloadsMenu
-    @abstract   Returns recently modified files in the system download directory using Spotlight.
+    @abstract   Returns a menu of modified files in the system download directory using Spotlight.
     @discussion (comprehensive description)
     @result     (description)
 */
 - (NSMenu *)recentDownloadsMenu;
 
+/*!
+    @method     updateRecentDownloadsMenu:
+    @abstract   Updates the menu of recently modified files in the system download directory using Spotlight.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (void)updateRecentDownloadsMenu:(NSMenu *)menu;
+
+
+/*!
+    @method     updateAuthorsToolbarMenu:
+    @abstract   Updates the menu representatino of the Authors toolbar item.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
 - (void)updateAuthorsToolbarMenu:(NSMenu *)menu;
 
 /*!
