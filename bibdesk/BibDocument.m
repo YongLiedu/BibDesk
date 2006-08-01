@@ -2818,8 +2818,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                                                action:NULL
                                                                         keyEquivalent:@""];
                 [theItem setSubmenu:submenu];
-                [theItem setRepresentedObject:representedObject];
-                [myMenu insertItem:theItem atIndex:0];
+                [myMenu insertItem:theItem atIndex:1];
                 [submenu release];
                 [theItem release];
             }
@@ -2838,7 +2837,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                                                action:NULL
                                                                         keyEquivalent:@""];
                 [theItem setSubmenu:submenu];
-                [myMenu insertItem:theItem atIndex:0];
+                [myMenu insertItem:theItem atIndex:1];
                 [submenu release];
                 [theItem release];
             }            
