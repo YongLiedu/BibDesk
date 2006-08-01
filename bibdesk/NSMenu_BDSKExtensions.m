@@ -126,7 +126,6 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     [item setSubmenu:submenu];
     [self insertItem:item atIndex:index];
-    [submenu release];
     [item release];
     return item;
 }
