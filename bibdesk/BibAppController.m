@@ -930,7 +930,7 @@
     [readmeWindow makeKeyAndOrderFront:self];
     [readmeTextView setString:@""];
     [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"README.rtf"]]];	
+                                     withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ReadMe" ofType:@"rtf"]]];	
 }
 
 - (IBAction)showRelNotes:(id)sender{
@@ -939,7 +939,7 @@
     [readmeWindow makeKeyAndOrderFront:self];
     [readmeTextView setString:@""];
     [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"RelNotes.rtf"]]];
+                                     withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNote" ofType:@"rtf"]]];
 }
 
 - (IBAction)showFindPanel:(id)sender{

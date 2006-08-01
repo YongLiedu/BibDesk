@@ -203,6 +203,8 @@
 		CE28347309176CD0006B4C63 /* NSBezierPath_CoreImageExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */; };
 		CE2837410917D31D006B4C63 /* BDSKEdgeView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */; };
 		CE2837420917D31D006B4C63 /* BDSKEdgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2837400917D31D006B4C63 /* BDSKEdgeView.m */; };
+		CE2941010A7F8F2300A46D05 /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CE2941000A7F8F2300A46D05 /* RelNotes.rtf */; };
+		CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CE2941040A7F8F2900A46D05 /* ReadMe.rtf */; };
 		CE2AFE590911425F00E65C87 /* BDSKGroupCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
@@ -371,7 +373,6 @@
 		F9022CEE0758050E00C3F701 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F9022CE50758050E00C3F701 /* Credits.rtf */; };
 		F9022CEF0758050E00C3F701 /* Previewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9022CE70758050E00C3F701 /* Previewer.nib */; };
 		F9022D210758066000C3F701 /* CharacterConversion.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D150758066000C3F701 /* CharacterConversion.plist */; };
-		F9022D240758066000C3F701 /* README.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F9022D180758066000C3F701 /* README.rtf */; };
 		F9022D270758066000C3F701 /* TypeInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D1B0758066000C3F701 /* TypeInfo.plist */; };
 		F9022D2E0758069E00C3F701 /* BibDeskInputManager in Resources */ = {isa = PBXBuildFile; fileRef = F9022D2C0758069E00C3F701 /* BibDeskInputManager */; };
 		F9022D780758073F00C3F701 /* direct.cfg in Resources */ = {isa = PBXBuildFile; fileRef = F9022D4B0758073E00C3F701 /* direct.cfg */; };
@@ -569,7 +570,6 @@
 		F98AA6820971E3F400184BD8 /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */; };
 		F98DB3170A23C7730040D347 /* BDSKTemplate.h in Headers */ = {isa = PBXBuildFile; fileRef = F98DB3150A23C7730040D347 /* BDSKTemplate.h */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
-		F994B8F707F5F65F00751DA1 /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F994B8F607F5F65F00751DA1 /* RelNotes.rtf */; };
 		F99BC25E095A5C7000E018C3 /* NSArray_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
 		F9A411F10A0B1FEF008493C0 /* BDSKSpotlightView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */; };
@@ -1233,7 +1233,7 @@
 		F9022D100758066000C3F701 /* BibDeskSuite.scriptSuite */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = BibDeskSuite.scriptSuite; sourceTree = "<group>"; };
 		F9022D110758066000C3F701 /* BibDeskSuite.scriptTerminology */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = BibDeskSuite.scriptTerminology; sourceTree = "<group>"; };
 		F9022D150758066000C3F701 /* CharacterConversion.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = CharacterConversion.plist; sourceTree = "<group>"; };
-		F9022D180758066000C3F701 /* README.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = README.rtf; sourceTree = "<group>"; };
+		F9022D180758066000C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/ReadMe.rtf; sourceTree = "<group>"; };
 		F9022D1B0758066000C3F701 /* TypeInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = TypeInfo.plist; sourceTree = "<group>"; };
 		F9022D2C0758069E00C3F701 /* BibDeskInputManager */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BibDeskInputManager; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9022D4B0758073E00C3F701 /* direct.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = direct.cfg; path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/direct.cfg; sourceTree = SOURCE_ROOT; };
@@ -1391,7 +1391,7 @@
 		F98DB3160A23C7730040D347 /* BDSKTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplate.m; sourceTree = "<group>"; };
 		F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKZoomablePDFView.h; sourceTree = "<group>"; };
 		F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomablePDFView.m; sourceTree = "<group>"; };
-		F994B8F607F5F65F00751DA1 /* RelNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = RelNotes.rtf; sourceTree = "<group>"; };
+		F994B8F607F5F65F00751DA1 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/RelNotes.rtf; sourceTree = "<group>"; };
 		F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSArray_BDSKExtensions.h; sourceTree = "<group>"; };
 		F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSArray_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpotlightView.h; sourceTree = "<group>"; };
@@ -1692,8 +1692,8 @@
 				3DA82938083ECE9300321864 /* Localizable.strings */,
 				F9022CE30758050E00C3F701 /* BibTeXKeys.strings */,
 				F9022CE50758050E00C3F701 /* Credits.rtf */,
-				F994B8F607F5F65F00751DA1 /* RelNotes.rtf */,
-				F9022D180758066000C3F701 /* README.rtf */,
+				CE2941000A7F8F2300A46D05 /* RelNotes.rtf */,
+				CE2941040A7F8F2900A46D05 /* ReadMe.rtf */,
 				F9022D9E075807DC00C3F701 /* pdftotext */,
 				F9022D6E0758073E00C3F701 /* latex2rtf */,
 				F9022D100758066000C3F701 /* BibDeskSuite.scriptSuite */,
@@ -2865,7 +2865,7 @@
 				F9022CEE0758050E00C3F701 /* Credits.rtf in Resources */,
 				F9022CEF0758050E00C3F701 /* Previewer.nib in Resources */,
 				F9022D210758066000C3F701 /* CharacterConversion.plist in Resources */,
-				F9022D240758066000C3F701 /* README.rtf in Resources */,
+				CE2941050A7F8F2900A46D05 /* ReadMe.rtf in Resources */,
 				F9022D270758066000C3F701 /* TypeInfo.plist in Resources */,
 				F9022D2E0758069E00C3F701 /* BibDeskInputManager in Resources */,
 				F9022D780758073F00C3F701 /* direct.cfg in Resources */,
@@ -2914,7 +2914,7 @@
 				3D8CA0A507CB625300460D07 /* AutoFileProgress.nib in Resources */,
 				2730079F07CF214E00F2E485 /* MacroTextFieldWindow.nib in Resources */,
 				273007A007CF214E00F2E485 /* MacroWindow.nib in Resources */,
-				F994B8F707F5F65F00751DA1 /* RelNotes.rtf in Resources */,
+				CE2941010A7F8F2300A46D05 /* RelNotes.rtf in Resources */,
 				3D4373AD07FB3E960007BA84 /* gear.tiff in Resources */,
 				3D8663790802CF5C00FF1724 /* BDSKTypeInfoEditor.nib in Resources */,
 				3D866C400803223900FF1724 /* BDSKCharacterConversion.nib in Resources */,
@@ -3562,6 +3562,22 @@
 				CE2391640A3348B1009F3A5B /* English */,
 			);
 			name = DocumentInfoWindow.nib;
+			sourceTree = "<group>";
+		};
+		CE2941000A7F8F2300A46D05 /* RelNotes.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F994B8F607F5F65F00751DA1 /* English */,
+			);
+			name = RelNotes.rtf;
+			sourceTree = "<group>";
+		};
+		CE2941040A7F8F2900A46D05 /* ReadMe.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F9022D180758066000C3F701 /* English */,
+			);
+			name = ReadMe.rtf;
 			sourceTree = "<group>";
 		};
 		CE38FB92091D953900BCB69D /* BDSKFilter.nib */ = {
