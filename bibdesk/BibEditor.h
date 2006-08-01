@@ -253,25 +253,25 @@
 - (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;
 
 /*!
-    @method     getSafariRecentDownloadsMenu
+    @method     safariRecentDownloadsMenu
     @abstract   Returns a menu of items for local paths of recent downloads from Safari. Returns nil if there are no valid items.
     @discussion (comprehensive description)
 */
-- (NSMenu *)getSafariRecentDownloadsMenu;
+- (NSMenu *)safariRecentDownloadsMenu;
 
 /*!
-    @method     getSafariRecentURLsMenu
+    @method     safariRecentURLsMenu
     @abstract   Returns a menu of items for remote URLs of recent downloads from Safari. Returns nil if there are no valid items.
     @discussion (comprehensive description)
 */
-- (NSMenu *)getSafariRecentURLsMenu;
+- (NSMenu *)safariRecentURLsMenu;
 
 /*!
-    @method     getSafariRecentURLsMenu
+    @method     previewRecentDocumentsMenu
     @abstract   Returns a menu of items for local paths of recent documents from Preview. Returns nil if there are no valid items.
     @discussion (comprehensive description)
 */
-- (NSMenu *)getPreviewRecentDocumentsMenu;
+- (NSMenu *)previewRecentDocumentsMenu;
 
 /*!
     @method     recentDownloadsMenu

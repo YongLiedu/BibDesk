@@ -418,6 +418,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
+    NSString *menuTitle = [menu title];
 	if (menu == [[viewLocalToolbarItem menuFormRepresentation] submenu]) {
         [self updateMenu:menu forImagePopUpButton:viewLocalButton];
 	} else if (menu == [[viewRemoteToolbarItem menuFormRepresentation] submenu]) {
@@ -426,7 +427,17 @@ static int numberOfOpenEditors = 0;
         [self updateMenu:menu forImagePopUpButton:documentSnoopButton];
 	} else if (menu == [[authorsToolbarItem menuFormRepresentation] submenu]) {
         [self updateAuthorsToolbarMenu:menu];
-	} else {
+	} else if([menuTitle isEqualToString:@"previewRecentDocumentsMenu"]){
+        [menu removeAllItems];
+        [menu addItemsFromMenu:[self previewRecentDocumentsMenu]];
+    } else if([menuTitle isEqualToString:@"safariRecentDownloadsMenu"]){
+        [menu removeAllItems];
+        [menu addItemsFromMenu:[self safariRecentDownloadsMenu]];
+    } else if([menuTitle isEqualToString:@"safariRecentURLsMenu"]){
+        [menu removeAllItems];
+        [menu addItemsFromMenu:[self safariRecentURLsMenu]];
+    } else {
+        // likely an "Open With..." submenu
         NSString *field = [menu title];
         if(field)
             [menu fillWithApplicationsForURL:[theBib URLForField:field]];
@@ -501,16 +512,18 @@ static int numberOfOpenEditors = 0;
 				 keyEquivalent:@""];
 		
 		// get Safari recent downloads
-		if (submenu = [self getSafariRecentDownloadsMenu]) {
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Safari Recent Downloads",@"Link to Download URL")
-											  action:NULL
-									   keyEquivalent:@""];
-			[item setSubmenu:submenu];
-			[menu addItem:item];
-			[item release];
-		}
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Safari Recent Downloads",@"Link to Download URL")
+                                          action:NULL
+                                   keyEquivalent:@""];
+        submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"safariRecentDownloadsMenu"] autorelease];
+        [submenu setDelegate:self];
+        [item setSubmenu:submenu];
+        [menu addItem:item];
+        [item release];
+
         // get recent downloads (Tiger only) by searching the system downloads directory
         // should work for browsers other than Safari, if they use IC to get/set the download directory
+        // don't create this in the delegate method; it needs to start working in the background
         if(submenu = [self recentDownloadsMenu]){
             item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recent Download", @"") action:NULL keyEquivalent:@""];
             [item setSubmenu:submenu];
@@ -519,14 +532,14 @@ static int numberOfOpenEditors = 0;
         }
 		
 		// get Preview recent documents
-		if (submenu = [self getPreviewRecentDocumentsMenu]) {
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recently Opened File",@"Link to Recently Opened or Modified File")
-											  action:NULL
-									   keyEquivalent:@""];
-			[item setSubmenu:submenu];
-			[menu addItem:item];
-			[item release];
-		}
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recently Opened File",@"Link to Recently Opened or Modified File")
+                                          action:NULL
+                                   keyEquivalent:@""];
+        submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"previewRecentDocumentsMenu"] autorelease];
+        [submenu setDelegate:self];
+        [item setSubmenu:submenu];
+        [menu addItem:item];
+        [item release];
 	}
 	else if (view == viewRemoteButton) {
 		NSEnumerator *e = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] objectEnumerator];
@@ -555,15 +568,15 @@ static int numberOfOpenEditors = 0;
 		}
 		
 		// get Safari recent URLs
-		if (submenu = [self getSafariRecentURLsMenu]) {
-			[menu addItem:[NSMenuItem separatorItem]];
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Download URL",@"Link to Download URL")
-										 	  action:NULL
-									   keyEquivalent:@""];
-			[item setSubmenu:submenu];
-			[menu addItem:item];
-			[item release];
-		}
+        [menu addItem:[NSMenuItem separatorItem]];
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Download URL",@"Link to Download URL")
+                                          action:NULL
+                                   keyEquivalent:@""];
+        submenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"safariRecentURLsMenu"] autorelease];
+        [submenu setDelegate:self];
+        [item setSubmenu:submenu];
+        [menu addItem:item];
+        [item release];
 	}
 	else if (view == documentSnoopButton) {
 		
@@ -590,26 +603,60 @@ static int numberOfOpenEditors = 0;
 	}
 }
 
-- (NSMenu *)getSafariRecentDownloadsMenu{
-	NSString *downloadPlistFileName = [NSHomeDirectory()  stringByAppendingPathComponent:@"Library"];
-	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Safari"];
-	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"downloads.plist"];
-	
-	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:downloadPlistFileName];
-	NSArray *historyArray = [dict objectForKey:@"DownloadHistory"];
+- (NSArray *)safariDownloadHistory{
+    static CFURLRef downloadPlistURL = NULL;
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    if(NULL == downloadPlistURL){
+        NSString *downloadPlistFileName = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+        downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Safari"];
+        downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"downloads.plist"];
+        downloadPlistURL = CFURLCreateWithFileSystemPath(alloc, (CFStringRef)downloadPlistFileName, kCFURLPOSIXPathStyle, FALSE);
+    }
+    Boolean success;
+    CFReadStreamRef readStream = CFReadStreamCreateWithFile(alloc, downloadPlistURL);
+    success = readStream != NULL;
+        
+    if(success)
+        success = CFReadStreamOpen(readStream);
+    
+    NSDictionary *theDictionary = nil;
+    CFPropertyListFormat format;
+    CFStringRef errorString = nil;
+    if(success)
+        theDictionary = (NSDictionary *)CFPropertyListCreateFromStream(alloc, readStream, 0, kCFPropertyListImmutable, &format, &errorString);
+    
+    if(nil == theDictionary){
+        NSLog(@"failed to read Safari download property list %@ (%@)", downloadPlistURL, errorString);
+        if(errorString) CFRelease(errorString);
+    }
+    
+    if(readStream){
+        CFReadStreamClose(readStream);
+        CFRelease(readStream);
+    }
+    
+    NSArray *historyArray = [[theDictionary objectForKey:@"DownloadHistory"] retain];
+    [theDictionary release];
+	return [historyArray autorelease];
+}
+
+- (NSMenu *)safariRecentDownloadsMenu{
+	NSArray *historyArray = [self safariDownloadHistory];
 		
 	NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
 	int i = 0;
-	
-	for (i = 0; i < [historyArray count]; i ++){
+	unsigned numberOfItems = [historyArray count];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+	for (i = 0; i < numberOfItems; i ++){
 		NSDictionary *itemDict = [historyArray objectAtIndex:i];
 		NSString *filePath = [itemDict objectForKey:@"DownloadEntryPath"];
 		filePath = [filePath stringByStandardizingPath];
         
         // after uncompressing the file, the original path is gone
-        if([[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO)
+        if([fileManager fileExistsAtPath:filePath] == NO)
             filePath = [[itemDict objectForKey:@"DownloadEntryPostPath"] stringByStandardizingPath];
-		if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+		if([fileManager fileExistsAtPath:filePath]){
 			NSString *fileName = [filePath lastPathComponent];
 			NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:filePath];
 			[image setSize: NSMakeSize(16, 16)];
@@ -629,21 +676,16 @@ static int numberOfOpenEditors = 0;
 }
 
 
-- (NSMenu *)getSafariRecentURLsMenu{
-	NSString *downloadPlistFileName = [NSHomeDirectory()  stringByAppendingPathComponent:@"Library"];
-	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Safari"];
-	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"downloads.plist"];
-	
-	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:downloadPlistFileName];
-	NSArray *historyArray = [dict objectForKey:@"DownloadHistory"];
-	
-	if (![historyArray count])
+- (NSMenu *)safariRecentURLsMenu{
+	NSArray *historyArray = [self safariDownloadHistory];
+	unsigned numberOfItems = [historyArray count];
+	if (!numberOfItems)
 		return nil;
 	
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	int i = 0;
 	
-	for (i = 0; i < [historyArray count]; i ++){
+	for (i = 0; i < numberOfItems; i ++){
 		NSDictionary *itemDict = [historyArray objectAtIndex:i];
 		NSString *URLString = [itemDict objectForKey:@"DownloadEntryURL"];
 		if (![NSString isEmptyString:URLString] && [NSURL URLWithString:URLString]) {
@@ -667,15 +709,7 @@ static int numberOfOpenEditors = 0;
 	return nil;
 }
 
-- (NSMenu *)getPreviewRecentDocumentsMenu{
-	BOOL success = CFPreferencesSynchronize(CFSTR("com.apple.Preview"),
-									   kCFPreferencesCurrentUser,
-									   kCFPreferencesCurrentHost);
-	
-	if(!success){
-		NSLog(@"error syncing preview's prefs!");
-	}
-
+- (NSMenu *)previewRecentDocumentsMenu{
     // get all of the items from the Apple menu (works on 10.4, anyway), and build a set of the file paths for easy comparison as strings
     NSMutableSet *globalRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
     CFDictionaryRef globalRecentDictionary = CFPreferencesCopyAppValue(CFSTR("Documents"), CFSTR("com.apple.recentitems"));
@@ -702,8 +736,8 @@ static int numberOfOpenEditors = 0;
     NSMutableSet *previewRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
 	
 	int i = 0;
-	
-	for (i = 0; i < [(NSArray *)historyArray count]; i ++){
+	unsigned numberOfItems = [(NSArray *)historyArray count];
+	for (i = 0; i < numberOfItems; i ++){
 		itemDict = [(NSArray *)historyArray objectAtIndex:i];
 		aliasData = [[itemDict objectForKey:@"_NSLocator"] objectForKey:@"_NSAlias"];
 		
