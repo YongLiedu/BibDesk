@@ -398,13 +398,13 @@
 - (void)setRating:(unsigned int)rating;
 
 /*!
-    @method     setRatingField:toValue:
+    @method     setField:toRatingValue:
     @abstract   Sets an integer-type field value 0--5
     @discussion (comprehensive description)
     @param      field (description)
     @param      rating (description)
 */
-- (void)setRatingField:(NSString *)field toValue:(unsigned int)rating;
+- (void)setField:(NSString *)field toRatingValue:(unsigned int)rating;
 
 /*!
     @method     ratingValueOfField:
@@ -425,13 +425,13 @@
 - (BOOL)boolValueOfField:(NSString *)field;
 
 /*!
-    @method     setBooleanField:toValue:
+    @method     setField:toBoolValue:
     @abstract   Sets a boolean type field to a string of Yes or No
     @discussion (comprehensive description)
     @param      field (description)
     @param      boolValue (description)
 */
-- (void)setBooleanField:(NSString *)field toValue:(BOOL)boolValue;
+- (void)setField:(NSString *)field toBoolValue:(BOOL)boolValue;
 
 
 /*!
@@ -444,14 +444,14 @@
 - (NSCellStateValue)triStateValueOfField:(NSString *)field;
 
 /*!
-    @method     setTriStateField:toValue:
+    @method     setField:toTriStateValue:
     @abstract   Sets a checkbox (aka boolean) type field to a string of Yes or No or "-" for mixed. (or a localized variant)
     @discussion (comprehensive description)
     @param      field (description)
     @param      triStateValue - one of NS{On,Off,Mixed}State
 */
 
-- (void)setTriStateField:(NSString *)field toValue:(NSCellStateValue)triStateValue;
+- (void)setField:(NSString *)field toTriStateValue:(NSCellStateValue)triStateValue;
     
 /*!
     @method     intValueOfField:
@@ -463,32 +463,32 @@
 - (int)intValueOfField:(NSString *)field;
 
 /*!
-    @method     valueOfGenericField:
-    @abstract   Calls valueOfGenericField:inherit: with inherit set to NO
+    @method     stringValueOfField:
+    @abstract   Calls stringValueOfField:inherit: with inherit set to NO
     @discussion (comprehensive description)
     @param      field (description)
     @result     (description)
 */
-- (NSString *)valueOfGenericField:(NSString *)field;
+- (NSString *)stringValueOfField:(NSString *)field;
 
 /*!
-    @method     valueOfGenericField:inherit:
-    @abstract   Returns the string value of a generic field in the item's pubFields dictionary
+    @method     stringValueOfField:inherit:
+    @abstract   Returns the proper string value of a field in the item's pubFields dictionary
     @discussion Returns boolean and rating fields as parsed strings. Note those are never inherited. Also supports Cite Key and Type. 
     @param      field (description)
     @param      inherit (description)
     @result     (description)
 */
-- (NSString *)valueOfGenericField:(NSString *)field inherit:(BOOL)inherit;
+- (NSString *)stringValueOfField:(NSString *)field inherit:(BOOL)inherit;
 
 /*!
-    @method     setGenericField:toValue:
-    @abstract   Sets generic field to the string value, using proper setting depending on the type of field. 
+    @method     setField:toStringValue:
+    @abstract   Sets field to the string value, using proper setting depending on the type of field. 
     @discussion (comprehensive description)
     @param      field (description)
     @param      boolValue (description)
 */
-- (void)setGenericField:(NSString *)field toValue:(NSString *)value;
+- (void)setField:(NSString *)field toStringValue:(NSString *)value;
 
 /*!
     @method     setHasBeenEdited:

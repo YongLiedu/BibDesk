@@ -245,7 +245,7 @@
 					break;
 				case 'y':
 					// year without century
-                    string = [pub valueOfGenericField:BDSKYearString];
+                    string = [pub stringValueOfField:BDSKYearString];
                     if ([NSString isEmptyString:string] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", string]];
 						string = [date descriptionWithCalendarFormat:@"%y" timeZone:nil locale:nil];
@@ -255,7 +255,7 @@
 					break;
 				case 'Y':
 					// year with century
-                    string = [pub valueOfGenericField:BDSKYearString];
+                    string = [pub stringValueOfField:BDSKYearString];
                     if ([NSString isEmptyString:string] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", string]];
 						string = [date descriptionWithCalendarFormat:@"%Y" timeZone:nil locale:nil];
@@ -265,7 +265,7 @@
 					break;
 				case 'm':
 					// month
-                    string = [pub valueOfGenericField:BDSKMonthString];
+                    string = [pub stringValueOfField:BDSKMonthString];
                     if ([NSString isEmptyString:string] == NO) {
                         NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-2000", string]];
 						string = [date descriptionWithCalendarFormat:@"%m" timeZone:nil locale:nil];
@@ -281,7 +281,7 @@
 						if (![scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
 						[scanner scanString:@"]" intoString:NULL];
 					}
-					string = [pub valueOfGenericField:BDSKKeywordsString];
+					string = [pub stringValueOfField:BDSKKeywordsString];
 					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
@@ -374,7 +374,7 @@
 						} else if ([string isEqualToString:BDSKContainerString]) {
 							string = [pub container];
 						} else {
-							string = [pub valueOfGenericField:string];
+							string = [pub stringValueOfField:string];
 						}
 						if (string != nil) {
 							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
@@ -398,7 +398,7 @@
 						[scanner scanString:@"}" intoString:NULL]) {
 						if (![scanner scanInt:&number]) number = 3;
 				
-						string = [[pub valueOfGenericField:string] acronymValueIgnoringWordLength:number];
+						string = [[pub stringValueOfField:string] acronymValueIgnoringWordLength:number];
 						string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
 						[parsedStr appendString:string];
 					}
@@ -438,7 +438,7 @@
                         } else if ([[BibTypeManager sharedManager] isRatingField:string]) {
                             string = [pub ratingValueOfField:string] == 0 ? noValue : yesValue;
                         } else {
-                            string = [NSString isEmptyString:[pub valueOfGenericField:string]] ? noValue : yesValue;
+                            string = [NSString isEmptyString:[pub stringValueOfField:string]] ? noValue : yesValue;
                         }
                         if (number > 0 && [string length] > number) {
                             [parsedStr appendString:[string substringToIndex:number]];

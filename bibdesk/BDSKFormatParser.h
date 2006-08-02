@@ -44,7 +44,7 @@
 - (NSString *)citeKey;
 - (NSString *)title;
 - (NSString *)container;
-- (NSString *)valueOfGenericField:(NSString *)field;
+- (NSString *)stringValueOfField:(NSString *)field;
 - (BOOL)boolValueOfField:(NSString *)field;
 - (int)triStateValueOfField:(NSString *)field;
 - (int)ratingValueOfField:(NSString *)field;

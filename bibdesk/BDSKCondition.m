@@ -209,7 +209,7 @@
         if (stringComparison == BDSKGroupNotContain) 
             return ([item isContainedInGroupNamed:stringValue forField:key] == NO);
         
-        NSString *itemValue = [item valueOfGenericField:key];
+        NSString *itemValue = [item stringValueOfField:key];
         // unset values are considered empty strings
         if (itemValue == nil)
             itemValue = @"";

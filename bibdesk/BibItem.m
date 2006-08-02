@@ -346,7 +346,7 @@ static CFDictionaryRef selectorTable = NULL;
 	
     // @@ remove TeX?  case-sensitive?
 	while (key = [keyEnum nextObject]) {
-		if ([[self valueOfGenericField:key inherit:NO] isEqualToString:[aBI valueOfGenericField:key inherit:NO]] == NO)
+		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO)
 			return NO;
 	}
 	
@@ -376,8 +376,8 @@ static CFDictionaryRef selectorTable = NULL;
 	NSString *key, *value1, *value2;
 	
 	while (key = [keyEnum nextObject]) {
-		value1 = [self valueOfGenericField:key inherit:NO];
-		value2 = [aBI valueOfGenericField:key inherit:NO];
+		value1 = [self stringValueOfField:key inherit:NO];
+		value2 = [aBI stringValueOfField:key inherit:NO];
 		if ([NSString isEmptyString:value1] == YES) {
 			if ([NSString isEmptyString:value2] == YES)
 				continue;
@@ -883,7 +883,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setRating:(unsigned int)rating{
-    [self setRatingField:BDSKRatingString toValue:rating];
+    [self setField:BDSKRatingString toRatingValue:rating];
 }
 
 - (void)setHasBeenEdited:(BOOL)yn{
@@ -1165,14 +1165,14 @@ static CFDictionaryRef selectorTable = NULL;
 #pragma mark Derived field values
 
 - (id)valueForUndefinedKey:(NSString *)key{
-    return [self valueOfGenericField:key];
+    return [self stringValueOfField:key];
 }
 
-- (NSString *)valueOfGenericField:(NSString *)field {
-	return [self valueOfGenericField:field inherit:YES];
+- (NSString *)stringValueOfField:(NSString *)field {
+	return [self stringValueOfField:field inherit:YES];
 }
 
-- (NSString *)valueOfGenericField:(NSString *)field inherit:(BOOL)inherit {
+- (NSString *)stringValueOfField:(NSString *)field inherit:(BOOL)inherit {
 	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 		
 	if([typeManager isRatingField:field]){
@@ -1192,16 +1192,16 @@ static CFDictionaryRef selectorTable = NULL;
     }
 }
 
-- (void)setGenericField:(NSString *)field toValue:(NSString *)value{
+- (void)setField:(NSString *)field toStringValue:(NSString *)value{
     OBASSERT([field isEqualToString:BDSKAllFieldsString] == NO);
 	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 	
 	if([typeManager isBooleanField:field]){
-		[self setBooleanField:field toValue:[value booleanValue]];
+		[self setField:field toBoolValue:[value booleanValue]];
     }else if([typeManager isTriStateField:field]){
-        [self setTriStateField:field toValue:[value triStateValue]];
+        [self setField:field toTriStateValue:[value triStateValue]];
 	}else if([typeManager isRatingField:field]){
-		[self setRatingField:field toValue:[value intValue]];
+		[self setField:field toRatingValue:[value intValue]];
 	}else if([field isEqualToString:BDSKPubTypeString]){
 		[self setPubType:value];
 	}else if([field isEqualToString:BDSKCiteKeyString]){
@@ -1229,7 +1229,7 @@ static CFDictionaryRef selectorTable = NULL;
     return [[pubFields objectForKey:field usingReadWriteLock:bibLock] intValue];
 }
 
-- (void)setRatingField:(NSString *)field toValue:(unsigned int)rating{
+- (void)setField:(NSString *)field toRatingValue:(unsigned int)rating{
 	if (rating > 5)
 		rating = 5;
 	[self setField:field toValue:[NSString stringWithFormat:@"%i", rating]];
@@ -1240,7 +1240,7 @@ static CFDictionaryRef selectorTable = NULL;
 	return [(NSString *)[pubFields objectForKey:field usingReadWriteLock:bibLock] booleanValue];
 }
 
-- (void)setBooleanField:(NSString *)field toValue:(BOOL)boolValue{
+- (void)setField:(NSString *)field toBoolValue:(BOOL)boolValue{
 	[self setField:field toValue:[NSString stringWithBool:boolValue]];
 }
 
@@ -1248,7 +1248,7 @@ static CFDictionaryRef selectorTable = NULL;
 	return [(NSString *)[pubFields objectForKey:field usingReadWriteLock:bibLock] triStateValue];
 }
 
-- (void)setTriStateField:(NSString *)field toValue:(NSCellStateValue)triStateValue{
+- (void)setField:(NSString *)field toTriStateValue:(NSCellStateValue)triStateValue{
 	if(![[pubFields allKeysUsingReadWriteLock:bibLock] containsObject:field])
 		[self addField:field];
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
@@ -1304,7 +1304,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
 
     // must be a string of some kind...
-    NSString *value = NULL == selector ? [self valueOfGenericField:field] : [self performSelector:selector];
+    NSString *value = NULL == selector ? [self stringValueOfField:field] : [self performSelector:selector];
     return stringContainsLossySubstring(value, substring, searchOptions, flag);
 }
 
@@ -2228,7 +2228,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		return groupSet;
 
 	// otherwise build it if we have a value
-    NSString *value = [self valueOfGenericField:field];
+    NSString *value = [self stringValueOfField:field];
 	if([value isComplex] || [value isInherited])
 		value = [NSString stringWithString:value];
     if([NSString isEmptyString:value])
@@ -2278,7 +2278,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	// otherwise build it if we have a value
 	BOOL isInherited = NO;
-    NSString *oldString = [self valueOfGenericField:field];
+    NSString *oldString = [self stringValueOfField:field];
 	if([oldString isComplex] || [oldString isInherited]){
 		isInherited = [oldString isInherited];
 		oldString = [NSString stringWithString:oldString];
@@ -2312,7 +2312,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
     
     [string appendString:groupDescription];
-	[self setGenericField:field toValue:string];
+	[self setField:field toStringValue:string];
     [string release];
 	
 	return operation;
@@ -2330,7 +2330,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	// otherwise build it if we have a value
 	BOOL isInherited = NO;
-    NSString *oldString = [self valueOfGenericField:field];
+    NSString *oldString = [self stringValueOfField:field];
 	if([oldString isComplex] || [oldString isInherited]){
 		isInherited = [oldString isInherited];
 		oldString = [NSString stringWithString:oldString];
@@ -2353,11 +2353,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	// first handle some special cases where we can simply set the value
 	if ([[pw stringArrayForKey:BDSKBooleanFieldsKey] containsObject:field]) {
 		// we flip the boolean, effectively removing it from the group
-		[self setBooleanField:field toValue:![groupName booleanValue]];
+		[self setField:field toBoolValue:![groupName booleanValue]];
 		return BDSKOperationSet;
 	} else if ([[pw stringArrayForKey:BDSKRatingFieldsKey] containsObject:field]) {
 		// this operation doesn't really make sense for ratings, but we need to do something
-		[self setRatingField:field toValue:([groupName intValue] == 0) ? 1 : 0];
+		[self setField:field toRatingValue:([groupName intValue] == 0) ? 1 : 0];
 		return BDSKOperationSet;
 	} else if ([[pw stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field]) {
 		// this operation also doesn't make much sense for tri-state fields
@@ -2372,11 +2372,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             case NSMixedState:
                 newVal = NSOffState;
         }
-		[self setTriStateField:field toValue:newVal];
+		[self setField:field toTriStateValue:newVal];
 		return BDSKOperationSet;
 	} else if (operation == BDSKOperationSet) {
 		// we should have a single value to remove, so we can simply clear the field
-		[self setGenericField:field toValue:@""];
+		[self setField:field toStringValue:@""];
 		return BDSKOperationSet;
 	}
 	
@@ -2464,7 +2464,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	// otherwise build it if we have a value
 	BOOL isInherited = NO;
-    NSString *oldString = [self valueOfGenericField:field];
+    NSString *oldString = [self stringValueOfField:field];
 	if([oldString isComplex] || [oldString isInherited]){
 		isInherited = [oldString isInherited];
 		oldString = [NSString stringWithString:oldString];
@@ -2487,15 +2487,15 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	// first handle some special cases where we can simply set the value
 	if ([[pw stringArrayForKey:BDSKBooleanFieldsKey] containsObject:field]) {
 		// we flip the boolean, effectively removing it from the group
-		[self setBooleanField:field toValue:[newGroupName booleanValue]];
+		[self setField:field toBoolValue:[newGroupName booleanValue]];
 		return BDSKOperationSet;
 	} else if ([[pw stringArrayForKey:BDSKRatingFieldsKey] containsObject:field]) {
 		// this operation doesn't really make sense for ratings, but we need to do something
-		[self setRatingField:field toValue:[newGroupName intValue]];
+		[self setField:field toRatingValue:[newGroupName intValue]];
 		return BDSKOperationSet;
 	} else if (operation == BDSKOperationSet) {
 		// we should have a single value to remove, so we can simply clear the field
-		[self setGenericField:field toValue:newGroupName];
+		[self setField:field toStringValue:newGroupName];
 		return BDSKOperationSet;
 	}
 	
@@ -2799,7 +2799,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     else if (isURL)
         return (id)[item URLForField:key];
     else 
-        return (id)[item valueOfGenericField:key];
+        return (id)[item stringValueOfField:key];
 }
 
 - (void)setPersons:(BOOL)flag{
@@ -2817,7 +2817,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (BOOL)isEmptyField:(NSString *)name{
-    return [NSString isEmptyString:[item valueOfGenericField:name]];
+    return [NSString isEmptyString:[item stringValueOfField:name]];
 }
 
 - (id)fieldForName:(NSString *)name{

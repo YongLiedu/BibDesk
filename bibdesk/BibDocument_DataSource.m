@@ -179,7 +179,7 @@
 			int oldRating = [pub ratingValueOfField:tcID];
 			int newRating = [object intValue];
 			if(newRating != oldRating) {
-				[pub setRatingField:tcID toValue:newRating];
+				[pub setField:tcID toRatingValue:newRating];
 				BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
 				if (scriptHook) {
 					[scriptHook setField:tcID];
@@ -194,7 +194,7 @@
             NSCellStateValue oldStatus = [pub boolValueOfField:tcID];
 			NSCellStateValue newStatus = [object intValue];
 			if(newStatus != oldStatus) {
-				[pub setBooleanField:tcID toValue:newStatus];
+				[pub setField:tcID toBoolValue:newStatus];
 				BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
 				if (scriptHook) {
 					[scriptHook setField:tcID];
@@ -209,7 +209,7 @@
             NSCellStateValue oldStatus = [pub triStateValueOfField:tcID];
 			NSCellStateValue newStatus = [object intValue];
 			if(newStatus != oldStatus) {
-				[pub setTriStateField:tcID toValue:newStatus];
+				[pub setField:tcID toTriStateValue:newStatus];
 				BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
 				if (scriptHook) {
 					[scriptHook setField:tcID];

@@ -94,7 +94,7 @@
 
 - (NSString *)container { return [pubFields objectForKey:BDSKJournalString]; }
 
-- (NSString *)valueOfGenericField:(NSString *)field { 
+- (NSString *)stringValueOfField:(NSString *)field { 
     NSString *value = [pubFields objectForKey:field];
     return (value != nil) ? value : field;
 }

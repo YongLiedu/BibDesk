@@ -1131,7 +1131,7 @@ static int numberOfOpenEditors = 0;
 	int newRating = [cell rating];
 		
 	if(newRating != oldRating) {
-		[theBib setRatingField:field toValue:newRating];
+		[theBib setField:field toRatingValue:newRating];
 		
 		BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
 		if (scriptHook) {
@@ -1162,7 +1162,7 @@ static int numberOfOpenEditors = 0;
     if(isTriState){
         if(newState == oldState) return;
         
-        [theBib setTriStateField:field toValue:newState];
+        [theBib setField:field toTriStateValue:newState];
         
         if (scriptHook) {
             [scriptHook setField:field];
@@ -1173,7 +1173,7 @@ static int numberOfOpenEditors = 0;
     }else{
         if(newBool == oldBool) return;    
         
-        [theBib setBooleanField:field toValue:newBool];
+        [theBib setField:field toBoolValue:newBool];
         
         if (scriptHook) {
  			[scriptHook setField:field];
