@@ -41,6 +41,7 @@
 #import "BibAppController.h"
 #import "BibAuthor.h"
 #import "BDSKFormatParser.h"
+#import "BibTypeManager.h"
 #import "NSString_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSArray-OFExtensions.h>
@@ -99,11 +100,17 @@
     return (value != nil) ? value : field;
 }
 
-- (BOOL)boolValueOfField:(NSString *)field {  return NO; }
-
-- (int)triStateValueOfField:(NSString *)field { return NSMixedState; }
-
-- (int)ratingValueOfField:(NSString *)field { return 0; }
+- (int)intValueOfField:(NSString *)field { 
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    if ([typeMan isBooleanField:field] || [typeMan isRatingField:field])
+        return 0;
+    else if ([typeMan isTriStateField:field])
+        return -1;
+    else if ([pubFields objectForKey:field] != nil)
+        return 1;
+    else 
+        return 0;
+}
 
 - (NSString *)localFilePathForField:(NSString *)field { return [pubFields objectForKey:field]; }
 

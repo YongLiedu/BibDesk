@@ -45,9 +45,7 @@
 - (NSString *)title;
 - (NSString *)container;
 - (NSString *)stringValueOfField:(NSString *)field;
-- (BOOL)boolValueOfField:(NSString *)field;
-- (int)triStateValueOfField:(NSString *)field;
-- (int)ratingValueOfField:(NSString *)field;
+- (int)intValueOfField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSString *)localFilePathForField:(NSString *)field;
 - (NSString *)documentFileName;

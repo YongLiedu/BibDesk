@@ -1221,7 +1221,7 @@ static CFDictionaryRef selectorTable = NULL;
     }else if([typeManager isTriStateField:field]){
 		return (int)[self triStateValueOfField:field];
 	}else{
-		return 0;
+		return [NSString isEmptyString:[self valueOfField:field]] ? 0 : 1;
     }
 }
 

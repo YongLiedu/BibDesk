@@ -430,16 +430,8 @@
                             }
                         }
 						if (![scanner scanInt:&number]) number = 0;
-                        if ([[BibTypeManager sharedManager] isBooleanField:string]) {
-                            string = [pub boolValueOfField:string] ? yesValue : noValue;
-                        } else if ([[BibTypeManager sharedManager] isTriStateField:string]) {
-                            i = [pub triStateValueOfField:string];
-                            string = i == NSOnState ? yesValue : (i == NSOffState ? noValue : mixedValue);
-                        } else if ([[BibTypeManager sharedManager] isRatingField:string]) {
-                            string = [pub ratingValueOfField:string] == 0 ? noValue : yesValue;
-                        } else {
-                            string = [NSString isEmptyString:[pub stringValueOfField:string]] ? noValue : yesValue;
-                        }
+                        i = [pub intValueOfField:string];
+                        string = (i == 0 ? noValue : (i > 0 ? yesValue : mixedValue));
                         if (number > 0 && [string length] > number) {
                             [parsedStr appendString:[string substringToIndex:number]];
                         } else {
