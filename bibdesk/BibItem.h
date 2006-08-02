@@ -83,10 +83,10 @@
      @param fileType A string representing which kind of file this item was read from.
      @param type A string representing the type of entry this item is - used to make the BibItem have the right entries in its dictionary.
      @param fieldsDict The dictionary of fields to initialize the item with.
-     @param date The created date of the BibItem. Pass nil if this is not a newly added BibItem (i.e. when it is added from a file). 
+     @param isNew Boolean determines if the item is new for the BibTeX document. Determines if the date-added should be set. Should be YES unless when reading the BibTeX source file.
      @result The receiver, initialized to type and containing authors authArray.
 */
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict createdDate:(NSCalendarDate *)date;
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
 
 /*!
     @method makeType

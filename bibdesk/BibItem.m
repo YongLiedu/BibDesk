@@ -177,18 +177,15 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (id)init
 {
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-									  fileType:BDSKBibtexString // Not Sure if this is good.
-									 pubFields:nil
-								   createdDate:[NSCalendarDate calendarDate]];
+	NSString *defaultType = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey];
+	self = [self initWithType:defaultType fileType:BDSKBibtexString pubFields:nil isNew:YES];
 	if (self) {
         [self setHasBeenEdited:NO]; // for new, empty bibs:  set this here, since makeType: and updateMetadataForKey set it to YES in our call to initWithType: above
 	}
 	return self;
 }
 
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ // this is the designated initializer.
     if (self = [super init]){
 		bibLock = [[OFReadWriteLock alloc] init];
 		[bibLock lockForWriting];
@@ -197,8 +194,8 @@ static CFDictionaryRef selectorTable = NULL;
 		}else{
 			pubFields = [[NSMutableDictionary alloc] initWithCapacity:7];
 		}
-		if (date){
-			NSString *nowStr = [date description];
+		if (isNew){
+			NSString *nowStr = [[NSCalendarDate date] description];
 			[pubFields setObject:nowStr forKey:BDSKDateAddedString];
 			[pubFields setObject:nowStr forKey:BDSKDateModifiedString];
         }
@@ -211,10 +208,8 @@ static CFDictionaryRef selectorTable = NULL;
         [self setPubTypeWithoutUndo:type];
         [self setCiteKeyString: BDSKDefaultCiteKey];
         [self setDate: nil];
-        
-        // this date will be nil when loading from a file or it will be the current date when pasting
-        [self setDateAdded: date];
-        [self setDateModified: date];
+        [self setDateAdded: nil];
+        [self setDateModified: nil];
         
 		[self setNeedsToBeFiled:NO];
 		
@@ -240,10 +235,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
-    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
-                                                               fileType:fileType
-															  pubFields:pubFields
-															createdDate:[NSCalendarDate calendarDate]];
+    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType pubFields:pubFields isNew:YES];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
 	
@@ -252,29 +244,30 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        self = [super init];
-        [self setFileType:[coder decodeObjectForKey:@"fileType"]];
-        [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
-        [self setDate:[coder decodeObjectForKey:@"pubDate"]];
-        [self setDateAdded:[coder decodeObjectForKey:@"dateAdded"]];
-        [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
-        [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
-        pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
-        groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-        // set by the document, which we don't archive
-        document = nil;
-        hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
-        bibLock = [[OFReadWriteLock alloc] init]; // not encoded
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(typeInfoDidChange:)
-                                                     name:BDSKBibTypeInfoChangedNotification
-                                                   object:[BibTypeManager sharedManager]];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(customFieldsDidChange:)
-                                                     name:BDSKCustomFieldsChangedNotification
-                                                   object:nil];
+        if(self = [super init]){
+            [self setFileType:[coder decodeObjectForKey:@"fileType"]];
+            [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
+            [self setDate:[coder decodeObjectForKey:@"pubDate"]];
+            [self setDateAdded:[coder decodeObjectForKey:@"dateAdded"]];
+            [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
+            [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
+            pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
+            groups = [[NSMutableDictionary alloc] initWithCapacity:5];
+            // set by the document, which we don't archive
+            document = nil;
+            hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
+            bibLock = [[OFReadWriteLock alloc] init]; // not encoded
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(typeInfoDidChange:)
+                                                         name:BDSKBibTypeInfoChangedNotification
+                                                       object:[BibTypeManager sharedManager]];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(customFieldsDidChange:)
+                                                         name:BDSKCustomFieldsChangedNotification
+                                                       object:nil];
+        }
     } else {       
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
     }
@@ -296,9 +289,7 @@ static CFDictionaryRef selectorTable = NULL;
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
         [bibLock unlockForReading];
     } else {
-        [bibLock lockForReading];
-        [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
-        [bibLock unlockForReading];
+        [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]]; // keyed archiving uses bibLock
     }        
 }
 
