@@ -99,14 +99,11 @@
     return (value != nil) ? value : field;
 }
 
-- (BOOL)boolValueOfField:(NSString *)field { 
-    return NO;
-}
+- (BOOL)boolValueOfField:(NSString *)field {  return NO; }
 
-- (int)triStateValueOfField:(NSString *)field { 
-    NSString *value = [pubFields objectForKey:field];
-    return NSMixedState;
-}
+- (int)triStateValueOfField:(NSString *)field { return NSMixedState; }
+
+- (int)ratingValueOfField:(NSString *)field { return 0; }
 
 - (NSString *)localFilePathForField:(NSString *)field { return [pubFields objectForKey:field]; }
 

@@ -435,6 +435,8 @@
                         } else if ([[BibTypeManager sharedManager] isTriStateField:string]) {
                             i = [pub triStateValueOfField:string];
                             string = i == NSOnState ? yesValue : (i == NSOffState ? noValue : mixedValue);
+                        } else if ([[BibTypeManager sharedManager] isRatingField:string]) {
+                            string = [pub ratingValueOfField:string] == 0 ? noValue : yesValue;
                         } else {
                             string = [NSString isEmptyString:[pub valueOfGenericField:string]] ? noValue : yesValue;
                         }
