@@ -3061,7 +3061,7 @@ Keywords must be separated by one of ;:, (semicolon, colon, or comma)
 @item @specargparam{%c, Field, 3}
 @tab Arbitrary field as initials, e.g. @samp{JCIS} for @samp{J. of Colloid and Interface Science}, with (optional) length of words to ignore
 @item @specargparam{%s, Field, [][][]0 }
-@tab Arbitrary boolean or three-value field switch, with (optional) replacement values for Yes, No and Mixed and maximal length
+@tab Arbitrary field switch, with (optional) values for Yes, No and Mixed, or empty and non-empty for generic fields, and maximal length
 @item @specargparam{%i, Key, 0 }
 @tab Arbitrary document info key, with (optional) maximal length
 @item @specparam{%r, 1}
