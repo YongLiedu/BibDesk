@@ -940,7 +940,7 @@
     [readmeWindow makeKeyAndOrderFront:self];
     [readmeTextView setString:@""];
     [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                     withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNote" ofType:@"rtf"]]];
+                                     withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
 }
 
 - (IBAction)showFindPanel:(id)sender{
