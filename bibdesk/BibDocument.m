@@ -2790,7 +2790,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 */
 - (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column {
 	NSMenu *myMenu = nil;
-    NSMenu *submenu = nil;
     NSMenuItem *theItem = nil;
     
 	if (column == -1 || row == -1) 
