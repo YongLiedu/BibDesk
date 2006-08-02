@@ -766,17 +766,17 @@ static CFDictionaryRef selectorTable = NULL;
 	NSString *c;
     NSString *type = [self pubType];
 	
-	if ( [type isEqualToString:@"inbook"]) {
+	if ( [type isEqualToString:BDSKInbookString]) {
 	    c = [self valueOfField:BDSKTitleString];
-	} else if ( [type isEqualToString:@"article"] ) {
+	} else if ( [type isEqualToString:BDSKArticleString] ) {
 		c = [self valueOfField:BDSKJournalString];
-	} else if ( [type isEqualToString:@"incollection"] || 
-				[type isEqualToString:@"inproceedings"] ||
-				[type isEqualToString:@"conference"] ) {
+	} else if ( [type isEqualToString:BDSKIncollectionString] || 
+				[type isEqualToString:BDSKInproceedingsString] ||
+				[type isEqualToString:BDSKConferenceString] ) {
 		c = [self valueOfField:BDSKBooktitleString];
-	} else if ( [type isEqualToString:@"commented"] ){
+	} else if ( [type isEqualToString:BDSKCommentedString] ){
 		c = [self valueOfField:BDSKVolumetitleString];
-	} else if ( [type isEqualToString:@"book"] ){
+	} else if ( [type isEqualToString:BDSKBookString] ){
 		c = [self valueOfField:BDSKSeriesString];
 	} else {
 		c = @""; //Container is empty for non-container types
@@ -795,7 +795,7 @@ static CFDictionaryRef selectorTable = NULL;
     NSString *title = [self valueOfField:BDSKTitleString];
 	if (title == nil) 
 		title = @"";
-	if ([[self pubType] isEqualToString:@"inbook"]) {
+	if ([[self pubType] isEqualToString:BDSKInbookString]) {
 		NSString *chapter = [self valueOfField:BDSKChapterString];
 		if (![NSString isEmptyString:chapter]) {
 			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter of %@)", @"Chapter of inbook (chapter of Title)"), chapter, title];
@@ -1686,10 +1686,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         NSString *hostTitle = nil;
         
-        if([[self pubType] isEqualToString:@"inproceedings"] || 
-           [[self pubType] isEqualToString:@"incollection"]){
+        if([[self pubType] isEqualToString:BDSKInproceedingsString] || 
+           [[self pubType] isEqualToString:BDSKIncollectionString]){
             hostTitle = [self valueOfField:BDSKBooktitleString];
-        }else if([[self pubType] isEqualToString:@"article"]){
+        }else if([[self pubType] isEqualToString:BDSKArticleString]){
             hostTitle = [self valueOfField:BDSKJournalString];
         }
         hostTitle = [hostTitle stringByEscapingBasicXMLEntitiesUsingUTF8];
@@ -1725,19 +1725,19 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if([entryType isEqualToString:@"misc"]){
         refTypeID = 13; // generic
         publisherField = @"Howpublished";
-    }else if([entryType isEqualToString:@"inbook"]){
+    }else if([entryType isEqualToString:BDSKInbookString]){
         refTypeID = 5; // book section
-    }else if([entryType isEqualToString:@"incollection"]){
+    }else if([entryType isEqualToString:BDSKIncollectionString]){
         refTypeID = 5; // book section
-    }else if([entryType isEqualToString:@"inproceedings"]){
+    }else if([entryType isEqualToString:BDSKInproceedingsString]){
         refTypeID = 10; // conference proceedings
-    }else if([entryType isEqualToString:@"proceedings"]){
+    }else if([entryType isEqualToString:BDSKProceedingsString]){
         refTypeID = 10; // conference proceedings
-    }else if([entryType isEqualToString:@"manual"]){
+    }else if([entryType isEqualToString:BDSKManualString]){
         refTypeID = 9; // computer program
         publisherField = @"Organization";
         organizationField = @"";
-    }else if([entryType isEqualToString:@"techreport"]){
+    }else if([entryType isEqualToString:BDSKTechreportString]){
         refTypeID = 27; // report
         isbnField = BDSKNumberString;
         numberField = @"";
@@ -1749,13 +1749,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         refTypeID = 32; // thesis
     }else if([entryType isEqualToString:@"unpublished"]){
         refTypeID = 34;
-    }else if([entryType isEqualToString:@"article"]){
+    }else if([entryType isEqualToString:BDSKArticleString]){
         refTypeID = 17; // journal article
         isbnField = @"Issn";
         booktitleField = BDSKJournalString;
         if ([NSString isEmptyString:[self valueOfField:BDSKVolumeString]] && [NSString isEmptyString:[self valueOfField:BDSKNumberString]])
             refTypeID = 23; // newspaper article
-    }else if([entryType isEqualToString:@"book"]){
+    }else if([entryType isEqualToString:BDSKBookString]){
         refTypeID = 6; // book
         booktitleField = BDSKSeriesString;
         if([self numberOfAuthors] == 0){

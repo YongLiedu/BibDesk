@@ -221,10 +221,10 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
                     // however, bibutils treats PT J as an article, so we'll do the same
                     type = [pubDict objectForKey:@"Publication-Type"];
                     if([type isEqualToString:@"J"]){
-                        type = @"article";
+                        type = BDSKArticleString;
                     } else {
                         type = [pubDict objectForKey:@"Document-Type"];
-                        type = type ? [typeManager bibtexTypeForWebOfScienceType:type] : @"misc";
+                        type = type ? [typeManager bibtexTypeForWebOfScienceType:type] : BDSKMiscString;
                     }
                     
                     newBI = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString pubFields:pubDict createdDate:[NSCalendarDate date]];

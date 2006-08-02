@@ -171,7 +171,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			// fix the date
 			splitDateString(pubDict);
 			
-			newBI = [[BibItem alloc] initWithType:@"article"
+			newBI = [[BibItem alloc] initWithType:BDSKArticleString
 										 fileType:BDSKBibtexString
 										pubFields:pubDict
 									  createdDate:[NSCalendarDate date]];
@@ -192,7 +192,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 					// fix the date
 					splitDateString(pubDict);
 					
-					newBI = [[BibItem alloc] initWithType:@"article"
+					newBI = [[BibItem alloc] initWithType:BDSKArticleString
 												 fileType:BDSKBibtexString
 												pubFields:pubDict
 											  createdDate:[NSCalendarDate date]];
@@ -248,7 +248,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 		// fix the date
 		splitDateString(pubDict);
 		
-		newBI = [[BibItem alloc] initWithType:@"article"
+		newBI = [[BibItem alloc] initWithType:BDSKArticleString
 									 fileType:BDSKBibtexString
 									pubFields:pubDict
 								  createdDate:[NSCalendarDate date]];

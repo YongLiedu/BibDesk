@@ -253,6 +253,18 @@ NSString *BDSKAddressString = @"Address";
 NSString *BDSKDoiString = @"Doi";
 NSString *BDSKCiteseerUrlString = @"Citeseerurl";
 NSString *BDSKPubTypeString = @"BibTeX Type"; // this is used for -[BibItem setPubType:], not equivalent to @"Type"
+NSString *BDSKArticleString = @"article";
+NSString *BDSKBookString = @"book";
+NSString *BDSKInbookString = @"inbook";
+NSString *BDSKIncollectionString = @"incollection";
+NSString *BDSKInproceedingsString = @"inproceedings";
+NSString *BDSKProceedingsString = @"proceedings";
+NSString *BDSKBookletString = @"booklet";
+NSString *BDSKManualString = @"manual";
+NSString *BDSKTechreportString = @"techreport";
+NSString *BDSKCommentedString = @"commented";
+NSString *BDSKConferenceString = @"conference";
+NSString *BDSKMiscString = @"misc";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";

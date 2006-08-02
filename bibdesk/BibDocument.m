@@ -3790,14 +3790,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	NSString *parentType = [item pubType];
     
 	[newBI setField:BDSKCrossrefString toValue:[item citeKey]];
-	if ([parentType isEqualToString:@"proceedings"]) {
-		[newBI setPubType:@"inproceedings"];
-	} else if ([parentType isEqualToString:@"book"] || 
-			   [parentType isEqualToString:@"booklet"] || 
-			   [parentType isEqualToString:@"techreport"] || 
-			   [parentType isEqualToString:@"manual"]) {
-		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:@"inbook"]) 
-			[newBI setPubType:@"incollection"];
+	if ([parentType isEqualToString:BDSKProceedingsString]) {
+		[newBI setPubType:BDSKInproceedingsString];
+	} else if ([parentType isEqualToString:BDSKBookString] || 
+			   [parentType isEqualToString:BDSKBookletString] || 
+			   [parentType isEqualToString:BDSKTechreportString] || 
+			   [parentType isEqualToString:BDSKManualString]) {
+		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
+			[newBI setPubType:BDSKIncollectionString];
 	}
     [self addPublication:newBI];
     [newBI release];

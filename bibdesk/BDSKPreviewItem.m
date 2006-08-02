@@ -86,7 +86,7 @@
 
 - (NSString *)fileType { return BDSKBibtexString; }
 
-- (NSString *)pubType { return @"article"; }
+- (NSString *)pubType { return BDSKArticleString; }
 
 - (NSString *)citeKey { return @"citeKey"; }
 

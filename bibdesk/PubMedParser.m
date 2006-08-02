@@ -310,7 +310,7 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
 	// choose the authors from the IP or IS tag as available
     chooseNumber(pubDict);
 	
-    newBI = [[BibItem alloc] initWithType:@"article"
+    newBI = [[BibItem alloc] initWithType:BDSKArticleString
 								 fileType:BDSKBibtexString
 								pubFields:pubDict
 							  createdDate:date];

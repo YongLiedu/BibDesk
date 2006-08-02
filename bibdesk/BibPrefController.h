@@ -236,6 +236,18 @@ extern NSString *BDSKAddressString;
 extern NSString *BDSKDoiString;
 extern NSString *BDSKCiteseerUrlString;
 extern NSString *BDSKPubTypeString;
+extern NSString *BDSKArticleString;
+extern NSString *BDSKBookString;
+extern NSString *BDSKInbookString;
+extern NSString *BDSKIncollectionString;
+extern NSString *BDSKInproceedingsString;
+extern NSString *BDSKProceedingsString;
+extern NSString *BDSKBookletString;
+extern NSString *BDSKManualString;
+extern NSString *BDSKTechreportString;
+extern NSString *BDSKCommentedString;
+extern NSString *BDSKConferenceString;
+extern NSString *BDSKMiscString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;

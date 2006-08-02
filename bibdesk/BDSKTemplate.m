@@ -156,7 +156,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate default item.rtf"]];
     [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
     fileURL = [NSURL fileURLWithPath:[appSupportPath stringByAppendingPathComponent:@"Templates/rtfServiceTemplate book.rtf"]];
-    [template addChildWithURL:fileURL role:@"book"];
+    [template addChildWithURL:fileURL role:BDSKBookString];
             
     return [itemNodes autorelease];
 }
