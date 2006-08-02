@@ -83,9 +83,9 @@ static void chooseAuthors(NSMutableDictionary *dict);
  */
 static void chooseNumber(NSMutableDictionary *dict);
 
-// creates a new BibItem from the dictionary and date passed; the date should be nil for paste/drag files
+// creates a new BibItem from the dictionary
 // caller is responsible for releasing the returned item
-static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, NSCalendarDate *date);
+static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict);
 @end
 
 @implementation PubMedParser
@@ -158,7 +158,7 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
 				// we are done with this publication
 				
 				if([[pubDict allKeys] count] > 0){
-					newBI = createBibItemWithPubMedDictionary(pubDict, [NSCalendarDate date]);
+					newBI = createBibItemWithPubMedDictionary(pubDict);
 					[returnArray addObject:newBI];
 					[newBI release];
 				}
@@ -297,7 +297,7 @@ static void chooseNumber(NSMutableDictionary *dict)
 	}
 }
 
-static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, NSCalendarDate *date)
+static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict)
 {
     
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
@@ -313,7 +313,7 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
     newBI = [[BibItem alloc] initWithType:BDSKArticleString
 								 fileType:BDSKBibtexString
 								pubFields:pubDict
-							  createdDate:date];
+                                    isNew:YES];
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]] != nil){ // "standard" RIS, if such a thing exists
         [newBI setPubType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]]];

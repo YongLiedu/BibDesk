@@ -202,7 +202,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                         newBI = [[BibItem alloc] initWithType:entryType
                                                      fileType:BDSKBibtexString
                                                     pubFields:dictionary
-                                                  createdDate:(isPasteOrDrag ? [NSCalendarDate date] : nil)];
+                                                        isNew:isPasteOrDrag];
 
                         tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
                         [newBI setCiteKeyString:tmpStr];

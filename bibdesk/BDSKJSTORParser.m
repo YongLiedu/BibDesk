@@ -174,7 +174,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			newBI = [[BibItem alloc] initWithType:BDSKArticleString
 										 fileType:BDSKBibtexString
 										pubFields:pubDict
-									  createdDate:[NSCalendarDate date]];
+                                            isNew:YES];
 			// set the citekey, since JSTOR types don't have a citekey field
 			[newBI setCiteKeyString:[newBI suggestedCiteKey]];
 			[returnArray addObject:newBI];
@@ -195,7 +195,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 					newBI = [[BibItem alloc] initWithType:BDSKArticleString
 												 fileType:BDSKBibtexString
 												pubFields:pubDict
-											  createdDate:[NSCalendarDate date]];
+                                                    isNew:YES];
 					// set the citekey, since JSTOR types don't have a citekey field
 					[newBI setCiteKeyString:[newBI suggestedCiteKey]];
 					[returnArray addObject:newBI];
@@ -251,7 +251,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
 		newBI = [[BibItem alloc] initWithType:BDSKArticleString
 									 fileType:BDSKBibtexString
 									pubFields:pubDict
-								  createdDate:[NSCalendarDate date]];
+                                        isNew:YES];
 		// set the citekey, since JSTOR types don't have a citekey field
 		[newBI setCiteKeyString:[newBI suggestedCiteKey]];
 		[returnArray addObject:newBI];

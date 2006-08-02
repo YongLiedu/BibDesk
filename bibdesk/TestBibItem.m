@@ -45,7 +45,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     BibItem *b = [[BibItem alloc] initWithType:BDSKIncollectionString
                                       fileType:BDSKBibtexString
                                        authors:[NSMutableArray arrayWithObjects:@"Less, von More, Jr.",nil]
-								   createdDate:nil];
+                                        isNew:NO];
     UKIntsEqual(1, [b numberOfAuthors]);
 
 }
