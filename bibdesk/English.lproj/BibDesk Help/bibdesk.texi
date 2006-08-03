@@ -1012,6 +1012,13 @@ the field will automatically go into raw BibteX mode.
 Text fields with raw BibTeX (e.g. a number or macro) is shown as dark blue
 in the editor, to provide a quick visual reference.
 
+You can use autocompletion in macro editing as well, so you don't have to remember 
+all of your cryptic abbreviations or constantly refer to the macro editor.  Edit as raw BibTeX as 
+described above, and start typing the expanded value; for a ``Journal'' field, this would 
+be the actual name of the journal.  Hit @opt{}-esc, and a 
+list of possible entries should appear (based on the @@string definitions in your file), and 
+you can then insert the correct value from the list.
+
 @node Editing a Document's Macro Definitions
 @subsection Editing a Document's Macro Definitions
 @abstract{How to edit the definitions of a macro.}
