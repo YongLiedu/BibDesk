@@ -37,9 +37,12 @@
 #import "MacroTextFieldWindowController.h"
 #import "BDSKComplexString.h"
 #import "BDSKComplexStringFormatter.h"
+#import "BDSKBackgroundView.h"
 #import <OmniBase/assertions.h>
 
 @interface MacroTextFieldWindowController (Private)
+
++ (Class)controlClass;
 
 - (void)endEditingAndOrderOut;
 
@@ -55,6 +58,9 @@
 - (void)cellFrameDidChange:(NSNotification *)notification;
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification;
 - (void)cellWindowDidResignKey:(NSNotification *)notification;
+
+- (void)registerForNotifications;
+- (void)unregisterForNotifications;
 
 @end
 
@@ -81,13 +87,7 @@
 	if ([self isEditing]) 
 		return NO; // we are already busy editing
 	
-	OBASSERT([aControl isKindOfClass:[NSForm class]] || [aControl isKindOfClass:[NSTableView class]] || [aControl isKindOfClass:[NSTextField class]]);
-	
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	NSWindow *controlWindow = [aControl window];
-	NSView *contentView = [[aControl enclosingScrollView] contentView];
-	if (contentView == nil)
-		contentView = aControl;
+	OBASSERT([aControl isKindOfClass:[[self class] controlClass]]);
 	
 	control = [aControl retain];
 	row = aRow;
@@ -99,8 +99,32 @@
 	[self setExpandedValue:aString];
 	[self cellWindowDidBecomeKey:nil]; //draw the focus ring we are covering
 	[self cellFrameDidChange:nil]; // reset the frame and show the window
+    // track changes in the text, the frame and the window's key status of the control
+    [self registerForNotifications];
 	
-	[nc addObserver:self
+	return YES;
+}
+
+- (BOOL)isEditing {
+	return (control != nil);
+}
+
+@end
+
+@implementation MacroTextFieldWindowController (Private)
+
++ (Class)controlClass {
+    return [NSTextField class];
+}
+
+- (void)registerForNotifications {
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	NSWindow *controlWindow = [control window];
+	NSView *contentView = [[control enclosingScrollView] contentView];
+	if (contentView == nil)
+		contentView = control;
+	
+    [nc addObserver:self
 		   selector:@selector(controlTextDidChange:)
 			   name:NSControlTextDidChangeNotification
 			 object:control];
@@ -127,27 +151,44 @@
 		   selector:@selector(cellWindowDidResignKey:)
 			   name:NSWindowDidResignKeyNotification
 			 object:controlWindow];
+}
+
+- (void)unregisterForNotifications {
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	NSWindow *controlWindow = [control window];
+	NSView *contentView = [[control enclosingScrollView] contentView];
+	if (contentView == nil)
+		contentView = control;
 	
-	return YES;
+    [nc addObserver:self
+		   selector:@selector(controlTextDidChange:)
+			   name:NSControlTextDidChangeNotification
+			 object:control];
+	[nc addObserver:self
+		   selector:@selector(controlTextDidEndEditing:)
+			   name:NSControlTextDidEndEditingNotification
+			 object:control];
+    
+    // we're going away now, so we can unregister for the notifications we registered for earlier
+	[nc removeObserver:self name:NSControlTextDidChangeNotification object:control];
+	[nc removeObserver:self name:NSControlTextDidEndEditingNotification object:control];
+	[nc removeObserver:self name:NSViewFrameDidChangeNotification object:contentView];
+	[nc removeObserver:self name:NSViewBoundsDidChangeNotification object:contentView];
+	[nc removeObserver:self name:NSWindowDidBecomeKeyNotification object:controlWindow];
+	[nc removeObserver:self name:NSWindowDidResignKeyNotification object:controlWindow];
 }
-
-- (BOOL)isEditing {
-	return (control != nil);
-}
-
-@end
-
-@implementation MacroTextFieldWindowController (Private)
 
 - (void)endEditingAndOrderOut {
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	NSWindow *controlWindow = [control window];
 	NSView *contentView = [[control enclosingScrollView] contentView];
 	
 	if (contentView == nil)
 		contentView = control;
 	
-    // we're going away now, so we can unregister for all notifications
-    [[NSNotificationCenter defaultCenter] removeObserver:self];	
-	[self hideWindow];
+    // we're going away now, so we can unregister for the notifications we registered for earlier
+	[self unregisterForNotifications];
+    [self hideWindow];
 	
 	// release the temporary objects
 	[control release];
@@ -180,13 +221,13 @@
 		color = [color blendedColorWithFraction:0.4 ofColor:[NSColor controlBackgroundColor]];
 	[expandedValueTextField setTextColor:color];
 	[expandedValueTextField setStringValue:expandedValue];
-	[backgroundView setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"")];
+	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"")];
 }
 
 - (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message {
 	[expandedValueTextField setTextColor:[NSColor redColor]];
 	[expandedValueTextField setStringValue:reason];
-	[backgroundView setToolTip:message]; 
+	[expandedValueTextField setToolTip:message]; 
 }
 
 #pragma mark Frame change and keywindow notification handlers
@@ -262,10 +303,13 @@
 
 @implementation MacroTableViewWindowController
 
-- (BOOL)attachToView:(NSControl *)aControl atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString {
-    
-    NSParameterAssert([aControl isKindOfClass:[NSTableView class]]);
++ (Class)controlClass {
+    return [NSTableView class];
+}
+
+- (void)registerForNotifications {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [super registerForNotifications];
     [nc addObserver:self
            selector:@selector(tableViewColumnDidResize:)
                name:NSTableViewColumnDidResizeNotification
@@ -274,8 +318,13 @@
            selector:@selector(tableViewColumnDidMove:)
                name:NSTableViewColumnDidMoveNotification
              object:control];
-    
-    return [super attachToView:aControl atRow:aRow column:aColumn withValue:aString];
+}
+
+- (void)unregisterForNotifications {
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [super unregisterForNotifications];
+    [nc removeObserver:self name:NSTableViewColumnDidResizeNotification object:control];
+    [nc removeObserver:self name:NSTableViewColumnDidMoveNotification object:control];
 }
 
 #pragma mark NSTableView notification handlers
@@ -315,9 +364,8 @@
 
 @implementation MacroFormWindowController
 
-- (BOOL)attachToView:(NSControl *)aControl atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString {
-    NSParameterAssert([aControl isKindOfClass:[NSForm class]]);    
-    return [super attachToView:aControl atRow:aRow column:aColumn withValue:aString];
++ (Class)controlClass {
+    return [NSForm class];
 }
 
 - (id)currentCell {
@@ -341,9 +389,8 @@
 
 @implementation MacroMatrixWindowController
 
-- (BOOL)attachToView:(NSControl *)aControl atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString {
-    NSParameterAssert([aControl isKindOfClass:[NSMatrix class]]);    
-    return [super attachToView:aControl atRow:aRow column:aColumn withValue:aString];
++ (Class)controlClass {
+    return [NSMatrix class];
 }
 
 - (id)currentCell {

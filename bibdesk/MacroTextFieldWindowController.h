@@ -38,7 +38,8 @@
  */
 
 #import <AppKit/AppKit.h>
-#import "BDSKBackgroundView.h"
+
+@class BDSKBackgroundView;
 
 @interface MacroTextFieldWindowController : NSWindowController {
     IBOutlet NSTextField *expandedValueTextField;
