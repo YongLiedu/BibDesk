@@ -179,13 +179,6 @@
 }
 
 - (void)endEditingAndOrderOut {
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	NSWindow *controlWindow = [control window];
-	NSView *contentView = [[control enclosingScrollView] contentView];
-	
-	if (contentView == nil)
-		contentView = control;
-	
     // we're going away now, so we can unregister for the notifications we registered for earlier
 	[self unregisterForNotifications];
     [self hideWindow];
