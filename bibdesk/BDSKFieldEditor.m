@@ -43,6 +43,8 @@
 
 - (BOOL)delegateHandlesDragOperation:(id <NSDraggingInfo>)sender;
 - (void)doAutoCompleteIfPossible;
+- (void)handleTextDidBeginEditingNotification:(NSNotification *)note;
+- (void)handleTextDidEndEditingNotification:(NSNotification *)note;
 
 @end
 
@@ -300,10 +302,6 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
     return [super resignFirstResponder];
 }
 
-- (void)handleTextDidBeginEditingNotification:(NSNotification *)note { isEditing = YES; }
-
-- (void)handleTextDidEndEditingNotification:(NSNotification *)note { isEditing = NO; }
-
 @end
 
 
@@ -321,6 +319,10 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
             [[self delegate] textViewShouldAutoComplete:self] == YES)
             [self complete:self]; // NB: the self argument is critical here (see comment in complete:)
     }
-}    
+} 
+
+- (void)handleTextDidBeginEditingNotification:(NSNotification *)note { isEditing = YES; }
+
+- (void)handleTextDidEndEditingNotification:(NSNotification *)note { isEditing = NO; }
 
 @end
