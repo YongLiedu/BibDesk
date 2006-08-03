@@ -407,13 +407,12 @@ static CFDictionaryRef selectorTable = NULL;
 #define ADD_KEY(s) if([pubFields objectForKey: s usingReadWriteLock:bibLock] == nil){[pubFields setObject:@"" forKey: s usingReadWriteLock:bibLock];} [removeKeys removeObject: s];
 
 - (void)makeType{
-    [bibLock lockForReading];
     NSString *fieldString;
+    NSString *theType = [self pubType];
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:pubType] objectEnumerator];
-    NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:pubType] objectEnumerator];
-    NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:pubType] objectEnumerator];
-    [bibLock unlockForReading];
+    NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:theType] objectEnumerator];
+    NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:theType] objectEnumerator];
+    NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:theType] objectEnumerator];
   
     NSMutableArray *removeKeys = [NSMutableArray array];
     NSEnumerator *keyE = [[self allFieldNames] objectEnumerator];
@@ -868,9 +867,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setPubType:(NSString *)newType withModDate:(NSCalendarDate *)date{
-    [bibLock lockForReading];
-    NSString *oldType = [[pubType copy] autorelease];
-    [bibLock unlockForReading];
+    NSString *oldType = [self pubType];
     
     if ([oldType isEqualToString:newType]) {
 		return;
@@ -925,9 +922,8 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date{
-    [bibLock lockForReading];
-    NSString *oldCiteKey = [citeKey retain];
-    [bibLock unlockForReading];
+    NSString *oldCiteKey = [self citeKey];
+
     if ([self undoManager]) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:oldCiteKey 
 															  withModDate:[self dateModified]];
@@ -954,7 +950,8 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setCiteKeyString:(NSString *)newCiteKey{
-    if (newCiteKey == nil) newCiteKey == @"";
+    // parser doesn't allow empty cite keys
+    OBPRECONDITION([NSString isEmptyString:newCiteKey] == NO);
     [bibLock lockForWriting];
     [citeKey autorelease];
     citeKey = [newCiteKey copy];
