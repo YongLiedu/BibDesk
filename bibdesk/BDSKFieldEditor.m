@@ -52,11 +52,22 @@
 	if (self = [super initWithFrame:NSZeroRect]) {
 		[self setFieldEditor:YES];
 		delegatedDraggedTypes = nil;
+        isEditing = NO;
+        
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleTextDidBeginEditingNotification:)
+													 name:NSTextDidBeginEditingNotification
+												   object:self];
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleTextDidEndEditingNotification:)
+													 name:NSTextDidEndEditingNotification
+												   object:self];
 	}
 	return self;
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[delegatedDraggedTypes release];
 	[super dealloc];
 }
@@ -289,6 +300,10 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
     return [super resignFirstResponder];
 }
 
+- (void)handleTextDidBeginEditingNotification:(NSNotification *)note { isEditing = YES; }
+
+- (void)handleTextDidEndEditingNotification:(NSNotification *)note { isEditing = NO; }
+
 @end
 
 
@@ -301,7 +316,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 }
 
 - (void)doAutoCompleteIfPossible {
-	if (completionWindowIsVisibleForTextView(self) == NO) {
+	if (completionWindowIsVisibleForTextView(self) == NO && isEditing) {
         if ([[self delegate] respondsToSelector:@selector(textViewShouldAutoComplete:)] &&
             [[self delegate] textViewShouldAutoComplete:self] == YES)
             [self complete:self]; // NB: the self argument is critical here (see comment in complete:)
