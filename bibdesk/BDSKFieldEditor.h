@@ -41,6 +41,7 @@
 
 @interface BDSKFieldEditor : NSTextView {
 	NSMutableArray *delegatedDraggedTypes;
+    BOOL isEditing;
 }
 
 - (void)registerForDelegatedDraggedTypes:(NSArray *)pboardTypes;
