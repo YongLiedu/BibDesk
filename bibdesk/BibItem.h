@@ -51,15 +51,15 @@
 
 */
 @interface BibItem : OFObject <NSCopying, NSCoding, BDSKParseableItem>{
-    NSString *fileType;
-    NSString *citeKey;    /*! @var citeKey the citeKey of the bibItem */
+    NSString *fileType; // thread safe
+    NSString *citeKey; // thread safe
+	NSString *pubType; // thread safe
+    NSMutableDictionary *pubFields; // thread safe
+    NSMutableDictionary *people; // thread safe
+	NSMutableDictionary *groups;
     NSCalendarDate *pubDate;
 	NSCalendarDate *dateAdded;
 	NSCalendarDate *dateModified;
-	NSString *pubType;
-    NSMutableDictionary *pubFields;
-    NSMutableDictionary *people;
-	NSMutableDictionary *groups;
 	BOOL needsToBeFiled;
 	BibDocument *document;
 	OFReadWriteLock *bibLock;
@@ -126,6 +126,7 @@
 /* Methods for handling people objects (BibAuthors) which may be any people type (Author, Editor, etc.)
 */
 - (void)rebuildPeople;
+- (void)rebuildPeopleIfNeeded;
 - (NSSet *)allPeople;
 - (int)numberOfPeople;
 - (NSArray *)sortedPeople;

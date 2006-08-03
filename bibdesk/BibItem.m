@@ -235,9 +235,11 @@ static CFDictionaryRef selectorTable = NULL;
 
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
+    [bibLock lockForReading];
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType pubFields:pubFields isNew:YES];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
+    [bibLock unlockForReading];
 	
     return theCopy;
 }
@@ -316,7 +318,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"%@ %@", [self citeKey], [pubFields description]];
+    return [NSString stringWithFormat:@"%@ %@", [self citeKey], [[self pubFields] description]];
 }
 
 - (BOOL)isEqual:(BibItem *)aBI{ 
@@ -402,17 +404,19 @@ static CFDictionaryRef selectorTable = NULL;
 
 #pragma mark Type info
 
-#define addkey(s) if([pubFields objectForKey: s usingReadWriteLock:bibLock] == nil){[pubFields setObject:@"" forKey: s usingReadWriteLock:bibLock];} [removeKeys removeObject: s usingReadWriteLock:bibLock];
+#define ADD_KEY(s) if([pubFields objectForKey: s usingReadWriteLock:bibLock] == nil){[pubFields setObject:@"" forKey: s usingReadWriteLock:bibLock];} [removeKeys removeObject: s];
 
 - (void)makeType{
+    [bibLock lockForReading];
     NSString *fieldString;
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
     NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:pubType] objectEnumerator];
     NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:pubType] objectEnumerator];
     NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:pubType] objectEnumerator];
+    [bibLock unlockForReading];
   
     NSMutableArray *removeKeys = [NSMutableArray array];
-    NSEnumerator *keyE = [[pubFields allKeysUsingReadWriteLock:bibLock] objectEnumerator];
+    NSEnumerator *keyE = [[self allFieldNames] objectEnumerator];
     NSString *key;
     
     while (key = [keyE nextObject]) {
@@ -421,20 +425,20 @@ static CFDictionaryRef selectorTable = NULL;
     }
     
     while(fieldString = [reqFieldsE nextObject]){
-        addkey(fieldString)
+        ADD_KEY(fieldString)
     }
     while(fieldString = [optFieldsE nextObject]){
-        addkey(fieldString)
+        ADD_KEY(fieldString)
     }
     while(fieldString = [defFieldsE nextObject]){
-        addkey(fieldString)
+        ADD_KEY(fieldString)
     }    
     
     //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
-    addkey(BDSKLocalUrlString) addkey(BDSKUrlString) addkey(BDSKAnnoteString) addkey(BDSKAbstractString) addkey(BDSKRssDescriptionString)
+    ADD_KEY(BDSKLocalUrlString) ADD_KEY(BDSKUrlString) ADD_KEY(BDSKAnnoteString) ADD_KEY(BDSKAbstractString) ADD_KEY(BDSKRssDescriptionString)
 
     // now remove everything that's left in remove keys from pubfields
-        [pubFields removeObjectsForKeys:removeKeys usingReadWriteLock:bibLock];
+    [pubFields removeObjectsForKeys:removeKeys usingReadWriteLock:bibLock];
     
 }
 
@@ -470,7 +474,12 @@ static CFDictionaryRef selectorTable = NULL;
     return [NSNumber numberWithInt:[[document publications] indexOfObjectIdenticalTo:self] + 1];
 }
 
-- (NSString *)fileType { return fileType; }
+- (NSString *)fileType { 
+    [bibLock lockForReading];
+    NSString *type = [[fileType copy] autorelease];
+    [bibLock unlockForReading];
+    return type;
+}
 
 - (void)setFileType:(NSString *)someFileType {
     [bibLock lockForWriting];
@@ -508,6 +517,16 @@ static CFDictionaryRef selectorTable = NULL;
     }
 }
 
+- (void)rebuildPeopleIfNeeded{
+    [bibLock lockForReading];
+    if (people == nil) {
+        [bibLock unlockForReading];
+        [self rebuildPeople];
+    }else{
+        [bibLock unlockForReading];
+    }
+}
+
 // this returns a set so it's clear that the objects are unordered
 - (NSSet *)allPeople{
     NSArray *allArrays = [[self people] allValues];
@@ -533,8 +552,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSArray *)peopleArrayForField:(NSString *)field inherit:(BOOL)inherit{
-    if (people == nil)
-        [self rebuildPeople];
+    [self rebuildPeopleIfNeeded];
     
     NSArray *peopleArray = [people objectForKey:field usingReadWriteLock:bibLock];
     if([peopleArray count] == 0 && inherit){
@@ -551,8 +569,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSDictionary *)peopleInheriting:(BOOL)inherit{
     BibItem *parent;
     
-    if (people == nil)
-        [self rebuildPeople];
+    [self rebuildPeopleIfNeeded];
     
     if(inherit && (parent = [self crossrefParent])){
         NSMutableDictionary *parentCopy = [[[parent peopleInheriting:NO] mutableCopy] autorelease];
@@ -743,7 +760,7 @@ static CFDictionaryRef selectorTable = NULL;
 #pragma mark Accessors
 
 - (BibItem *)crossrefParent{
-	NSString *key = [pubFields objectForKey:BDSKCrossrefString usingReadWriteLock:bibLock];
+	NSString *key = [self valueOfField:BDSKCrossrefString inherit:NO];
 	
 	if ([NSString isEmptyString:key])
 		return nil;
@@ -814,12 +831,12 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite{
-	NSString *title = [pubFields objectForKey:BDSKTitleString usingReadWriteLock:bibLock];
+	NSString *title = [self valueOfField:BDSKTitleString inherit:NO];
 	
 	if([NSString isEmptyString:title])
 		return;
 	
-	NSString *booktitle = [pubFields objectForKey:BDSKBooktitleString usingReadWriteLock:bibLock];
+	NSString *booktitle = [self valueOfField:BDSKBooktitleString inherit:NO];
 	if(![NSString isEmptyString:booktitle] && !overwrite)
 		return;
 	[self setField:BDSKBooktitleString toValue:title];
@@ -851,11 +868,16 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setPubType:(NSString *)newType withModDate:(NSCalendarDate *)date{
-    if (pubType && [pubType isEqualToString:newType])
+    [bibLock lockForReading];
+    NSString *oldType = [[pubType copy] autorelease];
+    [bibLock unlockForReading];
+    
+    if ([oldType isEqualToString:newType]) {
 		return;
+    }
 	
 	if ([self undoManager]) {
-		[[[self undoManager] prepareWithInvocationTarget:self] setPubType:pubType 
+		[[[self undoManager] prepareWithInvocationTarget:self] setPubType:oldType 
 															  withModDate:[self dateModified]];
     }
 	
@@ -868,14 +890,17 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:BDSKPubTypeString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", document, @"document", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", document, @"document", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
 }
 
 - (NSString *)pubType{
-    return pubType;
+    [bibLock lockForReading];
+    NSString *type = [[pubType copy] autorelease];
+    [bibLock unlockForReading];
+    return type;
 }
 
 - (unsigned int)rating{
@@ -900,11 +925,13 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date{
+    [bibLock lockForReading];
+    NSString *oldCiteKey = [citeKey retain];
+    [bibLock unlockForReading];
     if ([self undoManager]) {
-		[[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:citeKey 
+		[[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:oldCiteKey 
 															  withModDate:[self dateModified]];
     }
-    NSString *oldCiteKey = [citeKey retain];
 	
     [self setCiteKeyString:newCiteKey];
 	if (date != nil) {
@@ -914,7 +941,7 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", document, @"document", oldCiteKey, @"oldCiteKey", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", document, @"document", oldCiteKey, @"oldCiteKey", nil];
 
     if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){}
     else
@@ -927,6 +954,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setCiteKeyString:(NSString *)newCiteKey{
+    if (newCiteKey == nil) newCiteKey == @"";
     [bibLock lockForWriting];
     [citeKey autorelease];
     citeKey = [newCiteKey copy];
@@ -935,7 +963,10 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSString *)citeKey{
-    return (citeKey != nil ? citeKey : @"");
+    [bibLock lockForReading];
+    NSString *key = [[citeKey copy] autorelease];
+    [bibLock unlockForReading];
+    return key;
 }
 
 - (NSString *)suggestedCiteKey
@@ -991,7 +1022,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSString *)citation{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     return [NSString stringWithFormat:@"\\%@%@", [pw stringForKey:BDSKCiteStringKey], 
-            [pw stringForKey:BDSKCiteStartBracketKey], citeKey, [pw stringForKey:BDSKCiteEndBracketKey]]; 
+            [pw stringForKey:BDSKCiteStartBracketKey], [self citeKey], [pw stringForKey:BDSKCiteEndBracketKey]]; 
 }
 
 #pragma mark Pub Fields
@@ -1008,19 +1039,22 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setPubFields: (NSDictionary *)newFields{
+    [bibLock lockForWriting];
     if(newFields != pubFields){
-        [bibLock lockForWriting];
         [pubFields release];
         pubFields = [newFields mutableCopy];
         [bibLock unlockForWriting];
         [self updateMetadataForKey:BDSKAllFieldsString];
+    }else{
+        [bibLock unlockForWriting];
     }
 }
 
 - (void)setFields: (NSDictionary *)newFields{
-	if(![newFields isEqualToDictionary:pubFields]){
+    NSDictionary *oldFields = [self pubFields];
+	if(![newFields isEqualToDictionary:oldFields]){
 		if ([self undoManager]) {
-			[[[self undoManager] prepareWithInvocationTarget:self] setFields:pubFields];
+			[[[self undoManager] prepareWithInvocationTarget:self] setFields:oldFields];
 		}
 		
 		[self setPubFields:newFields];
@@ -1226,7 +1260,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (int)ratingValueOfField:(NSString *)field{
-    return [[pubFields objectForKey:field usingReadWriteLock:bibLock] intValue];
+    return [[self valueOfField:field inherit:NO] intValue];
 }
 
 - (void)setField:(NSString *)field toRatingValue:(unsigned int)rating{
@@ -1237,7 +1271,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (BOOL)boolValueOfField:(NSString *)field{
     // stored as a string
-	return [(NSString *)[pubFields objectForKey:field usingReadWriteLock:bibLock] booleanValue];
+	return [[self valueOfField:field inherit:NO] booleanValue];
 }
 
 - (void)setField:(NSString *)field toBoolValue:(BOOL)boolValue{
@@ -1245,11 +1279,11 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSCellStateValue)triStateValueOfField:(NSString *)field{
-	return [(NSString *)[pubFields objectForKey:field usingReadWriteLock:bibLock] triStateValue];
+	return [[self valueOfField:field inherit:NO] triStateValue];
 }
 
 - (void)setField:(NSString *)field toTriStateValue:(NSCellStateValue)triStateValue{
-	if(![[pubFields allKeysUsingReadWriteLock:bibLock] containsObject:field])
+	if(![[self allFieldNames] containsObject:field])
 		[self addField:field];
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
 }
@@ -1318,7 +1352,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	NSString *field;
     NSString *value;
     NSMutableString *s = [NSMutableString stringWithCapacity:200];
-    NSMutableArray *keys = [[pubFields allKeysUsingReadWriteLock:bibLock] mutableCopy];
+    NSMutableArray *keys = [[self allFieldNames] mutableCopy];
 	NSEnumerator *e;
     
     BibTypeManager *btm = [BibTypeManager sharedManager];
@@ -1423,7 +1457,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSAttributedString *)attributedStringValue{
     NSString *key;
-    NSEnumerator *e = [[[pubFields allKeysUsingReadWriteLock:bibLock] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
+    NSEnumerator *e = [[[self allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
     NSDictionary *cachedFonts = [(BDSKFontManager *)[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
 
     NSDictionary *titleAttributes =
@@ -1565,7 +1599,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSMutableArray *keys = [[pubFields allKeysUsingReadWriteLock:bibLock] mutableCopy];
+    NSMutableArray *keys = [[self allFieldNames] mutableCopy];
 	BOOL hasAU = [keys containsObject:@"AU"];
     [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
     [keys removeObject:BDSKDateAddedString];
@@ -1577,9 +1611,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
     // since they mark the beginning of each entry
     NSString *risType = nil;
-    if(risType = [pubFields objectForKey:@"TY" usingReadWriteLock:bibLock])
+    if(risType = [self valueOfField:@"TY" inherit:NO])
         [keys removeObject:@"TY"];
-    else if(risType = [pubFields objectForKey:@"PT" usingReadWriteLock:bibLock]) // Medline RIS
+    else if(risType = [self valueOfField:@"PT" inherit:NO]) // Medline RIS
         [keys removeObject:@"PT"];
     else
         risType = [btm RISTypeForBibTeXType:[self pubType]];
@@ -1599,7 +1633,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     while(k = [e nextObject]){
 		tag = [btm RISTagForBibTeXFieldName:k];
-        v = [pubFields objectForKey:k usingReadWriteLock:bibLock];
+        v = [self valueOfField:k inherit:NO];
         
         if([k isEqualToString:BDSKAuthorString]){
 			// if we also have an AU field, we use the FAU tag, otherwise we use AU
@@ -1676,11 +1710,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [s appendString:@"<relatedItem type=\"host\">\n"];
         
         NSString *hostTitle = nil;
+        NSString *type = [self pubType];
         
-        if([[self pubType] isEqualToString:BDSKInproceedingsString] || 
-           [[self pubType] isEqualToString:BDSKIncollectionString]){
+        if([type isEqualToString:BDSKInproceedingsString] || 
+           [type isEqualToString:BDSKIncollectionString]){
             hostTitle = [self valueOfField:BDSKBooktitleString];
-        }else if([[self pubType] isEqualToString:BDSKArticleString]){
+        }else if([type isEqualToString:BDSKArticleString]){
             hostTitle = [self valueOfField:BDSKJournalString];
         }
         hostTitle = [hostTitle stringByEscapingBasicXMLEntitiesUsingUTF8];
@@ -1898,7 +1933,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)allFieldsString{
-    NSMutableString *result = [[[NSMutableString alloc] initWithCapacity:([pubFields count] * 10)] autorelease];
+    NSDictionary *thePubFields = [self pubFields];
+    NSMutableString *result = [[[NSMutableString alloc] initWithCapacity:([thePubFields count] * 10)] autorelease];
     
     [result appendString:[self citeKey]];
     [result appendString:@" "];
@@ -1908,7 +1944,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     // if it has a parent, find all the available keys, and use valueOfField: to get either the
     // child object or parent object value. Inherit only the fields of the parent relevant for the item.
     if(parent){
-        NSEnumerator *keyEnum = [pubFields keyEnumerator];
+        NSEnumerator *keyEnum = [thePubFields keyEnumerator];
         NSString *key = nil;
         
         while(key = [keyEnum nextObject]){
@@ -1917,11 +1953,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
                 
     } else {
-        NSEnumerator *pubFieldsE = [pubFields objectEnumerator];
-        NSString *field = nil;
+        NSEnumerator *pubFieldsE = [thePubFields objectEnumerator];
+        NSString *value = nil;
         
-        while(field = [pubFieldsE nextObject]){
-            [result appendString:field];
+        while(value = [pubFieldsE nextObject]){
+            [result appendString:value];
             [result appendString:@" "];
         }
     }       
@@ -1955,9 +1991,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (id)allFields{
     NSMutableArray *allFields = [NSMutableArray array];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:[self pubType]]];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self pubType]]];
+    NSString *type = [self pubType];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:type]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:type]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:type]];
     [allFields addObjectsFromArray:[self allFieldNames]]; // duplicate fields will be dropped
     return [[self fields] fieldsWithNames:allFields];
 }
@@ -2043,7 +2080,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSURL *)remoteURLForField:(NSString *)field{
-    NSString *value = [pubFields objectForKey:field usingReadWriteLock:bibLock];
+    NSString *value = [self valueOfField:field inherit:NO];
     NSURL *baseURL = nil;
     
     // resolve DOI fields against a base URL if necessary, so they can be opened directly by NSWorkspace
@@ -2669,7 +2706,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (void)setPubTypeWithoutUndo:(NSString *)newType{
     newType = [newType lowercaseString];
     OBASSERT(![NSString isEmptyString:newType]);
-	if(![pubType isEqualToString:newType]){
+	if(![[self pubType] isEqualToString:newType]){
 		[bibLock lockForWriting];
 		[pubType release];
 		pubType = [newType copy];
@@ -2683,10 +2720,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
 	[self setHasBeenEdited:YES];
         
-    // re-parse people (authors, editors, etc.) if necessary
-    if (people != nil && ([BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key])) {
-       [self rebuildPeople];
-	}
+    // invalidate people (authors, editors, etc.) if necessary
+    if ([BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key]) {
+        [bibLock lockForWriting];
+        [people release];
+        people = nil;
+        [bibLock unlockForWriting];
+    }
 	
 	if([BDSKLocalUrlString isEqualToString:key]){
 		[self setNeedsToBeFiled:NO];
