@@ -170,7 +170,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 // used for autocompletion; returns global macro definitions + local (document) definitions
 - (NSDictionary *)allMacroDefinitions {
-    NSMutableDictionary *allDefs = [[[[BDSKMacroResolver defaultMacroResolver] macroDefinitions] mutableCopy] autorelease];
+    NSMutableDictionary *allDefs = [[[[BDSKMacroResolver defaultMacroResolver] allMacroDefinitions] mutableCopy] autorelease];
     [allDefs addEntriesFromDictionary:[self macroDefinitions]];
     return allDefs;
 }
@@ -415,6 +415,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     [fileMacroDefinitions release];
     fileMacroDefinitions = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+}
+
+- (NSDictionary *)allMacroDefinitions {
+    NSMutableDictionary *allDefs = [[standardMacroDefinitions mutableCopy] autorelease];
+    [allDefs addEntriesFromDictionary:[self fileMacroDefinitions]];
+    [allDefs addEntriesFromDictionary:[self macroDefinitions]];
+    return allDefs;
 }
 
 - (NSDictionary *)fileMacroDefinitions{
