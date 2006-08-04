@@ -736,25 +736,17 @@
 }
 
 - (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index{
-    // Add the definitions from preferences, if any exist; presumably the user can remember the month definitions/
-    NSDictionary *globalDefs = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibStyleMacroDefinitionsKey];
-	NSMutableDictionary *macroDefs = [[NSMutableDictionary alloc] initWithCapacity:[definitions count] + [globalDefs count]];
-    if (globalDefs != nil)
-        [macroDefs addEntriesFromDictionary:globalDefs];
-	[macroDefs addEntriesFromDictionary:definitions]; // add the definitions at the end, so they override global macros
-	
     NSString *partialString = [fullString substringWithRange:charRange];
-    NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[macroDefs count]];
-    NSEnumerator *keyE = [macroDefs keyEnumerator];
+    NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[definitions count]];
+    NSEnumerator *keyE = [definitions keyEnumerator];
     NSString *key = nil;
     
     // Search the definitions case-insensitively; we match on key or value, but only return keys.
     while (key = [keyE nextObject]) {
         if ([key rangeOfString:partialString options:NSCaseInsensitiveSearch].location != NSNotFound ||
-			[[macroDefs valueForKey:key] rangeOfString:partialString options:NSCaseInsensitiveSearch].location != NSNotFound)
+			[[definitions valueForKey:key] rangeOfString:partialString options:NSCaseInsensitiveSearch].location != NSNotFound)
             [matches addObject:key];
     }
-    [macroDefs release];
     [matches sortUsingSelector:@selector(caseInsensitiveCompare:)];
 
     int i, count = [matches count];
