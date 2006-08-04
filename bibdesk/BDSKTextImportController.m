@@ -1144,7 +1144,7 @@
 		return charRange;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] rangeForUserCompletion:charRange 
-								  forBibTeXStringString:[textView string]];
+								  forBibTeXString:[textView string]];
 	} else {
 		return [[NSApp delegate] entry:[fields objectAtIndex:[itemTableView selectedRow]] 
 				rangeForUserCompletion:charRange 
@@ -1159,7 +1159,7 @@
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[document macroResolver] allMacroDefinitions] 
-						   forBibTeXStringString:[textView string] 
+						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];
 	} else {

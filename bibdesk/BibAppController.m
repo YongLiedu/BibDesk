@@ -716,7 +716,7 @@
     return completions;
 }
 
-- (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXStringString:(NSString *)fullString {
+- (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXString:(NSString *)fullString {
     static NSCharacterSet *punctuationCharSet = nil;
 	if (punctuationCharSet == nil) {
 		NSMutableCharacterSet *tmpSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy];
@@ -735,7 +735,7 @@
 	return charRange;
 }
 
-- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXStringString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index{
+- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index{
     // Add the definitions from preferences, if any exist; presumably the user can remember the month definitions/
     NSDictionary *globalDefs = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibStyleMacroDefinitionsKey];
 	NSMutableDictionary *macroDefs = [[NSMutableDictionary alloc] initWithCapacity:[definitions count] + [globalDefs count]];

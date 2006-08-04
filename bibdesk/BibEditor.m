@@ -2051,7 +2051,7 @@ static int numberOfOpenEditors = 0;
 		return charRange;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] rangeForUserCompletion:charRange 
-								  forBibTeXStringString:[textView string]];
+								  forBibTeXString:[textView string]];
 	} else {
 		return [[NSApp delegate] entry:[[bibFields selectedCell] title] 
 				rangeForUserCompletion:charRange 
@@ -2072,7 +2072,7 @@ static int numberOfOpenEditors = 0;
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[theDocument macroResolver] allMacroDefinitions] 
-						   forBibTeXStringString:[textView string] 
+						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];
 	} else {

@@ -114,8 +114,8 @@
 */
 - (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(int *)index;
 
-- (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXStringString:(NSString *)fullString;
-- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXStringString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index;
+- (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXString:(NSString *)fullString;
+- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index;
 
 - (void)checkForUpdatesInBackground;
 - (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
