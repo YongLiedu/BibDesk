@@ -65,6 +65,8 @@ typedef struct _BibAuthorFlags {
     NSString *jrPart;
     NSString *normalizedName;
     NSString *sortableName;
+    NSString *abbreviatedName;
+    NSString *abbreviatedNormalizedName;
     BibPersonController *personController; // unretained
     BibItem *publication;
     unsigned hash;

@@ -52,6 +52,8 @@
 - (void)setJrPart:(NSString *)newJrPart;
 - (void)setFuzzyName:(NSString *)theName;
 - (NSString *)fuzzyName; // this is an implementation detail, so other classes mustn't rely on it
+- (void)setupAbbreviatedNames;
+
 @end
 
 static BibAuthor *emptyAuthorInstance = nil;
@@ -302,73 +304,14 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     return jrPart;
 }
 
-// Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
-static inline NSString *firstLetterCharacterString(NSString *string)
-{
-    NSRange range = [string rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
-    return (range.location != NSNotFound) ? [string substringWithRange:range] : nil;
-}
-
 // Given a normalized name of "von Last, Jr, First Middle", this will return "F. M. von Last, Jr"
 - (NSString *)abbreviatedName{
-    NSMutableString *abbrevName = [NSMutableString stringWithCapacity:[name length]];
-    NSEnumerator *e = [[self firstNames] objectEnumerator];
-    NSString *fragment = nil;
-    NSString *firstLetter = nil;
-    while(fragment = [e nextObject]){
-        firstLetter = firstLetterCharacterString(fragment);
-        if (firstLetter != nil) {
-            [abbrevName appendString:firstLetter];
-            [abbrevName appendString:@". "];
-        }
-    }
-    
-    // abbrevName should be empty or have a single trailing space
-    if(flags.hasVon){
-        [abbrevName appendString:vonPart];
-        [abbrevName appendString:@" "];
-    }
-    
-    if(flags.hasLast)
-        [abbrevName appendString:lastName];
-    
-    if(flags.hasJr){
-        [abbrevName appendString:@", "];
-        [abbrevName appendString:jrPart];
-    }
-    
-    return abbrevName;
+    return abbreviatedName;
 }
 
 // Given a normalized name of "von Last, Jr, First Middle", this will return "von Last, Jr, F. M."
 - (NSString *)abbreviatedNormalizedName{
-    NSMutableString *abbrevName = [NSMutableString stringWithCapacity:[name length]];
-
-    if(flags.hasVon){
-        [abbrevName appendString:vonPart];
-        [abbrevName appendString:@" "];
-    }
-    
-    if(flags.hasLast)
-        [abbrevName appendString:lastName];
-    
-    if(flags.hasJr){
-        [abbrevName appendString:@", "];
-        [abbrevName appendString:jrPart];
-    }
-    
-    if(flags.hasFirst)
-        [abbrevName appendString:@","];
-    
-    NSEnumerator *e = [[self firstNames] objectEnumerator];
-    NSString *fragment = nil;
-    while(fragment = [e nextObject]){
-        [abbrevName appendString:@" "]; // avoid trailing whitespace
-        [abbrevName appendString:firstLetterCharacterString(fragment)];
-        [abbrevName appendString:@"."];
-    }    
-    
-    return abbrevName;
+    return abbreviatedNormalizedName;
 }
 
 - (NSString *)MODSStringWithRole:(NSString *)role{
@@ -537,6 +480,7 @@ static inline NSString *firstLetterCharacterString(NSString *string)
     [mutableString release];
 	
     [self cacheNames];
+    [self setupAbbreviatedNames];
     
     bt_free_name(theName);
     
@@ -664,7 +608,92 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
     }
 }
 
+// Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
+static inline NSString *firstLetterCharacterString(NSString *string)
+{
+    NSRange range = [string rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
+    return (range.location != NSNotFound) ? [string substringWithRange:range] : nil;
+}
+
+- (void)setAbbreviatedName:(NSString *)aName{
+    if(aName != abbreviatedName){
+        [abbreviatedName release];
+        abbreviatedName = [aName copy];
+    }
+}
+
+- (void)setAbbreviatedNormalizedName:(NSString *)aName{
+    if(aName != abbreviatedNormalizedName){
+        [abbreviatedNormalizedName release];
+        abbreviatedNormalizedName = [aName copy];
+    }
+}
+
+- (void)setupAbbreviatedNames{
+    NSMutableString *abbrevName = [[NSMutableString alloc] initWithCapacity:[name length]];
+    CFArrayRef theFirstNames = (CFArrayRef)[self firstNames];
+    CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
+    NSString *fragment = nil;
+    NSString *firstLetter = nil;
+
+    for(idx = 0; idx < firstNameCount; idx++){
+        fragment = (NSString *)CFArrayGetValueAtIndex(theFirstNames, idx);
+        firstLetter = firstLetterCharacterString(fragment);
+        if (firstLetter != nil) {
+            [abbrevName appendString:firstLetter];
+            [abbrevName appendString:@". "];
+        }
+    }
+    
+    // abbrevName should be empty or have a single trailing space
+    if(flags.hasVon){
+        [abbrevName appendString:vonPart];
+        [abbrevName appendString:@" "];
+    }
+    
+    if(flags.hasLast)
+        [abbrevName appendString:lastName];
+    
+    if(flags.hasJr){
+        [abbrevName appendString:@", "];
+        [abbrevName appendString:jrPart];
+    }
+    
+    [self setAbbreviatedName:abbrevName];
+    
+    // now for the normalized abbreviated form
+    [abbrevName setString:@""];
+    
+    if(flags.hasVon){
+        [abbrevName appendString:vonPart];
+        [abbrevName appendString:@" "];
+    }
+    
+    if(flags.hasLast)
+        [abbrevName appendString:lastName];
+    
+    if(flags.hasJr){
+        [abbrevName appendString:@", "];
+        [abbrevName appendString:jrPart];
+    }
+    
+    if(flags.hasFirst)
+        [abbrevName appendString:@","];
+    
+    for(idx = 0; idx < firstNameCount; idx++){
+        fragment = (NSString *)CFArrayGetValueAtIndex(theFirstNames, idx);
+        [abbrevName appendString:@" "]; // avoid trailing whitespace
+        [abbrevName appendString:firstLetterCharacterString(fragment)];
+        [abbrevName appendString:@"."];
+    }    
+    
+    [self setAbbreviatedNormalizedName:abbrevName];
+    [abbrevName release];
+}
+
 @end
+
+#pragma mark Specialized collections
 
 // fuzzy equality requires that last names be equal case-insensitively, so equal objects are guaranteed the same hash
 CFHashCode BibAuthorFuzzyHash(const void *item)
