@@ -168,6 +168,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 #pragma mark BDSKMacroResolver protocol
 
+// used for autocompletion; returns global macro definitions + local (document) definitions
+- (NSDictionary *)allMacroDefinitions {
+    NSMutableDictionary *allDefs = [[[[BDSKMacroResolver defaultMacroResolver] macroDefinitions] mutableCopy] autorelease];
+    [allDefs addEntriesFromDictionary:[self macroDefinitions]];
+    return allDefs;
+}
+
 - (NSDictionary *)macroDefinitions {
     if (macroDefinitions == nil)
         [self loadMacroDefinitions];

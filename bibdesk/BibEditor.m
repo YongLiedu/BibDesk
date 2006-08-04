@@ -2071,7 +2071,7 @@ static int numberOfOpenEditors = 0;
     if (control != bibFields) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
-		return [[NSApp delegate] possibleMatches:[[theDocument macroResolver] macroDefinitions] 
+		return [[NSApp delegate] possibleMatches:[[theDocument macroResolver] allMacroDefinitions] 
 						   forBibTeXStringString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];

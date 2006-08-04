@@ -54,6 +54,9 @@
 - (NSString *)bibTeXString;
 - (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey;
 
+// returns global definitions + local overrides
+- (NSDictionary *)allMacroDefinitions;
+
 - (NSDictionary *)macroDefinitions;
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;
 - (NSString *)valueOfMacro:(NSString *)macro;

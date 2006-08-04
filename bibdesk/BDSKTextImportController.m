@@ -1158,7 +1158,7 @@
     if (control != itemTableView) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
-		return [[NSApp delegate] possibleMatches:[[document macroResolver] macroDefinitions] 
+		return [[NSApp delegate] possibleMatches:[[document macroResolver] allMacroDefinitions] 
 						   forBibTeXStringString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];
