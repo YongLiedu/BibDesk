@@ -846,20 +846,32 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSCalendarDate *)dateInheriting:(BOOL)inherit{
+    [bibLock lockForReading];
+    NSCalendarDate *date = [[pubDate copy] autorelease];
+    [bibLock unlockForReading];
+    
     BibItem *parent;
 	
-	if(inherit && pubDate == nil && (parent = [self crossrefParent])) {
+	if(inherit && date == nil && (parent = [self crossrefParent])) {
 		return [parent dateInheriting:NO];
 	}
-	return pubDate;
+	return date;
 }
 
 - (NSCalendarDate *)dateAdded {
-    return dateAdded;
+    [bibLock lockForReading];
+    NSCalendarDate *date = [[dateAdded copy] autorelease];
+    [bibLock unlockForReading];
+    
+    return date;
 }
 
 - (NSCalendarDate *)dateModified {
-    return dateModified;
+    [bibLock lockForReading];
+    NSCalendarDate *date = [[dateModified copy] autorelease];
+    [bibLock unlockForReading];
+    
+    return date;
 }
 
 - (void)setPubType:(NSString *)newType{
@@ -909,12 +921,16 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setHasBeenEdited:(BOOL)yn{
-    //NSLog(@"set has been edited %@", (yn)?@"YES":@"NO");
+    [bibLock lockForWriting];
     hasBeenEdited = yn;
+    [bibLock unlockForWriting];
 }
 
 - (BOOL)hasBeenEdited{
-    return hasBeenEdited;
+    [bibLock lockForReading];
+    BOOL yn = hasBeenEdited;
+    [bibLock unlockForReading];
+    return yn;
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{

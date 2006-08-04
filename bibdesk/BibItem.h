@@ -56,14 +56,14 @@
 	NSString *pubType; // thread safe
     NSMutableDictionary *pubFields; // thread safe
     NSMutableDictionary *people; // thread safe
+    NSCalendarDate *pubDate; // thread safe
+	NSCalendarDate *dateAdded; // thread safe
+	NSCalendarDate *dateModified; // thread safe
 	NSMutableDictionary *groups;
-    NSCalendarDate *pubDate;
-	NSCalendarDate *dateAdded;
-	NSCalendarDate *dateModified;
+    BOOL hasBeenEdited; // thread safe
 	BOOL needsToBeFiled;
 	BibDocument *document;
 	OFReadWriteLock *bibLock;
-    BOOL hasBeenEdited;
     BDSKFieldCollection *templateFields;
     int currentIndex;
 }
