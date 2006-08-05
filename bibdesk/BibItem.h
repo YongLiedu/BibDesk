@@ -63,7 +63,6 @@
     BOOL hasBeenEdited; // thread safe
 	BOOL needsToBeFiled;
 	BibDocument *document;
-	OFReadWriteLock *bibLock;
     BDSKFieldCollection *templateFields;
     int currentIndex;
 }
