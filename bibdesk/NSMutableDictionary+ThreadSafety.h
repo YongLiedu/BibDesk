@@ -42,6 +42,7 @@
 
 @interface NSMutableDictionary (ThreadSafety)
 
+- (id)copyUsingLock:(NSLock *)aLock;
 - (id)objectForKey:(id)aKey usingLock:(NSLock *)aLock;
 - (void)removeObjectForKey:(id)aKey usingLock:(NSLock *)aLock;
 - (void)setObject:(id)anObject forKey:(id)aKey usingLock:(NSLock *)aLock;

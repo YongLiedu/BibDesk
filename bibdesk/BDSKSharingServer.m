@@ -526,7 +526,7 @@ NSString *BDSKComputerName() {
 
 - (oneway void)cleanup
 {
-    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:remoteClients];
+    NSDictionary *copy = [remoteClients copyUsingLock:remoteClientsLock];
     NSEnumerator *e = [copy keyEnumerator];
     id proxyObject;
     NSString *key;
@@ -541,6 +541,7 @@ NSString *BDSKComputerName() {
         }
         [[proxyObject connectionForProxy] invalidate];
     }
+    [copy release];
     [remoteClients removeAllObjectsUsingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
@@ -583,7 +584,7 @@ NSString *BDSKComputerName() {
 {
     // here is where we notify other hosts that something changed
     // copy the dictionary since it's mutable
-    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:remoteClients];
+    NSDictionary *copy = [remoteClients copyUsingLock:remoteClientsLock];
     NSEnumerator *e = [copy keyEnumerator];
     id proxyObject;
     NSString *key;
@@ -601,6 +602,7 @@ NSString *BDSKComputerName() {
             [self removeClientForIdentifier:key];
         }
     }
+    [copy release];
 }
 
 @end

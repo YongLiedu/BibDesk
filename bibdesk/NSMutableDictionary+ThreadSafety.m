@@ -41,6 +41,16 @@
 
 @implementation NSMutableDictionary (ThreadSafety)
 
+- (id)copyUsingLock:(NSLock *)aLock{
+    
+	id copy;
+	
+	[aLock lock];
+	copy = [self copy];
+    [aLock unlock];
+	return copy;
+}
+
 - (id)objectForKey:(id)aKey usingLock:(NSLock *)aLock{
 
     id result;
