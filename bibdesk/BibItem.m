@@ -213,15 +213,6 @@ static CFDictionaryRef selectorTable = NULL;
         templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
         [self updateMetadataForKey:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(typeInfoDidChange:)
-													 name:BDSKBibTypeInfoChangedNotification
-												   object:[BibTypeManager sharedManager]];
-
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(customFieldsDidChange:)
-													 name:BDSKCustomFieldsChangedNotification
-												   object:nil];
     }
 
     //NSLog(@"bibitem init");
@@ -251,16 +242,6 @@ static CFDictionaryRef selectorTable = NULL;
             // set by the document, which we don't archive
             document = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
-            
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(typeInfoDidChange:)
-                                                         name:BDSKBibTypeInfoChangedNotification
-                                                       object:[BibTypeManager sharedManager]];
-            
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(customFieldsDidChange:)
-                                                         name:BDSKCustomFieldsChangedNotification
-                                                       object:nil];
         }
     } else {       
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
@@ -289,7 +270,6 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)dealloc{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[self undoManager] removeAllActionsWithTarget:self];
     [pubFields release];
     [people release];

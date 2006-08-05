@@ -262,6 +262,17 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                      name:NSWindowWillCloseNotification
                                                    object:nil];
         
+        // observe these on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleTypeInfoDidChangeNotification:)
+                                                     name:BDSKBibTypeInfoChangedNotification
+                                                   object:[BibTypeManager sharedManager]];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleCustomFieldsDidChangeNotification:)
+                                                     name:BDSKCustomFieldsChangedNotification
+                                                   object:nil];
+        
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
         
@@ -2985,6 +2996,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
     [self saveSortOrder];
+}
+
+- (void)handleTypeInfoDidChangeNotification:(NSNotification *)notification{
+    [publications makeObjectsPerformSelector:@selector(typeInfoDidChange:) withObject:notification];
+}
+
+- (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{
+    [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
 }
 
 #pragma mark UI updating

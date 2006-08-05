@@ -750,6 +750,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)handleResortDocumentNotification:(NSNotification *)notification;
 - (void)handleFlagsChangedNotification:(NSNotification *)notification;
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
+
+// notifications observed on behalf of owned BibItems for efficiency
+- (void)handleTypeInfoDidChangeNotification:(NSNotification *)notification;
+- (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification;
+    
 /*!
     @method     handleBibItemAddDelNotification:
     @abstract   this method gets called for setPublications: also
