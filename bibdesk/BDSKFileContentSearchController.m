@@ -150,8 +150,6 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
                                                object:[[tableView enclosingScrollView] contentView]];    
 
     // Do custom view setup 
-    NSRect frame = [[tableView enclosingScrollView] frame];
-
     [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
     [topBarView setEdgeColor:[NSColor windowFrameColor]];
     [topBarView adjustSubviews];
