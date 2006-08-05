@@ -155,38 +155,41 @@
 static id __sort = nil;
 static SEL __selector = NULL;
 
+// for thread safe usage of the cache (since we use static variables)
+static NSLock *sortingLock = nil;
+
 // typedef used for NSArray sorting category
 typedef NSComparisonResult (*comparatorIMP)(id, SEL, id, id);    
 static comparatorIMP __comparator = NULL;
 
 // structure used for mapping objects to the value which will be passed to -[NSSortDescriptor compareEndObject:toEndObject:]
-typedef struct _SortCacheValue {
+typedef struct _BDSortCacheValue {
     id sortValue;     // result of valueForKeyPath:
     id object;        // object in array
-} SortCacheValue;
+} BDSortCacheValue;
 
 // this function may be passed to a stdlib mergesort/qsort function
-static inline int __CompareSortCacheValues(const void *a, const void *b)
+static inline int __BDCompareSortCacheValues(const void *a, const void *b)
 {
-    return __comparator(__sort, __selector, ((SortCacheValue *)a)->sortValue, ((SortCacheValue *)b)->sortValue);
+    return __comparator(__sort, __selector, ((BDSortCacheValue *)a)->sortValue, ((BDSortCacheValue *)b)->sortValue);
 }
 
 // for multiple sort descriptors; finds ranges of objects compare NSOrderedSame (concept from GNUStep's NSSortDescriptor)
-static inline NSRange * __FindEqualRanges(SortCacheValue *buf, NSRange searchRange, NSRange *equalRanges, unsigned int *numRanges, NSZone *zone)
+static inline NSRange * __BDFindEqualRanges(BDSortCacheValue *buf, NSRange searchRange, NSRange *equalRanges, unsigned int *numRanges, NSZone *zone)
 {
     unsigned i = searchRange.location, j;
     unsigned bufLen = NSMaxRange(searchRange);
     *numRanges = 0;
     if(bufLen > 1){
         while(i < bufLen - 1){
-            for(j = i + 1; j < bufLen && __CompareSortCacheValues(&buf[i], &buf[j]) == 0; j++);
+            for(j = i + 1; j < bufLen && __BDCompareSortCacheValues(&buf[i], &buf[j]) == 0; j++);
             if(j - i > 1){
                 (*numRanges)++;
                 equalRanges = (NSRange *)NSZoneRealloc(zone, equalRanges, (*numRanges) * sizeof(NSRange));
                 equalRanges[(*numRanges) - 1].location = i;
                 equalRanges[(*numRanges) - 1].length = j - i;
 //                NSLog(@"equalityRange of %@", NSStringFromRange(NSMakeRange(i, j-i)));
-//                NSLog(@"objects are %@ and %@", (SortCacheValue *)(&buf[i])->sortValue, (SortCacheValue *)(&buf[j-1])->sortValue);
+//                NSLog(@"objects are %@ and %@", (BDSortCacheValue *)(&buf[i])->sortValue, (BDSortCacheValue *)(&buf[j-1])->sortValue);
                 i = j;
             } else {
                 i++;
@@ -199,10 +202,10 @@ static inline NSRange * __FindEqualRanges(SortCacheValue *buf, NSRange searchRan
 #if defined (OMNI_ASSERTIONS_ON)
 
 // for debugging only; prints a sort cache buffer (#ifdefed to avoid compiler warning)
-static void print_buffer(SortCacheValue *buf, unsigned count, NSString *msg){
+static void print_buffer(BDSortCacheValue *buf, unsigned count, NSString *msg){
     // print the array before using the second sort descriptor...
     NSMutableArray *new = [[NSMutableArray alloc] initWithCapacity:count];
-    SortCacheValue value;
+    BDSortCacheValue value;
     unsigned i;
     for(i = 0; i < count; i++){
         value = buf[i];
@@ -214,7 +217,7 @@ static void print_buffer(SortCacheValue *buf, unsigned count, NSString *msg){
 #endif
 
 // initialize the static variables
-static inline void __SetupStaticsForDescriptor(NSSortDescriptor *sort)
+static inline void __BDSetupStaticsForDescriptor(NSSortDescriptor *sort)
 {
     __sort = sort;
     __selector = @selector(compareEndObject:toEndObject:);
@@ -222,23 +225,28 @@ static inline void __SetupStaticsForDescriptor(NSSortDescriptor *sort)
 }
 
 // clear the static variables
-static inline void __ClearStatics()
+static inline void __BDClearStatics()
 {
     __sort = nil;
     __selector = NULL;
     __comparator = NULL;
 }
 
++ (void)didLoad
+{
+    if(nil == sortingLock)
+        sortingLock = [[NSLock alloc] init];
+}
+
 - (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)descriptors;
 {
-    OBASSERT([NSThread inMainThread]);
-    
+    [sortingLock lock];
     NSZone *zone = [self zone];
     size_t count = [self count];
-    size_t size = sizeof(SortCacheValue);
+    size_t size = sizeof(BDSortCacheValue);
     
-    SortCacheValue *cache = (SortCacheValue *)NSZoneMalloc(zone, count * size);
-    SortCacheValue aValue;
+    BDSortCacheValue *cache = (BDSortCacheValue *)NSZoneMalloc(zone, count * size);
+    BDSortCacheValue aValue;
     
     int i, sortIdx = 0, numberOfDescriptors = [descriptors count];
     
@@ -268,7 +276,7 @@ static inline void __ClearStatics()
         unsigned rangeIdx;
         
         // setup the statics for this descriptor, so we can use the sort functions
-        __SetupStaticsForDescriptor([descriptors objectAtIndex:sortIdx]);
+        __BDSetupStaticsForDescriptor([descriptors objectAtIndex:sortIdx]);
         
         NSString *keyPath = [__sort key];
         
@@ -281,10 +289,10 @@ static inline void __ClearStatics()
             // only the sortValue needs to change, as it's dependent on the key path
             unsigned maxRange = NSMaxRange(sortRange);
             for(i = sortRange.location; i < maxRange; i++)
-                ((SortCacheValue *)&cache[i])->sortValue = [cache[i].object valueForKeyPath:keyPath];
+                ((BDSortCacheValue *)&cache[i])->sortValue = [cache[i].object valueForKeyPath:keyPath];
             
             // mergesort seems faster than qsort for my casual testing with NSString/NSNumber instances
-            mergesort(&cache[sortRange.location], sortRange.length, size, __CompareSortCacheValues);
+            mergesort(&cache[sortRange.location], sortRange.length, size, __BDCompareSortCacheValues);
         }
         
         // find equal ranges based on the current descriptor, if we have another sort descriptor to process
@@ -294,18 +302,16 @@ static inline void __ClearStatics()
             
             // don't check the entire array; only previously equal ranges (of course, for the second sort descriptor, this will still cover the entire array)
             for(rangeIdx = 0; rangeIdx < numberOfEqualRanges; rangeIdx++)
-                newEqualRanges = __FindEqualRanges(cache, equalRanges[rangeIdx], newEqualRanges, &newNumberOfRanges, zone);
+                newEqualRanges = __BDFindEqualRanges(cache, equalRanges[rangeIdx], newEqualRanges, &newNumberOfRanges, zone);
             
             NSZoneFree(zone, equalRanges);
             equalRanges = newEqualRanges;
             numberOfEqualRanges = newNumberOfRanges;
         }
         
-        __ClearStatics();
+        __BDClearStatics();
     }
-    
-    __ClearStatics();
-    
+        
     if(equalRanges) NSZoneFree(zone, equalRanges);
     
     // our array of structures is now sorted correctly, so we just loop through it and create an array with the contents
@@ -318,6 +324,7 @@ static inline void __ClearStatics()
     [new release];
     
     NSZoneFree(zone, cache);
+    [sortingLock unlock];
     return self;
 }
 
