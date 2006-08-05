@@ -320,12 +320,10 @@ static inline void __BDClearStatics()
         aValue = cache[i];
         [new addObject:aValue.object];
     }
-    self = [[new copy] autorelease];
-    [new release];
     
     NSZoneFree(zone, cache);
     [sortingLock unlock];
-    return self;
+    return [new autorelease];
 }
 
 @end
