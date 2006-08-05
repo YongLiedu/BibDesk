@@ -38,7 +38,7 @@
 
 #import "BDSKDocumentInfoWindowController.h"
 #import "BibDocument.h"
-#import "NSMutableDictionary+ThreadSafety.h"
+#import "NSDictionary_BDSKExtensions.h"
 
 
 @implementation BDSKDocumentInfoWindowController
@@ -77,7 +77,7 @@
 
 - (void)resetInfo{
     if (info == nil)
-        info = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        info = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     [info setDictionary:[document documentInfo]];
     [self refreshKeys];
 }

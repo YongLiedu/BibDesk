@@ -157,10 +157,4 @@
     [aLock unlockForWriting];
 }
 
-NSMutableDictionary *BDSKCreateCaseInsensitiveKeyMutableDictionary(void)
-{
-    return (NSMutableDictionary *)CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFNSObjectDictionaryValueCallbacks);
-}
-
-
 @end

@@ -92,7 +92,7 @@
 #import "NSTextView_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKWebOfScienceParser.h"
-#import "NSMutableDictionary+ThreadSafety.h"
+#import "NSDictionary_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSFileManager_ExtendedAttributes.h"
 #import "PDFMetadata.h"
@@ -133,7 +133,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 
         frontMatter = [[NSMutableString alloc] initWithString:@""];
 		
-        documentInfo = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     
         currentGroupField = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentGroupFieldKey] retain];
 

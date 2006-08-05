@@ -58,5 +58,3 @@
 - (void)removeObjectsForKeys:(NSArray *)keys usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
 
 @end
-
-extern NSMutableDictionary *BDSKCreateCaseInsensitiveKeyMutableDictionary(void);

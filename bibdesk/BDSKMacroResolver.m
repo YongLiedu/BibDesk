@@ -40,7 +40,7 @@
 #import "BibPrefController.h"
 #import "BDSKComplexString.h"
 #import "BDSKStringNode.h"
-#import "NSMutableDictionary+ThreadSafety.h"
+#import "NSDictionary_BDSKExtensions.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
 #import "BibDocument.h"
@@ -282,7 +282,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     // It is not quite correct because bibtex does discriminate,
     // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
     // is used to create a dictionary with case-insensitive keys.
-    macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+    macroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
 }
 
 - (void)synchronize{}
@@ -323,7 +323,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         // we grab their localized versions for display.
         NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
                                                                  forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
-        standardMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        standardMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
         [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
         // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
         fileMacroDefinitions = nil; 
@@ -346,7 +346,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 - (void)loadMacroDefinitions{
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
-    macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+    macroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     
     // legacy, load old style prefs
     NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
@@ -374,7 +374,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
     NSString *file;
     
-    fileMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+    fileMacroDefinitions = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     
     while (file = [fileE nextObject]) {
         NSString *fileContent = [NSString stringWithContentsOfFile:file];
