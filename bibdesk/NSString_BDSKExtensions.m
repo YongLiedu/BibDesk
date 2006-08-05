@@ -191,12 +191,12 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 #pragma mark TeX cleaning
 
 - (NSString *)stringByConvertingDoubleHyphenToEndash{
+    NSString *string = nil;
     NSRange range = [self rangeOfString:@"--"];
     if(range.length){
-        self = [NSMutableString stringWithString:self];
-        [(NSMutableString *)self replaceCharactersInRange:range withString:[NSString endashString]];
+        string = [[NSMutableString stringWithString:self] replaceCharactersInRange:range withString:[NSString endashString]];
     }
-    return self;
+    return string ? string : self;
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
@@ -208,8 +208,8 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     if(command == nil)
         command = [[AGRegex alloc] initWithPattern:@"\\\\[a-z].+\\{" options:AGRegexLazy];
     
-    self = [command replaceWithString:@"" inString:self];
-    return [self stringByRemovingCharactersInOFCharacterSet:[OFCharacterSet curlyBraceCharacterSet]];
+    NSString *string = [command replaceWithString:@"" inString:self];
+    return [string stringByRemovingCharactersInOFCharacterSet:[OFCharacterSet curlyBraceCharacterSet]];
     
 }
 
@@ -648,6 +648,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 - (NSString *)stringByTrimmingPrefixCharactersFromSet:(NSCharacterSet *)characterSet;
 {
+    NSString *string = nil;
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];
     [scanner setCharactersToBeSkipped:nil];
     [scanner scanCharactersFromSet:characterSet intoString:nil];
@@ -657,10 +658,9 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     if(range.length){
         NSMutableString *mutableCopy = [self mutableCopy];
         [mutableCopy deleteCharactersInRange:range];
-        self = [[mutableCopy copy] autorelease];
-        [mutableCopy release];
+        string = [mutableCopy autorelease];
     }
-    return self;
+    return string ? string : self;
 }
 
 - (NSString *)stringByAppendingEllipsis{
