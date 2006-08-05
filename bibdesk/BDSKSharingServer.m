@@ -110,7 +110,7 @@ NSString *BDSKComputerName() {
 
 - (unsigned int)numberOfConnections;
 - (void)notifyClientConnectionsChanged;
-- (NSArray *)snapshotOfPublications;
+- (NSArray *)copyPublicationsFromOpenDocuments;
 
 @end
 
@@ -432,29 +432,34 @@ NSString *BDSKComputerName() {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
 }
 
-- (NSArray *)snapshotOfPublications
+- (NSArray *)copyPublicationsFromOpenDocuments
 {
     NSMutableSet *set = nil;
-    
+    NSMutableArray *pubs = [[NSMutableArray alloc] initWithCapacity:100];
+
     // this is only useful if everyone else uses the mutex, though...
     @synchronized([NSDocumentController sharedDocumentController]){
         NSEnumerator *docE = [[[[[NSDocumentController sharedDocumentController] documents] copy] autorelease] objectEnumerator];
-        set = [(id)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKBibItemEqualityCallBacks) autorelease];
+        set = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKBibItemEqualityCallBacks);
         id document = nil;
-        NSMutableArray *pubs = [[NSMutableArray alloc] initWithCapacity:100];
         while(document = [docE nextObject]){
             [document getCopyOfPublicationsOnMainThread:pubs];
             [set addObjectsFromArray:pubs];
             [pubs removeAllObjects];
         }
-        [pubs release];
+        [pubs removeAllObjects];
     }
-    return [set allObjects];
+    [pubs addObjectsFromSet:set];
+    [set release];
+    return pubs;
 }
 
 - (bycopy NSData *)archivedSnapshotOfPublications
 {
-    NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:[self snapshotOfPublications]];
+    NSArray *pubs = [self copyPublicationsFromOpenDocuments];
+    NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:pubs];
+    [pubs release];
+    
     if(dataToSend != nil){
         NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, nil];
         NSString *errorString = nil;
