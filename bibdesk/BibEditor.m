@@ -1863,13 +1863,13 @@ static int numberOfOpenEditors = 0;
 	
 - (void)bibWasAddedOrRemoved:(NSNotification *)notification{
 	NSEnumerator *pubEnum = [[[notification userInfo] objectForKey:@"pubs"] objectEnumerator];
-	BibItem *pub;
+	id pub;
 	NSString *crossref = [theBib valueOfField:BDSKCrossrefString inherit:NO];
 	
 	if ([NSString isEmptyString:crossref])
 		return;
 	while (pub = [pubEnum nextObject]) {
-		if ([crossref caseInsensitiveCompare:[pub citeKey]] != NSOrderedSame) 
+		if ([crossref caseInsensitiveCompare:[pub valueForKey:@"citeKey"]] != NSOrderedSame) 
 			continue;
 		[self setupForm];
 		return;
