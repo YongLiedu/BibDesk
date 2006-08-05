@@ -270,7 +270,6 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        NSDictionary *peopleDict = [self peopleInheriting:NO];
         [coder encodeObject:fileType forKey:@"fileType"];
         [coder encodeObject:citeKey forKey:@"citeKey"];
         [coder encodeObject:pubDate forKey:@"pubDate"];
@@ -278,7 +277,6 @@ static CFDictionaryRef selectorTable = NULL;
         [coder encodeObject:dateModified forKey:@"dateModified"];
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
-        [coder encodeObject:peopleDict forKey:@"people"]; // legacy, for sharing with older versions
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
