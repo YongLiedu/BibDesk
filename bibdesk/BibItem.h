@@ -619,6 +619,8 @@
 - (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 
 - (NSDictionary *)searchIndexInfo;
+- (NSDictionary *)metadataCacheInfo;
+
 /*!
     @method bibTeXString
  @abstract  returns the bibtex source for this bib item.  Is TeXified based on default preferences for the application.

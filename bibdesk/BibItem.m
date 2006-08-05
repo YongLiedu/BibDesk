@@ -812,6 +812,8 @@ static CFDictionaryRef selectorTable = NULL;
 			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (pp %@)", @"Title of inbook (pp Pages)"), title, pages];
 		}
 	}
+    if ([title isComplex] || [title isInherited])
+        title = [NSString stringWithFormat:@"%@", title];
     OBPOSTCONDITION(title != nil);
 	return title;
 }
@@ -1369,6 +1371,56 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self title], @"title", urls, @"urls", nil];
     [urls release];
+    return info;
+}
+
+- (NSDictionary *)metadataCacheInfo{
+    NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:11];
+    NSString *value;
+    NSArray *array;
+    NSDate *date;
+    unsigned int rating;
+    
+    if(value = [self citeKey])
+        [info setObject:citeKey forKey:@"net_sourceforge_bibdesk_citekey"];
+
+    // A given item is not guaranteed to have all of these, so make sure they are non-nil
+    if(value = [self displayTitle])
+        [info setObject:value forKey:(NSString *)kMDItemTitle];
+    
+    // this is what shows up in search results
+    [info setObject:value ? value : @"Unknown" forKey:(NSString *)kMDItemDisplayName];
+
+    [info setObject:[self pubAuthorsAsStrings] forKey:(NSString *)kMDItemAuthors];
+
+    if(value = [[self valueOfField:BDSKAbstractString] stringByRemovingTeX])
+        [info setObject:value forKey:(NSString *)kMDItemDescription];
+
+    if(date = [self dateModified])
+        [info setObject:date forKey:(NSString *)kMDItemContentModificationDate];
+
+    // keywords is supposed to be a CFArray type, so we'll use the group splitting code
+    if(array = [[self groupsForField:BDSKKeywordsString] allObjects])
+        [info setObject:array forKey:(NSString *)kMDItemKeywords];
+
+    if(rating = [self rating])
+        [info setObject:[NSNumber numberWithInt:rating] forKey:(NSString *)kMDItemStarRating];
+
+    // supporting tri-state fields will need a new key of type CFNumber; it will only show up as a number in get info, though, which is not particularly useful
+    if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:BDSKReadString] == NO)
+        [info setObject:(id)([self boolValueOfField:BDSKReadString] ? kCFBooleanTrue : kCFBooleanFalse) forKey:@"net_sourceforge_bibdesk_itemreadstatus"];
+
+    // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
+    NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:2];
+
+    if(value = [[self URLForField:BDSKUrlString] absoluteString]) 
+        [mutableArray addObject:value];
+    if(value = [[self localFileURLForField:BDSKLocalUrlString] absoluteString])
+        [mutableArray addObject:value];
+
+    [info setObject:mutableArray forKey:(NSString *)kMDItemWhereFroms];
+    [mutableArray release];
+    
     return info;
 }
 

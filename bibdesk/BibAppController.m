@@ -1324,8 +1324,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         
         NSString *path;
         NSString *citeKey;
-        BibItem *anItem;
-        NSDate *dateModified;
+        NSDictionary *anItem;
         
         BDAlias *alias = [[BDAlias alloc] initWithPath:docPath];
         if(alias == nil){
@@ -1337,70 +1336,17 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         [alias release];
     
         NSEnumerator *entryEnum = [publications objectEnumerator];
-        NSString *mdValue = nil;
-        unsigned int rating;
-        id array = nil;
-        
-        BOOL readFieldIsTristate = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:BDSKReadString];
         
         while(anItem = [entryEnum nextObject]){
-            citeKey = [anItem citeKey];
-            
+            citeKey = [anItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
             if(citeKey == nil)
                 continue;
-
+            
             // we won't index this, but it's needed to reopen the parent file
             [metadata setObject:aliasData forKey:@"FileAlias"];
             [metadata setObject:docPath forKey:@"net_sourceforge_bibdesk_owningfilepath"]; // use as a backup in case the alias fails
-
-            [metadata setObject:citeKey forKey:@"net_sourceforge_bibdesk_citekey"];
             
-            // A given item is not guaranteed to have all of these, so make sure they are non-nil
-            mdValue = [anItem displayTitle];
-            if(mdValue != nil){
-                [metadata setObject:mdValue forKey:(NSString *)kMDItemTitle];
-                
-                // this is what shows up in search results
-                [metadata setObject:mdValue forKey:(NSString *)kMDItemDisplayName];
-            } else {
-                [metadata setObject:@"Unknown" forKey:(NSString *)kMDItemDisplayName];
-            }
-            
-            array = [anItem pubAuthorsAsStrings];
-            [metadata setObject:(array ? array : [NSArray array]) forKey:(NSString *)kMDItemAuthors];
-            
-            mdValue = [[anItem valueOfField:BDSKAbstractString] stringByRemovingTeX];
-            if(mdValue != nil)
-                [metadata setObject:mdValue forKey:(NSString *)kMDItemDescription];
-            
-            if( (dateModified = [anItem dateModified]) != nil)
-                [metadata setObject:dateModified forKey:(NSString *)kMDItemContentModificationDate];
-            
-            // keywords is supposed to be a CFArray type, so we'll use the group splitting code
-            array = [anItem valueForKey:@"keywordsArray"];
-            if(array != nil)
-                [metadata setObject:array forKey:(NSString *)kMDItemKeywords];
-            
-            if((rating = [anItem rating]))
-                [metadata setObject:[NSNumber numberWithInt:rating] forKey:(NSString *)kMDItemStarRating];
-            
-            // supporting tri-state fields will need a new key of type CFNumber; it will only show up as a number in get info, though, which is not particularly useful
-			if(readFieldIsTristate == NO)
-                [metadata setValue:(id)([anItem boolValueOfField:BDSKReadString] ? kCFBooleanTrue : kCFBooleanFalse) forKey:@"net_sourceforge_bibdesk_itemreadstatus"];
-            
-            // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
-            array = [[NSMutableArray alloc] initWithCapacity:2];
-            
-            mdValue = [[anItem URLForField:BDSKUrlString] absoluteString];
-            if(mdValue) [array addObject:mdValue];
-            
-            // calling one of the BibItem URL wrapper methods is unsafe since they call -[NSDocument fileName]
-            mdValue = [[anItem localFileURLForField:BDSKLocalUrlString relativeTo:docPath inherit:YES] absoluteString];
-            mdValue = [[anItem URLForField:BDSKLocalUrlString] absoluteString];
-            if(mdValue) [array addObject:mdValue];
-            
-            [metadata setValue:array forKey:(NSString *)kMDItemWhereFroms];
-            [array release];
+            [metadata addEntriesFromDictionary:anItem];
 			
             // We use citeKey as the file's name, since it needs to be unique and static (relatively speaking), so we can overwrite the old cache content with newer content when saving the document.  We replace pathSeparator in paths, as we can't create subdirectories with -[NSDictionary writeToFile:] (currently this is the POSIX path separator).
             path = citeKey;
