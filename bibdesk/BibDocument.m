@@ -622,6 +622,16 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return anAuthorPubs;
 }
 
+- (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray{
+    if([NSThread inMainThread] == NO){
+        [self performSelectorOnMainThread:_cmd withObject:dstArray waitUntilDone:YES];
+    } else {
+        NSArray *array = [[NSArray alloc] initWithArray:[self publications] copyItems:YES];
+        [dstArray addObjectsFromArray:array];
+        [array release];
+    }
+}
+
 #pragma mark Document Info
 
 - (NSDictionary *)documentInfo{
@@ -763,8 +773,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     // rebuild metadata cache for this document whenever we save
     if([self fileName]){
+        NSArray *copyOfPubs = [[NSArray alloc] initWithArray:[self publications] copyItems:YES];
         // don't pass the fileName parameter, since it's likely a temp file somewhere due to the atomic save operation
-        NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:[self publications], @"publications", [self fileName], @"fileName", nil];
+        NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:copyOfPubs, @"publications", [self fileName], @"fileName", nil];
+        [copyOfPubs release];
         [[NSApp delegate] rebuildMetadataCache:infoDict];
         [infoDict release];
     }

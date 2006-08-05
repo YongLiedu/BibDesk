@@ -441,8 +441,13 @@ NSString *BDSKComputerName() {
         NSEnumerator *docE = [[[[[NSDocumentController sharedDocumentController] documents] copy] autorelease] objectEnumerator];
         set = [(id)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKBibItemEqualityCallBacks) autorelease];
         id document = nil;
-        while(document = [docE nextObject])
-            [set addObjectsFromArray:[document publications]];
+        NSMutableArray *pubs = [[NSMutableArray alloc] initWithCapacity:100];
+        while(document = [docE nextObject]){
+            [document getCopyOfPublicationsOnMainThread:pubs];
+            [set addObjectsFromArray:pubs];
+            [pubs removeAllObjects];
+        }
+        [pubs release];
     }
     return [set allObjects];
 }

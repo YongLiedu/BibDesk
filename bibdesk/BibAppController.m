@@ -1281,10 +1281,8 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
 
 - (void)rebuildMetadataCache:(id)userInfo{
         
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        return;
-    
-    [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forObject:self withObject:userInfo];
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
+        [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forObject:self withObject:userInfo];
 }
 
 - (void)privateRebuildMetadataCache:(id)userInfo{
