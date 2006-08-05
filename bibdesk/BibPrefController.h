@@ -288,6 +288,7 @@ extern NSString *BDSKSharingNameChangedNotification;
 extern NSString *BDSKSharingPasswordChangedNotification;
 extern NSString *BDSKDocumentControllerAddDocumentNotification;
 extern NSString *BDSKDocumentControllerRemoveDocumentNotification;
+extern NSString *BDSKSearchIndexInfoChangedNotification;
 
 #pragma mark Exception name strings
 extern NSString *BDSKComplexStringException;

@@ -305,6 +305,7 @@ NSString *BDSKClientConnectionsChangedNotification = @"BDSKClientConnectionsChan
 NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedNotification";
 NSString *BDSKDocumentControllerAddDocumentNotification = @"BDSKDocumentControllerAddDocumentNotification";
 NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentControllerRemoveDocumentNotification";
+NSString *BDSKSearchIndexInfoChangedNotification = @"BDSKSearchIndexInfoChangedNotification";
 
 #pragma mark Exception name strings
 

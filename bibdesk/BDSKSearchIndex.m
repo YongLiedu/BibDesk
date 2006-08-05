@@ -45,12 +45,12 @@
 @interface BDSKSearchIndex (Private)
 
 - (void)rebuildIndex;
-- (void)indexFilesForItem:(BibItem *)anItem;
+- (void)indexFilesForItem:(id)anItem;
 void *setupThreading(void *anObject);
 - (void)processNotification:(NSNotification *)note;
 - (void)handleDocAddItemNotification:(NSNotification *)note;
 - (void)handleDocDelItemNotification:(NSNotification *)note;
-- (void)handleBibItemChangedNotification:(NSNotification *)note;
+- (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note;
 - (void)handleMachMessage:(void *)msg;
 
 // use this to keep a temporary cache of objects for initial index creation, to avoid messaging the document from our worker thread
@@ -71,35 +71,35 @@ void *setupThreading(void *anObject);
 
 - (id)initWithDocument:(id)aDocument
 {
-    if(![super init])
-        return self = nil;
-
     OBASSERT([NSThread inMainThread]);
-   
-    CFMutableDataRef indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
-    index = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
-    CFRelease(indexData); // @@ doc bug: is this owned by the index now?  seems to be...
-        
-    document = [aDocument retain];
-    delegate = nil;
-    [self setInitialObjectsToIndex:[aDocument publications]];
-    NSURL *docURL = [document fileURL];
-    CFURLGetFSRef((CFURLRef)docURL, &documentPathRef);
-    
-    flags.isIndexing = 0;
-    flags.shouldKeepRunning = 1;
-    
-    // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    
-    OSStatus err = pthread_create(&notificationThread, &attr, &setupThreading, [[self retain] autorelease]);
-    pthread_attr_destroy(&attr);
 
-    if(err != noErr){
-        [self release];
-        return self = nil;
+    self = [super init];
+        
+    if(nil != self){
+    
+        CFMutableDataRef indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
+        index = SKIndexCreateWithMutableData(indexData, NULL, kSKIndexInverted, NULL);
+        CFRelease(indexData); // @@ doc bug: is this owned by the index now?  seems to be...
+            
+        document = [aDocument retain];
+        delegate = nil;
+        [self setInitialObjectsToIndex:[[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)]];
+        
+        flags.isIndexing = 0;
+        flags.shouldKeepRunning = 1;
+        
+        // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        
+        int err = pthread_create(&notificationThread, &attr, &setupThreading, [[self retain] autorelease]);
+        pthread_attr_destroy(&attr);
+
+        if(err){
+            [self release];
+            self = nil;
+        }
     }
     
     return self;
@@ -113,7 +113,7 @@ void *setupThreading(void *anObject);
     
     // the document does cleanup that should only be performed on the main thread (this was causing an assertion failure in -[BDSKFileContentSearchController cancelCurrentSearch:])
     [document performSelectorOnMainThread:@selector(release) withObject:nil waitUntilDone:NO];
-    [notificationLock release];
+    [queueLock release];
     if(index) CFRelease(index);
     [super dealloc];
 }
@@ -150,7 +150,6 @@ void *setupThreading(void *anObject);
 {    
     NSAssert2(pthread_equal(notificationThread, pthread_self()), @"-[%@ %@] must be called from the worker thread!", [self class], NSStringFromSelector(_cmd));
     
-    // copied since the document (may) be giving us a mutable array to enumerate
     OBPRECONDITION(initialObjectsToIndex);
     NSEnumerator *enumerator = [initialObjectsToIndex objectEnumerator];
     id anObject = nil;
@@ -162,7 +161,7 @@ void *setupThreading(void *anObject);
     [self setInitialObjectsToIndex:nil];
 }
 
-- (void)indexFilesForItem:(BibItem *)anItem
+- (void)indexFilesForItem:(id)anItem
 {
     OBASSERT(pthread_equal(notificationThread, pthread_self()));
     NSURL *url = nil;
@@ -170,35 +169,21 @@ void *setupThreading(void *anObject);
     SKDocumentRef skDocument;
     volatile Boolean success;
     
-    NSSet *urlFields = [[BibTypeManager sharedManager] localURLFieldsSet];
-    NSEnumerator *fieldEnumerator = [urlFields objectEnumerator];
-    NSString *urlFieldName = nil;
+    NSEnumerator *urlEnumerator = [[anItem valueForKey:@"urls"] objectEnumerator];
     CFDictionaryRef properties;
         
     BOOL swap;
     swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
     
-    // we assume that CFURL is safe to call here (FSRefMakePath and friends are thread safe)
-    NSString *documentPath = nil;
-    CFURLRef documentURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &documentPathRef);
-    OBPRECONDITION(documentURL);
-    if(documentURL != NULL){
-        documentPath = [(NSURL *)documentURL path];
-        CFRelease(documentURL);
-    }
-    
-    while(urlFieldName = [fieldEnumerator nextObject]){
-        
-        url = [anItem localFileURLForField:urlFieldName relativeTo:documentPath inherit:NO];
-        if(url == nil) continue;
-        
+    while(url = [urlEnumerator nextObject]){
+                
         skDocument = SKDocumentCreateWithURL((CFURLRef)url);
         OBPOSTCONDITION(skDocument);
         if(skDocument == NULL) continue;
         
-        // most documents on file will have a title, and -[BibItem title] is guaranteed to be non-nil
-        properties = (CFDictionaryRef)[[NSDictionary alloc] initWithObjectsAndKeys:[anItem title], @"title", nil];
+        // most documents on file will have a title, and the @"title" key is guaranteed to be non-nil
+        properties = (CFDictionaryRef)[[NSDictionary alloc] initWithObjectsAndKeys:[anItem valueForKey:@"title"], @"title", nil];
         OBASSERT(properties);
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
@@ -228,9 +213,9 @@ void *setupThreading(void *anObject)
         [self->notificationPort scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         
         self->notificationQueue = [[NSMutableArray alloc] initWithCapacity:5];
-        self->notificationLock = [[NSLock alloc] init];
+        self->queueLock = [[NSLock alloc] init];
             
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKBibItemChangedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKSearchIndexInfoChangedNotification object:self->document];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocAddItemNotification object:self->document];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocDelItemNotification object:self->document];
     }
@@ -278,15 +263,15 @@ void *setupThreading(void *anObject)
 {    
     if( pthread_equal(notificationThread, pthread_self()) == FALSE ){
         // Forward the notification to the correct thread
-        [notificationLock lock];
+        [queueLock lock];
         [notificationQueue addObject:note];
-        [notificationLock unlock];
+        [queueLock unlock];
         [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
         
     } else {
         // this is a background thread that can handle these notifications
-        if([[note name] isEqualToString:BDSKBibItemChangedNotification])
-            [self handleBibItemChangedNotification:note];
+        if([[note name] isEqualToString:BDSKSearchIndexInfoChangedNotification])
+            [self handleSearchIndexInfoChangedNotification:note];
         else if([[note name] isEqualToString:BDSKDocAddItemNotification])
             [self handleDocAddItemNotification:note];
         else if([[note name] isEqualToString:BDSKDocDelItemNotification])
@@ -301,8 +286,8 @@ void *setupThreading(void *anObject)
 {
     OBASSERT(pthread_equal(notificationThread, pthread_self()));
 
-	NSEnumerator *pubEnum = [[[note userInfo] valueForKey:@"pubs"] objectEnumerator];
-    BibItem *pub;
+	NSEnumerator *pubEnum = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
+    id pub;
     OBPRECONDITION(pubEnum);
             
 	while (pub = [pubEnum nextObject])
@@ -315,41 +300,30 @@ void *setupThreading(void *anObject)
 {
     OBASSERT(pthread_equal(notificationThread, pthread_self()));
 
-	NSEnumerator *pubEnum = [[[note userInfo] valueForKey:@"pubs"] objectEnumerator];
-    BibItem *pub;
-    OBPRECONDITION(pubEnum);
+	NSEnumerator *itemEnumerator = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
+    id anItem;
     
     NSURL *url = nil;
     
     SKDocumentRef skDocument;
     volatile Boolean success;
     
-    NSArray *urlFields = [[[BibTypeManager sharedManager] localURLFieldsSet] allObjects];
-    unsigned int fieldCnt, maxFields = [urlFields count];
-    NSString *urlFieldName = nil;
+    NSArray *urls = nil;
+    unsigned int idx, maxIdx;
     
-    NSAssert(maxFields, @"No local url fields are defined");
-
     // set this here because we're adding to the index apart from indexFilesForItem:
     BOOL swap;
     swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
-    
-    
-    NSString *documentPath = nil;
-    CFURLRef documentURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &documentPathRef);
-    OBPRECONDITION(documentURL);
-    if(documentURL != NULL){
-        documentPath = [(NSURL *)documentURL path];
-        CFRelease(documentURL);
-    }
 
-	while(pub = [pubEnum nextObject]){
-		for(fieldCnt = 0; fieldCnt < maxFields; fieldCnt++){
+	while(anItem = [itemEnumerator nextObject]){
+        urls = [anItem valueForKey:@"urls"];
+        maxIdx = [urls count];
+        
+        // loop through the array of URLs, create a new SKDocumentRef, and try to remove it
+		for(idx = 0; idx < maxIdx; idx++){
 			
-			urlFieldName = [urlFields objectAtIndex:fieldCnt];
-			url = [pub localFileURLForField:urlFieldName relativeTo:documentPath inherit:NO];
-			if(!url) continue;
+			url = [urls objectAtIndex:idx];
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);
 			OBPOSTCONDITION(skDocument);
@@ -367,67 +341,30 @@ void *setupThreading(void *anObject)
     [delegate performSelectorOnMainThread:@selector(updateSearchIfNeeded) withObject:nil waitUntilDone:NO];
 }
 
-- (void)handleBibItemChangedNotification:(NSNotification *)note
+- (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
 {
     OBASSERT(pthread_equal(notificationThread, pthread_self()));
 
-    NSDictionary *userInfo = [note userInfo];
-    id noteDocument = [userInfo valueForKey:@"document"];
-    
-    if(document != noteDocument)
-        return;
-    
-    NSString *changedKey = [userInfo objectForKey:@"key"];
-    
-    if([[BibTypeManager sharedManager] isLocalURLField:changedKey] == NO)
-        return;
-    
     // reindex all the files; unless you have many local files attached to the item, there won't be much savings vs. just adding the one that changed
-    [self indexFilesForItem:[note object]];
+    [self indexFilesForItem:[note userInfo]];
     
-    SKDocumentRef skDocument = NULL;    
-    
-    // set this here because we're adding to the index apart from indexFilesForItem:
-    BOOL swap;
-    swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
-
-    // remove the old document from the index
-    NSString *oldValue = [userInfo valueForKey:@"oldValue"];
-    if(![NSString isEmptyString:oldValue]){
-        
-        // try to create a valid URL from the string (which may be a path or a string representation of a URL); if it's a path, -[NSURL scheme] will return nil; we can no longer use the item to resolve the URL, but if this fails, it just means there's extra info in the index
-        NSURL *oldURL = [NSURL URLWithString:oldValue];
-        if(oldURL == nil || [oldURL scheme] == nil)
-            oldURL = [NSURL fileURLWithPath:[oldValue stringByNormalizingPath]];
-        
-        OBPRECONDITION([oldURL isFileURL]);
-        skDocument = SKDocumentCreateWithURL((CFURLRef)oldURL);
-        if(oldURL != nil && skDocument != NULL){
-            OBPOSTCONDITION(skDocument);
-            SKIndexRemoveDocument(index, skDocument);            
-            CFRelease(skDocument);
-        }
-    }
-    swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
-    OBASSERT(swap);
-    
+    // we used to remove the old object from the array, but it's a) not thread safe and b) having an extra document in the index isn't that bad
     [delegate performSelectorOnMainThread:@selector(updateSearchIfNeeded) withObject:nil waitUntilDone:NO];
 }    
 
 - (void)handleMachMessage:(void *)msg
 {
 
-    [notificationLock lock];
+    [queueLock lock];
     while ( [notificationQueue count] ) {
         NSNotification *note = [[notificationQueue objectAtIndex:0] retain];
         [notificationQueue removeObjectAtIndex:0];
-        [notificationLock unlock];
+        [queueLock unlock];
         [self processNotification:note];
         [note release];
-        [notificationLock lock];
+        [queueLock lock];
     };
-    [notificationLock unlock];
+    [queueLock unlock];
 }
 
 - (void)setInitialObjectsToIndex:(NSArray *)objects{

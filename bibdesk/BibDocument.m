@@ -553,7 +553,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[pubs makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
 	[self addToItemsForCiteKeys:pubs];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
 														object:self
 													  userInfo:notifInfo];
@@ -590,7 +590,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
 		[[NSFileManager defaultManager] removeSpotlightCacheForItemsNamed:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
-	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", nil];
+	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
 														object:self
 													  userInfo:notifInfo];

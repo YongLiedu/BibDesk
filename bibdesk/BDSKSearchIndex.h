@@ -52,7 +52,6 @@ typedef struct _BDSKSearchIndexFlags
 @interface BDSKSearchIndex : NSObject {
     SKIndexRef index;
     id document;
-    FSRef documentPathRef;
     
     id delegate;
     NSArray *initialObjectsToIndex;
@@ -62,7 +61,7 @@ typedef struct _BDSKSearchIndexFlags
     pthread_t notificationThread;
     BDSKSearchIndexFlags flags;
         
-    NSLock *notificationLock;
+    NSLock *queueLock;
 }
 
 - (id)initWithDocument:(id)aDocument;

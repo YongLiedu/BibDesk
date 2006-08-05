@@ -1355,6 +1355,23 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return stringContainsLossySubstring(value, substring, searchOptions, flag);
 }
 
+- (NSDictionary *)searchIndexInfo{
+    NSSet *urlFields = [[BibTypeManager sharedManager] localURLFieldsSet];
+    NSEnumerator *fieldEnumerator = [urlFields objectEnumerator];
+    NSString *urlFieldName = nil;
+    
+    // create an array of all local-URLs this object could have
+    NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:5];
+    while(urlFieldName = [fieldEnumerator nextObject]){
+        NSURL *aURL = [self URLForField:urlFieldName];
+        if(aURL) [urls addObject:aURL];
+    }
+    
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self title], @"title", urls, @"urls", nil];
+    [urls release];
+    return info;
+}
+
 #pragma mark -
 #pragma mark BibTeX strings
 
@@ -2766,16 +2783,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	// invalidate the cached groups; they are rebuilt when needed
 	if([BDSKAllFieldsString isEqualToString:key]){
 		[groups removeAllObjects];
+        // re-call make type to make sure we still have all the appropriate bibtex defined fields...
+        // but only if we have set the full pubFields array, as we should not be able to remove necessary fields.
+        [self makeType];
 	}else if(key != nil){
 		[groups removeObjectForKey:key];
 	}
 	
-    // re-call make type to make sure we still have all the appropriate bibtex defined fields...
-    // but only if we have set the full pubFields array, as we should not be able to remove necessary fields.
- 	if([BDSKAllFieldsString isEqualToString:key]){
- 		[self makeType];
- 	}
-    
     NSCalendarDate *theDate = nil;
     
     // pubDate is a derived field based on Month and Year fields; we take the 15th day of the month to avoid edge cases
@@ -2820,6 +2834,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [theDate release];
     }else{
         [self setDateModified:nil];
+    }
+    
+    if([[BibTypeManager sharedManager] isURLField:key] || [key isEqualToString:BDSKTitleString]){
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
+                                                            object:[self document]
+                                                          userInfo:[self searchIndexInfo]];
     }
 }
 
