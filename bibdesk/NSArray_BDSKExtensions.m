@@ -65,6 +65,20 @@
 
 @implementation NSMutableArray (BDSKExtensions)
 
+- (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;
+{
+    [self sortUsingSelector:comparator];
+    
+    if(ascend)
+        return;
+    
+    int rhIndex = ([self count] - 1);
+    int lhIndex = 0;
+    
+    while( (rhIndex - lhIndex) > 0)
+        [self exchangeObjectAtIndex:rhIndex-- withObjectAtIndex:lhIndex++];
+}
+
 /* Assumes the array is already sorted to insert the object quickly in the right place */
 /* (new objects are inserted just after old objects that are NSOrderedSame) */
 - (void)insertObject:anObject inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;

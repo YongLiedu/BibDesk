@@ -51,7 +51,7 @@
 #import "BibTypeManager.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharedGroup.h"
-#import "NSMutableArray+ThreadSafety.h"
+#import "NSArray_BDSKExtensions.h"
 
 @implementation BibDocument (Groups)
 
@@ -382,7 +382,7 @@ The groupedPublications array is a subset of the publications array, developed b
         sharedGroups = [array mutableCopy];
         // now sort using the current column and order
         SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
-        [sharedGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending usingLock:nil];
+        [sharedGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
     }
     
     // rebuild the dictionary of spinners
@@ -483,7 +483,7 @@ The groupedPublications array is a subset of the publications array, developed b
         // now sort using the current column and order
         SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ?
                             @selector(countCompare:) : @selector(nameCompare:);
-        [mutableGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending usingLock:nil];
+        [mutableGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
         
         // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
         // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
