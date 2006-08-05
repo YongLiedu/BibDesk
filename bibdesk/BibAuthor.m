@@ -683,8 +683,11 @@ static inline NSString *firstLetterCharacterString(NSString *string)
     for(idx = 0; idx < firstNameCount; idx++){
         fragment = (NSString *)CFArrayGetValueAtIndex(theFirstNames, idx);
         [abbrevName appendString:@" "]; // avoid trailing whitespace
-        [abbrevName appendString:firstLetterCharacterString(fragment)];
-        [abbrevName appendString:@"."];
+        firstLetter = firstLetterCharacterString(fragment);
+        if (firstLetter != nil) {
+            [abbrevName appendString:firstLetter];
+            [abbrevName appendString:@"."];
+        }
     }    
     
     [self setAbbreviatedNormalizedName:abbrevName];
