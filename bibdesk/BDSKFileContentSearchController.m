@@ -44,16 +44,7 @@
 #import "BDSKSearchResult.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
-
-#define TOOLBAR_BUTTON_SIZE NSMakeSize(24, 24)
-#define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
-#define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)
-
-NSString *FileContentSearchToolbarIdentifier = @"FileContentSearchToolbarIdentifier";
-NSString *StopButtonToolbarItemIdentifier = @"StopButtonToolbarItemIdentifier";
-NSString *SearchFieldToolbarItemIdentifier = @"SearchFieldToolbarItemIdentifier";
-
-static BDSKFileContentSearchController *theController = nil;
+#import "NSAttributedString_BDSKExtensions.h"
 
 // keys are NSDocument objects; compare using pointer equality, use NSObject retain/release
 const CFDictionaryKeyCallBacks BDSKNSRetainedPointerDictionaryKeyCallbacks = {
@@ -76,15 +67,7 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 
 @implementation BDSKFileContentSearchController
 
-+ (BDSKFileContentSearchController *)sharedController
-{
-    if (!theController) {
-        theController = [[BDSKFileContentSearchController alloc] init];
-    }
-    return theController;
-}
-
-- (id)init
+- (id)initForDocument:(id)aDocument
 {    
     self = [super init];
     if(!self) return nil;
@@ -103,7 +86,6 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     indexDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &BDSKNSRetainedPointerDictionaryKeyCallbacks, &BDSKNSRetainedPointerDictionaryValueCallbacks);
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDocumentCloseNotification:) name:BDSKDocumentWindowWillCloseNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeMain:) name:NSWindowDidBecomeMainNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     
     // this lock is used any time the mutable indexDictionary ivar is accessed
@@ -111,24 +93,10 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     
     // flag set from UI or before deallocating the current index
     searchCanceled = NO;
-    standalone = YES;
-    
-    searchContentView = nil;
-        
-    return self;
-}
-
-- (id)initForDocument:(id)aDocument
-{
-    self = [self init];
-	if(!self) return nil;
  
     OBPRECONDITION(aDocument);
-    standalone = NO;
     [self setDocument:aDocument];
     
-    // don't observe this, since all we use it for is to change the document
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:nil];
     NSAssert1([NSBundle loadNibNamed:[self windowNibName] owner:self], @"Failed to load nib %@", [self windowNibName]);
 
     return self;
@@ -141,7 +109,6 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 	[statusBar unbind:@"stringValue"];
     [self cancelCurrentSearch:nil]; // before releasing the dictionary
     [searchContentView release];
-    [toolbarItems release];
     CFRelease(indexDictionary);
     [dictionaryLock release];
     [results release];
@@ -164,20 +131,13 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     [spinner setUsesThreadedAnimation:NO];
     [spinner setDisplayedWhenStopped:NO];
     
-    // Make sure we get a window title and document, even though our window will be front when we open; this causes problems for the non-standalone case, obviously, if the the doc controller returns nil for current document.
-    if(standalone)
-        [self setDocument:[[NSDocumentController sharedDocumentController] currentDocument]];
-    
     // set up the image/text cell combination
     BDSKTextWithIconCell *textCell = [[BDSKTextWithIconCell alloc] init];
     [textCell setControlSize:[cell controlSize]];
     [textCell setDrawsHighlight:NO];
     [[tableView tableColumnWithIdentifier:@"name"] setDataCell:textCell];
     [textCell release];
-    
-    [self setupToolbar];
-    [[self window] makeFirstResponder:searchField];
-    
+        
     // preserve sort behavior between launches (set in windowWillClose:)
     NSData *sortDescriptorData = [[OFPreferenceWrapper sharedPreferenceWrapper] dataForKey:BDSKFileContentSearchSortDescriptorKey];
     if(sortDescriptorData != nil)
@@ -189,33 +149,18 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
                                                  name:NSViewFrameDidChangeNotification
                                                object:[[tableView enclosingScrollView] contentView]];    
 
-    // Do custom view setup depending on whether we have a window (singleton) or just a view
+    // Do custom view setup 
     NSRect frame = [[tableView enclosingScrollView] frame];
 
-    if(standalone == YES){
-        frame.size.height += NSHeight([topBarView frame]) + 1;
-        [topBarView removeFromSuperview];
-		topBarView = nil;
-        [[tableView enclosingScrollView] setFrame:frame];
-		spinner = [statusBar progressIndicator];
-		[statusBar bind:@"stringValue" 
-			   toObject:resultsArrayController 
-			withKeyPath:@"arrangedObjects.contentArray.@count" 
-				options:[NSDictionary dictionaryWithObjectsAndKeys:@"%{value1}@ found.", NSDisplayPatternBindingOption, nil]];
-		
-		// we shouldn't be able to remove the contentView
-		searchContentView = nil;
-    } else {
-		[topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
-		[topBarView setEdgeColor:[NSColor windowFrameColor]];
-		[topBarView adjustSubviews];
-		[statusBar toggleBelowView:[tableView enclosingScrollView] offset:0.0];
-		statusBar = nil;
-		
-		// we might remove this, so keep a retained reference
-        searchContentView = [[[self window] contentView] retain];
-    }        
+    [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
+    [topBarView setEdgeColor:[NSColor windowFrameColor]];
+    [topBarView adjustSubviews];
+    [statusBar toggleBelowView:[tableView enclosingScrollView] offset:0.0];
+    statusBar = nil;
     
+    // we might remove this, so keep a retained reference
+    searchContentView = [[[self window] contentView] retain];
+
     // @@ workaround: the font from prefs seems to be overridden by the nib; maybe bindings issue?
     [tableView changeFont:nil];
 }    
@@ -238,7 +183,7 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     NSEnumerator *selEnum = [selectedObjects objectEnumerator];
     
     while(result = [selEnum nextObject])
-        [array addObject:[result valueForKey:OATextWithIconCellStringKey]];
+        [array addObject:[result valueForKey:@"title"]];
     
     return array;
 }
@@ -401,30 +346,27 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     if([NSString isEmptyString:searchString]){
         [NSObject cancelPreviousPerformRequestsWithTarget:self];
         [spinner stopAnimation:self];
-        // for use in an external window: iTunes/Mail swap out their search view when clearing the searchfield. don't clear the array, though, since we may need the array controller's selected objects
-        if(standalone == NO)
-            [self restoreDocumentState:self];
-        else
-            [self setResults:[NSArray array]];
-        return;
-    }
+        // iTunes/Mail swap out their search view when clearing the searchfield. don't clear the array, though, since we may need the array controller's selected objects
+        [self restoreDocumentState:self];
+    } else {
     
-    // empty array; this takes care of updating the table for us
-    [self setResults:[NSArray array]];
+        // empty array; this takes care of updating the table for us
+        [self setResults:[NSArray array]];
 
-    [spinner startAnimation:self];
-    
-    SKIndexRef index = [currentSearchIndex index];
+        [spinner startAnimation:self];
         
-    // flushing a null index will cause a crash, so wait until the index is created
-    if(index == NULL){
-        [self performSelector:_cmd withObject:searchString afterDelay:0.1];
-        return;
+        SKIndexRef index = [currentSearchIndex index];
+            
+        // flushing a null index will cause a crash, so wait until the index is created
+        if(index == NULL){
+            [self performSelector:_cmd withObject:searchString afterDelay:0.1];
+        } else {
+            [stopButton setEnabled:YES];
+            [self setMaxValueWithDouble:0];
+            [self setMinValueWithDouble:0];
+            [self rebuildResultsWithCurrentString:searchString];
+        }
     }
-    [(standalone ? standaloneStopButton : stopButton) setEnabled:YES];
-    [self setMaxValueWithDouble:0];
-    [self setMinValueWithDouble:0];
-    [self rebuildResultsWithCurrentString:searchString];
 }
 
 - (void)rebuildResultsWithCurrentString:(NSString *)searchString
@@ -505,7 +447,13 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
                 title = pathKey;
             OBASSERT(pathKey);
             
-            [searchResult setValue:title forKey:OATextWithIconCellStringKey];
+            NSDictionary *attrs = [[NSDictionary alloc] initWithObjectsAndKeys:[tableView font], NSFontAttributeName, nil];
+            NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithTeXString:title attributes:attrs collapseWhitespace:NO];
+            [attrs release];
+            [searchResult setValue:attributedTitle forKey:OATextWithIconCellStringKey];
+            [searchResult setValue:title forKey:@"title"];
+            [attributedTitle release];
+
             if(properties) CFRelease(properties);
             CFRelease(skDocument);
             
@@ -544,7 +492,7 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     
     if(searchCanceled || ![currentSearchIndex isIndexing]){
         [spinner stopAnimation:nil];
-        [(standalone ? standaloneStopButton : stopButton) setEnabled:NO];
+        [stopButton setEnabled:NO];
     } else if([currentSearchIndex isIndexing])
         [self performSelector:_cmd withObject:searchString afterDelay:1];
     
@@ -568,8 +516,7 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     // necessary, otherwise we end up creating a retain cycle
     if(document == currentDocument){
         [self setDocument:nil];
-		if(standalone == NO)
-			[objectController setContent:nil];
+        [objectController setContent:nil];
 	}
 }
 
@@ -602,16 +549,13 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 // We care about the document accessor and KVO because our window's title is bound to its file name
 - (void)setDocument:(NSDocument *)document
 {
-    if(standalone == NO && document != nil)
+    if(document != nil)
         NSParameterAssert([document conformsToProtocol:@protocol(BDSKSearchContentView)]);
 
     // @@ ok to retain as long as handleDocumentCloseNotification: comes first
     if (document != currentDocument) {
-        // KVO notifications raise an exception here for some reason; maybe because we don't have a window for non-standalone?
-        if(standalone) [self willChangeValueForKey:@"document"];
         [currentDocument release];
         currentDocument = [document retain];
-        if(standalone) [self didChangeValueForKey:@"document"];
     }
 }    
 
@@ -644,127 +588,5 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     else 
         return nil;
 }
-
-#pragma mark -
-#pragma mark Toolbar setup
-
-// label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
-static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
-{
-    // here we create the NSToolbarItem and setup its attributes in line with the parameters
-    NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
-    [item setLabel:label];
-    [item setPaletteLabel:paletteLabel];
-    [item setToolTip:toolTip];
-    [item setTarget:target];
-    // the settingSelector parameter can either be @selector(setView:) or @selector(setImage:).  Pass in the right
-    // one depending upon whether your NSToolbarItem will have a custom view or an image, respectively
-    // (in the itemContent parameter).  Then this next line will do the right thing automatically.
-    [item performSelector:settingSelector withObject:itemContent];
-    [item setAction:action];
-    // The menuItem to be shown in text only mode. Don't reset this when we use the default behavior. 
-	if (menuItem)
-		[item setMenuFormRepresentation:menuItem];
-    // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
-    // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
-    // it (above).
-    [theDict setObject:item forKey:identifier];
-}
-
-// called from WindowControllerDidLoadNib.
-- (void) setupToolbar {
-    // Create a new toolbar instance, and attach it to our document window
-    NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:FileContentSearchToolbarIdentifier] autorelease];
-
-    toolbarItems=[[NSMutableDictionary alloc] initWithCapacity:3];
-    
-    // Set up toolbar properties: Allow customization, give a default display mode, and remember state in user defaults
-    [toolbar setAllowsUserCustomization: YES];
-    [toolbar setAutosavesConfiguration: YES];
-    [toolbar setDisplayMode: NSToolbarDisplayModeDefault];
-
-    // We are the delegate
-    [toolbar setDelegate: self];
-    
-    addToolbarItem(toolbarItems, StopButtonToolbarItemIdentifier,
-                   NSLocalizedString(@"Stop",@""), 
-				   NSLocalizedString(@"Stop Search",@""),
-                   NSLocalizedString(@"Stop the Current Search",@""),
-                   self, @selector(setView:),
-				   standaloneStopButton, 
-				   @selector(cancelCurrentSearch:),
-                   nil);
-    
-    addToolbarItem(toolbarItems, SearchFieldToolbarItemIdentifier,
-                   NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search Using SearchKit",@""),
-                   self, @selector(setView:),
-                   searchField,
-                   @selector(search:), 
-				   nil);
-    
-    // Attach the toolbar to the document window
-    [[self window] setToolbar: toolbar];
-}
-
-
-
-- (NSToolbarItem *) toolbar: (NSToolbar *)toolbar
-      itemForItemIdentifier: (NSString *)itemIdent
-  willBeInsertedIntoToolbar:(BOOL) willBeInserted {
-
-    OAToolbarItem *newItem = [[[OAToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
-    NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
-
-    [newItem setLabel:[item label]];
-    [newItem setPaletteLabel:[item paletteLabel]];
-    if ([item view] != nil) {
-        [newItem setView:[item view]];
-		[newItem setDelegate:self];
-        // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
-        // view won't show up at all!  This doesn't affect toolbar items with images, however.
-        // Set the sizes as a regular control size
-        // The actual controlSize might be different, so we shouldn't use [self bounds].size
-        if ([itemIdent isEqualToString:SearchFieldToolbarItemIdentifier]) {
-            [newItem setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
-            [newItem setMaxSize:TOOLBAR_SEARCHFIELD_MAX_SIZE];
-        } else {
-            // this is an action button
-            [newItem setMinSize:TOOLBAR_BUTTON_SIZE];
-            [newItem setMaxSize:TOOLBAR_BUTTON_SIZE];
-        } 
-    } else {
-        [newItem setImage:[item image]];
-    }
-    [newItem setToolTip:[item toolTip]];
-    [newItem setTarget:[item target]];
-    [newItem setAction:[item action]];
-    [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
-
-    return newItem;
-}
-
-- (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
-    return [NSArray arrayWithObjects:
-        NSToolbarSpaceItemIdentifier,
-        StopButtonToolbarItemIdentifier,
-		NSToolbarFlexibleSpaceItemIdentifier,
-		SearchFieldToolbarItemIdentifier, nil];
-}
-
-
-- (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
-    return [NSArray arrayWithObjects: 
-		FileContentSearchToolbarIdentifier,
-		StopButtonToolbarItemIdentifier,
-		SearchFieldToolbarItemIdentifier,
-		NSToolbarFlexibleSpaceItemIdentifier, 
-		NSToolbarSpaceItemIdentifier, 
-		NSToolbarSeparatorItemIdentifier, 
-		NSToolbarCustomizeToolbarItemIdentifier, nil];
-}
-
-- (BOOL)validateToolbarItem:(NSToolbarItem *)theItem{ return YES; }
 
 @end

@@ -83,12 +83,9 @@
         
     IBOutlet NSObjectController *objectController;
     IBOutlet NSArrayController *resultsArrayController;
-    IBOutlet NSSearchField *searchField;
     IBOutlet NSTableView *tableView;
     IBOutlet NSProgressIndicator *spinner;
     IBOutlet NSButton *stopButton;
-    IBOutlet NSButton *standaloneStopButton;
-    NSMutableDictionary *toolbarItems;
     IBOutlet BDSKStatusBar *statusBar;
     
     volatile BOOL searchCanceled;
@@ -96,12 +93,8 @@
     NSLock *dictionaryLock;
     
     IBOutlet BDSKEdgeView *topBarView;
-    BOOL standalone;
 	NSView *searchContentView;
 }
-
-// Returns a singleton instance; useful as an inspector of multiple or single documents
-+ (BDSKFileContentSearchController *)sharedController;
 
 // Use this method to instantiate a search controller for use within a document window
 - (id)initForDocument:(id)aDocument;
@@ -113,7 +106,6 @@
 - (void)rebuildResultsWithNewSearch:(NSString *)searchString;
 - (void)rebuildResultsWithCurrentString:(NSString *)searchString;
 - (void)updateSearchIfNeeded;
-- (void)setupToolbar;
 - (void)setResults:(NSArray *)newResults;
 
 - (void)saveSortDescriptors;

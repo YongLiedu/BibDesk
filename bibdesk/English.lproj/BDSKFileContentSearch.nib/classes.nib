@@ -2,15 +2,19 @@
     IBClasses = (
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {
-            ACTIONS = {cancelCurrentSearch = id; restoreDocumentState = id; search = id; }; 
+            ACTIONS = {
+                cancelCurrentSearch = id; 
+                restoreDocumentState = id; 
+                search = id; 
+                tableAction = id; 
+            }; 
             CLASS = BDSKFileContentSearchController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                currentDocument = id; 
                 objectController = NSObjectController; 
                 resultsArrayController = NSArrayController; 
-                searchField = NSSearchField; 
                 spinner = NSProgressIndicator; 
-                standaloneStopButton = NSButton; 
                 statusBar = BDSKStatusBar; 
                 stopButton = NSButton; 
                 tableView = NSTableView; 

@@ -46,3 +46,8 @@
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
 
 @end
+
+@interface NSAttributedString (TeXComparison)
+- (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
+@end
+

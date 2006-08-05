@@ -95,20 +95,22 @@ static NSMutableParagraphStyle *BDSKTextWithIconCellParagraphStyle = nil;
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 {
-    if (!_oaFlags.drawsHighlight)
-        return nil;
-    else
-        return [super highlightColorWithFrame:cellFrame inView:controlView];
+    NSColor *color = nil;
+    if (_oaFlags.drawsHighlight)
+        color = [super highlightColorWithFrame:cellFrame inView:controlView];
+    return color;
 }
 
 - (NSColor *)textColor;
 {
+    NSColor *color = nil;
     if (_oaFlags.settingUpFieldEditor)
-        return [NSColor blackColor];
+        color = [NSColor blackColor];
     else if (!_oaFlags.drawsHighlight && _cFlags.highlighted)
-        return [NSColor textBackgroundColor];
+        color = [NSColor textBackgroundColor];
     else
-        return [super textColor];
+        color = [super textColor];
+    return color;
 }
 
 #define BORDER_BETWEEN_EDGE_AND_IMAGE (2.0)
@@ -177,6 +179,9 @@ textRect.origin.y += vOffset; \
         // add the alternate text color attribute.
         [label addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:labelRange];
     }
+    
+    // when using an attributed string from setObjectValue:, -textColor isn't called, even though we need it for the highlight drawing; maybe this should be changed in -attributedStringValue?
+    [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
     
     [label addAttribute:NSParagraphStyleAttributeName value:BDSKTextWithIconCellParagraphStyle range:labelRange];
     [label drawInRect:textRect];

@@ -123,3 +123,12 @@
 }
 
 @end
+
+@implementation NSAttributedString (TeXComparison)
+- (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSAttributedString *)other;
+{
+    return [[self string] localizedCaseInsensitiveNonTeXNonArticleCompare:[other string]];
+}
+
+@end
+
