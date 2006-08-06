@@ -231,19 +231,21 @@ static CFDictionaryRef selectorTable = NULL;
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         if(self = [super init]){
+            // we need to set the pubFields first because makeType might have to change it
+            pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
             [self setFileType:[coder decodeObjectForKey:@"fileType"]];
             [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
             [self setDate:[coder decodeObjectForKey:@"pubDate"]];
             [self setDateAdded:[coder decodeObjectForKey:@"dateAdded"]];
             [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
-            pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             // set by the document, which we don't archive
             document = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
         }
     } else {       
+        [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
     }
 	return self;
