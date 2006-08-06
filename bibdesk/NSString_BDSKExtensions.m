@@ -205,13 +205,17 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 - (NSString *)stringByRemovingTeX{
-    static AGRegex *command = nil;    
-    if(command == nil)
-        command = [[AGRegex alloc] initWithPattern:@"\\\\[a-z].+\\{" options:AGRegexLazy];
-    
-    NSString *string = [command replaceWithString:@"" inString:self];
-    return [string stringByRemovingCharactersInOFCharacterSet:[OFCharacterSet curlyBraceCharacterSet]];
-    
+    NSMutableString *mutableString = [[self mutableCopy] autorelease];
+    NSRange searchRange = NSMakeRange(0, [self length]);
+    NSRange foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
+    while(foundRange.length){
+        [mutableString replaceCharactersInRange:foundRange withString:@""];
+        searchRange.location = foundRange.location;
+        searchRange.length -= foundRange.length;
+        foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
+    }
+    [mutableString deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
+    return mutableString;
 }
 
 #pragma mark TeX parsing
