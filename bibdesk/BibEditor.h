@@ -89,12 +89,14 @@
 	IBOutlet BDSKImagePopUpButton *viewLocalButton;
     IBOutlet BDSKImagePopUpButton *viewRemoteButton;
     IBOutlet BDSKImagePopUpButton *documentSnoopButton;
+	IBOutlet BDSKImagePopUpButton *actionMenuButton;
 	NSToolbarItem *viewLocalToolbarItem;
 	NSToolbarItem *viewRemoteToolbarItem;
 	NSToolbarItem *documentSnoopToolbarItem;
 	NSToolbarItem *authorsToolbarItem;
     IBOutlet NSScrollView *fieldsScrollView;
-	IBOutlet BDSKImagePopUpButton *actionMenuButton;
+	IBOutlet BDSKImagePopUpButton *actionButton;
+    IBOutlet NSMenu *actionMenu;
     // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;

@@ -54,6 +54,8 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 abstractView = NSTextView; 
+                actionButton = BDSKImagePopUpButton; 
+                actionMenu = NSMenu; 
                 actionMenuButton = BDSKImagePopUpButton; 
                 authorScrollView = NSScrollView; 
                 authorTableView = NSTableView; 

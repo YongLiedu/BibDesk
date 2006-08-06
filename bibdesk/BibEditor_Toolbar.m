@@ -45,6 +45,7 @@ NSString *BibEditorToolbarIdentifier = @"BibEditorToolbarIdentifier";
 NSString *BibEditorToolbarViewLocalItemIdentifier = @"BibEditorToolbarViewLocalItemIdentifier";
 NSString *BibEditorToolbarViewRemoteItemIdentifier = @"BibEditorToolbarViewRemoteItemIdentifier";
 NSString *BibEditorToolbarSnoopDrawerItemIdentifier = @"BibEditorToolbarSnoopDrawerItemIdentifier";
+NSString *BibEditorToolbarActionItemIdentifier = @"BibEditorToolbarActionItemIdentifier";
 NSString *BibEditorToolbarAuthorTableItemIdentifier = @"BibEditorToolbarAuthorTableItemIdentifier";
 NSString *BibEditorToolbarDeleteItemIdentifier = @"BibEditorToolbarDeleteItemIdentifier";
 NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddWithCrossrefItemIdentifier";
@@ -128,6 +129,24 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     [item setMenuFormRepresentation:menuItem];
     [toolbarItems setObject:item forKey:BibEditorToolbarSnoopDrawerItemIdentifier];
     [item release];
+	
+	// Action
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Action",@"") 
+                                                                     action:NULL 
+                                                              keyEquivalent:@""] autorelease];
+	[menuItem setSubmenu:actionMenu];
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarActionItemIdentifier];
+    [item setDelegate:self];
+    [item setLabel:NSLocalizedString(@"Action",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Action",@"")];
+    [item setToolTip:NSLocalizedString(@"Action for publication",@"")];
+    [item setTarget:self];
+    [item setView:actionMenuButton];
+    [item setMinSize:[actionMenuButton bounds].size];
+    [item setMaxSize:[actionMenuButton bounds].size];
+    [item setMenuFormRepresentation:menuItem];
+    [toolbarItems setObject:item forKey:BibEditorToolbarActionItemIdentifier];
+    [item release];
     
     // Authors
 	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Authors",@"") 
@@ -209,6 +228,7 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
 		BibEditorToolbarViewLocalItemIdentifier,
 		BibEditorToolbarViewRemoteItemIdentifier,
 		BibEditorToolbarSnoopDrawerItemIdentifier,
+        BibEditorToolbarActionItemIdentifier,
 		BibEditorToolbarAuthorTableItemIdentifier,
 		BibEditorToolbarDeleteItemIdentifier,
 		BibEditorToolbarAddWithCrossrefItemIdentifier,

@@ -221,6 +221,7 @@ static int numberOfOpenEditors = 0;
 		[self toggleStatusBar:nil];
 	}
 	[statusBar setDelegate:self];
+    [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
 	BDSKEdgeView *edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
@@ -1255,7 +1256,8 @@ static int numberOfOpenEditors = 0;
     NSArray *currentFields = [theBib allFieldNames];
     newField = [newField capitalizedString];
     if([currentFields containsObject:newField] == NO){
-		[theBib addField:newField];
+		[tabView selectFirstTabViewItem:nil];
+        [theBib addField:newField];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
 		[self setupForm];
 		[self makeKeyField:newField];
@@ -1299,6 +1301,7 @@ static int numberOfOpenEditors = 0;
     if(returnCode == NSCancelButton || oldField == nil || [removableFields count] == 0)
         return;
 	
+    [tabView selectFirstTabViewItem:nil];
     [theBib removeField:oldField];
     [[[self window] undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
     [self setupForm];
@@ -2980,13 +2983,20 @@ static int numberOfOpenEditors = 0;
 	[documentSnoopButton selectItemAtIndex:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey]];
     
     // Set the properties of actionMenuButton that cannot be set in IB
-	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
-	[actionMenuButton setArrowImage:nil];
+	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:NO];
+    
+	[actionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
+	[actionButton setArrowImage:nil];
+	[actionButton setShowsMenuWhenIconClicked:YES];
+	[[actionButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[actionButton cell] setUsesItemFromMenu:NO];
+	[[actionButton cell] setRefreshesMenu:NO];
 	
 }    
 
