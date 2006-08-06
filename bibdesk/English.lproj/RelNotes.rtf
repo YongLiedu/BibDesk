@@ -29,6 +29,7 @@ New Features\
   \'a5  Text import now has optional action/context menu option to paste and convert to plain text (RFE #1490863)\
   \'a5  Added menu option to show the intersection of selected groups instead of the union (default behavior)\
   \'a5  Added Mail-like interface for date ranges in smart groups (bug #1518519)\
+  \'a5  Added format specifier for boolean and tri-state fields\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 \
@@ -52,7 +53,7 @@ Bugs Fixed\
   \'a5  Fixed memory leak in template exporting, and a leak in the Finder comment code\
   \'a5  Fixed an exception that could raise when dropping a file on an empty table\
   \'a5  Converted BibItem to use read-write locks instead of a mutex\
-  \'a5  Improved sorting efficiency by ~10x\
+  \'a5  Improved sorting speed by ~8x\
   \'a5  Some type defininitions were not conformant with btxdoc (bug #1517088)\
   \'a5  The "Type" field is now handled correctly, and no longer confused with BibTeX type (bug #1517094)\
   \'a5  Fixed spelling of Services items (bug #1518836)\
@@ -87,6 +88,16 @@ Bugs Fixed\
   \'a5  Name display prefs now affect table as well as attributed preview\
   \'a5  Saving with normalized names will now convert Editor as well as Author names\
   \'a5  Editors are now sorted correctly in the main table\
+  \'a5  Text-only toolbar menus should work correctly in Tiger\
+  \'a5  Editor button menus are now created lazily, so opening editor windows is faster\
+  \'a5  Editor completion will no longer activate when textShouldBeginEditing: returns NO\
+  \'a5  Global file macros are now added to the editor's autocomplete list\
+  \'a5  Removed locking from BibItem, as they are no longer shared between threads; reworked threading code to be safer and generally more efficient\
+  \'a5  File content search table now shows attributed titles (TeX font commands are parsed, and braces are removed)\
+  \'a5  Fixed exception in abbreviated normalized name parsing\
+  \'a5  Closing a large document should be significantly faster\
+  \'a5  Saving a large document should be significantly faster\
+  \'a5  Added a few more standard RIS tags (partially fixed bug #1535227)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
