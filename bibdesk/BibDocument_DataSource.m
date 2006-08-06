@@ -942,10 +942,10 @@
         } else if([type isEqualToString:BDSKBibItemPboardType]){
             return NSDragOperationCopy; // @@ can't drag row indexes from another document; should use NSArchiver instead
         }else{
-            NSDragOperationEvery;
+            return NSDragOperationEvery;
         }
     }
-    return NO;
+    return NSDragOperationNone;
 }
 
 // This method is called when the mouse is released over a table view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
