@@ -168,7 +168,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarActionItemIdentifier];
     [item setDelegate:self];
     [item setLabel:NSLocalizedString(@"Action",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Action Publication",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Publication Action",@"")];
     [item setToolTip:NSLocalizedString(@"Action for selected publications",@"")];
     [item setTarget:self];
     [item setView:actionMenuButton];
