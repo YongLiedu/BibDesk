@@ -79,6 +79,7 @@ NSString *BDSKEditorFormShouldAutoCompleteKey = @"BDSKEditorFormShouldAutoComple
 NSString *BDSKReadExtendedAttributesKey = @"BDSKReadExtendedAttributesKey";
 NSString *BDSKShouldUsePDFMetadata = @"BDSKShouldUsePDFMetadata";
 NSString *BDSKShouldWritePDFMetadata = @"BDSKShouldWritePDFMetadata";
+NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
 
 NSString *BDSKDefaultStringEncodingKey = @"Default string encoding for opening and saving";
 NSString *BDSKShouldTeXifyWhenSavingAndCopyingKey = @"TeXify characters when saving or copying BibTeX";

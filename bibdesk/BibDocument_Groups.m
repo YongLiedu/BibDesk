@@ -595,6 +595,7 @@ The groupedPublications array is a subset of the publications array, developed b
         NSEnumerator *groupEnum;
         BDSKGroup *group;
         NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[array count]];
+        BOOL intersectGroups = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey];
         
         // to take union, we add the items contained in a selected group
         // to intersect, we remove the items not contained in a selected group
@@ -1051,8 +1052,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)changeIntersectGroupsAction:(id)sender {
     BOOL flag = (BOOL)[sender tag];
-    if (intersectGroups != flag) {
-        intersectGroups = flag;
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey] != flag) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:flag forKey:BDSKIntersectGroupsKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupTableSelectionChangedNotification object:self];
     }
 }

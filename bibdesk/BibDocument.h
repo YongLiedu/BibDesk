@@ -192,7 +192,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	NSString *currentGroupField;
     IBOutlet BDSKSplitView *groupSplitView;
 	float lastGroupViewWidth;
-    BOOL intersectGroups;
     
     IBOutlet BDSKImagePopUpButton *groupActionButton;
     IBOutlet NSButton *groupAddButton;

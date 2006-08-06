@@ -777,7 +777,7 @@
 }
 
 - (BOOL)validateChangeIntersectGroupsMenuItem:(NSMenuItem *)menuItem {
-    [menuItem setState: ((BOOL)[menuItem tag] == intersectGroups) ? NSOnState : NSOffState];
+    [menuItem setState: ((BOOL)[menuItem tag] == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKIntersectGroupsKey]) ? NSOnState : NSOffState];
     return YES;
 }
 

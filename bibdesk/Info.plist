@@ -618,6 +618,8 @@
 						<string>Keywords</string>
 						<string>Group</string>
 					</array>
+					<key>BDSKIntersectGroupsKey</key>
+					<false/>
 					<key>BDSKWarnOnDelete</key>
 					<true/>
 					<key>BDSKWarnOnRemovalFromGroupKey</key>
