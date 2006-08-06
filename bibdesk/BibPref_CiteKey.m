@@ -50,7 +50,7 @@
 
 // these should correspond to the items in the popups set in IB
 static NSString *presetFormatStrings[] = {@"%a1:%Y%u2", @"%a1:%Y%u0", @"%a33%y%m", @"%a1%Y%t15"};
-static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%c{}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0"};
+static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%s{}[][][]0", @"%c{}", @"%u0", @"%U0", @"%n0", @"%0"};
 
 - (void)dealloc{
     [coloringEditor release];
@@ -164,7 +164,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		selRange.location -= 1;
 		selRange.length = 1;
 	}
-	else if ([newSpecifier isEqualToString:@"%f{}0"] || [newSpecifier isEqualToString:@"%c{}"]) {
+	else if ([newSpecifier isEqualToString:@"%f{}0"] || [newSpecifier isEqualToString:@"%s{}[][][]0"] || [newSpecifier isEqualToString:@"%c{}"]) {
         selRange.location += 1;
 		selRange.length = 0;
 	}
