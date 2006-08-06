@@ -449,7 +449,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (void)setFileType:(NSString *)someFileType {
     if(someFileType != fileType){
         [fileType release];
-        fileType = someFileType;
+        fileType = [someFileType retain];
     }
 }
 
