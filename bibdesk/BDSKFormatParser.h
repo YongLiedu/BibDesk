@@ -69,6 +69,8 @@
 */
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub;
 
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion;
+
 /*!
     @method uniqueString:suffix:forField:ofItem:numberOfChars:from:to:force:
     @abstract Tries to return a unique string value for a field in a type, by adding characters from a range

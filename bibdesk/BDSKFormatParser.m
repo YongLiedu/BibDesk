@@ -49,8 +49,23 @@
 
 + (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
 {
-	NSMutableString *parsedStr = [NSMutableString string];
-	NSString *savedStr = nil;
+    return [self parseFormat:format forField:fieldName ofItem:pub suggestion:nil];
+}
+
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub suggestion:(NSString *)suggestion
+{
+	static NSCharacterSet *nonLowercaseLetterCharSet = nil;
+	static NSCharacterSet *nonUppercaseLetterCharSet = nil;
+	static NSCharacterSet *nonDecimalDigitCharSet = nil;
+	
+    if (nonLowercaseLetterCharSet == nil) {
+        nonLowercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('a',26)] invertedSet] copy];
+        nonUppercaseLetterCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('A',26)] invertedSet] copy];
+        nonDecimalDigitCharSet = [[[NSCharacterSet characterSetWithRange:NSMakeRange('0',10)] invertedSet] copy];
+    }
+    
+    NSMutableString *parsedStr = [NSMutableString string];
+	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
 	NSString *string, *authSep, *nameSep, *etal, *slash;
 	int number, numAuth, i, uniqueNumber;
@@ -506,7 +521,7 @@
 					// unique characters, these may only occur once
 					if (uniqueSpecifier == 0) {
 						uniqueSpecifier = specifier;
-						savedStr = parsedStr;
+						prefixStr = parsedStr;
 						parsedStr = [NSMutableString string];
 						if (![scanner scanInt:&uniqueNumber]) uniqueNumber = 1;
 					}
@@ -521,37 +536,60 @@
 	}
 	
 	if (uniqueSpecifier != 0) {
+        NSString *suggestedUnique = nil;
+        unsigned suggestionLength = [prefixStr length];
+        unsigned prefixLength = [prefixStr length];
+        unsigned suffixLength = [parsedStr length];
+        if (suggestion && suggestionLength >= prefixLength + suffixLength + uniqueNumber &&
+            (prefixLength == 0 || [suggestion hasPrefix:prefixStr]) && (suffixLength == 0 || [suggestion hasSuffix:parsedStr])) {
+            suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength - prefixLength - suffixLength)];
+        }
 		switch (uniqueSpecifier) {
 			case 'u':
 				// unique lowercase letters
-				[parsedStr setString:[self uniqueString:savedStr 
-												 suffix:parsedStr
-											   forField:fieldName
-												 ofItem:pub
-										  numberOfChars:uniqueNumber 
-												   from:'a' to:'z' 
-												  force:(uniqueNumber == 0)]];
+                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonLowercaseLetterCharSet].location == NSNotFound &&
+                    (uniqueNumber == 0 || [suggestedUnique length] == uniqueNumber)) {
+                    [parsedStr setString:suggestion];
+                } else {
+                    [parsedStr setString:[self uniqueString:prefixStr 
+                                                     suffix:parsedStr
+                                                   forField:fieldName
+                                                     ofItem:pub
+                                              numberOfChars:uniqueNumber 
+                                                       from:'a' to:'z' 
+                                                      force:(uniqueNumber == 0)]];
+                }
 				break;
 			case 'U':
 				// unique uppercase letters
-				[parsedStr setString:[self uniqueString:savedStr 
-												 suffix:parsedStr
-											   forField:fieldName
-												 ofItem:pub
-										  numberOfChars:uniqueNumber 
-												   from:'A' to:'Z' 
-												  force:(uniqueNumber == 0)]];
-				break;
+                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUppercaseLetterCharSet].location == NSNotFound && 
+                    (uniqueNumber == 0 || [suggestedUnique length] == uniqueNumber)) {
+                    [parsedStr setString:suggestion];
+                } else {
+                    [parsedStr setString:[self uniqueString:prefixStr 
+                                                     suffix:parsedStr
+                                                   forField:fieldName
+                                                     ofItem:pub
+                                              numberOfChars:uniqueNumber 
+                                                       from:'A' to:'Z' 
+                                                      force:(uniqueNumber == 0)]];
+				}
+                break;
 			case 'n':
 				// unique number
-				[parsedStr setString:[self uniqueString:savedStr 
-												 suffix:parsedStr
-											   forField:fieldName
-												 ofItem:pub
-										  numberOfChars:uniqueNumber 
-												   from:'0' to:'9' 
-												  force:(uniqueNumber == 0)]];
-				break;
+                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonDecimalDigitCharSet].location == NSNotFound && 
+                    (uniqueNumber == 0 || [suggestedUnique length] == uniqueNumber)) {
+                    [parsedStr setString:suggestion];
+                } else {
+                    [parsedStr setString:[self uniqueString:prefixStr 
+                                                     suffix:parsedStr
+                                                   forField:fieldName
+                                                     ofItem:pub
+                                              numberOfChars:uniqueNumber 
+                                                       from:'0' to:'9' 
+                                                      force:(uniqueNumber == 0)]];
+				}
+                break;
 		}
 	}
 	

@@ -895,7 +895,6 @@ static CFDictionaryRef selectorTable = NULL;
     else
         [[NSFileManager defaultManager] removeSpotlightCacheForItemNamed:oldCiteKey];
     
-    [oldCiteKey release];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -918,7 +917,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSString *)suggestedCiteKey
 {
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-	NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self];
+	NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self suggestion:[self citeKey]];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
 		ck = [ck lowercaseString];
 	}
@@ -2177,7 +2176,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (NSString *)suggestedLocalUrl{
 	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
-	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
+    
+    NSString *oldPath = [self localUrlPathInheriting:NO];
+    if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
+        oldPath = [oldPath substringFromIndex:[papersFolderPath length] + 1];
+    else
+        oldPath = nil;
+      
+	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self suggestion:oldPath];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey]) {
 		relativeFile = [relativeFile lowercaseString];
 	}
