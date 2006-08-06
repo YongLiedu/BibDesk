@@ -1684,7 +1684,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		[self openLinkedFileForField:colID];
     }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
 		[self openRemoteURLForField:colID];
-    }else{
+    }else if([self hasSharedGroupsSelected] == NO){
 		int n = [self numberOfSelectedPubs];
 		if (n > 6) {
             // Do we really want a gazillion of editor windows?
@@ -1700,7 +1700,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		} else {
             [self editPubAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
         }
-	}
+	} else {
+        // currently don't allow editing shared pubs; [self selectedPublications] only returns objects from shownPublications
+        NSBeginAlertSheet(NSLocalizedString(@"Can't Edit Shared Publications", @""), nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, NSLocalizedString(@"You need to drag or copy shared publications to your own document before attempting to edit them", @""));
+    }
 }
 
 //@@ notifications - when adding pub notifications is fully implemented we won't need this.
