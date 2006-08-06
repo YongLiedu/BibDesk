@@ -106,11 +106,15 @@
 		<key>AB</key>
 		<string>Abstract</string>
 		<key>AD</key>
-		<string>Affiliation</string>
+		<string>Address</string>
 		<key>BT</key>
 		<string>Title</string>
+		<key>CP</key>
+		<string>Address</string>
 		<key>CT</key>
 		<string>Title</string>
+		<key>CY</key>
+		<string>Address</string>
 		<key>DP</key>
 		<string>Year</string>
 		<key>ED</key>
@@ -133,12 +137,16 @@
 		<string>Annote</string>
 		<key>N2</key>
 		<string>Abstract</string>
+		<key>PB</key>
+		<string>Publisher</string>
 		<key>PG</key>
 		<string>Pages</string>
 		<key>PY</key>
 		<string>Year</string>
 		<key>RP</key>
 		<string>Status</string>
+		<key>SN</key>
+		<string>Isbn</string>
 		<key>T1</key>
 		<string>Title</string>
 		<key>T2</key>
