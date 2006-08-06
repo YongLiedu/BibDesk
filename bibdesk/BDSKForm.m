@@ -250,7 +250,6 @@
 #pragma mark NSDraggingDestination protocol 
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender{
-    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	NSPoint mouseLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
 	int row, column;
 	id cell;
@@ -277,7 +276,6 @@
     if([[self window] respondsToSelector:_cmd])
         [[self window] draggingUpdated:sender];
     
-	NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	NSPoint mouseLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
 	int row, column;
 	id cell;

@@ -260,8 +260,6 @@
 #pragma mark Dragging destination
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
-    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
-	
     if (delegate &&
         [delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
         [delegate respondsToSelector:@selector(imagePopUpButton:canReceiveDrag:)] && 
