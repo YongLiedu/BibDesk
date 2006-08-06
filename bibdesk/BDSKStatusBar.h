@@ -52,6 +52,7 @@ typedef enum {
 	NSProgressIndicator *progressIndicator;
 	NSMutableArray *icons;
 	id delegate;
+    float textOffset;
 }
 
 + (NSColor *)lowerColor;
@@ -94,6 +95,9 @@ typedef enum {
 
 - (id)textCell;
 - (void)setTextCell:(NSCell *)aCell;
+
+- (float)textOffset;
+- (void)setTextOffset:(float)offset;
 
 - (NSProgressIndicator *)progressIndicator;
 

@@ -74,6 +74,8 @@
 		icons = [[NSMutableArray alloc] initWithCapacity:2];
 		
 		delegate = nil;
+        
+        textOffset = 0.0;
 		
     }
     return self;
@@ -104,7 +106,7 @@
     
     if (progressIndicator)
         rightMargin += NSWidth([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
-    NSDivideRect([self bounds], &ignored, &textRect, LEFT_MARGIN, NSMinXEdge);
+    NSDivideRect([self bounds], &ignored, &textRect, LEFT_MARGIN + textOffset, NSMinXEdge);
     NSDivideRect(textRect, &ignored, &textRect, rightMargin, NSMaxXEdge);
 	
 	NSEnumerator *dictEnum = [icons objectEnumerator];
@@ -252,6 +254,17 @@
 		[textCell release];
 		textCell = [aCell retain];
 	}
+}
+
+- (float)textOffset {
+    return textOffset;
+}
+
+- (void)setTextOffset:(float)offset {
+    if (textOffset != offset) {
+        textOffset = offset;
+        [self setNeedsDisplay:YES];
+    }
 }
 
 #pragma mark Icons
