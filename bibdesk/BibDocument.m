@@ -783,7 +783,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 
     // rebuild metadata cache for this document whenever we save
-    if([self fileName]){
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 && [self fileName]){
         NSEnumerator *pubsE = [[self publications] objectEnumerator];
         NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
         BibItem *anItem;
