@@ -129,12 +129,13 @@
 - (NSString *)suggestedLocalUrl {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localUrlFormat = [pw objectForKey:BDSKLocalUrlFormatKey];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:nil];
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([pw boolForKey:BDSKLocalUrlLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
 	if ([pw boolForKey:BDSKAutoFileUsesRelativePathKey])
         return relativeFile;
-    return [[NSHomeDirectory() stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
+    return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
 }
 
 - (NSString *)suggestedCiteKey {
