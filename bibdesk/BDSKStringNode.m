@@ -97,6 +97,7 @@
             value = [[coder decodeObjectForKey:@"value"] retain];
         }
     } else {       
+        [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
     }
 	return self;

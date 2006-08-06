@@ -139,6 +139,7 @@ static BibAuthor *emptyAuthorInstance = nil;
         [self splitName:[coder decodeObjectForKey:@"name"]]; // this should take care of the rest of the ivars, right?
         publication = [coder decodeObjectForKey:@"publication"];
     } else {
+        [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
     }
     return self;

@@ -210,7 +210,8 @@ Rather than relying on the same call sequence to be used, I think we should igno
             } else
                 macroResolver = nil;
         }
-    } else {       
+    } else {
+        [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
     }
     return self;
