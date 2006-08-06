@@ -784,9 +784,18 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     // rebuild metadata cache for this document whenever we save
     if([self fileName]){
-        NSArray *pubsInfo = [[self publications] arrayByPerformingSelector:@selector(metadataCacheInfo)];
+        NSEnumerator *pubsE = [[self publications] objectEnumerator];
+        NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
+        BibItem *anItem;
+        while(anItem = [pubsE nextObject]){
+            OMNI_POOL_START {
+                [pubsInfo addObject:[anItem metadataCacheInfo]];
+            } OMNI_POOL_END;
+        }
+        
         // don't pass the fileName parameter, since it's likely a temp file somewhere due to the atomic save operation
         NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", [self fileName], @"fileName", nil];
+        [pubsInfo release];
         [[NSApp delegate] rebuildMetadataCache:infoDict];
         [infoDict release];
     }
@@ -1124,7 +1133,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop{
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
-    NSMutableData *d = [NSMutableData data];
+    NSMutableData *d = [NSMutableData dataWithCapacity:4096];
     
     if(encoding == 0)
         [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
@@ -1153,10 +1162,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
     
+    NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding allowLossyConversion:YES];
+    
     // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
     if(shouldAppendFrontMatter){
         [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
-        [d appendData:[@"\n\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
+        [d appendData:doubleNewlineData];
     }
         
     if([documentInfo count]){
@@ -1171,10 +1182,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
 	while(pub = [e nextObject]){
-        [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
-        [d appendData:[[pub bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
+        [d appendData:doubleNewlineData];
+        OMNI_POOL_START {
+            [d appendData:[[pub bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
+        } OMNI_POOL_END;
     }
-	
+    
 	if([staticGroups count] > 0){
         [d appendData:[@"\n\n@comment{BibDesk Static Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
 		[d appendData:[self serializedStaticGroupsData]];
