@@ -938,7 +938,10 @@
         // here we actually target a specific row
         [tv setDropRow:row dropOperation:NSTableViewDropOn];
         if([info draggingSource] == tableView){
-            return NSDragOperationLink;
+            if([type isEqualToString:BDSKBibItemPboardType])
+                return NSDragOperationLink;
+            else
+                return NSDragOperationNone;
         } else if([type isEqualToString:BDSKBibItemPboardType]){
             return NSDragOperationCopy; // @@ can't drag row indexes from another document; should use NSArchiver instead
         }else{
