@@ -259,13 +259,12 @@
 	
 	[self getRow:&row column:&column forPoint:mouseLoc];
 	cell = [self cellAtRow:row column:0];
-	if (cell && (sourceDragMask & NSDragOperationCopy) &&
-		[[self delegate] canReceiveDrag:sender forFormCell:cell]) {
+	if (cell && [[self delegate] canReceiveDrag:sender forFormCell:cell]) {
 		
 		dragRow = row;
 		highlight = YES;
 		[self setNeedsDisplay:YES];
-		return NSDragOperationCopy;
+		return NSDragOperationEvery;
 	} else {
 		highlight = NO;
 		dragRow = -1;
@@ -287,8 +286,7 @@
 	
 	[self getRow:&row column:&column forPoint:mouseLoc];
 	cell = [self cellAtRow:row column:0];
-	if (cell && (sourceDragMask & NSDragOperationCopy) &&
-		[[self delegate] canReceiveDrag:sender forFormCell:cell]) {
+	if (cell && [[self delegate] canReceiveDrag:sender forFormCell:cell]) {
 		
 		if (row != dragRow) {
 			[self setKeyboardFocusRingNeedsDisplayInRect:[self cellFrameAtRow:row column:0]];
@@ -297,7 +295,7 @@
 		}
 		dragRow = row;
 		highlight = YES;
-		return NSDragOperationCopy;
+		return NSDragOperationEvery;
 	} else {
 		if (highlight)
 			[self setKeyboardFocusRingNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
@@ -334,7 +332,7 @@
 #pragma mark NSDraggingSource protocol
 
 - (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-    return NSDragOperationCopy;
+    return (isLocal) ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 - (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination{

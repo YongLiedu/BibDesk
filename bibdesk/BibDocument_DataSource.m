@@ -919,13 +919,10 @@
                  [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
         }
-        if([info draggingSource]) {
-			// drag from another window
-            return NSDragOperationCopy;    
-        } else {
-            // drag is from a different application
-            return NSDragOperationEvery; // if it's not from me, copying is OK
-        }
+        if ([type isEqualToString:BDSKBibItemPboardType])   
+            return NSDragOperationCopy;
+        else
+            return NSDragOperationEvery;
     }else if(tv == groupTableView){
 		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups) {
             if (row != 0)
@@ -942,7 +939,11 @@
         [tv setDropRow:row dropOperation:NSTableViewDropOn];
         if([info draggingSource] == tableView){
             return NSDragOperationLink;
-        } else return NSDragOperationCopy; // @@ can't drag row indexes from another document; should use NSArchiver instead
+        } else if([type isEqualToString:BDSKBibItemPboardType]){
+            return NSDragOperationCopy; // @@ can't drag row indexes from another document; should use NSArchiver instead
+        }else{
+            NSDragOperationEvery;
+        }
     }
     return NO;
 }

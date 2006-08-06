@@ -214,7 +214,7 @@
 #pragma mark Dragging source
 
 - (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    return NSDragOperationCopy;
+    return (isLocal) ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 - (BOOL)startDraggingWithEvent:(NSEvent *)theEvent {
@@ -263,14 +263,13 @@
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	
     if (delegate &&
-	 	(sourceDragMask & NSDragOperationCopy) && 
         [delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
         [delegate respondsToSelector:@selector(imagePopUpButton:canReceiveDrag:)] && 
         [delegate imagePopUpButton:self canReceiveDrag:sender]) {
 		
 		highlight = YES;
         [self setNeedsDisplay:YES];
-		return NSDragOperationCopy;
+		return NSDragOperationEvery;
     }
     return NSDragOperationNone;
 }
