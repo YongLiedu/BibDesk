@@ -1281,7 +1281,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSDictionary *)searchIndexInfo{
-    NSSet *urlFields = [[BibTypeManager sharedManager] localURLFieldsSet];
+    NSSet *urlFields = [[BibTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *fieldEnumerator = [urlFields objectEnumerator];
     NSString *urlFieldName = nil;
     
@@ -2054,7 +2054,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSURL *url = [self URLForField:field];
     
-    if([[BibTypeManager sharedManager] isLocalURLField:field] && (url = [url fileURLByResolvingAliases]) == nil)
+    if([[BibTypeManager sharedManager] isLocalFileField:field] && (url = [url fileURLByResolvingAliases]) == nil)
         return [NSImage missingFileImage];
     
     return [NSImage imageForURL:url];
@@ -2067,14 +2067,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
     NSURL *url = [self URLForField:field];
     
-    if([[BibTypeManager sharedManager] isLocalURLField:field] && (url = [url fileURLByResolvingAliases]) == nil)
+    if([[BibTypeManager sharedManager] isLocalFileField:field] && (url = [url fileURLByResolvingAliases]) == nil)
         return [NSImage smallMissingFileImage];
     
     return [NSImage smallImageForURL:url];
 }
 
 - (NSURL *)URLForField:(NSString *)field{
-    if([[BibTypeManager sharedManager] isLocalURLField:field]){
+    if([[BibTypeManager sharedManager] isLocalFileField:field]){
         return [self localFileURLForField:field];
     } else if([[BibTypeManager sharedManager] isRemoteURLField:field])
         return [self remoteURLForField:field];
@@ -2670,7 +2670,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (void)addPDFMetadataToFileForLocalURLField:(NSString *)field;
 {
-    NSParameterAssert([[BibTypeManager sharedManager] isLocalURLField:field]);
+    NSParameterAssert([[BibTypeManager sharedManager] isLocalFileField:field]);
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata] && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         NSError *error = nil;

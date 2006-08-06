@@ -1599,7 +1599,7 @@ static int numberOfOpenEditors = 0;
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     NSString *oldValue = [[[theBib valueOfField:fieldName] copy] autorelease];
-    BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalURLField:fieldName];
+    BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalFileField:fieldName];
     NSURL *oldURL = (isLocalFile) ? [[theBib URLForField:fieldName] fileURLByResolvingAliases] : nil;
     
     [theBib setField:fieldName toValue:value];
@@ -2106,7 +2106,7 @@ static int numberOfOpenEditors = 0;
 	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
 	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
 	
-	if ([[BibTypeManager sharedManager] isLocalURLField:field]) {
+	if ([[BibTypeManager sharedManager] isLocalFileField:field]) {
 		if ([dragType isEqualToString:NSFilenamesPboardType]) {
 			return YES;
 		} else if ([dragType isEqualToString:NSURLPboardType]) {
@@ -2141,7 +2141,7 @@ static int numberOfOpenEditors = 0;
 	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
 	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     
-	if ([[BibTypeManager sharedManager] isLocalURLField:field]) {
+	if ([[BibTypeManager sharedManager] isLocalFileField:field]) {
 		// a file, we link the local file field
 		NSURL *fileURL = nil;
 		

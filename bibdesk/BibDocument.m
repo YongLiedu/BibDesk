@@ -1680,7 +1680,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([tableView clickedColumn] != -1){
 		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
     }
-    if([[BibTypeManager sharedManager] isLocalURLField:colID]){
+    if([[BibTypeManager sharedManager] isLocalFileField:colID]){
 		[self openLinkedFileForField:colID];
     }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
 		[self openRemoteURLForField:colID];
@@ -2836,7 +2836,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         NSURL *theURL;
         NSDictionary *representedObject;
         
-		if([[BibTypeManager sharedManager] isLocalURLField:tcId]){
+		if([[BibTypeManager sharedManager] isLocalFileField:tcId]){
 			myMenu = [[fileMenu copyWithZone:[NSMenu menuZone]] autorelease];
 			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
 			[[myMenu itemAtIndex:1] setRepresentedObject:tcId];

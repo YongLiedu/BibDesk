@@ -102,7 +102,7 @@ static BibTypeManager *sharedInstance = nil;
 	
 	strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
     
-    localURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
+    localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
     remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
     allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
     [self reloadURLFields];
@@ -146,7 +146,7 @@ static BibTypeManager *sharedInstance = nil;
 	[strictInvalidRemoteUrlCharSet release];
 	[invalidGeneralCharSet release];
 	[strictInvalidGeneralCharSet release];
-    [localURLFieldsSet release];
+    [localFileFieldsSet release];
     [remoteURLFieldsSet release];
     [allURLFieldsSet release];
     [ratingFieldsSet release];
@@ -221,14 +221,14 @@ static BibTypeManager *sharedInstance = nil;
 
 - (void)reloadURLFields {
     @synchronized(self){
-        [localURLFieldsSet removeAllObjects];
+        [localFileFieldsSet removeAllObjects];
         [remoteURLFieldsSet removeAllObjects];
         [allURLFieldsSet removeAllObjects];
         
-        [localURLFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey]];
+        [localFileFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey]];
         [remoteURLFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey]];
         [allURLFieldsSet unionSet:remoteURLFieldsSet];
-        [allURLFieldsSet unionSet:localURLFieldsSet];
+        [allURLFieldsSet unionSet:localFileFieldsSet];
     }
 }
 
@@ -483,10 +483,10 @@ static BibTypeManager *sharedInstance = nil;
     return [remoteURLFieldsSet containsObject:field];
 }
 
-- (BOOL)isLocalURLField:(NSString *)field{
+- (BOOL)isLocalFileField:(NSString *)field{
     BOOL rv;
     @synchronized(self){
-        rv = [localURLFieldsSet containsObject:field];
+        rv = [localFileFieldsSet containsObject:field];
     }
     return rv;
 }
@@ -500,10 +500,10 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 // this one needs to be thread safe
-- (NSSet *)localURLFieldsSet{
+- (NSSet *)localFileFieldsSet{
     NSSet *set;
     @synchronized(self){
-        set = [[localURLFieldsSet copy] autorelease];
+        set = [[localFileFieldsSet copy] autorelease];
     }
     return set;
 }
@@ -544,7 +544,7 @@ static BibTypeManager *sharedInstance = nil;
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
-	if([self isLocalURLField:fieldName]){
+	if([self isLocalFileField:fieldName]){
 		return invalidLocalUrlCharSet;
 	}
 	if([self isRemoteURLField:fieldName]){
@@ -557,7 +557,7 @@ static BibTypeManager *sharedInstance = nil;
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
-	if([self isLocalURLField:fieldName]){
+	if([self isLocalFileField:fieldName]){
 		return strictInvalidLocalUrlCharSet;
 	}
 	if([self isRemoteURLField:fieldName]){
@@ -567,7 +567,7 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if([self isLocalURLField:fieldName]){
+	if([self isLocalFileField:fieldName]){
 		return veryStrictInvalidLocalUrlCharSet;
 	}
 	return [self strictInvalidCharactersForField:fieldName inFileType:type];

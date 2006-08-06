@@ -325,7 +325,7 @@
 					break;
 				case 'l':
 					// old filename without extension
-					if ([[[BibTypeManager sharedManager] localURLFieldsSet] containsObject:fieldName])
+					if ([[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:fieldName])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];
@@ -337,7 +337,7 @@
 					break;
 				case 'L':
 					// old filename with extension
-					if ([[[BibTypeManager sharedManager] localURLFieldsSet] containsObject:fieldName])
+					if ([[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:fieldName])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];
@@ -349,7 +349,7 @@
 					break;
 				case 'e':
 					// old file extension
-					if ([[[BibTypeManager sharedManager] localURLFieldsSet] containsObject:fieldName])
+					if ([[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:fieldName])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];

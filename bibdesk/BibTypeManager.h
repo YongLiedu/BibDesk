@@ -80,7 +80,7 @@
 	NSCharacterSet *invalidGeneralCharSet;
 	NSCharacterSet *strictInvalidGeneralCharSet;
     
-    NSMutableSet *localURLFieldsSet;
+    NSMutableSet *localFileFieldsSet;
     NSMutableSet *remoteURLFieldsSet;
     NSMutableSet *allURLFieldsSet;
     NSMutableSet *ratingFieldsSet;
@@ -126,8 +126,8 @@
 
 - (BOOL)isURLField:(NSString *)field;
 - (BOOL)isRemoteURLField:(NSString *)field;
-- (BOOL)isLocalURLField:(NSString *)field;    
-- (NSSet *)localURLFieldsSet;
+- (BOOL)isLocalFileField:(NSString *)field;    
+- (NSSet *)localFileFieldsSet;
 - (NSSet *)allURLFieldsSet;
 - (NSSet *)noteFieldsSet;
 

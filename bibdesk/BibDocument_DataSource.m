@@ -497,7 +497,7 @@
 				
 				dragColumnId = [[[tv tableColumns] objectAtIndex:dragColumn] identifier];
 				
-				if([[BibTypeManager sharedManager] isLocalURLField:dragColumnId]){
+				if([[BibTypeManager sharedManager] isLocalFileField:dragColumnId]){
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
                     unsigned row = [rowIndexes firstIndex];
@@ -1206,7 +1206,7 @@
     
     // this ivar stores the field name (e.g. Url, L2)
     NSString *fieldName = [self promiseDragColumnIdentifier];
-    BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalURLField:fieldName];
+    BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalFileField:fieldName];
     
     NSString *originalPath;
     NSString *fileName;
