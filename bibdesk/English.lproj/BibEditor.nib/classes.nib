@@ -8,6 +8,11 @@
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
+            CLASS = BDSKImagePopUpButtonCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButtonCell; 
+        }, 
+        {
             CLASS = BDSKPreviewer; 
             LANGUAGE = ObjC; 
             OUTLETS = {imagePreviewView = NSImageView; }; 
@@ -49,14 +54,14 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 abstractView = NSTextView; 
-                actionMenuButton = RYZImagePopUpButton; 
+                actionMenuButton = BDSKImagePopUpButton; 
                 authorScrollView = NSScrollView; 
                 authorTableView = NSTableView; 
                 bibFields = BDSKForm; 
                 bibTypeButton = NSPopUpButton; 
                 citeKeyField = NSTextField; 
                 citeKeyWarningButton = NSButton; 
-                documentSnoopButton = RYZImagePopUpButton; 
+                documentSnoopButton = BDSKImagePopUpButton; 
                 documentSnoopDrawer = NSDrawer; 
                 documentSnoopImageView = PDFImageView; 
                 documentSnoopScrollView = NSScrollView; 
@@ -73,8 +78,8 @@
                 statusBar = BDSKStatusBar; 
                 tabView = NSTabView; 
                 textSnoopContainerView = NSView; 
-                viewLocalButton = RYZImagePopUpButton; 
-                viewRemoteButton = RYZImagePopUpButton; 
+                viewLocalButton = BDSKImagePopUpButton; 
+                viewRemoteButton = BDSKImagePopUpButton; 
                 webSnoopContainerView = NSView; 
             }; 
             SUPERCLASS = NSWindowController; 
@@ -83,12 +88,7 @@
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
-        {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
-        {
-            CLASS = RYZImagePopUpButtonCell; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButtonCell; 
-        }
+        {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }
     ); 
     IBVersion = 1; 
 }
