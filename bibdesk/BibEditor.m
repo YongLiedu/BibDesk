@@ -347,7 +347,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:[tabView superview] offset:0.0];
+	[statusBar toggleBelowView:[tabView superview] offset:1.0];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowEditorStatusBarKey];
 }
 
