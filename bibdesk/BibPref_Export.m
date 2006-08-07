@@ -42,8 +42,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "BibAppController.h"
-#import "NSWorkspace_BDSKExtensions.h"
-#import "NSURL_BDSKExtensions.h"
+#import "NSMenu_BDSKExtensions.h"
 
 static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
@@ -472,50 +471,22 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         theURL = [[tv itemAtRow:row] representedFileURL];
     
     if(nil != theURL){
-        
-        NSZone *menuZone = [NSMenu menuZone];
-        menu = [[[tv menu] copyWithZone:menuZone] autorelease];
-        
-        NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-        NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:theURL] objectEnumerator];
-        NSURL *defaultEditorURL = [workspace defaultEditorOrViewerURLForURL:theURL];
         NSMenuItem *item;
         
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Open With", @"") action:NULL keyEquivalent:@""];
-        NSMenu *submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
-        [item setSubmenu:submenu];
-        [menu insertItem:item atIndex:0];
-        [item release];
-                
-        NSString *menuTitle;
+        menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
         
-        while(theURL = [appEnum nextObject]){
-            menuTitle = [theURL lastPathComponent];
-            
-            // mark the default app, if we have one
-            if([defaultEditorURL isEqual:theURL])
-                menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
-            
-            item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(editFile:) keyEquivalent:@""];
-            [item setTarget:self];
-            [item setRepresentedObject:theURL];
-            
-            // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
-            NSImage *image = [workspace iconForFileURL:theURL];
-            [image setSize:NSMakeSize(16,16)];
-            [item setImage:image];            
-            [submenu addItem:item];
-            [item release];
-        }
+        item = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Open with") andSubmenuOfApplicationsForURL:theURL];
         
-        // add the choose... item
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"Choose") stringByAppendingEllipsis] action:@selector(editFile:) keyEquivalent:@""];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Reveal in Finder") action:@selector(revealInFinder:) keyEquivalent:@""];
         [item setTarget:self];
-        [item setRepresentedObject:nil];
-        [submenu addItem:item];
-        [item release];
     }
     return menu;
+}
+
+- (void)menuNeedsUpdate:(NSMenu *)menu{
+    NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
+    if(theURL != nil)
+        [menu fillWithApplicationsForURL:theURL];
 }
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem;

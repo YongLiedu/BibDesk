@@ -484,11 +484,6 @@ static int numberOfOpenEditors = 0;
         [self updateSafariRecentDownloadsMenu:menu];
     } else if([menuTitle isEqualToString:@"safariRecentURLsMenu"]){
         [self updateSafariRecentURLsMenu:menu];
-    } else {
-        // should be an "Open With..." submenu
-        NSString *field = [menu title];
-        if(field)
-            [menu fillWithApplicationsForURL:[theBib URLForField:field]];
     }
 }
 
@@ -527,8 +522,7 @@ static int numberOfOpenEditors = 0;
             theURL = [theBib URLForField:field];
             if(nil != theURL){
                 [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
-                          submenuTitle:field
-                       submenuDelegate:self];
+                        andSubmenuOfApplicationsForURL:theURL];
             }
             
 			item = [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Reveal Local-Url in finder"), field]
@@ -579,8 +573,7 @@ static int numberOfOpenEditors = 0;
             theURL = [theBib URLForField:field];
             if(nil != theURL){
                 [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
-                          submenuTitle:field
-                       submenuDelegate:self];
+                        andSubmenuOfApplicationsForURL:theURL];
             }
 		}
 		
