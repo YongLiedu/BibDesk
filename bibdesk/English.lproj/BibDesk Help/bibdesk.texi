@@ -150,7 +150,7 @@ about the BibTeX file format.
 * Character Conversion:: Character Conversion
 * Autogeneration Format Syntax:: Autogeneration Format Syntax
 * Character Encodings:: Character Encodings
-* Export Templates::    Export Templates
+* Template Tags::       Template Tags
 @end menu
 
 @shortcontents
@@ -1885,9 +1885,74 @@ service would insert ``CasObe00''.
 @cindex export templates
 @cindex service templates
 
-@i{To be written}
+@heading Using templates for Export and Services
 
-See @ref{Export Templates} for a technical introduction.
+This help page describes how to use templates to export your database in a great variety of formats.  
+You can also use templates to customize the BibDesk Services that can be accessed from other applications. 
+@ref{Template Preferences} preference help topic. The use of service templates is described in more detail 
+in the @ref{System Service} help topic. 
+
+@menu
+* Export Templates::       How to export a BibTeX database using templates. 
+* Customizing Templates::  How to customize the templates used for Export and Service features.
+@end menu
+
+@c --------------------------------------------------------------------------------------
+
+@node Export Templates
+@section Export Templates
+@abstract{How to use export templates.}
+
+@cindex export templates
+
+Templates allow you to export your database to a large variety of formats. It also allows you to 
+customize to a great extent how the data is exported.
+
+To export using templates, choose one of the menu items in one of the @menutitle{Export} menus, 
+which can be found under the @menutitle{File} menu. You can either export the whole database, 
+or just the references which you have selected.
+
+BibDesk provides several default templates, for export to HTML, RSS, Rich Text (RTF, RTFD) and to windows Doc format. 
+To use them, just choose the corresponding item from the export submenu.  
+
+In order to use a non-default template the last menu item @menutitle{Using Template} should be chosen. 
+This allows you to choose a template from a popup button in the save dialog window. 
+
+@c --------------------------------------------------------------------------------------
+
+@node Customizing Templates
+@section Customizing Templates
+@abstract{How to customize templates used for export and services.}
+
+@cindex templates, customize
+
+The default templates that BibDesk uses for Export and Services can be found in the folder 
+~/Library/Application Support/Bibdesk/Templates. You can modify these templates to suit your preferences. 
+If you remove any of the default templates, BibDesk will automatically replace it with the latest version 
+on the next startup. 
+
+For setting the templates used for export and services, or for adding completely new templates, 
+see the @ref{Template Preferences,Template Preferences} help topic.
+
+A template file is basically a file written in the format to which you want to export. However it contains 
+so-called @emph{template tags}, which look a bit like standard HTML tags, apart from an extra $ before its name. 
+When exporting, these tags are replaced by corresponding properties. 
+For example, the template tag @code{<$fields.Title/>} will be replaced by the title field of the publications. 
+
+The syntax for the template files is described in more detail in the @ref{Template Tags, Template Tags Appendix}. 
+
+A single template can consist of several template files, distinguished by their role, as set in the preferences. 
+Any template must always have a Main Page template file, which is used to create the data for the 
+document. A template can have a Default Item template file, which can be used for 
+creating the data for individual publications. If you want to use different templates for particular 
+publication types (like article or book) you can add separate template files for those types. 
+
+Furthermore, a template can have any number of Accessory Files, which are copied directly when exported. 
+For example for HTML export, this could be an external CSS style file. 
+
+If you want to use separate item template files, your Main Page template should 
+contain the @code{<$publicationsUsingTemplate/>} tag. Otherwise, the Main Page template should contain the 
+@code{<$publications>...</$publications>} collection tags.
 
 @c ======================================================================================
 
@@ -2244,7 +2309,7 @@ they will show up on a subsequent edit.
 Using the Templates preference pane you can customize the templates that BibDesk uses for 
 export to various other file formats and for some Services menu items. 
 
-See @ref{Export Templates, Appendix Export Templates} for more information about template files. 
+See @ref{Template Tags, Appendix Template Tags} for more information about template files. 
 
 @image{gfx/templatePrefs}
 
@@ -3222,8 +3287,8 @@ need it for other reasons.}
 
 @c ======================================================================================
 
-@node Export Templates
-@appendix Export Templates
+@node Template Tags
+@appendix Template Tags
 @abstract{Discussion of keys used in export templates.}
 
 @cindex template
