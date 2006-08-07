@@ -93,7 +93,7 @@
 	row = aRow;
 	column = aColumn;
 	
-	if ([self window]) return NO; // make sure we loaded the nib
+	[self window]; // make sure we loaded the nib
 	
 	[control scrollRectToVisible:[self currentCellFrame]];
 	[self setExpandedValue:aString];
