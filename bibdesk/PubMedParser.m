@@ -237,22 +237,24 @@ static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict
                 // This next step isn't strictly necessary for splitting the names, since the name parsing will do it for us, but you still see duplicate whitespace when editing the author field
                 NSString *collapsedWhitespaceString = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespace(NULL, (CFStringRef)newString);
                 [newString release];
-				[pubDict setObject:collapsedWhitespaceString forKey:key];
-                [collapsedWhitespaceString release];
+                newString = collapsedWhitespaceString;
 			}
-			return;
-        }else if( [key isEqualToString:BDSKKeywordsString]){
-			newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];
-			[pubDict setObject:newString forKey:key];
-            [newString release];
-			return;
+        }else if([key isEqualToString:BDSKKeywordsString]){
+            newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];
 		}else{
 			// we already had a tag mapping to the same fieldname, so use the tag instead
-			key = tag;
+			key = [tag capitalizedString];
+            oldString = [pubDict objectForKey:key];
+            if (![NSString isEmptyString:oldString]){
+                newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];
+            }else{
+                newString = [value copy];
+            }
 		}
+    }else{
+        // the default, just set the value
+        newString = [value copy];
     }
-	// the default, just set the value
-	newString = [value copy];
 	[pubDict setObject:newString forKey:key];
 	[newString release];
 }
