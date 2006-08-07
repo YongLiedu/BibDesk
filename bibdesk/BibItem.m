@@ -916,8 +916,12 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (NSString *)suggestedCiteKey
 {
+    NSString *suggestion = [self citeKey];
+    if ([self hasEmptyOrDefaultCiteKey] || [document citeKeyIsUsed:suggestion byItemOtherThan:self])
+        suggestion = nil;
+    
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-	NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self suggestion:[self citeKey]];
+    NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self suggestion:suggestion];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
 		ck = [ck lowercaseString];
 	}
