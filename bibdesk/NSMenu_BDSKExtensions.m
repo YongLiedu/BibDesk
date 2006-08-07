@@ -39,11 +39,19 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
-NSString *BDSKMenuTargetURL = @"BDSKMenuTargetURL";
-NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
+static NSString *BDSKMenuTargetURL = @"BDSKMenuTargetURL";
+static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
-@interface BDSKApplicationForURLSubmenu : NSMenu @end
+@interface BDSKOpenWithMenuController : NSObject 
++ (id)sharedInstance;
+@end
+
+@interface NSMenu (BDSKPrivate)
+- (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
+@end
 
 @implementation NSMenu (BDSKExtensions)
 
@@ -57,63 +65,6 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
         [self addItem:anItem];
         [anItem release];
     }
-}
-
-- (void)fillWithApplicationsForURL:(NSURL *)aURL;
-{    
-    int i = [self numberOfItems];
-    while(i--)
-        [self removeItemAtIndex:i];
-    
-    // if there's no url, just return an empty submenu, since we can't find applications
-    if(nil == aURL)
-        return;
-    
-    NSZone *menuZone = [NSMenu menuZone];
-    NSMenuItem *item;
-    
-    NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-    NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:aURL] objectEnumerator];
-    NSURL *defaultEditorURL = [workspace defaultEditorOrViewerURLForURL:aURL];
-    
-    NSString *menuTitle;
-    NSDictionary *representedObject;
-    NSURL *applicationURL;
-    
-    while(applicationURL = [appEnum nextObject]){
-        menuTitle = [applicationURL lastPathComponent];
-        
-        // mark the default app, if we have one
-        if([defaultEditorURL isEqual:applicationURL])
-            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
-        
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];
-        
-        // -[NSApp delegate] implements this
-        [item setTarget:nil];
-        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, applicationURL, BDSKMenuApplicationURL, nil];
-        [item setRepresentedObject:representedObject];
-        
-        // use the application's icon as an image; using [NSImage imageForURL:] doesn't work for some reason
-        NSImage *image = [workspace iconForFileURL:applicationURL];
-        [image setSize:NSMakeSize(16,16)];
-        [item setImage:image];
-        [representedObject release];
-        if([defaultEditorURL isEqual:applicationURL])
-            [self insertItem:item atIndex:0];
-        else
-            [self addItem:item];
-        [item release];
-    }
-    
-    // add the choose... item
-    item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
-    [item setTarget:nil];
-    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, nil];
-    [item setRepresentedObject:representedObject];
-    [representedObject release];
-    [self addItem:item];
-    [item release];
 }
 
 - (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)index;
@@ -150,10 +101,10 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 - (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)index;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
-    NSMenu *submenu = [[BDSKApplicationForURLSubmenu allocWithZone:[self zone]] initWithTitle:@""];
+    NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@""];
     NSMenuItem *placeholderItem = [submenu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
     [placeholderItem setRepresentedObject:[NSDictionary dictionaryWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil]];
-    [submenu setDelegate:submenu];
+    [submenu setDelegate:[BDSKOpenWithMenuController sharedInstance]];
     [item setSubmenu:submenu];
     [self insertItem:item atIndex:index];
     [submenu release];
@@ -168,12 +119,128 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 @end
 
-@implementation BDSKApplicationForURLSubmenu 
+
+@implementation NSMenu (BDSKPrivate)
+
+- (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
+{    
+    // if a menu item is the only thing retaining this URL, removing all items will cause it to become invalid
+    [[aURL retain] autorelease];
+    [self removeAllItems];
+    
+    // if there's no url, just return an empty submenu, since we can't find applications
+    if(nil == aURL)
+        return;
+    
+    NSZone *menuZone = [NSMenu menuZone];
+    NSMenuItem *item;
+    
+    NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+    NSEnumerator *appEnum = [[workspace editorAndViewerURLsForURL:aURL] objectEnumerator];
+    NSURL *defaultEditorURL = [workspace defaultEditorOrViewerURLForURL:aURL];
+    
+    NSString *menuTitle;
+    NSDictionary *representedObject;
+    NSURL *applicationURL;
+    
+    while(applicationURL = [appEnum nextObject]){
+        menuTitle = [applicationURL lastPathComponent];
+        
+        // mark the default app, if we have one
+        if([defaultEditorURL isEqual:applicationURL])
+            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
+        
+        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];
+        
+        // BDSKOpenWithMenuController singleton implements this
+        [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
+        representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, applicationURL, BDSKMenuApplicationURL, nil];
+        [item setRepresentedObject:representedObject];
+        
+        // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
+        NSImage *image = [workspace iconForFileURL:applicationURL];
+        [image setSize:NSMakeSize(16,16)];
+        [item setImage:image];
+        [representedObject release];
+        if([defaultEditorURL isEqual:applicationURL])
+            [self insertItem:item atIndex:0];
+        else
+            [self addItem:item];
+        [item release];
+    }
+    
+    // add the choose... item
+    item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
+    [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
+    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, nil];
+    [item setRepresentedObject:representedObject];
+    [representedObject release];
+    [self addItem:item];
+    [item release];
+}
+
+@end
+
+#pragma mark -
+
+/* Private singleton to act as target for the "Open With..." menu item, or run a modal panel to choose a different application.
+*/
+
+@implementation BDSKOpenWithMenuController
+
+static id sharedOpenWithController = nil;
+
++ (id)sharedInstance
+{
+    if(nil == sharedOpenWithController)
+        sharedOpenWithController = [[self alloc] init];
+    return sharedOpenWithController;
+}
+
+- (oneway void)release
+{
+    [self doesNotRecognizeSelector:_cmd];
+}
+
+- (void)chooseApplicationToOpenURL:(NSURL *)aURL;
+{
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    [openPanel setCanChooseDirectories:NO];
+    [openPanel setAllowsMultipleSelection:NO];
+    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"")];
+    
+    int rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
+                                        file:nil 
+                                       types:[NSArray arrayWithObjects:@"app", nil]];
+    if(NSFileHandlingPanelOKButton == rv)
+        [[NSWorkspace sharedWorkspace] openURL:aURL withApplicationURL:[[openPanel URLs] firstObject]];
+}
+
+// action for opening a file with a specific application
+- (void)openURLWithApplication:(id)sender{
+    NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
+    NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
+    
+    if(nil == applicationURL)
+        [self chooseApplicationToOpenURL:targetURL];
+    else if([[NSWorkspace sharedWorkspace] openURL:targetURL withApplicationURL:applicationURL] == NO)
+        NSBeep();
+}
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
     NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
     if(theURL != nil)
-        [menu fillWithApplicationsForURL:theURL];
+        [menu replaceAllItemsWithApplicationsForURL:theURL];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
+    if ([menuItem action] == @selector(openURLWithApplication:)) {
+        NSURL *theURL = [[menuItem representedObject] valueForKey:BDSKMenuTargetURL];
+        if([theURL isFileURL])
+            theURL = [theURL fileURLByResolvingAliases];
+        return (theURL == nil ? NO : YES);
+    }
+    return YES;
 }
 
 @end

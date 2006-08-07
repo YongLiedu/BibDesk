@@ -66,7 +66,5 @@ typedef enum {
 - (BOOL)canDeleteSelectedItem;
 
 - (IBAction)revealInFinder:(id)sender;
-- (IBAction)openFile:(id)sender;
-- (IBAction)editFile:(id)sender;
 
 @end

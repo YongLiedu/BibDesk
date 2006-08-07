@@ -483,12 +483,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     return menu;
 }
 
-- (void)menuNeedsUpdate:(NSMenu *)menu{
-    NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
-    if(theURL != nil)
-        [menu fillWithApplicationsForURL:theURL];
-}
-
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem;
 {
     SEL action = [menuItem action];
@@ -508,47 +502,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     int row = [outlineView selectedRow];
     if(row >= 0)
         [[NSWorkspace sharedWorkspace] selectFile:[[[outlineView itemAtRow:row] representedFileURL] path] inFileViewerRootedAtPath:@""];
-}
-
-- (IBAction)openFile:(id)sender;
-{
-    int row = [outlineView selectedRow];
-    if(row >= 0)
-        [[NSWorkspace sharedWorkspace] openURL:[[outlineView itemAtRow:row] representedFileURL]];
-}
-
-- (void)chooseEditorPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
-        NSString *appName = [[openPanel filenames] objectAtIndex:0];
-        NSString *filePath = [[[outlineView itemAtRow:[outlineView selectedRow]] representedFileURL] path];
-        [[NSWorkspace sharedWorkspace] openFile:filePath withApplication:appName];
-    }
-}
-
-- (IBAction)editFile:(id)sender;
-{
-    // sender should be NSMenuItem with a representedObject of the application's URL (or nil if we're supposed to choose one)
-    int row = [outlineView selectedRow];
-    if(row >= 0){
-        
-        BDSKTemplate *selectedTemplate = [outlineView itemAtRow:row];
-        if([sender representedObject]){
-            [[NSWorkspace sharedWorkspace] openFile:[[selectedTemplate representedFileURL] path] withApplication:[[sender representedObject] path]];
-        } else {
-            NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-            [openPanel setCanChooseDirectories:NO];
-            [openPanel setAllowsMultipleSelection:NO];
-            [openPanel setPrompt:NSLocalizedString(@"Choose Editor", @"")];
-            
-            [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                         file:nil 
-                                        types:[NSArray arrayWithObjects:@"app", nil] 
-                               modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
-                                modalDelegate:self 
-                               didEndSelector:@selector(chooseEditorPanelDidEnd:returnCode:contextInfo:) 
-                                  contextInfo:nil];
-        }
-    }
 }
 
 #pragma mark Combo box

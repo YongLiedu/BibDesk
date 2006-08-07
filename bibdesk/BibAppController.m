@@ -488,16 +488,8 @@
 		}
 		return YES;
 	}
-    else if (act == @selector(openURLWithApplication:)) {
-        NSURL *theURL = [[menuItem representedObject] valueForKey:BDSKMenuTargetURL];
-        if([theURL isFileURL])
-            theURL = [theURL fileURLByResolvingAliases];
-        return (theURL == nil ? NO : YES);
-    }
-
 	return YES;
 }
-
 
 - (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
 
@@ -523,31 +515,6 @@
         item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
         [item setTag:BDSKTemplateDragCopyType + i];
     }
-}
-
-- (void)chooseApplicationToOpenURL:(NSURL *)aURL;
-{
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setCanChooseDirectories:NO];
-    [openPanel setAllowsMultipleSelection:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"")];
-    
-    int rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                        file:nil 
-                                       types:[NSArray arrayWithObjects:@"app", nil]];
-    if(NSFileHandlingPanelOKButton == rv)
-        [[NSWorkspace sharedWorkspace] openURL:aURL withApplicationURL:[[openPanel URLs] firstObject]];
-}
-
-// action for opening a file with a specific application
-- (void)openURLWithApplication:(id)sender{
-    NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
-    NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
-    
-    if(nil == applicationURL)
-        [self chooseApplicationToOpenURL:targetURL];
-    else if([[NSWorkspace sharedWorkspace] openURL:targetURL withApplicationURL:applicationURL] == NO)
-        NSBeep();
 }
 
 #pragma mark Auto generation format stuff

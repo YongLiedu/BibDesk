@@ -38,44 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString *BDSKMenuTargetURL;
-extern NSString *BDSKMenuApplicationURL;
-
-// this must be implemented in the responder chain for submenuOfApplicationsForURL:, using the following implementation as reference
-/*
- - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
- {
-     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-     [openPanel setCanChooseDirectories:NO];
-     [openPanel setAllowsMultipleSelection:NO];
-     [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"")];
-     
-     int rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                         file:nil 
-                                        types:[NSArray arrayWithObjects:@"app", nil]];
-     if(NSFileHandlingPanelOKButton == rv)
-         [[NSWorkspace sharedWorkspace] openURL:aURL withApplicationURL:[[openPanel URLs] firstObject]];
- }
- 
- // action for opening a file with a specific application
- - (void)openURLWithApplication:(id)sender{
-     NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
-     NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
-     
-     if(nil == applicationURL)
-         [self chooseApplicationToOpenURL:targetURL];
-     else if([[NSWorkspace sharedWorkspace] openURL:targetURL withApplicationURL:applicationURL] == NO)
-         NSBeep();
- }
-*/
-
-@interface NSObject (BDSKMenuExtensions)
-- (void)openURLWithApplication:(id)sender;
-@end
-
 @interface NSMenu (BDSKExtensions)
 
-- (void)fillWithApplicationsForURL:(NSURL *)aURL;
 - (void)addItemsFromMenu:(NSMenu *)other;
 - (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)index;
 - (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu;
