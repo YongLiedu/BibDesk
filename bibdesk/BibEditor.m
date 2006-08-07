@@ -225,13 +225,15 @@ static int numberOfOpenEditors = 0;
 	BDSKEdgeView *edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
     NSRect ignored, frame = [edgeView contentRect];
-    NSDivideRect([edgeView contentRect], &ignored, &frame, 17.0, NSMinXEdge);
+    NSDivideRect([edgeView contentRect], &ignored, &frame, 13.0, NSMinXEdge);
     [[bibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[bibFields enclosingScrollView]];
+    // don't know why, but this is broken
+    [bibTypeButton setNextKeyView:bibFields];
     
     edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:1];
 	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    NSDivideRect([edgeView contentRect], &ignored, &frame, 17.0, NSMinXEdge);
+    NSDivideRect([edgeView contentRect], &ignored, &frame, 13.0, NSMinXEdge);
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
 
