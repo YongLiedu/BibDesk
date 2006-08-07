@@ -66,16 +66,20 @@
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 
+enum {
+    BDSKStringFieldCollection, 
+    BDSKPersonFieldCollection,
+    BDSKURLFieldCollection
+};
+
 @interface BDSKFieldCollection : NSObject {
     BibItem *item;
     NSMutableSet *usedFields;
-    BOOL isPersons;
-    BOOL isURL;
+    int type;
 }
 
 - (id)initWithItem:(BibItem *)anItem;
-- (void)setPersons:(BOOL)flag;
-- (void)setURL:(BOOL)flag;
+- (void)setType:(int)type;
 - (id)fieldForName:(NSString *)name;
 - (BOOL)isUsedField:(NSString *)name;
 - (BOOL)isEmptyField:(NSString *)name;
@@ -2011,24 +2015,21 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (BDSKFieldCollection *)fields{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
-    [templateFields setPersons:NO];
-    [templateFields setURL:NO];
+    [templateFields setType:BDSKStringFieldCollection];
     return templateFields;
 }
 
 - (BDSKFieldCollection *)urls{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
-    [templateFields setPersons:NO];
-    [templateFields setURL:YES];
+    [templateFields setType:BDSKURLFieldCollection];
     return templateFields;
 }
 
 - (BDSKFieldCollection *)persons{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
-    [templateFields setPersons:YES];
-    [templateFields setURL:NO];
+    [templateFields setType:BDSKPersonFieldCollection];
     return templateFields;
 }
 
@@ -2828,8 +2829,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if (self = [super init]) {
         item = anItem;
         usedFields = [[NSMutableSet alloc] init];
-        isPersons = NO;
-        isURL = NO;
+        type = BDSKStringFieldCollection;
     }
     return self;
 }
@@ -2844,20 +2844,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if (key == nil)
         return nil;
     [usedFields addObject:key];
-    if (isPersons)
+    if (type == BDSKPersonFieldCollection)
         return (id)[item peopleArrayForField:key];
-    else if (isURL)
+    else if (type == BDSKURLFieldCollection)
         return (id)[item URLForField:key];
-    else 
+    else
         return (id)[item stringValueOfField:key];
 }
 
-- (void)setPersons:(BOOL)flag{
-    isPersons = flag;
-}
-
-- (void)setURL:(BOOL)flag{
-    isURL = flag;
+- (void)setType:(int)aType{
+    type = aType;
 }
 
 - (BOOL)isUsedField:(NSString *)name{
