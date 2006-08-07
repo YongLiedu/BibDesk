@@ -83,6 +83,9 @@ enum{
 	BDSKDrawerStateRightMask = 8,
 };
 
+// offset of the form from the left window edge
+#define FORM_OFFSET 13.0
+
 // this is a PDFDocument method; we can't link with it because the framework doesn't exist on pre-10.4 systems
 @interface NSObject (PantherCompatibilityKludge)
 - (id)initWithPostScriptData:(NSData *)data;
@@ -225,7 +228,7 @@ static int numberOfOpenEditors = 0;
 	BDSKEdgeView *edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
     NSRect ignored, frame = [edgeView contentRect];
-    NSDivideRect([edgeView contentRect], &ignored, &frame, 13.0, NSMinXEdge);
+    NSDivideRect([edgeView contentRect], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
     [[bibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[bibFields enclosingScrollView]];
     // don't know why, but this is broken
@@ -233,7 +236,7 @@ static int numberOfOpenEditors = 0;
     
     edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:1];
 	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-    NSDivideRect([edgeView contentRect], &ignored, &frame, 13.0, NSMinXEdge);
+    NSDivideRect([edgeView contentRect], &ignored, &frame, FORM_OFFSET, NSMinXEdge);
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
 
@@ -3149,6 +3152,20 @@ static int numberOfOpenEditors = 0;
 			[extraBibFields selectCellAtRow:editedRow column:editedColumn];
 		}
 	}
+    
+    // align the cite key field with the form cells
+    if([bibFields numberOfRows] > 0){
+        [bibFields drawRect:NSZeroRect];// this forces the calculation of the titleWidth
+        float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([splitView frame]) + FORM_OFFSET + 4.0;
+        NSRect frame = [citeKeyField frame];
+        if(offset != NSMinX(frame) && offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
+            frame.size.width = NSMaxX(frame) - offset;
+            frame.origin.x = offset;
+            [citeKeyField setFrame:frame];
+            [[citeKeyField superview] setNeedsDisplay:YES];
+        }
+    }
+    
 	didSetupForm = YES;
 }
 

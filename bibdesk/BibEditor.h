@@ -86,6 +86,7 @@
 	BDSKRatingButtonCell *ratingButtonCell;
     
     IBOutlet NSTextField* citeKeyField;
+    IBOutlet NSTextField* citeKeyTitle;
 	IBOutlet BDSKImagePopUpButton *viewLocalButton;
     IBOutlet BDSKImagePopUpButton *viewRemoteButton;
     IBOutlet BDSKImagePopUpButton *documentSnoopButton;
@@ -96,6 +97,7 @@
 	NSToolbarItem *authorsToolbarItem;
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
+	IBOutlet NSButton *addFieldButton;
     // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;
