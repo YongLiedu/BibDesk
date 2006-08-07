@@ -717,7 +717,7 @@
 	} else if (tv == ccTableView) {
 		return (isLocal)? NSDragOperationNone : NSDragOperationCopy;
 	} else {
-		return NSDragOperationNone;
+		return (isLocal)? NSDragOperationEvery : NSDragOperationCopy;
 	}
 }
 
