@@ -537,18 +537,17 @@
 	
 	if (uniqueSpecifier != 0) {
         NSString *suggestedUnique = nil;
-        unsigned suggestionLength = [prefixStr length];
         unsigned prefixLength = [prefixStr length];
         unsigned suffixLength = [parsedStr length];
-        if (suggestion && suggestionLength >= prefixLength + suffixLength + uniqueNumber &&
+        unsigned suggestionLength = [suggestion length] - prefixLength - suffixLength;
+        if (suggestion && ((uniqueNumber == 0 && suggestionLength >= 0) || suggestionLength == uniqueNumber) &&
             (prefixLength == 0 || [suggestion hasPrefix:prefixStr]) && (suffixLength == 0 || [suggestion hasSuffix:parsedStr])) {
-            suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength - prefixLength - suffixLength)];
+            suggestedUnique = [suggestion substringWithRange:NSMakeRange(prefixLength, suggestionLength)];
         }
 		switch (uniqueSpecifier) {
 			case 'u':
 				// unique lowercase letters
-                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonLowercaseLetterCharSet].location == NSNotFound &&
-                    (uniqueNumber == 0 || [suggestedUnique length] == uniqueNumber)) {
+                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonLowercaseLetterCharSet].location == NSNotFound) {
                     [parsedStr setString:suggestion];
                 } else {
                     [parsedStr setString:[self uniqueString:prefixStr 
@@ -562,8 +561,7 @@
 				break;
 			case 'U':
 				// unique uppercase letters
-                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUppercaseLetterCharSet].location == NSNotFound && 
-                    (uniqueNumber == 0 || [suggestedUnique length] == uniqueNumber)) {
+                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonUppercaseLetterCharSet].location == NSNotFound) {
                     [parsedStr setString:suggestion];
                 } else {
                     [parsedStr setString:[self uniqueString:prefixStr 
@@ -577,8 +575,7 @@
                 break;
 			case 'n':
 				// unique number
-                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonDecimalDigitCharSet].location == NSNotFound && 
-                    (uniqueNumber == 0 || [suggestedUnique length] == uniqueNumber)) {
+                if (suggestedUnique && [suggestedUnique rangeOfCharacterFromSet:nonDecimalDigitCharSet].location == NSNotFound) {
                     [parsedStr setString:suggestion];
                 } else {
                     [parsedStr setString:[self uniqueString:prefixStr 
@@ -631,7 +628,7 @@
 	}
 	
 	if (force && ![self stringIsValid:uniqueStr forField:fieldName ofItem:pub]) {
-		// not uniqueString yet, so try with 1 more char
+		// not unique yet, so try with 1 more char
 		return [self uniqueString:baseStr suffix:suffix forField:fieldName ofItem:pub numberOfChars:number + 1 from:fromChar to:toChar force:YES];
 	}
 	
