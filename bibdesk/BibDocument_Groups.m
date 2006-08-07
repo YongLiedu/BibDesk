@@ -811,9 +811,12 @@ The groupedPublications array is a subset of the publications array, developed b
         return; // the user canceled
     
 	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField] || [newGroupField isEqualToString:@""]){
-        NSBeginAlertSheet(NSLocalizedString(@"Invalid Field", @"Invalid Field"),
-                          nil, nil, nil, documentWindow, nil, nil, nil, nil,
-                          [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), newGroupField] );
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Invalid Field")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), newGroupField]];
+        [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:NULL contextInfo:NULL];
 		return;
 	}
 	
@@ -856,7 +859,8 @@ The groupedPublications array is a subset of the publications array, developed b
                                                                                               fieldsArray:colNames];
 	[addFieldController beginSheetModalForWindow:documentWindow
                                    modalDelegate:self
-                                  didEndSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
+                                  didEndSelector:NULL
+                              didDismissSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
                                      contextInfo:NULL];
     [addFieldController release];
 }
