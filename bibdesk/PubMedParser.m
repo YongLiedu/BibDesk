@@ -204,9 +204,9 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict);
 @implementation PubMedParser (Private)
 
 static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict, NSString *tag){
-	NSString *key;
-	NSString *oldString;
-    NSString *newString;
+	NSString *key = nil;
+	NSString *oldString = nil;
+    NSString *newString = nil;
 	
 	// we handle fieldnames for authors later, as FAU can duplicate AU. All others are treated as AU. 
 	if([tag isEqualToString:@"A1"] || [tag isEqualToString:@"A2"] || [tag isEqualToString:@"A3"])
@@ -255,8 +255,10 @@ static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict
         // the default, just set the value
         newString = [value copy];
     }
-	[pubDict setObject:newString forKey:key];
-	[newString release];
+    if(newString != nil){
+        [pubDict setObject:newString forKey:key];
+        [newString release];
+    }
 }
 
 static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor){ // check to see if it's a duplicate; this relies on the whitespace around the " and ", and is basically a hack for Scopus
