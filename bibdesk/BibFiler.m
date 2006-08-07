@@ -283,14 +283,15 @@ static BibFiler *sharedFiler = nil;
 #pragma mark Error reporting
 
 - (void)showProblems{
-	BOOL success = [NSBundle loadNibNamed:@"AutoFile" owner:self];
-	if(!success){
-		NSRunCriticalAlertPanel(NSLocalizedString(@"Error loading AutoFile window module.",@""),
-								NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!",@""),
-								NSLocalizedString(@"OK",@"OK"),nil,nil);
-		return;
+    if (window == nil) {
+        if([NSBundle loadNibNamed:@"AutoFile" owner:self] == NO){
+            NSRunCriticalAlertPanel(NSLocalizedString(@"Error loading AutoFile window module.",@""),
+                                    NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!",@""),
+                                    NSLocalizedString(@"OK",@"OK"),nil,nil);
+            return;
+        }
 	}
-	[tv reloadData];
+    [tv reloadData];
     if (options & BDSKInitialAutoFileOptionMask)
         [infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the location generated using the format string. You can retry to move items selected in the first column.",@"description string")];
     else

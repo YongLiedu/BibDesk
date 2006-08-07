@@ -97,7 +97,7 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     OBPRECONDITION(aDocument);
     [self setDocument:aDocument];
     
-    NSAssert1([NSBundle loadNibNamed:[self windowNibName] owner:self], @"Failed to load nib %@", [self windowNibName]);
+    NSAssert1([self window], @"Failed to load nib %@", [self windowNibName]);
 
     return self;
 }

@@ -918,7 +918,8 @@
 #pragma mark Panels
 
 - (IBAction)showReadMeFile:(id)sender{
-    [NSBundle loadNibNamed:@"ReadMe" owner:self];
+    if (readmeWindow == nil)
+        [NSBundle loadNibNamed:@"ReadMe" owner:self];
     [readmeWindow setTitle:NSLocalizedString(@"ReadMe", "ReadMe")];
     [readmeWindow makeKeyAndOrderFront:self];
     [readmeTextView setString:@""];
@@ -927,7 +928,8 @@
 }
 
 - (IBAction)showRelNotes:(id)sender{
-    [NSBundle loadNibNamed:@"ReadMe" owner:self];
+    if (readmeWindow == nil)
+        [NSBundle loadNibNamed:@"ReadMe" owner:self];
     [readmeWindow setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
     [readmeWindow makeKeyAndOrderFront:self];
     [readmeTextView setString:@""];

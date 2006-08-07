@@ -93,7 +93,7 @@
 	row = aRow;
 	column = aColumn;
 	
-	if (![NSBundle loadNibNamed:[self windowNibName] owner:self]) return NO; // make sure we loaded the nib
+	if ([self window]) return NO; // make sure we loaded the nib
 	
 	[control scrollRectToVisible:[self currentCellFrame]];
 	[self setExpandedValue:aString];
