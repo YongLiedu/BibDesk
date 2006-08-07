@@ -43,14 +43,9 @@
 NSString *BDSKMenuTargetURL = @"BDSKMenuTargetURL";
 NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
-@implementation NSMenu (BDSKExtensions)
+@interface BDSKApplicationForURLSubmenu : NSMenu @end
 
-+ (NSMenu *)submenuOfApplicationsForURL:(NSURL *)aURL;
-{
-    NSMenu *submenu = [[[self allocWithZone:[self menuZone]] initWithTitle:@""] autorelease];
-    [submenu fillWithApplicationsForURL:aURL];
-    return submenu;
-}
+@implementation NSMenu (BDSKExtensions)
 
 - (void)addItemsFromMenu:(NSMenu *)other;
 {
@@ -152,4 +147,34 @@ NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     return [self insertItemWithTitle:itemTitle submenuTitle:submenuTitle submenuDelegate:delegate atIndex:[self numberOfItems]];
 }
 
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)index;
+{
+    NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
+    NSMenu *submenu = [[BDSKApplicationForURLSubmenu allocWithZone:[self zone]] initWithTitle:@""];
+    NSMenuItem *placeholderItem = [submenu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
+    [placeholderItem setRepresentedObject:[NSDictionary dictionaryWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil]];
+    [submenu setDelegate:submenu];
+    [item setSubmenu:submenu];
+    [self insertItem:item atIndex:index];
+    [submenu release];
+    [item release];
+    return item;
+}
+
+- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL;
+{
+    return [self insertItemWithTitle:itemTitle andSubmenuOfApplicationsForURL:theURL atIndex:[self numberOfItems]];
+}
+
 @end
+
+@implementation BDSKApplicationForURLSubmenu 
+
+- (void)menuNeedsUpdate:(NSMenu *)menu{
+    NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
+    if(theURL != nil)
+        [menu fillWithApplicationsForURL:theURL];
+}
+
+@end
+
