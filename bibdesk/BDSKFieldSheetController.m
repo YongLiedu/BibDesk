@@ -105,6 +105,14 @@
     [fieldsControl setFrame:fieldsFrame];
 }
 
+- (IBAction)dismiss:(id)sender{
+    if ([sender tag] == NSOKButton) {
+        if ([[self window] makeFirstResponder:nil] == NO)
+            [[self window] endEditingFor:nil];
+    }
+    [super dismiss:sender];
+}
+
 @end
 
 
