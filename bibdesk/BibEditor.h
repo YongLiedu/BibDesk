@@ -94,7 +94,6 @@
 	NSToolbarItem *viewRemoteToolbarItem;
 	NSToolbarItem *documentSnoopToolbarItem;
 	NSToolbarItem *authorsToolbarItem;
-    IBOutlet NSScrollView *fieldsScrollView;
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
     // ----------------------------------------------------------------------------------------

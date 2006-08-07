@@ -175,8 +175,9 @@ static int numberOfOpenEditors = 0;
 		return;
 	}
 	
-	// the rest is called when we load the window
+	// The rest is called when we load the window
 	
+    // Setup the default cells for the extraBibFields matrix
 	booleanButtonCell = [[NSButtonCell alloc] initTextCell:@""];
 	[booleanButtonCell setButtonType:NSSwitchButton];
 	[booleanButtonCell setTarget:self];
@@ -194,9 +195,18 @@ static int numberOfOpenEditors = 0;
 	[extraBibFields setPrototype:cell];
 	[cell release];
     
+    // Setup the toolbar
     [self setupToolbar];
+	
+    // Setup the statusbar
+	[statusBar retain]; // we need to retain, as we might remove it from the window
+	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowEditorStatusBarKey]) {
+		[self toggleStatusBar:nil];
+	}
+	[statusBar setDelegate:self];
+    [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
-    // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
+    // Set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
     [[self window] setFrameUsingName:BDSKBibEditorFrameAutosaveName];
     // we should only cascade windows if we have multiple editors open; bug #1299305
     // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
@@ -207,54 +217,59 @@ static int numberOfOpenEditors = 0;
         nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
     }
     nextWindowLocation = [[self window] cascadeTopLeftFromPoint:nextWindowLocation];
-
-    [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
-
-    [citeKeyField setFormatter:citeKeyFormatter];
-
-    [self setupTypePopUp];
-    [self setupForm];
-    [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
-	
-	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowEditorStatusBarKey]) {
-		[self toggleStatusBar:nil];
-	}
-	[statusBar setDelegate:self];
-    [statusBar setTextOffset:NSMaxX([actionButton frame])];
     
+    // Setup the splitview autosave frame, should be done after the statusBar is setup
+    [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
+    
+    // Setup the form and the matrix
 	BDSKEdgeView *edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:0];
 	[edgeView setEdges:BDSKMinYEdgeMask];
-	[edgeView adjustSubviews];
-	edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:1];
+    NSRect ignored, frame = [edgeView contentRect];
+    NSDivideRect([edgeView contentRect], &ignored, &frame, 17.0, NSMinXEdge);
+    [[bibFields enclosingScrollView] setFrame:frame];
+	[edgeView addSubview:[bibFields enclosingScrollView]];
+    
+    edgeView = (BDSKEdgeView *)[[splitView subviews] objectAtIndex:1];
 	[edgeView setEdges:BDSKMinYEdgeMask | BDSKMaxYEdgeMask];
-	[edgeView adjustSubviews];
+    NSDivideRect([edgeView contentRect], &ignored, &frame, 17.0, NSMinXEdge);
+    [[extraBibFields enclosingScrollView] setFrame:frame];
+	[edgeView addSubview:[extraBibFields enclosingScrollView]];
+
+    [self setupForm];
+    [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+    
+    // Setup the citekey textfield
+    [citeKeyField setFormatter:citeKeyFormatter];
+	[citeKeyField setStringValue:[theBib citeKey]];
 	
-	// The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
+    // Setup the type popup
+    [self setupTypePopUp];
+    
+	// Setup the toolbar buttons.
+    // The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
     [self setupButtons];
-    		
+
+	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
+    
+    // Setup the textviews
     [notesView setString:[theBib valueOfField:BDSKAnnoteString inherit:NO]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString inherit:NO]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString inherit:NO]];
 	currentEditedView = nil;
     
-    // set up identifiers for the tab view items, since we receive delegate messages from it
+    // Set up identifiers for the tab view items, since we receive delegate messages from it
     NSArray *tabViewItems = [tabView tabViewItems];
     [[tabViewItems objectAtIndex:0] setIdentifier:BDSKBibtexString];
     [[tabViewItems objectAtIndex:1] setIdentifier:BDSKAnnoteString];
     [[tabViewItems objectAtIndex:2] setIdentifier:BDSKAbstractString];
     [[tabViewItems objectAtIndex:3] setIdentifier:BDSKRssDescriptionString];
-    
-	[fieldsScrollView setDrawsBackground:NO];
 	
-	[citeKeyField setStringValue:[theBib citeKey]];
-	
-	[self needsToBeFiledDidChange:nil];
+	// Update the statusbar message and icons
+    [self needsToBeFiledDidChange:nil];
 	[self updateCiteKeyAutoGenerateStatus];
 	
 	windowLoaded = YES;
-
-	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
+    
     [self registerForNotifications];
     
     [bibFields setDelegate:self];

@@ -71,7 +71,6 @@
                 extraBibFields = NSMatrix; 
                 fieldsAccessoryView = NSView; 
                 fieldsPopUpButton = NSPopUpButton; 
-                fieldsScrollView = NSScrollView; 
                 notesView = NSTextView; 
                 pdfSnoopContainerView = NSView; 
                 remoteSnoopWebView = WebView; 
