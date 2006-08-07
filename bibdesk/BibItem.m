@@ -878,7 +878,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date{
-    NSString *oldCiteKey = [self citeKey];
+    NSString *oldCiteKey = [[self citeKey] retain];
 
     if ([self undoManager]) {
 		[[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:oldCiteKey 
@@ -895,9 +895,9 @@ static CFDictionaryRef selectorTable = NULL;
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", document, @"document", oldCiteKey, @"oldCiteKey", nil];
 
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){}
-    else
-        [[NSFileManager defaultManager] removeSpotlightCacheForItemNamed:oldCiteKey];
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
+        [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
+    [oldCiteKey release];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self

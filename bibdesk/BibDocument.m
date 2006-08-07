@@ -599,7 +599,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[pubs makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
 	[self removeFromItemsForCiteKeys:pubs];
 	if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
-		[[NSFileManager defaultManager] removeSpotlightCacheForItemsNamed:[pubs arrayByPerformingSelector:@selector(citeKey)]];
+		[[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification

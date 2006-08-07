@@ -598,21 +598,39 @@ static OSType finderSignatureBytes = 'MACS';
     return [self objectExistsAtFileURL:[NSURL fileURLWithPath:path]];
 }
 
-- (BOOL)removeSpotlightCacheForItemsNamed:(NSArray *)itemNames{
+- (BOOL)removeSpotlightCacheFilesForCiteKeys:(NSArray *)itemNames;
+{
 	NSEnumerator *nameEnum = [itemNames objectEnumerator];
 	NSString *name;
 	BOOL removed = YES;
 	
 	while (name = [nameEnum nextObject])
-		removed = removed && [self removeSpotlightCacheForItemNamed:name];
+		removed = removed && [self removeSpotlightCacheFileForCiteKey:name];
 	return removed;
 }
 
-- (BOOL)removeSpotlightCacheForItemNamed:(NSString *)itemName{
+- (NSString *)spotlightCacheFilePathWithCiteKey:(NSString *)citeKey;
+{
+    // We use citeKey as the file's name, since it needs to be unique and static (relatively speaking), so we can overwrite the old cache content with newer content when saving the document.  We replace pathSeparator in paths, as we can't create subdirectories with -[NSDictionary writeToFile:] (currently this is the POSIX path separator).
+    NSString *path = citeKey;
+    NSString *pathSeparator = [NSString pathSeparator];
+    if([path rangeOfString:pathSeparator].length){
+        NSMutableString *mutablePath = [[path mutableCopy] autorelease];
+        // replace with % as it can't occur in a cite key, so will still be unique
+        [mutablePath replaceOccurrencesOfString:pathSeparator withString:@"%" options:0 range:NSMakeRange(0, [path length])];
+        path = mutablePath;
+    }
+    path = [[self spotlightCacheFolderPathByCreating:NULL] stringByAppendingPathComponent:[path stringByAppendingPathExtension:@"bdskcache"]];
+    return path;
+}
 
-    NSString *fileName = [itemName stringByAppendingPathExtension:@"bdskcache"];
-    fileName = [[self spotlightCacheFolderPathByCreating:NULL] stringByAppendingPathComponent:fileName];
-    return [self deleteObjectAtFileURL:[NSURL fileURLWithPath:fileName] error:NULL];
+- (BOOL)removeSpotlightCacheFileForCiteKey:(NSString *)citeKey;
+{
+    NSString *path = [self spotlightCacheFilePathWithCiteKey:citeKey];
+    NSURL *theURL = nil;
+    if(path)
+        theURL = [NSURL fileURLWithPath:path];
+    return theURL ? [self deleteObjectAtFileURL:theURL error:NULL] : NO;
 }
 
 #pragma mark Webloc files

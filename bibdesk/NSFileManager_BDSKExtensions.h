@@ -74,8 +74,9 @@
 - (BOOL)spotlightCacheFolderExists;
 - (BOOL)removeSpotlightCacheFolder;
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError;
-- (BOOL)removeSpotlightCacheForItemsNamed:(NSArray *)itemNames;
-- (BOOL)removeSpotlightCacheForItemNamed:(NSString *)itemName;
+- (BOOL)removeSpotlightCacheFilesForCiteKeys:(NSArray *)itemNames;
+- (BOOL)removeSpotlightCacheFileForCiteKey:(NSString *)citeKey;
+- (NSString *)spotlightCacheFilePathWithCiteKey:(NSString *)citeKey;
 
 //
 // Thread safe API

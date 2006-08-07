@@ -1306,10 +1306,11 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     NSArray *publications = [userInfo valueForKey:@"publications"];
     NSMutableDictionary *metadata = [[NSMutableDictionary alloc] initWithCapacity:10];
     NSError *error = nil;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
     
     @try{
         
-        NSString *cachePath = [[NSFileManager defaultManager] spotlightCacheFolderPathByCreating:&error];
+        NSString *cachePath = [fileManager spotlightCacheFolderPathByCreating:&error];
         if(cachePath == nil){
             OFError(&error, NSCocoaErrorDomain, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create the cache folder for Spotlight metadata.", @""), nil);
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", cachePath] userInfo:nil];
@@ -1319,7 +1320,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         
         // After this point, there should be no underlying NSError, so we'll create one from scratch
         
-        if([[NSFileManager defaultManager] fileExistsAtPath:docPath] == NO){
+        if([fileManager fileExistsAtPath:docPath] == NO){
             error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @""), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache for document at path \"%@\"", docPath] userInfo:nil];
         }
@@ -1350,16 +1351,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             
             [metadata addEntriesFromDictionary:anItem];
 			
-            // We use citeKey as the file's name, since it needs to be unique and static (relatively speaking), so we can overwrite the old cache content with newer content when saving the document.  We replace pathSeparator in paths, as we can't create subdirectories with -[NSDictionary writeToFile:] (currently this is the POSIX path separator).
-            path = citeKey;
-            NSString *pathSeparator = [NSString pathSeparator];
-            if([path rangeOfString:pathSeparator].length){
-                NSMutableString *mutablePath = [[path mutableCopy] autorelease];
-                // replace with % as it can't occur in a cite key, so will still be unique
-                [mutablePath replaceOccurrencesOfString:pathSeparator withString:@"%" options:0 range:NSMakeRange(0, [path length])];
-                path = mutablePath;
-            }
-            path = [cachePath stringByAppendingPathComponent:[path stringByAppendingPathExtension:@"bdskcache"]];
+            path = [fileManager spotlightCacheFilePathWithCiteKey:citeKey];
             
             // Save the plist; we can get an error if these are not plist objects, or the file couldn't be written.  The first case is a programmer error, and the second should have been caught much earlier in this code.
             if([metadata writeToFile:path atomically:YES] == NO){
