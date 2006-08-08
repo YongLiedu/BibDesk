@@ -201,6 +201,7 @@
     [metadataCacheLock release];
     [metadataMessageQueue release];
 	[readmeWindow release];
+	[relnotesWindow release];
     [super dealloc];
 }
 
@@ -268,10 +269,10 @@
 			object:nil];
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
-        [self showReadMeFile:nil];
     if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey]])
         [self showRelNotes:nil];
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
+        [self showReadMeFile:nil];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoCheckForUpdatesKey])
@@ -894,23 +895,29 @@
 #pragma mark Panels
 
 - (IBAction)showReadMeFile:(id)sender{
-    if (readmeWindow == nil)
-        [NSBundle loadNibNamed:@"ReadMe" owner:self];
-    [readmeWindow setTitle:NSLocalizedString(@"ReadMe", "ReadMe")];
+    if (readmeWindow == nil) {
+        NSAssert([NSBundle loadNibNamed:@"ReadMe" owner:self], @"Unable to load ReadMe window");
+        [readmeTextView setString:@""];
+        [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
+                                         withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ReadMe" ofType:@"rtf"]]];	
+    }
     [readmeWindow makeKeyAndOrderFront:self];
-    [readmeTextView setString:@""];
-    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                     withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ReadMe" ofType:@"rtf"]]];	
 }
 
 - (IBAction)showRelNotes:(id)sender{
-    if (readmeWindow == nil)
-        [NSBundle loadNibNamed:@"ReadMe" owner:self];
-    [readmeWindow setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
-    [readmeWindow makeKeyAndOrderFront:self];
-    [readmeTextView setString:@""];
-    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                     withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
+    if (relnotesWindow == nil){
+        // we use the same nib as the ReadMe window, so loading the nib will connect the readmeWindow and readmeTextView outlets
+        NSWindow *savedWindow = readmeWindow;
+        readmeWindow = nil;
+        NSAssert([NSBundle loadNibNamed:@"ReadMe" owner:self], @"Unable to load Release Notes window");
+        relnotesWindow = readmeWindow;
+        readmeWindow = savedWindow;
+        [relnotesWindow setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
+        [readmeTextView setString:@""];
+        [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
+                                         withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
+    }
+    [relnotesWindow makeKeyAndOrderFront:self];
 }
 
 - (IBAction)showFindPanel:(id)sender{
