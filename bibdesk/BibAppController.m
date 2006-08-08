@@ -206,14 +206,7 @@
 
 
 - (void)awakeFromNib{
-
-	[self updateColumnsMenu];
-
-	// register to observe when the columns change, to update the columns menu
-	[[NSNotificationCenter defaultCenter] addObserver:self
-			selector:@selector(handleTableColumnsChangedNotification:)
-			name:BDSKTableColumnChangedNotification
-			object:nil];
+    // better not use this, as it is also called after the ReadMe nib is loaded, and we want to do it only once
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
@@ -250,8 +243,10 @@
     [NSApp setServicesProvider:self];
     NSUpdateDynamicServices();
     
+    // we do some UI initialization here instead of awakeFromNib, see remark there
+    // this seems to be called after awakeFromNib. Is that guaranteed?
+    
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
-    // ARM:  if we add this in -awakeFromNib, we get another script menu each time we show release notes or readme; whatever.
     if([BDSKScriptMenu disabled] == NO){
         NSString *scriptMenuTitle = @"Scripts";
         NSMenu *newMenu = [[BDSKScriptMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
@@ -263,6 +258,14 @@
         [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
         [scriptItem release];
     }
+
+	[self updateColumnsMenu];
+
+	// register to observe when the columns change, to update the columns menu
+	[[NSNotificationCenter defaultCenter] addObserver:self
+			selector:@selector(handleTableColumnsChangedNotification:)
+			name:BDSKTableColumnChangedNotification
+			object:nil];
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
