@@ -24,12 +24,7 @@
             }; 
             CLASS = BibAppController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {
-                columnsMenuItem = NSMenuItem; 
-                groupSortMenuItem = NSMenuItem; 
-                readmeTextView = NSTextView; 
-                readmeWindow = NSWindow; 
-            }; 
+            OUTLETS = {columnsMenuItem = NSMenuItem; groupSortMenuItem = NSMenuItem; }; 
             SUPERCLASS = NSObject; 
         }, 
         {
