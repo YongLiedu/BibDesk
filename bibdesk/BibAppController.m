@@ -506,7 +506,7 @@
     if([[menu title] isEqualToString:@"Scripts"]){
         [(BDSKScriptMenu *)menu reloadScriptMenu];
     } else {
-#warning what menu is this?
+        // this should be a Copy As > Template menu
         NSArray *styles = [BDSKTemplate allStyleNames];
         int i = [menu numberOfItems];
         while (i--) {
