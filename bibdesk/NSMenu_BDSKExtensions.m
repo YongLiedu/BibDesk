@@ -47,6 +47,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 @interface BDSKOpenWithMenuController : NSObject 
 + (id)sharedInstance;
+- (void)openURLWithApplication:(id)sender;
 @end
 
 @interface NSMenu (BDSKPrivate)
@@ -217,7 +218,8 @@ static id sharedOpenWithController = nil;
 }
 
 // action for opening a file with a specific application
-- (void)openURLWithApplication:(id)sender{
+- (void)openURLWithApplication:(id)sender;
+{
     NSURL *applicationURL = [[sender representedObject] valueForKey:BDSKMenuApplicationURL];
     NSURL *targetURL = [[sender representedObject] valueForKey:BDSKMenuTargetURL];
     

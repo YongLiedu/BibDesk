@@ -489,7 +489,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     BOOL validate = NO;
     if(@selector(delete:) == action){
         validate = [self canDeleteSelectedItem];
-    } else if(@selector(revealInFinder:) == action || @selector(openFile:) == action || @selector(editFile:) == action){
+    } else if(@selector(revealInFinder:) == action){
         int row = [outlineView selectedRow];
         if(row >= 0)
             validate = [[outlineView itemAtRow:row] isLeaf];
