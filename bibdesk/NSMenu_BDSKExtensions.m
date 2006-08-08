@@ -101,16 +101,27 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 - (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)index;
 {
-    NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
-    NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@""];
-    NSMenuItem *placeholderItem = [submenu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
-    [placeholderItem setRepresentedObject:[NSDictionary dictionaryWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil]];
-    [submenu setDelegate:[BDSKOpenWithMenuController sharedInstance]];
-    [item setSubmenu:submenu];
-    [self insertItem:item atIndex:index];
-    [submenu release];
-    [item release];
-    return item;
+    if (theURL == nil) {
+        // just return an empty item
+        return [self insertItemWithTitle:itemTitle action:NULL keyEquivalent:@"" atIndex:index];
+    }
+    
+    NSMenu *submenu;
+    NSMenuItem *item;
+    NSDictionary *representedObject;
+    BDSKOpenWithMenuController *controller;
+    
+    submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
+    [submenu setDelegate:controller];
+    
+    // add the choose... item, the other items are inserted lazily
+    item = [submenu addItemWithTitle:[NSLocalizedString(@"Choose", @"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
+    [item setTarget:controller];
+    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
+    [item setRepresentedObject:representedObject];
+    [representedObject release];
+    
+    return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:index];
 }
 
 - (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL;
@@ -125,13 +136,9 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 - (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
 {    
-    // if a menu item is the only thing retaining this URL, removing all items will cause it to become invalid
-    [[aURL retain] autorelease];
-    [self removeAllItems];
-    
-    // if there's no url, just return an empty submenu, since we can't find applications
-    if(nil == aURL)
-        return;
+    OBASSERT([self numberOfItems] > 0);
+    while([self numberOfItems] > 1)
+        [self removeItemAtIndex:0];
     
     NSZone *menuZone = [NSMenu menuZone];
     NSMenuItem *item;
@@ -163,21 +170,9 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
         [image setSize:NSMakeSize(16,16)];
         [item setImage:image];
         [representedObject release];
-        if([defaultEditorURL isEqual:applicationURL])
-            [self insertItem:item atIndex:0];
-        else
-            [self addItem:item];
+        [self insertItem:item atIndex:([defaultEditorURL isEqual:applicationURL]) ? 0 : [self numberOfItems] - 1];
         [item release];
     }
-    
-    // add the choose... item
-    item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSLocalizedString(@"Choose",@"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
-    [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
-    representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, nil];
-    [item setRepresentedObject:representedObject];
-    [representedObject release];
-    [self addItem:item];
-    [item release];
 }
 
 @end
@@ -230,7 +225,9 @@ static id sharedOpenWithController = nil;
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
+    OBASSERT([self numberOfItems] > 0);
     NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
+    OBASSERT(theURL != nil);
     if(theURL != nil)
         [menu replaceAllItemsWithApplicationsForURL:theURL];
 }
