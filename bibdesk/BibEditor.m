@@ -487,6 +487,11 @@ static int numberOfOpenEditors = 0;
     }
 }
 
+// prevents the menus from being updated just to look for key equivalents
+- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action{
+    return NO;
+}
+
 - (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
     [self updateMenu:menu forImagePopUpButton:view];
