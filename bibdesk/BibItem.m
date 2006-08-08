@@ -311,9 +311,10 @@ static CFDictionaryRef selectorTable = NULL;
 	
 	// compare only the standard fields; are these all we should compare?
 	BibTypeManager *btm = [BibTypeManager sharedManager];
-	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:14];
+	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
 	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
+	[keys addObjectsFromArray:[btm userDefaultFieldsForType:[self pubType]]];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
     
