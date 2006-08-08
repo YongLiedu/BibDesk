@@ -59,7 +59,9 @@
 	
     IBOutlet NSTextView* readmeTextView;
     IBOutlet NSWindow* readmeWindow;
-	
+    
+    NSWindow* relnotesWindow;
+    
 	IBOutlet NSMenuItem * columnsMenuItem;
 	IBOutlet NSMenuItem * groupSortMenuItem;
 
