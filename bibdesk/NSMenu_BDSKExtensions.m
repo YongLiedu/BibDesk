@@ -114,7 +114,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@""];
     [submenu setDelegate:controller];
     
-    // add the choose... item, the other items are inserted lazily
+    // add the choose... item, the other items are inserted lazily by BDSKOpenWithMenuController
     item = [submenu addItemWithTitle:[NSLocalizedString(@"Choose", @"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
     [item setTarget:controller];
     representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
@@ -136,6 +136,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
 
 - (void)replaceAllItemsWithApplicationsForURL:(NSURL *)aURL;
 {    
+    // assumption: last item is "Choose..." item; note that this item may be the only thing retaining aURL
     OBASSERT([self numberOfItems] > 0);
     while([self numberOfItems] > 1)
         [self removeItemAtIndex:0];
@@ -158,9 +159,8 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
         if([defaultEditorURL isEqual:applicationURL])
             menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
         
-        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];
-        
-        // BDSKOpenWithMenuController singleton implements this
+        // BDSKOpenWithMenuController singleton implements openURLWithApplication:
+        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
         [item setTarget:[BDSKOpenWithMenuController sharedInstance]];
         representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:aURL, BDSKMenuTargetURL, applicationURL, BDSKMenuApplicationURL, nil];
         [item setRepresentedObject:representedObject];
