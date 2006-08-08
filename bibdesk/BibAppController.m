@@ -258,11 +258,13 @@
     
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
     // ARM:  if we add this in -awakeFromNib, we get another script menu each time we show release notes or readme; whatever.
-    if([BDSKScriptMenuItem disabled] == NO){
-        NSString *scriptMenuTitle = @"";
-        NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
-        BDSKScriptMenuItem *scriptItem = [[BDSKScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
+    if([BDSKScriptMenu disabled] == NO){
+        NSString *scriptMenuTitle = @"Scripts";
+        NSMenu *newMenu = [[BDSKScriptMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
+        NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
+        [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
         [scriptItem setSubmenu:newMenu];
+        [newMenu setDelegate:self];
         [newMenu release];
         [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
         [scriptItem release];
@@ -501,19 +503,24 @@
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
-    NSArray *styles = [BDSKTemplate allStyleNames];
-    int i = [menu numberOfItems];
-    while (i--) {
-        if ([[menu itemAtIndex:i] tag] < BDSKTemplateDragCopyType)
-            break;
-        [menu removeItemAtIndex:i];
-    }
-    
-    NSMenuItem *item;
-    int count = [styles count];
-    for (i = 0; i < count; i++) {
-        item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
-        [item setTag:BDSKTemplateDragCopyType + i];
+    if([[menu title] isEqualToString:@"Scripts"]){
+        [(BDSKScriptMenu *)menu reloadScriptMenu];
+    } else {
+#warning what menu is this?
+        NSArray *styles = [BDSKTemplate allStyleNames];
+        int i = [menu numberOfItems];
+        while (i--) {
+            if ([[menu itemAtIndex:i] tag] < BDSKTemplateDragCopyType)
+                break;
+            [menu removeItemAtIndex:i];
+        }
+        
+        NSMenuItem *item;
+        int count = [styles count];
+        for (i = 0; i < count; i++) {
+            item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+            [item setTag:BDSKTemplateDragCopyType + i];
+        }
     }
 }
 

@@ -42,29 +42,16 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniAppKit/OAApplication.h>
 
-#define SCRIPT_REFRESH_TIMEOUT (5.0)
-
-@interface BDSKScriptMenuItem (Private)
-// copy OAScriptMenuItem private API
+@interface BDSKScriptMenu (Private)
 - (NSArray *)scripts;
 - (NSArray *)scriptPaths;
-- (void)updateScripts;
-- (void)setup;
 - (NSArray *)directoryContentsAtPath:(NSString *)path;
 - (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
 - (void)executeScript:(id)sender;
 - (void)openScript:(id)sender;
 @end
 
-@implementation BDSKScriptMenuItem
-
-static NSImage *scriptImage;
-
-+ (void)initialize;
-{
-    OBINITIALIZE;
-    scriptImage = [[NSImage imageNamed:@"OAScriptMenu"] retain];
-}
+@implementation BDSKScriptMenu
 
 + (BOOL)disabled;
 {
@@ -72,64 +59,14 @@ static NSImage *scriptImage;
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"OAScriptMenuDisabled"];
 }
 
-- initWithTitle:(NSString *)aTitle action:(SEL)anAction keyEquivalent:(NSString *)charCode;
+- (void)reloadScriptMenu;
 {
-    [super initWithTitle:aTitle action:anAction keyEquivalent:charCode];
-    [self setup];
-    return self;
-}
-
-- initWithCoder:(NSCoder *)coder;
-{
-    // Init from nib
-    [super initWithCoder:coder];
-    [self setup];
-    return self;
-}
-
-- (void)dealloc;
-{
-    [cachedScripts release];
-    [cachedScriptsDate release];
-    [super dealloc];
-}
-
-- (NSMenu *)submenu;
-{        
-    if (cachedScriptsDate == nil)
-        // We've never been updated, so we are likely launching the application.  Don't delay that.
-        [self queueSelectorOnce:@selector(updateScripts)];
-    else if ([[NSDate date] timeIntervalSinceDate:cachedScriptsDate] > SCRIPT_REFRESH_TIMEOUT)
-        // We haven't been updated in a while and the external filesystem might have changed.  Update right now.  The issue is that we might be asked due to tracking starting on the menu.  We don't want to queue the selector in this case since that can modify the menu out from underneath the Carbon menu tracking code, leaving to a crash.
-        [self updateScripts];
-    
-    return [super submenu];
+    [self updateSubmenu:self withScripts:[self scripts]];
 }
 
 @end
 
-@implementation BDSKScriptMenuItem (Private)
-/*
-Copied and modified from OmniAppKit/OAScriptMenuItem.h
-*/
-
-// this method is the preferred way to call updateSubmenu:withScripts, as it checks for a nil menu
-- (void)updateScripts;
-{
-    NSMenu *menu = [super submenu];
-    if(menu != nil)
-        [self updateSubmenu:menu withScripts:[self scripts]];
-}
-
-- (void)setup;
-{
-    if ([isa disabled]) {
-        // Don't queue anything since OAApplication will remove it.  We have to do it there (instead of here) since we can't modify the menu here while it is loading and if we queue it, the menu item will get displayed briefly and then disappear.
-    } else {
-        [self setImage:scriptImage]; // does nothing on 10.2 and earlier, replaces title with icon on 10.3+
-        [self queueSelectorOnce:@selector(updateScripts)];
-    }
-}
+@implementation BDSKScriptMenu (Private)
 
 static NSComparisonResult
 scriptSort(id script1, id script2, void *context)
@@ -143,7 +80,7 @@ scriptSort(id script1, id script2, void *context)
     NSMutableArray *scripts;
     NSArray *scriptFolders;
     unsigned int scriptFolderIndex, scriptFolderCount;
-
+    
     scripts = [[NSMutableArray alloc] init];
     scriptFolders = [self scriptPaths];
     scriptFolderCount = [scriptFolders count];
@@ -155,13 +92,7 @@ scriptSort(id script1, id script2, void *context)
 	
 	[scripts sortUsingFunction:scriptSort context:@"filename"];
     
-	[cachedScripts release];
-    cachedScripts = scripts;
-
-    [cachedScriptsDate release];
-    cachedScriptsDate = [[NSDate alloc] init];
-    
-	return cachedScripts;
+	return [scripts autorelease];
 }
 
 - (NSArray *)directoryContentsAtPath:(NSString *)path 
@@ -201,7 +132,6 @@ scriptSort(id script1, id script2, void *context)
 
 - (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
 {
-    
     // we call this method recursively; if the menu is nil, the stuff we add won't be retained
     NSParameterAssert(menu != nil);
     
@@ -210,7 +140,7 @@ scriptSort(id script1, id script2, void *context)
     
     [menu setAutoenablesItems:NO];
     [menu removeAllItems];
-
+    
     while (scriptInfo = [scriptEnum nextObject]) {
         NSString *scriptFilename = [scriptInfo objectForKey:@"filename"];
 		NSArray *folderContent = [scriptInfo objectForKey:@"content"];
@@ -286,13 +216,13 @@ scriptSort(id script1, id script2, void *context)
     NSAppleScript *script;
     NSDictionary *errorDictionary;
     NSAppleEventDescriptor *result;
-
+    
     scriptFilename = [sender representedObject];
     scriptName = [[NSFileManager defaultManager] displayNameAtPath:scriptFilename];
     script = [[[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptFilename] error:&errorDictionary] autorelease];
     if (script == nil) {
         NSString *errorText, *messageText, *okButton;
-
+        
         errorText = [NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"script loading error"), scriptName];
         messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
         okButton = NSLocalizedString(@"OK", @"OK");
@@ -302,7 +232,7 @@ scriptSort(id script1, id script2, void *context)
     result = [script executeAndReturnError:&errorDictionary];
     if (result == nil) {
         NSString *errorText, *messageText, *okButton, *editButton;
-
+        
         errorText = [NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"script execute error"), scriptName];
         messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
         okButton = NSLocalizedString(@"OK", "OK");
