@@ -74,6 +74,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "BDSKReadMeController.h"
 
 @implementation BibAppController
 
@@ -200,14 +201,31 @@
 	[requiredFieldsForCiteKey release];
     [metadataCacheLock release];
     [metadataMessageQueue release];
-	[readmeWindow release];
-	[relnotesWindow release];
     [super dealloc];
 }
 
 
 - (void)awakeFromNib{
-    // better not use this, as it is also called after the ReadMe nib is loaded, and we want to do it only once
+    // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
+    if([BDSKScriptMenu disabled] == NO){
+        NSString *scriptMenuTitle = @"Scripts";
+        NSMenu *newMenu = [[BDSKScriptMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
+        NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
+        [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
+        [scriptItem setSubmenu:newMenu];
+        [newMenu setDelegate:self];
+        [newMenu release];
+        [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
+        [scriptItem release];
+    }
+
+	[self updateColumnsMenu];
+
+	// register to observe when the columns change, to update the columns menu
+	[[NSNotificationCenter defaultCenter] addObserver:self
+			selector:@selector(handleTableColumnsChangedNotification:)
+			name:BDSKTableColumnChangedNotification
+			object:nil];
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
@@ -243,30 +261,6 @@
     // register as a service provider for completecitation:
     [NSApp setServicesProvider:self];
     NSUpdateDynamicServices();
-    
-    // we do some UI initialization here instead of awakeFromNib, see remark there
-    // this seems to be called after awakeFromNib. Is that guaranteed?
-    
-    // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
-    if([BDSKScriptMenu disabled] == NO){
-        NSString *scriptMenuTitle = @"Scripts";
-        NSMenu *newMenu = [[BDSKScriptMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
-        NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
-        [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
-        [scriptItem setSubmenu:newMenu];
-        [newMenu setDelegate:self];
-        [newMenu release];
-        [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
-        [scriptItem release];
-    }
-
-	[self updateColumnsMenu];
-
-	// register to observe when the columns change, to update the columns menu
-	[[NSNotificationCenter defaultCenter] addObserver:self
-			selector:@selector(handleTableColumnsChangedNotification:)
-			name:BDSKTableColumnChangedNotification
-			object:nil];
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey]])
@@ -895,29 +889,11 @@
 #pragma mark Panels
 
 - (IBAction)showReadMeFile:(id)sender{
-    if (readmeWindow == nil) {
-        NSAssert([NSBundle loadNibNamed:@"ReadMe" owner:self], @"Unable to load ReadMe window");
-        [readmeTextView setString:@""];
-        [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                         withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ReadMe" ofType:@"rtf"]]];	
-    }
-    [readmeWindow makeKeyAndOrderFront:self];
+    [[BDSKReadMeController sharedReadMeController] showWindow:self];
 }
 
 - (IBAction)showRelNotes:(id)sender{
-    if (relnotesWindow == nil){
-        // we use the same nib as the ReadMe window, so loading the nib will connect the readmeWindow and readmeTextView outlets
-        NSWindow *savedWindow = readmeWindow;
-        readmeWindow = nil;
-        NSAssert([NSBundle loadNibNamed:@"ReadMe" owner:self], @"Unable to load Release Notes window");
-        relnotesWindow = readmeWindow;
-        readmeWindow = savedWindow;
-        [relnotesWindow setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
-        [readmeTextView setString:@""];
-        [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                         withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
-    }
-    [relnotesWindow makeKeyAndOrderFront:self];
+    [[BDSKRelNotesController sharedRelNotesController] showWindow:self];
 }
 
 - (IBAction)showFindPanel:(id)sender{

@@ -56,11 +56,6 @@
 	// auto generation format
 	NSArray *requiredFieldsForCiteKey;
 	NSArray *requiredFieldsForLocalUrl;
-	
-    IBOutlet NSTextView* readmeTextView;
-    IBOutlet NSWindow* readmeWindow;
-    
-    NSWindow* relnotesWindow;
     
 	IBOutlet NSMenuItem * columnsMenuItem;
 	IBOutlet NSMenuItem * groupSortMenuItem;
