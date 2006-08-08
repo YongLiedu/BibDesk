@@ -213,7 +213,6 @@
         NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
         [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
         [scriptItem setSubmenu:newMenu];
-        [newMenu setDelegate:self];
         [newMenu release];
         [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
         [scriptItem release];
@@ -500,24 +499,20 @@
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
-    if([[menu title] isEqualToString:@"Scripts"]){
-        [(BDSKScriptMenu *)menu reloadScriptMenu];
-    } else {
-        // this should be a Copy As > Template menu
-        NSArray *styles = [BDSKTemplate allStyleNames];
-        int i = [menu numberOfItems];
-        while (i--) {
-            if ([[menu itemAtIndex:i] tag] < BDSKTemplateDragCopyType)
-                break;
-            [menu removeItemAtIndex:i];
-        }
-        
-        NSMenuItem *item;
-        int count = [styles count];
-        for (i = 0; i < count; i++) {
-            item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
-            [item setTag:BDSKTemplateDragCopyType + i];
-        }
+    // this should be a Copy As > Template menu
+    NSArray *styles = [BDSKTemplate allStyleNames];
+    int i = [menu numberOfItems];
+    while (i--) {
+        if ([[menu itemAtIndex:i] tag] < BDSKTemplateDragCopyType)
+            break;
+        [menu removeItemAtIndex:i];
+    }
+    
+    NSMenuItem *item;
+    int count = [styles count];
+    for (i = 0; i < count; i++) {
+        item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+        [item setTag:BDSKTemplateDragCopyType + i];
     }
 }
 

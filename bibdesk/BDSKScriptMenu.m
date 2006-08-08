@@ -42,6 +42,33 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniAppKit/OAApplication.h>
 
+@interface BDSKScriptMenuController : NSObject
+@end
+
+@implementation BDSKScriptMenuController
+
+static id sharedScriptMenuController = nil;
+
++ (id)sharedInstance;
+{
+    if(nil == sharedScriptMenuController)
+        sharedScriptMenuController = [[self alloc] init];
+    return sharedScriptMenuController;
+}
+
+- (void)menuNeedsUpdate:(BDSKScriptMenu *)menu
+{
+    [menu reloadScriptMenu];
+}
+
+- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action
+{
+    // implemented so the menu isn't populated on every key event
+    return NO;
+}
+
+@end
+
 @interface BDSKScriptMenu (Private)
 - (NSArray *)scripts;
 - (NSArray *)scriptPaths;
@@ -52,6 +79,19 @@
 @end
 
 @implementation BDSKScriptMenu
+
+- (id)initWithTitle:(NSString *)aTitle;
+{
+    self = [super initWithTitle:aTitle];
+    [self setDelegate:[BDSKScriptMenuController sharedInstance]];
+    return self;
+}
+
+- (void)dealloc
+{
+    [cachedScripts release];
+    [super dealloc];
+}
 
 + (BOOL)disabled;
 {
@@ -82,7 +122,7 @@ static Boolean scriptsArraysAreEqual(NSArray *array1, NSArray *array2)
 - (void)reloadScriptMenu;
 {
     NSArray *scripts = [self scripts];
-    
+    BDSKLOGIMETHOD();
     // don't recreate the menu unless the directory on disk has actually changed
     if(nil == cachedScripts || scriptsArraysAreEqual(cachedScripts, scripts) == FALSE){
         [self updateSubmenu:self withScripts:scripts];
@@ -94,12 +134,6 @@ static Boolean scriptsArraysAreEqual(NSArray *array1, NSArray *array2)
 @end
 
 @implementation BDSKScriptMenu (Private)
-
-- (void)dealloc
-{
-    [cachedScripts release];
-    [super dealloc];
-}
 
 static NSComparisonResult
 scriptSort(id script1, id script2, void *context)
