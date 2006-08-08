@@ -109,7 +109,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSMenu *submenu;
     NSMenuItem *item;
     NSDictionary *representedObject;
-    BDSKOpenWithMenuController *controller;
+    BDSKOpenWithMenuController *controller = [BDSKOpenWithMenuController sharedInstance];
     
     submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
     [submenu setDelegate:controller];
