@@ -498,6 +498,9 @@
     return [super validateToolbarItem:toolbarItem];
 }
 
+// implemented in order to prevent the Copy As > Template menu from being updated at every key event
+- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action { return NO; }
+
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     // this should be a Copy As > Template menu
     NSArray *styles = [BDSKTemplate allStyleNames];
@@ -1115,9 +1118,9 @@
                                                                     inField:constraintKey 
                                                                    forArray:[aDoc publications]]];
         }
-	// we have one set per search term, so copy it to an array and we'll get the next set of matches
-	[arrayOfSets addObject:[[itemsFound copy] autorelease]];
-	[itemsFound removeAllObjects];
+        // we have one set per search term, so copy it to an array and we'll get the next set of matches
+        [arrayOfSets addObject:[[itemsFound copy] autorelease]];
+        [itemsFound removeAllObjects];
     }
     
     // sort the sets in order of increasing length indexed 0-->[arrayOfSets length]
@@ -1129,7 +1132,7 @@
 
     NSSet *aSet = nil;
     while(aSet = [e nextObject]){
-	[itemsFound intersectSet:aSet];
+        [itemsFound intersectSet:aSet];
     }
     return itemsFound;
 }
@@ -1181,15 +1184,12 @@
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
 
     NSSet *items = [self itemsMatchingCiteKey:pboardString];
-	NSDictionary *itemDict = nil;
 	BibItem *item;
 	BibDocument *doc = nil;
 	NSEnumerator *itemE = [items objectEnumerator];
     
-    while(itemDict = [itemE nextObject]){
-		doc = [itemDict objectForKey:@"BibDocument"];
-		item = [itemDict objectForKey:@"BibItem"];
-		[doc editPub:item];
+    while(item = [itemE nextObject]){
+		[[item document] editPub:item];
     }
 
 }
