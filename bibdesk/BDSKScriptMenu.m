@@ -122,7 +122,6 @@ static Boolean scriptsArraysAreEqual(NSArray *array1, NSArray *array2)
 - (void)reloadScriptMenu;
 {
     NSArray *scripts = [self scripts];
-    BDSKLOGIMETHOD();
     // don't recreate the menu unless the directory on disk has actually changed
     if(nil == cachedScripts || scriptsArraysAreEqual(cachedScripts, scripts) == FALSE){
         [self updateSubmenu:self withScripts:scripts];
