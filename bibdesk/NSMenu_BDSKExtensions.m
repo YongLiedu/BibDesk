@@ -111,7 +111,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSDictionary *representedObject;
     BDSKOpenWithMenuController *controller = [BDSKOpenWithMenuController sharedInstance];
     
-    submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
+    submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@""];
     [submenu setDelegate:controller];
     
     // add the choose... item, the other items are inserted lazily
@@ -225,7 +225,7 @@ static id sharedOpenWithController = nil;
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
-    OBASSERT([self numberOfItems] > 0);
+    OBASSERT([menu numberOfItems] > 0);
     NSURL *theURL = [[[[menu itemArray] lastObject] representedObject] valueForKey:BDSKMenuTargetURL];
     OBASSERT(theURL != nil);
     if(theURL != nil)
