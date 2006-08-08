@@ -232,6 +232,12 @@ static id sharedOpenWithController = nil;
         [menu replaceAllItemsWithApplicationsForURL:theURL];
 }
 
+// this is needed to prevent the menu from being updated just to look for key equivalents, 
+// which would lead to considerable slowdown of key events
+- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action{
+    return NO;
+}
+ 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
     if ([menuItem action] == @selector(openURLWithApplication:)) {
         NSURL *theURL = [[menuItem representedObject] valueForKey:BDSKMenuTargetURL];
