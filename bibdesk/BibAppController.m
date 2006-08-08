@@ -1185,7 +1185,6 @@
 
     NSSet *items = [self itemsMatchingCiteKey:pboardString];
 	BibItem *item;
-	BibDocument *doc = nil;
 	NSEnumerator *itemE = [items objectEnumerator];
     
     while(item = [itemE nextObject]){
