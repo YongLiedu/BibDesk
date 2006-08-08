@@ -214,12 +214,6 @@
 			selector:@selector(handleTableColumnsChangedNotification:)
 			name:BDSKTableColumnChangedNotification
 			object:nil];
-    
-    // copy files to application support
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    [self copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
-    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];    
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
@@ -291,6 +285,11 @@
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowingPreviewKey])
 		[[BDSKPreviewer sharedPreviewer] showPreviewPanel:self];
     
+    // copy files to application support
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    [self copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
+    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];    
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
