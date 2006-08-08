@@ -1093,8 +1093,6 @@
 		CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAddSmart.tiff; path = Images/GroupAddSmart.tiff; sourceTree = "<group>"; };
 		CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CIImage_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CIImage_BDSKExtensions.m; sourceTree = "<group>"; };
-		CE95A17F0A88760D00334DFA /* BDSKScriptMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptMenuItem.m; sourceTree = "<group>"; };
-		CE95A1800A88762E00334DFA /* BDSKScriptMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptMenuItem.h; sourceTree = "<group>"; };
 		CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableHeaderView_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableHeaderView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE97A3B90A28F19A00CF2DF3 /* Templates */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Templates; sourceTree = "<group>"; };
@@ -1770,7 +1768,6 @@
 				F961FA9508C9429700332460 /* BDSKPrintableView.m */,
 				CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */,
 				CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */,
-				CE95A17F0A88760D00334DFA /* BDSKScriptMenuItem.m */,
 				CEF7A6670915115B00BE9E02 /* BDSKScriptMenu.m */,
 				F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */,
 				F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */,
@@ -2139,7 +2136,6 @@
 				CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */,
 				CED65DCA0907A338003EED90 /* BDSKScriptHook+Scripting.h */,
 				CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */,
-				CE95A1800A88762E00334DFA /* BDSKScriptMenuItem.h */,
 				CEF7A6660915115B00BE9E02 /* BDSKScriptMenu.h */,
 				F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */,
 				F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */,
