@@ -3592,29 +3592,28 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     
-    CFIndex index = [tableView numberOfRows];
-    id object1, object2;
+    CFIndex index = [tableView numberOfRows] - 1;
+    id object1 = nil, object2 = nil;
     
     OBASSERT(lastSelectedColumnForSort);
     
-    NSMutableSet *itemsToSelect = [NSMutableSet setWithCapacity:10];
+    NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
+    CFIndex countOfItems = 0;
     
     // Compare objects in the currently sorted table column using the isEqual: method to test adjacent cells in order to check for duplicates based on a specific sort key.  BibTool does this, but its effectiveness is obviously limited by the key used <http://lml.ls.fi.upm.es/manuales/bibtool/m_2_11_1.html>.
-    while(--index){
-        object1 = [self tableView:tableView objectValueForTableColumn:lastSelectedColumnForSort row:index];
-        object2 = [self tableView:tableView objectValueForTableColumn:lastSelectedColumnForSort row:(index - 1)];
+    while(index--){
+        object1 = object2;
+        object2 = [self tableView:tableView objectValueForTableColumn:lastSelectedColumnForSort row:index];
         if([object1 isEqual:object2]){
-            [itemsToSelect addObject:[shownPublications objectAtIndex:index]];
-            [itemsToSelect addObject:[shownPublications objectAtIndex:(index - 1)]];
+            [rowsToSelect addIndexesInRange:NSMakeRange(index, 2)];
+            countOfItems++;
         }
     }
-	CFIndex countOfItems = [itemsToSelect count];
-	
-	[self highlightBibs:[itemsToSelect allObjects]];
     
-    if(countOfItems)
-        [tableView scrollRowToVisible:[tableView selectedRow]];  // make sure at least one item is visible
-    else
+    if(countOfItems){
+        [tableView selectRowIndexes:rowsToSelect byExtendingSelection:NO];
+        [tableView scrollRowToVisible:[rowsToSelect firstIndex]];  // make sure at least one item is visible
+    }else
         NSBeep();
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
