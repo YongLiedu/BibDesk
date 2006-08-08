@@ -1,5 +1,5 @@
 //
-//  BDSKScriptMenuItem.h
+//  BDSKScriptMenu.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 30/10/05.

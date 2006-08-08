@@ -50,7 +50,7 @@
 #import "BDSKFindController.h"
 #import <OmniFoundation/OFVersionNumber.h>
 #import "BDSKFileContentSearchController.h"
-#import "BDSKScriptMenuItem.h"
+#import "BDSKScriptMenu.h"
 #import "BibDocument_Search.h"
 #import "BDSKPathIconTransformer.h"
 #import "BDSKFormatParser.h"

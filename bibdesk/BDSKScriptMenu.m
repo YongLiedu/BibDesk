@@ -1,5 +1,5 @@
 //
-//  BDSKScriptMenuItem.m
+//  BDSKScriptMenu.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 30/10/05.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKScriptMenuItem.h"
+#import "BDSKScriptMenu.h"
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniAppKit/NSMenu-OAExtensions.h>
 #import <OmniBase/OmniBase.h>
