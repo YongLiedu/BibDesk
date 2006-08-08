@@ -59,14 +59,47 @@
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"OAScriptMenuDisabled"];
 }
 
+static Boolean scriptsArraysAreEqual(NSArray *array1, NSArray *array2)
+{
+    CFIndex count = CFArrayGetCount((CFArrayRef)array1);
+    Boolean arraysAreEqual = FALSE;
+    if(count == CFArrayGetCount((CFArrayRef)array2)){
+        CFIndex idx;
+        NSDictionary *dict1, *dict2;
+        for(idx = 0; idx < count; idx++){
+            dict1 = (id)CFArrayGetValueAtIndex((CFArrayRef)array1, idx);
+            dict2 = (id)CFArrayGetValueAtIndex((CFArrayRef)array2, idx);
+            if([dict1 isEqualToDictionary:dict2] == NO){
+                arraysAreEqual = FALSE;
+                break;
+            }
+        }
+        arraysAreEqual = TRUE;
+    }
+    return arraysAreEqual;
+}
+
 - (void)reloadScriptMenu;
 {
-    [self updateSubmenu:self withScripts:[self scripts]];
+    NSArray *scripts = [self scripts];
+    
+    // don't recreate the menu unless the directory on disk has actually changed
+    if(nil == cachedScripts || scriptsArraysAreEqual(cachedScripts, scripts) == FALSE){
+        [self updateSubmenu:self withScripts:scripts];
+        [cachedScripts release];
+        cachedScripts = [scripts copy];
+    }   
 }
 
 @end
 
 @implementation BDSKScriptMenu (Private)
+
+- (void)dealloc
+{
+    [cachedScripts release];
+    [super dealloc];
+}
 
 static NSComparisonResult
 scriptSort(id script1, id script2, void *context)
@@ -131,7 +164,7 @@ scriptSort(id script1, id script2, void *context)
 }
 
 - (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
-{
+{        
     // we call this method recursively; if the menu is nil, the stuff we add won't be retained
     NSParameterAssert(menu != nil);
     

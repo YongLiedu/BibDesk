@@ -39,6 +39,10 @@
 #import <Cocoa/Cocoa.h>
 
 @interface BDSKScriptMenu : NSMenu
+{
+    NSArray *cachedScripts;
+}
+
 + (BOOL)disabled;
 - (void)reloadScriptMenu;
 @end
