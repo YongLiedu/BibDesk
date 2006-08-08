@@ -117,7 +117,7 @@ scriptSort(id script1, id script2, void *context)
     scripts = [[NSMutableArray alloc] init];
     scriptFolders = [self scriptPaths];
     scriptFolderCount = [scriptFolders count];
-	
+    
     for (scriptFolderIndex = 0; scriptFolderIndex < scriptFolderCount; scriptFolderIndex++) {
         NSString *scriptFolder = [scriptFolders objectAtIndex:scriptFolderIndex];
 		[scripts addObjectsFromArray:[self directoryContentsAtPath:scriptFolder]];
@@ -219,28 +219,34 @@ scriptSort(id script1, id script2, void *context)
 
 - (NSArray *)scriptPaths;
 {
-    NSString *appSupportDirectory = nil;
+    static NSArray *scriptPaths = nil;
     
-    id appDelegate = [NSApp delegate];
-    if (appDelegate != nil && [appDelegate respondsToSelector:@selector(applicationSupportDirectoryName)])
-        appSupportDirectory = [appDelegate applicationSupportDirectoryName];
-    
-    if (appSupportDirectory == nil)
-        appSupportDirectory = [[NSProcessInfo processInfo] processName];
-    
-    NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSAllDomainsMask, YES);
-    unsigned int libraryIndex, libraryCount;
-    libraryCount = [libraries count];
-    NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
-    for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
-        NSString *library = [libraries objectAtIndex:libraryIndex];        
+    if(nil == scriptPaths){
+        NSString *appSupportDirectory = nil;
         
-        [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
+        id appDelegate = [NSApp delegate];
+        if (appDelegate != nil && [appDelegate respondsToSelector:@selector(applicationSupportDirectoryName)])
+            appSupportDirectory = [appDelegate applicationSupportDirectoryName];
+        
+        if (appSupportDirectory == nil)
+            appSupportDirectory = [[NSProcessInfo processInfo] processName];
+        
+        NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSAllDomainsMask, YES);
+        unsigned int libraryIndex, libraryCount;
+        libraryCount = [libraries count];
+        NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
+        for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
+            NSString *library = [libraries objectAtIndex:libraryIndex];        
+            
+            [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
+        }
+        
+        [result addObject:[[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"Contents"] stringByAppendingPathComponent:@"Scripts"]];
+        scriptPaths = [result copy];
+        [result release];
     }
     
-    [result addObject:[[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"Contents"] stringByAppendingPathComponent:@"Scripts"]];
-    
-    return [result autorelease];
+    return scriptPaths;
 }
 
 - (void)executeScript:(id)sender;
