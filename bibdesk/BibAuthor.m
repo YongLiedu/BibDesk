@@ -123,6 +123,8 @@ static BibAuthor *emptyAuthorInstance = nil;
 	[jrPart release];
 	[normalizedName release];
     [sortableName release];
+    [abbreviatedName release];
+    [abbreviatedNormalizedName release];
     [fuzzyName release];
     [super dealloc];
 }
