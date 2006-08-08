@@ -69,91 +69,43 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 - (NSMenu *)searchFieldMenu{
 	NSMenu *cellMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Search Menu"] autorelease];
 	NSMenuItem *anItem;
-	int curIndex = 0;
 	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Recent Searches",@"Recent Searches menu item") action:NULL keyEquivalent:@""];
+	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Recent Searches", @"Recent Searches menu item") action:NULL keyEquivalent:@""];
 	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
+	
+    anItem = [cellMenu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
 	[anItem setTag:NSSearchFieldRecentsMenuItemTag];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
+    
+	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Clear Recent Searches", @"Clear menu item") action:NULL keyEquivalent:@""];
+	[anItem setTag:NSSearchFieldClearRecentsMenuItemTag];
     
     // this tag conditionally inserts a separator if there are recent searches (is it safe to set a tag on the separator item?)
     anItem = [NSMenuItem separatorItem];
 	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
+	[cellMenu addItem:anItem];
     
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Clear Recent Searches",@"Clear menu item") action:NULL keyEquivalent:@""];
-	[anItem setTag:NSSearchFieldClearRecentsMenuItemTag];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
-    
-	// another conditional separator item, this one without the line
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"" action:NULL keyEquivalent:@""];
-	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
-    
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Search Fields",@"Search Fields menu item") action:nil keyEquivalent:@""];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
-	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field",@"Add Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchAddField:) keyEquivalent:@""];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
-	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field",@"Remove Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
-	
-	[cellMenu insertItem:[NSMenuItem separatorItem] atIndex:curIndex++];
-	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[cellMenu insertItem:anItem atIndex:curIndex++];
-	[anItem release];
-
+	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Fields", @"Search Fields menu item") action:NULL keyEquivalent:@""];
+    [cellMenu addItemWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-        [cellMenu insertItem:anItem atIndex:curIndex++];
-        [anItem release];
-        [cellMenu insertItem:[NSMenuItem separatorItem] atIndex:curIndex++];
+        [cellMenu addItemWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
     }
         
-    NSMutableArray *itemArray = [NSMutableArray arrayWithCapacity:5];
+	NSMutableArray *quickSearchKeys = [[NSMutableArray alloc] initWithObjects:BDSKAuthorString, BDSKDateString, BDSKTitleString, nil];
+    [quickSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKQuickSearchKeys]];
+    [quickSearchKeys sortUsingSelector:@selector(compare:)];
     
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:BDSKTitleString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[itemArray addObject:anItem];
-	[anItem release];
-	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:BDSKAuthorString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[itemArray addObject:anItem];
-	[anItem release];
-	
-	anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:BDSKDateString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[itemArray addObject:anItem];
-	[anItem release];
-    	
-	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
     NSString *aKey = nil;
-    NSEnumerator *quickSearchKeyE = [prefsQuickSearchKeysArray objectEnumerator];
+    NSEnumerator *quickSearchKeyE = [quickSearchKeys objectEnumerator];
 	
     while(aKey = [quickSearchKeyE nextObject]){
-		
-		anItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:aKey 
-											action:@selector(searchFieldChangeKey:)
-									 keyEquivalent:@""]; 
-        [itemArray addObject:anItem];
-		[anItem release];
+		[cellMenu addItemWithTitle:aKey action:@selector(searchFieldChangeKey:) keyEquivalent:@""]; 
     }
-    
-    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"title" ascending:YES] autorelease];
-    [itemArray sortUsingDescriptors:[NSArray arrayWithObject:sort]];
-    
-    unsigned idx, itemCount = [itemArray count];
-    for(idx = 0; idx < itemCount; idx++)
-        [cellMenu addItem:[itemArray objectAtIndex:idx]];
+    [quickSearchKeys release];
+	
+	[cellMenu addItem:[NSMenuItem separatorItem]];
+	
+	[cellMenu addItemWithTitle:[NSLocalizedString(@"Add Field", @"Add Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchAddField:) keyEquivalent:@""];
+	[cellMenu addItemWithTitle:[NSLocalizedString(@"Remove Field", @"Remove Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
     
 	return cellMenu;
 }
