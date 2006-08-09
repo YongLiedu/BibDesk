@@ -201,6 +201,18 @@ static id sharedOpenWithController = nil;
     return sharedOpenWithController;
 }
 
+- (id)copyWithZone:(NSZone *)zone{
+    return [sharedOpenWithController retain];
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder{}
+
+- (id)initWithCoder:(NSCoder *)decoder{
+    [[self init] release];
+    self = [sharedOpenWithController retain];
+    return self;
+}
+
 - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
 {
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];

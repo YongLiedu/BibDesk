@@ -154,6 +154,16 @@ static int numberOfOpenEditors = 0;
     return self;
 }
 
+// implement NSCoding because we might be encoded as the delegate of some menus
+// mainly for the toolbar popups in a customization palette 
+- (id)initWithCoder:(NSCoder *)decoder{
+    [[self init] release];
+    self = nil;
+    return nil;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder{}
+
 - (void)windowDidLoad{
     [[self window] setDelegate:self];
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
