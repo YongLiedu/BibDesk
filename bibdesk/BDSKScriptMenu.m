@@ -43,53 +43,45 @@
 #import <OmniAppKit/OAApplication.h>
 
 @interface BDSKScriptMenuController : NSObject
-@end
-
-@implementation BDSKScriptMenuController
-
-static id sharedScriptMenuController = nil;
-
 + (id)sharedInstance;
-{
-    if(nil == sharedScriptMenuController)
-        sharedScriptMenuController = [[self alloc] init];
-    return sharedScriptMenuController;
-}
-
-- (void)menuNeedsUpdate:(BDSKScriptMenu *)menu
-{
-    [menu reloadScriptMenu];
-}
-
-- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action
-{
-    // implemented so the menu isn't populated on every key event
-    return NO;
-}
-
 @end
 
 @interface BDSKScriptMenu (Private)
-- (NSArray *)scripts;
 - (NSArray *)scriptPaths;
-- (NSArray *)directoryContentsAtPath:(NSString *)path;
+- (NSArray *)directoryContentsAtPath:(NSString *)path lastModified:(NSDate **)lastModifiedDate;
 - (void)updateSubmenu:(NSMenu *)menu withScripts:(NSArray *)scripts;
 - (void)executeScript:(id)sender;
 - (void)openScript:(id)sender;
+- (void)reloadScriptMenu;
 @end
 
 @implementation BDSKScriptMenu
 
-- (id)initWithTitle:(NSString *)aTitle;
+static NSArray *sortDescriptors = nil;
+
++ (void)initialize
 {
-    self = [super initWithTitle:aTitle];
-    [self setDelegate:[BDSKScriptMenuController sharedInstance]];
-    return self;
+    OBINITIALIZE;
+    sortDescriptors = [[NSArray alloc] initWithObjects:[[[NSSortDescriptor alloc] initWithKey:@"filename" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease], nil];
 }
+
++ (void)addScriptsToMainMenu;
+{
+    // title is currently unused
+    NSString *scriptMenuTitle = @"Scripts";
+    NSMenu *newMenu = [[BDSKScriptMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
+    NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
+    [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
+    [scriptItem setSubmenu:newMenu];
+    [newMenu setDelegate:[BDSKScriptMenuController sharedInstance]];
+    [newMenu release];
+    [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
+    [scriptItem release];
+}    
 
 - (void)dealloc
 {
-    [cachedScripts release];
+    [cachedDate release];
     [super dealloc];
 }
 
@@ -99,49 +91,25 @@ static id sharedScriptMenuController = nil;
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"OAScriptMenuDisabled"];
 }
 
-static Boolean scriptsArraysAreEqual(NSArray *array1, NSArray *array2)
-{
-    CFIndex count = CFArrayGetCount((CFArrayRef)array1);
-    Boolean arraysAreEqual = FALSE;
-    if(count == CFArrayGetCount((CFArrayRef)array2)){
-        CFIndex idx;
-        NSDictionary *dict1, *dict2;
-        for(idx = 0; idx < count; idx++){
-            dict1 = (id)CFArrayGetValueAtIndex((CFArrayRef)array1, idx);
-            dict2 = (id)CFArrayGetValueAtIndex((CFArrayRef)array2, idx);
-            if([dict1 isEqualToDictionary:dict2] == NO){
-                arraysAreEqual = FALSE;
-                break;
-            }
-        }
-        arraysAreEqual = TRUE;
-    }
-    return arraysAreEqual;
-}
-
-- (void)reloadScriptMenu;
-{
-    NSArray *scripts = [self scripts];
-    // don't recreate the menu unless the directory on disk has actually changed
-    if(nil == cachedScripts || scriptsArraysAreEqual(cachedScripts, scripts) == FALSE){
-        [self updateSubmenu:self withScripts:scripts];
-        [cachedScripts release];
-        cachedScripts = [scripts copy];
-    }   
-}
-
 @end
 
 @implementation BDSKScriptMenu (Private)
 
-static NSComparisonResult
-scriptSort(id script1, id script2, void *context)
+static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 {
-	NSString *key = (NSString *)context;
-    return [[[script1 objectForKey:key] lastPathComponent] caseInsensitiveCompare:[[script2 objectForKey:key] lastPathComponent]];
+    unsigned i, count = [folders count];
+    NSDate *date = [NSDate distantPast];
+    for(i = 0; i < count; i++){
+        NSDate *modDate = [[[NSFileManager defaultManager] fileAttributesAtPath:[folders objectAtIndex:i] traverseLink:YES] objectForKey:NSFileModificationDate];
+        
+        // typically these don't even exist for the other domains
+        if(modDate)
+            date = [modDate laterDate:date];
+    }
+    return date;
 }
-
-- (NSArray *)scripts;
+        
+- (void)reloadScriptMenu;
 {
     NSMutableArray *scripts;
     NSArray *scriptFolders;
@@ -151,17 +119,27 @@ scriptSort(id script1, id script2, void *context)
     scriptFolders = [self scriptPaths];
     scriptFolderCount = [scriptFolders count];
     
+    // must initialize this date before passing it by reference
+    NSDate *modDate = earliestDateFromBaseScriptsFolders(scriptFolders);
+    
+    // walk the subdirectories for each domain
     for (scriptFolderIndex = 0; scriptFolderIndex < scriptFolderCount; scriptFolderIndex++) {
         NSString *scriptFolder = [scriptFolders objectAtIndex:scriptFolderIndex];
-		[scripts addObjectsFromArray:[self directoryContentsAtPath:scriptFolder]];
+		[scripts addObjectsFromArray:[self directoryContentsAtPath:scriptFolder lastModified:&modDate]];
     }
-	
-	[scripts sortUsingFunction:scriptSort context:@"filename"];
     
-	return [scripts autorelease];
+    // don't recreate the menu unless the content on disk has actually changed
+    if(nil == cachedDate || [modDate compare:cachedDate] == NSOrderedDescending){
+        [cachedDate release];
+        cachedDate = [modDate retain];
+        
+        [scripts sortUsingDescriptors:sortDescriptors];
+        [self updateSubmenu:self withScripts:scripts];        
+    }   
+    [scripts release];
 }
 
-- (NSArray *)directoryContentsAtPath:(NSString *)path 
+- (NSArray *)directoryContentsAtPath:(NSString *)path lastModified:(NSDate **)lastModifiedDate
 {
 	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:path];
 	NSString *file, *fileType, *filePath;
@@ -170,16 +148,28 @@ scriptSort(id script1, id script2, void *context)
 	NSDictionary *dict;
 	NSMutableArray *fileArray = [NSMutableArray array];
 	
-	while (file = [dirEnum nextObject]) {
-		fileType = [[dirEnum fileAttributes] valueForKey:NSFileType];
-		fileCode = [[dirEnum fileAttributes] valueForKey:NSFileHFSTypeCode];
+    static int recursionDepth = 0;
+    recursionDepth++;
+    
+    NSDate *modDate;
+    NSDictionary *fileAttributes;
+    
+    // avoid recursing too many times (and creating an excessive number of submenus)
+	while (recursionDepth <= 3 && (file = [dirEnum nextObject])) {
+        fileAttributes = [dirEnum fileAttributes];
+		fileType = [fileAttributes valueForKey:NSFileType];
+		fileCode = [fileAttributes valueForKey:NSFileHFSTypeCode];
 		filePath = [path stringByAppendingPathComponent:file];
 		
+        // get the latest modification date
+        modDate = [fileAttributes valueForKey:NSFileModificationDate];
+        *lastModifiedDate = [*lastModifiedDate laterDate:modDate];
+        
 		if ([file hasPrefix:@"."]) {
 			[dirEnum skipDescendents];
 		} else if ([fileType isEqualToString:NSFileTypeDirectory]) {
 			[dirEnum skipDescendents];
-			content = [self directoryContentsAtPath:filePath];
+			content = [self directoryContentsAtPath:filePath lastModified:lastModifiedDate];
 			if ([content count] > 0) {
 				dict = [[NSDictionary alloc] initWithObjectsAndKeys:filePath, @"filename", content, @"content", nil];
 				[fileArray addObject:dict];
@@ -191,8 +181,8 @@ scriptSort(id script1, id script2, void *context)
 			[dict release];
 		}
 	}
-	[fileArray sortUsingFunction:scriptSort context:@"filename"];
-	
+    [fileArray sortUsingDescriptors:sortDescriptors];
+	recursionDepth--;
 	return fileArray;
 }
 
@@ -321,6 +311,30 @@ scriptSort(id script1, id script2, void *context)
     NSString *scriptFilename = [sender representedObject];
 	
 	[[NSWorkspace sharedWorkspace] openFile:scriptFilename];
+}
+
+@end
+
+@implementation BDSKScriptMenuController
+
+static id sharedScriptMenuController = nil;
+
++ (id)sharedInstance;
+{
+    if(nil == sharedScriptMenuController)
+        sharedScriptMenuController = [[self alloc] init];
+    return sharedScriptMenuController;
+}
+
+- (void)menuNeedsUpdate:(BDSKScriptMenu *)menu
+{
+    [menu reloadScriptMenu];
+}
+
+- (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action
+{
+    // implemented so the menu isn't populated on every key event
+    return NO;
 }
 
 @end

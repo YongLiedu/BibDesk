@@ -36,7 +36,6 @@
 
 #import "BibAppController.h"
 #import <Carbon/Carbon.h>
-#import <OmniBase/OmniBase.h>
 #import "BibPrefController.h"
 #import "BibItem.h"
 #import "BDSKPreviewer.h"
@@ -48,7 +47,6 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKCharacterConversion.h"
 #import "BDSKFindController.h"
-#import <OmniFoundation/OFVersionNumber.h>
 #import "BDSKFileContentSearchController.h"
 #import "BDSKScriptMenu.h"
 #import "BibDocument_Search.h"
@@ -56,7 +54,6 @@
 #import "BDSKFormatParser.h"
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
-#import <OmniAppKit/OAScriptMenuItem.h>
 #import <ILCrashReporter/ILCrashReporter.h>
 #import "NSMutableArray+ThreadSafety.h"
 #import "NSMutableDictionary+ThreadSafety.h"
@@ -205,17 +202,10 @@
 }
 
 
-- (void)awakeFromNib{
+- (void)awakeFromNib{   
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
     if([BDSKScriptMenu disabled] == NO){
-        NSString *scriptMenuTitle = @"Scripts";
-        NSMenu *newMenu = [[BDSKScriptMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
-        NSMenuItem *scriptItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
-        [scriptItem setImage:[NSImage imageNamed:@"OAScriptMenu"]];
-        [scriptItem setSubmenu:newMenu];
-        [newMenu release];
-        [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
-        [scriptItem release];
+        [BDSKScriptMenu addScriptsToMainMenu];
     }
 
 	[self updateColumnsMenu];

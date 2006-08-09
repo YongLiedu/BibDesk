@@ -40,9 +40,10 @@
 
 @interface BDSKScriptMenu : NSMenu
 {
-    NSArray *cachedScripts;
+    NSDate *cachedDate;
 }
 
 + (BOOL)disabled;
-- (void)reloadScriptMenu;
++ (void)addScriptsToMainMenu;
+
 @end
