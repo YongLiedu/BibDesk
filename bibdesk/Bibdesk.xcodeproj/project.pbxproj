@@ -618,8 +618,6 @@
 		F9E6C5980999323D00A8B97D /* BDSKParserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */; };
 		F9E6C937099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */; };
 		F9E6C9BA099A99ED00A8B97D /* NSFileManager_ExtendedAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */; };
-		F9E7591B0942AE7C00CFB46F /* BDSKDateStringFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E759190942AE7C00CFB46F /* BDSKDateStringFormatter.h */; };
-		F9E7591C0942AE7C00CFB46F /* BDSKDateStringFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E7591A0942AE7C00CFB46F /* BDSKDateStringFormatter.m */; };
 		F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DA80A0437E20048D912 /* FSCopyObject.c */; };
 		F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */ = {isa = PBXBuildFile; fileRef = F9ED4DA90A0437E20048D912 /* FSCopyObject.h */; };
 		F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */; };
@@ -1444,8 +1442,6 @@
 		F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKParserProtocol.h; sourceTree = "<group>"; };
 		F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_ExtendedAttributes.h; sourceTree = "<group>"; };
 		F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_ExtendedAttributes.m; sourceTree = "<group>"; };
-		F9E759190942AE7C00CFB46F /* BDSKDateStringFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDateStringFormatter.h; sourceTree = "<group>"; };
-		F9E7591A0942AE7C00CFB46F /* BDSKDateStringFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDateStringFormatter.m; sourceTree = "<group>"; };
 		F9ED4DA80A0437E20048D912 /* FSCopyObject.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 0; path = FSCopyObject.c; sourceTree = "<group>"; };
 		F9ED4DA90A0437E20048D912 /* FSCopyObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FSCopyObject.h; sourceTree = "<group>"; };
 		F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 0; path = GenLinkedList.c; sourceTree = "<group>"; };
@@ -1891,7 +1887,6 @@
 		CE38FA88091D258000BCB69D /* Data Handling */ = {
 			isa = PBXGroup;
 			children = (
-				F9E7591A0942AE7C00CFB46F /* BDSKDateStringFormatter.m */,
 				F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */,
 				F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */,
 				CEBA63D60A7CA0B400588BB7 /* BDSKCrossrefFormatter.m */,
@@ -2091,7 +2086,6 @@
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
 				F9022C3C0758027800C3F701 /* BDSKCustomCiteTableView.h */,
-				F9E759190942AE7C00CFB46F /* BDSKDateStringFormatter.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
 				CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */,
 				CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */,
@@ -2503,7 +2497,6 @@
 				CEEC6C54093A411E00A64F54 /* BDSKCollapsibleView.h in Headers */,
 				CEEC70E1093B6EC200A64F54 /* BDSKDragImageView.h in Headers */,
 				CE9DBEDF093CF2640008648B /* BibDeskBibliographyCommand.h in Headers */,
-				F9E7591B0942AE7C00CFB46F /* BDSKDateStringFormatter.h in Headers */,
 				F9463F4509436F7500CC4549 /* NSSet_BDSKExtensions.h in Headers */,
 				F9DCEA4F094B7D1100AEE662 /* BDSKTextWithIconCell.h in Headers */,
 				CE9F85400956A2C50073FCAD /* BDSKFieldEditor.h in Headers */,
@@ -3313,7 +3306,6 @@
 				CEEC6C55093A411E00A64F54 /* BDSKCollapsibleView.m in Sources */,
 				CEEC70E2093B6EC200A64F54 /* BDSKDragImageView.m in Sources */,
 				CE9DBEE0093CF2640008648B /* BibDeskBibliographyCommand.m in Sources */,
-				F9E7591C0942AE7C00CFB46F /* BDSKDateStringFormatter.m in Sources */,
 				F9463F4609436F7500CC4549 /* NSSet_BDSKExtensions.m in Sources */,
 				F9DCEA50094B7D1100AEE662 /* BDSKTextWithIconCell.m in Sources */,
 				CE9F85410956A2C50073FCAD /* BDSKFieldEditor.m in Sources */,
