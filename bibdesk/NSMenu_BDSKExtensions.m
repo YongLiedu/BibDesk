@@ -170,9 +170,17 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
         [image setSize:NSMakeSize(16,16)];
         [item setImage:image];
         [representedObject release];
-        [self insertItem:item atIndex:([defaultEditorURL isEqual:applicationURL]) ? 0 : [self numberOfItems] - 1];
+        if([defaultEditorURL isEqual:applicationURL]){
+            [self insertItem:item atIndex:0];
+            [self insertItem:[NSMenuItem separatorItem] atIndex:1];
+        }else{
+            [self insertItem:item atIndex:[self numberOfItems] - 1];
+        }
         [item release];
     }
+    
+    if ([self numberOfItems] > 1 && [[self itemAtIndex:[self numberOfItems] - 2] isSeparatorItem] == NO)
+        [self insertItem:[NSMenuItem separatorItem] atIndex:[self numberOfItems] - 1];
 }
 
 @end
