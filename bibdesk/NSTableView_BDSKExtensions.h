@@ -40,12 +40,7 @@
 
 
 @interface NSTableView (BDSKExtensions)
-- (void)replacementSetDataSource:(id)anObject;
-- (void)replacementReloadData;
-- (void)replacementNoteNumberOfRowsChanged;
-- (void)rebuildToolTips;
-- (BOOL)replacementBecomeFirstResponder;
-- (void)replacementDealloc;
+- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem;
 - (void)awakeFromNib;
 - (void)changeFont:(id)sender;
 - (void)tableViewFontChanged:(NSNotification *)notification;

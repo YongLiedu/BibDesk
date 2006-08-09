@@ -42,6 +42,19 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniAppKit/OAApplication.h>
 
+@interface NSTableView (BDSKExtensionsPrivate)
+- (void)rebuildToolTips;
+- (void)replacementSetDataSource:(id)anObject;
+- (void)replacementReloadData;
+- (void)replacementNoteNumberOfRowsChanged;
+- (BOOL)replacementBecomeFirstResponder;
+- (void)replacementDealloc;
+- (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation;
+-(void)_drawDropHighlightOnRow:(int)rowIndex;
+@end
+
+#pragma mark -
+
 @implementation NSTableView (BDSKExtensions)
 
 static IMP originalSetDataSource;
@@ -115,6 +128,8 @@ static IMP originalDraggedImageEndedAtOperation;
     return YES; // we assume that any other implemented action is always valid
 }
 
+#pragma mark Autocompletion
+
 - (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
 	if (textView == [self currentEditor] && [[self delegate] respondsToSelector:@selector(control:textView:rangeForUserCompletion:)]) 
 		return [[self delegate] control:self textView:textView rangeForUserCompletion:charRange];
@@ -127,57 +142,7 @@ static IMP originalDraggedImageEndedAtOperation;
 	return NO;
 }
 
-#pragma mark ToolTips for individual rows and columns
-
-// These are copied and modified from OAXTableView, as it was removed from NSTableView-OAExtensions
-
-- (void)resetCursorRects {
-	[self rebuildToolTips];
-}
-
-- (void)replacementSetDataSource:(id)anObject {
-	originalSetDataSource(self, _cmd, anObject);
-	[self rebuildToolTips];
-}
-
-- (void)replacementReloadData {
-	originalReloadData(self, _cmd);
-	[self rebuildToolTips];
-}
-
-- (void)replacementNoteNumberOfRowsChanged {
-	originalNoteNumberOfRowsChanged(self, _cmd);
-	[self rebuildToolTips];
-}
-
-- (void)rebuildToolTips {
-    NSRange rowRange, columnRange;
-    int rowIndex, columnIndex;
-	NSTableColumn *tableColumn;
-
-    if (![_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)])
-        return;
-
-    [self removeAllToolTips];
-    rowRange = [self rowsInRect:[self visibleRect]];
-    columnRange = [self columnsInRect:[self visibleRect]];
-    for (columnIndex = columnRange.location; columnIndex < NSMaxRange(columnRange); columnIndex++) {
-        tableColumn = [[self tableColumns] objectAtIndex:columnIndex];
-		for (rowIndex = rowRange.location; rowIndex < NSMaxRange(rowRange); rowIndex++) {
-            if ([_dataSource tableView:self toolTipForTableColumn:tableColumn row:rowIndex] != nil)
-                [self addToolTipRect:[self frameOfCellAtColumn:columnIndex row:rowIndex] owner:self userData:NULL];
-        }
-    }
-}
-
-- (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)data {
-    if ([_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)]) {
-		NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:[self columnAtPoint:point]];
-		int row = [self rowAtPoint:point];
-		return [_dataSource tableView:self toolTipForTableColumn:tableColumn row:row];
-	}
-	return nil;
-}
+#pragma mark Font preferences methods
 
 - (NSString *)fontNamePreferenceKey{
     if ([[self delegate] respondsToSelector:@selector(tableViewFontNamePreferenceKey:)])
@@ -195,16 +160,6 @@ static IMP originalDraggedImageEndedAtOperation;
     if ([[self delegate] respondsToSelector:@selector(tableViewFontChangedNotificationName:)])
         return [[self delegate] tableViewFontChangedNotificationName:self];
     return nil;
-}
-
-- (BOOL)replacementBecomeFirstResponder {
-    [self updateFontPanel:nil];
-    return originalBecomeFirstResponder(self, _cmd);
-}
-
-- (void)replacementDealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    originalDealloc(self, _cmd);
 }
 
 - (void)awakeFromNib {
@@ -285,6 +240,86 @@ static IMP originalDraggedImageEndedAtOperation;
 	}
 }
 
+@end
+
+#pragma mark -
+
+@implementation NSTableView (BDSKExtensionsPrivate)
+
+#pragma mark ToolTips for individual rows and columns
+
+// These are copied and modified from OAXTableView, as it was removed from NSTableView-OAExtensions
+
+- (void)resetCursorRects {
+	[self rebuildToolTips];
+}
+
+- (void)replacementSetDataSource:(id)anObject {
+	originalSetDataSource(self, _cmd, anObject);
+	[self rebuildToolTips];
+}
+
+- (void)replacementReloadData {
+	originalReloadData(self, _cmd);
+	[self rebuildToolTips];
+}
+
+- (void)replacementNoteNumberOfRowsChanged {
+	originalNoteNumberOfRowsChanged(self, _cmd);
+	[self rebuildToolTips];
+}
+
+- (void)rebuildToolTips {
+    NSRange rowRange, columnRange;
+    int rowIndex, columnIndex;
+	NSTableColumn *tableColumn;
+
+    if (![_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)])
+        return;
+
+    [self removeAllToolTips];
+    rowRange = [self rowsInRect:[self visibleRect]];
+    columnRange = [self columnsInRect:[self visibleRect]];
+    for (columnIndex = columnRange.location; columnIndex < NSMaxRange(columnRange); columnIndex++) {
+        tableColumn = [[self tableColumns] objectAtIndex:columnIndex];
+		for (rowIndex = rowRange.location; rowIndex < NSMaxRange(rowRange); rowIndex++) {
+            if ([_dataSource tableView:self toolTipForTableColumn:tableColumn row:rowIndex] != nil)
+                [self addToolTipRect:[self frameOfCellAtColumn:columnIndex row:rowIndex] owner:self userData:NULL];
+        }
+    }
+}
+
+- (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)data {
+    if ([_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)]) {
+		NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:[self columnAtPoint:point]];
+		int row = [self rowAtPoint:point];
+		return [_dataSource tableView:self toolTipForTableColumn:tableColumn row:row];
+	}
+	return nil;
+}
+
+#pragma mark Font preferences overrides
+
+- (BOOL)replacementBecomeFirstResponder {
+    [self updateFontPanel:nil];
+    return originalBecomeFirstResponder(self, _cmd);
+}
+
+- (void)replacementDealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    originalDealloc(self, _cmd);
+}
+
+#pragma mark Flag changes during drag
+
+// flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
+- (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
+    originalDraggedImageEndedAtOperation(self, _cmd, anImage, aPoint, operation);
+    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+}
+
+#pragma mark Drop highlight
+
 // we override this private method to draw something nicer than the default ugly black square
 // from http://www.cocoadev.com/index.pl?UglyBlackHighlightRectWhenDraggingToNSTableView
 // modified to use -intercellSpacing and save/restore graphics state
@@ -312,12 +347,6 @@ static IMP originalDraggedImageEndedAtOperation;
     
     [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];
-}
-
-// flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
-- (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
-    originalDraggedImageEndedAtOperation(self, _cmd, anImage, aPoint, operation);
-    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
 }
 
 @end
