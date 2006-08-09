@@ -331,7 +331,6 @@
 		F9022C4F0758027800C3F701 /* BDSKDragWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C430758027800C3F701 /* BDSKDragWindow.m */; };
 		F9022C500758027800C3F701 /* BDSKFieldNameFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */; };
 		F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */; };
-		F9022C77075802E300C3F701 /* BDSKLinkButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C54075802E300C3F701 /* BDSKLinkButton.m */; };
 		F9022C79075802E300C3F701 /* BDSKPreviewer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C58075802E300C3F701 /* BDSKPreviewer.m */; };
 		F9022C7A075802E300C3F701 /* BDSKShellTask.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5A075802E300C3F701 /* BDSKShellTask.m */; };
 		F9022C7B075802E300C3F701 /* BDSKZoomImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5C075802E300C3F701 /* BDSKZoomImageView.m */; };
@@ -447,7 +446,6 @@
 		F918101307583A5B00CF822D /* BDSKDragTableView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C400758027800C3F701 /* BDSKDragTableView.h */; };
 		F918101507583A5B00CF822D /* BDSKFieldNameFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C440758027800C3F701 /* BDSKFieldNameFormatter.h */; };
 		F918101707583A5B00CF822D /* BDSKComplexStringFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */; };
-		F918101807583A5B00CF822D /* BDSKLinkButton.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C53075802E300C3F701 /* BDSKLinkButton.h */; };
 		F918101A07583A5B00CF822D /* BDSKPreviewer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C57075802E300C3F701 /* BDSKPreviewer.h */; };
 		F918101B07583A5B00CF822D /* BDSKShellTask.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C59075802E300C3F701 /* BDSKShellTask.h */; };
 		F918101C07583A5B00CF822D /* BDSKZoomImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C5B075802E300C3F701 /* BDSKZoomImageView.h */; };
@@ -479,7 +477,6 @@
 		F918103D07583A5B00CF822D /* OATypeAheadSelectionHelper_Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA20758038000C3F701 /* OATypeAheadSelectionHelper_Extensions.h */; };
 		F918103E07583A5B00CF822D /* PDFImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA40758038000C3F701 /* PDFImageView.h */; };
 		F918103F07583A5B00CF822D /* PubMedParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA60758038000C3F701 /* PubMedParser.h */; };
-		F918104207583A5B00CF822D /* WeblogAEKeywords.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022DDD075808EB00C3F701 /* WeblogAEKeywords.h */; };
 		F91A2D6E089A7D4B0009B1C1 /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
 		F91A2EBC089A7D670009B1C1 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
 		F91A2EBD089A7D670009B1C1 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
@@ -1158,8 +1155,6 @@
 		F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFieldNameFormatter.m; sourceTree = "<group>"; };
 		F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKComplexStringFormatter.h; sourceTree = "<group>"; };
 		F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKComplexStringFormatter.m; sourceTree = "<group>"; };
-		F9022C53075802E300C3F701 /* BDSKLinkButton.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKLinkButton.h; sourceTree = "<group>"; };
-		F9022C54075802E300C3F701 /* BDSKLinkButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKLinkButton.m; sourceTree = "<group>"; };
 		F9022C57075802E300C3F701 /* BDSKPreviewer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewer.h; sourceTree = "<group>"; };
 		F9022C58075802E300C3F701 /* BDSKPreviewer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewer.m; sourceTree = "<group>"; };
 		F9022C59075802E300C3F701 /* BDSKShellTask.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKShellTask.h; sourceTree = "<group>"; };
@@ -1276,7 +1271,6 @@
 		F9022DBB0758088000C3F701 /* TinyFile.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = TinyFile.gif; path = Images/TinyFile.gif; sourceTree = "<group>"; };
 		F9022DDB075808EB00C3F701 /* BibPref_Cite.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_Cite.h; sourceTree = "<group>"; };
 		F9022DDC075808EB00C3F701 /* BibPref_Cite.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_Cite.m; sourceTree = "<group>"; };
-		F9022DDD075808EB00C3F701 /* WeblogAEKeywords.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = WeblogAEKeywords.h; sourceTree = "<group>"; };
 		F9022DE30758095000C3F701 /* AGRegex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AGRegex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9022DE40758095000C3F701 /* OmniAppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OmniAppKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9022DE50758095000C3F701 /* OmniBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OmniBase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1762,7 +1756,6 @@
 				CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */,
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
-				F9022C54075802E300C3F701 /* BDSKLinkButton.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlay.m */,
 				CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */,
 				F961FA9508C9429700332460 /* BDSKPrintableView.m */,
@@ -2115,7 +2108,6 @@
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
-				F9022C53075802E300C3F701 /* BDSKLinkButton.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
 				F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */,
@@ -2240,7 +2232,6 @@
 				F9022CA40758038000C3F701 /* PDFImageView.h */,
 				F91F284609A661A700419960 /* PDFMetadata.h */,
 				F9022CA60758038000C3F701 /* PubMedParser.h */,
-				F9022DDD075808EB00C3F701 /* WeblogAEKeywords.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -2382,7 +2373,6 @@
 				F918101307583A5B00CF822D /* BDSKDragTableView.h in Headers */,
 				F918101507583A5B00CF822D /* BDSKFieldNameFormatter.h in Headers */,
 				F918101707583A5B00CF822D /* BDSKComplexStringFormatter.h in Headers */,
-				F918101807583A5B00CF822D /* BDSKLinkButton.h in Headers */,
 				F918101A07583A5B00CF822D /* BDSKPreviewer.h in Headers */,
 				F918101B07583A5B00CF822D /* BDSKShellTask.h in Headers */,
 				F918101C07583A5B00CF822D /* BDSKZoomImageView.h in Headers */,
@@ -2414,7 +2404,6 @@
 				F918103D07583A5B00CF822D /* OATypeAheadSelectionHelper_Extensions.h in Headers */,
 				F918103E07583A5B00CF822D /* PDFImageView.h in Headers */,
 				F918103F07583A5B00CF822D /* PubMedParser.h in Headers */,
-				F918104207583A5B00CF822D /* WeblogAEKeywords.h in Headers */,
 				3DD300F4075C0532003FD2D7 /* BibField.h in Headers */,
 				F920DAFF075C2B69000C5FCA /* BibAppController+Scripting.h in Headers */,
 				F920DB00075C2B69000C5FCA /* BibAuthor+Scripting.h in Headers */,
@@ -3196,7 +3185,6 @@
 				F9022C4F0758027800C3F701 /* BDSKDragWindow.m in Sources */,
 				F9022C500758027800C3F701 /* BDSKFieldNameFormatter.m in Sources */,
 				F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */,
-				F9022C77075802E300C3F701 /* BDSKLinkButton.m in Sources */,
 				F9022C79075802E300C3F701 /* BDSKPreviewer.m in Sources */,
 				F9022C7A075802E300C3F701 /* BDSKShellTask.m in Sources */,
 				F9022C7B075802E300C3F701 /* BDSKZoomImageView.m in Sources */,
