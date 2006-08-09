@@ -124,6 +124,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     
     [pasteboardInfo setValue:theSelection forKey:@"selection"];
     [pasteboardInfo setValue:[self document] forKey:@"document"];
+    [pasteboardInfo setValue:[self currentPage] forKey:@"page"];
 }
 
 // override so we can put the entire document on the pasteboard if there is no selection
@@ -138,9 +139,13 @@ static float BDSKScaleMenuFontSize = 11.0;
 {    
     PDFSelection *theSelection = [pasteboardInfo valueForKey:@"selection"];
     PDFDocument *theDocument = [pasteboardInfo valueForKey:@"document"];
+    PDFPage *thePage = [pasteboardInfo valueForKey:@"page"];
     
-    if([type isEqualToString:NSPDFPboardType]){ 
-        // we can only write the whole document
+    // use a private type to signal that we need to provide a page as PDF
+    if([type isEqualToString:NSPDFPboardType] && [[sender types] containsObject:@"BDSKPrivatePDFPageDataPboardType"]){
+        [sender setData:[thePage dataRepresentation] forType:type];
+    } else if([type isEqualToString:NSPDFPboardType]){ 
+        // write the whole document
         [sender setData:[theDocument dataRepresentation] forType:type];
     } else if([type isEqualToString:NSStringPboardType]){
         [sender setString:[theSelection string] forType:type];
@@ -153,7 +158,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)copyAsPDF:(id)sender;
 {
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:self];
+    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, @"BDSKPrivatePDFPageDataPboardType", nil] owner:self];
     [self updatePasteboardInfo];
 }
 
@@ -162,6 +167,11 @@ static float BDSKScaleMenuFontSize = 11.0;
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
     [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:self];
     [self updatePasteboardInfo];
+}
+
+- (void)copyPDFPage:(id)sender;
+{
+    [self copyAsPDF:nil];
 }
 
 - (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode  contextInfo:(void  *)contextInfo;
@@ -188,15 +198,23 @@ static float BDSKScaleMenuFontSize = 11.0;
 {
     NSMenu *menu = [super menuForEvent:theEvent];
     [menu addItem:[NSMenuItem separatorItem]];
-    NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy PDF", @"") action:@selector(copyAsPDF:) keyEquivalent:@""];
+    NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Document as PDF", @"") action:@selector(copyAsPDF:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
     
-    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Text", @"") action:@selector(copyAsText:) keyEquivalent:@""];
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page as PDF", @"") action:@selector(copyPDFPage:) keyEquivalent:@""];
+    [menu addItem:item];
+    [item release];
+
+    NSString *title = (nil == [self currentSelection]) ? NSLocalizedString(@"Copy All Text", @"") : NSLocalizedString(@"Copy Selected Text", @"");
+    
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:title action:@selector(copyAsText:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
     
-    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save As", @"") stringByAppendingEllipsis] action:@selector(saveDocumentAs:) keyEquivalent:@""];
+    [menu addItem:[NSMenuItem separatorItem]];
+    
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save PDF As", @"") stringByAppendingEllipsis] action:@selector(saveDocumentAs:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
 
