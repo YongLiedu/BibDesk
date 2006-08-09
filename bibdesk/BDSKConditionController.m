@@ -41,7 +41,6 @@
 #import "BibItem.h"
 #import "BDSKFieldNameFormatter.h"
 #import <OmniBase/assertions.h>
-#import "BDSKDateStringFormatter.h"
 
 @implementation BDSKConditionController
 
