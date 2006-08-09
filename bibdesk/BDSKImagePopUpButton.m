@@ -39,6 +39,7 @@
 
 #import "BDSKImagePopUpButton.h"
 #import "NSBezierPath_BDSKExtensions.h"
+#import <OmniAppKit/OAApplication.h>
 
 @implementation BDSKImagePopUpButton
 
@@ -254,7 +255,9 @@
 
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
 	if ([delegate respondsToSelector:@selector(imagePopUpButton:cleanUpAfterDragOperation:)])
-		return [delegate imagePopUpButton:self cleanUpAfterDragOperation:operation];
+		[delegate imagePopUpButton:self cleanUpAfterDragOperation:operation];
+    // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
+    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
 }
 
 #pragma mark Dragging destination

@@ -38,6 +38,7 @@
 #import "BibPrefController.h"
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTextViewFindController.h"
+#import <OmniAppKit/OAApplication.h>
 
 @implementation NSTextView (BDSKExtensions)
 
@@ -49,6 +50,11 @@ static BDSKTextViewFindController *findController = nil;
 	[findController performFindPanelAction:sender];
 }
 
+// flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
+- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
+    // there is not original implementation
+    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+}
 
 - (void)selectLineNumber:(int) line;
 {

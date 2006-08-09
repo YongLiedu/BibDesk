@@ -40,6 +40,7 @@
 #import "BDSKFieldEditor.h"
 #import "BibPrefController.h"
 #import "NSBezierPath_BDSKExtensions.h"
+#import <OmniAppKit/OAApplication.h>
 
 @implementation NSTableView (BDSKExtensions)
 
@@ -48,6 +49,7 @@ static IMP originalReloadData;
 static IMP originalNoteNumberOfRowsChanged;
 static BOOL (*originalBecomeFirstResponder)(id self, SEL _cmd);
 static IMP originalDealloc;
+static IMP originalDraggedImageEndedAtOperation;
 
 + (void)didLoad;
 {
@@ -56,6 +58,7 @@ static IMP originalDealloc;
     originalNoteNumberOfRowsChanged = OBReplaceMethodImplementationWithSelector(self, @selector(noteNumberOfRowsChanged), @selector(replacementNoteNumberOfRowsChanged));
     originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
     originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
+    originalDraggedImageEndedAtOperation = OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
 }
 
 - (BOOL)validateDelegatedMenuItem:(id<NSMenuItem>)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
@@ -309,6 +312,12 @@ static IMP originalDealloc;
     
     [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];
+}
+
+// flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
+- (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
+    originalDraggedImageEndedAtOperation(self, _cmd, anImage, aPoint, operation);
+    [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
 }
 
 @end
