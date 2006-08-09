@@ -39,6 +39,8 @@
 
 #import "BDSKBorderlessKeyWindow.h"
 
+/* Note: this is the window class for MacroTextFieldWindow.nib */
+
 @implementation BDSKBorderlessKeyWindow
 
 - (id)initWithContentRect:(NSRect)contentRect 
