@@ -201,11 +201,6 @@ static id sharedOpenWithController = nil;
     return sharedOpenWithController;
 }
 
-- (oneway void)release
-{
-    [self doesNotRecognizeSelector:_cmd];
-}
-
 - (void)chooseApplicationToOpenURL:(NSURL *)aURL;
 {
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
