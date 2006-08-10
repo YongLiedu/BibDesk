@@ -201,7 +201,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 - (IBAction)quickSearchAddField:(id)sender{
     // first we fill the popup
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, @"Added", @"Modified", nil]
+    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil]
                                                 excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
@@ -296,7 +296,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     
     static NSSet *dateFields = nil;
     if(nil == dateFields)
-        dateFields = [[NSSet alloc] initWithObjects:BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, @"Added", @"Modified", @"Created", nil];
+        dateFields = [[NSSet alloc] initWithObjects:BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil];
     
     BOOL isDateField = [dateFields containsObject:field];
     

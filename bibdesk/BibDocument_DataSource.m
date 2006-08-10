@@ -101,22 +101,19 @@
 			return [pub title];
 		}else if([tcID isEqualToString: BDSKContainerString] ){
 			return [pub container];
-        }else if([tcID isEqualToString: BDSKDateAddedString] ||
-				 [tcID isEqualToString: @"Added"] ||
-				 [tcID isEqualToString: @"Created"] ){
+        }else if([tcID isEqualToString: BDSKDateAddedString]){
             return [[pub dateAdded] descriptionWithCalendarFormat:shortDateFormatString];
-        }else if([tcID isEqualToString: BDSKDateModifiedString] ||
-				 [tcID isEqualToString: @"Modified"] ){
+        }else if([tcID isEqualToString: BDSKDateModifiedString]){
 			return [[pub dateModified] descriptionWithCalendarFormat:shortDateFormatString];
         }else if([tcID isEqualToString: BDSKDateString] ){
 			NSString *value = [pub valueOfField:BDSKDateString];
 			if([NSString isEmptyString:value] == NO)
 				return value;
             NSCalendarDate *date = [pub date];
+            if(nil == date) 
+                return nil;
 			NSString *monthStr = [pub valueOfField:BDSKMonthString];
-			if(date == nil)
-                return @"";
-            else if([NSString isEmptyString:monthStr])
+            if([NSString isEmptyString:monthStr])
                 return [date descriptionWithCalendarFormat:@"%Y"];
             else
                 return [date descriptionWithCalendarFormat:@"%b %Y"];
@@ -132,11 +129,9 @@
 			return [[pub authorOrEditorAtIndex:1] displayName]; 
         }else if([tcID isEqualToString: BDSKThirdAuthorEditorString] ){
 			return [[pub authorOrEditorAtIndex:2] displayName];
-		} else if([tcID isEqualToString:BDSKAuthorString] ||
-				   [tcID isEqualToString:@"Authors"]) {
+		} else if([tcID isEqualToString:BDSKAuthorString]) {
 			return [pub pubAuthorsForDisplay];
-		} else if([tcID isEqualToString:BDSKAuthorEditorString] ||
-                   [tcID isEqualToString:@"Authors Or Editors"]) {
+		} else if([tcID isEqualToString:BDSKAuthorEditorString]){
 			return [pub pubAuthorsOrEditorsForDisplay];
         } else if([tcID isEqualToString:BDSKEditorString]) {
 			return [pub peopleStringForDisplayFromField:BDSKEditorString];

@@ -75,6 +75,36 @@
 
 @implementation BibAppController
 
+// remove legacy comparisons of added/created/modified strings in table column code from prefs
+// maybe we can support transforming these in the add field sheets, if we want to allow some 
+// sort of fuzzy matching?
+static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers){
+    unsigned index;
+    NSMutableArray *array = [[tableColumnIdentifiers mutableCopy] autorelease];
+    
+    index = [array indexOfObject:@"Added"];
+    if(NSNotFound != index)
+        [array replaceObjectAtIndex:index withObject:BDSKDateAddedString];
+    
+    index = [array indexOfObject:@"Created"];
+    if(NSNotFound != index)
+        [array replaceObjectAtIndex:index withObject:BDSKDateAddedString];
+    
+    index = [array indexOfObject:@"Modified"];
+    if(NSNotFound != index)
+        [array replaceObjectAtIndex:index withObject:BDSKDateModifiedString];
+    
+    index = [array indexOfObject:@"Authors Or Editors"];
+    if(NSNotFound != index)
+        [array replaceObjectAtIndex:index withObject:BDSKAuthorEditorString];
+    
+    index = [array indexOfObject:@"Authors"];
+    if(NSNotFound != index)
+        [array replaceObjectAtIndex:index withObject:BDSKAuthorString];
+    
+    return array;
+}
+
 + (void)initialize
 {
     OBINITIALIZE;
@@ -97,6 +127,18 @@
 	// register transformer class
 	[NSValueTransformer setValueTransformer:[[[BDSKPathIconTransformer alloc] init] autorelease]
 									forName:@"BDSKPathIconTransformer"];
+    
+    // eliminate support for some redundant keys
+    NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
+    if(prefsShownColNamesArray){
+        prefsShownColNamesArray = fixLegacyTableColumnIdentifiers(prefsShownColNamesArray);
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesArray forKey:BDSKShownColsNamesKey];
+    }
+    NSArray *searchKeys = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKQuickSearchKeys];
+    if(searchKeys){
+        searchKeys = fixLegacyTableColumnIdentifiers(searchKeys);
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys forKey:BDSKQuickSearchKeys];
+    }
 }
 
 - (id)init
