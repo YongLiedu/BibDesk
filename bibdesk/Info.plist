@@ -254,7 +254,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>BibDesk/Show Matching Reference</string>
+				<string>BibDesk/Show Reference With Cite Key</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>showPubWithKey</string>
