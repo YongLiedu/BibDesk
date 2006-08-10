@@ -30,6 +30,9 @@ New Features\
   \'a5  Added menu option to show the intersection of selected groups instead of the union (default behavior)\
   \'a5  Added Mail-like interface for date ranges in smart groups (bug #1518519)\
   \'a5  Added format specifier for boolean and tri-state fields\
+  \'a5  Added preference for selecting the intersection of groups, rather than the union\
+  \'a5  Editor action menu and new "Add" button are now in the status bar\
+  \'a5  Context menu for PDF views now allows copying a single page as PDF (10.4 only)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 \
@@ -98,6 +101,16 @@ Bugs Fixed\
   \'a5  Closing a large document should be significantly faster\
   \'a5  Saving a large document should be significantly faster\
   \'a5  Added a few more standard RIS tags (partially fixed bug #1535227)\
+  \'a5  Improved sharing efficiency, fixed some leaks in decoding objects\
+  \'a5  Copy file mouse cursor is no longer used when dropping files that aren't copied\
+  \'a5  When using unique specifiers in a format string for autofile/citekey, the old character will be used if it's still valid (bug #1534679)\
+  \'a5  Trying to edit a remote (shared) publication will now cause a warning to be displayed, instead of silently eating the event\
+  \'a5  Papers folder path is now included in generated Local-Url preview\
+  \'a5  Metadata cache file paths are now correctly transformed to remove the file when a cite key changes\
+  \'a5  Scripts menu is now more efficient, and doesn't recreate the entire menu every few seconds\
+  \'a5  Duplicate selection by column is more efficient, and gives a more consistent number in the status bar\
+  \'a5  Buttons are no longer left in an incorrect state after dragging with modifier keys\
+  \'a5  "Find" field in Find & Replace panel is now disabled when overwriting\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
