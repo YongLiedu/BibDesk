@@ -175,7 +175,7 @@ static BibFiler *sharedFiler = nil;
 			path = [paper localUrlPathInheriting:NO];
 			newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
 		}else{
-			// undo: a list of info dictionaries. We should move the file back!
+			// an explicit move, possibly from undo: a list of info dictionaries
 			paper = [paperInfo objectForKey:@"paper"];
 			path = [paperInfo objectForKey:@"oldPath"];
 			newPath = [paperInfo objectForKey:@"newPath"];
@@ -193,6 +193,7 @@ static BibFiler *sharedFiler = nil;
 		info = [NSMutableDictionary dictionaryWithCapacity:6];
 		[info setObject:paper forKey:@"paper"];
         error = nil;
+        oldValue  = [[NSURL fileURLWithPath:path] absoluteString]; // we don't use the field value, as we might have already changed it in undo or find/replace
         
         if(check && ![paper canSetLocalUrl]){
             
@@ -217,7 +218,6 @@ static BibFiler *sharedFiler = nil;
             
 		}else{
 			
-            oldValue  = [[NSURL fileURLWithPath:path] absoluteString]; // we don't use the field value, as we might have already changed it in undo or find/replace
 			newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
 			if(initial) {// otherwise will be done by undo of setField:
                 if(useRelativePath){
