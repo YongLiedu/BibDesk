@@ -1117,6 +1117,7 @@
 
 #pragma mark || Methods to support the type-ahead selector.
 
+// used for status bar
 - (void)updateTypeAheadStatus:(NSString *)searchString{
     NSString *tcID = [lastSelectedColumnForSort identifier];
     if(!searchString || !tcID)
@@ -1125,12 +1126,15 @@
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @""), tcID, searchString]];
 }
 
+// This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 - (NSArray *)typeAheadSelectionItems{
     if([documentWindow firstResponder] == tableView){    
         
-        // some users seem to expect that the currently sorted table column is used for typeahead
+        // Some users seem to expect that the currently sorted table column is used for typeahead;
         // since the datasource method already knows how to convert columns to BibItem values, we
-        // can use that
+        // can it almost directly.  It might be possible to cache this in the datasource method itself
+        // to avoid calling it twice on -reloadData, but that will only work if -reloadData reloads
+        // all rows instead of just visible rows.
         
         NSString *field = [lastSelectedColumnForSort identifier];
         NSTableColumn *column = [tableView tableColumnWithIdentifier:field];
@@ -1167,12 +1171,11 @@
         
     } else return [NSArray array];
 }
-    // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 
+// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 - (NSString *)currentlySelectedItem{
     if([documentWindow firstResponder] == tableView){
         int n = [self numberOfSelectedPubs];
-        BibItem *bib;
         if (n == 1){
             NSTableColumn *column = [tableView tableColumnWithIdentifier:[lastSelectedColumnForSort identifier]];
             unsigned row = [tableView selectedRow];
@@ -1187,9 +1190,8 @@
             return [[[self selectedGroups] lastObject] stringValue];
     } else return nil;
 }
-// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 
-// fixme -  also need to call the processkeychars in keydown...
+// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 - (void)typeAheadSelectItemAtIndex:(int)itemIndex{
     NSResponder *responder = [documentWindow firstResponder];
     OBPRECONDITION([responder isKindOfClass:[NSTableView class]]);
@@ -1198,10 +1200,8 @@
         [(NSTableView *)responder scrollRowToVisible:itemIndex];
     }
 }
-// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 
-
-
+// promise drags (currently used for webloc files)
 - (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet;
 {
 
