@@ -1919,7 +1919,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
-	BibDocument *changedDoc = [[aNotification object] document];
+	BibDocument *changedDoc = [[notification object] document];
 	if(changedDoc && changedDoc != theDocument)
 		return; // only macro changes for our own document or the global macros
 	
