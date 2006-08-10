@@ -1118,23 +1118,41 @@
 #pragma mark || Methods to support the type-ahead selector.
 
 - (void)updateTypeAheadStatus:(NSString *)searchString{
-    if(!searchString)
+    NSString *tcID = [lastSelectedColumnForSort identifier];
+    if(!searchString || !tcID)
         [self updateUI]; // resets the status line to its default value
     else
-        [self setStatus:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding item with author or title:", @""), searchString]];
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @""), tcID, searchString]];
 }
 
 - (NSArray *)typeAheadSelectionItems{
-    if([documentWindow firstResponder] == tableView){
-        NSEnumerator *e = [shownPublications objectEnumerator];
-        NSMutableArray *a = [NSMutableArray arrayWithCapacity:[shownPublications count]];
-        BibItem *pub = nil;
+    if([documentWindow firstResponder] == tableView){    
+        
+        // some users seem to expect that the currently sorted table column is used for typeahead
+        // since the datasource method already knows how to convert columns to BibItem values, we
+        // can use that
+        
+        NSString *field = [lastSelectedColumnForSort identifier];
+        NSTableColumn *column = [tableView tableColumnWithIdentifier:field];
+        unsigned int row, numberOfRows = [tableView numberOfRows];
+        NSMutableArray *a = [NSMutableArray arrayWithCapacity:numberOfRows];
 
-        while(pub = [e nextObject]){
-            [a addObject:[[pub bibTeXAuthorString] stringByAppendingString:[pub title]]];
+        // table datasource returns an NSImage for URL fields, so we'll ignore those columns
+        if([[BibTypeManager sharedManager] isURLField:field] == NO && nil != column){
+            id value;
+            typedef id (*dataIMP)(id, SEL, id, id, unsigned int);
+            SEL selector = @selector(tableView:objectValueForTableColumn:row:);
+            dataIMP get_datasource_value = (dataIMP)[self methodForSelector:selector];
+            
+            for (row = 0; row < numberOfRows; row++){
+                value = get_datasource_value(self, selector, tableView, column, row);
+                if(value) [a addObject:[value description]];
+            }
         }
         return a;
+        
     } else if([documentWindow firstResponder] == groupTableView){
+        
         int i;
 		int groupCount = [self countOfGroups];
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:groupCount];
@@ -1146,6 +1164,7 @@
             [array addObject:[group stringValue]];
 		}
         return array;
+        
     } else return [NSArray array];
 }
     // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
@@ -1155,8 +1174,9 @@
         int n = [self numberOfSelectedPubs];
         BibItem *bib;
         if (n == 1){
-            bib = [shownPublications objectAtIndex:[tableView selectedRow]];
-            return [[bib bibTeXAuthorString] stringByAppendingString:[bib title]];
+            NSTableColumn *column = [tableView tableColumnWithIdentifier:[lastSelectedColumnForSort identifier]];
+            unsigned row = [tableView selectedRow];
+            return [[self tableView:tableView objectValueForTableColumn:column row:row] description];
         }else{
             return nil;
         }
