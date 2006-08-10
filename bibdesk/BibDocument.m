@@ -2965,7 +2965,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
 	id sender = [aNotification object];
-	if([sender isKindOfClass:[BibDocument class]] && sender != self)
+	if([(BDSKMacroResolver *)sender document] != self)
 		return; // only macro changes for ourselves or the global macros
 	
     [tableView reloadData];
