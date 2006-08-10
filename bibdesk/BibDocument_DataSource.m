@@ -1150,7 +1150,7 @@
             
             for (row = 0; row < numberOfRows; row++){
                 value = get_datasource_value(self, selector, tableView, column, row);
-                if(value) [a addObject:[value description]];
+                [a addObject:value ? [value description] : @""];
             }
         }
         return a;
