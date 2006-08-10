@@ -58,4 +58,6 @@
 - (void)setParent:(BDSKTreeNode *)aParent;
 - (BOOL)isLeaf;
 
+- (void)setColumnValues:(NSDictionary *)values;
+
 @end

@@ -46,7 +46,7 @@
     if(self = [super init]){
         [self setParent:nil];
         [self setChildren:[NSArray array]];
-        columnValues = [[NSMutableDictionary alloc] initWithCapacity:2];
+        [self setColumnValues:[NSDictionary dictionary]];
     }
     return self;
 }
@@ -66,9 +66,9 @@
 
 - (id)initWithCoder:(NSCoder *)coder;
 {
-    if(self = [self init]){
+    if(self = [super init]){
         [self setChildren:[coder decodeObjectForKey:@"children"]];
-        [columnValues setDictionary:[coder decodeObjectForKey:@"columnValues"]];
+        [self setColumnValues:[coder decodeObjectForKey:@"columnValues"]];
         [self setParent:[coder decodeObjectForKey:@"parent"]];
     }
     return self;
@@ -93,6 +93,14 @@
 - (void)setParent:(BDSKTreeNode *)anObject;
 {
     parent = anObject;
+}
+
+- (void)setColumnValues:(NSDictionary *)values;
+{
+    if(columnValues != values){
+        [columnValues release];
+        columnValues = [values mutableCopy];
+    }
 }
 
 - (id)copyWithZone:(NSZone *)aZone;
