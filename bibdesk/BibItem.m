@@ -2138,6 +2138,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
     NSURL *localURL = nil;
+    NSURL *resolvedURL = nil;
     NSString *localURLFieldValue = [self valueOfField:field inherit:inherit];
     
     if ([NSString isEmptyString:localURLFieldValue]) return nil;
@@ -2159,13 +2160,15 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
 
         localURL = [NSURL fileURLWithPath:[localURLFieldValue stringByStandardizingPath]];
-        
     }
 	
     
     // resolve aliases in the containing dir, as most NSFileManager methods do not follow them, and NSWorkspace can't open aliases
 	// we don't resolve the last path component if it's an alias, as this is used in auto file, which should move the alias rather than the target file 
-    return [localURL fileURLByResolvingAliasesBeforeLastPathComponent];
+    resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent];
+    
+    // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
+    return (resolvedURL == nil) ? localURL : resolvedURL;
 }
 
 - (BOOL)isValidLocalUrlPath:(NSString *)proposedPath{
