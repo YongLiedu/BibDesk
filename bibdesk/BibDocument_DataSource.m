@@ -1150,6 +1150,8 @@
             
             for (row = 0; row < numberOfRows; row++){
                 value = get_datasource_value(self, selector, tableView, column, row);
+                
+                // use @"" for nil values; ensure typeahead index matches shownPublications index
                 [a addObject:value ? [value description] : @""];
             }
         }
@@ -1175,11 +1177,13 @@
 // Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 - (NSString *)currentlySelectedItem{
     if([documentWindow firstResponder] == tableView){
-        int n = [self numberOfSelectedPubs];
-        if (n == 1){
+        if ([self numberOfSelectedPubs] == 1){
             NSTableColumn *column = [tableView tableColumnWithIdentifier:[lastSelectedColumnForSort identifier]];
             unsigned row = [tableView selectedRow];
-            return [[self tableView:tableView objectValueForTableColumn:column row:row] description];
+            id value = [self tableView:tableView objectValueForTableColumn:column row:row];
+            
+            // return @"" for nil values; don't bother checking for URL types, since -typeAheadSelectionItems is empty in that case
+            return value ? [value description] : @"";
         }else{
             return nil;
         }
