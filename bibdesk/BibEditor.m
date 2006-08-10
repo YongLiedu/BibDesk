@@ -1919,8 +1919,8 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
-	id sender = [notification object];
-	if([(BDSKMacroResolver *)sender document] != theDocument)
+	BibDocument *changedDoc = [[aNotification object] document];
+	if(changedDoc && changedDoc != theDocument)
 		return; // only macro changes for our own document or the global macros
 	
 	NSArray *cells = [bibFields cells];
