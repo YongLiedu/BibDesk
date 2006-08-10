@@ -643,6 +643,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 }
 
+- (NSNumber *)fileOrderOfPublication:(BibItem *)thePub{
+    unsigned int order = [publications indexOfObjectIdenticalTo:thePub];
+    return NSNotFound == order ? nil : [NSNumber numberWithInt:(order + 1)];
+}
+
 #pragma mark Document Info
 
 - (NSDictionary *)documentInfo{
