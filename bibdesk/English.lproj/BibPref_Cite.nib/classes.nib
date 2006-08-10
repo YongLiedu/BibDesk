@@ -36,7 +36,12 @@
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
         {
             ACTIONS = {restoreDefaults = id; setValueForSender = id; }; 
             CLASS = OAPreferenceClient; 
