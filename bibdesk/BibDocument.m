@@ -1013,23 +1013,35 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 // this is only called for Save (As) menu actions, not for Export
 - (NSData *)dataRepresentationOfType:(NSString *)aType
 {
+    return [self dataOfType:aType error:NULL];
+}
+
+- (NSData *)dataOfType:(NSString *)aType error:(NSError **)outError
+{
     // first we make sure all edits are committed
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
     NSData *data = nil;
+    NSError *error;
     
     if ([aType isEqualToString:BDSKBibTeXDocumentType]){
         if([self documentStringEncoding] == 0)
             [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
-        data = [self bibTeXDataForPublications:publications encoding:[self documentStringEncoding] droppingInternal:NO];
+        data = [self bibTeXDataForPublications:publications encoding:[self documentStringEncoding] droppingInternal:NO error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType]){
         data = [self RISDataForPublications:publications];
     }
-
-    return data;
+    
+    if(nil == data && outError){
+        // even with all of this, NSDocumentController still presents a standard (lame) error message
+        OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to save the document", @""), NSUnderlyingErrorKey, error, nil);
+        *outError = error;
+    }
+    
+    return data;    
 }
 
 #define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSUTF8StringEncoding]]
@@ -1135,77 +1147,121 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return d;
 }
 
+static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
+{
+    if(nil != src)
+        [dst appendData:src];
+    else
+        @throw @"BDSKEncodingConversionException";
+}
+
 - (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop{
+    OB_WARN_OBSOLETE_METHOD;
+    return [self bibTeXDataForPublications:items encoding:encoding droppingInternal:drop error:NULL];
+}
+
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError{
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
-    NSMutableData *d = [NSMutableData dataWithCapacity:4096];
+    NSMutableData *outputData = [NSMutableData dataWithCapacity:4096];
+    NSData *data = nil;
+    NSError *error = nil;
     
     if(encoding == 0)
         [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
     
     BOOL shouldAppendFrontMatter = YES;
-	
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
-        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
-        
-        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+    NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
 
-        NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
+    @try{
+    
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
+            NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
+            
+            [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
 
-        [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
-        
-        // remove all whitespace so we can make a comparison; just collapsing isn't quite good enough, unfortunately
-        NSString *collapsedTemplate = [templateFile stringByRemovingWhitespace];
-        NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
-        if([NSString isEmptyString:collapsedFrontMatter]){
-            shouldAppendFrontMatter = NO;
-		}else if([collapsedTemplate containsString:collapsedFrontMatter]){
-            NSLog(@"*** WARNING! *** Found duplicate preamble %@.  Using template from preferences.", frontMatter);
-            shouldAppendFrontMatter = NO;
+            [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
+            
+            // remove all whitespace so we can make a comparison; just collapsing isn't quite good enough, unfortunately
+            NSString *collapsedTemplate = [templateFile stringByRemovingWhitespace];
+            NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
+            if([NSString isEmptyString:collapsedFrontMatter]){
+                shouldAppendFrontMatter = NO;
+            }else if([collapsedTemplate containsString:collapsedFrontMatter]){
+                NSLog(@"*** WARNING! *** Found duplicate preamble %@.  Using template from preferences.", frontMatter);
+                shouldAppendFrontMatter = NO;
+            }
+            
+            appendDataOrRaise(outputData, [templateFile dataUsingEncoding:encoding]);
         }
         
-        [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];
-    }
-    
-    NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding allowLossyConversion:YES];
-    
-    // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
-    if(shouldAppendFrontMatter){
-        [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
-        [d appendData:doubleNewlineData];
-    }
-        
-    if([documentInfo count]){
-        [d appendData:[[self documentInfoString] dataUsingEncoding:encoding allowLossyConversion:YES]];
-    }
-    
-    // output the document's macros:
-	[d appendData:[[[self macroResolver] bibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
-    
-    // output the bibs
-    
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
+        NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding];
 
-	while(pub = [e nextObject]){
-        [d appendData:doubleNewlineData];
-        OMNI_POOL_START {
-            [d appendData:[[pub bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
-        } OMNI_POOL_END;
+        // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
+        if(shouldAppendFrontMatter){
+            appendDataOrRaise(outputData, [frontMatter dataUsingEncoding:encoding]);
+            [outputData appendData:doubleNewlineData];
+        }
+            
+        if([documentInfo count]){
+            appendDataOrRaise(outputData, [[self documentInfoString] dataUsingEncoding:encoding]);
+        }
+        
+        // output the document's macros:
+        appendDataOrRaise(outputData, [[[self macroResolver] bibTeXString] dataUsingEncoding:encoding]);
+        
+        // output the bibs
+        
+        if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
+
+        CFAllocatorRef alloc = CFAllocatorGetDefault();
+        CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
+        NSAutoreleasePool *pool = nil;
+        while(pub = [e nextObject]){
+            [outputData appendData:doubleNewlineData];
+            pool = [[NSAutoreleasePool alloc] init];
+            data = (NSData *)CFStringCreateExternalRepresentation(alloc, (CFStringRef)[pub bibTeXStringDroppingInternal:drop], cfEncoding, 0);
+            @try{
+                appendDataOrRaise(outputData, data);
+            }
+            @catch(id exception){
+                // re-raise immediately
+                @throw;
+            }
+            @finally{
+                // make sure we don't leak
+                [data release];
+                [pool release];
+            }
+            // new pool won't get created if we @catch
+            pool = [[NSAutoreleasePool alloc] init];
+        }
+        
+        if([staticGroups count] > 0){
+            [outputData appendData:[@"\n\n@comment{BibDesk Static Groups{\n" dataUsingEncoding:encoding]];
+            [outputData appendData:[self serializedStaticGroupsData]];
+            [outputData appendData:[@"}}" dataUsingEncoding:encoding]];
+        }
+        if([smartGroups count] > 0){
+            [outputData appendData:[@"\n\n@comment{BibDesk Smart Groups{\n" dataUsingEncoding:encoding]];
+            [outputData appendData:[self serializedSmartGroupsData]];
+            [outputData appendData:[@"}}" dataUsingEncoding:encoding]];
+        }
+        [outputData appendData:[@"\n" dataUsingEncoding:encoding]];
+        
     }
     
-	if([staticGroups count] > 0){
-        [d appendData:[@"\n\n@comment{BibDesk Static Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
-		[d appendData:[self serializedStaticGroupsData]];
-        [d appendData:[@"}}" dataUsingEncoding:encoding allowLossyConversion:YES]];
-	}
-	if([smartGroups count] > 0){
-        [d appendData:[@"\n\n@comment{BibDesk Smart Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
-		[d appendData:[self serializedSmartGroupsData]];
-        [d appendData:[@"}}" dataUsingEncoding:encoding allowLossyConversion:YES]];
-	}
-	[d appendData:[@"\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
+    @catch(id exception){
+        if([exception isEqual:@"BDSKEncodingConversionException"]){
+            NSLog(@"Unable to save file with encoding %@", encodingName);
+            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], nil);
+            if(outError) *outError = error;
+            outputData = nil;
+        }
+        else @throw;
+    }
 	
-    return d;
+    return outputData;
         
 }
 

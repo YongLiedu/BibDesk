@@ -311,7 +311,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @result     (description)
 */
 - (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop;
-
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError;
 /*!
     @method     RISDataForPublications:encoding:
     @abstract   Returns document contents in RIS form as NSData, in the specified string encoding.
