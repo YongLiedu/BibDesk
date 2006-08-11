@@ -3504,50 +3504,46 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	return NO;
 }
 
-- (IBAction)generateCiteKey:(id)sender
-{
+- (void)generateCiteKeysForSelectedPublications{
+    
     unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
-	if (numberOfSelectedPubs == 0 ||
-        [self hasSharedGroupsSelected] == YES) return;
-	
-	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
-	BibItem *aPub;
+    NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
+    BibItem *aPub;
     NSMutableArray *arrayOfPubs = [NSMutableArray arrayWithCapacity:numberOfSelectedPubs];
     NSMutableArray *arrayOfOldValues = [NSMutableArray arrayWithCapacity:numberOfSelectedPubs];
     NSMutableArray *arrayOfNewValues = [NSMutableArray arrayWithCapacity:numberOfSelectedPubs];
-	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
-	
+    BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
+    
     // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
-	
-    // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
-	while (aPub = [selEnum nextObject]) {
-        [arrayOfPubs addObject:aPub];
-		if(scriptHook){
-			[arrayOfOldValues addObject:[aPub citeKey]];
-			[arrayOfNewValues addObject:[aPub suggestedCiteKey]];
-		}
-	}
-	
-	if (scriptHook) {
-		[scriptHook setField:BDSKCiteKeyString];
-		[scriptHook setOldValues:arrayOfOldValues];
-		[scriptHook setNewValues:arrayOfNewValues];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs];
-	}
     
-	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
-	[arrayOfOldValues removeAllObjects];
-	[arrayOfNewValues removeAllObjects];
+    // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
+    while (aPub = [selEnum nextObject]) {
+        [arrayOfPubs addObject:aPub];
+        if(scriptHook){
+            [arrayOfOldValues addObject:[aPub citeKey]];
+            [arrayOfNewValues addObject:[aPub suggestedCiteKey]];
+        }
+    }
+    
+    if (scriptHook) {
+        [scriptHook setField:BDSKCiteKeyString];
+        [scriptHook setOldValues:arrayOfOldValues];
+        [scriptHook setNewValues:arrayOfNewValues];
+        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs];
+    }
+    
+    scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
+    [arrayOfOldValues removeAllObjects];
+    [arrayOfNewValues removeAllObjects];
     selEnum = [arrayOfPubs objectEnumerator];
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    unsigned poolCount = 0;
-	
+    
     while(aPub = [selEnum nextObject]){
-		NSString *newKey = [aPub suggestedCiteKey];
+        NSString *newKey = [aPub suggestedCiteKey];
         NSString *crossref = [aPub valueOfField:BDSKCrossrefString inherit:NO];
         if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key",@"Could not generate cite key") 
@@ -3562,31 +3558,60 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             continue;
         }
         [aPub setCiteKey:newKey];
-        		
-        if(scriptHook){
-			[arrayOfOldValues addObject:[aPub citeKey]];
-			[arrayOfNewValues addObject:newKey];
-		}
         
-        // all the UI and group updates while generating cite keys can run us out of memory
-        if(poolCount++ > 50){
-            [pool release];
-            pool = [[NSAutoreleasePool alloc] init];
-            poolCount = 0;
+        if(scriptHook){
+            [arrayOfOldValues addObject:[aPub citeKey]];
+            [arrayOfNewValues addObject:newKey];
         }
-	}
-
+        
+        [pool release];
+        pool = [[NSAutoreleasePool alloc] init];
+    }
+    
     // should be safe to release here since arrays were created outside the scope of this local pool
     [pool release];
+    
+    if (scriptHook) {
+        [scriptHook setField:BDSKCiteKeyString];
+        [scriptHook setOldValues:arrayOfOldValues];
+        [scriptHook setNewValues:arrayOfNewValues];
+        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs];
+    }
+    
+    [[self undoManager] setActionName:(numberOfSelectedPubs > 1 ? NSLocalizedString(@"Generate Cite Keys",@"") : NSLocalizedString(@"Generate Cite Key",@""))];
+}    
 
-	if (scriptHook) {
-		[scriptHook setField:BDSKCiteKeyString];
-		[scriptHook setOldValues:arrayOfOldValues];
-		[scriptHook setNewValues:arrayOfNewValues];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs];
-	}
-	
-	[[self undoManager] setActionName:(numberOfSelectedPubs > 1 ? NSLocalizedString(@"Generate Cite Keys",@"") : NSLocalizedString(@"Generate Cite Key",@""))];
+- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if([alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
+    
+    if(returnCode == NSAlertDefaultReturn)
+        [self generateCiteKeysForSelectedPublications];
+}
+
+- (IBAction)generateCiteKey:(id)sender
+{
+    unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
+	if (numberOfSelectedPubs == 0 ||
+        [self hasSharedGroupsSelected] == YES) return;
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
+        NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"") : NSLocalizedString(@"Really Generate Cite Key?", @"");
+        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @""), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"");
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:alertTitle
+                                             defaultButton:NSLocalizedString(@"Generate", @"")
+                                           alternateButton:NSLocalizedString(@"Cancel", @"") 
+                                               otherButton:nil
+                                 informativeTextWithFormat:message];
+        [alert setHasCheckButton:YES];
+        [alert setCheckValue:NO];
+        [alert beginSheetModalForWindow:documentWindow 
+                          modalDelegate:self 
+                         didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+    } else {
+        [self generateCiteKeysForSelectedPublications];
+    }
 }
 
 // select duplicates, then allow user to delete/copy/whatever

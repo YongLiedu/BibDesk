@@ -188,6 +188,7 @@ extern NSString *BDSKShouldShareFilesKey;
 extern NSString *BDSKShouldLookForSharedFilesKey;
 extern NSString *BDSKSharingRequiresPasswordKey;
 extern NSString *BDSKSharingNameKey;
+extern NSString *BDSKWarnOnCiteKeyChangeKey;
 
 extern NSString *BDSKShouldDisplayFirstNamesKey;
 extern NSString *BDSKShouldAbbreviateFirstNamesKey;

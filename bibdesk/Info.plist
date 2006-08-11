@@ -626,6 +626,8 @@
 					<true/>
 					<key>BDSKWarnOnRenameGroup</key>
 					<true/>
+                    <key>BDSKWarnOnCiteKeyChangeKey</key>
+                    <true/>
 					<key>BlueComponentColor of alternating rows Key</key>
 					<string>1.010918794815856e-310</string>
 					<key>Check for updates when starting</key>

@@ -59,6 +59,9 @@
     [warnOnRemovalFromGroupButton setState:([defaults boolForKey:BDSKWarnOnRemovalFromGroupKey] == YES) ? NSOnState : NSOffState];
 
     [warnOnRenameGroupButton setState:([defaults boolForKey:BDSKWarnOnRenameGroupKey] == YES) ? NSOnState : NSOffState];
+    
+    [warnOnGenerateCiteKeysButton setState:([defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] == YES) ? NSOnState : NSOffState];
+    
 }
 
 - (IBAction)toggleAutoCheckForUpdates:(id)sender{
@@ -121,6 +124,10 @@
 - (IBAction)changeWarnOnRenameGroup:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
 	[self updateUI];
+}
+
+- (IBAction)changeWarnOnGenerateCiteKeys:(id)sender{
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
 }
 
 - (void)dealloc{
