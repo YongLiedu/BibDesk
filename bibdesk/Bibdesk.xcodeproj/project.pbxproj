@@ -194,6 +194,9 @@
 		CE2209A7093639B0004D7D92 /* BDSKAlert.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2209A5093639B0004D7D92 /* BDSKAlert.h */; };
 		CE2209A8093639B0004D7D92 /* BDSKAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2209A6093639B0004D7D92 /* BDSKAlert.m */; };
 		CE2209AB09363A05004D7D92 /* BDSKAlert.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE2209A909363A05004D7D92 /* BDSKAlert.nib */; };
+		CE22E1CD0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.h in Headers */ = {isa = PBXBuildFile; fileRef = CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */; };
+		CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */ = {isa = PBXBuildFile; fileRef = CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */; };
+		CE22E1D50A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE22E1CF0A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib */; };
 		CE2391610A334890009F3A5B /* BDSKDocumentInfoWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */; };
 		CE2391620A334890009F3A5B /* BDSKDocumentInfoWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */; };
 		CE23916A0A3348B2009F3A5B /* DocumentInfoWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE2391630A3348B1009F3A5B /* DocumentInfoWindow.nib */; };
@@ -1015,6 +1018,9 @@
 		CE2209A5093639B0004D7D92 /* BDSKAlert.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKAlert.h; sourceTree = "<group>"; };
 		CE2209A6093639B0004D7D92 /* BDSKAlert.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKAlert.m; sourceTree = "<group>"; };
 		CE2209AA09363A05004D7D92 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKAlert.nib; sourceTree = "<group>"; };
+		CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFilesFinder.h; sourceTree = "<group>"; };
+		CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFilesFinder.m; sourceTree = "<group>"; };
+		CE22E1D00A8CCFBD002CEFB8 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKOrphanedFilesFinder.nib; sourceTree = "<group>"; };
 		CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDocumentInfoWindowController.h; sourceTree = "<group>"; };
 		CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDocumentInfoWindowController.m; sourceTree = "<group>"; };
 		CE2391640A3348B1009F3A5B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/DocumentInfoWindow.nib; sourceTree = "<group>"; };
@@ -1658,6 +1664,7 @@
 				F9252E2408F60D520045D563 /* BDSKFileContentSearch.nib */,
 				CE38FB92091D953900BCB69D /* BDSKFilter.nib */,
 				F97965E20869098200050427 /* BDSKFindPanel.nib */,
+				CE22E1CF0A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib */,
 				CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */,
 				3D8663770802CF5C00FF1724 /* BDSKTypeInfoEditor.nib */,
 				F9022CC2075804A600C3F701 /* BibDocument.nib */,
@@ -1831,6 +1838,7 @@
 				F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */,
 				CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */,
 				F97965F0086909EA00050427 /* BDSKFindController.m */,
+				CE22E1CC0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.m */,
 				F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */,
 				F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */,
 				F9022C58075802E300C3F701 /* BDSKPreviewer.m */,
@@ -2109,6 +2117,7 @@
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
+				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
 				F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */,
 				F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */,
@@ -2537,6 +2546,7 @@
 				CEBA63D70A7CA0B500588BB7 /* BDSKCrossrefFormatter.h in Headers */,
 				CE6775160A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h in Headers */,
 				CE95A57B0A88883300334DFA /* BDSKReadMeController.h in Headers */,
+				CE22E1CD0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2969,6 +2979,7 @@
 				F963E4500A1D81B000695DDC /* exportPrefs.tiff in Resources */,
 				CE97A3C80A28F19A00CF2DF3 /* Templates in Resources */,
 				CE23916A0A3348B2009F3A5B /* DocumentInfoWindow.nib in Resources */,
+				CE22E1D50A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3343,6 +3354,7 @@
 				CEBA63D80A7CA0B500588BB7 /* BDSKCrossrefFormatter.m in Sources */,
 				CE6775170A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m in Sources */,
 				CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */,
+				CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3550,6 +3562,14 @@
 				CE2209AA09363A05004D7D92 /* English */,
 			);
 			name = BDSKAlert.nib;
+			sourceTree = "<group>";
+		};
+		CE22E1CF0A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE22E1D00A8CCFBD002CEFB8 /* English */,
+			);
+			name = BDSKOrphanedFilesFinder.nib;
 			sourceTree = "<group>";
 		};
 		CE2391630A3348B1009F3A5B /* DocumentInfoWindow.nib */ = {
