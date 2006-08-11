@@ -58,6 +58,7 @@
 @implementation BDSKScriptMenu
 
 static NSArray *sortDescriptors = nil;
+static int recursionDepth = 0;
 
 + (void)initialize
 {
@@ -125,6 +126,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     // walk the subdirectories for each domain
     for (scriptFolderIndex = 0; scriptFolderIndex < scriptFolderCount; scriptFolderIndex++) {
         NSString *scriptFolder = [scriptFolders objectAtIndex:scriptFolderIndex];
+        recursionDepth = 0;
 		[scripts addObjectsFromArray:[self directoryContentsAtPath:scriptFolder lastModified:&modDate]];
     }
     
@@ -148,7 +150,6 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
 	NSDictionary *dict;
 	NSMutableArray *fileArray = [NSMutableArray array];
 	
-    static int recursionDepth = 0;
     recursionDepth++;
     
     NSDate *modDate;
