@@ -72,6 +72,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKReadMeController.h"
+#import "BDSKOrphanedFilesFinder.h"
 
 @implementation BibAppController
 
@@ -947,6 +948,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
     [[BDSKPreviewer sharedPreviewer] toggleShowingPreviewPanel:sender];
+}
+
+- (IBAction)findOrphanedFiles:(id)sender{
+    [[BDSKOrphanedFilesFinder sharedFinder] showOrphanedFiles:sender];
 }
 
 #pragma mark Service code

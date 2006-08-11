@@ -128,6 +128,8 @@
 - (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current;
 - (void)showInputManagerUpdateAlert;
 
+- (IBAction)findOrphanedFiles:(id)sender;
+
 // ----------------------------------------------------------------------------------------
 // A first attempt at a service.
 // This allows you to type a substring of a title and hit a key to
