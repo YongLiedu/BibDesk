@@ -1179,11 +1179,7 @@
 - (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
     if(typeSelectHelper == [tableView typeSelectHelper]){    
         if ([self numberOfSelectedPubs] == 1){
-            NSTableColumn *column = [tableView tableColumnWithIdentifier:[lastSelectedColumnForSort identifier]];
-            unsigned row = [tableView selectedRow];
-            id value = [self tableView:tableView objectValueForTableColumn:column row:row];
-            
-            return row;
+            return [tableView selectedRow];
         }else{
             return NSNotFound;
         }
