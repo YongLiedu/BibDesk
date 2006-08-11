@@ -753,16 +753,24 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return [super writeToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteOriginalContentsURL error:outError];
 }
 
+// @@ 10.3 compatibility only
+- (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
+    return [self writeToURL:[NSURL fileURLWithPath:fileName] ofType:docType error:NULL];
+}
+
 // we override this method only to catch exceptions raised during TeXification of BibItems
 // returning NO keeps the document window from closing if the save was initiated by a close
 // action, so the user gets a second chance at fixing the problem
 // this method eventually gets called for save or save-as operations
-- (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
+- (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
 
     BOOL success = YES;
     NSString *error = nil;
+    NSString *fileName = [fileURL path];
     @try{
-        success = [super writeToFile:fileName ofType:docType];
+        // @@ 10.3 compatibility; should use super after we remove the call to writeToFile:ofType:, but that causes an endless loop on 10.4; revisit this if we need to support file wrappers
+        NSData *data = [self dataOfType:docType error:outError];
+        success = nil == data ? NO : [data writeToURL:fileURL atomically:YES];
     }
     @catch(id exception){
         if([exception isKindOfClass:[NSException class]] && [[exception name] isEqualToString:BDSKTeXifyException]){
@@ -775,7 +783,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         }
     }
     
-    // needed because of finalize changes; don't send this if the save failed for any reason, or if we're autosaving!
+    // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
 	if(success && currentSaveOperationType != 3)
         [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
     else if(error != nil){
@@ -1010,7 +1018,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 #pragma mark Data representations
 
-// this is only called for Save (As) menu actions, not for Export
+// this is only called for Save (As) menu actions, not for Export (and is only called on 10.3)
 - (NSData *)dataRepresentationOfType:(NSString *)aType
 {
     return [self dataOfType:aType error:NULL];
@@ -1036,8 +1044,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
     
     if(nil == data && outError){
-        // even with all of this, NSDocumentController still presents a standard (lame) error message
-        OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to save the document", @""), NSUnderlyingErrorKey, error, nil);
+        NSString *recoverySuggestion = nil;
+        // see if this was an encoding failure; if so, we can suggest how to fix it
+        // @@ 10.4 only error keys; should use real constant strings
+        if([[error userInfo] valueForKey:@"NSStringEncoding"]){
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), @"NSLocalizedRecoverySuggestion", NSLocalizedString(@"The document cannot be saved using the specified encoding.  You should ensure that TeX conversion is enabled in the Files preferences, and/or save using an encoding such as UTF-8", @""), nil);
+        } else {
+            // even with all of this, NSDocumentController still presents a standard (lame) error message
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to save the document", @""), nil);
+        }
         *outError = error;
     }
     
@@ -1216,27 +1231,31 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 
         CFAllocatorRef alloc = CFAllocatorGetDefault();
         CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
-        NSAutoreleasePool *pool = nil;
+
         while(pub = [e nextObject]){
-            [outputData appendData:doubleNewlineData];
-            pool = [[NSAutoreleasePool alloc] init];
-            data = (NSData *)CFStringCreateExternalRepresentation(alloc, (CFStringRef)[pub bibTeXStringDroppingInternal:drop], cfEncoding, 0);
-            @try{
+            
+            // run inside another exception handler since -[BibItem bibTeXString...] may raise
+            @try{                    
+                [outputData appendData:doubleNewlineData];
+                data = (NSData *)CFStringCreateExternalRepresentation(alloc, (CFStringRef)[pub bibTeXStringDroppingInternal:drop], cfEncoding, 0);
                 appendDataOrRaise(outputData, data);
             }
             @catch(id exception){
-                // re-raise immediately
+                // don't return partial data for a save
+                outputData = nil;
+                // could be TeXify or encoding conversion if it's ours
                 @throw;
             }
             @finally{
-                // make sure we don't leak
-                [data release];
-                [pool release];
+                // this is executed on every pass through the loop
+                if(nil != data){
+                    CFRelease(data);
+                    data = nil;
+                }
             }
-            // new pool won't get created if we @catch
-            pool = [[NSAutoreleasePool alloc] init];
         }
         
+        // no need to check for nil data here, since the data from groups is always UTF-8, and we shouldn't convert it; the comment key strings should be representable in any encoding
         if([staticGroups count] > 0){
             [outputData appendData:[@"\n\n@comment{BibDesk Static Groups{\n" dataUsingEncoding:encoding]];
             [outputData appendData:[self serializedStaticGroupsData]];
@@ -1254,7 +1273,8 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     @catch(id exception){
         if([exception isEqual:@"BDSKEncodingConversionException"]){
             NSLog(@"Unable to save file with encoding %@", encodingName);
-            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], nil);
+            // @@ 10.3 compatibility: convert these to AppKit constant strings
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
             if(outError) *outError = error;
             outputData = nil;
         }
