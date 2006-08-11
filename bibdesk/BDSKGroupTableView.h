@@ -38,10 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OAGradientTableView.h>
-#import <OmniAppKit/OATypeAheadSelectionHelper.h>
-#import "OATypeAheadSelectionHelper_Extensions.h"
 
-@class BDSKGroupTableView;
+@class BDSKGroupTableView, BDSKTypeSelectHelper;
 
 @protocol BDSKGroupTableDelegate <NSObject>
 
@@ -51,8 +49,9 @@
 @end
 
 @interface BDSKGroupTableView : OAGradientTableView {
-    OATypeAheadSelectionHelper *typeAheadHelper;
+    BDSKTypeSelectHelper *typeSelectHelper;
 }
+- (BDSKTypeSelectHelper *)typeSelectHelper;
 - (NSPopUpButtonCell *)popUpHeaderCell;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 - (void)updateHighlights;

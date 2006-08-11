@@ -59,6 +59,7 @@
 #import "BDSKSharedGroup.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "BDSKTemplate.h"
+#import "BDSKTypeSelectHelper.h"
 
 @implementation BibDocument (DataSource)
 
@@ -1118,7 +1119,7 @@
 #pragma mark || Methods to support the type-ahead selector.
 
 // used for status bar
-- (void)updateTypeAheadStatus:(NSString *)searchString{
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     NSString *tcID = [lastSelectedColumnForSort identifier];
     if(!searchString || !tcID)
         [self updateUI]; // resets the status line to its default value
@@ -1127,8 +1128,8 @@
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
-- (NSArray *)typeAheadSelectionItems{
-    if([documentWindow firstResponder] == tableView){    
+- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
+    if(typeSelectHelper == [tableView typeSelectHelper]){    
         
         // Some users seem to expect that the currently sorted table column is used for typeahead;
         // since the datasource method already knows how to convert columns to BibItem values, we
@@ -1157,7 +1158,7 @@
         }
         return a;
         
-    } else if([documentWindow firstResponder] == groupTableView){
+    } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
         
         int i;
 		int groupCount = [self countOfGroups];
@@ -1175,34 +1176,36 @@
 }
 
 // Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
-- (NSString *)currentlySelectedItem{
-    if([documentWindow firstResponder] == tableView){
+- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
+    if(typeSelectHelper == [tableView typeSelectHelper]){    
         if ([self numberOfSelectedPubs] == 1){
             NSTableColumn *column = [tableView tableColumnWithIdentifier:[lastSelectedColumnForSort identifier]];
             unsigned row = [tableView selectedRow];
             id value = [self tableView:tableView objectValueForTableColumn:column row:row];
             
-            // return @"" for nil values; don't bother checking for URL types, since -typeAheadSelectionItems is empty in that case
-            return value ? [value description] : @"";
+            return row;
         }else{
-            return nil;
+            return NSNotFound;
         }
-    } else if([documentWindow firstResponder] == groupTableView){
+    } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
         if([groupTableView numberOfSelectedRows] != 1)
-            return nil;
+            return NSNotFound;
         else
-            return [[[self selectedGroups] lastObject] stringValue];
-    } else return nil;
+            return [[groupTableView selectedRowIndexes] firstIndex];
+    } else return NSNotFound;
 }
 
 // We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
-- (void)typeAheadSelectItemAtIndex:(int)itemIndex{
-    NSResponder *responder = [documentWindow firstResponder];
-    OBPRECONDITION([responder isKindOfClass:[NSTableView class]]);
-    if(responder == tableView || responder == groupTableView){
-        [(NSTableView *)responder selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
-        [(NSTableView *)responder scrollRowToVisible:itemIndex];
-    }
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
+    NSTableView *tv = nil;
+    if(typeSelectHelper == [tableView typeSelectHelper])
+        tv = tableView;
+    else if(typeSelectHelper == [groupTableView typeSelectHelper])
+        tv = groupTableView;
+    else
+        return;
+    [tv selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
+    [tv scrollRowToVisible:itemIndex];
 }
 
 // promise drags (currently used for webloc files)

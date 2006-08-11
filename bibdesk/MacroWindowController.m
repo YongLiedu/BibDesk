@@ -49,7 +49,7 @@
 #import "BDSKMacroResolver.h"
 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
-#import "OATypeAheadSelectionHelper_Extensions.h"
+#import "BDSKTypeSelectHelper.h"
 
 @implementation MacroWindowController
 
@@ -484,7 +484,7 @@
 }
 
 #pragma mark || Methods to support the type-ahead selector.
-- (NSArray *)typeAheadSelectionItems{
+- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
     NSMutableArray *array = [NSMutableArray array];
     NSDictionary *defs = [macroResolver macroDefinitions];
     foreach(macro, macros)
@@ -493,17 +493,16 @@
 }
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 
-- (NSString *)currentlySelectedItem{
-    int n = [tableView numberOfSelectedRows];
-    if (n == 1){
-        return [[tableView dataSource] tableView:tableView objectValueForTableColumn:[[tableView tableColumns] lastObject] row:[tableView selectedRow]];
+- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
+    if ([tableView numberOfSelectedRows] == 1){
+        return [tableView selectedRow];
     }else{
-        return nil;
+        return NSNotFound;
     }
 }
 // Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 
-- (void)typeAheadSelectItemAtIndex:(int)itemIndex{
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
 }
 // We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
@@ -560,13 +559,14 @@
 }
 
 - (void)awakeFromNib{
-    typeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
-    [typeAheadHelper setDataSource:[self delegate]];
-    [typeAheadHelper setCyclesSimilarResults:YES];
+    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [typeSelectHelper setDataSource:[self delegate]];
+    [typeSelectHelper setCyclesSimilarResults:YES];
+    [typeSelectHelper setMatchesPrefix:NO];
 }
 
 - (void)dealloc{
-    [typeAheadHelper release];
+    [typeSelectHelper release];
     [super dealloc];
 }
 
@@ -585,7 +585,7 @@
                 if([self numberOfSelectedRows] == 1)
                     [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
     }else if ([alnum characterIsMember:c] && flags == 0) {
-        [typeAheadHelper substringProcessKeyDownCharacter:c];
+        [typeSelectHelper processKeyDownCharacter:c];
     }else{
         [super keyDown:event];
     }
@@ -595,7 +595,7 @@
 // a convenient place to rebuild the typeahead find cache
 - (void)reloadData{
     [super reloadData];
-    [typeAheadHelper rebuildTypeAheadSearchCache];
+    [typeSelectHelper rebuildTypeSelectSearchCache];
 }
 
 @end

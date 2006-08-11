@@ -35,20 +35,26 @@
 
 #import "BDSKDragTableView.h"
 #import "BibDocument.h"
+#import "BDSKTypeSelectHelper.h"
 
 @implementation BDSKDragTableView
 
 - (void)awakeFromNib{
     [super awakeFromNib]; // this updates the font
-    typeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
-    [typeAheadHelper setDataSource:[self delegate]]; // which is the bibdocument
-    [typeAheadHelper setCyclesSimilarResults:YES];
+    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [typeSelectHelper setDataSource:[self delegate]]; // which is the bibdocument
+    [typeSelectHelper setCyclesSimilarResults:YES];
+    [typeSelectHelper setMatchesPrefix:NO];
 }
 
 - (void)dealloc{
-    [typeAheadHelper setDataSource:nil];
-    [typeAheadHelper release];
+    [typeSelectHelper setDataSource:nil];
+    [typeSelectHelper release];
     [super dealloc];
+}
+
+- (BDSKTypeSelectHelper *)typeSelectHelper{
+    return typeSelectHelper;
 }
 
 - (void)keyDown:(NSEvent *)event{
@@ -88,7 +94,7 @@
         [self scrollRowToVisible:row];
     // pass it on the typeahead selector
     }else if ([alnum characterIsMember:c] && flags == 0) {
-        [typeAheadHelper substringProcessKeyDownCharacter:c];
+        [typeSelectHelper processKeyDownCharacter:c];
     }else{
         [super keyDown:event];
     }
@@ -96,7 +102,7 @@
 
 - (void)reloadData{
     [super reloadData];
-    [typeAheadHelper queueSelectorOnce:@selector(rebuildTypeAheadSearchCache)]; // if we resorted or searched, the cache is stale
+    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeAheadSearchCache)]; // if we resorted or searched, the cache is stale
 }
 
 // a convenience method.

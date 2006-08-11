@@ -43,7 +43,7 @@
 #import "MacroTextFieldWindowController.h"
 #import "BDSKImagePopUpButton.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
-#import "OATypeAheadSelectionHelper_Extensions.h"
+#import "BDSKTypeSelectHelper.h"
 
 @class BibDocument;
 @class BDSKEdgeView;
@@ -134,7 +134,7 @@
 @end
 
 @interface TextImportItemTableView : NSTableView {
-    OATypeAheadSelectionHelper *typeAheadHelper;
+    BDSKTypeSelectHelper *typeSelectHelper;
 }
 @end
 

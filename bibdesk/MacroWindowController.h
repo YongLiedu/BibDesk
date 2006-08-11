@@ -72,7 +72,9 @@
 
 @end
 
+@class BDSKTypeSelectHelper;
+
 @interface MacroDragTableView : NSTableView{
-    OATypeAheadSelectionHelper *typeAheadHelper;
+    BDSKTypeSelectHelper *typeSelectHelper;
 }
 @end

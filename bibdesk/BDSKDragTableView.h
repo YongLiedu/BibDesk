@@ -36,7 +36,9 @@
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import <OmniFoundation/OFPreference.h>
 #import "BibPrefController.h"
-#import "OATypeAheadSelectionHelper_Extensions.h"
+#import "BDSKTypeSelectHelper.h"
+
+@class BDSKTypeSelecthelper;
 
 /*!
     @class BDSKDragTableView
@@ -47,9 +49,10 @@
 {
     // for supporting type-ahead in the tableview:
     // datasource methods to support this are over in BibDocument_DataSource
-    OATypeAheadSelectionHelper *typeAheadHelper;
+    BDSKTypeSelectHelper *typeSelectHelper;
 }
 
+- (BDSKTypeSelectHelper *)typeSelectHelper;
 - (void)removeAllTableColumns;
 @end
 

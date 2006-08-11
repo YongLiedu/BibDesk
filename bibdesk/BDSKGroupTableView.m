@@ -46,13 +46,14 @@
 #import "BibDocument_Groups.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
+#import "BDSKTypeSelectHelper.h"
 
 @implementation BDSKGroupTableView
 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [typeAheadHelper release];
+    [typeSelectHelper release];
     [super dealloc];
 }
 
@@ -80,9 +81,14 @@
                                                  name:NSViewFrameDidChangeNotification
                                                object:[[self enclosingScrollView] contentView]];
     
-    typeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
-    [typeAheadHelper setDataSource:[self delegate]];
-    [typeAheadHelper setCyclesSimilarResults:NO];
+    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [typeSelectHelper setDataSource:[self delegate]];
+    [typeSelectHelper setCyclesSimilarResults:NO];
+    [typeSelectHelper setMatchesPrefix:NO];
+}
+
+- (BDSKTypeSelectHelper *)typeSelectHelper{
+    return typeSelectHelper;
 }
 
 - (NSPopUpButtonCell *)popUpHeaderCell{
@@ -91,7 +97,7 @@
 
 - (void)reloadData{
     [super reloadData];
-    [typeAheadHelper rebuildTypeAheadSearchCache]; // if we resorted or searched, the cache is stale
+    [typeSelectHelper rebuildTypeSelectSearchCache]; // if we resorted or searched, the cache is stale
 }
 
 - (void)keyDown:(NSEvent *)theEvent
@@ -104,12 +110,12 @@
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableTypeAheadSelection"]) {
 
         // @@ this is a hack; recaching in -reloadData doesn't work for us the first time around, but we don't want to recache on every keystroke
-        if([[typeAheadHelper valueForKey:@"typeAheadSearchCache"] count] == 0)
-            [typeAheadHelper rebuildTypeAheadSearchCache];
+        if([[typeSelectHelper valueForKey:@"typeAheadSearchCache"] count] == 0)
+            [typeSelectHelper rebuildTypeSelectSearchCache];
 
-		if (([[NSCharacterSet alphanumericCharacterSet] characterIsMember:c] || ([typeAheadHelper isProcessing] && ![[NSCharacterSet controlCharacterSet] characterIsMember:c])) && modifierFlags == 0) {
+		if (([[NSCharacterSet alphanumericCharacterSet] characterIsMember:c] || ([typeSelectHelper isProcessing] && ![[NSCharacterSet controlCharacterSet] characterIsMember:c])) && modifierFlags == 0) {
 			 
-			[typeAheadHelper substringProcessKeyDownCharacter:c];
+			[typeSelectHelper processKeyDownCharacter:c];
 			return;
 		}
 	}

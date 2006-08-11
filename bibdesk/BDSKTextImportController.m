@@ -1319,28 +1319,28 @@
 
 #pragma mark || Methods to support the type-ahead selector.
 
-- (void)updateTypeAheadStatus:(NSString *)searchString{
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(!searchString)
         [statusLine setStringValue:[self isInTemporaryTypeAheadMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
     else
         [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @""), [searchString capitalizedString]]];
 }
 
-- (NSArray *)typeAheadSelectionItems{
+- (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
     return fields;
 }
     // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 
-- (NSString *)currentlySelectedItem{
-    int row = [itemTableView selectedRow];
-    if (row == -1)
-        return nil;
-    return [fields objectAtIndex:row];
+- (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
+    if([itemTableView numberOfSelectedRows] == 1)
+        return [itemTableView selectedRow];
+    else
+        return NSNotFound;
 }
 // Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 
 // fixme -  also need to call the processkeychars in keydown...
-- (void)typeAheadSelectItemAtIndex:(int)itemIndex{
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
     OBPRECONDITION([[self window] firstResponder] == itemTableView);
     [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
     [itemTableView scrollRowToVisible:itemIndex];
@@ -1476,7 +1476,7 @@
     }
     
     if ([fieldNameCharSet characterIsMember:c] && flags == 0) {
-        [typeAheadHelper prefixProcessKeyDownCharacter:c];
+        [typeSelectHelper processKeyDownCharacter:c];
     }else{
         [super keyDown:event];
     }
@@ -1488,20 +1488,20 @@
 }
 
 - (void)awakeFromNib{
-    typeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
-    [typeAheadHelper setDataSource:[self dataSource]];
-    [typeAheadHelper setCyclesSimilarResults:YES];
+    typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
+    [typeSelectHelper setDataSource:[self dataSource]];
+    [typeSelectHelper setCyclesSimilarResults:YES];
 }
 
 - (void)dealloc{
-    [typeAheadHelper setDataSource:nil];
-    [typeAheadHelper release];
+    [typeSelectHelper setDataSource:nil];
+    [typeSelectHelper release];
     [super dealloc];
 }
 
 - (void)reloadData{
     [super reloadData];
-    [typeAheadHelper rebuildTypeAheadSearchCache];
+    [typeSelectHelper rebuildTypeSelectSearchCache];
 }
 
 @end
