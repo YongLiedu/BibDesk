@@ -73,7 +73,7 @@
 @end
 
 
-@interface NSObject (BDSKTypeSelectSelectionDataSource)
+@interface NSObject (BDSKTypeSelectDataSource)
 
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper; // required
 - (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper; // required
