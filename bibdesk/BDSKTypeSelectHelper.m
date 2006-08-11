@@ -175,7 +175,10 @@
 - (void)typeSelectSearchTimeout{
     if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
         [dataSource typeSelectHelper:self updateSearchString:nil];
-    originalTypeSelectSearchTimeoutIMP(self, _cmd);
+    [timeoutEvent release];
+    timeoutEvent = nil;
+    [searchString release];
+    searchString = nil;
 }
 
 - (unsigned int)indexOfItemWithSubstring:(NSString *)substring afterIndex:(unsigned int)selectedIndex;
