@@ -102,7 +102,7 @@
 
 - (void)reloadData{
     [super reloadData];
-    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeAheadSearchCache)]; // if we resorted or searched, the cache is stale
+    [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
 }
 
 // a convenience method.
