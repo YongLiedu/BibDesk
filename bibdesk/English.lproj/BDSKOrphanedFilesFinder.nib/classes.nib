@@ -1,0 +1,22 @@
+{
+    IBClasses = (
+        {CLASS = BDSKDragImageTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
+        {
+            ACTIONS = {refreshOrphanedFiles = id; showFile = id; showOrphanedFiles = id; }; 
+            CLASS = BDSKOrphanedFilesFinder; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                arrayController = NSArrayController; 
+                contextMenu = NSMenu; 
+                progressIndicator = NSProgressIndicator; 
+                statusField = NSTextField; 
+                tableView = NSTableView; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }
+    ); 
+    IBVersion = 1; 
+}
