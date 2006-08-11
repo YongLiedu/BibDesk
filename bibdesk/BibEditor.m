@@ -1037,7 +1037,13 @@ static int numberOfOpenEditors = 0;
 	[citeKeyField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])];
 }
 
-- (IBAction)generateCiteKey:(id)sender{
+- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	if([alert checkValue] == YES)
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
+    
+    if(returnCode == NSAlertAlternateReturn)
+        return;
+    
 	[self finalizeChangesPreservingSelection:YES];
 	
 	BDSKScriptHook *scriptHook = nil;
@@ -1081,6 +1087,25 @@ static int numberOfOpenEditors = 0;
 	
 	[[[self window] undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
 	[tabView selectFirstTabViewItem:self];
+}
+
+- (IBAction)generateCiteKey:(id)sender{
+    if([theBib hasEmptyOrDefaultCiteKey] == NO && 
+       [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"")
+                                             defaultButton:NSLocalizedString(@"Generate", @"")
+                                           alternateButton:NSLocalizedString(@"Cancel", @"") 
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"")];
+        [alert setHasCheckButton:YES];
+        [alert setCheckValue:NO];
+        [alert beginSheetModalForWindow:[self window] 
+                          modalDelegate:self 
+                         didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+    } else {
+        [self generateCiteKeyAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+    }
 }
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
