@@ -115,7 +115,6 @@
                 exportAsAction = id; 
                 exportSelectionAsAction = id; 
                 find = id; 
-                findOrphanedFiles = id; 
                 generateCiteKey = id; 
                 importFromFileAction = id; 
                 importFromPasteboardAction = id; 
@@ -151,6 +150,7 @@
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
                 toggleShowingErrorPanel = id; 
+                toggleShowingOrphanedFilesPanel = id; 
                 toggleShowingPreviewPanel = id; 
                 toggleSnoopDrawer = id; 
                 toggleStatusBar = id; 

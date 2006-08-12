@@ -128,7 +128,7 @@
 - (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current;
 - (void)showInputManagerUpdateAlert;
 
-- (IBAction)findOrphanedFiles:(id)sender;
+- (IBAction)toggleShowingOrphanedFilesPanel:(id)sender;
 
 // ----------------------------------------------------------------------------------------
 // A first attempt at a service.

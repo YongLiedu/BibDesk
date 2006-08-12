@@ -45,10 +45,15 @@
     IBOutlet NSTextField *statusField;
     IBOutlet NSMenu *contextMenu;
     NSMutableArray *orphanedFiles;
+    BOOL wasLaunched;
 }
 
 + (id)sharedFinder;
 
+- (IBAction)toggleShowingOrphanedFilesPanel:(id)sender;
+- (IBAction)showOrphanedFilesPanel:(id)sender;
+- (IBAction)hideOrphanedFilesPanel:(id)sender;
+// shows the panel and refreshes
 - (IBAction)showOrphanedFiles:(id)sender;
 - (IBAction)refreshOrphanedFiles:(id)sender;
 

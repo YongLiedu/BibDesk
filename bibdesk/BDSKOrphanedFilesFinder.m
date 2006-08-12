@@ -67,6 +67,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (id)init {
     if (self = [super init]) {
         orphanedFiles = [[NSMutableArray alloc] init];
+        wasLaunched = NO;
     }
     return self;
 }
@@ -82,6 +83,27 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSString *)windowNibName{
     return @"BDSKOrphanedFilesFinder";
+}
+
+- (IBAction)toggleShowingOrphanedFilesPanel:(id)sender{
+    if([[self window] isVisible]){
+		[self hideOrphanedFilesPanel:sender];
+    }else{
+		[self showOrphanedFilesPanel:sender];
+    }
+}
+
+- (IBAction)showOrphanedFilesPanel:(id)sender{
+    if (wasLaunched) {
+        [self showWindow:sender];
+    } else {
+        wasLaunched = YES;
+        [self showOrphanedFiles:sender];
+    }
+}
+
+- (IBAction)hideOrphanedFilesPanel:(id)sender{
+	[[self window] close];
 }
 
 - (IBAction)showOrphanedFiles:(id)sender{
@@ -117,6 +139,21 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     } else {
         [self refreshOrphanedFilesInPapersFolder:papersFolderPath];
     }
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
+	SEL act = [menuItem action];
+
+    if (act == @selector(toggleShowingOrphanedFilesPanel:)){ 
+		// menu item for toggling the orphaned files panel
+		// set the on/off state according to the panel's visibility
+		if ([[self window] isVisible]) {
+			[menuItem setState:NSOnState];
+		}else {
+			[menuItem setState:NSOffState];
+		}
+	}
+    return YES;
 }
 
 #pragma mark Accessors

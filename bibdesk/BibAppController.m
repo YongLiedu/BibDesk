@@ -519,6 +519,16 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 		}
 		return YES;
 	}
+    else if (act == @selector(toggleShowingOrphanedFilesPanel:)){ 
+		// menu item for toggling the orphaned files panel
+		// set the on/off state according to the panel's visibility
+		if ([[[BDSKOrphanedFilesFinder sharedFinder] window] isVisible]) {
+			[menuItem setState:NSOnState];
+		}else {
+			[menuItem setState:NSOffState];
+		}
+		return YES;
+	}
 	return YES;
 }
 
@@ -950,8 +960,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     [[BDSKPreviewer sharedPreviewer] toggleShowingPreviewPanel:sender];
 }
 
-- (IBAction)findOrphanedFiles:(id)sender{
-    [[BDSKOrphanedFilesFinder sharedFinder] showOrphanedFiles:sender];
+- (IBAction)toggleShowingOrphanedFilesPanel:(id)sender{
+    [[BDSKOrphanedFilesFinder sharedFinder] toggleShowingOrphanedFilesPanel:sender];
 }
 
 #pragma mark Service code
