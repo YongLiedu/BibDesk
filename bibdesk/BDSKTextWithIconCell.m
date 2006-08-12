@@ -178,10 +178,10 @@ textRect.origin.y += vOffset; \
     if (highlighted && [highlightColor isEqual:[NSColor alternateSelectedControlColor]]) {
         // add the alternate text color attribute.
         [label addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:labelRange];
+    } else {
+        // when using an attributed string from setObjectValue:, -textColor isn't called, even though we need it for the highlight drawing
+        [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
     }
-    
-    // when using an attributed string from setObjectValue:, -textColor isn't called, even though we need it for the highlight drawing; maybe this should be changed in -attributedStringValue?
-    [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
     
     [label addAttribute:NSParagraphStyleAttributeName value:BDSKTextWithIconCellParagraphStyle range:labelRange];
     [label drawInRect:textRect];
