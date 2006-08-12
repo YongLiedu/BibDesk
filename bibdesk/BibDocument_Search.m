@@ -84,10 +84,13 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
 	[cellMenu addItem:anItem];
     
-	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Fields", @"Search Fields menu item") action:NULL keyEquivalent:@""];
+	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Types", @"Searchfield menu separator title") action:NULL keyEquivalent:@""];
     [cellMenu addItemWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+    
+    // add a separator if we have this option; it and "Any Field" are special (and "File Content" looks out of place between "Any Field" and "Author")
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         [cellMenu addItemWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+        [cellMenu addItem:[NSMenuItem separatorItem]];
     }
         
 	NSMutableArray *quickSearchKeys = [[NSMutableArray alloc] initWithObjects:BDSKAuthorString, BDSKDateString, BDSKTitleString, nil];
