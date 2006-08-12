@@ -65,6 +65,21 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     NULL, // equal (use pointer equality)
 };
 
+// Overrides attributedStringValue since we return an attributed string; normally, the cell uses the font of the attributed string, rather than the table's font, so font changes are ignored.  This means that italics and bold in titles will be lost until the search string changes again, but that's not a great loss.
+@interface BDSKFileContentTextWithIconCell : BDSKTextWithIconCell
+@end
+
+@implementation BDSKFileContentTextWithIconCell
+
+- (NSAttributedString *)attributedStringValue
+{
+    NSMutableAttributedString *value = [[super attributedStringValue] mutableCopy];
+    [value addAttribute:NSFontAttributeName value:[self font] range:NSMakeRange(0, [value length])];
+    return [value autorelease];
+}
+
+@end
+
 @implementation BDSKFileContentSearchController
 
 - (id)initForDocument:(id)aDocument
@@ -132,14 +147,14 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     [spinner setDisplayedWhenStopped:NO];
     
     // set up the image/text cell combination
-    BDSKTextWithIconCell *textCell = [[BDSKTextWithIconCell alloc] init];
+    BDSKTextWithIconCell *textCell = [[BDSKFileContentTextWithIconCell alloc] init];
     [textCell setControlSize:[cell controlSize]];
     [textCell setDrawsHighlight:NO];
     [[tableView tableColumnWithIdentifier:@"name"] setDataCell:textCell];
     [textCell release];
         
     // preserve sort behavior between launches (set in windowWillClose:)
-    NSData *sortDescriptorData = [[OFPreferenceWrapper sharedPreferenceWrapper] dataForKey:BDSKFileContentSearchSortDescriptorKey];
+    NSData *sortDescriptorData = [[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey];
     if(sortDescriptorData != nil)
         [resultsArrayController setSortDescriptors:[NSUnarchiver unarchiveObjectWithData:sortDescriptorData]];
     
@@ -175,15 +190,7 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 
 - (NSArray *)titlesOfSelectedItems
 {
-    NSArray *selectedObjects = [resultsArrayController selectedObjects];
-    BDSKSearchResult *result;
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[selectedObjects count]];
-    NSEnumerator *selEnum = [selectedObjects objectEnumerator];
-    
-    while(result = [selEnum nextObject])
-        [array addObject:[result valueForKey:@"title"]];
-    
-    return array;
+    return [[resultsArrayController selectedObjects] valueForKey:@"title"];
 }
 
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
@@ -564,27 +571,16 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 
 #pragma mark TableView delegate
 
-// Use the same font as the document tableview
-
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    if (tv == tableView)
-        return BDSKMainTableViewFontNameKey;
-    else 
-        return nil;
+    return @"BDSKFileContentSearchTableViewFontNameKey";
 }
 
 - (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    if (tv == tableView)
-        return BDSKMainTableViewFontSizeKey;
-    else 
-        return nil;
+    return @"BDSKFileContentSearchTableViewFontSizeKey";
 }
 
 - (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
-    if (tv == tableView)
-        return BDSKMainTableViewFontChangedNotification;
-    else 
-        return nil;
+    return @"BDSKFileContentSearchTableViewFontChangedNotification";
 }
 
 @end
