@@ -108,8 +108,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
                                            alternateButton:NSLocalizedString(@"Don't Find", @"Don't Find")
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphined files in this folder could take a long time. Do you want to proceed?",@"")];
-        // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BibFiler 
-        // as that will use a sheet as well, see bug # 1526145
+        // we use the didDismissSelector because we want to alert to be gone before we start a long process
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:NULL
