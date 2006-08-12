@@ -291,8 +291,11 @@ static IMP originalDraggedImageEndedAtOperation;
 
 - (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)data {
     if ([_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)]) {
-		NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:[self columnAtPoint:point]];
+		int column = [self columnAtPoint:point];
 		int row = [self rowAtPoint:point];
+        if (column == -1 || row == -1)
+            return nil;
+		NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
 		return [_dataSource tableView:self toolTipForTableColumn:tableColumn row:row];
 	}
 	return nil;
