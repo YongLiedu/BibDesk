@@ -41,6 +41,7 @@
 /* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
 
 static NSMutableParagraphStyle *BDSKTextWithIconCellParagraphStyle = nil;
+static NSLayoutManager *layoutManager = nil;
 
 @implementation BDSKTextWithIconCell
 
@@ -50,6 +51,10 @@ static NSMutableParagraphStyle *BDSKTextWithIconCellParagraphStyle = nil;
     
     BDSKTextWithIconCellParagraphStyle = [[NSMutableParagraphStyle alloc] init];
     [BDSKTextWithIconCellParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
+    
+    // string drawing uses this behavior currently
+    layoutManager = [[NSLayoutManager alloc] init];
+    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
 }
 
 // Init and dealloc
@@ -153,9 +158,7 @@ if (imageSize.width > 0) \
 NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); \
 \
 /* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
-NSLayoutManager *lm = [[NSLayoutManager alloc] init]; \
-float vOffset = 0.5f * (NSHeight(aRect) - [lm defaultLineHeightForFont:[self font]]); \
-[lm release];  \
+float vOffset = 0.5f * (NSHeight(aRect) - [layoutManager defaultLineHeightForFont:[self font]]); \
 \
 if (![controlView isFlipped]) \
 textRect.origin.y -= vOffset; \

@@ -68,6 +68,7 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
     BDSKGroupCellCountParagraphStyle = [[NSMutableParagraphStyle alloc] init];
     [BDSKGroupCellCountParagraphStyle setLineBreakMode:NSLineBreakByClipping];
     layoutManager = [[NSLayoutManager alloc] init];
+    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
 }
 
 - (id)init {
