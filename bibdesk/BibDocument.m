@@ -766,7 +766,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     BOOL success = YES;
     NSString *error = nil;
-    NSString *fileName = [fileURL path];
     @try{
         // @@ 10.3 compatibility; should use super after we remove the call to writeToFile:ofType:, but that causes an endless loop on 10.4; revisit this if we need to support file wrappers
         NSData *data = [self dataOfType:docType error:outError];
@@ -1044,7 +1043,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
     
     if(nil == data && outError){
-        NSString *recoverySuggestion = nil;
         // see if this was an encoding failure; if so, we can suggest how to fix it
         // @@ 10.4 only error keys; should use real constant strings
         if([[error userInfo] valueForKey:@"NSStringEncoding"]){
