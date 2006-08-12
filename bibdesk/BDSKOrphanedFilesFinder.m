@@ -156,26 +156,30 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (IBAction)showFile:(id)sender{
-    int row = [tableView selectedRow];
-    if (row == -1)
+    NSIndexSet *rowIndexes = [tableView selectedRowIndexes];
+    if ([rowIndexes count] == 0)
         return;
     
     int type = -1;
-    NSString *path = [self objectInOrphanedFilesAtIndex:row];
     
     if(sender == tableView){
-        int column = [tableView clickedColumn];
-        if(column == -1)
+        if([tableView clickedColumn] == -1)
             return;
         type = 0;
     }else if([sender isKindOfClass:[NSMenuItem class]]){
         type = [sender tag];
     }
     
-    if(type == 1){
-        [[NSWorkspace sharedWorkspace] openFile:path];
-    }else{
-        [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:nil];
+    NSString *path;
+    unsigned int index = [rowIndexes firstIndex];
+    
+    while (index != NSNotFound) {
+        path = [self objectInOrphanedFilesAtIndex:index];
+        if(type == 1)
+            [[NSWorkspace sharedWorkspace] openFile:path];
+        else
+            [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:nil];
+        index = [rowIndexes indexGreaterThanIndex:index];
     }
 }   
 
