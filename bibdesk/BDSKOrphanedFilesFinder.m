@@ -86,7 +86,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (IBAction)showOrphanedFiles:(id)sender{
     [self showWindow:sender];
-    [self refreshOrphanedFiles:sender];
+    [self performSelector:@selector(refreshOrphanedFiles:) withObject:sender afterDelay:0.0];
 }
 
 - (IBAction)refreshOrphanedFiles:(id)sender{
