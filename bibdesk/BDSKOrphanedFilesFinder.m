@@ -37,7 +37,7 @@
  */
 
 #import "BDSKOrphanedFilesFinder.h"
-#import "BDSKPreferenceController.h"
+#import "BibPrefController.h"
 #import "BibTypeManager.h"
 #import "BibAppController.h"
 #import "BibDocument.h"
@@ -45,9 +45,12 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
+#import "NSBezierPath_BDSKExtensions.h"
+#import "BDSKAlert.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
-- (NSArray *)directoryContentsAtPath:(NSString *)path;
+- (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)refreshOrphanedFilesInPapersFolder:(NSString *)papersFolderPath;
 @end
 
 
@@ -87,10 +90,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (IBAction)refreshOrphanedFiles:(id)sender{
-    [statusField setStringValue:[NSLocalizedString(@"Looking for orphaned files", @"") stringByAppendingEllipsis]];
-    [statusField display];
-    [progressIndicator startAnimation:sender];
-    
     NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPapersFolderPathKey];
     
     if ([NSString isEmptyString:papersFolderPath]) {
@@ -103,37 +102,22 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[documents objectAtIndex:1]];
     }
     
-    NSMutableArray *allFiles = [[self directoryContentsAtPath:papersFolderPath] mutableCopy];
-    
-    NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
-    NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
-    BibDocument *doc;
-    NSEnumerator *pubEnum;
-    BibItem *pub;
-    NSEnumerator *fieldEnum;
-    NSString *field;
-    NSString *path;
-
-    while (doc = [docEnum nextObject]) {
-        pubEnum = [[doc publications] objectEnumerator];
-        while (pub = [pubEnum nextObject]) {
-            fieldEnum = [localFileFields objectEnumerator];
-            while (field = [fieldEnum nextObject]) {
-                path = [pub localFilePathForField:field];
-                if ([NSString isEmptyString:path] == NO)
-                    [allFiles removeObject:path];
-            }
-        }
+    if ([NSHomeDirectory() isEqualToString:papersFolderPath]) {
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Find Orphined Files", @"")
+                                             defaultButton:NSLocalizedString(@"Find", @"Find")
+                                           alternateButton:NSLocalizedString(@"Don't Find", @"Don't Find")
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphined files in this folder could take a long time. Do you want to proceed?",@"")];
+        // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BibFiler 
+        // as that will use a sheet as well, see bug # 1526145
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self
+                         didEndSelector:NULL
+                     didDismissSelector:@selector(findAlertDidEnd:returnCode:contextInfo:)
+                            contextInfo:[papersFolderPath retain]];
+    } else {
+        [self refreshOrphanedFilesInPapersFolder:papersFolderPath];
     }
-    
-    [[self mutableArrayValueForKey:@"orphanedFiles"] setArray:allFiles];
-    
-    int numberOfFiles = [allFiles count];
-    NSString *statusMessage = (numberOfFiles == 1) ? NSLocalizedString(@"Found 1 orphaned file", @"") : [NSString stringWithFormat:NSLocalizedString(@"Found %i orphaned files", @""), numberOfFiles];
-    [progressIndicator stopAnimation:sender];
-    [statusField setStringValue:statusMessage];
-    
-    [allFiles release];
 }
 
 #pragma mark Accessors
@@ -220,28 +204,71 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 @implementation BDSKOrphanedFilesFinder (Private)
 
-- (NSArray *)directoryContentsAtPath:(NSString *)path{
-	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:path];
-	NSString *file, *fileType, *filePath;
-	NSMutableArray *fileArray = [NSMutableArray array];
-    
+- (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSString *papersFolderPath = (NSString *)contextInfo;
+    if (returnCode == NSAlertDefaultReturn)
+        [self refreshOrphanedFilesInPapersFolder:papersFolderPath];
+    [papersFolderPath release];
+}
+
+- (void)refreshOrphanedFilesInPapersFolder:(NSString *)papersFolderPath{
+    NSMutableArray *allFiles = [[NSMutableArray alloc] init];
+	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:papersFolderPath];
+	NSString *file, *filePath;
+    BOOL isDir;
     NSDictionary *fileAttributes;
+    
+    [statusField setStringValue:[NSLocalizedString(@"Looking for orphaned files", @"") stringByAppendingEllipsis]];
+    [statusField display];
+    [progressIndicator startAnimation:self];
     
 	while (file = [dirEnum nextObject]) {
         fileAttributes = [dirEnum fileAttributes];
-		fileType = [fileAttributes valueForKey:NSFileType];
-		filePath = [path stringByAppendingPathComponent:file];
+		isDir = [[fileAttributes valueForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
+		filePath = [papersFolderPath stringByAppendingPathComponent:file];
+        // resolve aliases in the containing dir, because that is the form localFilePathForField returns
+        filePath = [[[NSURL fileURLWithPath:filePath] fileURLByResolvingAliasesBeforeLastPathComponent] path];
         
-		if ([file hasPrefix:@"."]) {
-			[dirEnum skipDescendents];
-		} else if ([fileType isEqualToString:NSFileTypeDirectory]) {
-			[dirEnum skipDescendents];
-			[fileArray addObjectsFromArray:[self directoryContentsAtPath:filePath]];
-		} else {
-			[fileArray addObject:filePath];
+		if ([[file lastPathComponent] hasPrefix:@"."]) {
+            if (isDir) 
+                [dirEnum skipDescendents];
+		} else if (isDir == NO) {
+			[allFiles addObject:filePath];
 		}
 	}
-	return fileArray;
+    
+    NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
+    NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
+    BibDocument *doc;
+    NSEnumerator *pubEnum;
+    BibItem *pub;
+    NSEnumerator *fieldEnum;
+    NSString *field;
+    NSString *path;
+
+    while (doc = [docEnum nextObject]) {
+        path = [doc fileName];
+        if ([NSString isEmptyString:path] == NO)
+            [allFiles removeObject:path];
+        pubEnum = [[doc publications] objectEnumerator];
+        while (pub = [pubEnum nextObject]) {
+            fieldEnum = [localFileFields objectEnumerator];
+            while (field = [fieldEnum nextObject]) {
+                path = [pub localFilePathForField:field];
+                if ([NSString isEmptyString:path] == NO)
+                    [allFiles removeObject:path];
+            }
+        }
+    }
+    
+    [[self mutableArrayValueForKey:@"orphanedFiles"] setArray:allFiles];
+    
+    int numberOfFiles = [allFiles count];
+    NSString *statusMessage = (numberOfFiles == 1) ? NSLocalizedString(@"Found 1 orphaned file", @"") : [NSString stringWithFormat:NSLocalizedString(@"Found %i orphaned files", @""), numberOfFiles];
+    [progressIndicator stopAnimation:self];
+    [statusField setStringValue:statusMessage];
+    
+    [allFiles release];
 }
 
 @end
@@ -264,25 +291,61 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
     NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
     NSImage *image = nil;
+    int count = 0;
     
     if ([dragType isEqualToString:NSFilenamesPboardType]) {
 		NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-		int count = [fileNames count];
+        count = [fileNames count];
         NSString *filePath = count ? [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0] : nil;
-		image = [NSImage imageForFile:filePath];
-        
-        NSImage *dragImage = [[NSImage alloc] initWithSize:[image size]];
-        
-        [dragImage lockFocus];
-        [image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
-        [dragImage unlockFocus];
-        
-        image = [dragImage autorelease];
-    } else {
-        image = [super dragImageForRowsWithIndexes:dragRows tableColumns:tableColumns event:dragEvent offset:dragImageOffset];
+		if (filePath)
+            image = [NSImage imageForFile:filePath];
     }
     
-    return image;
+    if (image == nil)
+        return [super dragImageForRowsWithIndexes:dragRows tableColumns:tableColumns event:dragEvent offset:dragImageOffset];
+    
+	if (count > 1) {
+		NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%i", count]
+											attributeName:NSForegroundColorAttributeName attributeValue:[NSColor whiteColor]] autorelease];
+		NSSize size = [image size];
+		NSRect rect = {NSZeroPoint, size};
+		NSRect iconRect = rect;
+		NSRect countRect = {NSZeroPoint, [countString size]};
+		float countOffset;
+		
+		countOffset = floorf(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
+		countRect.size.height = 2.0 * countOffset;
+        countRect.origin = NSMakePoint(NSMaxX(rect), 0.0);
+        size.width += NSWidth(countRect) + countOffset;
+        size.height += countOffset;
+        rect.origin.y += countOffset;
+		
+		NSImage *labeledImage = [[[NSImage alloc] initWithSize:size] autorelease];
+		
+		[labeledImage lockFocus];
+		
+		[image drawInRect:rect fromRect:iconRect operation:NSCompositeCopy fraction:1.0];
+		
+        [NSGraphicsContext saveGraphicsState];
+		// draw a count of the rows being dragged, similar to Mail.app
+		[[NSColor redColor] setFill];
+		[NSBezierPath fillHorizontalOvalAroundRect:countRect];
+		[countString drawInRect:countRect];
+		[NSGraphicsContext restoreGraphicsState];
+        
+		[labeledImage unlockFocus];
+		
+		image = labeledImage;
+    }
+    
+    NSImage *dragImage = [[NSImage alloc] initWithSize:[image size]];
+    
+    [dragImage lockFocus];
+    [image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
+    [dragImage unlockFocus];
+        
+    
+    return [dragImage autorelease];
 }
 
 @end
