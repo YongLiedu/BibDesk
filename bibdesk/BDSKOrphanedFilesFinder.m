@@ -121,7 +121,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
             NSBeep();
             return;
         }
-        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[documents objectAtIndex:1]];
+        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[documents objectAtIndex:0]];
     }
     
     if ([NSHomeDirectory() isEqualToString:papersFolderPath]) {
