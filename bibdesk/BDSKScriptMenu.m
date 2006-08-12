@@ -167,7 +167,8 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
         *lastModifiedDate = [*lastModifiedDate laterDate:modDate];
         
 		if ([file hasPrefix:@"."]) {
-			[dirEnum skipDescendents];
+            if ([fileType isEqualToString:NSFileTypeDirectory]) 
+                [dirEnum skipDescendents];
 		} else if ([fileType isEqualToString:NSFileTypeDirectory]) {
 			[dirEnum skipDescendents];
 			content = [self directoryContentsAtPath:filePath lastModified:lastModifiedDate];
