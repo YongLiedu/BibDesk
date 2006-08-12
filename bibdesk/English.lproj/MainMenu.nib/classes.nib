@@ -115,6 +115,7 @@
                 exportAsAction = id; 
                 exportSelectionAsAction = id; 
                 find = id; 
+                findOrphanedFiles = id; 
                 generateCiteKey = id; 
                 importFromFileAction = id; 
                 importFromPasteboardAction = id; 
