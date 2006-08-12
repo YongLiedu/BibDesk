@@ -239,6 +239,20 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return YES;
 }
 
+#pragma mark table font
+
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
+    return @"BDSKOrphanedFilesTableViewFontNameKey";
+}
+
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
+    return @"BDSKOrphanedFilesTableViewFontSizeKey";
+}
+
+- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
+        return @"BDSKOrphanedFilesTableViewFontChangedNotification";
+}
+
 @end
 
 
