@@ -129,7 +129,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [[self mutableArrayValueForKey:@"orphanedFiles"] setArray:allFiles];
     
     int numberOfFiles = [allFiles count];
-    NSString *statusMessage = (numberOfFiles == 1) ? NSLocalizedString(@"Found 1 orphaned files", @"") : [NSString stringWithFormat:NSLocalizedString(@"Found %i orphaned files", @""), numberOfFiles];
+    NSString *statusMessage = (numberOfFiles == 1) ? NSLocalizedString(@"Found 1 orphaned file", @"") : [NSString stringWithFormat:NSLocalizedString(@"Found %i orphaned files", @""), numberOfFiles];
     [progressIndicator stopAnimation:sender];
     [statusField setStringValue:statusMessage];
     
@@ -209,7 +209,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
-    unsigned row = [rowIndexes firstIndex];
     NSArray *filePaths = [[self mutableArrayValueForKey:@"orphanedFiles"] objectsAtIndexes:rowIndexes];
     [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
     [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
@@ -224,13 +223,10 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (NSArray *)directoryContentsAtPath:(NSString *)path{
 	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:path];
 	NSString *file, *fileType, *filePath;
-	NSNumber *fileCode;
-	NSArray *content;
 	NSMutableArray *fileArray = [NSMutableArray array];
     
     NSDictionary *fileAttributes;
     
-    // avoid recursing too many times (and creating an excessive number of submenus)
 	while (file = [dirEnum nextObject]) {
         fileAttributes = [dirEnum fileAttributes];
 		fileType = [fileAttributes valueForKey:NSFileType];
