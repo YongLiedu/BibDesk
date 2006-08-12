@@ -180,22 +180,27 @@ static IMP originalDraggedImageEndedAtOperation;
     }
 }
 
+- (NSControlSize)cellControlSize {
+    NSCell *dataCell = [[[self tableColumns] lastObject] dataCell];
+    return nil == dataCell ? NSRegularControlSize : [dataCell controlSize];
+}
+
 - (void)changeFont:(id)sender {
     NSString *fontNamePrefKey = [self fontNamePreferenceKey];
     NSString *fontSizePrefKey = [self fontSizePreferenceKey];
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    OFPreferenceWrapper *defaults = [OFPreferenceWrapper sharedPreferenceWrapper];
     
     NSString *fontName = [defaults objectForKey:fontNamePrefKey];
     float fontSize = [defaults floatForKey:fontSizePrefKey];
 	NSFont *font = nil;
-    
+        
     if(fontName != nil)
         font = [NSFont fontWithName:fontName size:fontSize];
     if(font == nil)
-        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+        font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
     font = [fontManager convertFont:font];
     
     [defaults setObject:[font fontName] forKey:fontNamePrefKey];
@@ -214,8 +219,8 @@ static IMP originalDraggedImageEndedAtOperation;
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
 
-    NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePrefKey];
-    float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePrefKey];
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
 	NSFont *font = nil;
     
     if(fontName != nil)
@@ -226,19 +231,21 @@ static IMP originalDraggedImageEndedAtOperation;
 	[self setFont:font];
     
     NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    [lm setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
     [self setRowHeight:([lm defaultLineHeightForFont:font] + 2.0f)];
     [lm release];
-    
+        
 	[self tile];
     [self reloadData]; // othewise the change isn't immediately visible
+    
 }
 
 - (void)updateFontPanel:(NSNotification *)notification {
     NSString *fontNamePrefKey = [self fontNamePreferenceKey];
     NSString *fontSizePrefKey = [self fontSizePreferenceKey];
     if (fontNamePrefKey != nil && fontSizePrefKey != nil) {
-        NSString *fontName = [[NSUserDefaults standardUserDefaults] objectForKey:fontNamePrefKey];
-        float fontSize = [[NSUserDefaults standardUserDefaults] floatForKey:fontSizePrefKey];
+        NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
+        float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
 	}
 }
