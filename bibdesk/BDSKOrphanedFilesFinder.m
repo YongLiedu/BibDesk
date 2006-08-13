@@ -117,20 +117,21 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     
     if ([NSString isEmptyString:papersFolderPath]) {
         NSArray *documents = [[NSDocumentController sharedDocumentController] documents];
-        if ([documents count] > 1) {
+        if ([documents count] == 1) {
+            papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[documents objectAtIndex:0]];
+        } else {
             [statusField setStringValue:NSLocalizedString(@"No papers folder", @"")];
             NSBeep();
             return;
         }
-        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[documents objectAtIndex:0]];
     }
     
     if ([NSHomeDirectory() isEqualToString:papersFolderPath]) {
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Find Orphined Files", @"")
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"")
                                              defaultButton:NSLocalizedString(@"Find", @"Find")
                                            alternateButton:NSLocalizedString(@"Don't Find", @"Don't Find")
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphined files in this folder could take a long time. Do you want to proceed?",@"")];
+                                 informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphaned files in this folder could take a long time. Do you want to proceed?",@"")];
         // we use the didDismissSelector because we want to alert to be gone before we start a long process
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
