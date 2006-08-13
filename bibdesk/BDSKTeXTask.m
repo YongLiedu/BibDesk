@@ -43,6 +43,7 @@
 #import "BibPrefController.h"
 #import "BibAppController.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
+#import "UKDirectoryEnumerator.h"
 
 @interface BDSKTeXTask (Private) 
 
@@ -400,9 +401,9 @@
 @implementation BDSKTeXTask (Private)
 
 - (void)writeHelperFiles{
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSEnumerator *fileEnum = nil;
-	NSString *file = nil;
+    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithPath:applicationSupportPath];
+    [enumerator setDesiredInfo:kFSCatInfoNodeFlags];
+    
 	NSString *path = nil;
     NSString *pathExt = nil;
     
@@ -411,16 +412,14 @@
     NSError *error;
 		
 	// copy all user .cfg and .sty files from application support
-	fileEnum = [[fm directoryContentsAtPath:applicationSupportPath] objectEnumerator];
-	while(file = [fileEnum nextObject]){
-		path = [applicationSupportPath stringByAppendingPathComponent:file];
-        pathExt = [file pathExtension];
-		if([fm fileExistsAtPath:path isDirectory:&isDir] && !isDir &&
+	while(path = [enumerator nextObjectFullPath]){
+        pathExt = [path pathExtension];
+		if([enumerator isDirectory] == NO &&
 		   ([pathExt isEqual:@"cfg"] ||
 		    [pathExt isEqual:@"sty"])){
 			
-			if(![fm copyObjectAtURL:[NSURL fileURLWithPath:path] toDirectoryAtURL:dstURL error:&error])
-                NSLog(@"unable to copy helper file %@ to %@; error %@", file, workingDirPath, [error localizedDescription]);
+			if(![[NSFileManager defaultManager] copyObjectAtURL:[NSURL fileURLWithPath:path] toDirectoryAtURL:dstURL error:&error])
+                NSLog(@"unable to copy helper file %@ to %@; error %@", path, workingDirPath, [error localizedDescription]);
 		}
 	}
 }
