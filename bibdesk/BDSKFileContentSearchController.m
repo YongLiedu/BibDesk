@@ -572,15 +572,15 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 #pragma mark TableView delegate
 
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    return @"BDSKFileContentSearchTableViewFontNameKey";
+    return BDSKFileContentSearchTableViewFontNameKey;
 }
 
 - (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    return @"BDSKFileContentSearchTableViewFontSizeKey";
+    return BDSKFileContentSearchTableViewFontSizeKey;
 }
 
 - (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
-    return @"BDSKFileContentSearchTableViewFontChangedNotification";
+    return BDSKFileContentSearchTableViewFontChangedNotification;
 }
 
 @end

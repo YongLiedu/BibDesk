@@ -531,6 +531,14 @@
                     <string>Helvetica</string>
                     <key>BDSKEditorFontSizeKey</key>
                     <real>0.0</real>
+                    <key>BDSKFileContentSearchTableViewFontNameKey</key>
+                    <string>LucidaGrande</string>
+                    <key>BDSKFileContentSearchTableViewFontSizeKey</key>
+                    <real>0.0</real>
+                    <key>BDSKOrphanedFilesTableViewFontNameKey</key>
+                    <string>LucidaGrande</string>
+                    <key>BDSKOrphanedFilesTableViewFontSizeKey</key>
+                    <real>0.0</real>
 					<key>Terms ignored when sorting</key>
 					<array/>
                     <key>BDSKShouldDisplayFirstNamesKey</key>
