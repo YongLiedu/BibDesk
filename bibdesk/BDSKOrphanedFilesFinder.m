@@ -47,6 +47,7 @@
 #import "NSImage+Toolbox.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKAlert.h"
+#import "UKDirectoryEnumerator.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
@@ -265,31 +266,81 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [papersFolderPath release];
 }
 
-- (void)refreshOrphanedFilesInPapersFolder:(NSString *)papersFolderPath{
-    NSMutableArray *allFiles = [[NSMutableArray alloc] init];
-	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:papersFolderPath];
-	NSString *file, *filePath;
+// traverse the entire directory structure and return all files as a flattened array; this method uses the thread safe Carbon File Manager
+- (NSArray *)allFilesInDirectoryRootedAtPath:(NSString *)fullPath
+{
+    NSMutableArray *files = [NSMutableArray array];
+    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithPath:fullPath];
+    
+    // get visibility and directory flags
+    [enumerator setDesiredInfo:(kFSCatInfoFinderInfo | kFSCatInfoNodeFlags)];
+    NSString *filePath;
     BOOL isDir;
-    NSDictionary *fileAttributes;
+    
+    while (filePath = [enumerator nextObjectFullPath]){
+        
+        isDir = [enumerator isDirectory];
+        
+        if (isDir){
+            [files addObjectsFromArray:[self allFilesInDirectoryRootedAtPath:filePath]];
+        } else if ([enumerator isInvisible] == NO){
+            
+            CFAllocatorRef alloc = CFAllocatorGetDefault();
+            CFURLRef fullPathURL = CFURLCreateWithFileSystemPath(alloc, (CFStringRef)filePath, kCFURLPOSIXPathStyle, isDir);
+            CFStringRef lastPathComponent = NULL;
+            CFStringRef resolvedPath = NULL;
+            
+            if(fullPathURL)
+                lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
+            
+            if (lastPathComponent && FALSE == CFStringHasPrefix(lastPathComponent, CFSTR("."))){
+                
+                // resolve aliases in the parent directory, since that's what BibItem does
+                CFURLRef parentURL = CFURLCreateCopyDeletingLastPathComponent(alloc, fullPathURL);
+                CFURLRef resolvedParent = NULL;
+                if(parentURL){
+                    resolvedParent = BDCopyFileURLResolvingAliases(parentURL);
+                    CFRelease(parentURL);
+                }
+                CFRelease(fullPathURL);
+                fullPathURL = NULL;
+                
+                // add the last path component back in
+                if(resolvedParent){
+                    fullPathURL = CFURLCreateCopyAppendingPathComponent(alloc, resolvedParent, lastPathComponent, FALSE);
+                    CFRelease(resolvedParent);
+                }
+                
+                // convert to a path
+                if(fullPathURL){
+                    resolvedPath = CFURLCopyFileSystemPath(fullPathURL, kCFURLPOSIXPathStyle);
+                    CFRelease(fullPathURL);
+                }
+                
+                if(resolvedPath){
+                    [files addObject:(NSString *)resolvedPath];
+                    CFRelease(resolvedPath);
+                }
+                
+            } else {
+                // couldn't get last path component, or started with a "."
+                if(lastPathComponent) CFRelease(lastPathComponent);
+                if(fullPathURL) CFRelease(fullPathURL);
+            }
+        }
+    }
+    return files;
+}
+        
+        
+
+- (void)refreshOrphanedFilesInPapersFolder:(NSString *)papersFolderPath{
     
     [statusField setStringValue:[NSLocalizedString(@"Looking for orphaned files", @"") stringByAppendingEllipsis]];
     [statusField display];
     [progressIndicator startAnimation:self];
     
-	while (file = [dirEnum nextObject]) {
-        fileAttributes = [dirEnum fileAttributes];
-		isDir = [[fileAttributes valueForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
-		filePath = [papersFolderPath stringByAppendingPathComponent:file];
-        // resolve aliases in the containing dir, because that is the form localFilePathForField returns
-        filePath = [[[NSURL fileURLWithPath:filePath] fileURLByResolvingAliasesBeforeLastPathComponent] path];
-        
-		if ([[file lastPathComponent] hasPrefix:@"."]) {
-            if (isDir) 
-                [dirEnum skipDescendents];
-		} else if (isDir == NO) {
-			[allFiles addObject:filePath];
-		}
-	}
+    NSMutableArray *allFiles = [[self allFilesInDirectoryRootedAtPath:papersFolderPath] mutableCopy];
     
     NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
