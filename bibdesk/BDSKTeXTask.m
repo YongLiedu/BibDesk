@@ -407,7 +407,6 @@
 	NSString *path = nil;
     NSString *pathExt = nil;
     
-	BOOL isDir;
     NSURL *dstURL = [NSURL fileURLWithPath:workingDirPath];
     NSError *error;
 		
