@@ -268,67 +268,80 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 // traverse the entire directory structure and return all files as a flattened array; this method uses the thread safe Carbon File Manager
-- (NSArray *)allFilesInDirectoryRootedAtPath:(NSString *)fullPath
+- (NSArray *)allFilesInDirectoryRootedAtURL:(NSURL *)baseURL
 {
     NSMutableArray *files = [NSMutableArray array];
-    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithPath:fullPath];
+    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithURL:baseURL];
     
     // get visibility and directory flags
     [enumerator setDesiredInfo:(kFSCatInfoFinderInfo | kFSCatInfoNodeFlags)];
     NSString *filePath;
-    BOOL isDir;
+    BOOL isDir, isHidden;
+    CFURLRef fullPathURL;
     
-    while (filePath = [enumerator nextObjectFullPath]){
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    
+    while (fullPathURL = (CFURLRef)[enumerator nextObjectURL]){
         
+        CFStringRef lastPathComponent = NULL;        
+        lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
+
         isDir = [enumerator isDirectory];
+        isHidden = NULL == lastPathComponent || [enumerator isInvisible] || CFStringHasPrefix(lastPathComponent, CFSTR("."));
         
-        if (isDir){
-            [files addObjectsFromArray:[self allFilesInDirectoryRootedAtPath:filePath]];
-        } else if ([enumerator isInvisible] == NO){
+        if (isDir && isHidden == NO){
             
-            CFAllocatorRef alloc = CFAllocatorGetDefault();
-            CFURLRef fullPathURL = CFURLCreateWithFileSystemPath(alloc, (CFStringRef)filePath, kCFURLPOSIXPathStyle, isDir);
-            CFStringRef lastPathComponent = NULL;
+            // recurse, then dispose of the lastPathComponent
+            [files addObjectsFromArray:[self allFilesInDirectoryRootedAtURL:(NSURL *)fullPathURL]];
+            
+            // isHidden == NO guarantees the existence of this object
+            CFRelease(lastPathComponent);
+            
+        } else if (isHidden == NO){
+
+            // resolve aliases in the parent directory, since that's what BibItem does
+            CFURLRef parentURL = CFURLCreateCopyDeletingLastPathComponent(alloc, fullPathURL);
+            CFURLRef resolvedParent = NULL;
+            if(parentURL){
+                resolvedParent = BDCopyFileURLResolvingAliases(parentURL);
+                CFRelease(parentURL);
+                parentURL = NULL;
+            }
+
+            // we'll check for this later
+            fullPathURL = NULL;
+            
+            // add the last path component back in
+            if(resolvedParent){
+                fullPathURL = CFURLCreateCopyAppendingPathComponent(alloc, resolvedParent, lastPathComponent, FALSE);
+                CFRelease(resolvedParent);
+                resolvedParent = NULL;
+            }
+            
+            // lastPathComponent exists if isHidden == NO
+            CFRelease(lastPathComponent);
+            lastPathComponent = NULL;
+            
+            // convert to a path            
             CFStringRef resolvedPath = NULL;
-            
-            if(fullPathURL)
-                lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
-            
-            if (lastPathComponent && FALSE == CFStringHasPrefix(lastPathComponent, CFSTR("."))){
-                
-                // resolve aliases in the parent directory, since that's what BibItem does
-                CFURLRef parentURL = CFURLCreateCopyDeletingLastPathComponent(alloc, fullPathURL);
-                CFURLRef resolvedParent = NULL;
-                if(parentURL){
-                    resolvedParent = BDCopyFileURLResolvingAliases(parentURL);
-                    CFRelease(parentURL);
-                }
+
+            if(fullPathURL){
+                resolvedPath = CFURLCopyFileSystemPath(fullPathURL, kCFURLPOSIXPathStyle);
                 CFRelease(fullPathURL);
                 fullPathURL = NULL;
-                
-                // add the last path component back in
-                if(resolvedParent){
-                    fullPathURL = CFURLCreateCopyAppendingPathComponent(alloc, resolvedParent, lastPathComponent, FALSE);
-                    CFRelease(resolvedParent);
-                }
-                
-                // convert to a path
-                if(fullPathURL){
-                    resolvedPath = CFURLCopyFileSystemPath(fullPathURL, kCFURLPOSIXPathStyle);
-                    CFRelease(fullPathURL);
-                }
-                
-                if(resolvedPath){
-                    [files addObject:[(NSString *)resolvedPath precomposedStringWithCanonicalMapping]];
-                    CFRelease(resolvedPath);
-                }
-                
-            } else {
-                // couldn't get last path component, or started with a "."
-                if(lastPathComponent) CFRelease(lastPathComponent);
-                if(fullPathURL) CFRelease(fullPathURL);
             }
+            
+            if(resolvedPath){
+                [files addObject:[(NSString *)resolvedPath precomposedStringWithCanonicalMapping]];
+                CFRelease(resolvedPath);
+                resolvedPath = NULL;
+            }
+            
+        } else {
+            // couldn't get last path component, or started with a "."
+            if(lastPathComponent) CFRelease(lastPathComponent);
         }
+
     }
     return files;
 }
@@ -341,7 +354,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [statusField display];
     [progressIndicator startAnimation:self];
     
-    NSMutableArray *allFiles = [[self allFilesInDirectoryRootedAtPath:papersFolderPath] mutableCopy];
+    NSMutableArray *allFiles = [[self allFilesInDirectoryRootedAtURL:[NSURL fileURLWithPath:papersFolderPath]] mutableCopy];
     
     NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
