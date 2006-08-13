@@ -319,7 +319,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
                 }
                 
                 if(resolvedPath){
-                    [files addObject:(NSString *)resolvedPath];
+                    [files addObject:[(NSString *)resolvedPath precomposedStringWithCanonicalMapping]];
                     CFRelease(resolvedPath);
                 }
                 
@@ -355,14 +355,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     while (doc = [docEnum nextObject]) {
         path = [doc fileName];
         if ([NSString isEmptyString:path] == NO)
-            [allFiles removeObject:path];
+            [allFiles removeObject:[path precomposedStringWithCanonicalMapping]];
         pubEnum = [[doc publications] objectEnumerator];
         while (pub = [pubEnum nextObject]) {
             fieldEnum = [localFileFields objectEnumerator];
             while (field = [fieldEnum nextObject]) {
                 path = [pub localFilePathForField:field];
                 if ([NSString isEmptyString:path] == NO)
-                    [allFiles removeObject:path];
+                    [allFiles removeObject:[path precomposedStringWithCanonicalMapping]];
             }
         }
     }
