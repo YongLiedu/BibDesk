@@ -115,6 +115,9 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (IBAction)refreshOrphanedFiles:(id)sender{
     NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPapersFolderPathKey];
     
+    // old prefs may not have a standarized path
+    papersFolderPath = [papersFolderPath stringByStandardizingPath];
+    
     if ([NSString isEmptyString:papersFolderPath]) {
         NSArray *documents = [[NSDocumentController sharedDocumentController] documents];
         if ([documents count] == 1) {
