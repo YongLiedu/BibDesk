@@ -71,12 +71,15 @@
 
 +(id)					enumeratorWithPath: (NSString*)fpath;
 +(id)					enumeratorWithPath: (NSString*)fpath cacheSize: (ItemCount)n;
++(id)					enumeratorWithURL: (NSURL*)furl;
 
 -(id)					initWithPath: (NSString*)fpath;
--(id)					initWithPath: (NSString*)fpath cacheSize: (ItemCount)n; // Designated.
+-(id)					initWithPath: (NSString*)fpath cacheSize: (ItemCount)n;
+-(id)		            initWithURL: (NSURL*)furl cacheSize: (ItemCount)n;      // Designated initializer.
 
 -(id)					nextObject;             // NSDirectoryEnumerator-compatible variant.
 -(id)                   nextObjectFullPath;     // Variant that returns an absolute path.
+-(id)                   nextObjectURL;          // Variant that returns a file URL
 
 // Advanced users:
 -(void)					setDesiredInfo: (FSCatalogInfoBitmap)n;   // Flags what additional info you want.

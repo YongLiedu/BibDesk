@@ -40,6 +40,12 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 	return [[[[self class] alloc] initWithPath: fpath cacheSize: n] autorelease];
 }
 
++(id)					enumeratorWithURL: (NSURL*)furl
+{
+	return [[[[self class] alloc] initWithURL: furl cacheSize: UKDirectoryEnumeratorCacheSize] autorelease];
+}
+
+
 // -----------------------------------------------------------------------------
 //  initWithPath:
 //      Convenience initializer. Uses a default cache size.
@@ -56,7 +62,7 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 
 // -----------------------------------------------------------------------------
 //  initWithPath:cacheSize:
-//      Designated initializer. Opens our FSIterator and initializes our
+//      Old designated initializer. Opens our FSIterator and initializes our
 //      cache.
 //
 //  REVISIONS:
@@ -65,6 +71,15 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 
 -(id)		initWithPath: (NSString*)fpath cacheSize: (ItemCount)n
 {
+    return [self initWithURL:[NSURL fileURLWithPath:fpath] cacheSize:n];
+}
+
+//
+//  New designated initializer
+//
+
+-(id)		initWithURL: (NSURL*)furl cacheSize: (ItemCount)n
+{
 	self = [super init];
 	if( self )
 	{
@@ -72,9 +87,8 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 		OSErr		err = noErr;
 		
 		whichInfo = kFSCatInfoNone;
-        CFURLRef fileURL = (CFURLRef)[NSURL fileURLWithPath:fpath];
 		
-		if( !CFURLGetFSRef(fileURL, &container)
+		if( !CFURLGetFSRef((CFURLRef)furl, &container)
 			|| (err = FSOpenIterator( &container, kFSIterateFlat, &iterator )) != noErr )
 		{
             if( err == noErr )  // getFSRef failed.
@@ -87,12 +101,8 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 			return nil;
 		}
         
-        fileURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &container);
-        fpath = (NSString *)CFURLCopyFileSystemPath(fileURL, kCFURLPOSIXPathStyle);
-        [(id)fileURL release];
-        
+        NSString *fpath = [furl path];        
         prefixlen = [fpath length] +(([fpath characterAtIndex: [fpath length] -1] == '/') ? 0 : 1);
-        [fpath release];
 		
 		[self setCacheSize: n];
 	}
@@ -153,11 +163,16 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 
 -(id)   nextObjectFullPath
 {
+    return [[self nextObjectURL] path];
+}
+
+-(id)   nextObjectURL
+{
 	if( currIndex >= foundItems )
 	{
 		OSErr err = FSGetCatalogInfoBulk( iterator, cacheSize, &foundItems,
-                                            NULL, whichInfo, infoCache,
-                                            cache, (FSSpec*) NULL, (HFSUniStr255*) NULL);
+                                          NULL, whichInfo, infoCache,
+                                          cache, (FSSpec*) NULL, (HFSUniStr255*) NULL);
 		if( err != noErr && err != errFSNoMoreItems )
 		{
             if(GetMacOSStatusErrorString != NULL)
@@ -176,9 +191,7 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
         }
 	}
     CFURLRef fileURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &(cache[currIndex++]));
-    NSString *path = [(id)CFURLCopyFileSystemPath(fileURL, kCFURLPOSIXPathStyle) autorelease];
-    [(id)fileURL release];
-	return path;
+    return [(id)fileURL autorelease];
 }
 
 
