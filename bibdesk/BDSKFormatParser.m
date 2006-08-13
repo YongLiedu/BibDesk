@@ -693,8 +693,8 @@
 		return newString;
 	}
 	else {
-		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
-		return string;
+		newString = [string stringByReplacingCharactersInSet:invalidCharSet withString:@""];
+		return newString;
 	}
 }
 
