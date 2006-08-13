@@ -79,7 +79,10 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 		{
             if( err == noErr )  // getFSRef failed.
                 err = fnfErr;   // Invalid path.
-			NSLog(@"UKDirectoryEnumerator::initWithPath: - MacOS Error ID= %d",err);
+            if(GetMacOSStatusErrorString != NULL)
+                NSLog(@"UKDirectoryEnumerator::initWithPath: - MacOS Error ID= %s", GetMacOSStatusErrorString(err));
+            else
+                NSLog(@"UKDirectoryEnumerator::initWithPath: - MacOS Error ID= %d",err);
 			[self autorelease];
 			return nil;
 		}
@@ -157,7 +160,10 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
                                             cache, (FSSpec*) NULL, (HFSUniStr255*) NULL);
 		if( err != noErr && err != errFSNoMoreItems )
 		{
-			NSLog(@"UKDirectoryEnumerator::nextObjectFullPath - MacOS Error ID= %d",err);
+            if(GetMacOSStatusErrorString != NULL)
+                NSLog(@"UKDirectoryEnumerator::initWithPath: - MacOS Error ID= %s", GetMacOSStatusErrorString(err));
+            else
+                NSLog(@"UKDirectoryEnumerator::initWithPath: - MacOS Error ID= %d",err);
 			return nil;
 		}
 		
