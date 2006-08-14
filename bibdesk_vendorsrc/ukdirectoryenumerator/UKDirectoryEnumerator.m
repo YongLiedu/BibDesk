@@ -30,6 +30,19 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 
 @implementation UKDirectoryEnumerator
 
+static NSZone *enumeratorZone = NULL;
+
++ (void)initialize
+{
+    static BOOL alreadyInit = NO;
+    if(NO == alreadyInit){
+        size_t size = sizeof(FSRef) + sizeof(FSCatalogInfo);
+        enumeratorZone = NSCreateZone(size * UKDirectoryEnumeratorCacheSize, size, NO);
+        NSSetZoneName(enumeratorZone, @"UKDirectoryEnumerator malloc zone");
+    }
+    alreadyInit = YES;
+}
+
 +(id)					enumeratorWithPath: (NSString*)fpath
 {
 	return [[[[self class] alloc] initWithPath: fpath] autorelease];
@@ -94,9 +107,9 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
             if( err == noErr )  // getFSRef failed.
                 err = fnfErr;   // Invalid path.
             if(GetMacOSStatusErrorString != NULL)
-                NSLog(@"UKDirectoryEnumerator::initWithPath: - MacOS Error ID= %s", GetMacOSStatusErrorString(err));
+                NSLog(@"-[UKDirectoryEnumerator %@] - MacOS Error ID= %s", NSStringFromSelector(_cmd), GetMacOSStatusErrorString(err));
             else
-                NSLog(@"UKDirectoryEnumerator::initWithPath: - MacOS Error ID= %d",err);
+                NSLog(@"-[UKDirectoryEnumerator %@] - MacOS Error ID= %d", NSStringFromSelector(_cmd), err);
 			[self autorelease];
 			return nil;
 		}
@@ -123,10 +136,10 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 -(void) dealloc
 {
 	if( cache )
-		free( cache );
+		NSZoneFree( enumeratorZone, cache );
 	
 	if( infoCache )
-		free( infoCache );
+		NSZoneFree( enumeratorZone, infoCache );
 	
 	if( iterator != NULL )
 		FSCloseIterator( iterator );
@@ -337,12 +350,12 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 		
 		if( whichInfo == kFSCatInfoNone && infoCache != NULL )
 		{
-			free( infoCache );
+			NSZoneFree( enumeratorZone, infoCache );
 			infoCache = NULL;
 		}
 		else if( whichInfo != kFSCatInfoNone && infoCache == NULL )
 		{
-			infoCache = malloc( sizeof(FSCatalogInfo) * cacheSize );
+			infoCache = NSZoneMalloc( enumeratorZone, sizeof(FSCatalogInfo) * cacheSize );
 			if( cache == NULL )
 				whichInfo = kFSCatInfoNone;
 		}
@@ -400,18 +413,18 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
     // Get rid of the old FSRef and FSCatalogInfo caches:
 	if( cache )
 	{
-		free(cache);
+		NSZoneFree( enumeratorZone, cache);
 		cache = NULL;
 	}
 	
 	if( infoCache )
 	{
-		free(infoCache);
+		NSZoneFree( enumeratorZone, infoCache);
 		infoCache = NULL;
 	}
 	
     // Allocate new caches of the requested size:
-	cache = malloc( sizeof(FSRef) * c );
+	cache = NSZoneMalloc( enumeratorZone, sizeof(FSRef) * c );
 	if( cache == NULL )
 		cacheSize = 0;
 	else
@@ -419,7 +432,7 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 	
 	if( whichInfo != kFSCatInfoNone )
 	{
-		infoCache = malloc( sizeof(FSCatalogInfo) * c );
+		infoCache = NSZoneMalloc( enumeratorZone, sizeof(FSCatalogInfo) * c );
 		if( cache == NULL )
 			whichInfo = kFSCatInfoNone;
 	}
