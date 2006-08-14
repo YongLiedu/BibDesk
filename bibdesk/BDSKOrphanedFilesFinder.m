@@ -46,12 +46,14 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "BDSKAlert.h"
 #import "BDSKOrphanedFileServer.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
 - (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)restartServer;
+- (void)startAnimationWithStatusMessage:(NSString *)message;
+- (void)stopAnimationWithStatusMessage:(NSString *)message;
 @end
 
 @implementation BDSKOrphanedFilesFinder
@@ -172,16 +174,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSString *papersFolderPath = [[self baseURL] path];
     
     if ([NSHomeDirectory() isEqualToString:papersFolderPath]) {
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"")
-                                             defaultButton:NSLocalizedString(@"Find", @"Find")
-                                           alternateButton:NSLocalizedString(@"Don't Find", @"Don't Find")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphaned files in this folder could take a long time. Do you want to proceed?",@"")];
-        // we use the didDismissSelector because we want to alert to be gone before we start a long process
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"")
+                                         defaultButton:NSLocalizedString(@"Find", @"Find")
+                                       alternateButton:NSLocalizedString(@"Don't Find", @"Don't Find")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphaned files in this folder could take a long time. Do you want to proceed?",@"")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
-                         didEndSelector:NULL
-                     didDismissSelector:@selector(findAlertDidEnd:returnCode:contextInfo:)
+                         didEndSelector:@selector(findAlertDidEnd:returnCode:contextInfo:)
                             contextInfo:NULL];
     } else {
         [self refreshOrphanedFiles];
@@ -316,34 +316,52 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (void)refreshOrphanedFiles{
-    
+    [self startAnimationWithStatusMessage:[NSLocalizedString(@"Looking for orphaned files", @"") stringByAppendingEllipsis]];
+    // do the actual work with a zero delay to let the UI update 
+    [self performSelector:@selector(restartServer) withObject:nil afterDelay:0.0];
+}
+
+- (void)restartServer{
     [[self mutableArrayValueForKey:@"orphanedFiles"] removeAllObjects];
     
     NSURL *baseURL = [self baseURL];
     NSSet *knownFiles = [self knownFiles];
     
-    if(baseURL && [knownFiles count]){
+    if(baseURL){
         if(nil == server){
             server = [[BDSKOrphanedFileServer alloc] initWithKnownFiles:knownFiles baseURL:baseURL];
             [server setDelegate:self];
         } else {
             [[server serverOnServerThread] restartWithKnownFiles:knownFiles baseURL:baseURL];
         }
+        
+        id proxy = [server serverOnServerThread];
+        if(nil == proxy){
+            [self performSelector:_cmd withObject:nil afterDelay:0.1];
+        } else {
+            [proxy checkForOrphans];
+        }
+        
     } else {
         NSBeep();
-        [statusField setStringValue:NSLocalizedString(@"Unknown papers folder path or no documents open.", @"")];
+        [self stopAnimationWithStatusMessage:NSLocalizedString(@"Unknown papers folder.", @"")];
     }
-    
-    id proxy = [server serverOnServerThread];
-    if(nil == proxy){
-        [self performSelector:_cmd withObject:nil afterDelay:0.1];
-    } else {
-        [progressIndicator startAnimation:self];
-        [proxy checkForOrphans];
-        [refreshButton setTitle:NSLocalizedString(@"Stop", @"Stop")];
-        [refreshButton setAction:@selector(stopRefreshing:)];
-    }
-    
+}
+
+- (void)startAnimationWithStatusMessage:(NSString *)message{
+    [progressIndicator startAnimation:nil];
+    [refreshButton setTitle:NSLocalizedString(@"Stop", @"Stop")];
+    [refreshButton setAction:@selector(stopRefreshing:)];
+    [refreshButton setToolTip:NSLocalizedString(@"Stop looking for orphaned files", @"")];
+    [statusField setStringValue:message];
+}
+
+- (void)stopAnimationWithStatusMessage:(NSString *)message{
+    [progressIndicator stopAnimation:nil];
+    [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Refresh")];
+    [refreshButton setAction:@selector(refreshOrphanedFiles:)];
+    [refreshButton setToolTip:NSLocalizedString(@"Refresh the list of orphaned files", @"")];
+    [statusField setStringValue:message];
 }
 
 // server delegate methods
@@ -356,15 +374,11 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
-    [progressIndicator stopAnimation:nil];
-    [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Refresh")];
-    [refreshButton setAction:@selector(refreshOrphanedFiles:)];
-    
-    unsigned int count = [orphanedFiles count];
+    unsigned int count = [self countOfOrphanedFiles];
     NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
     if ([server allFilesEnumerated] == NO)
         message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Stopped"), message];
-    [statusField setStringValue:message];
+    [self stopAnimationWithStatusMessage:message];
 }
 
 @end
