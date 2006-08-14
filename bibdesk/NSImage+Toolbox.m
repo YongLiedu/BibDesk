@@ -38,6 +38,7 @@
 
 #import "NSImage+Toolbox.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
+#import "NSBezierPath_BDSKExtensions.h"
 
 static NSImage *cautionIconImage = nil;
 
@@ -350,5 +351,67 @@ static NSImage *cautionIconImage = nil;
     return [newImage autorelease];
 }
 
+- (NSImage *)dragImageWithCount:(int)count;
+{
+    return [self dragImageWithCount:count inside:NO];
+}
+
+- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside;
+{
+    NSImage *labeledImage;
+    
+    if (count > 1) {
+        
+        NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%i", count]
+                                            attributeName:NSForegroundColorAttributeName attributeValue:[NSColor whiteColor]] autorelease];
+        NSSize size = [self size];
+        NSRect rect = {NSZeroPoint, size};
+        NSRect iconRect = rect;
+        NSRect countRect = {NSZeroPoint, [countString size]};
+        float countOffset;
+        
+        countOffset = floorf(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
+        countRect.size.height = 2.0 * countOffset;
+        
+        if (inside) {
+            // large image, draw it inside the corner
+            countRect.origin = NSMakePoint(NSMaxX(rect) - NSWidth(countRect) - countOffset - 2.0, 3.0);
+        } else {
+            // small image, draw it outside the corner
+            countRect.origin = NSMakePoint(NSMaxX(rect), 0.0);
+            size.width += NSWidth(countRect) + countOffset;
+            size.height += countOffset;
+            rect.origin.y += countOffset;
+        }
+        
+        labeledImage = [[[NSImage alloc] initWithSize:size] autorelease];
+        
+        [labeledImage lockFocus];
+        
+        [self drawInRect:rect fromRect:iconRect operation:NSCompositeCopy fraction:1.0];
+        
+        [NSGraphicsContext saveGraphicsState];
+        // draw a count of the rows being dragged, similar to Mail.app
+        [[NSColor redColor] setFill];
+        [NSBezierPath fillHorizontalOvalAroundRect:countRect];
+        [countString drawInRect:countRect];
+        [NSGraphicsContext restoreGraphicsState];
+        
+        [labeledImage unlockFocus];
+        
+    } else {
+        
+        labeledImage = self;
+        
+    }
+	
+    NSImage *dragImage = [[NSImage alloc] initWithSize:[labeledImage size]];
+	
+	[dragImage lockFocus];
+	[labeledImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
+	[dragImage unlockFocus];
+	
+	return [dragImage autorelease];
+}
 
 @end

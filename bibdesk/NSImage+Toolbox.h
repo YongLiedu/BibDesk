@@ -58,5 +58,7 @@
 + (NSImage *)smallImageForFile:(NSString *)path;
 - (NSImage *)imageFlippedHorizontally;
 - (NSImage *)highlightedImage;
+- (NSImage *)dragImageWithCount:(int)count;
+- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside;
 
 @end
