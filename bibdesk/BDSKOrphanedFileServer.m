@@ -89,6 +89,10 @@
         CFStringRef lastPathComponent = NULL;        
         lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
         
+        // periodically run the runloop to service the DO requests, or else the main thread just spins
+        if([enumerator cacheExhausted])
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        
         isDir = [enumerator isDirectory];
         isHidden = NULL == lastPathComponent || [enumerator isInvisible] || CFStringHasPrefix(lastPathComponent, CFSTR("."));
         
@@ -125,7 +129,7 @@
             CFRelease(lastPathComponent);
             lastPathComponent = NULL;
             
-            if(fullPathURL && [knownFiles containsObject:(NSURL *)fullPathURL]){
+            if(fullPathURL && [knownFiles containsObject:(NSURL *)fullPathURL] == NO){
                 [filesFound addObject:(NSURL *)fullPathURL];
                 CFRelease(fullPathURL);
                 fullPathURL = NULL;
@@ -154,6 +158,16 @@
     OSAtomicCompareAndSwap32Barrier(0, 1, &keepEnumerating);
     OSAtomicCompareAndSwap32Barrier(1, 0, &allFilesEnumerated);
     
+    // increase file limit for enumerating a home directory http://developer.apple.com/qa/qa2001/qa1292.html
+    struct rlimit limit;
+    int err;
+    
+    err = getrlimit(RLIMIT_NOFILE, &limit);
+    if (err == 0) {
+        limit.rlim_cur = RLIM_INFINITY;
+        (void) setrlimit(RLIMIT_NOFILE, &limit);
+    }
+        
     // not oneway
     [self checkAllFilesInDirectoryRootedAtURL:baseURL];
     OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
