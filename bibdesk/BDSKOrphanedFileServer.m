@@ -102,8 +102,6 @@
     BOOL isDir, isHidden;
     CFURLRef fullPathURL;
     
-    CFAllocatorRef alloc = CFAllocatorGetDefault();
-    
     while ( (1 == keepEnumerating) && (fullPathURL = (CFURLRef)[enumerator nextObjectURL]) ){
         
         // periodically flush the cache        
