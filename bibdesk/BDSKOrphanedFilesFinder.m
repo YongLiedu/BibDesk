@@ -53,6 +53,7 @@
 - (void)refreshOrphanedFiles;
 - (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)updateTableView:(NSTimer *)theTimer;
+- (void)stopUpdating; // doesn't halt server, but stops the current enumeration and UI updates
 @end
 
 @implementation BDSKOrphanedFilesFinder
@@ -106,8 +107,11 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     }
 }
 
+- (void)windowWillClose:(NSNotification *)aNotification{
+    [self stopUpdating];
+}
+
 - (IBAction)hideOrphanedFilesPanel:(id)sender{
-    [server stopEnumerating];
 	[[self window] close];
 }
 
@@ -308,6 +312,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     if (returnCode == NSAlertDefaultReturn)
         [self refreshOrphanedFiles];
 }
+
+- (void)stopUpdating{
+    [timer invalidate];
+    [timer release];
+    timer = nil;
+    [progressIndicator stopAnimation:nil];
+}    
    
 - (void)updateTableView:(NSTimer *)theTimer{
     
@@ -323,11 +334,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [statusField setStringValue:(count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count])];
     
     if([server allFilesEnumerated]){
-        OBPRECONDITION(theTimer == timer);
-        [timer invalidate];
-        [timer release];
-        timer = nil;
-        [progressIndicator stopAnimation:nil];
+        [self stopUpdating];
     }
 }
 
