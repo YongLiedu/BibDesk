@@ -176,9 +176,9 @@ void            UKFSCatInfoFromDictionary( NSDictionary* attrs, FSCatalogInfo* c
 		if( err != noErr && err != errFSNoMoreItems )
 		{
             if(GetMacOSStatusErrorString != NULL)
-                NSLog(@"UKDirectoryEnumerator::nextObjectFullPath: - MacOS Error ID= %s", GetMacOSStatusErrorString(err));
+                NSLog(@"-[UKDirectoryEnumerator %@] - MacOS Error ID= %s", NSStringFromSelector(_cmd), GetMacOSStatusErrorString(err));
             else
-                NSLog(@"UKDirectoryEnumerator::nextObjectFullPath: - MacOS Error ID= %d",err);
+                NSLog(@"-[UKDirectoryEnumerator %@] - MacOS Error ID= %d", NSStringFromSelector(_cmd), err);
 			return nil;
 		}
 		
