@@ -38,6 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKOrphanedFileServer;
+
 @interface BDSKOrphanedFilesFinder : NSWindowController  {
     IBOutlet NSTableView *tableView;
     IBOutlet NSArrayController *arrayController;
@@ -46,6 +48,8 @@
     IBOutlet NSMenu *contextMenu;
     NSMutableArray *orphanedFiles;
     BOOL wasLaunched;
+    BDSKOrphanedFileServer *server;
+    NSTimer *timer;
 }
 
 + (id)sharedFinder;

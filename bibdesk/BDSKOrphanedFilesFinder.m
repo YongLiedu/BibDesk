@@ -47,13 +47,13 @@
 #import "NSImage+Toolbox.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKAlert.h"
-#import "UKDirectoryEnumerator.h"
+#import "BDSKOrphanedFileServer.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
+- (void)refreshOrphanedFiles;
 - (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)refreshOrphanedFilesInPapersFolder:(NSString *)papersFolderPath;
+- (void)updateTableView:(NSTimer *)theTimer;
 @end
-
 
 @implementation BDSKOrphanedFilesFinder
 
@@ -74,6 +74,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (void)dealloc {
+    [server stopDOServer];
+    [server release];
     [orphanedFiles release];
     [super dealloc];
 }
@@ -104,15 +106,17 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (IBAction)hideOrphanedFilesPanel:(id)sender{
+    [server stopEnumerating];
 	[[self window] close];
 }
 
 - (IBAction)showOrphanedFiles:(id)sender{
     [self showWindow:sender];
-    [self performSelector:@selector(refreshOrphanedFiles:) withObject:sender afterDelay:0.0];
+    [self refreshOrphanedFiles:nil];
 }
 
-- (IBAction)refreshOrphanedFiles:(id)sender{
+- (NSURL *)baseURL
+{
     NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPapersFolderPathKey];
     
     // old prefs may not have a standarized path
@@ -123,11 +127,46 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         if ([documents count] == 1) {
             papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[documents objectAtIndex:0]];
         } else {
-            [statusField setStringValue:NSLocalizedString(@"No papers folder", @"")];
-            NSBeep();
-            return;
+            return nil;
         }
     }
+
+    return [NSURL fileURLWithPath:papersFolderPath];
+}
+
+- (NSSet *)knownFiles
+{
+    NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
+    NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
+    BibDocument *doc;
+    NSEnumerator *pubEnum;
+    BibItem *pub;
+    NSEnumerator *fieldEnum;
+    NSString *field;
+    NSURL *fileURL;
+    
+    NSMutableSet *knownFiles = [NSMutableSet set];
+    
+    while (doc = [docEnum nextObject]) {
+        fileURL = [doc fileURL];
+        if (fileURL)
+            [knownFiles addObject:fileURL];
+        pubEnum = [[doc publications] objectEnumerator];
+        while (pub = [pubEnum nextObject]) {
+            fieldEnum = [localFileFields objectEnumerator];
+            while (field = [fieldEnum nextObject]) {
+                fileURL = [pub localFileURLForField:field];
+                if (fileURL)
+                    [knownFiles addObject:fileURL];
+            }
+        }
+    }
+    return knownFiles;
+}
+
+- (IBAction)refreshOrphanedFiles:(id)sender{
+    
+    NSString *papersFolderPath = [[self baseURL] path];
     
     if ([NSHomeDirectory() isEqualToString:papersFolderPath]) {
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"")
@@ -140,10 +179,11 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
                           modalDelegate:self
                          didEndSelector:NULL
                      didDismissSelector:@selector(findAlertDidEnd:returnCode:contextInfo:)
-                            contextInfo:[papersFolderPath retain]];
+                            contextInfo:NULL];
     } else {
-        [self refreshOrphanedFilesInPapersFolder:papersFolderPath];
+        [self refreshOrphanedFiles];
     }
+
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
@@ -190,7 +230,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{ return nil; }
 
 - (NSString *)tableView:(NSTableView *)tableView toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    return [self objectInOrphanedFilesAtIndex:row];
+    return [[self objectInOrphanedFilesAtIndex:row] path];
 }
 
 - (NSMenu *)tableView:(NSTableView *)tableView contextMenuForRow:(int)row column:(int)column{
@@ -216,7 +256,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     unsigned int index = [rowIndexes firstIndex];
     
     while (index != NSNotFound) {
-        path = [self objectInOrphanedFilesAtIndex:index];
+        path = [[self objectInOrphanedFilesAtIndex:index] path];
         if(type == 1)
             [[NSWorkspace sharedWorkspace] openFile:path];
         else
@@ -238,7 +278,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
-    NSArray *filePaths = [[self mutableArrayValueForKey:@"orphanedFiles"] objectsAtIndexes:rowIndexes];
+    NSArray *filePaths = [[[self mutableArrayValueForKey:@"orphanedFiles"] objectsAtIndexes:rowIndexes] valueForKey:@"path"];
     [pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
     [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
     return YES;
@@ -264,133 +304,64 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 @implementation BDSKOrphanedFilesFinder (Private)
 
 - (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSString *papersFolderPath = (NSString *)contextInfo;
     if (returnCode == NSAlertDefaultReturn)
-        [self refreshOrphanedFilesInPapersFolder:papersFolderPath];
-    [papersFolderPath release];
+        [self refreshOrphanedFiles];
+}
+   
+- (void)updateTableView:(NSTimer *)theTimer{
+    
+    NSMutableSet *newOrphans = [[[server serverOnServerThread] orphanedFiles] mutableCopy];
+    
+    NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
+    NSSet *currentOrphans = [NSSet setWithArray:mutableArray];
+    [newOrphans minusSet:currentOrphans];
+    [mutableArray addObjectsFromSet:newOrphans];
+    [newOrphans release];
+    
+    unsigned int count = [mutableArray count];
+    [statusField setStringValue:(count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count])];
+    
+    if([server allFilesEnumerated]){
+        OBPRECONDITION(theTimer == timer);
+        [timer invalidate];
+        [timer release];
+        timer = nil;
+        [progressIndicator stopAnimation:nil];
+    }
 }
 
-// traverse the entire directory structure and return all files as a flattened array; this method uses the thread safe Carbon File Manager
-- (NSArray *)allFilesInDirectoryRootedAtURL:(NSURL *)baseURL
-{
-    NSMutableArray *files = [NSMutableArray array];
-    UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithURL:baseURL];
+- (void)refreshOrphanedFiles{
     
-    // get visibility and directory flags
-    [enumerator setDesiredInfo:(kFSCatInfoFinderInfo | kFSCatInfoNodeFlags)];
-    NSString *filePath;
-    BOOL isDir, isHidden;
-    CFURLRef fullPathURL;
+    [[self mutableArrayValueForKey:@"orphanedFiles"] setArray:[NSArray array]];
     
-    CFAllocatorRef alloc = CFAllocatorGetDefault();
-    
-    while (fullPathURL = (CFURLRef)[enumerator nextObjectURL]){
-        
-        CFStringRef lastPathComponent = NULL;        
-        lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
-
-        isDir = [enumerator isDirectory];
-        isHidden = NULL == lastPathComponent || [enumerator isInvisible] || CFStringHasPrefix(lastPathComponent, CFSTR("."));
-        
-        if (isDir && isHidden == NO){
-            
-            // recurse, then dispose of the lastPathComponent
-            [files addObjectsFromArray:[self allFilesInDirectoryRootedAtURL:(NSURL *)fullPathURL]];
-            
-            // isHidden == NO guarantees the existence of this object
-            CFRelease(lastPathComponent);
-            
-        } else if (isHidden == NO){
-
-            // resolve aliases in the parent directory, since that's what BibItem does
-            CFURLRef parentURL = CFURLCreateCopyDeletingLastPathComponent(alloc, fullPathURL);
-            CFURLRef resolvedParent = NULL;
-            if(parentURL){
-                resolvedParent = BDCopyFileURLResolvingAliases(parentURL);
-                CFRelease(parentURL);
-                parentURL = NULL;
-            }
-
-            // we'll check for this later
-            fullPathURL = NULL;
-            
-            // add the last path component back in
-            if(resolvedParent){
-                fullPathURL = CFURLCreateCopyAppendingPathComponent(alloc, resolvedParent, lastPathComponent, FALSE);
-                CFRelease(resolvedParent);
-                resolvedParent = NULL;
-            }
-            
-            // lastPathComponent exists if isHidden == NO
-            CFRelease(lastPathComponent);
-            lastPathComponent = NULL;
-            
-            // convert to a path            
-            CFStringRef resolvedPath = NULL;
-
-            if(fullPathURL){
-                resolvedPath = CFURLCopyFileSystemPath(fullPathURL, kCFURLPOSIXPathStyle);
-                CFRelease(fullPathURL);
-                fullPathURL = NULL;
-            }
-            
-            if(resolvedPath){
-                [files addObject:[(NSString *)resolvedPath precomposedStringWithCanonicalMapping]];
-                CFRelease(resolvedPath);
-                resolvedPath = NULL;
-            }
-            
-        } else {
-            // couldn't get last path component, or started with a "."
-            if(lastPathComponent) CFRelease(lastPathComponent);
-        }
-
-    }
-    return files;
-}
-        
-        
-
-- (void)refreshOrphanedFilesInPapersFolder:(NSString *)papersFolderPath{
-    
-    [statusField setStringValue:[NSLocalizedString(@"Looking for orphaned files", @"") stringByAppendingEllipsis]];
-    [statusField display];
-    [progressIndicator startAnimation:self];
-    
-    NSMutableArray *allFiles = [[self allFilesInDirectoryRootedAtURL:[NSURL fileURLWithPath:papersFolderPath]] mutableCopy];
-    
-    NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
-    NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
-    BibDocument *doc;
-    NSEnumerator *pubEnum;
-    BibItem *pub;
-    NSEnumerator *fieldEnum;
-    NSString *field;
-    NSString *path;
-
-    while (doc = [docEnum nextObject]) {
-        path = [doc fileName];
-        if ([NSString isEmptyString:path] == NO)
-            [allFiles removeObject:[path precomposedStringWithCanonicalMapping]];
-        pubEnum = [[doc publications] objectEnumerator];
-        while (pub = [pubEnum nextObject]) {
-            fieldEnum = [localFileFields objectEnumerator];
-            while (field = [fieldEnum nextObject]) {
-                path = [pub localFilePathForField:field];
-                if ([NSString isEmptyString:path] == NO)
-                    [allFiles removeObject:[path precomposedStringWithCanonicalMapping]];
-            }
-        }
+    if(nil != timer){
+        [timer invalidate];
+        [timer release];
     }
     
-    [[self mutableArrayValueForKey:@"orphanedFiles"] setArray:allFiles];
+    NSURL *baseURL = [self baseURL];
+    NSSet *knownFiles = [self knownFiles];
     
-    int numberOfFiles = [allFiles count];
-    NSString *statusMessage = (numberOfFiles == 1) ? NSLocalizedString(@"Found 1 orphaned file", @"") : [NSString stringWithFormat:NSLocalizedString(@"Found %i orphaned files", @""), numberOfFiles];
-    [progressIndicator stopAnimation:self];
-    [statusField setStringValue:statusMessage];
+    if(baseURL && [knownFiles count]){
+        if(nil == server)
+            server = [[BDSKOrphanedFileServer alloc] initWithKnownFiles:knownFiles baseURL:baseURL];
+        else
+            [[server serverOnServerThread] restartWithKnownFiles:knownFiles baseURL:baseURL];
+    } else {
+        NSBeep();
+        [statusField setStringValue:NSLocalizedString(@"Unknown papers folder path or no documents open.", @"")];
+    }
     
-    [allFiles release];
+    id proxy = [server serverOnServerThread];
+    if(nil == proxy){
+        [self performSelector:_cmd withObject:nil afterDelay:0.1];
+    } else {
+        [progressIndicator startAnimation:self];
+        [proxy checkForOrphans];
+        timer = [[NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(updateTableView:) userInfo:nil repeats:YES] retain];
+        [timer fire];
+    }
+    
 }
 
 @end
