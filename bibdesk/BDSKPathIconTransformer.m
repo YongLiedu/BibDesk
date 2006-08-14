@@ -40,7 +40,7 @@
 #import "NSImage+Toolbox.h"
 #import <OmniAppKit/FrameworkDefines.h>
 #import <OmniAppKit/OATextWithIconCell.h>
-
+#import "NSFileManager_BDSKExtensions.h"
 
 @implementation BDSKPathIconTransformer
 
