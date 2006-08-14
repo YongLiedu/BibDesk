@@ -262,7 +262,7 @@ static inline void __BDClearStatics()
     BDSortCacheValue *cache = (BDSortCacheValue *)NSZoneMalloc(zone, count * size);
     BDSortCacheValue aValue;
     
-    int i, sortIdx = 0, numberOfDescriptors = [descriptors count];
+    unsigned int i, sortIdx = 0, numberOfDescriptors = [descriptors count];
     
     // first "equal range" is considered to be the entire array
     NSRange *equalRanges = (NSRange *)NSZoneMalloc(zone, 1 * sizeof(NSRange));

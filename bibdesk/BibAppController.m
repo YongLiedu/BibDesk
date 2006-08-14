@@ -740,7 +740,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 		[tmpSet release];
 	}
 	// we extend, as we use a different set of punctuation characters as Apple does
-	int prefixLength = 0;
+	unsigned int prefixLength = 0;
 	while (charRange.location > prefixLength && ![punctuationCharSet characterIsMember:[fullString characterAtIndex:charRange.location - prefixLength - 1]]) 
 		prefixLength++;
 	if (prefixLength > 0) {
