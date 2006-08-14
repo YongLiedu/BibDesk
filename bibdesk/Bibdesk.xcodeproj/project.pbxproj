@@ -591,6 +591,8 @@
 		F9B07D15082B1B9100345747 /* BibDeskSuite.scriptTerminology in Resources */ = {isa = PBXBuildFile; fileRef = F9022D110758066000C3F701 /* BibDeskSuite.scriptTerminology */; };
 		F9C4C42D097619AE00DF25F3 /* BibDeskScripting.r in Rez */ = {isa = PBXBuildFile; fileRef = F920DB25075C2D8F000C5FCA /* BibDeskScripting.r */; };
 		F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */; };
+		F9CEFCBB0A90090B00A0E54E /* BDSKOrphanedFileServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */; };
+		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
 		F9D3E285088DA01F00E70D49 /* BDSKFormCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F9D3E283088DA01F00E70D49 /* BDSKFormCell.h */; };
 		F9D3E286088DA01F00E70D49 /* BDSKFormCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D3E284088DA01F00E70D49 /* BDSKFormCell.m */; };
 		F9D5A8CB07B9B94F0092E7E2 /* BDSKDragWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C420758027800C3F701 /* BDSKDragWindow.h */; };
@@ -1010,7 +1012,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1417,6 +1419,8 @@
 		F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = BTParse/BTParse.xcodeproj; sourceTree = "<group>"; };
 		F9B9E17E089479FC00C21B17 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ArrowImage.tiff; path = Images/ArrowImage.tiff; sourceTree = "<group>"; };
+		F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFileServer.h; sourceTree = "<group>"; };
+		F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFileServer.m; sourceTree = "<group>"; };
 		F9D3E283088DA01F00E70D49 /* BDSKFormCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFormCell.h; sourceTree = "<group>"; };
 		F9D3E284088DA01F00E70D49 /* BDSKFormCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFormCell.m; sourceTree = "<group>"; };
 		F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceController.h; sourceTree = "<group>"; };
@@ -1909,6 +1913,7 @@
 				F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */,
 				F9A6742907D04E8000782ACD /* BDSKFontManager.m */,
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
+				F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */,
 				F9DB863E08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
 				CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */,
@@ -2124,6 +2129,7 @@
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
+				F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
 				F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */,
 				F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */,
@@ -2554,6 +2560,7 @@
 				CE95A57B0A88883300334DFA /* BDSKReadMeController.h in Headers */,
 				CE22E1CD0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.h in Headers */,
 				F900CD090A8EA97D005C3A0F /* UKDirectoryEnumerator.h in Headers */,
+				F9CEFCBB0A90090B00A0E54E /* BDSKOrphanedFileServer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3363,6 +3370,7 @@
 				CE95A57C0A88883300334DFA /* BDSKReadMeController.m in Sources */,
 				CE22E1CE0A8CCF9D002CEFB8 /* BDSKOrphanedFilesFinder.m in Sources */,
 				F900CD0A0A8EA97D005C3A0F /* UKDirectoryEnumerator.m in Sources */,
+				F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
