@@ -209,6 +209,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     return [(id)CFURLCopyLastPathComponent((CFURLRef)self) autorelease];
 }
 
+- (NSString *)precomposedPath;
+{
+    return [[self path] precomposedStringWithCanonicalMapping];
+}
+
 @end
 
 @implementation NSURL (Templating)

@@ -46,6 +46,7 @@
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
 + (NSCharacterSet *)illegalURLCharacterSet;
 - (NSString *)lastPathComponent;
+- (NSString *)precomposedPath;
 
 @end
 
