@@ -351,7 +351,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
     [mutableArray addObjectsFromArray:newFiles];
     unsigned int count = [mutableArray count];
-    [statusField setStringValue:(count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count])];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
+    [statusField setStringValue:[message stringByAppendingEllipsis]];
 }
 
 - (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
@@ -359,10 +360,11 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Refresh")];
     [refreshButton setAction:@selector(refreshOrphanedFiles:)];
     
-    if ([server allFilesEnumerated] == NO){
-        unsigned int count = [orphanedFiles count];
-        [statusField setStringValue:(count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"Stopped. %d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"Stopped. %d orphaned files found.", @""), count])];
-    }
+    unsigned int count = [orphanedFiles count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
+    if ([server allFilesEnumerated] == NO)
+        message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Stopped"), message];
+    [statusField setStringValue:message];
 }
 
 @end
