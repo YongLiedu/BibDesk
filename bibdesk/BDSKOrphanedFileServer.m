@@ -54,7 +54,8 @@
 {
     self = [super init];
     if(self){
-        filesFound = [[NSMutableSet alloc] initWithCapacity:1024];
+        NSParameterAssert([theURL isFileURL]);
+        orphanedFiles = [[NSMutableSet alloc] initWithCapacity:1024];
         [self setKnownFiles:theFiles];
         [self setBaseURL:theURL];
         keepEnumerating = 0;
@@ -65,20 +66,23 @@
 
 - (void)dealloc
 {
-    [filesFound release];
+    [orphanedFiles release];
     [knownFiles release];
     [baseURL release];
     [super dealloc];
 }
 
-// must not be oneway
+// must not be oneway; we need to wait for this method to return and set a flag when enumeration is complete (or been stopped)
 - (void)checkAllFilesInDirectoryRootedAtURL:(NSURL *)theURL
 {
     UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithURL:theURL];
+
+    // default is 16, which is a bit small (don't set it too large, though, since we use -cacheExhausted to signal that it's time to run the runloop again)
+    [enumerator setCacheSize:32];
     
     // get visibility and directory flags
     [enumerator setDesiredInfo:(kFSCatInfoFinderInfo | kFSCatInfoNodeFlags)];
-    NSString *filePath;
+    
     BOOL isDir, isHidden;
     CFURLRef fullPathURL;
     
@@ -130,7 +134,7 @@
             lastPathComponent = NULL;
             
             if(fullPathURL && [knownFiles containsObject:(NSURL *)fullPathURL] == NO){
-                [filesFound addObject:(NSURL *)fullPathURL];
+                [orphanedFiles addObject:(NSURL *)fullPathURL];
                 CFRelease(fullPathURL);
                 fullPathURL = NULL;
             }
@@ -153,8 +157,6 @@
 
 - (oneway void)checkForOrphans;
 {
-    // call using serverOnServerThread or you're screwed
-    // run directory enumerator; if knownFiles doesn't contain object, add to filesFound
     OSAtomicCompareAndSwap32Barrier(0, 1, &keepEnumerating);
     OSAtomicCompareAndSwap32Barrier(1, 0, &allFilesEnumerated);
     
@@ -168,13 +170,16 @@
         (void) setrlimit(RLIMIT_NOFILE, &limit);
     }
         
-    // not oneway
+    // run directory enumerator; if knownFiles doesn't contain object, add to orphanedFiles
+
+    // not oneway, since we need to set the allFilesEnumerated flag here
     [self checkAllFilesInDirectoryRootedAtURL:baseURL];
     OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
 }
 
 - (void)setBaseURL:(NSURL *)theURL;
 {
+    NSParameterAssert([theURL isFileURL]);
     [baseURL autorelease];
     baseURL = [theURL copy];
 }
@@ -187,12 +192,15 @@
 
 - (void)clearFoundFiles;
 {
-    [filesFound removeAllObjects];
+    [orphanedFiles removeAllObjects];
 }
 
 - (oneway void)restartWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
 {
-    OSAtomicCompareAndSwap32Barrier(0, 1, &keepEnumerating);
+    // set the stop flag so enumeration ceases
+    OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating);
+    
+    // reset our local variables
     [self setKnownFiles:theFiles];
     [self clearFoundFiles];
     [self setBaseURL:theURL];
@@ -201,7 +209,7 @@
 - (bycopy NSSet *)orphanedFiles;
 {
     // only call using serverOnServerThread
-    return [[filesFound copy] autorelease];
+    return [[orphanedFiles copy] autorelease];
 }
 
 - (Protocol *)protocolForServerThread { return @protocol(BDSKOrphanedFileServerThread); }
