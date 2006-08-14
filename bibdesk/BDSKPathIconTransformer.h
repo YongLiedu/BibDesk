@@ -42,3 +42,7 @@
 @interface BDSKPathIconTransformer : NSValueTransformer {
 }
 @end
+
+@interface BDSKURLIconTransformer : NSValueTransformer {
+}
+@end

@@ -65,3 +65,27 @@
 }
 
 @end
+
+@implementation BDSKURLIconTransformer
+
++ (Class)transformedValueClass {
+    return [NSObject class];
+}
+
++ (BOOL)allowsReverseTransformation {
+    return NO;
+}
+
+- (id)transformedValue:(id)fileURL {
+	NSString *abbrevPath = [[fileURL path] stringByAbbreviatingWithTildeInPath];
+	if(abbrevPath && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
+		return [NSDictionary dictionaryWithObjectsAndKeys:
+            abbrevPath, OATextWithIconCellStringKey, 
+            [NSImage smallImageForURL:fileURL], OATextWithIconCellImageKey, nil];
+	} else {
+		return abbrevPath;
+	}
+}
+
+@end
+

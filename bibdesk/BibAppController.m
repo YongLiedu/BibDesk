@@ -129,6 +129,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	[NSValueTransformer setValueTransformer:[[[BDSKPathIconTransformer alloc] init] autorelease]
 									forName:@"BDSKPathIconTransformer"];
     
+    [NSValueTransformer setValueTransformer:[[[BDSKURLIconTransformer alloc] init] autorelease]
+                                    forName:@"BDSKURLIconTransformer"];
+    
     // eliminate support for some redundant keys
     NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
     if(prefsShownColNamesArray){
