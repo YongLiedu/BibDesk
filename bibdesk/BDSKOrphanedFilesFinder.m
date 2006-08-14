@@ -153,14 +153,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     while (doc = [docEnum nextObject]) {
         fileURL = [doc fileURL];
         if (fileURL)
-            [knownFiles addObject:fileURL];
+            [knownFiles addObject:[fileURL precomposedPath]];
         pubEnum = [[doc publications] objectEnumerator];
         while (pub = [pubEnum nextObject]) {
             fieldEnum = [localFileFields objectEnumerator];
             while (field = [fieldEnum nextObject]) {
                 fileURL = [pub localFileURLForField:field];
                 if (fileURL)
-                    [knownFiles addObject:fileURL];
+                    [knownFiles addObject:[fileURL precomposedPath]];
             }
         }
     }

@@ -106,59 +106,37 @@
     
     while ( (1 == keepEnumerating) && (fullPathURL = (CFURLRef)[enumerator nextObjectURL]) ){
         
-        CFStringRef lastPathComponent = NULL;        
-        lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
-        
         // periodically flush the cache        
         if([enumerator cacheExhausted] && [orphanedFiles count] >= 16){
             [self flushFoundFiles];
         }
         
+        CFStringRef lastPathComponent = NULL;        
+        lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
+        
         isDir = [enumerator isDirectory];
         isHidden = NULL == lastPathComponent || [enumerator isInvisible] || CFStringHasPrefix(lastPathComponent, CFSTR("."));
         
-        if (isDir && isHidden == NO){
+        if(lastPathComponent) CFRelease(lastPathComponent);
+        
+        // ignore hidden files
+        if (isHidden)
+            continue;
             
-            // recurse, then dispose of the lastPathComponent
-            [self checkAllFilesInDirectoryRootedAtURL:(NSURL *)fullPathURL];
+        if (isDir){
             
-            // isHidden == NO guarantees the existence of this object
-            CFRelease(lastPathComponent);
-            
-        } else if (isHidden == NO){
-            
-            // resolve aliases in the parent directory, since that's what BibItem does
-            CFURLRef parentURL = CFURLCreateCopyDeletingLastPathComponent(alloc, fullPathURL);
-            CFURLRef resolvedParent = NULL;
-            if(parentURL){
-                resolvedParent = BDCopyFileURLResolvingAliases(parentURL);
-                CFRelease(parentURL);
-                parentURL = NULL;
+            // resolve aliases in parent directories, since that's what BibItem does
+            CFURLRef resolvedURL = BDCopyFileURLResolvingAliases(fullPathURL);
+            if(resolvedURL){
+                // recurse
+                [self checkAllFilesInDirectoryRootedAtURL:(NSURL *)resolvedURL];
+                CFRelease(resolvedURL);
             }
             
-            // we'll check for this later
-            fullPathURL = NULL;
+        } else if([knownFiles containsObject:[(NSURL *)fullPathURL precomposedPath]] == NO){
             
-            // add the last path component back in
-            if(resolvedParent){
-                fullPathURL = CFURLCreateCopyAppendingPathComponent(alloc, resolvedParent, lastPathComponent, FALSE);
-                CFRelease(resolvedParent);
-                resolvedParent = NULL;
-            }
+            [orphanedFiles addObject:(NSURL *)fullPathURL];
             
-            // lastPathComponent exists if isHidden == NO
-            CFRelease(lastPathComponent);
-            lastPathComponent = NULL;
-            
-            if(fullPathURL && [knownFiles containsObject:(NSURL *)fullPathURL] == NO){
-                [orphanedFiles addObject:(NSURL *)fullPathURL];
-                CFRelease(fullPathURL);
-                fullPathURL = NULL;
-            }
-            
-        } else {
-            // couldn't get last path component, or started with a "."
-            if(lastPathComponent) CFRelease(lastPathComponent);
         }
         
     }
