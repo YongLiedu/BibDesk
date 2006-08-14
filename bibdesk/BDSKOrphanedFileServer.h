@@ -42,26 +42,42 @@
 
 @interface BDSKOrphanedFileServer : BDSKAsynchronousDOServer
 {
-    NSMutableSet *orphanedFiles;    // file URLs from UKDirectoryEnumerator minus knownFiles
+    NSMutableArray *orphanedFiles;    // file URLs from UKDirectoryEnumerator minus knownFiles
     NSSet *knownFiles;              // file URLs from BibItem
     NSURL *baseURL;                 // root URL to start enumerating
     int32_t keepEnumerating __attribute__ ((aligned (4)));
     int32_t allFilesEnumerated __attribute__ ((aligned (4)));
+    id delegate;
 }
 
 // designated initializer; OK to create on main thread
 - (id)initWithKnownFiles:(NSSet *)theFiles baseURL:(NSURL *)theURL;
 
+- (id)delegate;
+- (void)setDelegate:(id)newDelegate;
+
 // these messages should only be sent to the serverOnServerThread proxy
 - (oneway void)checkForOrphans;
 - (void)setBaseURL:(NSURL *)theURL;
 - (void)setKnownFiles:(NSSet *)theFiles;
+- (void)flushFoundFiles;
 - (void)clearFoundFiles;
 - (oneway void)restartWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
-- (bycopy NSSet *)orphanedFiles;
+
+// these messages should only be sent to the serverOnMainThread proxy
+- (oneway void)serverFoundFiles:(bycopy NSArray *)newFiles;
+- (oneway void)serverDidFinish;
 
 // OK to access on main thread (uses OSAtomic)
 - (BOOL)allFilesEnumerated;
 - (void)stopEnumerating;
+
+@end
+
+
+@interface NSObject (BDSKOrphanedFileServerDelegate) 
+
+- (void)orphanedFileServer:(BDSKOrphanedFileServer *)server foundFiles:(NSArray *)newFiles;
+- (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)server;
 
 @end

@@ -52,8 +52,6 @@
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
 - (void)findAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)updateTableView:(NSTimer *)theTimer;
-- (void)stopUpdating; // doesn't halt server, but stops the current enumeration and UI updates
 @end
 
 @implementation BDSKOrphanedFilesFinder
@@ -108,7 +106,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (void)windowWillClose:(NSNotification *)aNotification{
-    [self stopUpdating];
+    [self stopRefreshing:nil];
 }
 
 - (IBAction)hideOrphanedFilesPanel:(id)sender{
@@ -189,6 +187,10 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         [self refreshOrphanedFiles];
     }
 
+}
+
+- (IBAction)stopRefreshing:(id)sender{
+    [server stopEnumerating];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
@@ -313,48 +315,20 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         [self refreshOrphanedFiles];
 }
 
-- (void)stopUpdating{
-    [timer invalidate];
-    [timer release];
-    timer = nil;
-    [progressIndicator stopAnimation:nil];
-}    
-   
-- (void)updateTableView:(NSTimer *)theTimer{
-    
-    NSMutableSet *newOrphans = [[[server serverOnServerThread] orphanedFiles] mutableCopy];
-    
-    NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
-    NSSet *currentOrphans = [NSSet setWithArray:mutableArray];
-    [newOrphans minusSet:currentOrphans];
-    [mutableArray addObjectsFromSet:newOrphans];
-    [newOrphans release];
-    
-    unsigned int count = [mutableArray count];
-    [statusField setStringValue:(count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count])];
-    
-    if([server allFilesEnumerated]){
-        [self stopUpdating];
-    }
-}
-
 - (void)refreshOrphanedFiles{
     
     [[self mutableArrayValueForKey:@"orphanedFiles"] removeAllObjects];
-    
-    if(nil != timer){
-        [timer invalidate];
-        [timer release];
-    }
     
     NSURL *baseURL = [self baseURL];
     NSSet *knownFiles = [self knownFiles];
     
     if(baseURL && [knownFiles count]){
-        if(nil == server)
+        if(nil == server){
             server = [[BDSKOrphanedFileServer alloc] initWithKnownFiles:knownFiles baseURL:baseURL];
-        else
+            [server setDelegate:self];
+        } else {
             [[server serverOnServerThread] restartWithKnownFiles:knownFiles baseURL:baseURL];
+        }
     } else {
         NSBeep();
         [statusField setStringValue:NSLocalizedString(@"Unknown papers folder path or no documents open.", @"")];
@@ -366,10 +340,29 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     } else {
         [progressIndicator startAnimation:self];
         [proxy checkForOrphans];
-        timer = [[NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateTableView:) userInfo:nil repeats:YES] retain];
-        [timer fire];
+        [refreshButton setTitle:NSLocalizedString(@"Stop", @"Stop")];
+        [refreshButton setAction:@selector(stopRefreshing:)];
     }
     
+}
+
+// server delegate methods
+- (void)orphanedFileServer:(BDSKOrphanedFileServer *)aServer foundFiles:(NSArray *)newFiles{
+    NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
+    [mutableArray addObjectsFromArray:newFiles];
+    unsigned int count = [mutableArray count];
+    [statusField setStringValue:(count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count])];
+}
+
+- (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
+    [progressIndicator stopAnimation:nil];
+    [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Refresh")];
+    [refreshButton setAction:@selector(refreshOrphanedFiles:)];
+    
+    if ([server allFilesEnumerated] == NO){
+        unsigned int count = [orphanedFiles count];
+        [statusField setStringValue:(count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"Stopped. %d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"Stopped. %d orphaned files found.", @""), count])];
+    }
 }
 
 @end

@@ -44,7 +44,13 @@
 
 - (oneway void)checkForOrphans;
 - (oneway void)restartWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
-- (bycopy NSSet *)orphanedFiles;
+
+@end
+
+@protocol BDSKOrphanedFileServerMainThread <BDSKAsyncDOServerMainThread>
+
+- (oneway void)serverFoundFiles:(bycopy NSArray *)newFiles;
+- (oneway void)serverDidFinish;
 
 @end
 
@@ -55,11 +61,12 @@
     self = [super init];
     if(self){
         NSParameterAssert([theURL isFileURL]);
-        orphanedFiles = [[NSMutableSet alloc] initWithCapacity:1024];
+        orphanedFiles = [[NSMutableArray alloc] initWithCapacity:16];
         [self setKnownFiles:theFiles];
         [self setBaseURL:theURL];
         keepEnumerating = 0;
         allFilesEnumerated = 0;
+        delegate = nil;
     }
     return self;
 }
@@ -72,12 +79,21 @@
     [super dealloc];
 }
 
+- (id)delegate {
+    return delegate;
+}
+
+- (void)setDelegate:(id)newDelegate {
+    delegate = newDelegate;
+    
+}
+
 // must not be oneway; we need to wait for this method to return and set a flag when enumeration is complete (or been stopped)
 - (void)checkAllFilesInDirectoryRootedAtURL:(NSURL *)theURL
 {
     UKDirectoryEnumerator *enumerator = [UKDirectoryEnumerator enumeratorWithURL:theURL];
 
-    // default is 16, which is a bit small (don't set it too large, though, since we use -cacheExhausted to signal that it's time to run the runloop again)
+    // default is 16, which is a bit small (don't set it too large, though, since we use -cacheExhausted to signal that it's time to flush the found files)
     [enumerator setCacheSize:32];
     
     // get visibility and directory flags
@@ -93,9 +109,10 @@
         CFStringRef lastPathComponent = NULL;        
         lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
         
-        // periodically run the runloop to service the DO requests, or else the main thread just spins
-        if([enumerator cacheExhausted])
-            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        // periodically flush the cache        
+        if([enumerator cacheExhausted] && [orphanedFiles count] >= 16){
+            [self flushFoundFiles];
+        }
         
         isDir = [enumerator isDirectory];
         isHidden = NULL == lastPathComponent || [enumerator isInvisible] || CFStringHasPrefix(lastPathComponent, CFSTR("."));
@@ -174,7 +191,13 @@
 
     // not oneway, since we need to set the allFilesEnumerated flag here
     [self checkAllFilesInDirectoryRootedAtURL:baseURL];
-    OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
+    // see if we have some left in the cache
+    [self flushFoundFiles];
+    if (keepEnumerating == 1)
+        OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
+    
+    // notify the delegate
+    [[self serverOnMainThread] serverDidFinish];
 }
 
 - (void)setBaseURL:(NSURL *)theURL;
@@ -188,6 +211,14 @@
 {
     [knownFiles autorelease];
     knownFiles = [theFiles copy];
+}
+
+- (void)flushFoundFiles;
+{
+    if([orphanedFiles count]){
+        [[self serverOnMainThread] serverFoundFiles:[[orphanedFiles copy] autorelease]];
+        [self clearFoundFiles];
+    }
 }
 
 - (void)clearFoundFiles;
@@ -206,13 +237,21 @@
     [self setBaseURL:theURL];
 }
 
-- (bycopy NSSet *)orphanedFiles;
+- (oneway void)serverFoundFiles:(bycopy NSArray *)newFiles;
 {
-    // only call using serverOnServerThread
-    return [[orphanedFiles copy] autorelease];
+    if ([delegate respondsToSelector:@selector(orphanedFileServer:foundFiles:)])
+        [delegate orphanedFileServer:self foundFiles:newFiles];
+}
+
+- (oneway void)serverDidFinish;
+{
+    if ([delegate respondsToSelector:@selector(orphanedFileServerDidFinish:)])
+        [delegate orphanedFileServerDidFinish:self];
 }
 
 - (Protocol *)protocolForServerThread { return @protocol(BDSKOrphanedFileServerThread); }
+
+- (Protocol *)protocolForMainThread { return @protocol(BDSKOrphanedFileServerMainThread); }
 
 @end
 

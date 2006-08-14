@@ -42,6 +42,7 @@
 
 @interface BDSKOrphanedFilesFinder : NSWindowController  {
     IBOutlet NSTableView *tableView;
+    IBOutlet NSButton *refreshButton;
     IBOutlet NSArrayController *arrayController;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSTextField *statusField;
@@ -49,7 +50,6 @@
     NSMutableArray *orphanedFiles;
     BOOL wasLaunched;
     BDSKOrphanedFileServer *server;
-    NSTimer *timer;
 }
 
 + (id)sharedFinder;
@@ -60,6 +60,7 @@
 // shows the panel and refreshes
 - (IBAction)showOrphanedFiles:(id)sender;
 - (IBAction)refreshOrphanedFiles:(id)sender;
+- (IBAction)stopRefreshing:(id)sender;
 
 - (IBAction)showFile:(id)sender;
 

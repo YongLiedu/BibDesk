@@ -2,13 +2,22 @@
     IBClasses = (
         {CLASS = BDSKDragImageTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
-            ACTIONS = {refreshOrphanedFiles = id; showFile = id; showOrphanedFiles = id; }; 
+            ACTIONS = {
+                hideOrphanedFilesPanel = id; 
+                refreshOrphanedFiles = id; 
+                showFile = id; 
+                showOrphanedFiles = id; 
+                showOrphanedFilesPanel = id; 
+                stopRefreshing = id; 
+                toggleShowingOrphanedFilesPanel = id; 
+            }; 
             CLASS = BDSKOrphanedFilesFinder; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 arrayController = NSArrayController; 
                 contextMenu = NSMenu; 
                 progressIndicator = NSProgressIndicator; 
+                refreshButton = NSButton; 
                 statusField = NSTextField; 
                 tableView = NSTableView; 
             }; 
