@@ -341,7 +341,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (void)refreshOrphanedFiles{
     
     [[self mutableArrayValueForKey:@"orphanedFiles"] removeAllObjects];
-    [tableView reloadData];
     
     if(nil != timer){
         [timer invalidate];
