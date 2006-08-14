@@ -325,21 +325,18 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [[self mutableArrayValueForKey:@"orphanedFiles"] removeAllObjects];
     
     NSURL *baseURL = [self baseURL];
-    NSSet *knownFiles = [self knownFiles];
     
     if(baseURL){
         if(nil == server){
-            server = [[BDSKOrphanedFileServer alloc] initWithKnownFiles:knownFiles baseURL:baseURL];
+            server = [[BDSKOrphanedFileServer alloc] init];
             [server setDelegate:self];
-        } else {
-            [[server serverOnServerThread] restartWithKnownFiles:knownFiles baseURL:baseURL];
         }
         
         id proxy = [server serverOnServerThread];
         if(nil == proxy){
             [self performSelector:_cmd withObject:nil afterDelay:0.1];
         } else {
-            [proxy checkForOrphans];
+            [proxy checkForOrphansWithKnownFiles:[self knownFiles] baseURL:baseURL];
         }
         
     } else {

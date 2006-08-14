@@ -40,30 +40,28 @@
 #import "UKDirectoryEnumerator.h"
 #import "NSURL_BDSKExtensions.h"
 
-@protocol BDSKOrphanedFileServerThread <BDSKAsyncDOServerThread>
+@interface BDSKOrphanedFileServer (PrivateServerThread)
 
-- (oneway void)checkForOrphans;
-- (oneway void)restartWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
-
-@end
-
-@protocol BDSKOrphanedFileServerMainThread <BDSKAsyncDOServerMainThread>
-
-- (oneway void)serverFoundFiles:(bycopy NSArray *)newFiles;
-- (oneway void)serverDidFinish;
+// these messages should only be sent on the server thread
+- (void)checkAllFilesInDirectoryRootedAtURL:(NSURL *)theURL;
+- (void)setBaseURL:(NSURL *)theURL;
+- (void)setKnownFiles:(NSSet *)theFiles;
+- (void)flushFoundFiles;
+- (void)clearFoundFiles;
 
 @end
+
+#pragma mark -
 
 @implementation BDSKOrphanedFileServer
 
-- (id)initWithKnownFiles:(NSSet *)theFiles baseURL:(NSURL *)theURL;
+- (id)init;
 {
     self = [super init];
     if(self){
-        NSParameterAssert([theURL isFileURL]);
-        orphanedFiles = [[NSMutableArray alloc] initWithCapacity:16];
-        [self setKnownFiles:theFiles];
-        [self setBaseURL:theURL];
+        foundFiles = [[NSMutableArray alloc] initWithCapacity:32];
+        knownFiles = nil;
+        baseURL = nil;
         keepEnumerating = 0;
         allFilesEnumerated = 0;
         delegate = nil;
@@ -73,20 +71,87 @@
 
 - (void)dealloc
 {
-    [orphanedFiles release];
+    [foundFiles release];
     [knownFiles release];
     [baseURL release];
     [super dealloc];
 }
 
-- (id)delegate {
-    return delegate;
+// superclass overrides
+
+- (Protocol *)protocolForServerThread { return @protocol(BDSKOrphanedFileServerThread); }
+
+- (Protocol *)protocolForMainThread { return @protocol(BDSKOrphanedFileServerMainThread); }
+
+#pragma mark API
+
+- (id)delegate { return delegate; }
+
+- (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
+
+- (BOOL)allFilesEnumerated { return (BOOL)(1 == allFilesEnumerated); }
+
+- (void)stopEnumerating { OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating); }
+
+#pragma mark Server thread protocol
+
+- (oneway void)checkForOrphansWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
+{
+    // set the stop flag so enumeration ceases
+    // CMH: is this necessary, shouldn't we already be done as we're on the same thread?
+    OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating);
+    
+    // reset our local variables
+    [self setKnownFiles:theFiles];
+    [self setBaseURL:theURL];
+    [self clearFoundFiles];
+    
+    OSAtomicCompareAndSwap32Barrier(0, 1, &keepEnumerating);
+    OSAtomicCompareAndSwap32Barrier(1, 0, &allFilesEnumerated);
+    
+    // increase file limit for enumerating a home directory http://developer.apple.com/qa/qa2001/qa1292.html
+    struct rlimit limit;
+    int err;
+    
+    err = getrlimit(RLIMIT_NOFILE, &limit);
+    if (err == 0) {
+        limit.rlim_cur = RLIM_INFINITY;
+        (void) setrlimit(RLIMIT_NOFILE, &limit);
+    }
+        
+    // run directory enumerator; if knownFiles doesn't contain object, add to foundFiles
+    [self checkAllFilesInDirectoryRootedAtURL:baseURL];
+    
+    // see if we have some left in the cache
+    [self flushFoundFiles];
+    
+    // keepEnumerating is 0 when enumeration was stopped
+    if (keepEnumerating == 1)
+        OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
+    
+    // notify the delegate that we're done
+    [[self serverOnMainThread] serverDidFinish];
 }
 
-- (void)setDelegate:(id)newDelegate {
-    delegate = newDelegate;
-    
+#pragma mark Main thread protocol
+
+- (oneway void)serverFoundFiles:(bycopy NSArray *)newFiles;
+{
+    if ([delegate respondsToSelector:@selector(orphanedFileServer:foundFiles:)])
+        [delegate orphanedFileServer:self foundFiles:newFiles];
 }
+
+- (oneway void)serverDidFinish;
+{
+    if ([delegate respondsToSelector:@selector(orphanedFileServerDidFinish:)])
+        [delegate orphanedFileServerDidFinish:self];
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKOrphanedFileServer (PrivateServerThread)
 
 // must not be oneway; we need to wait for this method to return and set a flag when enumeration is complete (or been stopped)
 - (void)checkAllFilesInDirectoryRootedAtURL:(NSURL *)theURL
@@ -105,7 +170,7 @@
     while ( (1 == keepEnumerating) && (fullPathURL = (CFURLRef)[enumerator nextObjectURL]) ){
         
         // periodically flush the cache        
-        if([enumerator cacheExhausted] && [orphanedFiles count] >= 16){
+        if([enumerator cacheExhausted] && [foundFiles count] >= 16){
             [self flushFoundFiles];
         }
         
@@ -133,47 +198,12 @@
             
         } else if([knownFiles containsObject:[(NSURL *)fullPathURL precomposedPath]] == NO){
             
-            [orphanedFiles addObject:(NSURL *)fullPathURL];
+            [foundFiles addObject:(NSURL *)fullPathURL];
             
         }
         
     }
     
-}
-
-- (BOOL)allFilesEnumerated { return (BOOL)(1 == allFilesEnumerated); }
-
-- (void)stopEnumerating
-{
-    OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating);
-}
-
-- (oneway void)checkForOrphans;
-{
-    OSAtomicCompareAndSwap32Barrier(0, 1, &keepEnumerating);
-    OSAtomicCompareAndSwap32Barrier(1, 0, &allFilesEnumerated);
-    
-    // increase file limit for enumerating a home directory http://developer.apple.com/qa/qa2001/qa1292.html
-    struct rlimit limit;
-    int err;
-    
-    err = getrlimit(RLIMIT_NOFILE, &limit);
-    if (err == 0) {
-        limit.rlim_cur = RLIM_INFINITY;
-        (void) setrlimit(RLIMIT_NOFILE, &limit);
-    }
-        
-    // run directory enumerator; if knownFiles doesn't contain object, add to orphanedFiles
-
-    // not oneway, since we need to set the allFilesEnumerated flag here
-    [self checkAllFilesInDirectoryRootedAtURL:baseURL];
-    // see if we have some left in the cache
-    [self flushFoundFiles];
-    if (keepEnumerating == 1)
-        OSAtomicCompareAndSwap32Barrier(0, 1, &allFilesEnumerated);
-    
-    // notify the delegate
-    [[self serverOnMainThread] serverDidFinish];
 }
 
 - (void)setBaseURL:(NSURL *)theURL;
@@ -191,43 +221,16 @@
 
 - (void)flushFoundFiles;
 {
-    if([orphanedFiles count]){
-        [[self serverOnMainThread] serverFoundFiles:[[orphanedFiles copy] autorelease]];
+    if([foundFiles count]){
+        [[self serverOnMainThread] serverFoundFiles:[[foundFiles copy] autorelease]];
         [self clearFoundFiles];
     }
 }
 
 - (void)clearFoundFiles;
 {
-    [orphanedFiles removeAllObjects];
+    [foundFiles removeAllObjects];
 }
-
-- (oneway void)restartWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
-{
-    // set the stop flag so enumeration ceases
-    OSAtomicCompareAndSwap32Barrier(1, 0, &keepEnumerating);
-    
-    // reset our local variables
-    [self setKnownFiles:theFiles];
-    [self clearFoundFiles];
-    [self setBaseURL:theURL];
-}
-
-- (oneway void)serverFoundFiles:(bycopy NSArray *)newFiles;
-{
-    if ([delegate respondsToSelector:@selector(orphanedFileServer:foundFiles:)])
-        [delegate orphanedFileServer:self foundFiles:newFiles];
-}
-
-- (oneway void)serverDidFinish;
-{
-    if ([delegate respondsToSelector:@selector(orphanedFileServerDidFinish:)])
-        [delegate orphanedFileServerDidFinish:self];
-}
-
-- (Protocol *)protocolForServerThread { return @protocol(BDSKOrphanedFileServerThread); }
-
-- (Protocol *)protocolForMainThread { return @protocol(BDSKOrphanedFileServerMainThread); }
 
 @end
 
