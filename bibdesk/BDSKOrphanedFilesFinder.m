@@ -82,6 +82,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (void)awakeFromNib{
     [tableView setDoubleAction:@selector(showFile:)];
+    [progressIndicator setUsesThreadedAnimation:YES];
 }
 
 - (NSString *)windowNibName{
@@ -332,7 +333,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (void)refreshOrphanedFiles{
     
-    [[self mutableArrayValueForKey:@"orphanedFiles"] setArray:[NSArray array]];
+    [[self mutableArrayValueForKey:@"orphanedFiles"] removeAllObjects];
+    [tableView reloadData];
     
     if(nil != timer){
         [timer invalidate];
@@ -358,7 +360,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     } else {
         [progressIndicator startAnimation:self];
         [proxy checkForOrphans];
-        timer = [[NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(updateTableView:) userInfo:nil repeats:YES] retain];
+        timer = [[NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateTableView:) userInfo:nil repeats:YES] retain];
         [timer fire];
     }
     
