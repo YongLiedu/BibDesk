@@ -1,4 +1,4 @@
-// BDSKDragTableView.m
+// BDSKMainTableView.m
 
 /*
  This software is Copyright (c) 2002,2003,2004,2005,2006
@@ -33,14 +33,14 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKDragTableView.h"
+#import "BDSKMainTableView.h"
 #import <OmniFoundation/OFPreference.h>
 #import "BibPrefController.h"
 #import "BibDocument.h"
 #import "BDSKTypeSelectHelper.h"
 #import "NSTableView_BDSKExtensions.h"
 
-@implementation BDSKDragTableView
+@implementation BDSKMainTableView
 
 - (void)awakeFromNib{
     [super awakeFromNib]; // this updates the font

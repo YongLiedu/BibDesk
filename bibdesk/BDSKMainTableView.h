@@ -1,4 +1,4 @@
-// BDSKDragTableView.h
+// BDSKMainTableView.h
 /*
  This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
@@ -37,11 +37,11 @@
 @class BDSKTypeSelectHelper;
 
 /*!
-    @class BDSKDragTableView
+    @class BDSKMainTableView
     @abstract Drag n' Droppable Tableview
     @discussion Subclass of NSTableview that allows drag n' drop.
 */
-@interface BDSKDragTableView : NSTableView
+@interface BDSKMainTableView : NSTableView
 {
     // for supporting type-ahead in the tableview:
     // datasource methods to support this are over in BibDocument_DataSource
