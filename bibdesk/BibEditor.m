@@ -178,6 +178,9 @@ static int numberOfOpenEditors = 0;
 		return;
 	}
 	
+    // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
+    OBASSERT([self document]);
+    
 	// The rest is called when we load the window
 	
     // Setup the default cells for the extraBibFields matrix
@@ -3358,11 +3361,6 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)registerForNotifications {
-	// make sure we have the document, as we can't be sure we already set it
-    BibDocument *doc = [self document];
-    if (doc == nil)
-        doc = [publication document];
-    
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibDidChange:)
 												 name:BDSKBibItemChangedNotification
@@ -3374,19 +3372,19 @@ static int numberOfOpenEditors = 0;
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibWasAddedOrRemoved:)
 												 name:BDSKDocAddItemNotification
-											   object:doc];
+											   object:[self document]];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibWasAddedOrRemoved:)
 												 name:BDSKDocDelItemNotification
-											   object:doc];
+											   object:[self document]];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibWillBeRemoved:)
 												 name:BDSKDocWillRemoveItemNotification
-											   object:doc];
+											   object:[self document]];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(finalizeChanges:)
 												 name:BDSKFinalizeChangesNotification
-											   object:doc];
+											   object:[self document]];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(typeInfoDidChange:)
 												 name:BDSKBibTypeInfoChangedNotification
