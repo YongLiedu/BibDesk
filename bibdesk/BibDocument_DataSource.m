@@ -850,7 +850,7 @@
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
-        if([info draggingSource] == tableView || [info draggingSource] == groupTableView || type == nil) {
+        if([info draggingSource] == tableView || [info draggingSource] == groupTableView || [info draggingSource] == ccTableView || type == nil) {
 			// can't copy onto same table
 			return NSDragOperationNone;
 		}
@@ -874,7 +874,7 @@
         }
             
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[self objectInGroupsAtIndex:row]  isValidDropTarget] == NO || (type == nil && [info draggingSource] != tableView)) 
+        if([info draggingSource] == ccTableView || [info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[self objectInGroupsAtIndex:row]  isValidDropTarget] == NO || (type == nil && [info draggingSource] != tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
