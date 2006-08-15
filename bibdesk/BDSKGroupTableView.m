@@ -110,7 +110,7 @@
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableTypeAheadSelection"]) {
 
         // @@ this is a hack; recaching in -reloadData doesn't work for us the first time around, but we don't want to recache on every keystroke
-        if([[typeSelectHelper valueForKey:@"typeAheadSearchCache"] count] == 0)
+        if([[typeSelectHelper valueForKey:@"searchCache"] count] == 0)
             [typeSelectHelper rebuildTypeSelectSearchCache];
 
 		if (([[NSCharacterSet alphanumericCharacterSet] characterIsMember:c] || ([typeSelectHelper isProcessing] && ![[NSCharacterSet controlCharacterSet] characterIsMember:c])) && modifierFlags == 0) {
