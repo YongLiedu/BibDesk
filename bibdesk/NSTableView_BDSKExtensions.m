@@ -346,6 +346,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
 }
 
+#if MAC_OS_X_VERSION_10_3 <= MAC_OS_X_VERSION_MAX_ALLOWED
 // @@ legacy implementation for 10.3 compatibility
 - (NSImage *)dragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
@@ -357,6 +358,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     NSPoint zeroPoint = NSMakePoint(0,0);
 	return [self replacementDragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
 }
+#endif
 
 - (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset{
    	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
