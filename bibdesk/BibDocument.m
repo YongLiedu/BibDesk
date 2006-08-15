@@ -1791,13 +1791,13 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 	NSWindowController *wc;
 	
 	while(wc = [wcEnum nextObject]){
-		if([wc isKindOfClass:[BibEditor class]] && [(BibEditor*)wc currentBib] == pub){
+		if([wc isKindOfClass:[BibEditor class]] && [(BibEditor*)wc publication] == pub){
 			e = (BibEditor*)wc;
 			break;
 		}
 	}
     if(e == nil){
-        e = [[BibEditor alloc] initWithBibItem:pub document:self];
+        e = [[BibEditor alloc] initWithPublication:pub];
         [self addWindowController:e];
         [e release];
     }

@@ -35,16 +35,6 @@
 
 #import "BDSKDragWindow.h"
 
-#import <Carbon/Carbon.h>
-#import "BibDocument.h"
-#import "BibItem.h"
-#import "BibEditor.h"
-#import "NSString_BDSKExtensions.h"
-#import "BibTeXParser.h"
-#import "PubMedParser.h"
-#import "BDSKJSTORParser.h"
-#import "BDSKWebOfScienceParser.h"
-
 @implementation BDSKDragWindow
 
 // see bug #1471488; now that BibEditor has a reference to its NSDocument, the document is used as represented filename
@@ -60,148 +50,29 @@
 }
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender {
-    NSPasteboard *pboard = [sender draggingPasteboard];
-    // weblocs also put strings on the pboard, so check for that type first so we don't get a false positive on NSStringPboardType
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
-	
-	if(pboardType == nil){
-            return NSDragOperationNone;
-    }
-	// sniff the string to see if it's a format we can parse
-    if([pboardType isEqualToString:NSStringPboardType]){
-        NSString *pbString = [pboard stringForType:pboardType];    
-        if([pbString contentStringType] == BDSKUnknownStringType)
-            return NSDragOperationNone;
-    }
-
-    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
-	unsigned modifier = GetCurrentKeyModifiers();
-	if ( (modifier & (optionKey | cmdKey)) == (optionKey | cmdKey) ){ // hack to get the correct cursor
-		return NSDragOperationLink;
-	}
-	if (sourceDragMask & NSDragOperationCopy) {
-		return NSDragOperationCopy;
-	}
-	return NSDragOperationNone;
+    if ([[self delegate] respondsToSelector:@selector(dragWindow:receiveDrag:)] && 
+        [[self delegate] respondsToSelector:@selector(dragWindow:canReceiveDrag:)]) {
+        
+        return [[self delegate] dragWindow:self canReceiveDrag:sender];
+    
+    } else return NSDragOperationNone;
 }
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
-	return [self draggingUpdated:sender];
+    if ([[self delegate] respondsToSelector:@selector(dragWindow:receiveDrag:)] && 
+        [[self delegate] respondsToSelector:@selector(dragWindow:canReceiveDrag:)]) {
+        
+        return [[self delegate] dragWindow:self canReceiveDrag:sender];
+    
+    } else return NSDragOperationNone;
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
-    NSPasteboard *pboard = [sender draggingPasteboard];
-	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
-	NSArray *draggedPubs = nil;
-	BibItem *editorBib = [[self windowController] currentBib];
-	NSError *error = nil;
+    if ([[self delegate] respondsToSelector:@selector(dragWindow:receiveDrag:)]) {
+        
+        return [[self delegate] dragWindow:self receiveDrag:sender];
     
-	if([pboardType isEqualToString:NSStringPboardType]){
-		NSString *pbString = [pboard stringForType:NSStringPboardType];
-		// sniff the string to see if it's a format we can parse
-		switch([pbString contentStringType]){
-			case BDSKBibTeXStringType:
-				draggedPubs = [BibTeXParser itemsFromData:[pboard dataForType:NSStringPboardType] error:&error document:[editorBib document]];
-                break;
-			case BDSKRISStringType:
-				draggedPubs = [PubMedParser itemsFromString:pbString error:&error];
-                break;
-			case BDSKJSTORStringType:
-				draggedPubs = [BDSKJSTORParser itemsFromString:pbString error:&error];
-                break;
-			case BDSKWOSStringType:
-				draggedPubs = [BDSKWebOfScienceParser itemsFromString:pbString error:&error];
-                break;
-			default:
-				OBASSERT_NOT_REACHED("Unsupported data type");
-				return NO;
-		}
-		if(error != nil) return NO;
-	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
-		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-        // we can't just unarchive, as this gives complex strings with the wrong macroResolver
-		draggedPubs = [[editorBib document] newPublicationsFromArchivedData:pbData];
-	}else{
-		// we did not find a valid dragtype
-		return NO;
-	}
-	
-	BibItem *tempBI = [draggedPubs objectAtIndex:0]; // no point in dealing with multiple pubs for a single editor
-	[tempBI setDocument:[editorBib document]]; // this assures that the macroResolver is set for complex strings
-
-	// Test a keyboard mask so that we can override all fields when dragging into the editor window (option)
-	// create a crossref (cmd-option), or fill empty fields (no modifiers)
-	unsigned modifier = GetCurrentKeyModifiers(); // use the Carbon function since [[NSApp currentEvent] modifierFlags] won't work if we're not the front app
-	
-	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
-	if((modifier & (optionKey | cmdKey)) == (optionKey | cmdKey)){
-		
-		NSString *crossref = [tempBI citeKey];
-		NSString *message = nil;
-		
-		// first check if we don't create a Crossref chain
-		if ([[editorBib citeKey] caseInsensitiveCompare:crossref] == NSOrderedSame) {
-			message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
-		} else {
-			BibDocument *doc = [editorBib document]; 
-			NSString *parentCr = [[doc publicationForCiteKey:crossref] valueOfField:BDSKCrossrefString inherit:NO];
-			
-			if (![NSString isEmptyString:parentCr]) {
-				message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
-			} else if ([doc citeKeyIsCrossreffed:[editorBib citeKey]]) {
-				message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
-			}
-		}
-		
-		if (message) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
-                                             defaultButton:NSLocalizedString(@"OK",@"OK")
-                                           alternateButton:nil
-                                               otherButton:nil
-                                  informativeTextWithFormat:message];
-            [alert beginSheetModalForWindow:self modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-			return NO;
-		}
-		// add the crossref field if it doesn't exist, then set it to the citekey of the drag source's bibitem
-		[editorBib setField:BDSKCrossrefString toValue:crossref];
-		[[editorBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
-		return YES;
-	}
-	
-	// we aren't linking, so here we decide which fields to overwrite, and just copy values over
-	NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
-	NSString *key = nil;
-	NSString *oldValue = nil;
-	NSString *newValue = nil;
-	
-	[editorBib setPubType:[tempBI pubType]]; // do we want this always?
-	
-	while(key = [newKeyE nextObject]){
-		newValue = [tempBI valueOfField:key inherit:NO];
-		if([newValue isEqualToString:@""])
-			continue;
-		
-		oldValue = [editorBib valueOfField:key inherit:NO]; // value is the value of key in the dragged-onto window.
-		
-		// only set the field if we force or the value was empty
-		if((modifier & optionKey) || [NSString isEmptyString:oldValue]){
-			[editorBib setField:key toValue:newValue];
-		}
-	}
-    
-    // autogenerate cite key if we aren't overwriting, and it hasn't already been set by the user
-    if((modifier & optionKey) == 0 && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [editorBib canGenerateAndSetCiteKey]){
-        [[self windowController] generateCiteKey:nil];
-    }
-    
-    // check cite key here in case we didn't autogenerate, or we're supposed to overwrite
-	if(((modifier & optionKey) != 0 || [editorBib hasEmptyOrDefaultCiteKey]) && ([tempBI hasEmptyOrDefaultCiteKey] == NO)){
-		[editorBib setCiteKey:[tempBI citeKey]];
-	}
-    
-	[[editorBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
-	
-	return YES;
+    } else return  NO;
 }
 
 @end

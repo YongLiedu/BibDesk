@@ -53,7 +53,6 @@
 @class BDSKImagePopUpButton;
 @class BibItem;
 @class BDSKStatusBar;
-@class BibDocument;
 @class BDSKAlert;
 @class BibAuthor;
 
@@ -99,10 +98,7 @@
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
     // ----------------------------------------------------------------------------------------
-    NSString *currentType;
-    BibItem *theBib;
-    BibDocument *theDocument;
-    NSMutableDictionary *fieldNumbers;
+    BibItem *publication;
 // ----------------------------------------------------------------------------------------
 // doc preview stuff
 // ----------------------------------------------------------------------------------------
@@ -159,16 +155,15 @@
 }
 
 /*!
-@method initWithBibItem: document:
+@method initWithPublication:
     @abstract designated Initializer
     @discussion
  @param aBib gives us a bib to edit
 */
-- (id)initWithBibItem:(BibItem *)aBib document:(BibDocument *)doc;
+- (id)initWithPublication:(BibItem *)aBib;
 
-- (BibItem *)currentBib;
+- (BibItem *)publication;
 
-- (void)setCurrentType:(NSString *)type;
 /*!
     @method     show
     @abstract   Shows the window.
@@ -207,7 +202,7 @@
 
 /*!
     @method     recordChangingField:toValue:
-    @abstract   sets field to value in theBib and does other stuff
+    @abstract   sets field to value in publication and does other stuff
     @discussion factored out because setting field and doing other things is done from more than one place.
     @param      fieldName (description)
     @param      value (description)
@@ -443,6 +438,8 @@
 - (IBAction)deletePub:(id)sender;
 
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (NSUndoManager *)undoManager;
 
 #pragma mark Person controller
 

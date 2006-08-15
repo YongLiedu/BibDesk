@@ -38,3 +38,8 @@
 {
 }
 @end
+
+@interface NSObject (BDSKDragWindowDelegate)
+- (NSDragOperation)dragWindow:(BDSKDragWindow *)window canReceiveDrag:(id <NSDraggingInfo>)sender;
+- (BOOL)dragWindow:(BDSKDragWindow *)window receiveDrag:(id <NSDraggingInfo>)sender;
+@end
