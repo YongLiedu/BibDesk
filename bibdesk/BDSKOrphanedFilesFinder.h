@@ -71,5 +71,3 @@
 - (void)removeObjectFromOrphanedFilesAtIndex:(unsigned)theIndex;
 
 @end
-
-@interface BDSKDragImageTableView : NSTableView @end

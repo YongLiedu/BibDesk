@@ -399,19 +399,3 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 @end
-
-@implementation BDSKDragImageTableView
-
-// @@ legacy implementation for 10.3 compatibility
-- (NSImage *)dragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    NSNumber *number;
-    NSEnumerator *rowE = [dragRows objectEnumerator];
-    while(number = [rowE nextObject])
-        [indexes addIndex:[number intValue]];
-    
-    NSPoint zeroPoint = NSMakePoint(0,0);
-	return [self dragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
-}
-
-@end

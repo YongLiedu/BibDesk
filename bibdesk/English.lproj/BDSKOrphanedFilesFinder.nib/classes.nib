@@ -1,6 +1,5 @@
 {
     IBClasses = (
-        {CLASS = BDSKDragImageTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
             ACTIONS = {
                 hideOrphanedFilesPanel = id; 
