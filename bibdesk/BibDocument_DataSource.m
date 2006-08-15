@@ -48,7 +48,6 @@
 #import "BDSKPreviewer.h"
 #import "BDSKDragTableView.h"
 #import "BDSKGroupTableView.h"
-#import "BDSKCustomCiteTableView.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BibTypeManager.h"

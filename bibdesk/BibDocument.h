@@ -45,7 +45,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController;
-@class BDSKAlert, BDSKStatusBar, BDSKDragTableView, BDSKGroupTableView, BDSKCustomCiteTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton;
+@class BDSKAlert, BDSKStatusBar, BDSKDragTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -127,7 +127,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 #pragma mark Custom Cite-String drawer variable declarations:
 
     IBOutlet NSDrawer* customCiteDrawer;
-    IBOutlet BDSKCustomCiteTableView* ccTableView;
+    IBOutlet NSTableView* ccTableView;
     IBOutlet NSButton *addCustomCiteStringButton;
     IBOutlet NSButton *removeCustomCiteStringButton;
     NSMutableArray* customStringArray;
