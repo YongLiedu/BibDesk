@@ -40,22 +40,36 @@
 
 
 @interface NSTableView (BDSKExtensions)
+
 - (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem;
+
 - (void)awakeFromNib;
+
 - (void)changeFont:(id)sender;
 - (void)tableViewFontChanged:(NSNotification *)notification;
 - (void)updateFontPanel:(NSNotification *)notification;
 - (NSString *)fontNamePreferenceKey;
 - (NSString *)fontSizePreferenceKey;
 - (NSString *)fontChangedNotificationName;
+
+- (void)removeAllTableColumns;
+
 @end
+
 
 @interface NSObject (NSTableBDSKExtendedDataSource)
+
 - (NSString *)tableView:(NSTableView *)aTableView toolTipForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
+- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
+
 @end
 
+
 @interface NSObject (NSTableBDSKExtendedDelegate)
+
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)aTableView;
 - (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)aTableView;
 - (NSString *)tableViewFontChangedNotificationName:(NSTableView *)aTableView;
+
 @end

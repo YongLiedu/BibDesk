@@ -36,31 +36,4 @@
 
 @implementation BDSKCustomCiteTableView
 
-// @@ legacy implementation for 10.3 compatibility
-- (NSImage *)dragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    NSNumber *number;
-    NSEnumerator *rowE = [dragRows objectEnumerator];
-    while(number = [rowE nextObject])
-        [indexes addIndex:[number intValue]];
-    
-    NSPoint zeroPoint = NSMakePoint(0,0);
-	return [self dragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
-}
-
-- (NSImage *)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset{
-   	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
-		NSImage *image = [[self dataSource] tableView:self dragImageForRowsWithIndexes:dragRows];
-		if (image != nil)
-			return image;
-	}
-    return [super dragImageForRowsWithIndexes:dragRows tableColumns:tableColumns event:dragEvent offset:dragImageOffset];
-}
-
-- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation {
-	[super draggedImage:anImage endedAt:aPoint operation:operation];
-	if([[self dataSource] respondsToSelector:@selector(tableView:concludeDragOperation:)]) 
-		[[self dataSource] tableView:self concludeDragOperation:operation];
-}
-
 @end

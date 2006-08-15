@@ -34,12 +34,5 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKCustomCiteTableView : NSTableView
-{
-}
-@end
-
-@interface NSObject (BDSKCustomCiteTableViewDataSource)
-- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
-- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
+@interface BDSKCustomCiteTableView : NSTableView {} 
 @end

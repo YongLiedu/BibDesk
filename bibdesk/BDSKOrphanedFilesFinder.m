@@ -47,6 +47,7 @@
 #import "NSImage+Toolbox.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKOrphanedFileServer.h"
+#import "NSTableView_BDSKExtensions.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -291,6 +292,25 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return YES;
 }
 
+#pragma mark table dragimage
+
+- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+    NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    NSImage *image = nil;
+    int count = 0;
+    
+    if ([dragType isEqualToString:NSFilenamesPboardType]) {
+		NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
+        count = [fileNames count];
+        NSString *filePath = count ? [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0] : nil;
+		if (filePath)
+            image = [NSImage imageForFile:filePath];
+    }
+    
+    return image ? [image dragImageWithCount:count] : nil;
+}
+
 #pragma mark table font
 
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
@@ -392,26 +412,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     
     NSPoint zeroPoint = NSMakePoint(0,0);
 	return [self dragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
-}
-
-- (NSImage *)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset{
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-    NSString *dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
-    NSImage *image = nil;
-    int count = 0;
-    
-    if ([dragType isEqualToString:NSFilenamesPboardType]) {
-		NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-        count = [fileNames count];
-        NSString *filePath = count ? [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0] : nil;
-		if (filePath)
-            image = [NSImage imageForFile:filePath];
-    }
-    
-    if (image == nil)
-        return [super dragImageForRowsWithIndexes:dragRows tableColumns:tableColumns event:dragEvent offset:dragImageOffset];
-    else
-        return [image dragImageWithCount:count];
 }
 
 @end

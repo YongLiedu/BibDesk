@@ -50,6 +50,7 @@
 - (BOOL)replacementBecomeFirstResponder;
 - (void)replacementDealloc;
 - (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation;
+- (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset;
 -(void)_drawDropHighlightOnRow:(int)rowIndex;
 @end
 
@@ -63,6 +64,7 @@ static IMP originalNoteNumberOfRowsChanged;
 static BOOL (*originalBecomeFirstResponder)(id self, SEL _cmd);
 static IMP originalDealloc;
 static IMP originalDraggedImageEndedAtOperation;
+static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 
 + (void)didLoad;
 {
@@ -72,6 +74,7 @@ static IMP originalDraggedImageEndedAtOperation;
     originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
     originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
     originalDraggedImageEndedAtOperation = OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
+    originalDragImageForRowsWithIndexesTableColumnsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
 }
 
 - (BOOL)validateDelegatedMenuItem:(id<NSMenuItem>)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
@@ -250,6 +253,14 @@ static IMP originalDraggedImageEndedAtOperation;
 	}
 }
 
+#pragma mark Convenience method
+
+- (void)removeAllTableColumns{
+    while ([self numberOfColumns] > 0) {
+        [self removeTableColumn:[[self tableColumns] objectAtIndex:0]];
+    }
+}
+
 @end
 
 #pragma mark -
@@ -323,12 +334,37 @@ static IMP originalDraggedImageEndedAtOperation;
     originalDealloc(self, _cmd);
 }
 
-#pragma mark Flag changes during drag
+#pragma mark Dragging and drag image
 
-// flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
 - (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
     originalDraggedImageEndedAtOperation(self, _cmd, anImage, aPoint, operation);
+	
+    if([[self dataSource] respondsToSelector:@selector(tableView:concludeDragOperation:)]) 
+		[[self dataSource] tableView:self concludeDragOperation:operation];
+    
+    // flag changes during a drag are not forwarded to the application, so we fix that at the end of the drag
     [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
+}
+
+// @@ legacy implementation for 10.3 compatibility
+- (NSImage *)dragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    NSNumber *number;
+    NSEnumerator *rowE = [dragRows objectEnumerator];
+    while(number = [rowE nextObject])
+        [indexes addIndex:[number intValue]];
+    
+    NSPoint zeroPoint = NSMakePoint(0,0);
+	return [self replacementDragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
+}
+
+- (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset{
+   	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
+		NSImage *image = [[self dataSource] tableView:self dragImageForRowsWithIndexes:dragRows];
+		if (image != nil)
+			return image;
+	}
+    return originalDragImageForRowsWithIndexesTableColumnsEventOffset(self, _cmd, dragRows, tableColumns, dragEvent, dragImageOffset);
 }
 
 #pragma mark Drop highlight

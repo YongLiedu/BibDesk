@@ -33,12 +33,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OATypeAheadSelectionHelper.h>
-#import <OmniFoundation/OFPreference.h>
-#import "BibPrefController.h"
-#import "BDSKTypeSelectHelper.h"
 
-@class BDSKTypeSelecthelper;
+@class BDSKTypeSelectHelper;
 
 /*!
     @class BDSKDragTableView
@@ -53,10 +49,4 @@
 }
 
 - (BDSKTypeSelectHelper *)typeSelectHelper;
-- (void)removeAllTableColumns;
-@end
-
-@interface NSObject (BDSKDragTableViewDataSource)
-- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
-- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
 @end

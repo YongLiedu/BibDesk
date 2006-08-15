@@ -34,8 +34,11 @@
  */
 
 #import "BDSKDragTableView.h"
+#import <OmniFoundation/OFPreference.h>
+#import "BibPrefController.h"
 #import "BibDocument.h"
 #import "BDSKTypeSelectHelper.h"
+#import "NSTableView_BDSKExtensions.h"
 
 @implementation BDSKDragTableView
 
@@ -103,41 +106,6 @@
 - (void)reloadData{
     [super reloadData];
     [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
-}
-
-// a convenience method.
-- (void)removeAllTableColumns{
-    while ([self numberOfColumns] > 0) {
-        [self removeTableColumn:[[self tableColumns] objectAtIndex:0]];
-    }
-}
-
-// @@ legacy implementation for 10.3 compatibility
-- (NSImage *)dragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    NSNumber *number;
-    NSEnumerator *rowE = [dragRows objectEnumerator];
-    while(number = [rowE nextObject])
-        [indexes addIndex:[number intValue]];
-    
-    NSPoint zeroPoint = NSMakePoint(0,0);
-	return [self dragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
-}
-
-- (NSImage *)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset{
-   	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
-		NSImage *image = [[self dataSource] tableView:self dragImageForRowsWithIndexes:dragRows];
-		if (image != nil)
-			return image;
-	}
-    return [super dragImageForRowsWithIndexes:dragRows tableColumns:tableColumns event:dragEvent offset:dragImageOffset];
-}
-    
-
-- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation {
-	[super draggedImage:anImage endedAt:aPoint operation:operation];
-	if([[self dataSource] respondsToSelector:@selector(tableView:concludeDragOperation:)]) 
-		[[self dataSource] tableView:self concludeDragOperation:operation];
 }
 
 @end

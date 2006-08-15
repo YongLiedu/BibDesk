@@ -77,8 +77,3 @@
 @interface NSObject (BDSKGroupTableViewDelegate)
 - (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
 @end
-
-@interface NSObject (BDSKGroupTableViewDataSource)
-- (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
-- (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
-@end
