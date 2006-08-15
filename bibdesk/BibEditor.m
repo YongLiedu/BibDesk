@@ -49,7 +49,7 @@
 #import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BibFiler.h"
-
+#import "BDSKDragWindow.h"
 #import "BibItem.h"
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
@@ -72,6 +72,10 @@
 #import "BDSKPersistentSearch.h"
 #import "BDSKMacroResolver.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "BibTeXParser.h"
+#import "PubMedParser.h"
+#import "BDSKJSTORParser.h"
+#import "BDSKWebOfScienceParser.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -112,42 +116,28 @@ static int numberOfOpenEditors = 0;
 }
 
 - (NSString *)representedFilename{
-    NSString *fname = [theBib localUrlPath];
+    NSString *fname = [publication localUrlPath];
     return fname ? fname : @"";
 }
 
-- (id)initWithBibItem:(BibItem *)aBib document:(BibDocument *)doc{
-    self = [super initWithWindowNibName:@"BibEditor"];
-    
-    numberOfOpenEditors++;
-    
-    fieldNumbers = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
-    citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
-    fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
-    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
-    crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
-	
-    theBib = aBib;
-    currentType = [[theBib pubType] retain];    // do this once in init so it's right at the start.
-                                    // has to be before we call [self window] because that calls windowDidLoad:.
-    theDocument = doc; // don't retain - it retains us.
-	pdfSnoopViewLoaded = NO;
-	webSnoopViewLoaded = NO;
-	drawerState = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey] | BDSKDrawerStateRightMask;
-	drawerButtonState = BDSKDrawerUnknownState;
-	
-	windowLoaded = NO;
-	drawerLoaded = NO;
-	
-	forceEndEditing = NO;
-    didSetupForm = NO;
-	
-    macroTextFieldWC = [[MacroFormWindowController alloc] init];
-    
-    notesViewUndoManager = [[NSUndoManager alloc] init];
-    abstractViewUndoManager = [[NSUndoManager alloc] init];
-    rssDescriptionViewUndoManager = [[NSUndoManager alloc] init];
-
+- (id)initWithPublication:(BibItem *)aBib{
+    if (self = [super initWithWindowNibName:@"BibEditor"]) {
+        
+        numberOfOpenEditors++;
+        
+        publication = [aBib retain];
+                                        // has to be before we call [self window] because that calls windowDidLoad:.
+        pdfSnoopViewLoaded = NO;
+        webSnoopViewLoaded = NO;
+        drawerState = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey] | BDSKDrawerStateRightMask;
+        drawerButtonState = BDSKDrawerUnknownState;
+        
+        windowLoaded = NO;
+        drawerLoaded = NO;
+        
+        forceEndEditing = NO;
+        didSetupForm = NO;
+    }
 #if DEBUG
     NSLog(@"BibEditor alloc");
 #endif
@@ -167,17 +157,17 @@ static int numberOfOpenEditors = 0;
 - (void)windowDidLoad{
     [[self window] setDelegate:self];
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
-	[self setCiteKeyDuplicateWarning:![theBib isValidCiteKey:[theBib citeKey]]];
+	[self setCiteKeyDuplicateWarning:![publication isValidCiteKey:[publication citeKey]]];
     [documentSnoopButton setIconImage:nil];
     [self fixURLs];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    return [theBib displayTitle];
+    return [publication displayTitle];
 }
 
-- (BibItem *)currentBib{
-    return theBib;
+- (BibItem *)publication{
+    return publication;
 }
 
 - (void)awakeFromNib{
@@ -250,12 +240,17 @@ static int numberOfOpenEditors = 0;
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
 
+    citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
+    fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
+    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[self document] macroResolver]];
+    crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
+    
     [self setupForm];
     [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
     // Setup the citekey textfield
     [citeKeyField setFormatter:citeKeyFormatter];
-	[citeKeyField setStringValue:[theBib citeKey]];
+	[citeKeyField setStringValue:[publication citeKey]];
 	
     // Setup the type popup
     [self setupTypePopUp];
@@ -267,9 +262,9 @@ static int numberOfOpenEditors = 0;
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
     
     // Setup the textviews
-    [notesView setString:[theBib valueOfField:BDSKAnnoteString inherit:NO]];
-    [abstractView setString:[theBib valueOfField:BDSKAbstractString inherit:NO]];
-    [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString inherit:NO]];
+    [notesView setString:[publication valueOfField:BDSKAnnoteString inherit:NO]];
+    [abstractView setString:[publication valueOfField:BDSKAbstractString inherit:NO]];
+    [rssDescriptionView setString:[publication valueOfField:BDSKRssDescriptionString inherit:NO]];
 	currentEditedView = nil;
     
     // Set up identifiers for the tab view items, since we receive delegate messages from it
@@ -295,8 +290,8 @@ static int numberOfOpenEditors = 0;
 #if DEBUG
     NSLog(@"BibEditor dealloc");
 #endif
-    // release theBib? no...
     numberOfOpenEditors--;
+    [publication release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
     [notesViewUndoManager release];
@@ -305,10 +300,8 @@ static int numberOfOpenEditors = 0;
     [booleanButtonCell release];
     [triStateButtonCell release];
     [ratingButtonCell release];
-    [currentType release];
     [citeKeyFormatter release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [fieldNumbers release];
     [fieldNameFormatter release];
 	[dragFieldEditor release];
 	[viewLocalToolbarItem release];
@@ -387,7 +380,7 @@ static int numberOfOpenEditors = 0;
     if (field == nil)
 		field = BDSKLocalUrlString;
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	NSString *path = [theBib localFilePathForField:field];
+	NSString *path = [publication localFilePathForField:field];
 	[sw selectFile:path inFileViewerRootedAtPath:nil];
 }
 
@@ -399,7 +392,7 @@ static int numberOfOpenEditors = 0;
 	
     BOOL err = NO;
 
-    if(![sw openFile:[theBib localFilePathForField:field]]){
+    if(![sw openFile:[publication localFilePathForField:field]]){
             err = YES;
     }
     if(err)
@@ -419,7 +412,7 @@ static int numberOfOpenEditors = 0;
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     [sPanel setPrompt:NSLocalizedString(@"Move", @"Move file")];
     [sPanel setNameFieldLabel:NSLocalizedString(@"Move To:", @"Move To: label")];
-    [sPanel setDirectory:[[theBib localFilePathForField:field] stringByDeletingLastPathComponent]];
+    [sPanel setDirectory:[[publication localFilePathForField:field] stringByDeletingLastPathComponent]];
 	
     [sPanel beginSheetForDirectory:nil 
                               file:nil 
@@ -433,15 +426,15 @@ static int numberOfOpenEditors = 0;
     NSString *field = (NSString *)contextInfo;
 
     if(returnCode == NSOKButton){
-        NSString *oldPath = [theBib localFilePathForField:field];
+        NSString *oldPath = [publication localFilePathForField:field];
         NSString *newPath = [sheet filename];
         if([NSString isEmptyString:oldPath] == NO){
-            NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:theBib, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
+            NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:publication, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
             
-            [theBib setField:field toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
-            [[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+            [publication setField:field toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
+            [[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:[self document] options:0];
             
-            [[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+            [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		}
     }
     
@@ -453,9 +446,9 @@ static int numberOfOpenEditors = 0;
 	if (field == nil)
 		field = BDSKUrlString;
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    NSURL *url = [theBib remoteURLForField:field];
+    NSURL *url = [publication remoteURLForField:field];
     if(url == nil){
-        NSString *rurl = [theBib valueOfField:field];
+        NSString *rurl = [publication valueOfField:field];
         
         if([rurl isEqualToString:@""])
             return;
@@ -534,7 +527,7 @@ static int numberOfOpenEditors = 0;
             [item setTarget:self];
             [item setRepresentedObject:field];
             
-            theURL = [theBib URLForField:field];
+            theURL = [publication URLForField:field];
             if(nil != theURL){
                 [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Open %@ With",@"Open Local-Url file"), field]
                         andSubmenuOfApplicationsForURL:theURL];
@@ -585,7 +578,7 @@ static int numberOfOpenEditors = 0;
                             keyEquivalent:@""];
 			[item setRepresentedObject:field];
             
-            theURL = [theBib URLForField:field];
+            theURL = [publication URLForField:field];
             if(nil != theURL){
                 [menu addItemWithTitle:[NSString stringWithFormat:NSLocalizedString(@"View %@ With",@"Open URL"), field]
                         andSubmenuOfApplicationsForURL:theURL];
@@ -855,7 +848,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)updateAuthorsToolbarMenu:(NSMenu *)menu{
-    NSArray *thePeople = [theBib sortedPeople];
+    NSArray *thePeople = [publication sortedPeople];
     int count = [thePeople count];
     int i = [menu numberOfItems];
     BibAuthor *person;
@@ -890,25 +883,25 @@ static int numberOfOpenEditors = 0;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
 		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
-		NSString *lurl = [theBib localUrlPath];
+		NSString *lurl = [publication localUrlPath];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
 	else if (theAction == @selector(duplicateTitleToBooktitle:)) {
 		// need to set the title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle")];
-		return (![NSString isEmptyString:[theBib valueOfField:BDSKTitleString]]);
+		return (![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
 	}
 	else if (theAction == @selector(selectCrossrefParentAction:)) {
-        return ([NSString isEmptyString:[theBib valueOfField:BDSKCrossrefString inherit:NO]] == NO);
+        return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == NO);
 	}
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
-        return ([NSString isEmptyString:[theBib valueOfField:BDSKCrossrefString inherit:NO]] == YES);
+        return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKLocalUrlString;
-		NSURL *lurl = [[theBib URLForField:field] fileURLByResolvingAliases];
+		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Open Linked File", @"Open Linked File")];
 		return (lurl == nil ? NO : YES);
@@ -917,7 +910,7 @@ static int numberOfOpenEditors = 0;
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKLocalUrlString;
-		NSURL *lurl = [[theBib URLForField:field] fileURLByResolvingAliases];
+		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Reveal Linked File in Finder")];
 		return (lurl == nil ? NO : YES);
@@ -926,7 +919,7 @@ static int numberOfOpenEditors = 0;
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKLocalUrlString;
-		NSURL *lurl = [[theBib URLForField:field] fileURLByResolvingAliases];
+		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Move Linked File", @"Move Linked File")];
 		return (lurl == nil ? NO : YES);
@@ -948,9 +941,9 @@ static int numberOfOpenEditors = 0;
 			// always enable the close item
 			return YES;
 		} else if (requiredContent & BDSKDrawerStateWebMask) {
-			return ([theBib remoteURL] != nil);
+			return ([publication remoteURL] != nil);
 		} else {
-            NSURL *lurl = [[theBib URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
+            NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
             return (lurl == nil ? NO : YES);
 		}
 	}
@@ -960,7 +953,7 @@ static int numberOfOpenEditors = 0;
 			field = BDSKUrlString;
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Open URL in Browser", @"Open URL in Browser")];
-		return ([theBib remoteURLForField:field] != nil);
+		return ([publication remoteURLForField:field] != nil);
 	}
 	else if (theAction == @selector(saveFileAsLocalUrl:)) {
 		return ![[[remoteSnoopWebView mainFrame] dataSource] isLoading];
@@ -992,23 +985,23 @@ static int numberOfOpenEditors = 0;
 
 - (IBAction)citeKeyDidChange:(id)sender{
     NSString *newKey = [sender stringValue];
-	NSString *oldKey = [theBib citeKey];
+	NSString *oldKey = [publication citeKey];
 	
    	if(![newKey isEqualToString:oldKey]){
-		[theBib setCiteKey:newKey];
+		[publication setCiteKey:newKey];
 		
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
 		
 		// autofile paper if we have enough information
 		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
-			 [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
-			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
-			[theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+			 [publication needsToBeFiled] && [publication canSetLocalUrl] ) {
+			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
+			[publication setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
 			[self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
 		}
 
 		// still need to check duplicates ourselves:
-		if(![theBib isValidCiteKey:newKey]){
+		if(![publication isValidCiteKey:newKey]){
 			[self setCiteKeyDuplicateWarning:YES];
 		}else{
 			[self setCiteKeyDuplicateWarning:NO];
@@ -1019,7 +1012,7 @@ static int numberOfOpenEditors = 0;
 			[scriptHook setField:BDSKCiteKeyString];
 			[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
 			[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
+			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
 		}
 		
 	}
@@ -1047,22 +1040,22 @@ static int numberOfOpenEditors = 0;
 	[self finalizeChangesPreservingSelection:YES];
 	
 	BDSKScriptHook *scriptHook = nil;
-	NSString *oldKey = [theBib citeKey];
-	NSString *newKey = [theBib suggestedCiteKey];
+	NSString *oldKey = [publication citeKey];
+	NSString *newKey = [publication suggestedCiteKey];
 	
 	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
 	if (scriptHook) {
 		[scriptHook setField:BDSKCiteKeyString];
 		[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
 		[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
 	}
 	
 	// get them again, as the script hook might have changed some values
-	oldKey = [theBib citeKey];
-	newKey = [theBib suggestedCiteKey];
+	oldKey = [publication citeKey];
+	newKey = [publication suggestedCiteKey];
     
-    NSString *crossref = [theBib valueOfField:BDSKCrossrefString inherit:NO];
+    NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
     if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key",@"Could not generate cite key") 
                                          defaultButton:nil
@@ -1075,22 +1068,22 @@ static int numberOfOpenEditors = 0;
                             contextInfo:NULL];
         return;
     }
-	[theBib setCiteKey:newKey];
+	[publication setCiteKey:newKey];
 	
 	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
 	if (scriptHook) {
 		[scriptHook setField:BDSKCiteKeyString];
 		[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
 		[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
 	}
 	
-	[[[self window] undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
 	[tabView selectFirstTabViewItem:self];
 }
 
 - (IBAction)generateCiteKey:(id)sender{
-    if([theBib hasEmptyOrDefaultCiteKey] == NO && 
+    if([publication hasEmptyOrDefaultCiteKey] == NO && 
        [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Generate Cite Key?", @"")
                                              defaultButton:NSLocalizedString(@"Generate", @"")
@@ -1112,21 +1105,21 @@ static int numberOfOpenEditors = 0;
     if (returnCode == NSAlertAlternateReturn){
         return;
     }else if(returnCode == NSAlertOtherReturn){
-        [theBib setNeedsToBeFiled:YES];
+        [publication setNeedsToBeFiled:YES];
         return;
     }
     
-	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
+	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
 	
 	[tabView selectFirstTabViewItem:self];
 	
-	[[[self window] undoManager] setActionName:NSLocalizedString(@"Move File",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Move File",@"")];
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
-	if (![theBib canSetLocalUrl]){
+	if (![publication canSetLocalUrl]){
 		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
 		NSString *otherButton = nil;
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
@@ -1150,52 +1143,47 @@ static int numberOfOpenEditors = 0;
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
-	[theBib duplicateTitleToBooktitleOverwriting:YES];
+	[publication duplicateTitleToBooktitleOverwriting:YES];
 	
-	[[[self window] undoManager] setActionName:NSLocalizedString(@"Duplicate Title",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Duplicate Title",@"")];
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
     if (![[self window] makeFirstResponder:[self window]]){
         [[self window] endEditingFor:nil];
     }
-    [self setCurrentType:[bibTypeButton titleOfSelectedItem]];
-    if(![[theBib pubType] isEqualToString:currentType]){
-        [theBib setPubType:currentType];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentType
-                                                           forKey:BDSKPubTypeStringKey];
+    NSString *newType = [bibTypeButton titleOfSelectedItem];
+    if(![[publication pubType] isEqualToString:newType]){
+        [publication setPubType:newType];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newType
+                                                          forKey:BDSKPubTypeStringKey];
 		
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Type",@"")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Change Type",@"")];
     }
 }
 
 - (void)updateTypePopup{ // used to update UI after dragging into the editor
-    [bibTypeButton selectItemWithTitle:[theBib pubType]];
-}
-
-- (void)setCurrentType:(NSString *)type{
-    [currentType release];
-    currentType = [type retain];
+    [bibTypeButton selectItemWithTitle:[publication pubType]];
 }
 
 - (IBAction)changeRating:(id)sender{
 	BDSKRatingButtonCell *cell = [sender selectedCell];
 	NSString *field = [cell title];
-	int oldRating = [theBib ratingValueOfField:field];
+	int oldRating = [publication ratingValueOfField:field];
 	int newRating = [cell rating];
 		
 	if(newRating != oldRating) {
-		[theBib setField:field toRatingValue:newRating];
+		[publication setField:field toRatingValue:newRating];
 		
 		BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
 		if (scriptHook) {
 			[scriptHook setField:field];
 			[scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", oldRating]]];
 			[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", newRating]]];
-			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
+			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
 		}
 		
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Rating",@"")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Change Rating",@"")];
 	}
 }
 
@@ -1203,10 +1191,10 @@ static int numberOfOpenEditors = 0;
 	NSButtonCell *cell = [sender selectedCell];
 	NSString *field = [cell title];
 	
-    NSCellStateValue oldState = [theBib triStateValueOfField:field];
+    NSCellStateValue oldState = [publication triStateValueOfField:field];
     NSCellStateValue newState = [cell state];
 	
-    BOOL oldBool = [theBib boolValueOfField:field];
+    BOOL oldBool = [publication boolValueOfField:field];
     BOOL newBool = [cell state] == NSOnState ? YES : NO;
     
     BOOL isTriState = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:field];
@@ -1216,29 +1204,29 @@ static int numberOfOpenEditors = 0;
     if(isTriState){
         if(newState == oldState) return;
         
-        [theBib setField:field toTriStateValue:newState];
+        [publication setField:field toTriStateValue:newState];
         
         if (scriptHook) {
             [scriptHook setField:field];
             [scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithTriStateValue:oldState]]];
             [scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithTriStateValue:newState]]];
-            [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
+            [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
         }
     }else{
         if(newBool == oldBool) return;    
         
-        [theBib setField:field toBoolValue:newBool];
+        [publication setField:field toBoolValue:newBool];
         
         if (scriptHook) {
  			[scriptHook setField:field];
             [scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithBool:oldBool]]];
             [scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithBool:newBool]]];
- 			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
+ 			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
  		}
         
         
     }
-    [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Flag",@"")];
+    [[self undoManager] setActionName:NSLocalizedString(@"Change Flag",@"")];
 	
 }
 
@@ -1273,27 +1261,27 @@ static int numberOfOpenEditors = 0;
         NSString *fileURLString = [[NSURL fileURLWithPath:[[sheet filenames] objectAtIndex:0]] absoluteString];
 		NSString *field = [fieldsPopUpButton titleOfSelectedItem];
         
-		[theBib setField:field toValue:fileURLString];
+		[publication setField:field toValue:fileURLString];
 		if ([field isEqualToString:BDSKLocalUrlString])
 			[self autoFilePaper];
 		
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     }        
 }
 
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
 	
-	[theBib setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:path] absoluteString]];
+	[publication setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:path] absoluteString]];
 	[self autoFilePaper];
 	
-	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 }
 
 - (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender{
-	[theBib setField:BDSKUrlString toValue:[sender representedObject]];
+	[publication setField:BDSKUrlString toValue:[sender representedObject]];
 	
-	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 }
 
 // ----------------------------------------------------------------------------------------
@@ -1306,12 +1294,12 @@ static int numberOfOpenEditors = 0;
     if(returnCode == NSCancelButton || newField == nil)
         return;
     
-    NSArray *currentFields = [theBib allFieldNames];
+    NSArray *currentFields = [publication allFieldNames];
     newField = [newField capitalizedString];
     if([currentFields containsObject:newField] == NO){
 		[tabView selectFirstTabViewItem:nil];
-        [theBib addField:newField];
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
+        [publication addField:newField];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
 		[self setupForm];
 		[self makeKeyField:newField];
     }
@@ -1320,7 +1308,7 @@ static int numberOfOpenEditors = 0;
 // raises the add field sheet
 - (IBAction)raiseAddField:(id)sender{
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *currentFields = [theBib allFieldNames];
+    NSArray *currentFields = [publication allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
@@ -1355,16 +1343,17 @@ static int numberOfOpenEditors = 0;
         return;
 	
     [tabView selectFirstTabViewItem:nil];
-    [theBib removeField:oldField];
-    [[[self window] undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
+    [publication removeField:oldField];
+    [[self undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
     [self setupForm];
 }
 
 // raises the del field sheet
 - (IBAction)raiseDelField:(id)sender{
     // populate the popupbutton
+    NSString *currentType = [publication pubType];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableArray *removableFields = [[theBib allFieldNames] mutableCopy];
+	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
 	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
 	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];
@@ -1406,11 +1395,15 @@ static int numberOfOpenEditors = 0;
 	NSCell *cell = [bibFields selectedCell];
 	if ([macroTextFieldWC isEditing] || cell == nil || [[cell title] isEqualToString:BDSKCrossrefString]) 
 		return NO;
-	NSString *value = [theBib valueOfField:[cell title]];
+	NSString *value = [publication valueOfField:[cell title]];
 	
 	[formCellFormatter setEditAsComplexString:YES];
 	[cell setObjectValue:value];
-	return [macroTextFieldWC attachToView:bibFields atRow:[bibFields selectedRow] column:0 withValue:value];
+    
+    if (macroTextFieldWC == nil)
+        macroTextFieldWC = [[MacroFormWindowController alloc] init];
+	
+    return [macroTextFieldWC attachToView:bibFields atRow:[bibFields selectedRow] column:0 withValue:value];
 }
 
 - (BOOL)formatter:(BDSKComplexStringFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
@@ -1423,7 +1416,7 @@ static int numberOfOpenEditors = 0;
     if (control != bibFields) return YES;
     
     NSString *field = [[bibFields selectedCell] title];
-	NSString *value = [theBib valueOfField:field];
+	NSString *value = [publication valueOfField:field];
     
 	if([value isInherited] &&
 	   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnEditInheritedKey]){
@@ -1484,7 +1477,7 @@ static int numberOfOpenEditors = 0;
                 
                 [alert runSheetModalForWindow:[self window]];
                 if(forceEndEditing)
-                    [cell setStringValue:[theBib valueOfField:fieldName]];
+                    [cell setStringValue:[publication valueOfField:fieldName]];
             }else{
                 NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
             }
@@ -1492,7 +1485,7 @@ static int numberOfOpenEditors = 0;
         } else if ([formCellFormatter editAsComplexString]) {
 			if (forceEndEditing) {
 				// reset the cell's value to the last saved value and proceed
-				[cell setStringValue:[theBib valueOfField:fieldName]];
+				[cell setStringValue:[publication valueOfField:fieldName]];
 				return YES;
 			}
 			// don't set the value
@@ -1518,7 +1511,7 @@ static int numberOfOpenEditors = 0;
             int rv = [alert runSheetModalForWindow:[self window]];
 			
 			if (forceEndEditing || rv == NSAlertAlternateReturn) {
-				[cell setStringValue:[theBib valueOfField:fieldName]];
+				[cell setStringValue:[publication valueOfField:fieldName]];
 				return YES;
 			} else {
 				return NO;
@@ -1535,7 +1528,7 @@ static int numberOfOpenEditors = 0;
             
             [alert runSheetModalForWindow:[self window]];
             if(forceEndEditing)
-                [control setStringValue:[theBib citeKey]];
+                [control setStringValue:[publication citeKey]];
 		}else{
             NSLog(@"%@:%d formatter for control %@ failed for unknown reason", __FILENAMEASNSSTRING__, __LINE__, control);
 		}
@@ -1557,14 +1550,14 @@ static int numberOfOpenEditors = 0;
 		
 		if ([[cell title] isEqualToString:BDSKCrossrefString]) {
 			
-			if ([[theBib citeKey] caseInsensitiveCompare:[cell stringValue]] == NSOrderedSame) {
+			if ([[publication citeKey] caseInsensitiveCompare:[cell stringValue]] == NSOrderedSame) {
 				message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
 			} else {
-				NSString *parentCr = [[theDocument publicationForCiteKey:[cell stringValue]] valueOfField:BDSKCrossrefString inherit:NO];
+				NSString *parentCr = [[[self document] publicationForCiteKey:[cell stringValue]] valueOfField:BDSKCrossrefString inherit:NO];
 				
 				if (![NSString isEmptyString:parentCr]) {
 					message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
-				} else if ([theDocument citeKeyIsCrossreffed:[theBib citeKey]]) {
+				} else if ([[self document] citeKeyIsCrossreffed:[publication citeKey]]) {
 					message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
 				}
 			}
@@ -1630,7 +1623,7 @@ static int numberOfOpenEditors = 0;
     NSCell *cell = [control cellAtIndex:index];
     NSString *title = [cell title];
 	NSString *value = [cell stringValue];
-	NSString *prevValue = [theBib valueOfField:title];
+	NSString *prevValue = [publication valueOfField:title];
 
     if ([prevValue isInherited] &&
 	    ([value isEqualAsComplexString:prevValue] || [value isEqualAsComplexString:@""]) ) {
@@ -1648,41 +1641,41 @@ static int numberOfOpenEditors = 0;
     if (returnCode == NSAlertDefaultReturn) {
         NSArray *paperInfos = [NSArray arrayWithObject:info];
         NSString *fieldName = [info objectForKey:@"fieldName"];
-        [[BibFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:theDocument options:0];
+        [[BibFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:[self document] options:0];
     }
     [info release];
 }
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
-    NSString *oldValue = [[[theBib valueOfField:fieldName] copy] autorelease];
+    NSString *oldValue = [[[publication valueOfField:fieldName] copy] autorelease];
     BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalFileField:fieldName];
-    NSURL *oldURL = (isLocalFile) ? [[theBib URLForField:fieldName] fileURLByResolvingAliases] : nil;
+    NSURL *oldURL = (isLocalFile) ? [[publication URLForField:fieldName] fileURLByResolvingAliases] : nil;
     
-    [theBib setField:fieldName toValue:value];
+    [publication setField:fieldName toValue:value];
 	
-	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     
 	NSMutableString *status = [NSMutableString stringWithString:@""];
 	
     // autogenerate cite key if we have enough information
     if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] &&
-         [theBib canGenerateAndSetCiteKey] ) {
+         [publication canGenerateAndSetCiteKey] ) {
         [self generateCiteKey:nil];
-        if ([theBib hasEmptyOrDefaultCiteKey] == NO)
+        if ([publication hasEmptyOrDefaultCiteKey] == NO)
             [status appendString:NSLocalizedString(@"Autogenerated Cite Key.",@"Autogenerated Cite Key.")];
     }
     
     // autofile paper if we have enough information
     if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
-         [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
-        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
-        [theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+         [publication needsToBeFiled] && [publication canSetLocalUrl] ) {
+        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
+        [publication setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
 		if (![status isEqualToString:@""]) {
 			[status appendString:@" "];
 		}
 		[status appendString:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
     } else if (isLocalFile) {
-        NSString *newPath = [theBib localFilePathForField:fieldName];
+        NSString *newPath = [publication localFilePathForField:fieldName];
         if (oldURL != nil && newPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Move File?", @"Move File?") 
                                              defaultButton:NSLocalizedString(@"Yes", @"Yes") 
@@ -1690,7 +1683,7 @@ static int numberOfOpenEditors = 0;
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"") ];
 
-            NSArray *info = [[NSDictionary alloc] initWithObjectsAndKeys:theBib, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", fieldName, @"fieldName", nil];
+            NSArray *info = [[NSDictionary alloc] initWithObjectsAndKeys:publication, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", fieldName, @"fieldName", nil];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:self
                              didEndSelector:@selector(moveFileAlertDidEnd:returnCode:contextInfo:)
@@ -1707,7 +1700,7 @@ static int numberOfOpenEditors = 0;
 		[scriptHook setField:fieldName];
 		[scriptHook setOldValues:[NSArray arrayWithObject:oldValue]];
 		[scriptHook setNewValues:[NSArray arrayWithObject:value]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:theBib]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
 	}
 }
 
@@ -1739,15 +1732,15 @@ static int numberOfOpenEditors = 0;
 	
 	while (field = [fieldEnum nextObject]) {
 		if ([field isEqualToString:BDSKCiteKeyString]) {
-			if ([theBib hasEmptyOrDefaultCiteKey])
+			if ([publication hasEmptyOrDefaultCiteKey])
 				[missingFields addObject:field];
 		} else if ([field isEqualToString:@"Document Filename"]) {
-			if ([NSString isEmptyString:[[theBib document] fileName]])
+			if ([NSString isEmptyString:[[self document] fileName]])
 				[missingFields addObject:field];
 		} else if ([field isEqualToString:BDSKAuthorEditorString]) {
-			if ([NSString isEmptyString:[theBib valueOfField:BDSKAuthorString]] && [NSString isEmptyString:[theBib valueOfField:BDSKEditorString]])
+			if ([NSString isEmptyString:[publication valueOfField:BDSKAuthorString]] && [NSString isEmptyString:[publication valueOfField:BDSKEditorString]])
 				[missingFields addObject:field];
-		} else if ([NSString isEmptyString:[theBib valueOfField:field]]) {
+		} else if ([NSString isEmptyString:[publication valueOfField:field]]) {
 			[missingFields addObject:field];
 		}
 	}
@@ -1759,7 +1752,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)needsToBeFiledDidChange:(NSNotification *)notification{
-	if ([theBib needsToBeFiled] == YES) {
+	if ([publication needsToBeFiled] == YES) {
 		[self setStatus:NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.")];
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToBeFiled"] == NO) {
 			NSImage *icon = [NSImage smallImageNamed:@"genericFolderIcon"];
@@ -1773,7 +1766,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)updateCiteKeyAutoGenerateStatus{
-	if ([theBib hasEmptyOrDefaultCiteKey] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey]) {
+	if ([publication hasEmptyOrDefaultCiteKey] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey]) {
 		if ([[statusBar iconIdentifiers] containsObject:@"NeedsToGenerateCiteKey"] == NO) {
 			NSImage *icon = [NSImage smallImageNamed:@"key"];
 			NSString *tooltip = NSLocalizedString(@"The cite key needs to be generated.", @"");
@@ -1785,7 +1778,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)autoFilePaper{
-	if ([theBib autoFilePaper])
+	if ([publication autoFilePaper])
 		[self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
 }
 
@@ -1796,14 +1789,14 @@ static int numberOfOpenEditors = 0;
 	NSString *changeKey = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
 	BibItem *sender = (BibItem *)[notification object];
-	NSString *crossref = [theBib valueOfField:BDSKCrossrefString inherit:NO];
+	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	BOOL parentDidChange = (crossref != nil && 
 							([crossref caseInsensitiveCompare:[sender citeKey]] == NSOrderedSame || 
 							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldCiteKey"]] == NSOrderedSame));
 	
     // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
-	if (sender != theBib && !parentDidChange)
+	if (sender != publication && !parentDidChange)
 		return;
 
 	if([changeType isEqualToString:@"Add/Del Field"]){
@@ -1820,7 +1813,7 @@ static int numberOfOpenEditors = 0;
 	if([changeKey isEqualToString:BDSKCrossrefString] || 
 	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
 		[self setupForm];
-		[[self window] setTitle:[theBib displayTitle]];
+		[[self window] setTitle:[publication displayTitle]];
 		[authorTableView reloadData];
 		pdfSnoopViewLoaded = NO;
 		webSnoopViewLoaded = NO;
@@ -1842,7 +1835,7 @@ static int numberOfOpenEditors = 0;
 		NSButtonCell *entry = nil;
 		while(entry = [cellE nextObject]){
 			if([[entry title] isEqualToString:changeKey]){
-				[entry setIntValue:[theBib intValueOfField:changeKey]];
+				[entry setIntValue:[publication intValueOfField:changeKey]];
 				[extraBibFields setNeedsDisplay:YES];
 				break;
 			}
@@ -1854,7 +1847,7 @@ static int numberOfOpenEditors = 0;
 		[citeKeyField setStringValue:newValue];
 		[self updateCiteKeyAutoGenerateStatus];
 		// still need to check duplicates ourselves:
-		if(![theBib isValidCiteKey:newValue]){
+		if(![publication isValidCiteKey:newValue]){
 			[self setCiteKeyDuplicateWarning:YES];
 		}else{
 			[self setCiteKeyDuplicateWarning:NO];
@@ -1865,7 +1858,7 @@ static int numberOfOpenEditors = 0;
 		NSFormCell *entry = nil;
 		while(entry = [cellE nextObject]){
 			if([[entry title] isEqualToString:changeKey]){
-				[entry setObjectValue:[theBib valueOfField:changeKey]];
+				[entry setObjectValue:[publication valueOfField:changeKey]];
 				[bibFields setNeedsDisplay:YES];
 				break;
 			}
@@ -1881,7 +1874,7 @@ static int numberOfOpenEditors = 0;
 		[self fixURLs];
 	}
 	else if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
-		[[self window] setTitle:[theBib displayTitle]];
+		[[self window] setTitle:[publication displayTitle]];
 	}
 	else if([changeKey isEqualToString:BDSKAuthorString]){
 		[authorTableView reloadData];
@@ -1889,7 +1882,7 @@ static int numberOfOpenEditors = 0;
     else if([changeKey isEqualToString:BDSKAnnoteString]){
         if(ignoreFieldChange) return;
         // make a copy of the current value, so we don't overwrite it when we set the field value to the text storage
-        NSString *tmpValue = [[theBib valueOfField:BDSKAnnoteString inherit:NO] copy];
+        NSString *tmpValue = [[publication valueOfField:BDSKAnnoteString inherit:NO] copy];
         [notesView setString:(tmpValue == nil ? @"" : tmpValue)];
         [tmpValue release];
         if(currentEditedView == notesView)
@@ -1898,7 +1891,7 @@ static int numberOfOpenEditors = 0;
     }
     else if([changeKey isEqualToString:BDSKAbstractString]){
         if(ignoreFieldChange) return;
-        NSString *tmpValue = [[theBib valueOfField:BDSKAbstractString inherit:NO] copy];
+        NSString *tmpValue = [[publication valueOfField:BDSKAbstractString inherit:NO] copy];
         [abstractView setString:(tmpValue == nil ? @"" : tmpValue)];
         [tmpValue release];
         if(currentEditedView == abstractView)
@@ -1907,7 +1900,7 @@ static int numberOfOpenEditors = 0;
     }
     else if([changeKey isEqualToString:BDSKRssDescriptionString]){
         if(ignoreFieldChange) return;
-        NSString *tmpValue = [[theBib valueOfField:BDSKRssDescriptionString inherit:NO] copy];
+        NSString *tmpValue = [[publication valueOfField:BDSKRssDescriptionString inherit:NO] copy];
         [rssDescriptionView setString:(tmpValue == nil ? @"" : tmpValue)];
         [tmpValue release];
         if(currentEditedView == rssDescriptionView)
@@ -1920,7 +1913,7 @@ static int numberOfOpenEditors = 0;
 - (void)bibWasAddedOrRemoved:(NSNotification *)notification{
 	NSEnumerator *pubEnum = [[[notification userInfo] objectForKey:@"pubs"] objectEnumerator];
 	id pub;
-	NSString *crossref = [theBib valueOfField:BDSKCrossrefString inherit:NO];
+	NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
 	
 	if ([NSString isEmptyString:crossref])
 		return;
@@ -1934,18 +1927,18 @@ static int numberOfOpenEditors = 0;
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
 	[self setupTypePopUp];
-	[theBib makeType]; // make sure this is done now, and not later
+	[publication makeType]; // make sure this is done now, and not later
 	[self setupForm];
 }
  
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
-	[theBib makeType]; // make sure this is done now, and not later
+	[publication makeType]; // make sure this is done now, and not later
 	[self setupForm];
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
 	BibDocument *changedDoc = [[notification object] document];
-	if(changedDoc && changedDoc != theDocument)
+	if(changedDoc && changedDoc != [self document])
 		return; // only macro changes for our own document or the global macros
 	
 	NSArray *cells = [bibFields cells];
@@ -1954,7 +1947,7 @@ static int numberOfOpenEditors = 0;
 	NSString *value;
 	
 	while(entry = [cellE nextObject]){
-		value = [theBib valueOfField:[entry title]];
+		value = [publication valueOfField:[entry title]];
 		if([value isComplex]){
             // ARM: the cell must check pointer equality in the setter, or something; since it's the same object, setting the value again is a noop unless we set to nil first.  Fixes bug #1284205.
             [entry setObjectValue:nil];
@@ -1974,14 +1967,14 @@ static int numberOfOpenEditors = 0;
     // we need to preserve selection manually; otherwise you end up editing at the end of the string after the call to setField: below
     NSRange selRange = [currentEditedView selectedRange];
     if(currentEditedView == notesView){
-        [theBib setField:BDSKAnnoteString toValue:[[notesView textStorage] mutableString]];
-        [[theBib undoManager] setActionName:NSLocalizedString(@"Edit Annotation",@"")];
+        [publication setField:BDSKAnnoteString toValue:[[notesView textStorage] mutableString]];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Annotation",@"")];
     } else if(currentEditedView == abstractView){
-        [theBib setField:BDSKAbstractString toValue:[[abstractView textStorage] mutableString]];
-        [[theBib undoManager] setActionName:NSLocalizedString(@"Edit Abstract",@"")];
+        [publication setField:BDSKAbstractString toValue:[[abstractView textStorage] mutableString]];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Abstract",@"")];
     }else if(currentEditedView == rssDescriptionView){
-        [theBib setField:BDSKRssDescriptionString toValue:[[rssDescriptionView textStorage] mutableString]];
-        [[theBib undoManager] setActionName:NSLocalizedString(@"Edit RSS Description",@"")];
+        [publication setField:BDSKRssDescriptionString toValue:[[rssDescriptionView textStorage] mutableString]];
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit RSS Description",@"")];
     }
     if(selRange.location != NSNotFound && selRange.location < [[currentEditedView string] length])
         [currentEditedView setSelectedRange:selRange];
@@ -2016,23 +2009,23 @@ static int numberOfOpenEditors = 0;
 - (void)bibWillBeRemoved:(NSNotification *)notification{
 	NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
 	
-	if ([pubs containsObject:theBib])
+	if ([pubs containsObject:publication])
 		[self close];
 }
 
 // these methods are for crossref interaction with the form
 - (void)openParentItem:(id)sender{
-    BibItem *parent = [theBib crossrefParent];
+    BibItem *parent = [publication crossrefParent];
     if(parent)
-        [theDocument editPub:parent];
+        [[self document] editPub:parent];
 }
 
 - (IBAction)selectCrossrefParentAction:(id)sender{
-    [[self document] selectCrossrefParentForItem:theBib];
+    [[self document] selectCrossrefParentForItem:publication];
 }
 
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender{
-    [[self document] createNewPubUsingCrossrefForItem:theBib];
+    [[self document] createNewPubUsingCrossrefForItem:publication];
 }
 
 - (void)deletePubAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -2042,9 +2035,9 @@ static int numberOfOpenEditors = 0;
     if (returnCode == NSAlertOtherReturn)
         return;
     
-	[[[self document] undoManager] setActionName:NSLocalizedString(@"Delete Publication", @"Delete Publication")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Delete Publication", @"Delete Publication")];
     [[self document] setStatus:NSLocalizedString(@"Deleted 1 publication",@"Deleted 1 publication") immediate:NO];
-	[[self document] removePublication:theBib];
+	[[self document] removePublication:publication];
 }
 
 - (IBAction)deletePub:(id)sender{
@@ -2072,19 +2065,19 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)iconClickedInFormCell:(id)cell{
-    [[NSWorkspace sharedWorkspace] openURL:[theBib URLForField:[cell title]]];
+    [[NSWorkspace sharedWorkspace] openURL:[publication URLForField:[cell title]]];
 }
 
 - (BOOL)formCellHasArrowButton:(id)cell{
-	return ([[theBib valueOfField:[cell title]] isInherited] || 
-			([[cell title] isEqualToString:BDSKCrossrefString] && [theBib crossrefParent]));
+	return ([[publication valueOfField:[cell title]] isInherited] || 
+			([[cell title] isEqualToString:BDSKCrossrefString] && [publication crossrefParent]));
 }
 
 - (BOOL)formCellHasFileIcon:(id)cell{
     NSString *title = [cell title];
     if ([[BibTypeManager sharedManager] isURLField:title]) {
 		// if we inherit a field, we don't show the file icon but the arrow button
-		NSString *url = [theBib valueOfField:title inherit:NO];
+		NSString *url = [publication valueOfField:title inherit:NO];
 		// we could also check for validity here
 		if (![NSString isEmptyString:url])
 			return YES;
@@ -2094,12 +2087,12 @@ static int numberOfOpenEditors = 0;
 
 - (NSImage *)fileIconForFormCell:(id)cell{
     // we can assume that this cell should have a file icon
-    return [theBib smallImageForURLField:[cell title]];
+    return [publication smallImageForURLField:[cell title]];
 }
 
 - (NSImage *)dragIconForFormCell:(id)cell{
     // we can assume that this cell should have a file icon
-    return [theBib imageForURLField:[cell title]];
+    return [publication imageForURLField:[cell title]];
 }
 
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
@@ -2127,7 +2120,7 @@ static int numberOfOpenEditors = 0;
     if (control != bibFields) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
-		return [[NSApp delegate] possibleMatches:[[theDocument macroResolver] allMacroDefinitions] 
+		return [[NSApp delegate] possibleMatches:[[[self document] macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];
@@ -2215,15 +2208,15 @@ static int numberOfOpenEditors = 0;
 		}
 		
 		if (fileURL == nil || 
-            [fileURL isEqual:[theBib URLForField:field]])
+            [fileURL isEqual:[publication URLForField:field]])
 			return NO;
 		        
-		[theBib setField:field toValue:[fileURL absoluteString]];
+		[publication setField:field toValue:[fileURL absoluteString]];
 
 		// perform autofile on delay; see comment in -[BibDocument (DataSource) tableView:acceptDrop:row:dropOperation:] about drags from Finder
         if ([field isEqualToString:BDSKLocalUrlString])
             [self performSelector:@selector(autoFilePaper) withObject:nil afterDelay:0.7];
-		[[theBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
         
 		return YES;
 		
@@ -2234,11 +2227,11 @@ static int numberOfOpenEditors = 0;
 			NSString *remoteURLString = [pboard stringForType:BDSKWeblocFilePboardType];
 			
 			if (remoteURLString == nil ||
-				[[NSURL URLWithString:remoteURLString] isEqual:[theBib remoteURLForField:field]])
+				[[NSURL URLWithString:remoteURLString] isEqual:[publication remoteURLForField:field]])
 				return NO;
 			
-			[theBib setField:field toValue:remoteURLString];
-			[[theBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+			[publication setField:field toValue:remoteURLString];
+			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 
 			return YES;
 			
@@ -2247,11 +2240,11 @@ static int numberOfOpenEditors = 0;
 			NSURL *remoteURL = [NSURL URLFromPasteboard:pboard];
 			
 			if (remoteURL == nil || [remoteURL isFileURL] ||
-				[remoteURL isEqual:[theBib remoteURLForField:field]])
+				[remoteURL isEqual:[publication remoteURLForField:field]])
 				return NO;
 			
-			[theBib setField:field toValue:[remoteURL absoluteString]];
-			[[theBib undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+			[publication setField:field toValue:[remoteURL absoluteString]];
+			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 			
 			return YES;
 			
@@ -2293,6 +2286,147 @@ static int numberOfOpenEditors = 0;
 	return [self receiveDrag:sender forField:field];
 }
 
+- (NSDragOperation)dragWindow:(BDSKDragWindow *)window canReceiveDrag:(id <NSDraggingInfo>)sender{
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    // weblocs also put strings on the pboard, so check for that type first so we don't get a false positive on NSStringPboardType
+	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
+	
+	if(pboardType == nil){
+            return NSDragOperationNone;
+    }
+	// sniff the string to see if it's a format we can parse
+    if([pboardType isEqualToString:NSStringPboardType]){
+        NSString *pbString = [pboard stringForType:pboardType];    
+        if([pbString contentStringType] == BDSKUnknownStringType)
+            return NSDragOperationNone;
+    }
+
+    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
+	unsigned modifier = GetCurrentKeyModifiers();
+	if ( (modifier & (optionKey | cmdKey)) == (optionKey | cmdKey) ){ // hack to get the correct cursor
+		return NSDragOperationLink;
+	}
+	if (sourceDragMask & NSDragOperationCopy) {
+		return NSDragOperationCopy;
+	}
+	return NSDragOperationNone;
+}
+
+- (BOOL)dragWindow:(BDSKDragWindow *)window receiveDrag:(id <NSDraggingInfo>)sender{
+    
+    NSPasteboard *pboard = [sender draggingPasteboard];
+	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
+	NSArray *draggedPubs = nil;
+	NSError *error = nil;
+    
+	if([pboardType isEqualToString:NSStringPboardType]){
+		NSString *pbString = [pboard stringForType:NSStringPboardType];
+		// sniff the string to see if it's a format we can parse
+		switch([pbString contentStringType]){
+			case BDSKBibTeXStringType:
+				draggedPubs = [BibTeXParser itemsFromData:[pboard dataForType:NSStringPboardType] error:&error document:[self document]];
+                break;
+			case BDSKRISStringType:
+				draggedPubs = [PubMedParser itemsFromString:pbString error:&error];
+                break;
+			case BDSKJSTORStringType:
+				draggedPubs = [BDSKJSTORParser itemsFromString:pbString error:&error];
+                break;
+			case BDSKWOSStringType:
+				draggedPubs = [BDSKWebOfScienceParser itemsFromString:pbString error:&error];
+                break;
+			default:
+				OBASSERT_NOT_REACHED("Unsupported data type");
+				return NO;
+		}
+		if(error != nil) return NO;
+	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
+		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
+        // we can't just unarchive, as this gives complex strings with the wrong macroResolver
+		draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
+	}else{
+		// we did not find a valid dragtype
+		return NO;
+	}
+	
+	BibItem *tempBI = [draggedPubs objectAtIndex:0]; // no point in dealing with multiple pubs for a single editor
+	[tempBI setDocument:[self document]]; // this assures that the macroResolver is set for complex strings
+
+	// Test a keyboard mask so that we can override all fields when dragging into the editor window (option)
+	// create a crossref (cmd-option), or fill empty fields (no modifiers)
+	unsigned modifier = GetCurrentKeyModifiers(); // use the Carbon function since [[NSApp currentEvent] modifierFlags] won't work if we're not the front app
+	
+	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
+	if((modifier & (optionKey | cmdKey)) == (optionKey | cmdKey)){
+		
+		NSString *crossref = [tempBI citeKey];
+		NSString *message = nil;
+		
+		// first check if we don't create a Crossref chain
+		if ([[publication citeKey] caseInsensitiveCompare:crossref] == NSOrderedSame) {
+			message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
+		} else {
+			BibDocument *doc = [self document]; 
+			NSString *parentCr = [[[self document] publicationForCiteKey:crossref] valueOfField:BDSKCrossrefString inherit:NO];
+			
+			if (![NSString isEmptyString:parentCr]) {
+				message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
+			} else if ([[self document] citeKeyIsCrossreffed:[publication citeKey]]) {
+				message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
+			}
+		}
+		
+		if (message) {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
+                                             defaultButton:NSLocalizedString(@"OK",@"OK")
+                                           alternateButton:nil
+                                               otherButton:nil
+                                  informativeTextWithFormat:message];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+			return NO;
+		}
+		// add the crossref field if it doesn't exist, then set it to the citekey of the drag source's bibitem
+		[publication setField:BDSKCrossrefString toValue:crossref];
+		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+		return YES;
+	}
+	
+	// we aren't linking, so here we decide which fields to overwrite, and just copy values over
+	NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
+	NSString *key = nil;
+	NSString *oldValue = nil;
+	NSString *newValue = nil;
+	
+	[publication setPubType:[tempBI pubType]]; // do we want this always?
+	
+	while(key = [newKeyE nextObject]){
+		newValue = [tempBI valueOfField:key inherit:NO];
+		if([newValue isEqualToString:@""])
+			continue;
+		
+		oldValue = [publication valueOfField:key inherit:NO]; // value is the value of key in the dragged-onto window.
+		
+		// only set the field if we force or the value was empty
+		if((modifier & optionKey) || [NSString isEmptyString:oldValue]){
+			[publication setField:key toValue:newValue];
+		}
+	}
+    
+    // autogenerate cite key if we aren't overwriting, and it hasn't already been set by the user
+    if((modifier & optionKey) == 0 && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [publication canGenerateAndSetCiteKey]){
+        [self generateCiteKey:nil];
+    }
+    
+    // check cite key here in case we didn't autogenerate, or we're supposed to overwrite
+	if(((modifier & optionKey) != 0 || [publication hasEmptyOrDefaultCiteKey]) && ([tempBI hasEmptyOrDefaultCiteKey] == NO)){
+		[publication setCiteKey:[tempBI citeKey]];
+	}
+    
+	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+	
+	return YES;
+}
+
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
 	if (anObject != bibFields)
 		return nil;
@@ -2307,7 +2441,7 @@ static int numberOfOpenEditors = 0;
 
 - (BOOL)writeDataToPasteboard:(NSPasteboard *)pboard forField:(NSString *)field {
 
-    NSURL *url = [theBib URLForField:field];
+    NSURL *url = [publication URLForField:field];
 	
 	if (url == nil)
 		return NO;
@@ -2326,7 +2460,7 @@ static int numberOfOpenEditors = 0;
 		[self setPromisedDragFilename:[path lastPathComponent]];
 		[pboard setPropertyList:[NSArray arrayWithObject:promisedDragFilename] forType:NSFilesPromisePboardType];
 	} else {
-		NSString *filename = [theBib displayTitle];
+		NSString *filename = [publication displayTitle];
 		if ([NSString isEmptyString:filename])
 			filename = @"Remote URL";
 		pathExtension = @"webloc";
@@ -2458,8 +2592,8 @@ static int numberOfOpenEditors = 0;
 {
 	int requiredContent = [[documentSnoopButton selectedItem] tag];
 	int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-    NSString *lurl = [theBib localUrlPath];
-    NSURL *rurl = [theBib remoteURL];
+    NSString *lurl = [publication localUrlPath];
+    NSURL *rurl = [publication remoteURL];
 	int state = requiredContent;
 	
 	if ((requiredContent == currentContent) && (drawerState & BDSKDrawerStateOpenMask))
@@ -2485,7 +2619,7 @@ static int numberOfOpenEditors = 0;
 		else if (state & BDSKDrawerStateTextMask)
 			badgeImage = [NSImage smallImageForFileType:@"txt"];
 		else
-			badgeImage = [theBib smallImageForURLField:BDSKLocalUrlString];
+			badgeImage = [publication smallImageForURLField:BDSKLocalUrlString];
 		
 		NSRect iconRect = NSMakeRect(0, 0, 32, 32);
 		NSSize arrowSize = [arrowImage size];
@@ -2540,7 +2674,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)updateSnoopDrawerContent{
-    NSURL *lurl = [[theBib URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
+    NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
 
 	if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
 
@@ -2623,7 +2757,7 @@ static int numberOfOpenEditors = 0;
 	}
 	else if ([documentSnoopDrawer contentView] == webSnoopContainerView) {
 		if (!webSnoopViewLoaded) {
-			NSURL *rurl = [theBib remoteURL];
+			NSURL *rurl = [publication remoteURL];
 			if (rurl == nil) return;
 			[[remoteSnoopWebView mainFrame] loadRequest:[NSURLRequest requestWithURL:rurl]];
 			webSnoopViewLoaded = YES;
@@ -2710,18 +2844,18 @@ static int numberOfOpenEditors = 0;
     NSString *discardMsg = NSLocalizedString(@"Discard", @"");
     
     // case 1: the item has not been edited
-    if(![theBib hasBeenEdited]){
+    if(![publication hasBeenEdited]){
         errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"");
     // case 2: cite key hasn't been set, and paper needs to be filed
-    }else if([theBib hasEmptyOrDefaultCiteKey] && [theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([publication hasEmptyOrDefaultCiteKey] && [publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 3: only the paper needs to be filed
-    }else if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+    }else if([publication needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to cancel and continue editing, or close the window and keep this entry as-is?", @"");
         discardMsg = nil; // this item has some fields filled out and has a paper associated with it; no discard option
     // case 4: only the cite key needs to be set
-    }else if([theBib hasEmptyOrDefaultCiteKey]){
+    }else if([publication hasEmptyOrDefaultCiteKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to cancel and edit the cite key, or close the window and keep this entry as-is?", @"");
 	// case 5: good to go
     }else{
@@ -2747,8 +2881,8 @@ static int numberOfOpenEditors = 0;
         case NSAlertOtherReturn:
             break; // do nothing
         case NSAlertAlternateReturn:
-            [[theBib retain] autorelease]; // make sure it stays around till we're closed
-            [[theBib document] removePublication:theBib]; // now fall through to default
+            [[publication retain] autorelease]; // make sure it stays around till we're closed
+            [[self document] removePublication:publication]; // now fall through to default
         default:
             [sheet orderOut:nil];
             [self close];
@@ -2761,7 +2895,7 @@ static int numberOfOpenEditors = 0;
     [documentSnoopDrawer close];
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
-												 forPublications:[NSArray arrayWithObject:theBib]];
+												 forPublications:[NSArray arrayWithObject:publication]];
 	
     // see method for notes
     [self breakTextStorageConnections];
@@ -2843,10 +2977,10 @@ static int numberOfOpenEditors = 0;
 		if ([[dataSource data] writeToFile:[sPanel filename] atomically:YES]) {
 			NSString *fileURLString = [[NSURL fileURLWithPath:[sPanel filename]] absoluteString];
 			
-			[theBib setField:BDSKLocalUrlString toValue:fileURLString];
+			[publication setField:BDSKLocalUrlString toValue:fileURLString];
 			[self autoFilePaper];
 			
-			[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+			[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
 		}
@@ -2861,36 +2995,47 @@ static int numberOfOpenEditors = 0;
 
 #pragma mark undo manager
 
+- (NSUndoManager *)undoManager {
+	return [[self document] undoManager];
+}
+
 // we want to have the same undoManager as our document, so we use this 
 // NSWindow delegate method to return the doc's undomanager, except for
 // the abstract/annote/rss text views.
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
     // work around for a bug(?) in Panther, as the main menu appears to use this method rather than -undoManagerForTextView:
 	id firstResponder = [sender firstResponder];
-	if(firstResponder == notesView)
+	if(firstResponder == notesView){
+        if(notesViewUndoManager == nil)
+            notesViewUndoManager = [[NSUndoManager alloc] init];
         return notesViewUndoManager;
-    else if(firstResponder == abstractView)
+    }else if(firstResponder == abstractView){
+        if(abstractViewUndoManager == nil)
+            abstractViewUndoManager = [[NSUndoManager alloc] init];
         return abstractViewUndoManager;
-    else if(firstResponder == rssDescriptionView)
+    }else if(firstResponder == rssDescriptionView){
+        if(rssDescriptionViewUndoManager == nil)
+            rssDescriptionViewUndoManager = [[NSUndoManager alloc] init];
         return rssDescriptionViewUndoManager;
-	
-	return [theDocument undoManager];
+	}
+    
+	return [self undoManager];
 }
 
 
 #pragma mark author table view datasource methods
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-	return [theBib numberOfPeople];
+	return [publication numberOfPeople];
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn 
 			row:(int)row{
-    return [[theBib sortedPeople] objectAtIndex:row];
+    return [[publication sortedPeople] objectAtIndex:row];
 }
 
 - (IBAction)showPersonDetailCmd:(id)sender{
-    NSArray *thePeople = [theBib sortedPeople];
+    NSArray *thePeople = [publication sortedPeople];
     int count = [thePeople count];
     int i = -1;
     
@@ -2910,7 +3055,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)showPersonDetail:(BibAuthor *)person{
-    [theDocument showPerson:person];
+    [[self document] showPerson:person];
 }
 
 #pragma mark Splitview delegate methods
@@ -3058,7 +3203,7 @@ static int numberOfOpenEditors = 0;
     while(tmp = [e nextObject]){ \
         if ([ignoredKeys containsObject:tmp]) continue; \
 		[ignoredKeys addObject:tmp]; \
-		entry = [bibFields insertEntry:tmp usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[theBib valueOfField:tmp]]; \
+		entry = [bibFields insertEntry:tmp usingTitleFont:requiredFont attributesForTitle:attrs indexAndTag:i objectValue:[publication valueOfField:tmp]]; \
 		if ([tmp isEqualToString:BDSKCrossrefString]) \
 			[entry setFormatter:crossrefFormatter]; \
 		else \
@@ -3077,7 +3222,7 @@ static int numberOfOpenEditors = 0;
 		} \
 		NSButtonCell *buttonCell = [cell copy]; \
 		[buttonCell setTitle:tmp]; \
-		[buttonCell setIntValue:[theBib intValueOfField:tmp]]; \
+		[buttonCell setIntValue:[publication intValueOfField:tmp]]; \
 		[extraBibFields putCell:buttonCell atRow:i column:j]; \
 		[buttonCell release]; \
 		if([editedTitle isEqualToString:tmp]){ \
@@ -3140,11 +3285,11 @@ static int numberOfOpenEditors = 0;
 
     // make two passes to get the required entries at top.
     i=0;
-    sKeys = [[theBib allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    sKeys = [[publication allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 	
 	// now add the entries to the form
-	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[theBib pubType]], reqAtt);
-	AddFormEntries([[BibTypeManager sharedManager] optionalFieldsForType:[theBib pubType]], nil);
+	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[publication pubType]], reqAtt);
+	AddFormEntries([[BibTypeManager sharedManager] optionalFieldsForType:[publication pubType]], nil);
 	AddFormEntries(sKeys, nil);
     
     [ignoredKeys release];
@@ -3203,7 +3348,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)setupTypePopUp{
-    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[theBib fileType]] objectEnumerator];
+    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[publication fileType]] objectEnumerator];
     NSString *typeName = nil;
 
     [bibTypeButton removeAllItems];
@@ -3211,11 +3356,15 @@ static int numberOfOpenEditors = 0;
         [bibTypeButton addItemWithTitle:typeName];
     }
 
-    [bibTypeButton selectItemWithTitle:currentType];
+    [bibTypeButton selectItemWithTitle:[publication pubType]];
 }
 
 - (void)registerForNotifications {
-	
+	// make sure we have the document, as we can't be sure we already set it
+    BibDocument *doc = [self document];
+    if (doc == nil)
+        doc = [publication document];
+    
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibDidChange:)
 												 name:BDSKBibItemChangedNotification
@@ -3223,23 +3372,23 @@ static int numberOfOpenEditors = 0;
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(needsToBeFiledDidChange:)
 												 name:BDSKNeedsToBeFiledChangedNotification
-											   object:theBib];
+											   object:publication];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibWasAddedOrRemoved:)
 												 name:BDSKDocAddItemNotification
-											   object:theDocument];
+											   object:doc];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibWasAddedOrRemoved:)
 												 name:BDSKDocDelItemNotification
-											   object:theDocument];
+											   object:doc];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibWillBeRemoved:)
 												 name:BDSKDocWillRemoveItemNotification
-											   object:theDocument];
+											   object:doc];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(finalizeChanges:)
 												 name:BDSKFinalizeChangesNotification
-											   object:theDocument];
+											   object:doc];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(typeInfoDidChange:)
 												 name:BDSKBibTypeInfoChangedNotification
@@ -3255,8 +3404,8 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)fixURLs{
-    NSURL *lurl = [[theBib URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
-    NSString *rurl = [theBib valueOfField:BDSKUrlString];
+    NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
+    NSString *rurl = [publication valueOfField:BDSKUrlString];
     NSImage *icon;
     BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState ||
 						  [documentSnoopDrawer state] == NSDrawerOpeningState);
@@ -3266,7 +3415,7 @@ static int numberOfOpenEditors = 0;
     if(drawerWasOpen) [documentSnoopDrawer close];
     
     // either missing file or the document icon
-    icon = [theBib imageForURLField:BDSKLocalUrlString];
+    icon = [publication imageForURLField:BDSKLocalUrlString];
     if(icon == nil) // nil for an empty field; we use missing file icon for a placeholder in that case
         icon = [NSImage missingFileImage];
     [viewLocalButton setIconImage:icon];
@@ -3283,7 +3432,7 @@ static int numberOfOpenEditors = 0;
         [[self window] setRepresentedFilename:@""];
     }
 
-    NSURL *remoteURL = [theBib remoteURL];
+    NSURL *remoteURL = [publication remoteURL];
     if(remoteURL != nil){
         icon = [NSImage imageForURL:remoteURL];
 		[viewRemoteButton setIconImage:icon];
@@ -3313,10 +3462,10 @@ static int numberOfOpenEditors = 0;
     NSString *currentValue = nil;
     NSString *fieldName = nil;
     while(fieldName = [fieldE nextObject]){
-        currentValue = [[theBib valueOfField:fieldName inherit:NO] copy];
+        currentValue = [[publication valueOfField:fieldName inherit:NO] copy];
         // set without undo, or we dirty the document every time the editor is closed
         if(nil != currentValue)
-            [theBib setField:fieldName toValueWithoutUndo:currentValue];
+            [publication setField:fieldName toValueWithoutUndo:currentValue];
         [currentValue release];
     }
 }
