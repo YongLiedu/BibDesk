@@ -57,6 +57,9 @@
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* statusLine;
+    IBOutlet NSButton *addButton;
+    IBOutlet NSButton *addAndCloseButton;
+    IBOutlet NSButton *CloseButton;
     IBOutlet NSPopUpButton* itemTypeButton;
     IBOutlet BDSKImagePopUpButton *actionMenuButton;
     IBOutlet NSSplitView* splitView;

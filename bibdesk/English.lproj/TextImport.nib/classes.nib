@@ -42,10 +42,13 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 actionMenuButton = BDSKImagePopUpButton; 
+                addAndCloseButton = NSButton; 
                 addBookmarkSheet = NSPanel; 
+                addButton = NSButton; 
                 backButton = NSButton; 
                 bookmarkField = NSTextField; 
                 bookmarkPopUpButton = NSPopUpButton; 
+                closeButton = NSButton; 
                 forwardButton = NSButton; 
                 itemTableView = NSTableView; 
                 itemTypeButton = NSPopUpButton; 

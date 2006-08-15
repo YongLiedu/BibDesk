@@ -53,6 +53,8 @@
 
 @interface BDSKTextImportController (Private)
 
+- (void)handleFlagsChangedNotification:(NSNotification *)notification;
+
 - (void)loadPasteboardData;
 - (void)showWebViewWithURLString:(NSString *)urlString;
 - (void)setShowingWebView:(BOOL)showWebView;
@@ -110,12 +112,18 @@
 			}
 		}
 		macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleFlagsChangedNotification:)
+                                                     name:OAFlagsChangedNotification
+                                                   object:nil];
     }
     return self;
 }
 
 - (void)dealloc{
     OBASSERT(download == nil);
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     // next line is a workaround for a nasty webview crasher; looks like it messages a garbage pointer to its undo manager
     [webView setEditingDelegate:nil];
     [item release];
@@ -225,19 +233,22 @@
 #pragma mark Actions
 
 - (IBAction)addItemAction:(id)sender{
+    int optionKey = [[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask;
+    BibItem *newItem = (optionKey) ? [item copy] : [[BibItem alloc] init];
+    
     // make the tableview stop editing:
     [[self window] makeFirstResponder:[self window]];
     
 	[itemsAdded addObject:item];
     [document addPublication:item];
 	[item setCiteKey:[item suggestedCiteKey]]; // only now can we generate, due to unique specifiers
-	[item release];
+    [item release];
+    item = newItem;
 	
 	int numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d %@ added.", @"format string for pubs added. args: one int for number added, then one string for singular or plural of publication(s)."), numItems, pubSingularPlural]];
-
-    item = [[BibItem alloc] init];
+    
     [itemTypeButton selectItemWithTitle:[item pubType]];
     [itemTableView reloadData];
 }
@@ -459,6 +470,16 @@
 
 
 @implementation BDSKTextImportController (Private)
+
+- (void)handleFlagsChangedNotification:(NSNotification *)notification{
+    unsigned int modifierFlags = [[notification object] modifierFlags];
+    
+    if (modifierFlags & NSAlternateKeyMask) {
+        [addButton setTitle:NSLocalizedString(@"Add & Copy", @"Add & Copy")];
+    } else {
+        [addButton setTitle:NSLocalizedString(@"Add", @"Add")];
+    }
+}
 
 #pragma mark Setup
 
