@@ -1149,10 +1149,10 @@
 		CEF94340092656BB00750FFA /* BDSKPathIconTransformer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPathIconTransformer.m; sourceTree = "<group>"; };
 		CEF94412092668EA00750FFA /* BDSKTableSortDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTableSortDescriptor.h; sourceTree = "<group>"; };
 		CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTableSortDescriptor.m; sourceTree = "<group>"; };
-		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UKDirectoryEnumerator.h; path = ../bibdesk_vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.h; sourceTree = "<group>"; };
-		F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UKDirectoryEnumerator.m; path = ../bibdesk_vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.m; sourceTree = "<group>"; };
-		F9022C1B0758013E00C3F701 /* BDAlias.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BDAlias.h; path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.h; sourceTree = "<group>"; };
-		F9022C1C0758013E00C3F701 /* BDAlias.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = BDAlias.m; path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.m; sourceTree = "<group>"; };
+		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UKDirectoryEnumerator.h; path = /Users/hofman/Documents/Bibdesk_SVN/trunk/bibdesk_vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.h; sourceTree = "<absolute>"; };
+		F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UKDirectoryEnumerator.m; path = /Users/hofman/Documents/Bibdesk_SVN/trunk/bibdesk_vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.m; sourceTree = "<absolute>"; };
+		F9022C1B0758013E00C3F701 /* BDAlias.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BDAlias.h; path = /Users/hofman/Documents/Bibdesk_SVN/trunk/bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.h; sourceTree = "<absolute>"; };
+		F9022C1C0758013E00C3F701 /* BDAlias.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = BDAlias.m; path = /Users/hofman/Documents/Bibdesk_SVN/trunk/bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.m; sourceTree = "<absolute>"; };
 		F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteKeyFormatter.h; sourceTree = "<group>"; };
 		F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteKeyFormatter.m; sourceTree = "<group>"; };
 		F9022C3A0758027800C3F701 /* BDSKConverter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKConverter.h; sourceTree = "<group>"; };
@@ -1357,10 +1357,10 @@
 		F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAsynchronousDOServer.m; sourceTree = "<group>"; };
 		F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFDocument_BDSKExtensions.h; sourceTree = "<group>"; };
 		F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDFDocument_BDSKExtensions.m; sourceTree = "<group>"; };
-		F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFAppleScriptHandlerAdditionsCore.h; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.h; sourceTree = SOURCE_ROOT; };
-		F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFAppleScriptHandlerAdditionsCore.m; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.m; sourceTree = SOURCE_ROOT; };
-		F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "KFASHandlerAdditions-TypeTranslation.h"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.h"; sourceTree = SOURCE_ROOT; };
-		F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "KFASHandlerAdditions-TypeTranslation.m"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.m"; sourceTree = SOURCE_ROOT; };
+		F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFAppleScriptHandlerAdditionsCore.h; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.h; sourceTree = "<group>"; };
+		F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFAppleScriptHandlerAdditionsCore.m; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.m; sourceTree = "<group>"; };
+		F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "KFASHandlerAdditions-TypeTranslation.h"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.h"; sourceTree = "<group>"; };
+		F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "KFASHandlerAdditions-TypeTranslation.m"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.m"; sourceTree = "<group>"; };
 		F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPersistentSearch.h; sourceTree = "<group>"; };
 		F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPersistentSearch.m; sourceTree = "<group>"; };
 		F9569C2B08415E8300316D02 /* BDSKForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKForm.h; sourceTree = "<group>"; };
@@ -1626,6 +1626,7 @@
 				27D4FB5607DE7A97001CAB00 /* DeveloperDocumentation */,
 				275E26FA07838E150070398A /* Test */,
 				080E96DDFE201D6D7F000001 /* Classes */,
+				CE220FE20A91BF86002CEFB8 /* Third Party Sources */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				27AF74ED08021E47006A6ADE /* Help Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -1640,15 +1641,6 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				F9ED4DA80A0437E20048D912 /* FSCopyObject.c */,
-				F9ED4DA90A0437E20048D912 /* FSCopyObject.h */,
-				F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */,
-				F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */,
-				F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */,
-				F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */,
-				F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */,
-				F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */,
-				F9022C1C0758013E00C3F701 /* BDAlias.m */,
 				32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 				F91B5C510764135B0011ED22 /* About the Scripts Menu.scpt */,
@@ -1745,6 +1737,25 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CE220FE20A91BF86002CEFB8 /* Third Party Sources */ = {
+			isa = PBXGroup;
+			children = (
+				F9022C1B0758013E00C3F701 /* BDAlias.h */,
+				F9022C1C0758013E00C3F701 /* BDAlias.m */,
+				F9ED4DA80A0437E20048D912 /* FSCopyObject.c */,
+				F9ED4DA90A0437E20048D912 /* FSCopyObject.h */,
+				F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */,
+				F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */,
+				F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */,
+				F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */,
+				F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */,
+				F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */,
+				F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */,
+				F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */,
+			);
+			name = "Third Party Sources";
 			sourceTree = "<group>";
 		};
 		CE38FA7C091D20FB00BCB69D /* Views */ = {
@@ -1949,8 +1960,6 @@
 				F9022C64075802E300C3F701 /* BibDocument_DataSource.m */,
 				F9E07C8309202309007BCDD4 /* BibDocument_Groups.m */,
 				F9E07C8E09202345007BCDD4 /* BibDocument_Search.m */,
-				F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */,
-				F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */,
 				F9022C8A0758034000C3F701 /* BibDocument+Menus.m */,
 				F9022C8C0758034000C3F701 /* BibDocumentView_Toolbar.m */,
 			);
@@ -2081,7 +2090,6 @@
 		F918104307583A6E00CF822D /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				F9022C1B0758013E00C3F701 /* BDAlias.h */,
 				CE2209A5093639B0004D7D92 /* BDSKAlert.h */,
 				F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */,
 				3D824AA607D099C300FB2F67 /* BDSKBackgroundView.h */,
