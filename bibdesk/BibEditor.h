@@ -45,7 +45,6 @@
 @class BDSKRatingButton;
 @class BDSKRatingButtonCell;
 @class PDFImageView;
-@class BDSKCiteKeyFormatter;
 @class BDSKFieldNameFormatter;
 @class BDSKComplexStringFormatter;
 @class BDSKCrossrefFormatter;
@@ -124,11 +123,7 @@
     IBOutlet BDSKStatusBar *statusBar;
 	
 // cite-key checking stuff:
-    BDSKCiteKeyFormatter *citeKeyFormatter;
 	IBOutlet NSButton *citeKeyWarningButton;
-	
-// new field formatter
-    BDSKFieldNameFormatter *fieldNameFormatter;
 	
 // form cell formatter
     BDSKComplexStringFormatter *formCellFormatter;

@@ -240,8 +240,6 @@ static int numberOfOpenEditors = 0;
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
 
-    citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
-    fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[self document] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     
@@ -249,7 +247,9 @@ static int numberOfOpenEditors = 0;
     [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
     // Setup the citekey textfield
+    BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
     [citeKeyField setFormatter:citeKeyFormatter];
+    [citeKeyFormatter release];
 	[citeKeyField setStringValue:[publication citeKey]];
 	
     // Setup the type popup
@@ -300,9 +300,7 @@ static int numberOfOpenEditors = 0;
     [booleanButtonCell release];
     [triStateButtonCell release];
     [ratingButtonCell release];
-    [citeKeyFormatter release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [fieldNameFormatter release];
 	[dragFieldEditor release];
 	[viewLocalToolbarItem release];
 	[viewRemoteToolbarItem release];
