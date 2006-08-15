@@ -331,8 +331,7 @@
 		F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C1C0758013E00C3F701 /* BDAlias.m */; };
 		F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */; };
 		F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
-		F9022C4C0758027800C3F701 /* BDSKCustomCiteTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3D0758027800C3F701 /* BDSKCustomCiteTableView.m */; };
-		F9022C4E0758027800C3F701 /* BDSKDragTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C410758027800C3F701 /* BDSKDragTableView.m */; };
+		F9022C4E0758027800C3F701 /* BDSKMainTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C410758027800C3F701 /* BDSKMainTableView.m */; };
 		F9022C4F0758027800C3F701 /* BDSKDragWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C430758027800C3F701 /* BDSKDragWindow.m */; };
 		F9022C500758027800C3F701 /* BDSKFieldNameFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C450758027800C3F701 /* BDSKFieldNameFormatter.m */; };
 		F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */; };
@@ -447,8 +446,7 @@
 		F918100E07583A5B00CF822D /* BDAlias.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C1B0758013E00C3F701 /* BDAlias.h */; };
 		F918100F07583A5B00CF822D /* BDSKCiteKeyFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */; };
 		F918101007583A5B00CF822D /* BDSKConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C3A0758027800C3F701 /* BDSKConverter.h */; };
-		F918101107583A5B00CF822D /* BDSKCustomCiteTableView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C3C0758027800C3F701 /* BDSKCustomCiteTableView.h */; };
-		F918101307583A5B00CF822D /* BDSKDragTableView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C400758027800C3F701 /* BDSKDragTableView.h */; };
+		F918101307583A5B00CF822D /* BDSKMainTableView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C400758027800C3F701 /* BDSKMainTableView.h */; };
 		F918101507583A5B00CF822D /* BDSKFieldNameFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C440758027800C3F701 /* BDSKFieldNameFormatter.h */; };
 		F918101707583A5B00CF822D /* BDSKComplexStringFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */; };
 		F918101A07583A5B00CF822D /* BDSKPreviewer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C57075802E300C3F701 /* BDSKPreviewer.h */; };
@@ -1157,10 +1155,8 @@
 		F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteKeyFormatter.m; sourceTree = "<group>"; };
 		F9022C3A0758027800C3F701 /* BDSKConverter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKConverter.h; sourceTree = "<group>"; };
 		F9022C3B0758027800C3F701 /* BDSKConverter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKConverter.m; sourceTree = "<group>"; };
-		F9022C3C0758027800C3F701 /* BDSKCustomCiteTableView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCustomCiteTableView.h; sourceTree = "<group>"; };
-		F9022C3D0758027800C3F701 /* BDSKCustomCiteTableView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCustomCiteTableView.m; sourceTree = "<group>"; };
-		F9022C400758027800C3F701 /* BDSKDragTableView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDragTableView.h; sourceTree = "<group>"; };
-		F9022C410758027800C3F701 /* BDSKDragTableView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDragTableView.m; sourceTree = "<group>"; };
+		F9022C400758027800C3F701 /* BDSKMainTableView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKMainTableView.h; sourceTree = "<group>"; };
+		F9022C410758027800C3F701 /* BDSKMainTableView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKMainTableView.m; sourceTree = "<group>"; };
 		F9022C420758027800C3F701 /* BDSKDragWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDragWindow.h; sourceTree = "<group>"; };
 		F9022C430758027800C3F701 /* BDSKDragWindow.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDragWindow.m; sourceTree = "<group>"; };
 		F9022C440758027800C3F701 /* BDSKFieldNameFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFieldNameFormatter.h; sourceTree = "<group>"; };
@@ -1765,9 +1761,8 @@
 				2730077707CF20B500F2E485 /* BDSKBorderlessKeyWindow.m */,
 				CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */,
 				CE34E9780A03C16B00222942 /* BDSKConditionsView.m */,
-				F9022C3D0758027800C3F701 /* BDSKCustomCiteTableView.m */,
 				CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */,
-				F9022C410758027800C3F701 /* BDSKDragTableView.m */,
+				F9022C410758027800C3F701 /* BDSKMainTableView.m */,
 				F9022C430758027800C3F701 /* BDSKDragWindow.m */,
 				CE2837400917D31D006B4C63 /* BDSKEdgeView.m */,
 				F941135309B549BF00EE8463 /* BDSKEditorTextView.m */,
@@ -2105,11 +2100,10 @@
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
-				F9022C3C0758027800C3F701 /* BDSKCustomCiteTableView.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
 				CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */,
 				CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */,
-				F9022C400758027800C3F701 /* BDSKDragTableView.h */,
+				F9022C400758027800C3F701 /* BDSKMainTableView.h */,
 				F9022C420758027800C3F701 /* BDSKDragWindow.h */,
 				CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */,
 				F941135209B549BF00EE8463 /* BDSKEditorTextView.h */,
@@ -2398,8 +2392,7 @@
 				F918100E07583A5B00CF822D /* BDAlias.h in Headers */,
 				F918100F07583A5B00CF822D /* BDSKCiteKeyFormatter.h in Headers */,
 				F918101007583A5B00CF822D /* BDSKConverter.h in Headers */,
-				F918101107583A5B00CF822D /* BDSKCustomCiteTableView.h in Headers */,
-				F918101307583A5B00CF822D /* BDSKDragTableView.h in Headers */,
+				F918101307583A5B00CF822D /* BDSKMainTableView.h in Headers */,
 				F918101507583A5B00CF822D /* BDSKFieldNameFormatter.h in Headers */,
 				F918101707583A5B00CF822D /* BDSKComplexStringFormatter.h in Headers */,
 				F918101A07583A5B00CF822D /* BDSKPreviewer.h in Headers */,
@@ -3213,8 +3206,7 @@
 				F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */,
 				F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */,
 				F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */,
-				F9022C4C0758027800C3F701 /* BDSKCustomCiteTableView.m in Sources */,
-				F9022C4E0758027800C3F701 /* BDSKDragTableView.m in Sources */,
+				F9022C4E0758027800C3F701 /* BDSKMainTableView.m in Sources */,
 				F9022C4F0758027800C3F701 /* BDSKDragWindow.m in Sources */,
 				F9022C500758027800C3F701 /* BDSKFieldNameFormatter.m in Sources */,
 				F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */,

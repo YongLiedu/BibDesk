@@ -65,7 +65,7 @@
 #import "BDSKPreviewer.h"
 
 #import "BDSKTeXTask.h"
-#import "BDSKDragTableView.h"
+#import "BDSKMainTableView.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
 #import "PubMedParser.h"

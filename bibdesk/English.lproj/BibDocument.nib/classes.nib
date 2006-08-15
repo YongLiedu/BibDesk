@@ -7,7 +7,6 @@
             SUPERCLASS = NSView; 
         }, 
         {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
-        {CLASS = BDSKDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKGroupCell; LANGUAGE = ObjC; SUPERCLASS = OATextWithIconCell; }, 
         {
@@ -21,6 +20,7 @@
             SUPERCLASS = NSTextFieldCell; 
         }, 
         {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
+        {CLASS = BDSKMainTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
             CLASS = BDSKPopUpButtonCell; 
             LANGUAGE = ObjC; 

@@ -45,7 +45,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController;
-@class BDSKAlert, BDSKStatusBar, BDSKDragTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -102,7 +102,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 {
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
-    IBOutlet BDSKDragTableView *tableView;
+    IBOutlet BDSKMainTableView *tableView;
     IBOutlet NSMenuItem *ctxCopyBibTex;
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
