@@ -2329,24 +2329,12 @@ static int numberOfOpenEditors = 0;
 	if([pboardType isEqualToString:NSStringPboardType]){
 		NSString *pbString = [pboard stringForType:NSStringPboardType];
 		// sniff the string to see if it's a format we can parse
-		switch([pbString contentStringType]){
-			case BDSKBibTeXStringType:
-				draggedPubs = [BibTeXParser itemsFromData:[pboard dataForType:NSStringPboardType] error:&error document:[self document]];
-                break;
-			case BDSKRISStringType:
-				draggedPubs = [PubMedParser itemsFromString:pbString error:&error];
-                break;
-			case BDSKJSTORStringType:
-				draggedPubs = [BDSKJSTORParser itemsFromString:pbString error:&error];
-                break;
-			case BDSKWOSStringType:
-				draggedPubs = [BDSKWebOfScienceParser itemsFromString:pbString error:&error];
-                break;
-			default:
-				OBASSERT_NOT_REACHED("Unsupported data type");
-				return NO;
-		}
-		if(error != nil) return NO;
+		int type = [pbString contentStringType];
+        if (type == BDSKBibTeXStringType)
+            draggedPubs = [BibTeXParser itemsFromData:[pboard dataForType:NSStringPboardType] error:&error document:[self document]];
+        else
+            draggedPubs = [BDSKParserForStringType(type) itemsFromString:pbString error:&error];
+		if(draggedPubs == nil || error != nil) return NO;
 	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
 		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
         // we can't just unarchive, as this gives complex strings with the wrong macroResolver

@@ -350,9 +350,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-- (BOOL)loadRISDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-- (BOOL)loadJSTORDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
-- (BOOL)loadWebOfScienceDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
+- (BOOL)loadDataRepresentation:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data error:(NSError **)outError;
 
 // Responses to UI actions

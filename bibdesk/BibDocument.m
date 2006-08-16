@@ -1420,7 +1420,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 	if ([aType isEqualToString:BDSKBibTeXDocumentType]){
         success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
     }else if([aType isEqualToString:BDSKRISDocumentType]){
-		success = [self loadRISDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
+		success = [self loadDataRepresentation:data ofStringType:BDSKRISStringType fromURL:absoluteURL encoding:encoding error:&error];
     }else{
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
@@ -1430,22 +1430,11 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
             if(outError) *outError = error;
 			return NO;
         }
-		switch([string contentStringType]){
-			case BDSKBibTeXStringType:
-				success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
-                break;
-			case BDSKRISStringType:
-				success = [self loadRISDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
-                break;
-			case BDSKJSTORStringType:
-				success = [self loadJSTORDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
-                break;
-			case BDSKWOSStringType:
-				success = [self loadWebOfScienceDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
-                break;
-			default:
-				success = NO;
-		}
+        int type = [string contentStringType];
+        if(type == BDSKBibTeXStringType)
+            success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
+		else
+            success = [self loadDataRepresentation:data ofStringType:type fromURL:absoluteURL encoding:encoding error:&error];
 	}
     
     // @@ move this to NSDocumentController; need to figure out where to add it, though
@@ -1475,7 +1464,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     return success;        
 }
 
-- (BOOL)loadRISDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
+- (BOOL)loadDataRepresentation:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
     NSMutableArray *newPubs = nil;
     
@@ -1485,71 +1474,23 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
                     format:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", 
                                              @"need a single NSString format specifier"), encStr];
     }
-        
+    
+    OBASSERT(type == BDSKRISStringType || type == BDSKJSTORStringType || type == BDSKWOSStringType);
+    
     NSError *error = nil;
-	newPubs = [PubMedParser itemsFromString:dataString
-                                      error:&error
-                                frontMatter:frontMatter
-                                   filePath:[absoluteURL path]];
+	newPubs = [BDSKParserForStringType(type) itemsFromString:dataString
+                                                       error:&error
+                                                 frontMatter:frontMatter
+                                                    filePath:[absoluteURL path]];
         
     if(outError) *outError = error;
     [self setPublications:newPubs undoable:NO];
     
-    // since we can't save pubmed files as pubmed files:
-    [self updateChangeCount:NSChangeDone];
-    return error == nil;
-}
-
-
-- (BOOL)loadJSTORDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
-    NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
-    NSMutableArray *newPubs = nil;
+    if (type == BDSKRISStringType) // since we can't save pubmed files as pubmed files:
+        [self updateChangeCount:NSChangeDone];
+    else // since we can't save other files in its native format
+        [self setFileName:nil];
     
-    if(dataString == nil){
-        NSString *encStr = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
-        [NSException raise:BDSKStringEncodingException 
-                    format:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", 
-                                             @"need a single NSString format specifier"), encStr];
-    }
-        
-    NSError *error = nil;
-	newPubs = [BDSKJSTORParser itemsFromString:dataString
-										 error:&error
-								   frontMatter:frontMatter
-									  filePath:[absoluteURL path]];
-    
-    [self setPublications:newPubs undoable:NO];
-    if(outError) *outError = error;
-    
-    // since we can't save JSTOR files as JSTOR files:
-    [self setFileName:nil];
-    
-    return error == nil;
-}
-
-
-- (BOOL)loadWebOfScienceDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
-    NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
-    NSMutableArray *newPubs = nil;
-    
-    if(dataString == nil){
-        NSString *encStr = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
-        [NSException raise:BDSKStringEncodingException 
-                    format:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", 
-                                             @"need a single NSString format specifier"), encStr];
-    }
-
-    NSError *error = nil;
-	newPubs = [BDSKWebOfScienceParser itemsFromString:dataString
-												error:&error
-										  frontMatter:frontMatter
-											 filePath:[absoluteURL path]];
-    
-    if(outError) *outError = error;
-    [self setPublications:newPubs undoable:NO];
-    
-    // since we can't save wos files as wos files:
-    [self setFileName:nil];
     return error == nil;
 }
 
@@ -2302,24 +2243,10 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
     NSError *parseError = nil;
     
-    switch(type){
-		case BDSKBibTeXStringType:
-			newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
-			break;
-		case BDSKRISStringType:
-			newPubs = [PubMedParser itemsFromString:string error:&parseError];
-			break;
-		case BDSKJSTORStringType:
-			newPubs = [BDSKJSTORParser itemsFromString:string error:&parseError];
-            break;
-        case BDSKWOSStringType:
-            newPubs = [BDSKWebOfScienceParser itemsFromString:string error:&parseError];
-            break;
-        case BDSKUnknownStringType:
-            break;
-        default:
-            [NSException raise:NSInternalInconsistencyException format:@"Type %d is not supported", type];
-    }
+    if(type == BDSKBibTeXStringType)
+        newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
+	else if (type != BDSKUnknownStringType)
+        newPubs = [BDSKParserForStringType(type) itemsFromString:string error:&parseError];
 
     // The parser methods may return a non-empty array (partial data) if they failed; we check for parseError != nil as an error condition, then, although that's generally not correct
 	if(parseError != nil) {
