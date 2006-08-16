@@ -80,7 +80,7 @@
 @end
 
 @interface NSObject (BDSKImagePopUpButtonDraggingDestination)
-- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender;
+- (NSDragOperation)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender;
 - (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view receiveDrag:(id <NSDraggingInfo>)sender;
 @end
 

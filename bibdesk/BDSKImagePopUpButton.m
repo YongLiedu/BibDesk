@@ -263,16 +263,17 @@
 #pragma mark Dragging destination
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
-    if (delegate &&
-        [delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
-        [delegate respondsToSelector:@selector(imagePopUpButton:canReceiveDrag:)] && 
-        [delegate imagePopUpButton:self canReceiveDrag:sender]) {
-		
-		highlight = YES;
-        [self setNeedsDisplay:YES];
-		return NSDragOperationEvery;
+    NSDragOperation dragOp = NSDragOperationNone;
+    if ([delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
+        [delegate respondsToSelector:@selector(imagePopUpButton:canReceiveDrag:)]) {
+        
+        dragOp = [delegate imagePopUpButton:self canReceiveDrag:sender];
+        if (dragOp != NSDragOperationNone) {	
+            highlight = YES;
+            [self setNeedsDisplay:YES];
+        }
     }
-    return NSDragOperationNone;
+    return dragOp;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender {

@@ -250,69 +250,47 @@
 #pragma mark NSDraggingDestination protocol 
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender{
-	NSPoint mouseLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
-	int row, column;
-	id cell;
-	
-	if (![self delegate]) return NSDragOperationNone;
-	
-	[self getRow:&row column:&column forPoint:mouseLoc];
-	cell = [self cellAtRow:row column:0];
-	if (cell && [[self delegate] canReceiveDrag:sender forFormCell:cell]) {
-		
-		dragRow = row;
-		highlight = YES;
-		[self setNeedsDisplay:YES];
-		return NSDragOperationEvery;
-	} else {
-		highlight = NO;
-		dragRow = -1;
-		return NSDragOperationNone;
-	}
+    return [self draggingUpdated:sender];
 }
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender{
-    
-    if([[self window] respondsToSelector:_cmd])
-        [[self window] draggingUpdated:sender];
-    
 	NSPoint mouseLoc = [self convertPoint:[sender draggingLocation] fromView:nil];
 	int row, column;
 	id cell;
+    NSDragOperation dragOp = NSDragOperationNone;
 	
 	if (![self delegate]) return NSDragOperationNone;
 	
 	[self getRow:&row column:&column forPoint:mouseLoc];
-	cell = [self cellAtRow:row column:0];
-	if (cell && [[self delegate] canReceiveDrag:sender forFormCell:cell]) {
-		
+	if (cell = [self cellAtRow:row column:0])
+        dragOp = [[self delegate] canReceiveDrag:sender forFormCell:cell];
+	if (dragOp != NSDragOperationNone) {	
 		if (row != dragRow) {
-			[self setKeyboardFocusRingNeedsDisplayInRect:[self cellFrameAtRow:row column:0]];
+			[self setNeedsDisplayInRect:[self cellFrameAtRow:row column:0]];
 			if (highlight)
-				[self setKeyboardFocusRingNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
+				[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
 		}
 		dragRow = row;
 		highlight = YES;
-		return NSDragOperationEvery;
 	} else {
 		if (highlight)
-			[self setKeyboardFocusRingNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
+			[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
 		highlight = NO;
 		dragRow = -1;
-		return NSDragOperationNone;
 	}
+    return dragOp;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender{
 	if (highlight)
-		[self setKeyboardFocusRingNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
+		[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
     highlight = NO;
 	dragRow = -1;
 }
 
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender{
 	highlight = NO;
-	[self setKeyboardFocusRingNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
+	[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
 	
 	return (dragRow != -1);
 } 

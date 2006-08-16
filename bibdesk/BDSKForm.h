@@ -49,7 +49,7 @@
 - (BOOL)writeDataToPasteboard:(NSPasteboard *)pasteboard forFormCell:(id)cell;
 - (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forFormCell:(id)cell;
 - (void)cleanUpAfterDragOperation:(NSDragOperation)operation forFormCell:(id)cell;
-- (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;
+- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;
 - (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;
 @end
 

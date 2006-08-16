@@ -2137,7 +2137,7 @@ static int numberOfOpenEditors = 0;
 
 #pragma mark dragging destination delegate methods
 
-- (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
+- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
 	NSPasteboard *pboard = [sender draggingPasteboard];
     id dragSource = [sender draggingSource];
     NSString *dragSourceField = nil;
@@ -2151,37 +2151,37 @@ static int numberOfOpenEditors = 0;
         dragSourceField = [[bibFields dragSourceCell] title];
     
     if ([field isEqualToString:dragSourceField])
-        return NO;
+        return NSDragOperationNone;
     
 	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
 	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
 	
 	if ([[BibTypeManager sharedManager] isLocalFileField:field]) {
 		if ([dragType isEqualToString:NSFilenamesPboardType]) {
-			return YES;
+			return NSDragOperationEvery;
 		} else if ([dragType isEqualToString:NSURLPboardType]) {
 			// a file can put NSURLPboardType on the pasteboard
 			// we really only want to receive local files for file URLs
 			NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
 			if(fileURL && [fileURL isFileURL])
-				return YES;
+				return NSDragOperationEvery;
 		}
-		return NO;
+		return NSDragOperationNone;
 	} else if ([[BibTypeManager sharedManager] isRemoteURLField:field]){
 		if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
-			return YES;
+			return NSDragOperationEvery;
 		} else if ([dragType isEqualToString:NSURLPboardType]) {
 			// a file puts NSFilenamesPboardType and NSURLPboardType on the pasteboard
 			// we really only want to receive webloc files for remote URLs, not file URLs
 			NSURL *remoteURL = [NSURL URLFromPasteboard:pboard];
 			if(remoteURL && ![remoteURL isFileURL])
-				return YES;
+				return NSDragOperationEvery;
 		}
-        return NO;
+        return NSDragOperationNone;
 	} else {
 		// we don't support dropping on a textual field. This is handled by the window
 	}
-	return NO;
+	return NSDragOperationNone;
 }
 
 - (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
@@ -2257,9 +2257,9 @@ static int numberOfOpenEditors = 0;
 	return NO;
 }
 
-- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender{
+- (NSDragOperation)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender{
 	if (view == [sender draggingSource])
-		return NO;
+		return NSDragOperationNone;
 	NSString *field = nil;
 	if (view == viewLocalButton)
 		field = BDSKLocalUrlString;
@@ -2277,7 +2277,7 @@ static int numberOfOpenEditors = 0;
 	return [self receiveDrag:sender forField:field];
 }
 
-- (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
+- (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)cell{
 	NSString *field = [cell title];
 	return [self canReceiveDrag:sender forField:field];
 }
@@ -2351,7 +2351,6 @@ static int numberOfOpenEditors = 0;
 	}
 	
 	BibItem *tempBI = [draggedPubs objectAtIndex:0]; // no point in dealing with multiple pubs for a single editor
-	[tempBI setDocument:[self document]]; // this assures that the macroResolver is set for complex strings
 
 	// Test a keyboard mask so that we can override all fields when dragging into the editor window (option)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
