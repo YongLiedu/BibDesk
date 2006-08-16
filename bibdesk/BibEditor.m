@@ -2367,7 +2367,6 @@ static int numberOfOpenEditors = 0;
 		if ([[publication citeKey] caseInsensitiveCompare:crossref] == NSOrderedSame) {
 			message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
 		} else {
-			BibDocument *doc = [self document]; 
 			NSString *parentCr = [[[self document] publicationForCiteKey:crossref] valueOfField:BDSKCrossrefString inherit:NO];
 			
 			if (![NSString isEmptyString:parentCr]) {
