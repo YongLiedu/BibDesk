@@ -41,6 +41,13 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
 
+enum {
+    BDSKNoCrossrefError,
+    BDSKSelfCrossrefError,
+    BDSKChainCrossrefError,
+    BDSKIsCrossreffedCrossrefError
+};
+
 @class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate;
 @protocol BDSKParseableItem;
 
@@ -522,6 +529,14 @@
     @discussion - 
 */
 - (BOOL)canGenerateAndSetCiteKey;
+
+/*
+    @method canSetCrossref:andCiteKey:
+    @abstract Returns an integer error code indicating whether the combination of crossref and citekey would lead to a crossref chain
+    @discussion -
+    @result 0: no problem, 1: crossref to self, 2: crossref to item with crossref, 3: self is crossreffed
+*/
+- (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey;
 
 /*!
 	@method     setCiteKeyString

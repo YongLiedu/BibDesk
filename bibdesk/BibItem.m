@@ -971,6 +971,19 @@ static CFDictionaryRef selectorTable = NULL;
     return ([document citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
 }
 
+- (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey{
+    int errorCode = BDSKNoCrossrefError;
+    if ([NSString isEmptyString:aCrossref] == NO) {
+        if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
+            errorCode = BDSKSelfCrossrefError;
+        else if ([NSString isEmptyString:[[[self document] publicationForCiteKey:aCiteKey] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
+            errorCode = BDSKChainCrossrefError;
+        else if ([[self document] citeKeyIsCrossreffed:aCiteKey])
+            errorCode = BDSKIsCrossreffedCrossrefError;
+    }
+    return errorCode;
+}
+
 - (NSString *)citation{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     return [NSString stringWithFormat:@"\\%@%@", [pw stringForKey:BDSKCiteStringKey], 

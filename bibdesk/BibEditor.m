@@ -1549,19 +1549,16 @@ static int numberOfOpenEditors = 0;
 		NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
 		NSString *message = nil;
 		
-		if ([[cell title] isEqualToString:BDSKCrossrefString]) {
+		if ([[cell title] isEqualToString:BDSKCrossrefString] && [NSString isEmptyString:[cell stringValue]] == NO) {
 			
-			if ([[publication citeKey] caseInsensitiveCompare:[cell stringValue]] == NSOrderedSame) {
-				message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
-			} else {
-				NSString *parentCr = [[[self document] publicationForCiteKey:[cell stringValue]] valueOfField:BDSKCrossrefString inherit:NO];
-				
-				if (![NSString isEmptyString:parentCr]) {
-					message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
-				} else if ([[self document] citeKeyIsCrossreffed:[publication citeKey]]) {
-					message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
-				}
-			}
+            // check whether we won't get a crossref chain
+            int errorCode = [publication canSetCrossref:[cell stringValue] andCiteKey:[publication citeKey]];
+            if (errorCode == BDSKSelfCrossrefError)
+                message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
+            else if (errorCode == BDSKChainCrossrefError)
+                message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
+            else if (errorCode == BDSKIsCrossreffedCrossrefError)
+                message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
 			
 			if (message) {
                 BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
@@ -1578,12 +1575,12 @@ static int numberOfOpenEditors = 0;
         		
 	} else if (control == citeKeyField) {
 		
+        NSString *message = nil;
+        NSString *cancelButton = nil;
         NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] fragileCiteKeyCharacterSet];
         NSRange r = [[control stringValue] rangeOfCharacterFromSet:invalidSet];
         
         if (r.location != NSNotFound) {
-            NSString *message = nil;
-            NSString *cancelButton = nil;
             
             if (forceEndEditing) {
                 message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX.", @"");
@@ -1592,6 +1589,16 @@ static int numberOfOpenEditors = 0;
                 cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
             }
             
+        } else {
+            // check whether we won't crossref to the new citekey
+            int errorCode = [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[control stringValue]];
+            if (errorCode == BDSKSelfCrossrefError)
+                message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
+            else if (errorCode != BDSKNoCrossrefError) // shouldn't happen
+                message = NSLocalizedString(@"Cannot set this cite key as this would lead to a crossreff chain.", @"");
+        }
+        
+        if (message) {
             BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Value", @"Invalid Value") 
                                                  defaultButton:NSLocalizedString(@"OK", @"OK")
                                                alternateButton:cancelButton
@@ -1606,8 +1613,7 @@ static int numberOfOpenEditors = 0;
                 [control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
                 return NO;
             }
-        }
-		
+		}
 	}
 	
 	return YES;
@@ -2363,17 +2369,13 @@ static int numberOfOpenEditors = 0;
 		NSString *message = nil;
 		
 		// first check if we don't create a Crossref chain
-		if ([[publication citeKey] caseInsensitiveCompare:crossref] == NSOrderedSame) {
+        int errorCode = [publication canSetCrossref:crossref andCiteKey:[publication citeKey]];
+		if (errorCode == BDSKSelfCrossrefError)
 			message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
-		} else {
-			NSString *parentCr = [[[self document] publicationForCiteKey:crossref] valueOfField:BDSKCrossrefString inherit:NO];
-			
-			if (![NSString isEmptyString:parentCr]) {
-				message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
-			} else if ([[self document] citeKeyIsCrossreffed:[publication citeKey]]) {
-				message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
-			}
-		}
+		else if (errorCode == BDSKChainCrossrefError)
+            message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
+		else if (errorCode == BDSKIsCrossreffedCrossrefError)
+            message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
 		
 		if (message) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value") 
@@ -2395,6 +2397,7 @@ static int numberOfOpenEditors = 0;
 	NSString *key = nil;
 	NSString *oldValue = nil;
 	NSString *newValue = nil;
+    NSString *crossref = nil;
 	
 	[publication setPubType:[tempBI pubType]]; // do we want this always?
 	
@@ -2402,12 +2405,15 @@ static int numberOfOpenEditors = 0;
 		newValue = [tempBI valueOfField:key inherit:NO];
 		if([newValue isEqualToString:@""])
 			continue;
-		
+        
 		oldValue = [publication valueOfField:key inherit:NO]; // value is the value of key in the dragged-onto window.
 		
 		// only set the field if we force or the value was empty
 		if((modifier & optionKey) || [NSString isEmptyString:oldValue]){
-			[publication setField:key toValue:newValue];
+            if([key isEqualToString:BDSKCrossrefString])
+                crossref == newValue; // we have to check this later against the cite key to avoid crossref chains
+            else
+                [publication setField:key toValue:newValue];
 		}
 	}
     
@@ -2417,9 +2423,16 @@ static int numberOfOpenEditors = 0;
     }
     
     // check cite key here in case we didn't autogenerate, or we're supposed to overwrite
-	if(((modifier & optionKey) != 0 || [publication hasEmptyOrDefaultCiteKey]) && ([tempBI hasEmptyOrDefaultCiteKey] == NO)){
+	if(((modifier & optionKey) != 0 || [publication hasEmptyOrDefaultCiteKey]) && 
+       [tempBI hasEmptyOrDefaultCiteKey] == NO &&
+       [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[tempBI citeKey]] == BDSKNoCrossrefError) {
 		[publication setCiteKey:[tempBI citeKey]];
 	}
+    
+    // we don't set the crossref when it would lead to a crossref chain
+    if(crossref && [publication canSetCrossref:crossref andCiteKey:[publication citeKey]] == BDSKNoCrossrefError) {
+        [publication setField:BDSKCrossrefString toValue:crossref];
+    }
     
 	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 	
