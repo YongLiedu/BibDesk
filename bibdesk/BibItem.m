@@ -1875,8 +1875,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     AddXMLField(@"keyword",BDSKKeywordsString);
     [s appendString:@"</keywords>"];
     [s appendString:@"<urls>"];
-    AddXMLField(@"pdf-urls",BDSKLocalUrlString);
-    AddXMLField(@"related-urls",BDSKUrlString);
+    [s appendString:@"<pdf-urls>"];
+    AddXMLField(@"url",BDSKLocalUrlString);
+    [s appendString:@"</pdf-urls>"];
+    [s appendString:@"<related-urls>"];
+    AddXMLField(@"url",BDSKUrlString);
+    [s appendString:@"</related-urls>"];
     [s appendString:@"</urls>"];
     AddXMLField(@"abstract",BDSKAbstractString);
     AddXMLField(@"research-notes",BDSKAnnoteString);
