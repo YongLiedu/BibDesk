@@ -976,9 +976,9 @@ static CFDictionaryRef selectorTable = NULL;
     if ([NSString isEmptyString:aCrossref] == NO) {
         if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
             errorCode = BDSKSelfCrossrefError;
-        else if ([NSString isEmptyString:[[[self document] publicationForCiteKey:aCiteKey] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
+        else if ([NSString isEmptyString:[[document publicationForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
             errorCode = BDSKChainCrossrefError;
-        else if ([[self document] citeKeyIsCrossreffed:aCiteKey])
+        else if ([document citeKeyIsCrossreffed:aCiteKey])
             errorCode = BDSKIsCrossreffedCrossrefError;
     }
     return errorCode;
