@@ -14,10 +14,9 @@
 		);
 		argumentStrings = (
 		);
+		autoAttachOnCrash = 1;
 		configStateDict = {
 		};
-		cppStopOnCatchEnabled = 0;
-		cppStopOnThrowEnabled = 0;
 		customDataFormattersEnabled = 1;
 		debuggerPlugin = GDBDebugging;
 		disassemblyDisplayState = 0;
@@ -307,13 +306,45 @@
 		vrLen = 748;
 		vrLoc = 2827;
 	};
-	27AF74EF08021E93006A6ADE /* Makefile */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {810, 288}}";
-			sepNavSelRange = "{319, 0}";
-			sepNavVisRect = "{{0, 24}, {810, 254}}";
-			sepNavWindowFrame = "{{15, 14}, {827, 813}}";
-		};
+	27B38E3A0A952970001C09FA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = F9022C970758038000C3F701 /* BibTypeManager.h */;
+		name = "BibTypeManager.h: 39";
+		rLen = 30;
+		rLoc = 1695;
+		rType = 0;
+		vrLen = 2441;
+		vrLoc = 1172;
+	};
+	27B38E460A9529AA001C09FA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = F9022C970758038000C3F701 /* BibTypeManager.h */;
+		name = "BibTypeManager.h: 39";
+		rLen = 30;
+		rLoc = 1695;
+		rType = 0;
+		vrLen = 2441;
+		vrLoc = 1172;
+	};
+	27B38E4A0A9529F1001C09FA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = F9022C970758038000C3F701 /* BibTypeManager.h */;
+		name = "BibTypeManager.h: 39";
+		rLen = 30;
+		rLoc = 1695;
+		rType = 0;
+		vrLen = 2441;
+		vrLoc = 1172;
+	};
+	27B38E4C0A952D13001C09FA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = F9022C970758038000C3F701 /* BibTypeManager.h */;
+		name = "BibTypeManager.h: 39";
+		rLen = 30;
+		rLoc = 1695;
+		rType = 0;
+		vrLen = 2441;
+		vrLoc = 1172;
 	};
 	27CD031A07D82C4E00806B7E /* TestComplexString.h */ = {
 		uiCtxt = {
@@ -346,13 +377,6 @@
 			sepNavVisRect = "{{0, 606}, {357, 516}}";
 		};
 	};
-	27D4FB5907DE7A97001CAB00 /* Scripting Notes */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {856, 300}}";
-			sepNavSelRange = "{257, 0}";
-			sepNavVisRect = "{{0, 0}, {856, 217}}";
-		};
-	};
 	27E89E220805E9F500E4DA08 /* applehelp.init */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {810, 1790}}";
@@ -368,8 +392,7 @@
 		};
 	};
 	29B97313FDCFA39411CA2CEA /* Project object */ = {
-		activeBuildConfigurationName = Development;
-		activeBuildStyle = 4A9504CCFFE6A4B311CA0CBA /* Development */;
+		activeBuildConfigurationName = Debug;
 		activeExecutable = 2701AA790767BFDE0070AB6F /* Bibdesk */;
 		activeTarget = 8D1107260486CEB800E47090 /* BibDesk */;
 		addToTargets = (
@@ -496,7 +519,7 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 143494105;
+			PBXPerProjectTemplateStateSaveDate = 177547567;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -673,7 +696,7 @@
 					};
 				},
 			);
-			PBXWorkspaceStateSaveDate = 143494105;
+			PBXWorkspaceStateSaveDate = 177547567;
 		};
 		perUserProjectItems = {
 			274168C9083E51C000341FAB = 274168C9083E51C000341FAB /* PBXTextBookmark */;
@@ -688,9 +711,13 @@
 			2766739E088D8A89004CA127 = 2766739E088D8A89004CA127 /* PBXTextBookmark */;
 			2766739F088D8A89004CA127 = 2766739F088D8A89004CA127 /* PBXTextBookmark */;
 			276673A0088D8A89004CA127 = 276673A0088D8A89004CA127 /* PBXTextBookmark */;
-			276673E2088D8BDB004CA127 /* PBXTextBookmark */ = 276673E2088D8BDB004CA127 /* PBXTextBookmark */;
+			276673E2088D8BDB004CA127 = 276673E2088D8BDB004CA127 /* PBXTextBookmark */;
 			27A9379F083E5617005376F9 = 27A9379F083E5617005376F9 /* PBXTextBookmark */;
 			27A937A1083E5617005376F9 = 27A937A1083E5617005376F9 /* PBXTextBookmark */;
+			27B38E3A0A952970001C09FA /* PBXTextBookmark */ = 27B38E3A0A952970001C09FA /* PBXTextBookmark */;
+			27B38E460A9529AA001C09FA /* PBXTextBookmark */ = 27B38E460A9529AA001C09FA /* PBXTextBookmark */;
+			27B38E4A0A9529F1001C09FA /* PBXTextBookmark */ = 27B38E4A0A9529F1001C09FA /* PBXTextBookmark */;
+			27B38E4C0A952D13001C09FA /* PBXTextBookmark */ = 27B38E4C0A952D13001C09FA /* PBXTextBookmark */;
 		};
 		sourceControlManager = 2701AABC0767BFF60070AB6F /* Source Control */;
 		userBuildSettings = {
@@ -755,42 +782,28 @@
 			sepNavVisRect = "{{0, 0}, {856, 266}}";
 		};
 	};
-	F9022C3E0758027800C3F701 /* BDSKDragOutlineView.h */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {860, 576}}";
-			sepNavSelRange = "{1562, 0}";
-			sepNavVisRect = "{{0, 21}, {860, 555}}";
-		};
-	};
-	F9022C3F0758027800C3F701 /* BDSKDragOutlineView.m */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {860, 720}}";
-			sepNavSelRange = "{2044, 0}";
-			sepNavVisRect = "{{0, 155}, {860, 555}}";
-		};
-	};
-	F9022C400758027800C3F701 /* BDSKDragTableView.h */ = {
+	F9022C400758027800C3F701 /* BDSKMainTableView.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {860, 756}}";
 			sepNavSelRange = "{3, 17}";
 			sepNavVisRect = "{{0, 0}, {860, 391}}";
 		};
 	};
-	F9022C410758027800C3F701 /* BDSKDragTableView.m */ = {
+	F9022C410758027800C3F701 /* BDSKMainTableView.m */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {813, 3420}}";
 			sepNavSelRange = "{6655, 0}";
 			sepNavVisRect = "{{0, 1603}, {813, 454}}";
 		};
 	};
-	F9022C480758027800C3F701 /* BDSKFormCellFormatter.h */ = {
+	F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {655, 548}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRect = "{{0, 0}, {655, 548}}";
 		};
 	};
-	F9022C490758027800C3F701 /* BDSKFormCellFormatter.m */ = {
+	F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {655, 1800}}";
 			sepNavSelRange = "{0, 0}";
@@ -944,9 +957,9 @@
 	};
 	F9022C970758038000C3F701 /* BibTypeManager.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {557, 1992}}";
+			sepNavIntBoundsRect = "{{0, 0}, {557, 2916}}";
 			sepNavSelRange = "{1695, 30}";
-			sepNavVisRect = "{{0, 408}, {557, 559}}";
+			sepNavVisRect = "{{0, 351}, {557, 559}}";
 		};
 	};
 	F9022C980758038000C3F701 /* BibTypeManager.m */ = {
@@ -978,14 +991,14 @@
 			sepNavVisRect = "{{0, 1691}, {792, 590}}";
 		};
 	};
-	F9022CA20758038000C3F701 /* OATypeAheadSelectionHelper_Extensions.h */ = {
+	F9022CA20758038000C3F701 /* BDSKTypeSelectHelper.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1192, 576}}";
 			sepNavSelRange = "{1730, 50}";
 			sepNavVisRect = "{{0, 374}, {1192, 202}}";
 		};
 	};
-	F9022CA30758038000C3F701 /* OATypeAheadSelectionHelper_Extensions.m */ = {
+	F9022CA30758038000C3F701 /* BDSKTypeSelectHelper.m */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {813, 1380}}";
 			sepNavSelRange = "{1716, 7}";
@@ -1013,6 +1026,9 @@
 			sepNavVisRect = "{{0, 0}, {863, 283}}";
 		};
 	};
+	F91A2D65089A7CF70009B1C1 /* Tiger */ = {
+		activeExec = 0;
+	};
 	F91B5C510764135B0011ED22 /* About the Scripts Menu.scpt */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {655, 4812}}";
@@ -1020,22 +1036,10 @@
 			sepNavVisRect = "{{0, 0}, {655, 548}}";
 		};
 	};
-	F98870A107580D63001D4D49 /* OmniAppKit */ = {
-		activeExec = 0;
-	};
-	F98870A607580D83001D4D49 /* OmniFoundation */ = {
-		activeExec = 0;
-	};
-	F98870B007580DAF001D4D49 /* OmniBase */ = {
-		activeExec = 0;
-	};
 	F98870BB07580DEF001D4D49 /* latex2rtf */ = {
 		activeExec = 0;
 	};
 	F98870BF07580E0B001D4D49 /* pdftotext */ = {
-		activeExec = 0;
-	};
-	F98870C407580E18001D4D49 /* AGRegex */ = {
 		activeExec = 0;
 	};
 	F98870CE07580E5F001D4D49 /* HeaderDoc */ = {
@@ -1044,7 +1048,7 @@
 	F98870D407580E94001D4D49 /* DiskImage */ = {
 		activeExec = 0;
 	};
-	F994B8F607F5F65F00751DA1 /* RelNotes.rtf */ = {
+	F994B8F607F5F65F00751DA1 /* English */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {792, 6524}}";
 			sepNavSelRange = "{59, 0}";
