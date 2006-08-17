@@ -101,7 +101,7 @@
 	
 	MacroTableViewWindowController *macroTextFieldWC;
     
-    BOOL temporaryTypeAheadMode;
+    BOOL temporaryTypeSelectMode;
     NSResponder *savedFirstResponder;
 }
 
