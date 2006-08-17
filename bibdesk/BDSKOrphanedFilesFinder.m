@@ -209,6 +209,14 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return YES;
 }
 
+- (IBAction)search:(id)sender{
+    [arrayController setSearchString:[sender stringValue]];
+    [arrayController rearrangeObjects];
+    unsigned int count = [[arrayController arrangedObjects] count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
+    [statusField setStringValue:message];
+}    
+
 #pragma mark Accessors
  
 - (NSArray *)orphanedFiles {
@@ -385,17 +393,105 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (void)orphanedFileServer:(BDSKOrphanedFileServer *)aServer foundFiles:(NSArray *)newFiles{
     NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
     [mutableArray addObjectsFromArray:newFiles];
-    unsigned int count = [mutableArray count];
+    unsigned int count = [[arrayController arrangedObjects] count];
     NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @""), count];
     [statusField setStringValue:[message stringByAppendingEllipsis]];
 }
 
 - (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
-    unsigned int count = [self countOfOrphanedFiles];
+    unsigned int count = [[arrayController arrangedObjects] count];
     NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
     if ([server allFilesEnumerated] == NO)
         message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Stopped"), message];
     [self stopAnimationWithStatusMessage:message];
+}
+
+@end
+
+#pragma mark -
+#pragma mark Array controller subclass for searching
+
+@interface NSURL (BDSKPathSearch)
+- (BOOL)pathContainsSubstring:(NSString *)aString;
+@end
+
+@implementation NSURL (BDSKPathSearch)
+
+// compare case-insensitive and non-literal
+- (BOOL)pathContainsSubstring:(NSString *)aString;
+{
+    CFURLRef theURL = (CFURLRef)self;
+    CFStringRef path = CFURLCopyFileSystemPath(theURL, kCFURLPOSIXPathStyle);
+    BOOL found = NO;
+    if(path){
+        found = CFStringFindWithOptions(path, (CFStringRef)aString, CFRangeMake(0, CFStringGetLength(path)), kCFCompareNonliteral | kCFCompareCaseInsensitive, NULL);
+        CFRelease(path);
+    }
+    return found;
+}
+
+@end
+
+@implementation BDSKOrphanedFilesArrayController
+
+- (void)updateTemplateMenu
+{
+    NSMenu *menu = [[[searchField cell] searchMenuTemplate] copyWithZone:[NSMenu menuZone]];
+    [[menu itemAtIndex:0] setState:(showsMatches ? NSOnState : NSOffState)];
+    [[menu itemAtIndex:1] setState:(showsMatches ? NSOffState : NSOnState)];
+    [[searchField cell] setSearchMenuTemplate:menu];
+    [menu release];
+}
+
+- (void)awakeFromNib
+{
+    showsMatches = YES;
+    [self updateTemplateMenu];   
+}
+
+- (void)dealloc
+{
+    [self setSearchString:nil];
+    [super dealloc];
+}
+
+- (void)setSearchString:(NSString *)aString;
+{
+    [searchString autorelease];
+    searchString = [aString copy];
+}
+
+- (NSString *)searchString { return searchString; }
+
+- (IBAction)showMatches:(id)sender;
+{
+    showsMatches = YES;
+    [self updateTemplateMenu];
+    [self rearrangeObjects];
+}
+
+- (IBAction)hideMatches:(id)sender;
+{
+    showsMatches = NO;
+    [self updateTemplateMenu];
+    [self rearrangeObjects];
+}
+
+- (NSArray *)arrangeObjects:(NSArray *)objects
+{
+    if([NSString isEmptyString:searchString])
+        return [super arrangeObjects:objects];
+    
+    NSMutableArray *array = [[objects mutableCopy] autorelease];
+    unsigned i = [array count];
+    BOOL itemMatches;
+    while(i--){
+        itemMatches = [[array objectAtIndex:i] pathContainsSubstring:searchString];
+        if((itemMatches && showsMatches == NO) || (itemMatches == NO && showsMatches))
+            [array removeObjectAtIndex:i];
+    }
+    
+    return [super arrangeObjects:array];
 }
 
 @end

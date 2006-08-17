@@ -38,12 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKOrphanedFileServer;
+@class BDSKOrphanedFileServer, BDSKOrphanedFilesArrayController;
 
 @interface BDSKOrphanedFilesFinder : NSWindowController  {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *refreshButton;
-    IBOutlet NSArrayController *arrayController;
+    IBOutlet BDSKOrphanedFilesArrayController *arrayController;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSTextField *statusField;
     IBOutlet NSMenu *contextMenu;
@@ -63,11 +63,27 @@
 - (IBAction)stopRefreshing:(id)sender;
 
 - (IBAction)showFile:(id)sender;
+- (IBAction)search:(id)sender;
 
 - (NSArray *)orphanedFiles;
 - (unsigned)countOfOrphanedFiles;
 - (id)objectInOrphanedFilesAtIndex:(unsigned)theIndex;
 - (void)insertObject:(id)obj inOrphanedFilesAtIndex:(unsigned)theIndex;
 - (void)removeObjectFromOrphanedFilesAtIndex:(unsigned)theIndex;
+
+@end
+
+@interface BDSKOrphanedFilesArrayController : NSArrayController
+{
+    NSString *searchString;
+    BOOL showsMatches;
+    IBOutlet NSSearchField *searchField;
+    NSString *statusMessage;
+}
+
+- (void)setSearchString:(NSString *)aString;
+- (NSString *)searchString;
+- (IBAction)showMatches:(id)sender;
+- (IBAction)hideMatches:(id)sender;
 
 @end
