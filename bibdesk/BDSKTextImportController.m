@@ -37,6 +37,7 @@
  */
 
 #import "BDSKTextImportController.h"
+#import <OmniFoundation/NSString-OFExtensions.h>
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BDSKCiteKeyFormatter.h"
@@ -74,9 +75,9 @@
 
 - (BOOL)addCurrentSelectionToFieldAtIndex:(int)index;
 
-- (void)startTemporaryTypeAheadMode;
-- (void)endTemporaryTypeAheadModeAndSet:(BOOL)set edit:(BOOL)edit;
-- (BOOL)isInTemporaryTypeAheadMode;
+- (void)startTemporaryTypeSelectMode;
+- (void)endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit;
+- (BOOL)isInTemporaryTypeSelectMode;
 
 - (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
 - (void)saveBookmarks;
@@ -1251,11 +1252,13 @@
         return key;
     }else if([tcID isEqualToString:@"Num"]){
         if(row < 10)
-            return [NSString stringWithFormat:@"%C%d", 0x2318, row];
+            return [NSString stringWithFormat:@"%@%d", [NSString commandKeyIndicatorString], row];
         else if(row < 20)
-            return [NSString stringWithFormat:@"%C%C%d", 0x2325, 0x2318, row - 10];
+            return [NSString stringWithFormat:@"%@%@%d", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], row - 10];
         else if(row < 30)
-            return [NSString stringWithFormat:@"%C%C%d", 0x21E7, 0x2318, row - 20];
+            return [NSString stringWithFormat:@"%@%@%d", [NSString controlKeyIndicatorString], [NSString commandKeyIndicatorString], row - 20];
+        else if(row < 40)
+            return [NSString stringWithFormat:@"%@%@%@%d", [NSString controlKeyIndicatorString], [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], row - 30];
         else return @"";
     }else{
         return [item valueOfField:key];
@@ -1338,11 +1341,11 @@
 	}
 }
 
-#pragma mark || Methods to support the type-ahead selector.
+#pragma mark || Methods to support the type-select selector.
 
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(!searchString)
-        [statusLine setStringValue:[self isInTemporaryTypeAheadMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
+        [statusLine setStringValue:[self isInTemporaryTypeSelectMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
     else
         [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @""), [searchString capitalizedString]]];
 }
@@ -1358,7 +1361,7 @@
     else
         return NSNotFound;
 }
-// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
+// Type-select behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 
 // fixme -  also need to call the processkeychars in keydown...
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
@@ -1366,12 +1369,12 @@
     [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
     [itemTableView scrollRowToVisible:itemIndex];
 }
-// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
+// We call this when a type-select match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 
-- (void)startTemporaryTypeAheadMode{
-    if (temporaryTypeAheadMode == YES)
+- (void)startTemporaryTypeSelectMode{
+    if (temporaryTypeSelectMode == YES)
         return;
-    temporaryTypeAheadMode = YES;
+    temporaryTypeSelectMode = YES;
     savedFirstResponder = [[self window] firstResponder];
     if ([savedFirstResponder isKindOfClass:[NSTextView class]] && [(NSTextView *)savedFirstResponder isFieldEditor]) {
         savedFirstResponder = [(NSTextView *)savedFirstResponder delegate];
@@ -1382,10 +1385,10 @@
     [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"")];
 }
 
-- (void)endTemporaryTypeAheadModeAndSet:(BOOL)set edit:(BOOL)edit{
-    if (temporaryTypeAheadMode == NO)
+- (void)endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit{
+    if (temporaryTypeSelectMode == NO)
         return;
-    temporaryTypeAheadMode = NO;
+    temporaryTypeSelectMode = NO;
     if (edit == NO)
         [[self window] makeFirstResponder:savedFirstResponder];
     savedFirstResponder = nil;
@@ -1399,8 +1402,8 @@
     [statusLine setStringValue:@""];
 }
 
-- (BOOL)isInTemporaryTypeAheadMode{
-    return temporaryTypeAheadMode;
+- (BOOL)isInTemporaryTypeSelectMode{
+    return temporaryTypeSelectMode;
 }
 
 #pragma mark Splitview delegate methods
@@ -1424,12 +1427,6 @@
     unsigned int flags = [theEvent modifierFlags];
     
     if (flags & NSCommandKeyMask) {
-        // these are returned for digits and the shift modifier, at least with the standard keyboard
-        NSRange range = [@")!@#$%^&*(" rangeOfCharacterFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(c,1)]];
-        if (range.location != NSNotFound) {
-            c = (unichar)range.location + '0';
-            flags |= NSShiftKeyMask;
-        }
         
         if (c >= '0' && c <= '9') {
         
@@ -1437,29 +1434,29 @@
             BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 index += 10;
-            if (flags & NSShiftKeyMask)
+            if (flags & NSControlKeyMask)
                 index += 20;
             if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
                 NSBeep();
                 rv = NO;
             }
-            if ([[self dataSource] isInTemporaryTypeAheadMode])
-                [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:NO];
+            if ([[self dataSource] isInTemporaryTypeSelectMode])
+                [[self dataSource] endTemporaryTypeSelectModeAndSet:NO edit:NO];
             return rv;
         
-        } else if ([[self dataSource] isInTemporaryTypeAheadMode]) {
+        } else if ([[self dataSource] isInTemporaryTypeSelectMode]) {
         
             if (c == NSTabCharacter || c == 0x001b) {
-                [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:YES];
+                [[self dataSource] endTemporaryTypeSelectModeAndSet:NO edit:YES];
                 return YES;
             } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
-                [[self dataSource] endTemporaryTypeAheadModeAndSet:YES edit:YES];
+                [[self dataSource] endTemporaryTypeSelectModeAndSet:YES edit:YES];
                 return YES;
             }
         
         } else if (c == '=') {
         
-            [[self dataSource] startTemporaryTypeAheadMode];
+            [[self dataSource] startTemporaryTypeSelectMode];
             return YES;
         }
     }
@@ -1478,17 +1475,17 @@
     if (fieldNameCharSet == nil) 
         fieldNameCharSet = [[[[BibTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
     
-    if ([[self dataSource] isInTemporaryTypeAheadMode]) {
+    if ([[self dataSource] isInTemporaryTypeSelectMode]) {
         if (c == NSDownArrowFunctionKey || c == NSUpArrowFunctionKey) {
             // we allow navigation in the table using arrow keys
         } else if (flags != 0) {
             NSBeep();
             return;
         } else if (c == NSTabCharacter || c == 0x001b) {
-            [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:NO];
+            [[self dataSource] endTemporaryTypeSelectModeAndSet:NO edit:NO];
             return;
         } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
-            [[self dataSource] endTemporaryTypeAheadModeAndSet:YES edit:NO];
+            [[self dataSource] endTemporaryTypeSelectModeAndSet:YES edit:NO];
             return;
         } else if ([fieldNameCharSet characterIsMember:c] == NO) {
             NSBeep();
@@ -1504,7 +1501,7 @@
 }
 
 - (BOOL)resignFirstResponder {
-    [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:NO];
+    [[self dataSource] endTemporaryTypeSelectModeAndSet:NO edit:NO];
     return [super resignFirstResponder];
 }
 
