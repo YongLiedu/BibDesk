@@ -1,9 +1,8 @@
-/*
- *  BDSKParserProtocol.h
- *  Bibdesk
- *
- *  Created by Adam Maxwell on 02/07/06.
- *  Copyright (c) 2006 Adam R. Maxwell. All rights reserved.
+//
+// BDSKParserProtocol.h
+// Bibdesk
+//
+// Created by Adam Maxwell on 02/07/06.
 /*
  This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
