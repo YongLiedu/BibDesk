@@ -2299,7 +2299,7 @@ static int numberOfOpenEditors = 0;
 	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];
 	
 	if(pboardType == nil){
-            return NSDragOperationNone;
+        return NSDragOperationNone;
     }
 	// sniff the string to see if it's a format we can parse
     if([pboardType isEqualToString:NSStringPboardType]){
@@ -2308,15 +2308,15 @@ static int numberOfOpenEditors = 0;
             return NSDragOperationNone;
     }
 
-    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	unsigned modifier = GetCurrentKeyModifiers();
-	if ( (modifier & (optionKey | cmdKey)) == (optionKey | cmdKey) ){ // hack to get the correct cursor
+    // get the correct cursor depending on the modifiers
+	if( (modifier & (optionKey | cmdKey)) == (optionKey | cmdKey) ){
 		return NSDragOperationLink;
-	}
-	if (sourceDragMask & NSDragOperationCopy) {
+    }else if (modifier & optionKey){ // give some indication that we are overwriting
 		return NSDragOperationCopy;
-	}
-	return NSDragOperationNone;
+	} else {
+        return NSDragOperationEvery;
+    }
 }
 
 - (BOOL)dragWindow:(BDSKDragWindow *)window receiveDrag:(id <NSDraggingInfo>)sender{
@@ -2324,25 +2324,20 @@ static int numberOfOpenEditors = 0;
     NSPasteboard *pboard = [sender draggingPasteboard];
 	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
 	NSArray *draggedPubs = nil;
-	NSError *error = nil;
     
 	if([pboardType isEqualToString:NSStringPboardType]){
 		NSString *pbString = [pboard stringForType:NSStringPboardType];
-		// sniff the string to see if it's a format we can parse
-		int type = [pbString contentStringType];
-        if (type == BDSKBibTeXStringType)
-            draggedPubs = [BibTeXParser itemsFromData:[pboard dataForType:NSStringPboardType] error:&error document:[self document]];
-        else
-            draggedPubs = [BDSKParserForStringType(type) itemsFromString:pbString error:&error];
-		if(draggedPubs == nil || error != nil) return NO;
+        // this returns nil when there was a parser error and the user didn't decide to proceed anyway
+        draggedPubs = [[self document] newPublicationsForString:pbString type:[pbString contentStringType] error:NULL];
 	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
 		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
         // we can't just unarchive, as this gives complex strings with the wrong macroResolver
 		draggedPubs = [[self document] newPublicationsFromArchivedData:pbData];
-	}else{
-		// we did not find a valid dragtype
-		return NO;
 	}
+    
+    // this happens when we didn't find a valid pboardType or parsing failed
+    if([draggedPubs count] == 0) 
+        return NO;
 	
 	BibItem *tempBI = [draggedPubs objectAtIndex:0]; // no point in dealing with multiple pubs for a single editor
 
@@ -2353,7 +2348,8 @@ static int numberOfOpenEditors = 0;
 	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
 	if((modifier & (optionKey | cmdKey)) == (optionKey | cmdKey)){
 		
-		NSString *crossref = [tempBI citeKey];
+		// linking, try to set the crossref field
+        NSString *crossref = [tempBI citeKey];
 		NSString *message = nil;
 		
 		// first check if we don't create a Crossref chain
@@ -2374,57 +2370,57 @@ static int numberOfOpenEditors = 0;
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return NO;
 		}
-		// add the crossref field if it doesn't exist, then set it to the citekey of the drag source's bibitem
+		
+        // add the crossref field if it doesn't exist, then set it to the citekey of the drag source's bibitem
 		[publication setField:BDSKCrossrefString toValue:crossref];
 		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
-		return YES;
-	}
-	
-	// we aren't linking, so here we decide which fields to overwrite, and just copy values over
-	NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
-	NSString *key = nil;
-	NSString *oldValue = nil;
-	NSString *newValue = nil;
-    NSString *crossref = nil;
-	
-	[publication setPubType:[tempBI pubType]]; // do we want this always?
-	
-	while(key = [newKeyE nextObject]){
-		newValue = [tempBI valueOfField:key inherit:NO];
-		if([newValue isEqualToString:@""])
-			continue;
-        
-		oldValue = [publication valueOfField:key inherit:NO]; // value is the value of key in the dragged-onto window.
 		
-		// only set the field if we force or the value was empty
-		if((modifier & optionKey) || [NSString isEmptyString:oldValue]){
-            if([key isEqualToString:BDSKCrossrefString])
-                crossref == newValue; // we have to check this later against the cite key to avoid crossref chains
-            else
-                [publication setField:key toValue:newValue];
-		}
-	}
-    
-    // autogenerate cite key if we aren't overwriting, and it hasn't already been set by the user
-    if((modifier & optionKey) == 0 && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [publication canGenerateAndSetCiteKey]){
-        [self generateCiteKey:nil];
-    }
-    
-    // check cite key here in case we didn't autogenerate, or we're supposed to overwrite
-	if(((modifier & optionKey) != 0 || [publication hasEmptyOrDefaultCiteKey]) && 
-       [tempBI hasEmptyOrDefaultCiteKey] == NO &&
-       [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[tempBI citeKey]] == BDSKNoCrossrefError) {
-		[publication setCiteKey:[tempBI citeKey]];
-	}
-    
-    // we don't set the crossref when it would lead to a crossref chain
-    if(crossref && [publication canSetCrossref:crossref andCiteKey:[publication citeKey]] == BDSKNoCrossrefError) {
-        [publication setField:BDSKCrossrefString toValue:crossref];
-    }
-    
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+        return YES;
+        
+	} else {
 	
-	return YES;
+        // we aren't linking, so here we decide which fields to overwrite, and just copy values over
+        NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
+        NSString *key = nil;
+        NSString *oldValue = nil;
+        NSString *newValue = nil;
+        BOOL shouldOverwrite = (modifier & optionKey) != 0;
+        
+        [publication setPubType:[tempBI pubType]]; // do we want this always?
+        
+        while(key = [newKeyE nextObject]){
+            newValue = [tempBI valueOfField:key inherit:NO];
+            if([newValue isEqualToString:@""])
+                continue;
+            
+            oldValue = [publication valueOfField:key inherit:NO]; // value is the value of key in the dragged-onto window.
+            
+            // only set the field if we force or the value was empty
+            if(shouldOverwrite || [NSString isEmptyString:oldValue]){
+                // if it's a crossref we should check if we don't create a crossref chain, otherwise we ignore
+                if([key isEqualToString:BDSKCrossrefString] && 
+                   [publication canSetCrossref:newValue andCiteKey:[publication citeKey]] != BDSKNoCrossrefError)
+                    continue;
+                [publication setField:key toValue:newValue];
+            }
+        }
+        
+        // autogenerate cite key if we aren't overwriting, and it hasn't already been set by the user
+        if(shouldOverwrite == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] && [publication canGenerateAndSetCiteKey]){
+            [self generateCiteKey:nil];
+        }
+        
+        // check cite key here in case we didn't autogenerate, or we're supposed to overwrite
+        if((shouldOverwrite || [publication hasEmptyOrDefaultCiteKey]) && 
+           [tempBI hasEmptyOrDefaultCiteKey] == NO &&
+           [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[tempBI citeKey]] == BDSKNoCrossrefError) {
+            [publication setCiteKey:[tempBI citeKey]];
+        }
+        
+        [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+        
+        return YES;
+    }
 }
 
 - (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
