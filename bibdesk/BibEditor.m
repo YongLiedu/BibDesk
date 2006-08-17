@@ -2308,14 +2308,15 @@ static int numberOfOpenEditors = 0;
             return NSDragOperationNone;
     }
 
-	unsigned modifier = GetCurrentKeyModifiers();
+    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
+    unsigned modifier = GetCurrentKeyModifiers();
     // get the correct cursor depending on the modifiers
 	if( (modifier & (optionKey | cmdKey)) == (optionKey | cmdKey) ){
 		return NSDragOperationLink;
-    }else if (modifier & optionKey){ // give some indication that we are overwriting
+    }else if (sourceDragMask & NSDragOperationCopy){
 		return NSDragOperationCopy;
 	} else {
-        return NSDragOperationEvery;
+        return NSDragOperationNone;
     }
 }
 
