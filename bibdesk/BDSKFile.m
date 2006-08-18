@@ -37,6 +37,7 @@
  */
 
 #import "BDSKFile.h"
+#import "NSURL_BDSKExtensions.h"
 
 @interface NSURL (BDSKPathEquality)
 - (BOOL)isEqualToFileURL:(NSURL *)other;
@@ -51,7 +52,7 @@ static Class BDSKFileClass = Nil;
 
 @implementation BDSKFile
 
-/* Lightweight object wrapper for an FSRef, but can also refer to a non-existent file by falling back to an NSURL.  Should not be archived to disk (use BDAlias), but can be passed between processes or threads via DO.  Not safe to use in hashing containers; uses FSRef-based comparison to determine equality if possible, and falls back to comparing paths non-literally and case-insensitively.
+/* Lightweight object wrapper for an FSRef, but can also refer to a non-existent file by falling back to an NSURL.  Should not be archived to disk (use BDAlias), but can be passed between processes or threads via DO.  Safe to use in hashing containers; uses FSRef-based comparison to determine equality if possible, and falls back to comparing paths non-literally and case-insensitively.
 
    Has some convenience accessors for other data representations.
 
@@ -106,13 +107,6 @@ static Class BDSKFileClass = Nil;
     return [[[self allocWithZone:NULL] initWithURL:aURL] autorelease]; 
 }
 
-// improved variant of NSObject's pointer-based hash; unsafe to return anything based on name, since it could change
-- (unsigned int)hash
-{
-    return( ((unsigned int) self >> 4) | 
-            (unsigned int) self << (32 - 4));
-}
-
 // we only want to encode the public superclass
 - (Class)classForCoder { return BDSKFileClass; }
 
@@ -144,51 +138,6 @@ static Class BDSKFileClass = Nil;
 - (id)copyWithZone:(NSZone *)aZone
 {
     return [[BDSKFile allocWithZone:aZone] initWithURL:[self fileURL]];
-}
-
-- (BOOL)isEqual:(id)other
-{
-    BOOL isEqual = NO;
-    if(other == self){
-        isEqual = YES;
-    
-    } else if([other isKindOfClass:BDSKFileClass]){
-        const FSRef *otherRef = [other fsRef];
-        
-        // use accessors for encapsulation...
-        const FSRef *fileRef = [self fsRef];
-        
-        if(fileRef && otherRef){
-            
-            // compare the FSRefs directly
-            isEqual = (noErr == FSCompareFSRefs(otherRef, fileRef));
-            
-        } else if(fileRef){ 
-            
-            // other didn't have an FSRef when created, but let's see if it exists now...
-            NSURL *otherURL = [other fileURL];
-            FSRef aRef;
-            if(CFURLGetFSRef((CFURLRef)otherURL, &aRef)){
-                otherRef = &aRef;
-                isEqual = (noErr == FSCompareFSRefs(otherRef, fileRef));
-            }
-            
-        } else if(otherRef){ 
-            
-            // I didn't have an FSRef when created, but let's see if we can create one now...
-            FSRef myRef;
-            if(CFURLGetFSRef((CFURLRef)[self fileURL], &myRef)){
-                const FSRef *myRefPtr = &myRef;
-                isEqual = (noErr == FSCompareFSRefs(otherRef, myRefPtr));
-            }
-            
-        } else { 
-            
-            // neither object has an FSRef; compare the file URLs as paths
-            isEqual = [[other fileURL] isEqualToFileURL:[self fileURL]];
-        }
-    }
-    return isEqual;
 }
 
 // primitive methods: subclass responsibility
@@ -231,6 +180,7 @@ static Class BDSKFileClass = Nil;
 @interface BDSKURLFile : BDSKFile <NSCopying>
 {
     NSURL *fileURL;
+    unsigned int hash;
 }
 @end
 
@@ -246,6 +196,7 @@ static Class BDSKFileClass = Nil;
     self = [super init];
     if(self){
         fileURL = [aURL copy];
+        hash = BDCaseInsensitiveStringHash([fileURL lastPathComponent]);
     }
     return self;
 }
@@ -259,6 +210,26 @@ static Class BDSKFileClass = Nil;
 - (id)copyWithZone:(NSZone *)aZone
 {
     return [self retain];
+}
+
+- (unsigned int)hash
+{ 
+    return hash; 
+}
+
+- (BOOL)isEqual:(id)other
+{
+    BOOL isEqual = NO;
+    if(self == other){
+        isEqual = YES;
+    } else if([other isKindOfClass:BDSKFileClass]){
+        isEqual = [fileURL isEqualToFileURL:[other fileURL]];
+    }
+#if OMNI_FORCE_ASSERTIONS
+    if(isEqual)
+        NSAssert([self hash] == [other hash], @"inconsistent hash and isEqual:");
+#endif
+    return isEqual; 
 }
 
 - (NSURL *)fileURL;
@@ -313,6 +284,39 @@ static Class BDSKFileClass = Nil;
 {
     NSZoneFree([self zone], (void *)fileRef);
     [super dealloc];
+}
+
+- (BOOL)isEqual:(id)other
+{
+    BOOL isEqual = NO;
+    if(self == other){
+        isEqual = YES;
+    } else if([other isKindOfClass:BDSKFileClass]){
+        isEqual = (noErr == FSCompareFSRefs(fileRef, [other fsRef]));
+    }
+#if OMNI_FORCE_ASSERTIONS
+    if(isEqual)
+        NSAssert([self hash] == [other hash], @"inconsistent hash and isEqual:");
+#endif
+    return isEqual;
+}
+
+// Knuth hash from http://www.partow.net/programming/hashfunctions/index.html
+unsigned int DEKHash(char *str, unsigned int len)
+{
+    unsigned int hash = len;
+    unsigned int i    = 0;
+    
+    for(i = 0; i < len; str++, i++)
+    {
+        hash = ((hash << 5) ^ (hash >> 27)) ^ (*str);
+    }
+    return (hash & 0x7FFFFFFF);
+}
+
+- (unsigned int)hash
+{
+    return DEKHash((char *)fileRef, sizeof(FSRef)/sizeof(char));
 }
 
 - (id)copyWithZone:(NSZone *)aZone
