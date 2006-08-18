@@ -50,9 +50,7 @@
 - (BOOL)replacementBecomeFirstResponder;
 - (void)replacementDealloc;
 - (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation;
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_3
 - (NSImage *)replacementDragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset;
-#endif
 - (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset;
 -(void)_drawDropHighlightOnRow:(int)rowIndex;
 @end
@@ -67,7 +65,8 @@ static IMP originalNoteNumberOfRowsChanged;
 static BOOL (*originalBecomeFirstResponder)(id self, SEL _cmd);
 static IMP originalDealloc;
 static IMP originalDraggedImageEndedAtOperation;
-static IMP originalDragImageForRows;
+static IMP originalDragImageForRowsEventOffset;
+static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 
 + (void)didLoad;
 {
@@ -77,10 +76,8 @@ static IMP originalDragImageForRows;
     originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
     originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
     originalDraggedImageEndedAtOperation = OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        originalDragImageForRows = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRows:event:offset:), @selector(replacementDragImageForRows:event:offset:));
-    else
-        originalDragImageForRows = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
+    originalDragImageForRowsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRows:event:offset:), @selector(replacementDragImageForRows:event:offset:));
+    originalDragImageForRowsWithIndexesTableColumnsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
 }
 
 - (BOOL)validateDelegatedMenuItem:(id<NSMenuItem>)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
@@ -352,23 +349,23 @@ static IMP originalDragImageForRows;
     [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
 }
 
-#if MAC_OS_X_VERSION_10_3 >= MAC_OS_X_VERSION_MAX_ALLOWED
 // @@ legacy implementation for 10.3 compatibility
 - (NSImage *)replacementDragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
-   	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
-        NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-        NSNumber *number;
-        NSEnumerator *rowE = [dragRows objectEnumerator];
-        while(number = [rowE nextObject])
-            [indexes addIndex:[number intValue]];
-		NSImage *image = [[self dataSource] tableView:self dragImageForRowsWithIndexes:indexes];
-		if (image != nil)
-			return image;
-	}
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    NSNumber *number;
+    NSEnumerator *rowE = [dragRows objectEnumerator];
+    while(number = [rowE nextObject])
+        [indexes addIndex:[number intValue]];
     
-    return originalDragImageForRows(self, _cmd, dragRows, dragEvent, dragImageOffset);
+    NSPoint zeroPoint = NSZeroPoint;
+    NSImage *image = [self replacementDragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
+    
+    if (image != nil) {
+        return image;
+    } else {
+        return originalDragImageForRowsEventOffset(self, _cmd, dragRows, dragEvent, dragImageOffset);
+    }
 }
-#endif
 
 - (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset{
    	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
@@ -377,9 +374,8 @@ static IMP originalDragImageForRows;
 			return image;
 	}
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        return originalDragImageForRows(self, _cmd, dragRows, tableColumns, dragEvent, dragImageOffset);
+        return originalDragImageForRowsWithIndexesTableColumnsEventOffset(self, _cmd, dragRows, tableColumns, dragEvent, dragImageOffset);
     } else {
-        OBASSERT_NOT_REACHED("10.4 replacement method called in 10.3");
         return nil;
     }
 }
