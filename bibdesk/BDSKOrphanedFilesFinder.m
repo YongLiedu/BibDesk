@@ -48,6 +48,7 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKOrphanedFileServer.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "BDSKFile.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -150,20 +151,21 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSEnumerator *fieldEnum;
     NSString *field;
     NSURL *fileURL;
+    BDSKFile *aFile;
     
     NSMutableSet *knownFiles = [NSMutableSet set];
     
     while (doc = [docEnum nextObject]) {
         fileURL = [doc fileURL];
         if (fileURL)
-            [knownFiles addObject:[fileURL precomposedPath]];
+            [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];;
         pubEnum = [[doc publications] objectEnumerator];
         while (pub = [pubEnum nextObject]) {
             fieldEnum = [localFileFields objectEnumerator];
             while (field = [fieldEnum nextObject]) {
                 fileURL = [pub localFileURLForField:field];
                 if (fileURL)
-                    [knownFiles addObject:[fileURL precomposedPath]];
+                    [knownFiles addObject:[BDSKFile fileWithURL:fileURL]];
             }
         }
     }

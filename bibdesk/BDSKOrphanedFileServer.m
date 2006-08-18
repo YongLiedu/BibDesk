@@ -39,6 +39,7 @@
 #import "BDSKOrphanedFileServer.h"
 #import "UKDirectoryEnumerator.h"
 #import "NSURL_BDSKExtensions.h"
+#import "BDSKFile.h"
 
 @interface BDSKOrphanedFileServer (PrivateServerThread)
 
@@ -165,40 +166,35 @@
     [enumerator setDesiredInfo:(kFSCatInfoFinderInfo | kFSCatInfoNodeFlags)];
     
     BOOL isDir, isHidden;
-    CFURLRef fullPathURL;
+    BDSKFile *aFile;
     
-    while ( (1 == keepEnumerating) && (fullPathURL = (CFURLRef)[enumerator nextObjectURL]) ){
+    while ( (1 == keepEnumerating) && (aFile = [enumerator nextObjectFile]) ){
         
         // periodically flush the cache        
         if([enumerator cacheExhausted] && [foundFiles count] >= 16){
             [self flushFoundFiles];
         }
         
-        CFStringRef lastPathComponent = NULL;        
-        lastPathComponent = CFURLCopyLastPathComponent(fullPathURL);
-        
         isDir = [enumerator isDirectory];
-        isHidden = NULL == lastPathComponent || [enumerator isInvisible] || CFStringHasPrefix(lastPathComponent, CFSTR("."));
-        
-        if(lastPathComponent) CFRelease(lastPathComponent);
+        isHidden = [enumerator isInvisible] || CFStringHasPrefix((CFStringRef)[aFile fileName], CFSTR("."));
         
         // ignore hidden files
         if (isHidden)
             continue;
-            
+        
         if (isDir){
             
             // resolve aliases in parent directories, since that's what BibItem does
-            CFURLRef resolvedURL = BDCopyFileURLResolvingAliases(fullPathURL);
+            NSURL *resolvedURL = (NSURL *)BDCopyFileURLResolvingAliases((CFURLRef)[aFile fileURL]);
             if(resolvedURL){
                 // recurse
-                [self checkAllFilesInDirectoryRootedAtURL:(NSURL *)resolvedURL];
+                [self checkAllFilesInDirectoryRootedAtURL:resolvedURL];
                 CFRelease(resolvedURL);
             }
             
-        } else if([knownFiles containsObject:[(NSURL *)fullPathURL precomposedPath]] == NO){
+        } else if([knownFiles containsObject:aFile] == NO){
             
-            [foundFiles addObject:(NSURL *)fullPathURL];
+            [foundFiles addObject:[aFile fileURL]];
             
         }
         
