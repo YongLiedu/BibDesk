@@ -63,11 +63,28 @@
 		[self setScriptErrorString:[NSString stringWithFormat:@"Invalid format string: %@", error]]; 
 		return nil;
 	}
+    
+    BOOL isLocalFile = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field];
+    NSString *papersFolderPath;
+    if (isLocalFile)
+        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub document]];
 	
-	NSString *string = [BDSKFormatParser parseFormat:formatString forField:field ofItem:pub];
+    NSString *suggestion = nil;
+    if ([field isEqualToString:BDSKCiteKeyString]) {
+        suggestion = [pub citeKey];
+    } else if (isLocalFile) {
+        suggestion = [pub localFilePathForField:field relativeTo:[[[pub document] fileName] stringByDeletingLastPathComponent] inherit:NO];
+        if ([suggestion hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
+            suggestion = [suggestion substringFromIndex:[papersFolderPath length]];
+        else
+            suggestion = nil;
+    } else {
+        suggestion = [pub valueOfField:field inherit:NO];
+    }
+    
+	NSString *string = [BDSKFormatParser parseFormat:formatString forField:field ofItem:pub suggestion:suggestion];
 	
-	if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field]) {
-		NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub document]];
+	if (isLocalFile) {
 		return [[NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:string]] absoluteString];
 	} 
 	
