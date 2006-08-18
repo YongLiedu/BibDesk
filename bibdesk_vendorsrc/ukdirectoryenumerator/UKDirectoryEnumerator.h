@@ -80,6 +80,7 @@
 -(id)					nextObject;             // NSDirectoryEnumerator-compatible variant.
 -(id)                   nextObjectFullPath;     // Variant that returns an absolute path.
 -(id)                   nextObjectURL;          // Variant that returns a file URL
+-(id)                   nextObjectFile;         // Variant that returns a BDSKFile object
 
 // Advanced users:
 -(void)					setDesiredInfo: (FSCatalogInfoBitmap)n;   // Flags what additional info you want.

@@ -18,7 +18,7 @@
 // -----------------------------------------------------------------------------
 
 #import "UKDirectoryEnumerator.h"
-
+#import "BDSKFile.h"
 
 // -----------------------------------------------------------------------------
 //  Prototypes:
@@ -179,7 +179,7 @@ static NSZone *enumeratorZone = NULL;
     return [[self nextObjectURL] path];
 }
 
--(id)   nextObjectURL
+-(id)   nextObjectFile
 {
 	if( currIndex >= foundItems )
 	{
@@ -203,8 +203,13 @@ static NSZone *enumeratorZone = NULL;
 			return nil;
         }
 	}
-    CFURLRef fileURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &(cache[currIndex++]));
-    return [(id)fileURL autorelease];
+    BDSKFile *file = [[BDSKFile alloc] initWithFSRef:&(cache[currIndex++])];
+    return [file autorelease];
+}
+
+-(id)   nextObjectURL
+{
+    return [[self nextObjectFile] fileURL];
 }
 
 
