@@ -141,7 +141,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return [NSURL fileURLWithPath:papersFolderPath];
 }
 
-- (NSSet *)knownFiles
+- (NSArray *)knownFiles
 {
     NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
@@ -151,9 +151,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSEnumerator *fieldEnum;
     NSString *field;
     NSURL *fileURL;
-    BDSKFile *aFile;
     
-    NSMutableSet *knownFiles = [NSMutableSet set];
+    NSMutableArray *knownFiles = [NSMutableArray array];
     
     while (doc = [docEnum nextObject]) {
         fileURL = [doc fileURL];

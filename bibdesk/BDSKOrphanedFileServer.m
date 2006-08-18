@@ -46,7 +46,7 @@
 // these messages should only be sent on the server thread
 - (void)checkAllFilesInDirectoryRootedAtURL:(NSURL *)theURL;
 - (void)setBaseURL:(NSURL *)theURL;
-- (void)setKnownFiles:(NSSet *)theFiles;
+- (void)setKnownFiles:(NSArray *)theFiles;
 - (void)flushFoundFiles;
 - (void)clearFoundFiles;
 
@@ -96,7 +96,7 @@
 
 #pragma mark Server thread protocol
 
-- (oneway void)checkForOrphansWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
+- (oneway void)checkForOrphansWithKnownFiles:(bycopy NSArray *)theFiles baseURL:(bycopy NSURL *)theURL;
 {
     // set the stop flag so enumeration ceases
     // CMH: is this necessary, shouldn't we already be done as we're on the same thread?
@@ -209,7 +209,7 @@
     baseURL = [theURL copy];
 }
 
-- (void)setKnownFiles:(NSSet *)theFiles;
+- (void)setKnownFiles:(NSArray *)theFiles;
 {
     [knownFiles autorelease];
     knownFiles = [theFiles copy];

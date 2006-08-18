@@ -51,7 +51,7 @@ static Class BDSKFileClass = Nil;
 
 @implementation BDSKFile
 
-/* Lightweight object wrapper for an FSRef, but can also refer to a non-existent file by falling back to an NSURL.  Should not be archived to disk (use BDAlias), but can be passed between processes or threads via DO.  Safe to use in hashing containers.  Uses FSRef-based comparison to determine equality if possible, and falls back to comparing paths non-literally and case-insensitively.
+/* Lightweight object wrapper for an FSRef, but can also refer to a non-existent file by falling back to an NSURL.  Should not be archived to disk (use BDAlias), but can be passed between processes or threads via DO.  Not safe to use in hashing containers; uses FSRef-based comparison to determine equality if possible, and falls back to comparing paths non-literally and case-insensitively.
 
    Has some convenience accessors for other data representations.
 
