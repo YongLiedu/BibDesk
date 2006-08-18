@@ -42,7 +42,7 @@
 
 @protocol BDSKOrphanedFileServerThread <BDSKAsyncDOServerThread>
 
-- (oneway void)checkForOrphansWithKnownFiles:(bycopy NSArray *)theFiles baseURL:(bycopy NSURL *)theURL;
+- (oneway void)checkForOrphansWithKnownFiles:(bycopy NSSet *)theFiles baseURL:(bycopy NSURL *)theURL;
 
 @end
 
@@ -57,7 +57,7 @@
 @interface BDSKOrphanedFileServer : BDSKAsynchronousDOServer <BDSKOrphanedFileServerThread, BDSKOrphanedFileServerMainThread>
 {
     NSMutableArray *foundFiles;     // cache of file URLs from UKDirectoryEnumerator minus knownFiles
-    NSArray *knownFiles;            // file paths from BibItem
+    NSSet *knownFiles;              // file paths from BibItem
     NSURL *baseURL;                 // root URL to start enumerating
     int32_t keepEnumerating __attribute__ ((aligned (4)));
     int32_t allFilesEnumerated __attribute__ ((aligned (4)));
