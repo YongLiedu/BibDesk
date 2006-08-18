@@ -157,7 +157,6 @@ static Class BDSKFileClass = Nil;
         
         // use accessors for encapsulation...
         const FSRef *fileRef = [self fsRef];
-        NSURL *fileURL = [self fileURL];
         
         if(fileRef && otherRef){
             
@@ -178,7 +177,7 @@ static Class BDSKFileClass = Nil;
             
             // I didn't have an FSRef when created, but let's see if we can create one now...
             FSRef myRef;
-            if(CFURLGetFSRef((CFURLRef)fileURL, &myRef)){
+            if(CFURLGetFSRef((CFURLRef)[self fileURL], &myRef)){
                 const FSRef *myRefPtr = &myRef;
                 isEqual = (noErr == FSCompareFSRefs(otherRef, myRefPtr));
             }
@@ -186,7 +185,7 @@ static Class BDSKFileClass = Nil;
         } else { 
             
             // neither object has an FSRef; compare the file URLs as paths
-            isEqual = [[other fileURL] isEqualToFileURL:fileURL];
+            isEqual = [[other fileURL] isEqualToFileURL:[self fileURL]];
         }
     }
     return isEqual;
