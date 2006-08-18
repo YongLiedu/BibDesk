@@ -76,7 +76,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
     originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
     originalDraggedImageEndedAtOperation = OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
-    originalDragImageForRowsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRows:event:offset:), @selector(replacementDragImageForRows:event:offset:));
+    originalDragImageForRowsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRows:event:dragImageOffset:), @selector(replacementDragImageForRows:event:dragImageOffset:));
     originalDragImageForRowsWithIndexesTableColumnsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
 }
 
