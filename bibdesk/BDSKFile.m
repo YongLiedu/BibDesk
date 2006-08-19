@@ -107,6 +107,13 @@ static Class BDSKFileClass = Nil;
     return [[[self allocWithZone:NULL] initWithURL:aURL] autorelease]; 
 }
 
+- (NSString *)description
+{
+    NSMutableString *desc = [[super description] mutableCopy];
+    [desc appendFormat:@" \"%@\"", [self path]];
+    return [desc autorelease];
+}
+
 // we only want to encode the public superclass
 - (Class)classForCoder { return BDSKFileClass; }
 
