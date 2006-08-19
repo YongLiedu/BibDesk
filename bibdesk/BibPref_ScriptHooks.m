@@ -52,7 +52,8 @@
 														   BDSKWillAutoFileScriptHookName, 
 														   BDSKDidAutoFileScriptHookName, 
 														   BDSKWillGenerateCiteKeyScriptHookName, 
-														   BDSKDidGenerateCiteKeyScriptHookName, nil];
+														   BDSKDidGenerateCiteKeyScriptHookName, 
+														   BDSKSaveDocumentScriptHookName, nil];
 	}
 	return self;
 }

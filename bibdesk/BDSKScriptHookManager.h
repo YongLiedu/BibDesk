@@ -45,6 +45,7 @@ extern NSString *BDSKWillAutoFileScriptHookName;
 extern NSString *BDSKDidAutoFileScriptHookName;
 extern NSString *BDSKWillGenerateCiteKeyScriptHookName;
 extern NSString *BDSKDidGenerateCiteKeyScriptHookName;
+extern NSString *BDSKSaveDocumentScriptHookName;
 
 @interface BDSKScriptHookManager : NSObject {
 	NSMutableDictionary *scriptHooks;

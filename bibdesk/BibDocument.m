@@ -818,6 +818,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [super saveDocument:sender];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState && ![[self fileType] isEqualToString:@"Rich Site Summary file"])
         [self exportAsFileType:BDSKRSSExportFileType selected:NO];
+    [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
+                                                 forPublications:publications];
 }
 
 - (void)clearChangeCount{
