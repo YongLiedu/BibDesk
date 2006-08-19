@@ -572,6 +572,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<responds-to name="selectionToClipboard">
 				<cocoa method="copyAsRTF:"/>
 			</responds-to>
+			<responds-to name="templated text">
+				<cocoa method=""/>
+			</responds-to>
+			<responds-to name="templated rich text">
+				<cocoa method=""/>
+			</responds-to>
 			<responds-to name="search">
 				<cocoa method=""/>
 			</responds-to>
@@ -776,10 +782,47 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			description="Bibliography as styled text"/>
         </command>
         
-        <command name="selectionToClipboard" code="BDSKsbtc"
-			description="Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document.">
+        <command name="selectionToClipboard" code="BDSKsbtc" hidden="yes" 
+			description="Deprecated. Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document.">
             <!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
         </command>    
+        
+        <command name="templated text" code="BDSKttxt"
+			description="Returns a string representation of items in the document using a template.">
+            <cocoa name="templatedText" class="BibDeskTemplatedTextCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" type="text"
+                description="The name of the template to use.">
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <result description="the templated text" type="text">
+            </result>
+        </command>
+        
+        <command name="templated rich text" code="BDSKtrtx"
+			description="Returns a string representation of items in the document using a template.">
+            <cocoa name="templatedRichText" class="BibDeskTemplatedRichTextCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" type="text"
+                description="The name of the template to use.">
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <type type="publication"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <result description="the templated rich text" type="rich text">
+            </result>
+        </command>
         
         <command name="show" code="BDSKshow"
 			description="Shows an author or a publication in a separate window for editing.">
