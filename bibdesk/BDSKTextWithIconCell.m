@@ -221,14 +221,14 @@ textRect.origin.y += vOffset; \
 
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj;
 {
-    if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSAttributedString class]]) {
-        [super setObjectValue:obj];
-        return;
-    } else if ([obj isKindOfClass:[NSDictionary class]]) {
+    if ([obj isKindOfClass:[NSDictionary class]]) {
         NSDictionary *dictionary = (NSDictionary *)obj;
         
         [super setObjectValue:[dictionary objectForKey:OATextWithIconCellStringKey]];
         [self setIcon:[dictionary objectForKey:OATextWithIconCellImageKey]];
+    } else {
+        [super setObjectValue:obj];
+        [self setIcon:nil];
     }
 }
 
