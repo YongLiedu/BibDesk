@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 02/25/05.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,39 +38,30 @@
 
 #import "BDSKFontManager.h"
 
-@implementation BDSKFontManager
+@implementation NSFontManager (BDSKExtensions)
 
-+ (void)load{
-    // supposed to do this in applicationWillFinishLaunching, but that seems to be too late
-    [NSClassFromString(@"NSFontManager") setFontManagerFactory:NSClassFromString(@"BDSKFontManager")];
-}
-    
+static NSDictionary *cachedFontsForPreviewPane = nil;
 
-- (id)init{
-    if(self = [super init]){
-        cachedFontsForPreviewPane = nil;
++ (void)didLoad
+{
+    @try{
+    OMNI_POOL_START {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setupFonts) name:BDSKPreviewPaneFontChangedNotification object:nil];
         [self setupFonts];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(setupFonts) 
-                                                     name:BDSKPreviewPaneFontChangedNotification
-                                                   object:nil];
+    } OMNI_POOL_END;
     }
-   return self;
+    @catch(id exception){
+        NSLog(@"caught exception %@", exception);
+    }
 }
 
-- (void)dealloc{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [cachedFontsForPreviewPane release];
-    [super dealloc];
-}
-
-- (float)previewFontBaseSize;
++ (float)previewFontBaseSize;
 {
     float defaultSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewBaseFontSizeKey];
     return (defaultSize == 0 ? [NSFont systemFontSize] : defaultSize);
 }
 
-- (NSFont *)titleFontForFamily:(NSString *)tryFamily;
++ (NSFont *)titleFontForFamily:(NSString *)tryFamily;
 {
     float size = [self previewFontBaseSize];
     size += 2;
@@ -83,7 +74,7 @@
             if(!font){
                 font = [NSFont fontWithName:[tryFamily stringByAppendingString:@" Black Italic"] size:size];
                 if(!font){
-                    font = [self convertFont:[NSFont fontWithName:tryFamily size:size] toHaveTrait:(NSBoldFontMask | NSItalicFontMask)];
+                    font = [[NSFontManager sharedFontManager] convertFont:[NSFont fontWithName:tryFamily size:size] toHaveTrait:(NSBoldFontMask | NSItalicFontMask)];
                     if(!font){
                         font = [NSFont boldSystemFontOfSize:size];
                     }
@@ -94,7 +85,7 @@
     return font;
 }
 
-- (NSFont *)typeFontForFamily:(NSString *)tryFamily;
++ (NSFont *)typeFontForFamily:(NSString *)tryFamily;
 {
     float size = [self previewFontBaseSize];
     size -= 2;
@@ -106,7 +97,7 @@
     return font;
 }    
 
-- (NSFont *)keyFontForFamily:(NSString *)tryFamily;
++ (NSFont *)keyFontForFamily:(NSString *)tryFamily;
 {
     float size = [self previewFontBaseSize];
     
@@ -114,7 +105,7 @@
     if(!font){
         font = [NSFont fontWithName:[tryFamily stringByAppendingString:@" Black"] size:size];
         if(!font){
-            font = [self convertFont:[NSFont fontWithName:tryFamily size:size] toHaveTrait:NSBoldFontMask];
+            font = [[NSFontManager sharedFontManager] convertFont:[NSFont fontWithName:tryFamily size:size] toHaveTrait:NSBoldFontMask];
             if(!font){
                 font = [NSFont boldSystemFontOfSize:size];
             }
@@ -123,7 +114,7 @@
     return font;
 }
 
-- (NSFont *)bodyFontForFamily:(NSString *)tryFamily;
++ (NSFont *)bodyFontForFamily:(NSString *)tryFamily;
 {
     float size = [self previewFontBaseSize];
 
@@ -134,7 +125,7 @@
     return font;
 }
 
-- (void)setupFonts{
++ (void)setupFonts{
     NSString *fontFamily = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey];
     [cachedFontsForPreviewPane release];
     cachedFontsForPreviewPane = [[NSDictionary alloc] initWithObjectsAndKeys:

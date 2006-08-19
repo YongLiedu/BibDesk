@@ -3059,7 +3059,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     NSDictionary *bodyAttributes = nil;
     NSDictionary *titleAttributes = nil;
     if (displayType == 1 || displayType == 2) {
-        NSDictionary *cachedFonts = [(BDSKFontManager *)[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
+        NSDictionary *cachedFonts = [[NSFontManager sharedFontManager] cachedFontsForPreviewPane];
         bodyAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, nil];
         titleAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, [NSNumber numberWithBool:YES], NSUnderlineStyleAttributeName, nil];
     }

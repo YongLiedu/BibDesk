@@ -59,7 +59,7 @@
     NSMutableAttributedString *mas = [[NSMutableAttributedString alloc] initWithString:string attributes:attributes]; // set the whole thing up with default attrs
     NSMutableString *mutableString = [mas mutableString];
     
-    BDSKFontManager *fontManager = (BDSKFontManager *)[BDSKFontManager sharedFontManager];
+    NSFontManager *fontManager = [NSFontManager sharedFontManager];
     NSString *texStyle = nil;    
     NSMutableDictionary *attrs = [attributes mutableCopy];
     NSFont *font = [attributes objectForKey:NSFontAttributeName];

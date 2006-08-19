@@ -40,18 +40,16 @@
 #import "BibPrefController.h"
 
 
-@interface BDSKFontManager : NSFontManager {
-    NSDictionary *cachedFontsForPreviewPane;
-}
+@interface NSFontManager (BDSKExtensions)
 
-- (float)previewFontBaseSize;
++ (float)previewFontBaseSize;
 
-- (NSFont *)titleFontForFamily:(NSString *)tryFamily;
-- (NSFont *)typeFontForFamily:(NSString *)tryFamily;
-- (NSFont *)keyFontForFamily:(NSString *)tryFamily;
-- (NSFont *)bodyFontForFamily:(NSString *)tryFamily;
++ (NSFont *)titleFontForFamily:(NSString *)tryFamily;
++ (NSFont *)typeFontForFamily:(NSString *)tryFamily;
++ (NSFont *)keyFontForFamily:(NSString *)tryFamily;
++ (NSFont *)bodyFontForFamily:(NSString *)tryFamily;
 
-- (void)setupFonts; // private method
++ (void)setupFonts; // private method
 
 /*!
     @method     cachedFontsForPreviewPane

@@ -219,7 +219,7 @@ static BDSKPreviewer *thePreviewer;
 - (NSData *)PDFDataWithString:(NSString *)string color:(NSColor *)color{
 	NSData *data;
 	BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:YES];
-	[printableView setFont:[(BDSKFontManager *)[BDSKFontManager sharedFontManager] bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]]];
+	[printableView setFont:[NSFontManager bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]]];
 	[printableView setTextColor:color];
 	data = [printableView PDFDataWithString:string];
 	[printableView release];
