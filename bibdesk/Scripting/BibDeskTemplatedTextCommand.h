@@ -41,3 +41,6 @@
 
 @interface BibDeskTemplatedTextCommand : NSScriptCommand {}
 @end
+
+@interface BibDeskTemplatedRichTextCommand : NSScriptCommand {}
+@end

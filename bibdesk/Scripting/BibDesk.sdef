@@ -572,6 +572,12 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<responds-to name="templated text">
 				<cocoa method=""/>
 			</responds-to>
+			<responds-to name="templated rich text">
+				<cocoa method=""/>
+			</responds-to>
+			<responds-to name="export">
+				<cocoa method=""/>
+			</responds-to>
 			<responds-to name="search">
 				<cocoa method=""/>
 			</responds-to>
@@ -782,7 +788,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         </command>    
         
         <command name="templated text" code="BDSKttxt"
-			description="Returns a string representation of items in the document using a template.">
+			description="Returns a string representation of publications in the document using a template.">
             <cocoa name="templatedText" class="BibDeskTemplatedTextCommand"/>
             <direct-parameter type="document"
                 description="The object responding to the command, the document."/>
@@ -797,6 +803,44 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </parameter>                
             <result description="the templated text" type="text">
             </result>
+        </command>
+        
+        <command name="templated rich text" code="BDSKtrtx"
+			description="Returns a styled text representation of publications in the document using a template.">
+            <cocoa name="templatedRichText" class="BibDeskTemplatedRichTextCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using" code="usng" type="text"
+                description="The name of the template to use.">
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <cocoa key="for"/>
+            </parameter>                
+            <result description="the templated rich text" type="rich text">
+            </result>
+        </command>
+        
+        <command name="export" code="BDSKexpt"
+			description="Exports publications in the document using a template to file.">
+            <cocoa name="exportUsingTemplate" class="BibDeskExportUsingTemplateCommand"/>
+            <direct-parameter type="document"
+                description="The object responding to the command, the document."/>
+            <parameter name="using template" code="uset" type="text"
+                description="The name of the template to use.">
+                <cocoa key="using"/>
+            </parameter>
+            <parameter name="in" code="in  " type="file"
+                description="The file to save in">
+                <cocoa key="in"/>
+            </parameter>
+            <parameter name="for" code="for " optional="yes"
+                description="Specifies the publication or list of publications to parse.">
+                <type type="publication" list="yes"/>
+                <cocoa key="for"/>
+            </parameter>                
         </command>
         
         <command name="show" code="BDSKshow"
