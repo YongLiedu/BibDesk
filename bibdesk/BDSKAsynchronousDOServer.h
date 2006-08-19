@@ -43,18 +43,10 @@ typedef struct _BDSKDOServerFlags {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
 } BDSKDOServerFlags;
 
-// protocols for the server thread proxies, must be included in protocols used by subclasses
-@protocol BDSKAsyncDOServerThread
-// override for custom cleanup on the server thread; call super afterwards
-- (oneway void)cleanup; 
-@end
+// protocols for the server proxies, should be included in protocols used by subclasses
+@protocol BDSKAsyncDOServerThread, BDSKAsyncDOServerMainThread;
 
-@protocol BDSKAsyncDOServerMainThread
-- (oneway void)setLocalServer:(byref id)anObject;
-@end
-
-
-@interface BDSKAsynchronousDOServer : NSObject <BDSKAsyncDOServerThread, BDSKAsyncDOServerMainThread> {
+@interface BDSKAsynchronousDOServer : NSObject {
     @private
     id serverOnMainThread;               // proxy for the main thread
     id serverOnServerThread;             // proxy for the local server thread
@@ -74,12 +66,16 @@ typedef struct _BDSKDOServerFlags {
 // override for custom cleanup on the main thread; call super afterwards
 - (void)stopDOServer;
 
+// override for custom cleanup on the server thread; call super afterwards
+- (void)cleanup;
+
 // run loop flag
 - (BOOL)shouldKeepRunning;
 
-// override for custom protocols; they should always include our protocol
-- (Protocol *)protocolForServerThread;
-- (Protocol *)protocolForMainThread;
+// override to add additional methods adopted by serverOn...Thread objects; they should always adopt our protocols
+
+- (Protocol *)protocolForServerThread; // protocol must adopt <BDSKAsyncDOServerThread>
+- (Protocol *)protocolForMainThread;   // protocol must adopt <BDSKAsyncDOServerMainThread>
 
 
 @end

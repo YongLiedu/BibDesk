@@ -38,6 +38,17 @@
 
 #import "BDSKAsynchronousDOServer.h"
 
+// protocols for the server thread proxies, must be included in protocols used by subclasses
+@protocol BDSKAsyncDOServerThread
+// override for custom cleanup on the server thread; call super afterwards
+- (oneway void)cleanup; 
+@end
+
+@protocol BDSKAsyncDOServerMainThread
+- (oneway void)setLocalServer:(byref id)anObject;
+@end
+
+
 @interface BDSKAsynchronousDOServer (Private)
 // avoid categories in the implementation, since categories and formal protocols don't mix
 - (void)runDOServerForPorts:(NSArray *)ports;
@@ -126,7 +137,7 @@
         [localThreadConnection setRootObject:self];
         
         serverOnMainThread = [[localThreadConnection rootProxy] retain];
-        [serverOnMainThread setProtocolForProxy:@protocol(BDSKAsyncDOServerMainThread)];
+        [serverOnMainThread setProtocolForProxy:[self protocolForMainThread]];
         // handshake, this sets the proxy at the other side
         [serverOnMainThread setLocalServer:self];
         
