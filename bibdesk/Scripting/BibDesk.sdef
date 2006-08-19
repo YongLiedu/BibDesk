@@ -569,13 +569,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<responds-to name="bibliography for">
 				<cocoa method=""/>
 			</responds-to>
-			<responds-to name="selectionToClipboard">
-				<cocoa method="copyAsRTF:"/>
-			</responds-to>
 			<responds-to name="templated text">
-				<cocoa method=""/>
-			</responds-to>
-			<responds-to name="templated rich text">
 				<cocoa method=""/>
 			</responds-to>
 			<responds-to name="search">
@@ -802,25 +796,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="for"/>
             </parameter>                
             <result description="the templated text" type="text">
-            </result>
-        </command>
-        
-        <command name="templated rich text" code="BDSKtrtx"
-			description="Returns a string representation of items in the document using a template.">
-            <cocoa name="templatedRichText" class="BibDeskTemplatedRichTextCommand"/>
-            <direct-parameter type="document"
-                description="The object responding to the command, the document."/>
-            <parameter name="using" code="usng" type="text"
-                description="The name of the template to use.">
-                <cocoa key="using"/>
-            </parameter>
-            <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to parse.">
-                <type type="publication" list="yes"/>
-                <type type="publication"/>
-                <cocoa key="for"/>
-            </parameter>                
-            <result description="the templated rich text" type="rich text">
             </result>
         </command>
         
