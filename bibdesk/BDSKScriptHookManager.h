@@ -60,6 +60,13 @@ extern NSString *BDSKSaveDocumentScriptHookName;
 + (BDSKScriptHookManager *)sharedManager;
 
 /*!
+	@method scriptHookNames
+	@abstract Returns the known scripthook names
+	@discussion -
+*/
++ (NSArray *)scriptHookNames;
+
+/*!
 	@method scriptHookWithUniqueID:
 	@abstract Returns the script hook with the given unique ID. 
 	@discussion This is used for the AppleScript accessor.

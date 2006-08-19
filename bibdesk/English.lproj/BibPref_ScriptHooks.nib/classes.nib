@@ -1,5 +1,6 @@
 {
     IBClasses = (
+        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             ACTIONS = {addScriptHook = id; removeScriptHook = id; showScriptFile = id; }; 
             CLASS = "BibPref_ScriptHooks"; 

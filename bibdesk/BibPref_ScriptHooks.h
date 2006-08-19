@@ -43,7 +43,6 @@
 	IBOutlet NSTableView *tableView;
 	IBOutlet NSButton *addButton;
 	IBOutlet NSButton *removeButton;
-	NSArray *scriptHookNames;
 }
 
 - (IBAction)addScriptHook:(id)sender;

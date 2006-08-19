@@ -51,6 +51,7 @@ NSString *BDSKDidGenerateCiteKeyScriptHookName = @"Did Generate Cite Key";
 NSString *BDSKSaveDocumentScriptHookName = @"Save Document";
 
 static BDSKScriptHookManager *sharedManager = nil;
+static NSArray *scriptHookNames = nil;
 
 @implementation BDSKScriptHookManager
 
@@ -59,6 +60,19 @@ static BDSKScriptHookManager *sharedManager = nil;
 		sharedManager = [[BDSKScriptHookManager alloc] init];
 	}
 	return sharedManager;
+}
+
++ (NSArray *)scriptHookNames {
+    if (scriptHookNames == nil) {
+		scriptHookNames = [[NSArray alloc] initWithObjects:BDSKChangeFieldScriptHookName, 
+														   BDSKCloseEditorWindowScriptHookName, 
+														   BDSKWillAutoFileScriptHookName, 
+														   BDSKDidAutoFileScriptHookName, 
+														   BDSKWillGenerateCiteKeyScriptHookName, 
+														   BDSKDidGenerateCiteKeyScriptHookName, 
+														   BDSKSaveDocumentScriptHookName, nil];
+    }
+    return scriptHookNames;
 }
 
 - (id)init {

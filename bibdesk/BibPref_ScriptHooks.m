@@ -45,24 +45,6 @@
 
 @implementation BibPref_ScriptHooks
 
-- (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
-	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
-		scriptHookNames = [[NSArray alloc] initWithObjects:BDSKChangeFieldScriptHookName, 
-														   BDSKCloseEditorWindowScriptHookName, 
-														   BDSKWillAutoFileScriptHookName, 
-														   BDSKDidAutoFileScriptHookName, 
-														   BDSKWillGenerateCiteKeyScriptHookName, 
-														   BDSKDidGenerateCiteKeyScriptHookName, 
-														   BDSKSaveDocumentScriptHookName, nil];
-	}
-	return self;
-}
-
-- (void)dealloc{
-	[scriptHookNames release];
-	[super dealloc];
-}
-
 - (void)awakeFromNib{
     [super awakeFromNib];
 	[tableView setTarget:self];
@@ -100,7 +82,7 @@
 		return;
 
 	int row = [tableView selectedRow]; // cannot be -1
-	NSString *name = [scriptHookNames objectAtIndex:row];
+	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
 	[dict setObject:path forKey:name];
 	[defaults setObject:dict forKey:BDSKScriptHooksKey];
@@ -111,7 +93,7 @@
 	int row = [tableView selectedRow];
 	if (row == -1) return;
 	
-	NSString *name = [scriptHookNames objectAtIndex:row];
+	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
 	[dict removeObjectForKey:name];
 	[defaults setObject:dict forKey:BDSKScriptHooksKey];
@@ -124,7 +106,7 @@
 	if (row == -1)
 		return;
 	
-	NSString *name = [scriptHookNames objectAtIndex:row];
+	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
 	NSString *path = [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path]) {
@@ -142,17 +124,18 @@
 #pragma mark TableView DataSource methods
 
 - (int)numberOfRowsInTableView:(NSTableView *)tv{
-	return [scriptHookNames count];
+	return [[BDSKScriptHookManager scriptHookNames] count];
 }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	NSString *colID = [tableColumn identifier];
-	NSString *name = [scriptHookNames objectAtIndex:row];
+	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
 	
 	if([colID isEqualToString:@"name"]){
 		return name;
 	}else{
-		return [[[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name] stringByAbbreviatingWithTildeInPath];
+        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:@"BDSKPathIconTransformer"]; 
+		return [transformer transformedValue:[[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name]];
 	}
 }
 
@@ -162,7 +145,7 @@
 	if([colID isEqualToString:@"name"])
 		return nil;
 	
-	NSString *name = [scriptHookNames objectAtIndex:row];
+	NSString *name = [[BDSKScriptHookManager scriptHookNames] objectAtIndex:row];
 	NSString *path = [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path])
