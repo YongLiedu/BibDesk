@@ -799,6 +799,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <parameter name="for" code="for " optional="yes"
                 description="Specifies the publication or list of publications to parse.">
                 <type type="publication" list="yes"/>
+                <type type="publication"/>
                 <cocoa key="for"/>
             </parameter>                
             <result description="the templated text" type="text">
@@ -817,6 +818,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <parameter name="for" code="for " optional="yes"
                 description="Specifies the publication or list of publications to parse.">
                 <type type="publication" list="yes"/>
+                <type type="publication"/>
                 <cocoa key="for"/>
             </parameter>                
             <result description="the templated rich text" type="rich text">
@@ -837,8 +839,9 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="to"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
-                description="Specifies the publication or list of publications to parse.">
+                description="Specifies the publication or list of publications to export.">
                 <type type="publication" list="yes"/>
+                <type type="publication"/>
                 <cocoa key="for"/>
             </parameter>                
         </command>
