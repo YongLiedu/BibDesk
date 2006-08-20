@@ -254,8 +254,7 @@ enum {
     if (tableView == defaultFieldsTableView) {
         return [[customFieldsArray objectAtIndex:row] objectForKey:[tableColumn identifier]];
     } else if (tableView == globalMacroFilesTableView) {
-        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:@"BDSKPathIconTransformer"]; 
-        return [transformer transformedValue:[globalMacroFiles objectAtIndex:row]];
+        return [globalMacroFiles objectAtIndex:row];
     }
     return nil;
 }

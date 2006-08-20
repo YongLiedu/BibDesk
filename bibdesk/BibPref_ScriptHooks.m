@@ -134,8 +134,7 @@
 	if([colID isEqualToString:@"name"]){
 		return name;
 	}else{
-        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:@"BDSKPathIconTransformer"]; 
-		return [transformer transformedValue:[[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name]];
+		return [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	}
 }
 

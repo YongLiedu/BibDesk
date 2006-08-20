@@ -1,5 +1,10 @@
 {
     IBClasses = (
+        {
+            CLASS = BDSKFilePathCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = BDSKTextWithIconCell; 
+        }, 
         {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             ACTIONS = {
