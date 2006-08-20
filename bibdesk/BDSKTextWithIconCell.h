@@ -65,3 +65,11 @@
 
 @end
 
+
+@interface BDSKFilePathCell : BDSKTextWithIconCell {
+    int displayType;
+}
+// 0: full path, 1: tilde abbreviated path, 2: file name
+- (int)displayType;
+- (void)setDisplayType:(int)type;
+@end

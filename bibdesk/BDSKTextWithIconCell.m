@@ -37,6 +37,8 @@
  */
 #import "BDSKTextWithIconCell.h"
 #import "NSGeometry_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
+#import "NSImage+Toolbox.h"
 
 /* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
 
@@ -275,3 +277,87 @@ textRect.origin.y += vOffset; \
 }
 
 @end
+
+
+@implementation BDSKFilePathCell
+
+- (id)init;
+{
+    if (self = [super init]) {
+        [self setDisplayType:1];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)coder;
+{
+    if (self = [super initWithCoder:coder]) {
+        [self setDisplayType:1];
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone;
+{
+    BDSKFilePathCell *copy = (BDSKFilePathCell *)[super copyWithZone:zone];
+    [copy setDisplayType:displayType];
+    return copy;
+}
+
+- (int)displayType { return displayType; }
+
+- (void)setDisplayType:(int)type { displayType = type; }
+
+- (void)setObjectValue:(id <NSObject, NSCopying>)obj;
+{
+    NSString *path = nil;
+    NSImage *image = nil;
+    
+    if ([obj isKindOfClass:[NSString class]]) {
+        path = [(NSString *)obj stringByStandardizingPath];
+        if(path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            image = [NSImage smallImageForFile:path];
+    } else if ([obj isKindOfClass:[NSURL class]]) {
+        NSURL *fileURL = (NSURL *)obj;
+        path = [[fileURL path] stringByStandardizingPath];
+        if(path && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL])
+            image = [NSImage smallImageForURL:fileURL];
+    } else if ([obj isKindOfClass:[NSDictionary class]]) {
+        NSDictionary *dict = (NSDictionary *)obj;
+        if ([[dict objectForKey:OATextWithIconCellStringKey] isKindOfClass:[NSString class]]) {
+            path = [[dict objectForKey:OATextWithIconCellStringKey] stringByStandardizingPath];
+            image = [dict objectForKey:OATextWithIconCellImageKey];
+            if(image == nil && path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+                image = [NSImage smallImageForFile:path];
+        } else {
+            [super setObjectValue:dict];
+            return;
+        }
+    } else {
+        [super setObjectValue:obj];
+        return;
+    }
+    
+	NSString *displayPath = path;
+    switch (displayType) {
+        case 0:
+            displayPath = path;
+            break;
+        case 1:
+            displayPath = [path stringByAbbreviatingWithTildeInPath];
+            break;
+        case 2:
+            displayPath = [path lastPathComponent];
+    }
+	if(image && displayPath){
+		NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                                displayPath, OATextWithIconCellStringKey, 
+                                image, OATextWithIconCellImageKey, nil];
+        [super setObjectValue:dict];
+	} else {
+        [super setObjectValue:displayPath];
+	}
+}
+
+@end
+
