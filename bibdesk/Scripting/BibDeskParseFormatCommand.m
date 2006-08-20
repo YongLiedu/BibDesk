@@ -95,7 +95,7 @@
 	}
     
     BOOL isLocalFile = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field];
-    NSString *papersFolderPath;
+    NSString *papersFolderPath = nil;
     if (isLocalFile)
         papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub document]];
 	
