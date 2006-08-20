@@ -37,7 +37,6 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BibTeXParser.h"
 #import "BDSKMacroResolver.h"
-#import "BDSKPathIconTransformer.h"
 
 // this corresponds with the menu item order in the nib
 enum {

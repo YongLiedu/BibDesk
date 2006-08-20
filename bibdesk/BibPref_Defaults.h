@@ -39,8 +39,6 @@
 #import "BDSKFieldNameFormatter.h"
 #import "MacroWindowController.h"
 
-@class BDSKPathIconTransformer;
-
 @interface BibPref_Defaults : OAPreferenceClient
 {
     IBOutlet NSButton* delSelectedDefaultFieldButton;

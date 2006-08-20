@@ -50,7 +50,6 @@
 #import "BDSKFileContentSearchController.h"
 #import "BDSKScriptMenu.h"
 #import "BibDocument_Search.h"
-#import "BDSKPathIconTransformer.h"
 #import "BDSKFormatParser.h"
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
@@ -125,13 +124,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
         	
-	// register transformer class
-	[NSValueTransformer setValueTransformer:[[[BDSKPathIconTransformer alloc] init] autorelease]
-									forName:@"BDSKPathIconTransformer"];
-    
-    [NSValueTransformer setValueTransformer:[[[BDSKURLIconTransformer alloc] init] autorelease]
-                                    forName:@"BDSKURLIconTransformer"];
-    
     // eliminate support for some redundant keys
     NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
     if(prefsShownColNamesArray){
