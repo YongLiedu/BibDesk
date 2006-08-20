@@ -81,8 +81,8 @@
 			return nil;
 	}
 	
-	// the 'in' parameters gives the template name to use
-	id fileObj = [params objectForKey:@"in"];
+	// the 'to' parameters gives the file to save to, either as a path or a url (it seems)
+	id fileObj = [params objectForKey:@"to"];
     NSURL *fileURL;
 	// make sure we get something
 	if (!fileObj) {

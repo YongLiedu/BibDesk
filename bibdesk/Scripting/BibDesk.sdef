@@ -832,9 +832,9 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The name of the template to use.">
                 <cocoa key="using"/>
             </parameter>
-            <parameter name="in" code="in  " type="file"
-                description="The file to save in">
-                <cocoa key="in"/>
+            <parameter name="to" code="to  " type="file"
+                description="The file to export to">
+                <cocoa key="to"/>
             </parameter>
             <parameter name="for" code="for " optional="yes"
                 description="Specifies the publication or list of publications to parse.">
