@@ -62,7 +62,7 @@ static Class BDSKFileClass = Nil;
 
 + (void)initialize
 {
-    OBINITIALIZE();
+    OBINITIALIZE;
     if(self == [BDSKFile class]){
         BDSKFileClass = self;
         defaultPlaceholderFile = (BDSKFile *)NSAllocateObject(BDSKFileClass, 0, NSDefaultMallocZone());
@@ -276,14 +276,6 @@ static Class BDSKFileClass = Nil;
 @end
 
 @implementation BDSKFSRefFile
-
-+ (void)initialize
-{
-    OBINITIALIZE();
-    if(self == [BDSKFSRefFile class]){
-        BDSKFSRefFileClass = self;
-    }
-}
 
 + (id)allocWithZone:(NSZone *)aZone
 {
