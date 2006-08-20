@@ -37,6 +37,7 @@
  */
 
 #import "BDSKFile.h"
+#import <OmniBase/assertions.h>
 #import "NSURL_BDSKExtensions.h"
 
 @interface NSURL (BDSKPathEquality)
@@ -61,6 +62,7 @@ static Class BDSKFileClass = Nil;
 
 + (void)initialize
 {
+    OBINITIALIZE();
     if(self == [BDSKFile class]){
         BDSKFileClass = self;
         defaultPlaceholderFile = (BDSKFile *)NSAllocateObject(BDSKFileClass, 0, NSDefaultMallocZone());
@@ -78,7 +80,12 @@ static Class BDSKFileClass = Nil;
 // returns an FSRef wrapper
 - (id)initWithFSRef:(FSRef *)aRef;
 {
-    return [[BDSKFSRefFile alloc] initWithFSRef:aRef];
+    if(aRef != NULL){
+        self = [[BDSKFSRefFile alloc] initWithFSRef:aRef];
+    } else {
+        self = nil;
+    }
+    return self;
 }
 
 // This is a common, convenient initializer, but we prefer to return the FSRef variant so we can use FSCompareFSRefs and survive external name changes.  If the file doesn't exist (yet), though, we return an NSURL variant.
@@ -184,7 +191,7 @@ static Class BDSKFileClass = Nil;
 #pragma mark -
 #pragma mark NSURL-based concrete subclass
 
-@interface BDSKURLFile : BDSKFile <NSCopying>
+@interface BDSKURLFile : BDSKFile
 {
     NSURL *fileURL;
     unsigned int hash;
@@ -231,9 +238,9 @@ static Class BDSKFileClass = Nil;
     BOOL isEqual = NO;
     if(self == other){
         isEqual = YES;
-    } else if([other isKindOfClass:BDSKFileClass]){
+    } else if([other isKindOfClass:[self class]]){
         // always return NO if comparing against an instance with a valid FSRef, since self isn't a valid file (or wasn't when instantiated) and hashes aren't guaranteed to be the same for differend subclasses
-        isEqual = NULL == [other fsRef] ? [fileURL isEqualToFileURL:[other fileURL]] : NO;
+        isEqual = [fileURL isEqualToFileURL:[other fileURL]];
     }
 #if OMNI_FORCE_ASSERTIONS
     if(isEqual)
@@ -270,6 +277,14 @@ static Class BDSKFileClass = Nil;
 
 @implementation BDSKFSRefFile
 
++ (void)initialize
+{
+    OBINITIALIZE();
+    if(self == [BDSKFSRefFile class]){
+        BDSKFSRefFileClass = self;
+    }
+}
+
 + (id)allocWithZone:(NSZone *)aZone
 {
     return NSAllocateObject(self, 0, aZone);
@@ -301,9 +316,9 @@ static Class BDSKFileClass = Nil;
     BOOL isEqual = NO;
     if(self == other){
         isEqual = YES;
-    } else if([other isKindOfClass:BDSKFileClass]){
+    } else if([other isKindOfClass:[self class]]){
         const FSRef *otherFSRef = [other fsRef];
-        isEqual = NULL == otherFSRef ? NO : (noErr == FSCompareFSRefs(fileRef, otherFSRef));
+        isEqual = (noErr == FSCompareFSRefs(fileRef, otherFSRef));
     }
 #if OMNI_FORCE_ASSERTIONS
     if(isEqual)
