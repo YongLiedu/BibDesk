@@ -2953,7 +2953,7 @@ It exports an RSS representation of the document in the same folder as the BibTe
                     @b{set} AppleScript's text item delimiters @b{to} "."
                     @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName as string
                 @b{end if}
-                @b{set} theFileName @b{to} @b{to} theFileName & ".rss"
+                @b{set} theFileName @b{to} theFileName & ".rss"
                 @i{-- create the RSS file if necessary}
                 @b{if} file theFileName @b{of} folder theFolder exists @b{then}
                     @b{set} theFile @b{to} (file theFileName @b{of} folder theFolder) @b{as} alias
