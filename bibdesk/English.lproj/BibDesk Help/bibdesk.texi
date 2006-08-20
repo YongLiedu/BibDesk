@@ -2797,17 +2797,18 @@ various script hooks that BibDesk recognizes.
 Go to the item linked below to see a sample script. 
 
 @menu
-* Script Hook Sample::
+* Script Hook Sample 1::  Automatically generating a field
+* Script Hook Sample 2::  Automatically saving RSS
 @end menu
 
 
-@node Script Hook Sample
-@subsection Script Hook Sample
-@abstract{An example script hookk}
+@node Script Hook Sample 1
+@subsection Script Hook Sample 1
+@abstract{An example script hook}
 
 @cindex script hook sample
 
-Here is an example for an AppleScript you can set for a script hook. 
+Here is an example for an AppleScript you can set for a Change Field script hook. 
 It generates the "Url" field from a custom "Aid" field when the value 
 of the "Aid" field is set in the editor. 
 
@@ -2870,6 +2871,98 @@ of the "Aid" field is set in the editor.
                     @b{end if}
                 @b{end tell}
             @b{end repeat}
+        @b{end tell}
+    @b{end} perform BibDesk action with publications
+@b{end using terms from}
+@end ifnothtml
+@end example
+
+The main thing that should be done in the script is to define a 
+@samp{perform BibDesk action with publications} subroutine to handle the script hook. 
+An important thing to note is that you should bracket the whole subroutine in 
+@samp{using terms from application "BibDesk"}, so that certain AppleScript 
+definitions (such as the subroutine name) are recognized. 
+
+For another sample script, look in the @ref{Scripts Menu} of BibDesk. To view its source, 
+select the @menutitle{Sample Script Hook} menu item with the Option key held down. 
+
+
+@node Script Hook Sample 2
+@subsection Script Hook Sample 2
+@abstract{An example script hook}
+
+@cindex script hook sample
+
+Here is an example for an AppleScript you can set for a Save Document script hook. 
+It exports an RSS representation of the document in the same folder as the BibTeX file whenever the document is saved. 
+
+@example
+@html
+<span class="aslangkeyword">using terms from</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
+    <span class="aslangkeyword">on</span> <span class="asappkeyword">perform BibDesk action with publications</span> <span class="asvariable">thePubs</span> <span class="asappkeyword">for script hook</span> <span class="asvariable">theScriptHook</span>
+        <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
+            <span class="ascomment">-- get some properties from the script hook</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theName</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theDocument</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">document</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
+            <span class="ascomment">-- check if we get the right script hook event</span>
+            <span class="aslangkeyword">if</span> <span class="asvariable">theName</span> <span class="aslangkeyword">is not</span> <span class="asvalue">"Save Document"</span> <span class="aslangkeyword">then return</span>
+            <span class="ascomment">-- get the document's full path</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFullPath</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
+            <span class="ascomment">-- extract containing folder and file name, change extension to "rss"</span>
+            <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">":"</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theParts</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFullPath</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">item</span> <span class="asvalue">-1</span> <span class="aslangkeyword">of</span> <span class="asvariable">theParts</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">item</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theParts</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
+            <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text item</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span>  <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvalue">".rss"</span>
+            <span class="ascomment">-- create the RSS file if necessary</span>
+            <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"Finder"</span>
+                <span class="aslangkeyword">if</span> <span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">folder</span> <span class="asvariable">theFolder</span> <span class="asappkeyword">exists</span> <span class="aslangkeyword">then</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">folder</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
+                <span class="aslangkeyword">else</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">make new file with properties</span> <span class="asoperator">{</span><span class="asappkeyword">name</span><span class="asoperator">:</span><span class="asvariable">theFileName</span><span class="asoperator">}</span> <span class="asappkeyword">at folder</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
+                <span class="aslangkeyword">end if</span>
+            <span class="aslangkeyword">end tell</span>
+            <span class="ascomment">-- now export as RSS</span>
+            <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
+                <span class="asappkeyword">export using template</span> <span class="asvalue">"Default RSS template"</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
+            <span class="aslangkeyword">end tell</span>
+        <span class="aslangkeyword">end tell</span>
+    <span class="aslangkeyword">end</span> <span class="asappkeyword">perform BibDesk action with publications</span>
+<span class="aslangkeyword">end using terms from</span>
+@end html
+@ifnothtml
+@b{using terms from} application "BibDesk"
+    @b{on} perform BibDesk action with publications thePubs for script hook theScriptHook
+        @b{tell} application "BibDesk"
+            @i{-- get some properties from the script hook}
+            @b{set} theName @b{to the} name @b{of} theScriptHook
+            @b{set} theDocument @b{to the} document @b{of} theScriptHook
+            @i{-- check if we get the right script hook event}
+            @b{if} theName @b{is not} "Save Document" @b{then return}
+            @i{-- get the document's full path}
+            @b{set} theFullPath @b{to the} file of theDocument @b{as} string
+            @i{-- extract containing folder and file name, change extension to "rss"}
+            @b{set} AppleScript's text item delimiters @b{to} ":"
+            @b{set} theParts @b{to} text items of theFullPath
+            @b{set} theFileName @b{to} item -1 of theParts
+            @b{set} theFolder @b{to} item 1 @b{thru} -2 of theParts as string
+            @b{set} AppleScript's text item delimiters @b{to} "."
+            @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName as string
+            @b{set} theFileName @b{to} @b{to} theFileName & ".rss"
+            @i{-- create the RSS file if necessary}
+            @b{tell} application "Finder"
+                @b{if} file theFileName @b{of} folder theFolder exists @b{then}
+                    @b{set} theFile @b{to} (file theFileName @b{of} folder theFolder) @b{as} alias
+                @b{else} 
+                    @b{set} theFile @b{to} (make new file with properties {name:theFileName} at folder theFolder) @b{as} alias
+                @b{end if} 
+            @b{end tell} 
+            @i{-- now export as RSS}
+            @b{tell} application "BibDesk"
+                export using template "Default RSS template" to theFile
+            @b{end tell} 
         @b{end tell}
     @b{end} perform BibDesk action with publications
 @b{end using terms from}
