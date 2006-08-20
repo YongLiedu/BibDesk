@@ -319,10 +319,12 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 // here we have to identify errors by file name, as we've no idea what document the edit window is associated with
 - (void)handleEditWindowWillCloseNotification:(NSNotification *)notification{
-	if ([self currentDocument] == nil)
+	if ([self currentDocument] == nil) {
 		[self removeErrorObjsForFileName:[[self currentFileName] stringByExpandingTildeInPath]];
-	else
+        [self setCurrentFileName:nil];
+	} else {
 		[self setCurrentDocument:nil];
+    }
 }
 
 static inline Boolean isLeftBrace(UniChar ch) { return ch == '{'; }
