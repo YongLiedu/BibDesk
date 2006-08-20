@@ -649,6 +649,7 @@ split_simple_name (name_loc * loc,
               comma_token
               first_lc
               last_lc
+              full_name_string
 @OUTPUT     : name
 @RETURNS    : 
 @DESCRIPTION: Splits a name according to the BibTeX rules for names 
@@ -683,7 +684,8 @@ split_general_name (name_loc * loc,
                     int        num_commas,
                     int *      comma_token,
                     int        first_lc,
-                    int        last_lc)
+                    int        last_lc,
+                    char *     full_name_string)
 {
    int   first_t[2], von_t[2], last_t[2], jr_t[2];
    int   end;
@@ -694,7 +696,7 @@ split_general_name (name_loc * loc,
    {                                    /* lowercase tokens */
       if (last_lc == comma_token[0])    /* lc string ends at first comma */
       {
-         name_warning (loc, "no capitalized tokens before first comma");
+         name_warning (loc, "no capitalized tokens before first comma in name \"%s\"", full_name_string);
          last_lc--;
       }
       
@@ -788,6 +790,7 @@ bt_split_name (char *  name,
    int    first_lc, last_lc;
    bt_name * split_name;
    int    i;
+   char * original_name = NULL; /* use this to stash the name string */
 
    DBG_ACTION (1, printf ("bt_split_name(): name=%p (%s)\n", name, name))
 
@@ -798,6 +801,7 @@ bt_split_name (char *  name,
    }
    else
    {
+      original_name = name;
       name = strdup (name);             /* private copy that we may clobber */
       len = strlen (name);
    }
@@ -876,7 +880,7 @@ bt_split_name (char *  name,
       {
          split_general_name (&loc, split_name,
                              num_commas, comma_token,
-                             first_lc, last_lc);
+                             first_lc, last_lc, original_name);
       }
    }
 
