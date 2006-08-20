@@ -81,7 +81,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             [self insertObject:[BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] inDocumentsAtIndex:1];
             [errorsController setFilterValue:[self objectInDocumentsAtIndex:0]];
             [errorsController setWarningKey:@"errorClassName"];
-            [errorsController setWarningValue:@"warning"];
+            [errorsController setWarningValue:BDSKParserWarningString];
             [errorsController setHideWarnings:NO];
             
             enableSyntaxHighlighting = YES;
