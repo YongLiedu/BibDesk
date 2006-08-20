@@ -163,3 +163,4 @@
 
 @end
 
+@interface BDSKLineNumberTransformer : NSValueTransformer @end

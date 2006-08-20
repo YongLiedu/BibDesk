@@ -37,6 +37,7 @@
  */
 
 #import "BDSKErrorObjectController.h"
+#import <OmniBase/assertions.h>
 #import "BibPrefController.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
@@ -47,6 +48,13 @@
 static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 @implementation BDSKErrorObjectController
+
++ (void)initialize;
+{
+    OBINITIALIZE;
+	[NSValueTransformer setValueTransformer:[[[BDSKLineNumberTransformer alloc] init] autorelease]
+									forName:@"BDSKLineNumberTransformer"];
+}
 
 + (BDSKErrorObjectController *)sharedErrorObjectController;
 {
@@ -756,6 +764,23 @@ static BDSKPlaceHolderFilterItem *emptyItemsPlaceHolderFilterItem = nil;
         hideWarnings = flag;
 		[self rearrangeObjects];
     }
+}
+
+@end
+
+
+@implementation BDSKLineNumberTransformer
+
++ (Class)transformedValueClass {
+    return [NSObject class];
+}
+
++ (BOOL)allowsReverseTransformation {
+    return NO;
+}
+
+- (id)transformedValue:(id)number {
+	return ([number intValue] == -1) ? @"?" : number;
 }
 
 @end
