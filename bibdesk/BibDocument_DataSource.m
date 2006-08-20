@@ -176,7 +176,7 @@
 					[scriptHook setField:tcID];
 					[scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", oldRating]]];
 					[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", newRating]]];
-					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub]];
+					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:self];
 				}
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Rating",@"Change Rating")];
 			}
@@ -191,7 +191,7 @@
 					[scriptHook setField:tcID];
 					[scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithBool:oldStatus]]];
 					[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithBool:newStatus]]];
-					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub]];
+					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:self];
 				}
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box",@"Change Check Box")];
 			}
@@ -206,7 +206,7 @@
 					[scriptHook setField:tcID];
 					[scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithTriStateValue:oldStatus]]];
 					[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithTriStateValue:newStatus]]];
-					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub]];
+					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:self];
 				}
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box",@"Change Check Box")];
 			}

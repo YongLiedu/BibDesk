@@ -756,6 +756,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="Unique ID of the script hook.">
                 <cocoa key="asUniqueID"/>
             </property>  
+            <property name="document" code="docu" type="document" access="r"
+                description="Document for the script hook.">
+                <cocoa key="document"/>
+            </property>  
             <property name="field name" code="fnam" type="text" access="r"
                 description="Name of the field relevant for the script hook. This is only set when the there are relevant old and new values for the script hook.">
                 <cocoa key="asField"/>

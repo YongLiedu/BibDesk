@@ -37,6 +37,7 @@
  */
 
 #import "BDSKScriptHookManager.h"
+#import "BibDocument.h"
 #import "BibPrefController.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 
@@ -131,21 +132,21 @@ static NSArray *scriptHookNames = nil;
 	return scriptHook;
 }
 
-- (BOOL)runScriptHook:(BDSKScriptHook *)scriptHook forPublications:(NSArray *)items {
+- (BOOL)runScriptHook:(BDSKScriptHook *)scriptHook forPublications:(NSArray *)items document:(BibDocument *)document {
 	if (scriptHook == nil)
 		return NO;
 	// execute the script
-	BOOL rv = [scriptHook executeForPublications:items];
+	BOOL rv = [scriptHook executeForPublications:items document:document];
 	// cleanup
 	[self removeScriptHook:scriptHook];
 	return rv;
 }
 
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items {
-	return [self runScriptHookWithName:name forPublications:items userInfo:nil];
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document {
+	return [self runScriptHookWithName:name forPublications:items document:document userInfo:nil];
 }
 
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items userInfo:(NSDictionary *)userInfo {
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document userInfo:(NSDictionary *)userInfo {
 	BDSKScriptHook *scriptHook = [self makeScriptHookWithName:name];
 	if (scriptHook == nil)
 		return NO;
@@ -158,7 +159,7 @@ static NSArray *scriptHookNames = nil;
 	if ((value = [userInfo objectForKey:@"newValues"]) != nil)
 		[scriptHook setNewValues:value];
 	// execute the script and remove the script hook
-	return [self runScriptHook:scriptHook forPublications:items];
+	return [self runScriptHook:scriptHook forPublications:items document:document];
 }
 
 @end

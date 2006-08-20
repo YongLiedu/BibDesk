@@ -38,6 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BibDocument;
 
 @interface BDSKScriptHook : NSObject {
 	NSString *name;
@@ -46,6 +47,7 @@
 	NSString *field;
 	NSArray *oldValues;
 	NSArray *newValues;
+    BibDocument *document;
 }
 
 /*!
@@ -117,6 +119,21 @@
 - (void)setNewValues:(NSArray *)values;
 
 /*!
+	@method document
+	@abstract Returns the document of the script hook event.
+	@discussion -
+*/
+- (BibDocument *)document;
+
+/*!
+	@method setDocument:
+	@abstract Set the array of new values for the field of the script hook event.
+	@discussion -
+	@param values The array of values to set.
+*/
+- (void)setDocument:(BibDocument *)newDocument;
+
+/*!
 	@method script
 	@abstract Returns the script to execute by the script hook.
 	@discussion -
@@ -130,6 +147,6 @@
 	@param items An array of publications passed to the script for the script hook.
 	@result Boolean indicating whether the script was executed sucessfully. 
 */
-- (BOOL)executeForPublications:(NSArray *)item;
+- (BOOL)executeForPublications:(NSArray *)item document:(BibDocument *)aDocument;
 
 @end

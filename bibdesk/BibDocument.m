@@ -819,7 +819,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState && ![[self fileType] isEqualToString:@"Rich Site Summary file"])
         [self exportAsFileType:BDSKRSSExportFileType selected:NO];
     [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
-                                                 forPublications:publications];
+                                                 forPublications:publications
+                                                        document:self];
 }
 
 - (void)clearChangeCount{
@@ -3534,7 +3535,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
         [scriptHook setField:BDSKCiteKeyString];
         [scriptHook setOldValues:arrayOfOldValues];
         [scriptHook setNewValues:arrayOfNewValues];
-        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs];
+        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
     }
     
     scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
@@ -3577,7 +3578,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
         [scriptHook setField:BDSKCiteKeyString];
         [scriptHook setOldValues:arrayOfOldValues];
         [scriptHook setNewValues:arrayOfNewValues];
-        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs];
+        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
     }
     
     [[self undoManager] setActionName:(numberOfSelectedPubs > 1 ? NSLocalizedString(@"Generate Cite Keys",@"") : NSLocalizedString(@"Generate Cite Key",@""))];

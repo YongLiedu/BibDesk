@@ -156,7 +156,7 @@ static BibFiler *sharedFiler = nil;
 		}
 		// we don't set the old/new values as the newValues are not reliable
 		[scriptHook setField:field];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers document:doc];
 	}
 	
 	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
@@ -253,7 +253,7 @@ static BibFiler *sharedFiler = nil;
 		[scriptHook setField:field];
 		[scriptHook setOldValues:oldValues];
 		[scriptHook setNewValues:newValues];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers document:doc];
 	}
 	
 	if(numberOfPapers > 1){

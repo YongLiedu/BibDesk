@@ -47,6 +47,9 @@ extern NSString *BDSKWillGenerateCiteKeyScriptHookName;
 extern NSString *BDSKDidGenerateCiteKeyScriptHookName;
 extern NSString *BDSKSaveDocumentScriptHookName;
 
+
+@class BibDocument;
+
 @interface BDSKScriptHookManager : NSObject {
 	NSMutableDictionary *scriptHooks;
 }
@@ -91,32 +94,34 @@ extern NSString *BDSKSaveDocumentScriptHookName;
 - (BDSKScriptHook *)makeScriptHookWithName:(NSString *)name;
 
 /*!
-	@method runScriptHook:forPublications:
+	@method runScriptHook:forPublications:document:
 	@abstract Convenience method to execute the script and remove the script hook object. 
 	@discussion -
 	@param scriptHook The script hook to run.
 	@param items An array of publications passed to the script for the script hook.
-	@param userInfo The user info set in the script hook.
+	@param document The document for the script hook.
 */
-- (BOOL)runScriptHook:(BDSKScriptHook *)scriptHook forPublications:(NSArray *)items;
+- (BOOL)runScriptHook:(BDSKScriptHook *)scriptHook forPublications:(NSArray *)items document:(BibDocument *)document;
 
 /*!
-	@method runScriptHookWithName:forPublications:
+	@method runScriptHookWithName:forPublications:document:
 	@abstract Calls -runScriptHookWithName:forPublication:userInfo: with nil userInfo. 
 	@discussion -
 	@param name The name for the script hook.
 	@param items An array of publications passed to the script for the script hook.
+	@param document The document for the script hook.
 */
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items;
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document;
 
 /*!
-	@method runScriptHookWithName:forPublications:userInfo:
+	@method runScriptHookWithName:forPublications:document:userInfo:
 	@abstract Convenience method to create a script hook with the given name, set values from the userInfo, run the script, and remove the script hook object. 
 	@discussion -
 	@param name The name for the script hook.
 	@param items An array of publications passed to the script for the script hook.
+	@param document The document for the script hook.
 	@param userInfo The user info set in the script hook.
 */
-- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items userInfo:(NSDictionary *)userInfo;
+- (BOOL)runScriptHookWithName:(NSString *)name forPublications:(NSArray *)items document:(BibDocument *)document userInfo:(NSDictionary *)userInfo;
 
 @end

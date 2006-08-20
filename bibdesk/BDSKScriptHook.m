@@ -37,6 +37,7 @@
  */
 
 #import "BDSKScriptHook.h"
+#import "BibDocument.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 
 // these correspond to the script codes in the .sdef file
@@ -66,6 +67,7 @@ static unsigned long scriptHookID = 0;
             field = nil;
             oldValues = nil;
             newValues = nil;
+            document = nil;
         }
 	}
 	return self;
@@ -78,6 +80,7 @@ static unsigned long scriptHookID = 0;
 	[field release];
 	[oldValues release];
 	[newValues release];
+	[document release];
 	[super dealloc];
 }
 
@@ -126,12 +129,25 @@ static unsigned long scriptHookID = 0;
     }
 }
 
-- (BOOL)executeForPublications:(NSArray *)items {
+- (BibDocument *)document {
+    return document;
+}
+
+- (void)setDocument:(BibDocument *)newDocument {
+    if (document != newDocument) {
+        [document release];
+        document = [newDocument retain];
+    }
+}
+
+- (BOOL)executeForPublications:(NSArray *)items document:(BibDocument *)aDocument{
 	if (script == nil) {
 		NSLog(@"No script found for script hook \"%@\"", name);
 		return NO;
 	}
 	BOOL rv = YES;
+    
+    [self setDocument:aDocument];
 	
 	NS_DURING
 		[script executeHandler:kBDSKPerformBibdeskAction 

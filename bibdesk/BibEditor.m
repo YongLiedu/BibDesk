@@ -1013,7 +1013,7 @@ static int numberOfOpenEditors = 0;
 			[scriptHook setField:BDSKCiteKeyString];
 			[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
 			[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
+			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
 		}
 		
 	}
@@ -1049,7 +1049,7 @@ static int numberOfOpenEditors = 0;
 		[scriptHook setField:BDSKCiteKeyString];
 		[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
 		[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
 	}
 	
 	// get them again, as the script hook might have changed some values
@@ -1076,7 +1076,7 @@ static int numberOfOpenEditors = 0;
 		[scriptHook setField:BDSKCiteKeyString];
 		[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
 		[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
 	}
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
@@ -1181,7 +1181,7 @@ static int numberOfOpenEditors = 0;
 			[scriptHook setField:field];
 			[scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", oldRating]]];
 			[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", newRating]]];
-			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
+			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
 		}
 		
 		[[self undoManager] setActionName:NSLocalizedString(@"Change Rating",@"")];
@@ -1211,7 +1211,7 @@ static int numberOfOpenEditors = 0;
             [scriptHook setField:field];
             [scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithTriStateValue:oldState]]];
             [scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithTriStateValue:newState]]];
-            [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
+            [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
         }
     }else{
         if(newBool == oldBool) return;    
@@ -1222,7 +1222,7 @@ static int numberOfOpenEditors = 0;
  			[scriptHook setField:field];
             [scriptHook setOldValues:[NSArray arrayWithObject:[NSString stringWithBool:oldBool]]];
             [scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithBool:newBool]]];
- 			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
+ 			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
  		}
         
         
@@ -1707,7 +1707,7 @@ static int numberOfOpenEditors = 0;
 		[scriptHook setField:fieldName];
 		[scriptHook setOldValues:[NSArray arrayWithObject:oldValue]];
 		[scriptHook setNewValues:[NSArray arrayWithObject:value]];
-		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication]];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
 	}
 }
 
@@ -2892,7 +2892,8 @@ static int numberOfOpenEditors = 0;
     [documentSnoopDrawer close];
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
-												 forPublications:[NSArray arrayWithObject:publication]];
+												 forPublications:[NSArray arrayWithObject:publication]
+                                                        document:[self document]];
 	
     // see method for notes
     [self breakTextStorageConnections];
