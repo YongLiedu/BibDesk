@@ -203,6 +203,8 @@ static Class BDSKFileClass = Nil;
     self = [super init];
     if(self){
         fileURL = [aURL copy];
+        
+        // @@ case-insensitive because of isEqualToFileURL:; this is true for HFS+, SMB, and AFP, but not UFS or NFS (can we check FS type?)
         hash = BDCaseInsensitiveStringHash([fileURL lastPathComponent]);
     }
     return self;
@@ -230,7 +232,8 @@ static Class BDSKFileClass = Nil;
     if(self == other){
         isEqual = YES;
     } else if([other isKindOfClass:BDSKFileClass]){
-        isEqual = [fileURL isEqualToFileURL:[other fileURL]];
+        // always return NO if comparing against an instance with a valid FSRef, since self isn't a valid file (or wasn't when instantiated) and hashes aren't guaranteed to be the same for differend subclasses
+        isEqual = NULL == [other fsRef] ? [fileURL isEqualToFileURL:[other fileURL]] : NO;
     }
 #if OMNI_FORCE_ASSERTIONS
     if(isEqual)
@@ -299,7 +302,8 @@ static Class BDSKFileClass = Nil;
     if(self == other){
         isEqual = YES;
     } else if([other isKindOfClass:BDSKFileClass]){
-        isEqual = (noErr == FSCompareFSRefs(fileRef, [other fsRef]));
+        const FSRef *otherFSRef = [other fsRef];
+        isEqual = NULL == otherFSRef ? NO : (noErr == FSCompareFSRefs(fileRef, otherFSRef));
     }
 #if OMNI_FORCE_ASSERTIONS
     if(isEqual)
@@ -323,7 +327,7 @@ unsigned int DEKHash(char *str, unsigned int len)
 
 - (unsigned int)hash
 {
-    return DEKHash((char *)fileRef, sizeof(FSRef)/sizeof(char));
+    return DEKHash((void *)fileRef, sizeof(FSRef)/sizeof(char));
 }
 
 - (id)copyWithZone:(NSZone *)aZone
@@ -344,7 +348,7 @@ unsigned int DEKHash(char *str, unsigned int len)
 static inline CFStringRef copyFileNameFromFSRef(const FSRef *fsRef)
 {
     HFSUniStr255 fileName;
-    OSErr err = FSGetCatalogInfo(fsRef, kIconServicesCatalogInfoMask, NULL, &fileName, NULL, NULL);
+    OSErr err = FSGetCatalogInfo(fsRef, kFSCatInfoNone, NULL, &fileName, NULL, NULL);
     return noErr == err ? CFStringCreateWithCharacters(CFAllocatorGetDefault(), fileName.unicode, fileName.length) : NULL;
 }
 
