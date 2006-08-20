@@ -2925,7 +2925,7 @@ It exports an RSS representation of the document in the same folder as the BibTe
                 <span class="aslangkeyword">end if</span>
             <span class="aslangkeyword">end tell</span>
             <span class="ascomment">-- now export as RSS</span>
-            <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
+            <span class="aslangkeyword">tell</span> <span class="asvariable">theDocument</span>
                 <span class="asappkeyword">export using template</span> <span class="asvalue">"Default RSS template"</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
             <span class="aslangkeyword">end tell</span>
         <span class="aslangkeyword">end tell</span>
@@ -2960,7 +2960,7 @@ It exports an RSS representation of the document in the same folder as the BibTe
                 @b{end if} 
             @b{end tell} 
             @i{-- now export as RSS}
-            @b{tell} application "BibDesk"
+            @b{tell} theDocument
                 export using template "Default RSS template" to theFile
             @b{end tell} 
         @b{end tell}
