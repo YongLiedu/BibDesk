@@ -2906,22 +2906,23 @@ It exports an RSS representation of the document in the same folder as the BibTe
             <span class="aslangkeyword">set</span> <span class="asvariable">theDocument</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">document</span> <span class="aslangkeyword">of</span> <span class="asvariable">theScriptHook</span>
             <span class="ascomment">-- check if we get the right script hook event</span>
             <span class="aslangkeyword">if</span> <span class="asvariable">theName</span> <span class="aslangkeyword">is not</span> <span class="asvalue">"Save Document"</span> <span class="aslangkeyword">then return</span>
-            <span class="ascomment">-- get the document's full path</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFullPath</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
-            <span class="ascomment">-- extract containing folder and file name, change extension to "rss"</span>
-            <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">":"</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theParts</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFullPath</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">item</span> <span class="asvalue">-1</span> <span class="aslangkeyword">of</span> <span class="asvariable">theParts</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">item</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theParts</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
-            <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text item</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span>  <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
-            <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvalue">".rss"</span>
-            <span class="ascomment">-- create the RSS file if necessary</span>
+            <span class="ascomment">-- get the document's file</span>
+            <span class="aslangkeyword">set</span> <span class="asvariable">theDocFile</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">file</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocument</span>
             <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"Finder"</span>
-                <span class="aslangkeyword">if</span> <span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">folder</span> <span class="asvariable">theFolder</span> <span class="asappkeyword">exists</span> <span class="aslangkeyword">then</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">folder</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
+                <span class="ascomment">-- extract containing folder and file name</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFolder</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">container</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">name</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span>
+                <span class="ascomment">-- change extension to "rss"</span>
+                <span class="aslangkeyword">if the</span> <span class="asappkeyword">name extension</span> <span class="aslangkeyword">of</span> <span class="asvariable">theDocFile</span> <span class="asappkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
+                    <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
+                <span class="aslangkeyword">end if</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvalue">".rss"</span>
+                <span class="ascomment">-- create the RSS file if necessary</span>
+                <span class="aslangkeyword">if</span> <span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span> <span class="asappkeyword">exists</span> <span class="aslangkeyword">then</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
                 <span class="aslangkeyword">else</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">make new file with properties</span> <span class="asoperator">{</span><span class="asappkeyword">name</span><span class="asoperator">:</span><span class="asvariable">theFileName</span><span class="asoperator">}</span> <span class="asappkeyword">at folder</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">make new file with properties</span> <span class="asoperator">{</span><span class="asappkeyword">name</span><span class="asoperator">:</span><span class="asvariable">theFileName</span><span class="asoperator">}</span> <span class="asappkeyword">at</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
                 <span class="aslangkeyword">end if</span>
             <span class="aslangkeyword">end tell</span>
             <span class="ascomment">-- now export as RSS</span>
@@ -2941,18 +2942,19 @@ It exports an RSS representation of the document in the same folder as the BibTe
             @b{set} theDocument @b{to the} document @b{of} theScriptHook
             @i{-- check if we get the right script hook event}
             @b{if} theName @b{is not} "Save Document" @b{then return}
-            @i{-- get the document's full path}
-            @b{set} theFullPath @b{to the} file of theDocument @b{as} string
-            @i{-- extract containing folder and file name, change extension to "rss"}
-            @b{set} AppleScript's text item delimiters @b{to} ":"
-            @b{set} theParts @b{to} text items of theFullPath
-            @b{set} theFileName @b{to} item -1 of theParts
-            @b{set} theFolder @b{to} item 1 @b{thru} -2 of theParts as string
-            @b{set} AppleScript's text item delimiters @b{to} "."
-            @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName as string
-            @b{set} theFileName @b{to} @b{to} theFileName & ".rss"
-            @i{-- create the RSS file if necessary}
+            @i{-- get the document's file}
+            @b{set} theDocFile @b{to the} file of theDocument
             @b{tell} application "Finder"
+                @i{-- extract containing folder and file name}
+                @b{set} theFolder @b{to the} container of theDocFile
+                @b{set} theFileName @b{to the} name of theDocFile
+                @i{-- change extension to "rss"}
+                @b{if} file theFileName @b{of} folder theFolder exists @b{then}
+                    @b{set} AppleScript's text item delimiters @b{to} "."
+                    @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName as string
+                @b{end if}
+                @b{set} theFileName @b{to} @b{to} theFileName & ".rss"
+                @i{-- create the RSS file if necessary}
                 @b{if} file theFileName @b{of} folder theFolder exists @b{then}
                     @b{set} theFile @b{to} (file theFileName @b{of} folder theFolder) @b{as} alias
                 @b{else} 
