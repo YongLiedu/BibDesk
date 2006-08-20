@@ -25,6 +25,7 @@
         {
             CLASS = BDSKFilteringArrayController; 
             LANGUAGE = ObjC; 
+            OUTLETS = {}; 
             SUPERCLASS = NSArrayController; 
         }, 
         {CLASS = BDSKPlaceHolderFilterItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 

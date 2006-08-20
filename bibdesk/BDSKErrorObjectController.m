@@ -72,6 +72,9 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             [self insertObject:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem] inDocumentsAtIndex:0];
             [self insertObject:[BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] inDocumentsAtIndex:1];
             [errorsController setFilterValue:[self objectInDocumentsAtIndex:0]];
+            [errorsController setWarningKey:@"errorClassName"];
+            [errorsController setWarningValue:@"warning"];
+            [errorsController setHideWarnings:NO];
             
             enableSyntaxHighlighting = YES;
         }
@@ -669,20 +672,25 @@ static BDSKPlaceHolderFilterItem *emptyItemsPlaceHolderFilterItem = nil;
 @implementation BDSKFilteringArrayController
 
 - (NSArray *)arrangeObjects:(NSArray *)objects {
-	
-    if (filterValue == nil || filterValue == [BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem] || [NSString isEmptyString:filterKey]) 
-		return [super arrangeObjects:objects];   
-
-    NSMutableArray *matchedObjects = [NSMutableArray arrayWithCapacity:[objects count]];
+	BOOL filterByKey = (filterValue != nil && filterValue != [BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem] && [NSString isEmptyString:filterKey] == NO);
+    BOOL filterWarnings = (hideWarnings == YES && [NSString isEmptyString:warningKey] == NO && [NSString isEmptyString:warningValue] == NO);
     
-	NSEnumerator *itemEnum = [objects objectEnumerator];
-    id item;	
-    while (item = [itemEnum nextObject]) {
-		id value = [item valueForKeyPath:filterKey];
-		if ((filterValue == [BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] && value == nil) || [value isEqual:filterValue]) 
-			[matchedObjects addObject:item];
+    if(filterByKey || filterWarnings){
+        NSMutableArray *matchedObjects = [NSMutableArray arrayWithCapacity:[objects count]];
+        
+        NSEnumerator *itemEnum = [objects objectEnumerator];
+        id item;	
+        while (item = [itemEnum nextObject]) {
+            id value = [item valueForKeyPath:filterKey];
+            if ((filterByKey == NO || (filterValue == [BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] && value == nil) || [value isEqual:filterValue]) &&
+                (filterWarnings == NO || [warningValue isEqual:[item valueForKey:warningKey]] == NO) ) {
+                [matchedObjects addObject:item];
+            }
+        }
+        
+        objects = matchedObjects;
     }
-    return [super arrangeObjects:matchedObjects];
+    return [super arrangeObjects:objects];
 }
 
 - (void)dealloc {
@@ -710,7 +718,42 @@ static BDSKPlaceHolderFilterItem *emptyItemsPlaceHolderFilterItem = nil;
 - (void)setFilterKey:(NSString *)newKey {
     if (filterKey != newKey) {
         [filterKey release];
-        filterKey = [newKey copy];
+        filterKey = [newKey retain];
+		[self rearrangeObjects];
+    }
+}
+
+- (NSString *)warningKey {
+    return [[warningKey retain] autorelease];
+}
+
+- (void)setWarningKey:(NSString *)newKey {
+    if (warningKey != newKey) {
+        [warningKey autorelease];
+        warningKey = [newKey retain];
+		[self rearrangeObjects];
+    }
+}
+
+- (NSString *)warningValue {
+    return [[warningValue retain] autorelease];
+}
+
+- (void)setWarningValue:(NSString *)newValue {
+    if (warningValue != newValue) {
+        [warningValue autorelease];
+        warningValue = [newValue retain];
+		[self rearrangeObjects];
+    }
+}
+
+- (BOOL)hideWarnings {
+    return hideWarnings;
+}
+
+- (void)setHideWarnings:(BOOL)flag {
+    if(hideWarnings != flag) {
+        hideWarnings = flag;
 		[self rearrangeObjects];
     }
 }

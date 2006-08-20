@@ -145,12 +145,21 @@
 @interface BDSKFilteringArrayController : NSArrayController {
     id filterValue;
 	NSString *filterKey;
+    NSString *warningKey;
+    NSString *warningValue;
+    BOOL hideWarnings;
 }
 
 - (id)filterValue;
 - (void)setFilterValue:(id)newValue;
 - (NSString *)filterKey;
 - (void)setFilterKey:(NSString *)newKey;
+- (NSString *)warningKey;
+- (void)setWarningKey:(NSString *)newKey;
+- (NSString *)warningValue;
+- (void)setWarningValue:(NSString *)newKey;
+- (BOOL)hideWarnings;
+- (void)setHideWarnings:(BOOL)flag;
 
 @end
 
