@@ -43,7 +43,8 @@
 	// stuff for the accessory view for open text encoding 
 	IBOutlet NSView *openTextEncodingAccessoryView;
 	IBOutlet NSPopUpButton *openTextEncodingPopupButton;
-
+    
+    BOOL isOpening;
 }
 
 /*!

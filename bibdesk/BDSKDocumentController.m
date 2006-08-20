@@ -58,6 +58,7 @@
         // @@ NSDocumentController autosave is 10.4 only
 		if([self respondsToSelector:@selector(setAutosavingDelay:)] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
 		    [self setAutosavingDelay:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutosaveTimeIntervalKey]];
+        isOpening = NO;
     }
     return self;
 }
@@ -132,6 +133,9 @@
 
 - (IBAction)openDocumentUsingFilter:(id)sender
 {
+    if (isOpening) 
+        return;
+    
     int result;
     NSString *fileToOpen = nil;
     NSString *shellCommand = nil;
@@ -159,9 +163,11 @@
         [openUsingFilterComboBox selectItemAtIndex:0];
         [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
     }
+    isOpening = YES;
     result = [oPanel runModalForDirectory:nil
                                      file:nil
                                     types:nil];
+    isOpening = NO;
     if (result == NSOKButton) {
         fileToOpen = [oPanel filename];
         shellCommand = [openUsingFilterComboBox stringValue];
@@ -210,16 +216,21 @@
 }
 
 - (void)openDocumentCreatingPhonyCiteKeys:(BOOL)phony{
-	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+	if (isOpening)
+        return;
+    
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
     NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
     [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
 		
 	NSArray *types = (phony ? [NSArray arrayWithObject:@"bib"] : [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil]);
 	
-	int result = [oPanel runModalForDirectory:nil
+	isOpening = YES;
+    int result = [oPanel runModalForDirectory:nil
                                      file:nil
                                     types:types];
+	isOpening = NO;
 	if (result == NSOKButton) {
         id document = nil;
         NSString *fileToOpen = [oPanel filename];
