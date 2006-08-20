@@ -31,6 +31,7 @@
 
 NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
 NSString *BDSKParserHarmlessWarningString = @"harmless";
+NSString *BDSKParserWarningString = @"warning";
 
 @implementation BDSKErrObj
 + (BOOL)accessInstanceVariablesDirectly{ return YES; }

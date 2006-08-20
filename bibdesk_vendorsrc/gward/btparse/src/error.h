@@ -25,6 +25,7 @@
 
 extern NSString *BDSKParserErrorNotification;
 extern NSString *BDSKParserHarmlessWarningString;
+extern NSString *BDSKParserWarningString;
 
 @interface BDSKErrObj : NSObject{
     NSString *fileName;
