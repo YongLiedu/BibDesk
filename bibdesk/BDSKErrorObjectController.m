@@ -488,19 +488,6 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
 		[self removeObjectFromDocumentsAtIndex:[documents indexOfObject:document]];
 }
 
-- (void)transferErrorsTo:(NSString *)fileName fromDocument:(id)document{
-	unsigned index = [self countOfErrors];
-    id errObj;
-    
-    while (index--) {
-		errObj = [self objectInErrorsAtIndex:index];
-        if ([errObj document] == document) {
-            [errObj setDocument:nil];
-            [errObj setFileName:fileName];
-    	}
-    }
-}
-
 #pragma mark Edit window
 
 - (id <OAFindControllerTarget>)omniFindControllerTarget { return sourceEditTextView; }
@@ -544,6 +531,9 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
 - (IBAction)reopenDocument:(id)sender{
     NSString *expandedCurrentFileName = [[self currentFileName] stringByExpandingTildeInPath];
     
+    if (expandedCurrentFileName == nil)
+        return;
+    
     [self removeErrorObjsForFileName:expandedCurrentFileName];
     
     expandedCurrentFileName = [[NSFileManager defaultManager] uniqueFilePath:expandedCurrentFileName
@@ -556,6 +546,7 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
     [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:expandedCurrentFileName
                                                                             display:YES];
     
+    [sourceEditWindow close];
 }
 
 #pragma mark TableView tooltips
