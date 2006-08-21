@@ -515,6 +515,11 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 		return YES;
 	}
     else if (act == @selector(toggleShowingOrphanedFilesPanel:)){ 
+        
+        // @@ BDSKAsynchronousDOServer is 10.4 only due to OSAtomic functions
+        if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+            return NO;
+        
 		// menu item for toggling the orphaned files panel
 		// set the on/off state according to the panel's visibility
 		if ([[[BDSKOrphanedFilesFinder sharedFinder] window] isVisible]) {
@@ -892,7 +897,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
 }
 
-#pragma mark | Input manager
+#pragma mark Input manager
 
 - (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current{
     NSParameterAssert(current != NULL);
