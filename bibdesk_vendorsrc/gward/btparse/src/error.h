@@ -29,7 +29,7 @@ extern NSString *BDSKParserWarningString;
 
 @interface BDSKErrObj : NSObject{
     NSString *fileName;
-	NSDocument *document;
+	id document;
     int lineNumber;
     
     NSString *itemDescription;
