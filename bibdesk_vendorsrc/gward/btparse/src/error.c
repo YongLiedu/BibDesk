@@ -168,11 +168,8 @@ void print_error (bt_error *err)
 
    NSNotification *errNotif = [NSNotification notificationWithName:BDSKParserErrorNotification object:errObj];
 
-   [[NSNotificationQueue defaultQueue] enqueueNotification:errNotif
-                                              postingStyle:NSPostWhenIdle
-                                              coalesceMask:NSNotificationCoalescingOnSender
-                                                  forModes:nil];
-
+   [[NSNotificationCenter defaultCenter] postNotification:errNotif];
+   
 } /* print_error() */
 
 
