@@ -794,7 +794,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 
     // rebuild metadata cache for this document whenever we save
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 && [self fileName]){
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 && [self fileURL]){
         NSEnumerator *pubsE = [[self publications] objectEnumerator];
         NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
         BibItem *anItem;
@@ -805,7 +805,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         }
         
         // don't pass the fileName parameter, since it's likely a temp file somewhere due to the atomic save operation
-        NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", [self fileName], @"fileName", nil];
+        NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", [self fileURL], @"fileURL", nil];
         [pubsInfo release];
         [[NSApp delegate] rebuildMetadataCache:infoDict];
         [infoDict release];

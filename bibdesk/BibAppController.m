@@ -1311,11 +1311,12 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", cachePath] userInfo:nil];
         }
         
-        NSString *docPath = [userInfo valueForKey:@"fileName"];
+        NSURL *documentURL = [userInfo valueForKey:@"fileURL"];
+        NSString *docPath = [documentURL path];
         
         // After this point, there should be no underlying NSError, so we'll create one from scratch
         
-        if([fileManager fileExistsAtPath:docPath] == NO){
+        if([fileManager objectExistsAtFileURL:documentURL] == NO){
             error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @""), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache for document at path \"%@\"", docPath] userInfo:nil];
         }
@@ -1324,14 +1325,14 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         NSString *citeKey;
         NSDictionary *anItem;
         
-        BDAlias *alias = [[BDAlias alloc] initWithPath:docPath];
+        BDAlias *alias = [[BDAlias alloc] initWithURL:documentURL];
         if(alias == nil){
             error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to create an alias for this document.", @""), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
             @throw [NSException exceptionWithName:NSObjectNotAvailableException reason:[NSString stringWithFormat:@"Unable to get an alias for file %@", docPath] userInfo:nil];
         }
         
         NSData *aliasData = [alias aliasData];
-        [alias release];
+        [alias autorelease];
     
         NSEnumerator *entryEnum = [publications objectEnumerator];
         
