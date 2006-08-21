@@ -380,8 +380,7 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
     
-    if ([[self publication] document])
-		[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:[[self publication] document]];
+    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:[[self publication] document]];
 	
     bt_name *theName;
     int i = 0;
@@ -487,6 +486,7 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     
     bt_free_name(theName);
     
+    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:nil];
 }
 
 - (void)setVonPart:(NSString *)newVonPart{

@@ -237,6 +237,9 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
         if(error && outError) *outError = error;
         [parserLock unlock];
     }
+	
+    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:nil];
+    
     return returnArray;
 }
 
@@ -285,6 +288,9 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
     bt_cleanup();
     [parserLock unlock];
     fclose(stream);
+    
+    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:nil];
+    
     return retDict;
 }
 
@@ -319,6 +325,8 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 	bt_free_ast(entry);
 	bt_cleanup();
 	[parserLock unlock];
+    
+    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:nil];
     
 	return [valueString autorelease];
 }
