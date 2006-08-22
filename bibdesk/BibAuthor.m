@@ -394,7 +394,7 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     newName = [newName fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines];
     
     // pass the name as a UTF8 string, since btparse doesn't work with UniChars
-    theName = bt_split_name((char *)[newName UTF8String],(char *)[newName UTF8String],0,0);
+    theName = bt_split_name((char *)[newName UTF8String],(char *)[BDSKAuthorString UTF8String],0,0);
     
     [mutableString setString:@""];
     

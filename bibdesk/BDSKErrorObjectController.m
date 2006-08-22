@@ -283,7 +283,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)showEditorForErrorObject:(BDSKErrObj *)errObj{
     NSString *fileName = [errObj fileName];
     
-    if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString] || [[NSFileManager defaultManager] fileExistsAtPath:fileName] == NO) {
+    if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString] || [fileName isEqualToString:BDSKAuthorString] || [[NSFileManager defaultManager] fileExistsAtPath:fileName] == NO) {
         // paste/drag or author parsing errors
         NSBeep();
         return;
@@ -386,6 +386,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)endObservingErrorsForDocument:(BibDocument *)document{
     if([currentErrors count]){
         // document shouldn't be nil, but just be sure
+        OBASSERT(document != nil);
         id editor =  (document == nil) ? nil : [self editorForDocument:document create:YES];
         [currentErrors makeObjectsPerformSelector:@selector(setEditor:) withObject:editor];
         [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
@@ -443,7 +444,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 		docFileName = [fileName lastPathComponent];
 	if (docFileName == nil)
         docFileName = @"?";
-    else if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString])
+    else if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString] || [fileName isEqualToString:BDSKAuthorString])
         docFileName = [NSString stringWithFormat:@"[%@]", docFileName];
     return docFileName;
 }
