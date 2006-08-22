@@ -37,7 +37,7 @@ NSString *BDSKParserWarningString = @"warning";
 + (BOOL)accessInstanceVariablesDirectly{ return YES; }
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"File name: %@, Document: %@, line number: %d \n\t item: %@, error class: %@, error message: %@", fileName, document, lineNumber, itemDescription, errorClassName, errorMessage];
+    return [NSString stringWithFormat:@"File name: %@, Editor: %@, line number: %d \n\t item: %@, error class: %@, error message: %@", fileName, editor, lineNumber, itemDescription, errorClassName, errorMessage];
 }
 
 @end
