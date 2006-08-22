@@ -616,6 +616,96 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 	return authors;
 }
 
++ (NSDictionary *)splitAuthorName:(NSString *)name document:(BibDocument *)aDocument{
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
+	
+    NSMutableDictionary *nameDict = [NSMutableDictionary dictionaryWithCapacity:4];
+    
+    bt_name *theName;
+    int i = 0;
+    
+    // use this as a buffer for appending separators
+    NSMutableString *mutableString = [[NSMutableString alloc] initWithCapacity:14];
+    NSString *tmpStr = nil;
+    
+    // we need to remove newlines and collapse whitespace before using bt_split_name 
+    name = [name fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines];
+    
+    // pass the name as a UTF8 string, since btparse doesn't work with UniChars
+    theName = bt_split_name((char *)[name UTF8String],(char *)[BDSKAuthorString UTF8String],0,0);
+    
+    [mutableString setString:@""];
+    
+    // get tokens from first part
+    for (i = 0; i < theName->part_len[BTN_FIRST]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_FIRST][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
+            [mutableString appendString:@" "];
+    }
+    tmpStr = [mutableString copy];
+    [nameDict setObject:tmpStr forKey:@"firstName"];
+    [tmpStr release];
+    
+    [mutableString setString:@""];
+    // get tokens from von part
+    for (i = 0; i < theName->part_len[BTN_VON]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_VON][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_VON]-1)
+            [mutableString appendString:@" "];
+        
+    }
+    tmpStr = [mutableString copy];
+    [nameDict setObject:tmpStr forKey:@"vonPart"];
+    [tmpStr release];
+	
+    [mutableString setString:@""];
+	// get tokens from last part
+    for (i = 0; i < theName->part_len[BTN_LAST]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_LAST][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
+            [mutableString appendString:@" "];
+    }
+    tmpStr = [mutableString copy];
+    [nameDict setObject:tmpStr forKey:@"lastName"];
+    [tmpStr release];
+	
+    [mutableString setString:@""];
+    // get tokens from jr part
+    for (i = 0; i < theName->part_len[BTN_JR]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_JR][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_JR]-1)
+            [mutableString appendString:@" "];
+    }
+    tmpStr = [mutableString copy];
+    [nameDict setObject:tmpStr forKey:@"jrPart"];
+    [tmpStr release];
+    
+    [mutableString release];
+	
+    bt_free_name(theName);
+    
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
+    
+    return nameDict;
+}
+
+
 @end
 
 /// private functions used with libbtparse code

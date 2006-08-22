@@ -37,8 +37,8 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import <OmniFoundation/OmniFoundation.h>
-#import "BDSKErrorObjectController.h"
 #import "BibPrefController.h"
+#import "BibTeXParser.h"
 
 @interface BibAuthor (Private)
 
@@ -381,80 +381,18 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
     
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[[self publication] document]];
-	
-    bt_name *theName;
-    int i = 0;
+    NSDictionary *nameDict = [BibTeXParser splitAuthorName:newName document:[[self publication] document]];
     
-    // use this as a buffer for appending separators
-    NSMutableString *mutableString = [[NSMutableString alloc] initWithCapacity:14];
-    NSString *tmpStr = nil;
-    
-    // we need to remove newlines and collapse whitespace before using bt_split_name 
-    newName = [newName fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines];
-    
-    // pass the name as a UTF8 string, since btparse doesn't work with UniChars
-    theName = bt_split_name((char *)[newName UTF8String],(char *)[BDSKAuthorString UTF8String],0,0);
-    
-    [mutableString setString:@""];
-    
-    // get tokens from first part
-    for (i = 0; i < theName->part_len[BTN_FIRST]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_FIRST][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
-            [mutableString appendString:@" "];
-    }
-    [self setFirstName:mutableString];
-    
-    [mutableString setString:@""];
-    // get tokens from von part
-    for (i = 0; i < theName->part_len[BTN_VON]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_VON][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_VON]-1)
-            [mutableString appendString:@" "];
-        
-    }
-    [self setVonPart:mutableString];
-	
-    [mutableString setString:@""];
-	// get tokens from last part
-    for (i = 0; i < theName->part_len[BTN_LAST]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_LAST][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
-            [mutableString appendString:@" "];
-    }
-    [self setLastName:mutableString];
-	
-    [mutableString setString:@""];
-    // get tokens from jr part
-    for (i = 0; i < theName->part_len[BTN_JR]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_JR][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_JR]-1)
-            [mutableString appendString:@" "];
-    }
-    [self setJrPart:mutableString];
+    [self setFirstName:[nameDict objectForKey:@"firstName"]];
+    [self setVonPart:[nameDict objectForKey:@"vonPart"]];
+    [self setLastName:[nameDict objectForKey:@"lastName"]];
+    [self setJrPart:[nameDict objectForKey:@"jrPart"]];
     
     // create the name as "First Middle von Last, Jr", which is more readable and less sortable
     // @@ This will potentially alter data if BibItem ever saves based on -[BibAuthor name] instead of the original string it keeps in pubFields
-    [mutableString setString:@""];
+    NSMutableString *mutableString = [[NSMutableString alloc] initWithCapacity:14];
     
-    flags.hasFirst = !BDIsEmptyString((CFStringRef)firstName);;
+    flags.hasFirst = !BDIsEmptyString((CFStringRef)firstName);
 	flags.hasVon = !BDIsEmptyString((CFStringRef)vonPart);
 	flags.hasLast = !BDIsEmptyString((CFStringRef)lastName);
     flags.hasJr = !BDIsEmptyString((CFStringRef)jrPart);
@@ -485,9 +423,6 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     [self cacheNames];
     [self setupAbbreviatedNames];
     
-    bt_free_name(theName);
-    
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[[self publication] document]];
 }
 
 - (void)setVonPart:(NSString *)newVonPart{
