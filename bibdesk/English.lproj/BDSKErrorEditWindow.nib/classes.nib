@@ -1,0 +1,13 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {changeSyntaxHighlighting = id; reopenDocument = id; }; 
+            CLASS = BDSKErrorEditController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {syntaxHighlightCheckbox = NSButton; textView = NSTextView; }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+    ); 
+    IBVersion = 1; 
+}
