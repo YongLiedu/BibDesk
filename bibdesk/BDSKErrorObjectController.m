@@ -38,16 +38,18 @@
 
 #import "BDSKErrorObjectController.h"
 #import <OmniBase/assertions.h>
+#import "BDSKErrorEditor.h"
 #import "BibPrefController.h"
-#import "NSTextView_BDSKExtensions.h"
-#import "NSString_BDSKExtensions.h"
 #import "BibDocument.h"
-#import "NSFileManager_BDSKExtensions.h"
-#import "CFString_BDSKExtensions.h"
 
-static BDSKErrorObjectController *sharedErrorObjectController = nil;
+// put it here because IB chokes on it
+@interface BDSKLineNumberTransformer : NSValueTransformer @end
+
+#pragma mark -
 
 @implementation BDSKErrorObjectController
+
+static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 + (void)initialize;
 {
@@ -70,21 +72,17 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             [self release];
             self = sharedErrorObjectController;
         } else {
-            [self window]; // forces the nib to be loaded
+            errors = [[NSMutableArray alloc] initWithCapacity:10];
+            managers = [[NSMutableArray alloc] initWithCapacity:4];
+            editors = [[NSMutableArray alloc] initWithCapacity:2];
+            
+            [managers addObject:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
+            [managers addObject:[BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem]];
+            
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(handleErrorNotification:)
                                                          name:BDSKParserErrorNotification
                                                        object:nil];
-            errors = [[NSMutableArray alloc] initWithCapacity:10];
-            documents = [[NSMutableArray alloc] initWithCapacity:4];
-            [self insertObject:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem] inDocumentsAtIndex:0];
-            [self insertObject:[BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] inDocumentsAtIndex:1];
-            [errorsController setFilterValue:[self objectInDocumentsAtIndex:0]];
-            [errorsController setWarningKey:@"errorClassName"];
-            [errorsController setWarningValue:BDSKParserWarningString];
-            [errorsController setHideWarnings:NO];
-            
-            enableSyntaxHighlighting = YES;
         }
     }
     
@@ -101,25 +99,26 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [errors release];
-    [documents release];
+    [managers release];
+    [editors release];
+    [currentErrors release];
     [super dealloc];
 }
 
 - (void)awakeFromNib;
 {
     [errorTableView setDoubleAction:@selector(gotoError:)];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleEditWindowWillCloseNotification:)
-                                                 name:NSWindowWillCloseNotification
-                                               object:sourceEditWindow];
-
-    [errorsController setFilterKey:@"document"];
-	
-	[[sourceEditTextView textStorage] setDelegate:self];
-    [syntaxHighlightCheckbox setState:NSOnState];
+    
+    [errorsController setFilterKey:@"editor"];
+    [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
+    [errorsController setWarningKey:@"errorClassName"];
+    [errorsController setWarningValue:BDSKParserWarningString];
+    [errorsController setHideWarnings:NO];
 }
 
 #pragma mark Accessors
+
+// errors
 
 - (NSArray *)errors {
     return [[errors retain] autorelease];
@@ -141,77 +140,165 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [errors removeObjectAtIndex:index];
 }
 
-- (void)replaceObjectInErrorsAtIndex:(unsigned)index withObject:(id)newObject{
-    [errors replaceObjectAtIndex:index withObject:newObject];
+// managers
+
+- (NSArray *)managers {
+    return [[managers retain] autorelease];
 }
 
-- (NSArray *)documents {
-    return [[documents retain] autorelease];
+- (unsigned)countOfManagers {
+    return [managers count];
 }
 
-- (unsigned)countOfDocuments {
-    return [documents count];
+- (id)objectInManagersAtIndex:(unsigned)theIndex {
+    return [managers objectAtIndex:theIndex];
 }
 
-- (id)objectInDocumentsAtIndex:(unsigned)theIndex {
-    return [documents objectAtIndex:theIndex];
+- (void)insertObject:(id)obj inManagersAtIndex:(unsigned)theIndex {
+    [managers insertObject:obj atIndex:theIndex];
 }
 
-- (void)insertObject:(id)obj inDocumentsAtIndex:(unsigned)theIndex {
-    [documents insertObject:obj atIndex:theIndex];
+- (void)removeObjectFromManagersAtIndex:(unsigned)theIndex {
+    [managers removeObjectAtIndex:theIndex];
 }
 
-- (void)removeObjectFromDocumentsAtIndex:(unsigned)theIndex {
-    [documents removeObjectAtIndex:theIndex];
+// editors
+
+- (NSArray *)editors{
+    return editors;
 }
 
-- (void)replaceObjectInDocumentsAtIndex:(unsigned)theIndex withObject:(id)obj {
-    [documents replaceObjectAtIndex:theIndex withObject:obj];
+#pragma mark Error editors
+
+- (void)addEditor:(BDSKErrorEditor *)editor{
+    [editor setErrorController:self];
+    [editors addObject:editor];
 }
 
-- (void)setCurrentFileName:(NSString *)newPath;
-{
-    if(currentFileName != newPath){
-        [currentFileName release];
-        currentFileName = [newPath copy];
+- (void)removeEditor:(BDSKErrorEditor *)editor{
+    // remove all errors associated to this controller
+	unsigned index = [self countOfErrors];
+    BDSKErrObj *errObj;
+    
+    while (index--) {
+		errObj = [self objectInErrorsAtIndex:index];
+        if ([errObj editor] == editor) {
+            [self removeObjectFromErrorsAtIndex:index];
+    	}
+    }
+    
+    if ([errorsController filterValue] == editor)
+        [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
+	if ([managers containsObject:editor])
+		[self removeObjectFromManagersAtIndex:[managers indexOfObject:editor]];
+    [editor setErrorController:nil];
+    [editors removeObject:editor];
+}
+
+- (BDSKErrorEditor *)editorForDocument:(BibDocument *)document create:(BOOL)create{
+    NSEnumerator *eEnum = [editors objectEnumerator];
+    BDSKErrorEditor *editor = nil;
+    BDSKErrorEditor *docEditor = nil;
+    int number = 0;
+    NSString *fileName = [[document fileName] lastPathComponent];
+    
+    while(editor = [eEnum nextObject]){
+        if(document == [editor document])
+            docEditor = editor;
+        if(create && [fileName isEqualToString:[[editor fileName] lastPathComponent]])
+            number = MAX(number, [editor uniqueNumber] + 1);
+    }
+    
+    if(docEditor == nil && create){
+        docEditor = [[BDSKErrorEditor alloc] initWithFileName:[document fileName] andDocument:document];
+        [docEditor setUniqueNumber:number];
+        [self addEditor:docEditor];
+        [docEditor release];
+        [self insertObject:docEditor inManagersAtIndex:[self countOfManagers]];
+    }
+    
+    return docEditor;
+}
+
+- (BDSKErrorEditor *)editorForFileName:(NSString *)fileName create:(BOOL)create{
+    NSEnumerator *eEnum = [editors objectEnumerator];
+    BDSKErrorEditor *editor = nil;
+    
+    while(editor = [eEnum nextObject]){
+        if([fileName isEqualToString:[editor fileName]])
+            break;
+    }
+    
+    if(editor == nil && create){
+        editor = [[BDSKErrorEditor alloc] initWithFileName:fileName andDocument:nil];
+        [self addEditor:editor];
+        [editor release];
+    }
+    
+    return editor;
+}
+
+// failed load of a document
+- (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit{
+    if(shouldEdit)
+        [self showErrorPanel:self];
+	
+    // remove any earlier failed load editors unless we're editing them
+    unsigned index = [editors count];
+    BDSKErrorEditor *editor;
+    
+    while (index--) {
+        editor = [editors objectAtIndex:index];
+        if([editor document] == document){
+           [editor setDocument:nil];
+           if(shouldEdit)
+                [editor showWindow:self];
+        }else if([editor isEditing] == NO){
+            [self removeEditor:editor];
+        }
     }
 }
 
-- (NSString *)currentFileName;
-{
-    return currentFileName;
-}
-
-- (void)setCurrentDocument:(id)document;
-{
-    if(currentDocument != document){
-        [currentDocument release];
-        currentDocument = [document retain];
+// close a document
+- (void)documentWillBeRemoved:(BibDocument *)document{
+    // clear reference to document in its editor and close it when it is not editing
+    BDSKErrorEditor *editor = [self editorForDocument:document create:NO]; // there should be at most one
+    
+    if(editor){
+        [editor setDocument:nil];
+        if([editor isEditing] == NO)
+            [self removeEditor:editor];
     }
 }
 
-- (id)currentDocument;
-{
-    return currentDocument;
+// edit failed paste/drag data
+- (void)showEditorForFileName:(NSString *)fileName{
+    // we create a new editor without a document, because the data is not part of the document's source file
+    BDSKErrorEditor *editor = [self editorForFileName:fileName create:YES];
+    [self showErrorPanel:self];
+    [editor showWindow:self];
 }
 
-- (void)setDocumentForErrors:(id)document{
-	if (document != currentDocumentForErrors) {
-		[currentDocumentForErrors release];
-		currentDocumentForErrors = [document retain];
-		if (document != nil && [documents containsObject:document] == NO)
-			[self insertObject:document inDocumentsAtIndex:[self countOfDocuments]];
-	}
-}
-
-- (id)documentForErrors{
-	return currentDocumentForErrors;
+// double click in the error tableview
+- (void)showEditorForErrorObject:(BDSKErrObj *)errObj{
+    NSString *fileName = [errObj fileName];
+    
+    if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString] || [[NSFileManager defaultManager] fileExistsAtPath:fileName] == NO) {
+        // paste/drag or author parsing errors
+        NSBeep();
+        return;
+    }
+    
+    BDSKErrorEditor *editor = [errObj editor];
+    
+    [editor showWindow:self];
+    [editor gotoLine:[errObj lineNumber]];
 }
 
 #pragma mark Actions
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
-    if (![errorPanel isVisible]) {
+    if (![[self window] isVisible]) {
         [self showErrorPanel:sender];
     }else{
         [self hideErrorPanel:sender];
@@ -219,16 +306,16 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (IBAction)hideErrorPanel:(id)sender{
-    [errorPanel orderOut:sender];
+    [[self window] orderOut:sender];
 }
 
 - (IBAction)showErrorPanel:(id)sender{
-    [errorPanel makeKeyAndOrderFront:sender];
+    [[self window] makeKeyAndOrderFront:sender];
 }
 
 // copy error messages
 - (IBAction)copy:(id)sender{
-    if([errorPanel isKeyWindow] && [errorTableView numberOfSelectedRows] > 0){
+    if([[self window] isKeyWindow] && [errorTableView numberOfSelectedRows] > 0){
         NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
         NSMutableString *s = [[NSMutableString string] retain];
         NSEnumerator *objEnumerator = [[errorsController selectedObjects] objectEnumerator];
@@ -265,28 +352,12 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (IBAction)gotoError:(id)sender{
     int clickedRow = [sender clickedRow];
     if(clickedRow != -1)
-        [self gotoErrorObj:[[errorsController arrangedObjects] objectAtIndex:clickedRow]];
+        [self showEditorForErrorObject:[[errorsController arrangedObjects] objectAtIndex:clickedRow]];
 }
 
-- (void)gotoErrorObj:(id)errObj{
-    NSString *fileName = [errObj fileName];    
-    [self openEditWindowWithFile:fileName forDocument:[errObj document]];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:fileName])
-        [sourceEditTextView selectLineNumber:[errObj lineNumber]];
-}
+#pragma mark Menu validation
 
-- (IBAction)changeSyntaxHighlighting:(id)sender{
-    NSTextStorage *textStorage = [sourceEditTextView textStorage];
-    if([sender state] == NSOffState){
-        enableSyntaxHighlighting = NO;
-        [textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:NSMakeRange(0, [textStorage length])];
-    } else 
-        enableSyntaxHighlighting = YES;
-    [textStorage edited:NSTextStorageEditedAttributes range:NSMakeRange(0, [textStorage length]) changeInLength:0];
-}
-
-- (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
+- (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
 	if (act == @selector(toggleShowingErrorPanel:)){ 
@@ -301,252 +372,34 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return YES;
 }
 
-#pragma mark Notifications and Update
+#pragma mark Error notification handling
 
-- (void)handleErrorNotification:(NSNotification *)notification{
-    BDSKErrObj *errDict = [notification object];
-    NSString *errorClass = [errDict errorClassName];
-    
-    // don't show lexical buffer overflow warnings
-    if ([errorClass isEqualToString:BDSKParserHarmlessWarningString] == NO) {
-		[errDict setDocument:currentDocumentForErrors];
-		[self insertObject:errDict inErrorsAtIndex:[self countOfErrors]];
-        if([errorPanel isVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
+- (void)startObservingErrorsForDocument:(BibDocument *)document{
+    if(currentErrors == nil){
+        currentErrors = [[NSMutableArray alloc] initWithCapacity:10];
+    } else {
+        OBASSERT([currentErrors count] == 0);
+        [currentErrors removeAllObjects];
+    }
+}
+
+- (void)endObservingErrorsForDocument:(BibDocument *)document{
+    if([currentErrors count]){
+        // document shouldn't be nil, but just be sure
+        id editor =  (document == nil) ? nil : [self editorForDocument:document create:YES];
+        [currentErrors makeObjectsPerformSelector:@selector(setEditor:) withObject:editor];
+        [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
+        [currentErrors removeAllObjects];
+        if([[self window] isVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
             [self showErrorPanel:self];
     }
-
 }
 
-// here we have to identify errors by file name, as we've no idea what document the edit window is associated with
-- (void)handleEditWindowWillCloseNotification:(NSNotification *)notification{
-	if ([self currentDocument] == nil) {
-		[self removeErrorObjsForFileName:[[self currentFileName] stringByExpandingTildeInPath]];
-        [self setCurrentFileName:nil];
-	} else {
-		[self setCurrentDocument:nil];
-    }
-}
-
-static inline Boolean isLeftBrace(UniChar ch) { return ch == '{'; }
-static inline Boolean isRightBrace(UniChar ch) { return ch == '}'; }
-static inline Boolean isAt(UniChar ch) { return ch == '@'; }
-
-// extend the edited range of the textview to include the previous and next newline; including the previous/next delimiter is less reliable
-static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
-    
-    static NSCharacterSet *delimSet = nil;
-    if(delimSet == nil)
-        delimSet = [[NSCharacterSet characterSetWithCharactersInString:@"@{}"] retain];
-    
-    static NSMutableCharacterSet *newlineSet = nil;
-    if(newlineSet == nil){
-        newlineSet = (NSMutableCharacterSet *)CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-        CFCharacterSetInvert((CFMutableCharacterSetRef)newlineSet); // no whitespace in this one, but it also has all letters...
-        CFCharacterSetIntersect((CFMutableCharacterSetRef)newlineSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
-    }
-    
-    if([string containsCharacterInSet:delimSet] == NO)
-        return proposedRange;
-    
-    NSRange startRange;
-    startRange = [string rangeOfCharacterFromSet:newlineSet options:NSBackwardsSearch|NSLiteralSearch range:NSMakeRange(0, proposedRange.location)];
-    if(startRange.location == NSNotFound)
-        startRange = NSMakeRange(proposedRange.location, 0);
-    
-    NSRange endRange;
-    endRange = [string rangeOfCharacterFromSet:newlineSet options:NSLiteralSearch range:NSMakeRange(NSMaxRange(proposedRange), [string length] - NSMaxRange(proposedRange))];
-    if(endRange.location == NSNotFound)
-        endRange = proposedRange;
-    
-    return NSMakeRange(startRange.location, NSMaxRange(endRange) - startRange.location);
-}
-    
-
-- (void)textStorageDidProcessEditing:(NSNotification *)notification{
-    
-    if(enableSyntaxHighlighting == NO)
-        return;
-    
-    NSTextStorage *textStorage = [notification object];    
-    CFStringRef string = (CFStringRef)[textStorage string];
-    CFIndex length = CFStringGetLength(string);
-
-    NSRange editedRange = [textStorage editedRange];
-    
-    // see what range we should actually invalidate; if we're not adding any special characters, the default edited range is probably fine
-    editedRange = invalidatedRange((NSString *)string, editedRange);
-    
-    CFIndex cnt = editedRange.location;
-    
-    CFStringInlineBuffer inlineBuffer;
-    CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(cnt, editedRange.length));
-    
-    [textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:editedRange];
-    
-    // inline buffer only covers the edited range, starting from 0; adjust length to length of buffer
-    length = editedRange.length;
-    UniChar ch;
-    CFIndex lbmark, atmark;
-    
-    NSColor *braceColor = [NSColor blueColor];
-    NSColor *typeColor = [NSColor purpleColor];
-    NSColor *quotedColor = [NSColor brownColor];
-    
-    CFIndex braceDepth = 0;
-     
-    // This is fairly crude; I don't think it's worthwhile to implement a full BibTeX parser here, since we need this to be fast (and it won't be used that often).
-    // remember that cnt and length determine the index and length of the inline buffer, not the textStorage
-    for(cnt = 0; cnt < length; cnt++){
-        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(isAt(ch) && (cnt == 0 || BDIsNewlineCharacter(CFStringGetCharacterAtIndex(string, cnt - 1)))){
-            atmark = cnt;
-            for(cnt = cnt; cnt < length; cnt++){
-                ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-                if(isLeftBrace(ch)){
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
-                    break;
-                }
-            }
-            [textStorage addAttribute:NSForegroundColorAttributeName value:typeColor range:NSMakeRange(editedRange.location + atmark, cnt - atmark)];
-            // sneaky hack: don't rewind here, since cite keys don't have a closing brace (of course)
-        }else if(isLeftBrace(ch)){
-            braceDepth++;
-            [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
-            lbmark = cnt + 1;
-            for(cnt = lbmark; (cnt < length && braceDepth != 0); cnt++){
-                ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-                if(isRightBrace(ch)){
-                    braceDepth--;
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
-                } else if(isLeftBrace(ch)){
-                    braceDepth++;
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
-                } else
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:quotedColor range:NSMakeRange(editedRange.location + cnt, 1)];
-            }
-        }
-    }
-
-}
-
-#pragma mark Error objects management
-
-- (void)removeErrorObjsForDocument:(id)document{
-	
-    if ([errorsController filterValue] == document) {
-        [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
-    }
-    
-	if ([self currentDocument] == document) {
-		[self handoverErrorObjsForDocument:document];
-		[self setCurrentDocument:nil];
-		return;
-	}
-	
-	unsigned index = [self countOfErrors];
-    id errObj;
-    
-    while (index--) {
-		errObj = [self objectInErrorsAtIndex:index];
-        if ([errObj document] == document) {
-            [self removeObjectFromErrorsAtIndex:index];
-    	}
-    }
-	if (currentDocumentForErrors == document)
-		[self setDocumentForErrors:nil];
-	if ([documents containsObject:document])
-		[self removeObjectFromDocumentsAtIndex:[documents indexOfObject:document]];
-}
-
-- (void)removeErrorObjsForFileName:(NSString *)fileName{
-	unsigned index = [self countOfErrors];
-    id errObj;
-    
-    while (index--) {
-		errObj = [self objectInErrorsAtIndex:index];
-        if ([[errObj fileName] isEqualToString:fileName]) {
-            [self removeObjectFromErrorsAtIndex:index];
-    	}
-    }
-	[self setCurrentFileName:nil];
-}
-
-- (void)handoverErrorObjsForDocument:(id)document{
-	unsigned index = [self countOfErrors];
-    id errObj;
-    
-    while (index--) {
-		errObj = [self objectInErrorsAtIndex:index];
-        if ([errObj document] == document) {
-            [errObj setDocument:nil];
-    	}
-    }
-    // this is required, or else we retain the document and can have problems (potential crash due to endless loop from notifications); if it never had a window, it won't be cleaned up.  maybe better just to clear them immediately?
-    if(document == currentDocumentForErrors)
-        [self setDocumentForErrors:nil];
-	if ([documents containsObject:document])
-		[self removeObjectFromDocumentsAtIndex:[documents indexOfObject:document]];
-}
-
-#pragma mark Edit window
-
-- (id <OAFindControllerTarget>)omniFindControllerTarget { return sourceEditTextView; }
-
-- (void)openEditWindowWithFile:(NSString *)fileName;
-{
-	[self openEditWindowWithFile:fileName forDocument:nil];
-}
-
-- (void)openEditWindowWithFile:(NSString *)fileName forDocument:(id)document;
-{
-    NSFileManager *dfm = [NSFileManager defaultManager];
-    if (!fileName) return;
-    
-    // let's see if the document has an encoding (hopefully the user guessed correctly); if not, fall back to the default C string encoding
-    NSStringEncoding encoding = (currentDocumentForErrors != nil ? [(BibDocument *)currentDocumentForErrors documentStringEncoding] : [NSString defaultCStringEncoding]);
-        
-    if ([dfm fileExistsAtPath:fileName]) {
-        if(![currentFileName isEqualToString:fileName]){
-            NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];;
-            if(!fileStr)
-                fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"")];
-            [sourceEditTextView setString:fileStr];
-            [fileStr release];
-            [sourceEditWindow setTitle:[fileName lastPathComponent]];
-        }
-        [sourceEditWindow makeKeyAndOrderFront:self];
-        [self setCurrentFileName:fileName];
-		[self setCurrentDocument:document];
-    }
-}
-    
-// we identify errors either by document or file name
-- (void)openEditWindowForDocument:(id)document{
-	[self removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
-	[self handoverErrorObjsForDocument:document]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
-	
-	[self openEditWindowWithFile:[document fileName] forDocument:nil];
-}
-
-- (IBAction)reopenDocument:(id)sender{
-    NSString *expandedCurrentFileName = [[self currentFileName] stringByExpandingTildeInPath];
-    
-    if (expandedCurrentFileName == nil)
-        return;
-    
-    [self removeErrorObjsForFileName:expandedCurrentFileName];
-    
-    expandedCurrentFileName = [[NSFileManager defaultManager] uniqueFilePath:expandedCurrentFileName
-															 createDirectory:NO];
-    
-    // write this out with the user's default encoding, so the openDocumentWithContentsOfFile is more likely to succeed
-    NSData *fileData = [[sourceEditTextView string] dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey] allowLossyConversion:NO];
-    [fileData writeToFile:expandedCurrentFileName atomically:YES];
-    
-    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:expandedCurrentFileName
-                                                                            display:YES];
-    
-    [sourceEditWindow close];
+- (void)handleErrorNotification:(NSNotification *)notification{
+    BDSKErrObj *errObj = [notification object];
+    // don't show lexical buffer overflow warnings
+    if ([[errObj errorClassName] isEqualToString:BDSKParserHarmlessWarningString] == NO)
+		[currentErrors addObject:errObj];
 }
 
 #pragma mark TableView tooltips
@@ -557,6 +410,8 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
 
 @end
 
+#pragma mark -
+#pragma mark Error object accessors
 
 @implementation BDSKErrObj (Accessors)
 
@@ -571,22 +426,26 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
     }
 }
 
-- (NSDocument *)document {
-    return [[document retain] autorelease];
+- (id)editor {
+    return [[editor retain] autorelease];
 }
 
-- (void)setDocument:(NSDocument *)newDocument {
-    if (document != newDocument) {
-        [document release];
-        document = [newDocument retain];
+- (void)setEditor:(id)newEditor {
+    if (editor != newEditor) {
+        [editor release];
+        editor = [newEditor retain];
     }
 }
 
 - (NSString *)displayFileName {
-	NSString *docFileName = [document fileName];
+	NSString *docFileName = [editor displayName];
     if (docFileName == nil)
-		docFileName = fileName;
-	return [docFileName lastPathComponent];
+		docFileName = [fileName lastPathComponent];
+	if (docFileName == nil)
+        docFileName = @"?";
+    else if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString])
+        docFileName = [NSString stringWithFormat:@"[%@]", docFileName];
+    return docFileName;
 }
 
 - (int)lineNumber {
@@ -644,6 +503,9 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
 
 @end
 
+#pragma mark -
+#pragma mark Placeholder objects for filter menu
+
 @implementation BDSKPlaceHolderFilterItem
 
 static BDSKPlaceHolderFilterItem *allItemsPlaceHolderFilterItem = nil;
@@ -669,6 +531,9 @@ static BDSKPlaceHolderFilterItem *emptyItemsPlaceHolderFilterItem = nil;
 }
 
 @end
+
+#pragma mark -
+#pragma mark Array controller for error objects
 
 @implementation BDSKFilteringArrayController
 
@@ -761,6 +626,8 @@ static BDSKPlaceHolderFilterItem *emptyItemsPlaceHolderFilterItem = nil;
 
 @end
 
+#pragma mark -
+#pragma mark Line number transformer
 
 @implementation BDSKLineNumberTransformer
 

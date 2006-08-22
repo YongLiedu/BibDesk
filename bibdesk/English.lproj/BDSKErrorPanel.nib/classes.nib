@@ -2,29 +2,24 @@
     IBClasses = (
         {
             ACTIONS = {
-                changeSyntaxHighlighting = id; 
                 copy = id; 
                 gotoError = id; 
                 hideErrorPanel = id; 
-                reopenDocument = id; 
                 showErrorPanel = id; 
                 toggleShowingErrorPanel = id; 
             }; 
             CLASS = BDSKErrorObjectController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                errorPanel = NSPanel; 
                 errorTableView = NSTableView; 
                 errorsController = BDSKFilteringArrayController; 
-                sourceEditTextView = NSTextView; 
-                sourceEditWindow = NSWindow; 
-                syntaxHighlightCheckbox = NSButton; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {
             CLASS = BDSKFilteringArrayController; 
             LANGUAGE = ObjC; 
+            OUTLETS = {}; 
             SUPERCLASS = NSArrayController; 
         }, 
         {CLASS = BDSKPlaceHolderFilterItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 

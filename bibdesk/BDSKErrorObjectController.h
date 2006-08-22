@@ -39,23 +39,17 @@
 #import <Cocoa/Cocoa.h>
 #import <BTParse/error.h>
 
-@class BDSKFilteringArrayController;
+@class BibDocument, BDSKErrorEditor, BDSKFilteringArrayController;
 
 @interface BDSKErrorObjectController : NSWindowController {
     NSMutableArray *errors;
-    NSMutableArray *documents;
+    NSMutableArray *managers;
+    NSMutableArray *editors;
+    NSMutableArray *currentErrors;
     
     // error-handling stuff:
-    IBOutlet NSPanel* errorPanel;
     IBOutlet NSTableView *errorTableView;
-    IBOutlet NSTextView *sourceEditTextView;
-    IBOutlet NSWindow *sourceEditWindow;
-    IBOutlet NSButton *syntaxHighlightCheckbox;
     IBOutlet BDSKFilteringArrayController *errorsController;
-    NSString *currentFileName;
-    NSDocument *currentDocument;
-    NSDocument *currentDocumentForErrors;
-    BOOL enableSyntaxHighlighting;
 }
 
 + (BDSKErrorObjectController *)sharedErrorObjectController;
@@ -66,54 +60,54 @@
 - (void)insertObject:(id)obj inErrorsAtIndex:(unsigned)index;
 - (void)removeObjectFromErrorsAtIndex:(unsigned)index;
 
-- (NSArray *)documents;
-- (unsigned)countOfDocuments;
-- (id)objectInDocumentsAtIndex:(unsigned)theIndex;
-- (void)insertObject:(id)obj inDocumentsAtIndex:(unsigned)theIndex;
-- (void)removeObjectFromDocumentsAtIndex:(unsigned)theIndex;
-- (void)replaceObjectInDocumentsAtIndex:(unsigned)theIndex withObject:(id)obj;
+- (NSArray *)managers;
+- (unsigned)countOfManagers;
+- (id)objectInManagersAtIndex:(unsigned)theIndex;
+- (void)insertObject:(id)obj inManagersAtIndex:(unsigned)theIndex;
+- (void)removeObjectFromManagersAtIndex:(unsigned)theIndex;
 
-- (void)setCurrentFileName:(NSString *)newPath;
-- (NSString *)currentFileName;
+- (NSArray *)editors;
+- (void)addEditor:(BDSKErrorEditor *)editor;
+- (void)removeEditor:(BDSKErrorEditor *)editorr;
 
-- (void)setCurrentDocument:(id)document;
-- (id)currentDocument;
+- (BDSKErrorEditor *)editorForDocument:(BibDocument *)document create:(BOOL)create;
+- (BDSKErrorEditor *)editorForFileName:(NSString *)fileName  create:(BOOL)create;
 
-- (void)setDocumentForErrors:(id)document;
-- (id)documentForErrors;
+// called after a failed load
+- (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
+// called when a document closes
+- (void)documentWillBeRemoved:(BibDocument *)document;
+
+// called to edit a failed parse/drag
+- (void)showEditorForFileName:(NSString *)fileName;
+// called from the tableView doubleclick
+- (void)showEditorForErrorObject:(BDSKErrObj *)errObj;
 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
 - (IBAction)showErrorPanel:(id)sender;
 
+// tableView actions
 - (IBAction)copy:(id)sender;
-
 - (IBAction)gotoError:(id)sender;
-- (void)gotoErrorObj:(id)errObj;
-- (IBAction)changeSyntaxHighlighting:(id)sender;
 
-- (void)removeErrorObjsForDocument:(id)document;
-- (void)removeErrorObjsForFileName:(NSString *)fileName;
-- (void)handoverErrorObjsForDocument:(id)document;
-
-- (void)openEditWindowWithFile:(NSString *)fileName;
-- (void)openEditWindowWithFile:(NSString *)fileName forDocument:(id)document;
-- (void)openEditWindowForDocument:(id)document;
-- (IBAction)reopenDocument:(id)sender;
+// any use of btparse should be bracketed by these two calls
+- (void)startObservingErrorsForDocument:(BibDocument *)document;
+- (void)endObservingErrorsForDocument:(BibDocument *)document;
 
 - (void)handleErrorNotification:(NSNotification *)notification;
-- (void)handleEditWindowWillCloseNotification:(NSNotification *)notification;
 
 @end
 
+#pragma mark -
 
 @interface BDSKErrObj (Accessors)
 
 - (NSString *)fileName;
 - (void)setFileName:(NSString *)newFileName;
 
-- (NSDocument *)document;
-- (void)setDocument:(NSDocument *)newDocument;
+- (id)editor;
+- (void)setEditor:(id)newEditor;
 
 - (NSString *)displayFileName;
 
@@ -134,6 +128,8 @@
 
 @end
 
+#pragma mark -
+
 @interface BDSKPlaceHolderFilterItem : NSObject {
 	NSString *displayName;
 }
@@ -141,6 +137,8 @@
 + (BDSKPlaceHolderFilterItem *)emptyItemsPlaceHolderFilterItem;
 - (id)initWithDisplayName:(NSString *)name;
 @end
+
+#pragma mark -
 
 @interface BDSKFilteringArrayController : NSArrayController {
     id filterValue;
@@ -162,5 +160,3 @@
 - (void)setHideWarnings:(BOOL)flag;
 
 @end
-
-@interface BDSKLineNumberTransformer : NSValueTransformer @end
