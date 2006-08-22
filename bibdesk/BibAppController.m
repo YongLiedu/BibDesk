@@ -1355,16 +1355,17 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             path = [fileManager spotlightCacheFilePathWithCiteKey:citeKey];
             
             // Save the plist; we can get an error if these are not plist objects, or the file couldn't be written.  The first case is a programmer error, and the second should have been caught much earlier in this code.
-            if([metadata writeToFile:path atomically:YES] == NO){
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to save metadata cache file.", @""), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil]];
-                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create file %@", path] userInfo:nil];
+            if(nil == path || [metadata writeToFile:path atomically:YES] == NO){
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:NSLocalizedString(@"Unable to save metadata cache file for item with cite key \"%@\".", @""), citeKey], NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil]];
+                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", [anItem description]] userInfo:nil];
             }                
             [metadata removeAllObjects];
         }
     }    
-    @catch (NSException *localException){
-        NSLog(@"%@ discarding %@ %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-        NSLog(@"The error was: \"%@\"", [error description]);
+    @catch (id localException){
+        NSLog(@"-[%@ %@] discarding exception %@", [self class], NSStringFromSelector(_cmd), [localException description]);
+        // log the error since presentError: only gives minimum info
+        NSLog(@"%@", [error description]);
         [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:error waitUntilDone:NO];
     }
     @finally{

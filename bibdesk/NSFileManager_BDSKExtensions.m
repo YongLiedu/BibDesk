@@ -620,7 +620,9 @@ static OSType finderSignatureBytes = 'MACS';
         [mutablePath replaceOccurrencesOfString:pathSeparator withString:@"%" options:0 range:NSMakeRange(0, [path length])];
         path = mutablePath;
     }
-    path = [[self spotlightCacheFolderPathByCreating:NULL] stringByAppendingPathComponent:[path stringByAppendingPathExtension:@"bdskcache"]];
+    
+    // return nil in case of an empty/nil path
+    path = [NSString isEmptyString:path] ? nil : [[self spotlightCacheFolderPathByCreating:NULL] stringByAppendingPathComponent:[path stringByAppendingPathExtension:@"bdskcache"]];
     return path;
 }
 
