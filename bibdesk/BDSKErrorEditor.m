@@ -89,7 +89,8 @@
 
 - (void)awakeFromNib;
 {
-	[[self window] setRepresentedFilename:fileName];
+    [[self window] setRepresentedFilename:fileName];
+	[[self window] setTitle:[self windowTitleForDocumentDisplayName:nil]];
     
     [[textView textStorage] setDelegate:self];
     [syntaxHighlightCheckbox setState:NSOnState];
