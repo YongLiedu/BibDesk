@@ -465,7 +465,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [[self undoManager] removeAllActionsWithTarget:self];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
     [macroResolver release];
     [itemsForCiteKeys release];
     // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
@@ -1451,16 +1450,14 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
                                      NSLocalizedString(@"Edit File", @""));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
-            [[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
-            [[BDSKErrorObjectController sharedErrorObjectController] handoverErrorObjsForDocument:self]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
+            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
             // if we don't return YES, NSDocumentController puts up its lame alert saying the document could not be opened, and we get no partial data
             success = YES;
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
-            [[BDSKErrorObjectController sharedErrorObjectController] openEditWindowForDocument:self];
-            [[BDSKErrorObjectController sharedErrorObjectController] showErrorPanel:self];
+            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:YES]; // this hands the errors to a new error editor and sets that as the documentForErrors
         }
     }
     if(outError) *outError = error;
@@ -2270,8 +2267,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 			// they said to edit the file.
 			NSString * tempFileName = [[NSApp delegate] temporaryFilePath:[[self fileName] lastPathComponent] createDirectory:NO];
 			[data writeToFile:tempFileName atomically:YES];
-			[[BDSKErrorObjectController sharedErrorObjectController] openEditWindowWithFile:tempFileName forDocument:self];
-			[[BDSKErrorObjectController sharedErrorObjectController] showErrorPanel:self];		
+			[[BDSKErrorObjectController sharedErrorObjectController] showEditorForFileName:tempFileName];
 			newPubs = nil;	
 		}		
 	}
@@ -3388,7 +3384,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
     isDocumentClosed = YES;
-    [[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
+    [[BDSKErrorObjectController sharedErrorObjectController] documentWillBeRemoved:self];
     [customCiteDrawer close];
     [self saveSortOrder];
     

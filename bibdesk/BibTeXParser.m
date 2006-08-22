@@ -89,7 +89,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 }
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
-	[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
     
 	if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
         return [NSMutableArray array];
@@ -238,13 +238,15 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
         [parserLock unlock];
     }
 	
-    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:nil];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
     
     return returnArray;
 }
 
+/* 
+// these were not used, might revisit error handling if we do
 + (NSDictionary *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems document:(BibDocument *)aDocument{
-	[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
     
 	NSMutableDictionary *retDict = [NSMutableDictionary dictionary];
     AST *entry = NULL;
@@ -289,13 +291,14 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
     [parserLock unlock];
     fclose(stream);
     
-    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:nil];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
     
     return retDict;
 }
 
+// these were not used, might revisit error handling if we do
 + (NSString *)stringFromBibTeXValue:(NSString *)value error:(NSError **)outError document:(BibDocument *)aDocument{
-	[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
 	
 	NSString *entryString = [NSString stringWithFormat:@"@dummyentry{dummykey, dummyfield = %@}", value];
 	NSString *valueString = @"";
@@ -326,10 +329,11 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 	bt_cleanup();
 	[parserLock unlock];
     
-    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:nil];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
     
 	return [valueString autorelease];
 }
+*/
 
 + (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument{
     NSScanner *scanner = [[NSScanner alloc] initWithString:stringContents];

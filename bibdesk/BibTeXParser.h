@@ -79,7 +79,7 @@
     @param      aDocument (description)
     @result     (description)
 */
-+ (NSDictionary *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems document:(BibDocument *)aDocument;
+//+ (NSDictionary *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems document:(BibDocument *)aDocument;
 
 /*!
     @method     macrosFromBibTeXString:document:
@@ -112,7 +112,7 @@
     @param      aDocument (description)
     @result     (description)
 */
-+ (NSString *)stringFromBibTeXValue:(NSString *)value error:(NSError **)outError document:(BibDocument *)aDocument;
+//+ (NSString *)stringFromBibTeXValue:(NSString *)value error:(NSError **)outError document:(BibDocument *)aDocument;
 
 /*!
     @method     authorsFromBibtexString:document:
