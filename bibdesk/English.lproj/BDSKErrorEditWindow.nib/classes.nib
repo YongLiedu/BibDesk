@@ -2,7 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {changeSyntaxHighlighting = id; reopenDocument = id; }; 
-            CLASS = BDSKErrorEditController; 
+            CLASS = BDSKErrorEditor; 
             LANGUAGE = ObjC; 
             OUTLETS = {syntaxHighlightCheckbox = NSButton; textView = NSTextView; }; 
             SUPERCLASS = NSWindowController; 
