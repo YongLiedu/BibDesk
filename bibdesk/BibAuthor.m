@@ -106,9 +106,10 @@ static BibAuthor *emptyAuthorInstance = nil;
         // zero the flags
         memset(&flags, 0, sizeof(BibAuthorFlags));
 
+		// set this first so we have the document for parser errors
+        publication = aPub; // don't retain this, since it retains us
         // this does all the name parsing
 		[self splitName:aName];
-		publication = aPub; // don't retain this, since it retains us
 	}
     
     return self;
