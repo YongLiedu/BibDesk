@@ -62,6 +62,15 @@
         fileName = [aFileName retain];
         uniqueNumber = 0;
         enableSyntaxHighlighting = YES;
+        isPasteDrag = NO;
+    }
+    return self;
+}
+
+- (id)initWithFileName:(NSString *)aFileName;
+{
+    if(self = [self initWithFileName:aFileName andDocument:nil]){
+        isPasteDrag = YES;
     }
     return self;
 }
@@ -104,7 +113,10 @@
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    return [NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Edit Source", @"Edit Source"), [self displayName]];
+    if(isPasteDrag)
+        return [NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag"), [self displayName]];
+    else
+        return [NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Edit Source", @"Edit Source"), [self displayName]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -164,6 +176,11 @@
 - (BOOL)isEditing;
 {
     return isEditing;
+}
+
+- (BOOL)isPasteDrag;
+{
+    return isPasteDrag;
 }
 
 #pragma mark Editing

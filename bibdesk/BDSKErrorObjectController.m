@@ -230,7 +230,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     }
     
     if(editor == nil && create){
-        editor = [[BDSKErrorEditor alloc] initWithFileName:fileName andDocument:nil];
+        editor = [[BDSKErrorEditor alloc] initWithFileName:fileName];
         [self addEditor:editor];
         [editor release];
     }

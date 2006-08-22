@@ -49,9 +49,13 @@
     int uniqueNumber;
     BOOL enableSyntaxHighlighting;
     BOOL isEditing;
+    BOOL isPasteDrag;
 }
 
+// designated initializer
 - (id)initWithFileName:(NSString *)aFileName andDocument:(id)aDocument;
+// for editing temporary file with Paste/Drag data
+- (id)initWithFileName:(NSString *)aFileName;
 
 - (BDSKErrorObjectController *)errorController;
 - (void)setErrorController:(BDSKErrorObjectController *)controller;
@@ -63,6 +67,7 @@
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)document;
 - (BOOL)isEditing;
+- (BOOL)isPasteDrag;
 
 - (IBAction)changeSyntaxHighlighting:(id)sender;
 - (IBAction)reopenDocument:(id)sender;
