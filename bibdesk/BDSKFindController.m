@@ -115,7 +115,8 @@ enum {
 }
 
 - (void)awakeFromNib{
-    NSArray *fields = [[BibTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
+    BibTypeManager *btm = [BibTypeManager sharedManager];
+    NSArray *fields = [btm allFieldNamesIncluding:[[btm noteFieldsSet] allObjects] excluding:nil];
 	[fieldToSearchComboBox removeAllItems];
 	[fieldToSearchComboBox addItemsWithObjectValues:fields];
 
@@ -740,6 +741,7 @@ enum {
 	switch(searchScope){
 		case FCContainsSearch:
 			regexFormat = (findAsMacro) ? @"(?<=^|\\s#\\s)%@(?=$|\\s#\\s)" : @"%@";
+			break;
 		case FCStartsWithSearch:
 			regexFormat = (findAsMacro) ? @"(?<=^)%@(?=$|\\s#\\s)" : @"(?<=^)%@";
 			break;
