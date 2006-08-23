@@ -93,25 +93,12 @@
 	[[self window] setTitle:[self windowTitleForDocumentDisplayName:nil]];
     
     if(isPasteDrag)
-        [reopenButton setHidden:YES];
+        [reopenButton setEnabled:NO];
     
     [[textView textStorage] setDelegate:self];
     [syntaxHighlightCheckbox setState:NSOnState];
     
-    NSFileManager *dfm = [NSFileManager defaultManager];
-    if (!fileName) return;
-    
-    // let's see if the document has an encoding (hopefully the user guessed correctly); if not, fall back to the default C string encoding
-    NSStringEncoding encoding = (document != nil ? [document documentStringEncoding] : [NSString defaultCStringEncoding]);
-        
-    if ([dfm fileExistsAtPath:fileName]) {
-        NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];;
-        if(!fileStr)
-            fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"")];
-        [textView setString:fileStr];
-        [fileStr release];
-        [[self window] makeKeyAndOrderFront:self];
-    }
+    [self loadFile:self];
     
     isEditing = YES;
 }
@@ -190,6 +177,22 @@
 #pragma mark Editing
 
 - (id <OAFindControllerTarget>)omniFindControllerTarget { return textView; }
+
+- (IBAction)loadFile:(id)sender{
+    NSFileManager *dfm = [NSFileManager defaultManager];
+    if (!fileName) return;
+    
+    // let's see if the document has an encoding (hopefully the user guessed correctly); if not, fall back to the default C string encoding
+    NSStringEncoding encoding = (document != nil ? [document documentStringEncoding] : [NSString defaultCStringEncoding]);
+        
+    if ([dfm fileExistsAtPath:fileName]) {
+        NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];;
+        if(!fileStr)
+            fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"")];
+        [textView setString:fileStr];
+        [fileStr release];
+    }
+}
 
 - (IBAction)reopenDocument:(id)sender{
     NSString *expandedFileName = [[self fileName] stringByExpandingTildeInPath];

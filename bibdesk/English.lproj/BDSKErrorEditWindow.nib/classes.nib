@@ -1,17 +1,23 @@
 {
     IBClasses = (
         {
-            ACTIONS = {changeSyntaxHighlighting = id; reopenDocument = id; }; 
+            ACTIONS = {changeSyntaxHighlighting = id; loadFile = id; reopenDocument = id; }; 
             CLASS = BDSKErrorEditor; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                reloadButton = NSButton; 
                 reopenButton = NSButton; 
                 syntaxHighlightCheckbox = NSButton; 
                 textView = NSTextView; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }
     ); 
     IBVersion = 1; 
 }
