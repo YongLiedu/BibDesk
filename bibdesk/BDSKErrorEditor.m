@@ -92,6 +92,9 @@
     [[self window] setRepresentedFilename:fileName];
 	[[self window] setTitle:[self windowTitleForDocumentDisplayName:nil]];
     
+    if(isPasteDrag)
+        [reopenButton setHidden:YES];
+    
     [[textView textStorage] setDelegate:self];
     [syntaxHighlightCheckbox setState:NSOnState];
     

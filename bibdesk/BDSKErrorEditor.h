@@ -43,6 +43,7 @@
 @interface BDSKErrorEditor : NSWindowController {
     IBOutlet NSTextView *textView;
     IBOutlet NSButton *syntaxHighlightCheckbox;
+    IBOutlet NSButton *reopenButton;
     BDSKErrorObjectController *errorController;
     BibDocument *document;
     NSString *fileName;
