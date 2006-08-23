@@ -304,31 +304,25 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
     if(delimSet == nil)
         delimSet = [[NSCharacterSet characterSetWithCharactersInString:@"@{}"] retain];
     
-    static NSMutableCharacterSet *newlineSet = nil;
-    if(newlineSet == nil){
-        newlineSet = (NSMutableCharacterSet *)CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-        CFCharacterSetInvert((CFMutableCharacterSetRef)newlineSet); // no whitespace in this one, but it also has all letters...
-        CFCharacterSetIntersect((CFMutableCharacterSetRef)newlineSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
-    }
-    
     NSString *string = [textStorage string];
+    
+    // see if we need to extend the range; coloring won't change unless this is a delimiter
+    if([string rangeOfCharacterFromSet:delimSet].length == 0)
+        return proposedRange;
+    
+    NSCharacterSet *newlineSet = [NSCharacterSet newlineCharacterSet];
     NSColor *quotedColor = [NSColor brownColor];
     
     unsigned start = proposedRange.location;
-    unsigned end = NSMaxRange(proposedRange);
     
     // quoted text can have multiple lines
-    do{
+    do {
         start = [string rangeOfCharacterFromSet:newlineSet options:NSBackwardsSearch|NSLiteralSearch range:NSMakeRange(0, start)].location;
         if(start == NSNotFound)
             start = 0;
     } while (start > 0 && [textStorage attribute:NSForegroundColorAttributeName atIndex:start - 1 effectiveRange:NULL] == quotedColor);
-    
-    end = NSMaxRange([string rangeOfCharacterFromSet:newlineSet options:NSLiteralSearch range:NSMakeRange(end, [string length] - end)]);
-    if(end == NSNotFound)
-        end = [string length];
-    
-    return NSMakeRange(start, end - start);
+        
+    return NSMakeRange(start, [string length] - start);
 }
     
 #define SetColor(color, start, length) [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(editedRange.location + start, length)];
