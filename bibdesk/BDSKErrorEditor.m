@@ -264,7 +264,7 @@ static inline Boolean isAt(UniChar ch) { return ch == '@'; }
 static inline Boolean isBackslash(UniChar ch) { return ch == '\\'; }
 
 // extend the edited range of the textview to include the previous and next newline; including the previous/next delimiter is less reliable
-static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
+static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange proposedRange){
     
     static NSCharacterSet *delimSet = nil;
     if(delimSet == nil)
@@ -277,20 +277,24 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
         CFCharacterSetIntersect((CFMutableCharacterSetRef)newlineSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
     }
     
-    if([string containsCharacterInSet:delimSet] == NO)
-        return proposedRange;
+    NSString *string = [textStorage string];
+    NSColor *quotedColor = [NSColor brownColor];
     
-    NSRange startRange;
-    startRange = [string rangeOfCharacterFromSet:newlineSet options:NSBackwardsSearch|NSLiteralSearch range:NSMakeRange(0, proposedRange.location)];
-    if(startRange.location == NSNotFound)
-        startRange = NSMakeRange(proposedRange.location, 0);
+    unsigned start = proposedRange.location;
+    unsigned end = NSMaxRange(proposedRange);
     
-    NSRange endRange;
-    endRange = [string rangeOfCharacterFromSet:newlineSet options:NSLiteralSearch range:NSMakeRange(NSMaxRange(proposedRange), [string length] - NSMaxRange(proposedRange))];
-    if(endRange.location == NSNotFound)
-        endRange = proposedRange;
+    // quoted text can have multiple lines
+    do{
+        start = [string rangeOfCharacterFromSet:newlineSet options:NSBackwardsSearch|NSLiteralSearch range:NSMakeRange(0, start)].location;
+        if(start == NSNotFound)
+            start = 0;
+    } while (start > 0 && [textStorage attribute:NSForegroundColorAttributeName atIndex:start - 1 effectiveRange:NULL] == quotedColor);
     
-    return NSMakeRange(startRange.location, NSMaxRange(endRange) - startRange.location);
+    end = NSMaxRange([string rangeOfCharacterFromSet:newlineSet options:NSLiteralSearch range:NSMakeRange(end, [string length] - end)]);
+    if(end == NSNotFound)
+        end = [string length];
+    
+    return NSMakeRange(start, end - start);
 }
     
 #define SetColor(color, start, length) [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(editedRange.location + start, length)];
@@ -308,7 +312,7 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
     NSRange editedRange = [textStorage editedRange];
     
     // see what range we should actually invalidate; if we're not adding any special characters, the default edited range is probably fine
-    editedRange = invalidatedRange((NSString *)string, editedRange);
+    editedRange = invalidatedRange(textStorage, editedRange);
     
     CFIndex cnt = editedRange.location;
     
