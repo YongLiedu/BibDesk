@@ -310,11 +310,15 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
 
 // Given a normalized name of "von Last, Jr, First Middle", this will return "F. M. von Last, Jr"
 - (NSString *)abbreviatedName{
+    if(abbreviatedName == nil)
+        [self setupAbbreviatedNames];
     return abbreviatedName;
 }
 
 // Given a normalized name of "von Last, Jr, First Middle", this will return "von Last, Jr, F. M."
 - (NSString *)abbreviatedNormalizedName{
+    if(abbreviatedNormalizedName == nil)
+        [self setupAbbreviatedNames];
     return abbreviatedNormalizedName;
 }
 
@@ -421,8 +425,7 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     [mutableString release];
 	
     [self cacheNames];
-    [self setupAbbreviatedNames];
-    
+    // we create abbreviated forms lazily as we might not always need them
 }
 
 - (void)setVonPart:(NSString *)newVonPart{
@@ -569,65 +572,54 @@ static inline NSString *firstLetterCharacterString(NSString *string)
 }
 
 - (void)setupAbbreviatedNames{
-    NSMutableString *abbrevName = [[NSMutableString alloc] initWithCapacity:[name length]];
     CFArrayRef theFirstNames = (CFArrayRef)[self firstNames];
     CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
     NSString *fragment = nil;
     NSString *firstLetter = nil;
+    NSMutableString *abbrevName = [[NSMutableString alloc] initWithCapacity:[name length]];
+    NSMutableString *abbrevFirstName = [[NSMutableString alloc] initWithCapacity:3 * firstNameCount];
+    NSMutableString *abbrevLastName = [[NSMutableString alloc] initWithCapacity:[name length]];
 
     for(idx = 0; idx < firstNameCount; idx++){
         fragment = (NSString *)CFArrayGetValueAtIndex(theFirstNames, idx);
         firstLetter = firstLetterCharacterString(fragment);
         if (firstLetter != nil) {
-            [abbrevName appendString:firstLetter];
-            [abbrevName appendString:@". "];
+            [abbrevFirstName appendString:firstLetter];
+            [abbrevFirstName appendString:idx == firstNameCount - 1 ? @".", @". "];
         }
     }
     
     // abbrevName should be empty or have a single trailing space
     if(flags.hasVon){
-        [abbrevName appendString:vonPart];
-        [abbrevName appendString:@" "];
+        [abbrevLastName appendString:vonPart];
+        [abbrevLastName appendString:@" "];
     }
     
     if(flags.hasLast)
-        [abbrevName appendString:lastName];
+        [abbrevLastName appendString:lastName];
     
     if(flags.hasJr){
-        [abbrevName appendString:@", "];
-        [abbrevName appendString:jrPart];
+        [abbrevLastName appendString:@", "];
+        [abbrevLastName appendString:jrPart];
     }
+    
+    // first for the abbreviated form
+    if(flags hasFirst){
+        [abbrevName appendString:abbrevFirstName];
+        [abbrevName appendString:@" "];
+    }
+    
+    [abbrevName appendString:abbrevLastName];
     
     [self setAbbreviatedName:abbrevName];
     
     // now for the normalized abbreviated form
-    [abbrevName setString:@""];
+    [abbrevName setString:abbrevLastName];
     
-    if(flags.hasVon){
-        [abbrevName appendString:vonPart];
-        [abbrevName appendString:@" "];
-    }
-    
-    if(flags.hasLast)
-        [abbrevName appendString:lastName];
-    
-    if(flags.hasJr){
+    if(flags hasFirst){
         [abbrevName appendString:@", "];
-        [abbrevName appendString:jrPart];
+        [abbrevName appendString:abbrevFirstName];
     }
-    
-    if(flags.hasFirst)
-        [abbrevName appendString:@","];
-    
-    for(idx = 0; idx < firstNameCount; idx++){
-        fragment = (NSString *)CFArrayGetValueAtIndex(theFirstNames, idx);
-        [abbrevName appendString:@" "]; // avoid trailing whitespace
-        firstLetter = firstLetterCharacterString(fragment);
-        if (firstLetter != nil) {
-            [abbrevName appendString:firstLetter];
-            [abbrevName appendString:@"."];
-        }
-    }    
     
     [self setAbbreviatedNormalizedName:abbrevName];
     [abbrevName release];
