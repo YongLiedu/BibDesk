@@ -287,22 +287,26 @@
     NSTextStorage *textStorage = [textView textStorage];
     if(enableSyntaxHighlighting == NO)
         [textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:NSMakeRange(0, [textStorage length])];
-    [textStorage edited:NSTextStorageEditedAttributes range:NSMakeRange(0, [textStorage length]) changeInLength:0];
+    else
+        [textStorage edited:NSTextStorageEditedAttributes range:NSMakeRange(0, [textStorage length]) changeInLength:0];
 }
 
 #pragma mark Syntax highlighting
 
 static inline Boolean isLeftBrace(UniChar ch) { return ch == '{'; }
 static inline Boolean isRightBrace(UniChar ch) { return ch == '}'; }
+static inline Boolean isDoubleQuote(UniChar ch) { return ch == '"'; }
 static inline Boolean isAt(UniChar ch) { return ch == '@'; }
+static inline Boolean isPercent(UniChar ch) { return ch == '%'; }
 static inline Boolean isBackslash(UniChar ch) { return ch == '\\'; }
+static inline Boolean isCommentOrQuotedColor(NSColor *color) { return color == [NSColor brownColor] || color == [NSColor grayColor]; }
 
 // extend the edited range of the textview to include the previous and next newline; including the previous/next delimiter is less reliable
 static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange proposedRange){
     
     static NSCharacterSet *delimSet = nil;
     if(delimSet == nil)
-        delimSet = [[NSCharacterSet characterSetWithCharactersInString:@"@{}"] retain];
+         delimSet = [[NSCharacterSet characterSetWithCharactersInString:@"@{}\"%"] retain];
     
     NSString *string = [textStorage string];
     
@@ -315,12 +319,12 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
     
     unsigned start = proposedRange.location;
     
-    // quoted text can have multiple lines
+    // quoted or commented text can have multiple lines
     do {
         start = [string rangeOfCharacterFromSet:newlineSet options:NSBackwardsSearch|NSLiteralSearch range:NSMakeRange(0, start)].location;
         if(start == NSNotFound)
             start = 0;
-    } while (start > 0 && [textStorage attribute:NSForegroundColorAttributeName atIndex:start - 1 effectiveRange:NULL] == quotedColor);
+    } while (start > 0 && isCommentOrQuotedColor([textStorage attribute:NSForegroundColorAttributeName atIndex:start - 1 effectiveRange:NULL]));
         
     return NSMakeRange(start, [string length] - start);
 }
@@ -330,8 +334,12 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
 
 - (void)textStorageDidProcessEditing:(NSNotification *)notification{
     
-    if(enableSyntaxHighlighting == NO)
-        return;
+    static NSMutableCharacterSet *newlineSet = nil;
+    if(newlineSet == nil){
+        newlineSet = (NSMutableCharacterSet *)CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
+        CFCharacterSetInvert((CFMutableCharacterSetRef)newlineSet); // no whitespace in this one, but it also has all letters...
+        CFCharacterSetIntersect((CFMutableCharacterSetRef)newlineSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
+    }
     
     NSTextStorage *textStorage = [notification object];    
     CFStringRef string = (CFStringRef)[textStorage string];
@@ -347,17 +355,21 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(cnt, editedRange.length));
     
-    //[textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:editedRange];
     SetColor([NSColor blackColor], 0, editedRange.length)
+    
+    if(enableSyntaxHighlighting == NO)
+        return;
     
     // inline buffer only covers the edited range, starting from 0; adjust length to length of buffer
     length = editedRange.length;
     UniChar ch;
-    CFIndex lbmark, atmark;
+    CFIndex lbmark, atmark, percmark;
     
     NSColor *braceColor = [NSColor blueColor];
     NSColor *typeColor = [NSColor purpleColor];
     NSColor *quotedColor = [NSColor brownColor];
+    NSColor *commentColor = [NSColor grayColor];
+    CFStringRef commentString = (CFStringRef)@"comment";
     
     CFIndex braceDepth = 0;
      
@@ -365,7 +377,7 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
     // remember that cnt and length determine the index and length of the inline buffer, not the textStorage
     for(cnt = 0; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(isAt(ch) && (cnt == 0 || BDIsNewlineCharacter(CFStringGetCharacterAtIndex(string, cnt - 1)))){
+        if(isAt(ch)){
             atmark = cnt;
             while(++cnt < length){
                 ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
@@ -375,7 +387,39 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
                 }
             }
             SetColor(typeColor, atmark, cnt - atmark);
+            // in fact whitespace is allowed at the end of "comment", but harder to check
+            if(cnt - atmark == 8 && CFStringCompareWithOptions(string, commentString, CFRangeMake(editedRange.location + atmark + 1, 7), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
+                braceDepth = 1;
+                SetColor(braceColor, cnt, 1)
+                lbmark = cnt + 1;
+                while(++cnt < length){
+                    if(isBackslash(ch)){ // ignore escaped braces
+                        ch = 0;
+                        continue;
+                    }
+                    ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+                    if(isRightBrace(ch)){
+                        braceDepth--;
+                        if(braceDepth == 0){
+                            SetColor(braceColor, cnt, 1);
+                            break;
+                        }
+                    } else if(isLeftBrace(ch)){
+                        braceDepth++;
+                    }
+                }
+                SetColor(commentColor, lbmark, cnt - lbmark);
+            }
             // sneaky hack: don't rewind here, since cite keys don't have a closing brace (of course)
+        }else if(isPercent(ch)){
+            percmark = cnt;
+            while(++cnt < length){
+                ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+                if([newlineSet characterIsMember:ch]){
+                    break;
+                }
+            }
+            SetColor(commentColor, percmark, cnt - percmark);
         }else if(isLeftBrace(ch)){
             braceDepth = 1;
             SetColor(braceColor, cnt, 1)
@@ -397,11 +441,27 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
                 }
             }
             SetColor(quotedColor, lbmark, cnt - lbmark);
+        }else if(isDoubleQuote(ch)){
+            braceDepth = 1;
+            SetColor(braceColor, cnt, 1)
+            lbmark = cnt + 1;
+            while(++cnt < length){
+                if(isBackslash(ch)){ // ignore escaped braces
+                    ch = 0;
+                    continue;
+                }
+                ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+                if(isDoubleQuote(ch)){
+                    braceDepth--;
+                    SetColor(braceColor, cnt, 1);
+                    break;
+                }
+            }
+            SetColor(quotedColor, lbmark, cnt - lbmark);
         }else if(isRightBrace(ch)){
             SetColor(braceColor, cnt, 1);
         }
     }
-
 }
 
 @end
