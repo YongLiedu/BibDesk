@@ -346,10 +346,10 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
                     break;
                 }
             }
-            [textStorage addAttribute:NSForegroundColorAttributeName value:typeColor range:NSMakeRange(editedRange.location + atmark, cnt - atmark)];
+            SetColor(typeColor, atmark, cnt - atmark);
             // sneaky hack: don't rewind here, since cite keys don't have a closing brace (of course)
         }else if(isLeftBrace(ch)){
-            braceDepth++;
+            braceDepth = 1;
             SetColor(braceColor, cnt, 1)
             lbmark = cnt + 1;
             while(++cnt < length){
