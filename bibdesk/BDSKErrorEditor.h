@@ -66,8 +66,8 @@
 - (int)uniqueNumber;
 - (void)setUniqueNumber:(int)newNumber;
 - (NSString *)displayName;
-- (BibDocument *)document;
-- (void)setDocument:(BibDocument *)document;
+- (BibDocument *)sourceDocument;
+- (void)setSourceDocument:(BibDocument *)document;
 - (BOOL)isEditing;
 - (BOOL)isPasteDrag;
 

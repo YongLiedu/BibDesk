@@ -89,8 +89,22 @@
 
 - (void)awakeFromNib;
 {
+    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
+    
     [[self window] setRepresentedFilename:fileName];
-	[[self window] setTitle:[self windowTitleForDocumentDisplayName:nil]];
+	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [self displayName]]];
+    
+    // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
+    [[self window] setFrameUsingName:@"Edit Source Window"];
+    // we should only cascade windows if we have multiple documents open; bug #1299305
+    // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
+    static NSPoint nextWindowLocation = {0.0, 0.0};
+    [self setShouldCascadeWindows:NO];
+    if ([[self window] setFrameAutosaveName:@"Edit Source Window"]) {
+        NSRect windowFrame = [[self window] frame];
+        nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
+    }
+    nextWindowLocation = [[self window] cascadeTopLeftFromPoint:nextWindowLocation];
     
     if(isPasteDrag)
         [reopenButton setEnabled:NO];
@@ -101,13 +115,6 @@
     [self loadFile:self];
     
     isEditing = YES;
-}
-
-- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    if(isPasteDrag)
-        return [NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag"), [self displayName]];
-    else
-        return [NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Edit Source", @"Edit Source"), [self displayName]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -148,15 +155,17 @@
 - (NSString *)displayName;
 {
     NSString *displayName = [fileName lastPathComponent];
+    if(displayName == nil)
+        displayName = @"?";
     return (uniqueNumber == 0) ? displayName : [NSString stringWithFormat:@"%@ (%d)", displayName, uniqueNumber];
 }
 
-- (BibDocument *)document;
+- (BibDocument *)sourceDocument;
 {
     return document;
 }
 
-- (void)setDocument:(BibDocument *)newDocument;
+- (void)setSourceDocument:(BibDocument *)newDocument;
 {
     if (document != newDocument) {
         [document release];
@@ -252,6 +261,7 @@
 static inline Boolean isLeftBrace(UniChar ch) { return ch == '{'; }
 static inline Boolean isRightBrace(UniChar ch) { return ch == '}'; }
 static inline Boolean isAt(UniChar ch) { return ch == '@'; }
+static inline Boolean isBackslash(UniChar ch) { return ch == '\\'; }
 
 // extend the edited range of the textview to include the previous and next newline; including the previous/next delimiter is less reliable
 static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
@@ -283,6 +293,8 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
     return NSMakeRange(startRange.location, NSMaxRange(endRange) - startRange.location);
 }
     
+#define SetColor(color, start, length) [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(editedRange.location + start, length)];
+
 
 - (void)textStorageDidProcessEditing:(NSNotification *)notification{
     
@@ -303,7 +315,8 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(cnt, editedRange.length));
     
-    [textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:editedRange];
+    //[textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:editedRange];
+    SetColor([NSColor blackColor], 0, editedRange.length)
     
     // inline buffer only covers the edited range, starting from 0; adjust length to length of buffer
     length = editedRange.length;
@@ -322,10 +335,10 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
         if(isAt(ch) && (cnt == 0 || BDIsNewlineCharacter(CFStringGetCharacterAtIndex(string, cnt - 1)))){
             atmark = cnt;
-            for(cnt = cnt; cnt < length; cnt++){
+            while(++cnt < length){
                 ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
                 if(isLeftBrace(ch)){
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
+                    SetColor(braceColor, cnt, 1);
                     break;
                 }
             }
@@ -333,19 +346,27 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
             // sneaky hack: don't rewind here, since cite keys don't have a closing brace (of course)
         }else if(isLeftBrace(ch)){
             braceDepth++;
-            [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
+            SetColor(braceColor, cnt, 1)
             lbmark = cnt + 1;
-            for(cnt = lbmark; (cnt < length && braceDepth != 0); cnt++){
+            while(++cnt < length){
+                if(isBackslash(ch)){ // ignore escaped braces
+                    ch = 0;
+                    continue;
+                }
                 ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
                 if(isRightBrace(ch)){
                     braceDepth--;
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
+                    if(braceDepth == 0){
+                        SetColor(braceColor, cnt, 1);
+                        break;
+                    }
                 } else if(isLeftBrace(ch)){
                     braceDepth++;
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:braceColor range:NSMakeRange(editedRange.location + cnt, 1)];
-                } else
-                    [textStorage addAttribute:NSForegroundColorAttributeName value:quotedColor range:NSMakeRange(editedRange.location + cnt, 1)];
+                }
             }
+            SetColor(quotedColor, lbmark, cnt - lbmark);
+        }else if(isRightBrace(ch)){
+            SetColor(braceColor, cnt, 1);
         }
     }
 

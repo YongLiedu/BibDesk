@@ -203,7 +203,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     NSString *fileName = [[document fileName] lastPathComponent];
     
     while(editor = [eEnum nextObject]){
-        if(document == [editor document])
+        if(document == [editor sourceDocument])
             docEditor = editor;
         if(create && [fileName isEqualToString:[[editor fileName] lastPathComponent]])
             number = MAX(number, [editor uniqueNumber] + 1);
@@ -249,8 +249,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     while (index--) {
         editor = [editors objectAtIndex:index];
-        if([editor document] == document){
-           [editor setDocument:nil];
+        if([editor sourceDocument] == document){
+           [editor setSourceDocument:nil];
            if(shouldEdit)
                 [editor showWindow:self];
         }else if([editor isEditing] == NO){
@@ -265,7 +265,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     BDSKErrorEditor *editor = [self editorForDocument:document create:NO]; // there should be at most one
     
     if(editor){
-        [editor setDocument:nil];
+        [editor setSourceDocument:nil];
         if([editor isEditing] == NO)
             [self removeEditor:editor];
     }
