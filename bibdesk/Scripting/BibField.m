@@ -113,4 +113,8 @@ A wrapper object around the fields to access them in AppleScript.
     NS_ENDHANDLER
 }
 
+- (BOOL)isInherited {
+	return [[bibItem valueOfField:name] isInherited];
+}
+
 @end

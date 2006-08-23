@@ -56,4 +56,6 @@
 - (NSString *)bibTeXString;
 - (void)setBibTeXString:(NSString *)newValue;
 
+- (BOOL)isInherited;
+
 @end

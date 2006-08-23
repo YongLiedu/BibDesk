@@ -743,6 +743,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 description="The value of the field as raw BibTeX">
                 <cocoa key="bibTeXString"/>
             </property>  
+            <property name="inherited" code="Inhe" type="boolean"
+                description="Whether the value of the field is inherited (crossreffed)">
+                <cocoa key="isInherited"/>
+            </property>  
         </class>
         
         <class name="script hook" plural="script hooks" code="bshk" inherits="item"
