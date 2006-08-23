@@ -585,7 +585,7 @@ static inline NSString *firstLetterCharacterString(NSString *string)
         firstLetter = firstLetterCharacterString(fragment);
         if (firstLetter != nil) {
             [abbrevFirstName appendString:firstLetter];
-            [abbrevFirstName appendString:idx == firstNameCount - 1 ? @".", @". "];
+            [abbrevFirstName appendString:idx == firstNameCount - 1 ? @"." : @". "];
         }
     }
     
@@ -604,7 +604,7 @@ static inline NSString *firstLetterCharacterString(NSString *string)
     }
     
     // first for the abbreviated form
-    if(flags hasFirst){
+    if(flags.hasFirst){
         [abbrevName appendString:abbrevFirstName];
         [abbrevName appendString:@" "];
     }
@@ -616,7 +616,7 @@ static inline NSString *firstLetterCharacterString(NSString *string)
     // now for the normalized abbreviated form
     [abbrevName setString:abbrevLastName];
     
-    if(flags hasFirst){
+    if(flags.hasFirst){
         [abbrevName appendString:@", "];
         [abbrevName appendString:abbrevFirstName];
     }
