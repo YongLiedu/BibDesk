@@ -45,6 +45,7 @@
     IBOutlet NSButton *syntaxHighlightCheckbox;
     IBOutlet NSButton *reopenButton;
     IBOutlet NSButton *reloadButton;
+    IBOutlet NSTextField *lineNumberField;
     BDSKErrorObjectController *errorController;
     BibDocument *document;
     NSString *fileName;
@@ -71,10 +72,12 @@
 - (BOOL)isEditing;
 - (BOOL)isPasteDrag;
 
-- (IBAction)changeSyntaxHighlighting:(id)sender;
 - (IBAction)loadFile:(id)sender;
 - (IBAction)reopenDocument:(id)sender;
+- (IBAction)changeSyntaxHighlighting:(id)sender;
+- (IBAction)changeLineNumber:(id)sender;
 
 - (void)gotoLine:(int)lineNumber;
+- (void)handleSelectionDidChangeNotification:(NSNotification *)notification;
 
 @end

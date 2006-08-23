@@ -1,10 +1,16 @@
 {
     IBClasses = (
         {
-            ACTIONS = {changeSyntaxHighlighting = id; loadFile = id; reopenDocument = id; }; 
+            ACTIONS = {
+                changeLineNumber = id; 
+                changeSyntaxHighlighting = id; 
+                loadFile = id; 
+                reopenDocument = id; 
+            }; 
             CLASS = BDSKErrorEditor; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                lineNumberField = NSTextField; 
                 reloadButton = NSButton; 
                 reopenButton = NSButton; 
                 syntaxHighlightCheckbox = NSButton; 

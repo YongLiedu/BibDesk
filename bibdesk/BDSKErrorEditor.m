@@ -115,6 +115,11 @@
     [self loadFile:self];
     
     isEditing = YES;
+    
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(handleSelectionDidChangeNotification:)
+												 name:NSTextViewDidChangeSelectionNotification
+											   object:textView];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -215,6 +220,14 @@
     [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:expandedFileName display:YES];
 }
 
+- (IBAction)changeLineNumber:(id)sender{
+    int lineNumber = [sender intValue];
+    if (lineNumber > 0)
+        [self gotoLine:lineNumber];
+    else
+        NSBeep();
+}
+
 - (void)gotoLine:(int)lineNumber{
     // we're not using getLineStart:end:contentsEnd:forRange: because btparse only recognized \n as a newline
     static NSCharacterSet *newlineCharacterSet = nil;
@@ -244,6 +257,27 @@
     range.length = (end - start);
     [textView setSelectedRange:range];
     [textView scrollRangeToVisible:range];
+}
+
+- (void)handleSelectionDidChangeNotification:(NSNotification *)notification{
+    static NSCharacterSet *newlineCharacterSet = nil;
+    
+    if(newlineCharacterSet == nil)
+        newlineCharacterSet = [[NSCharacterSet characterSetWithRange:NSMakeRange('\n', 1)] retain];
+    
+    NSRange selectedRange = [textView selectedRange];
+    
+    int lineNumber = 0;
+    NSString *string = [textView string];
+    unsigned location = selectedRange.location;
+    NSRange range = NSMakeRange(0, 0);
+    
+    while (range.location != NSNotFound) {
+        ++lineNumber;
+        range = [string rangeOfCharacterFromSet:newlineCharacterSet options:NSLiteralSearch range:NSMakeRange(NSMaxRange(range), location - NSMaxRange(range))];
+    }
+    
+    [lineNumberField setIntValue:lineNumber];
 }
 
 - (IBAction)changeSyntaxHighlighting:(id)sender;
