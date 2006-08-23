@@ -622,16 +622,16 @@
 #pragma mark Sheet callbacks
 
 - (void)didEndSheet:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	[self retain];
-    [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
-	
     // cleanup
     [self cancelDownload];
 	[webView stopLoading:nil];
+    [webView setFrameLoadDelegate:nil];
+    [webView setUIDelegate:nil];
 	// select the items we just added
 	[document highlightBibs:itemsAdded];
 	[itemsAdded removeAllObjects];
-    [self release];
+    
+    [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
