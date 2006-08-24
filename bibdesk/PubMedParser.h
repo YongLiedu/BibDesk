@@ -52,6 +52,7 @@
 @interface NSString (RISExtensions)
 - (NSString *)stringByFixingRefMinerPubMedTags;
 - (NSString *)stringByFixingReferenceMinerString;
+- (NSString *)stringByFixingScopusEndTags;
 - (NSString *)stringByConvertingHTMLToTeX;
 - (NSArray *)sourceLinesBySplittingString;
 + (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;

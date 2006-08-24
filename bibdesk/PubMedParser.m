@@ -117,6 +117,8 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict);
     if([itemString rangeOfString:@"PMID- " options:0 range:NSMakeRange(0, 10)].location != NSNotFound)
         itemString = [itemString stringByAddingRISEndTagsToPubMedString];
     
+    itemString = [itemString stringByFixingScopusEndTags];
+        
     BibItem *newBI = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
     
@@ -458,6 +460,13 @@ static void mergePageNumbers(NSMutableDictionary *dict)
     tmpStr = [ends replaceWithString:@"ER  - \r\nTY  - " inString:tmpStr];
 	
     return [tmpStr stringByAppendingString:@"\r\nER  - "];	
+}
+
+- (NSString *)stringByFixingScopusEndTags;
+{    
+    // Scopus doesn't put the end tag RE on a separate line.
+    AGRegex *endTag = [AGRegex regexWithPattern:@"([^\r\n])ER  - $" options:AGRegexMultiline];
+    return [endTag replaceWithString:@"$1\r\nER  - " inString:self];
 }
 
 - (NSArray *)sourceLinesBySplittingString;
