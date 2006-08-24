@@ -299,7 +299,7 @@ static inline Boolean isDoubleQuote(UniChar ch) { return ch == '"'; }
 static inline Boolean isAt(UniChar ch) { return ch == '@'; }
 static inline Boolean isPercent(UniChar ch) { return ch == '%'; }
 static inline Boolean isBackslash(UniChar ch) { return ch == '\\'; }
-static inline Boolean isCommentOrQuotedColor(NSColor *color) { return color == [NSColor brownColor] || color == [NSColor grayColor]; }
+static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isEqual:[NSColor brownColor]] || [color isEqual:[NSColor grayColor]]; }
 
 // extend the edited range of the textview to include the previous and next newline; including the previous/next delimiter is less reliable
 static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange proposedRange){
@@ -334,12 +334,7 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
 
 - (void)textStorageDidProcessEditing:(NSNotification *)notification{
     
-    static NSMutableCharacterSet *newlineSet = nil;
-    if(newlineSet == nil){
-        newlineSet = (NSMutableCharacterSet *)CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-        CFCharacterSetInvert((CFMutableCharacterSetRef)newlineSet); // no whitespace in this one, but it also has all letters...
-        CFCharacterSetIntersect((CFMutableCharacterSetRef)newlineSet, CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
-    }
+    NSCharacterSet *newlineSet = [NSCharacterSet newlineCharacterSet];
     
     NSTextStorage *textStorage = [notification object];    
     CFStringRef string = (CFStringRef)[textStorage string];
@@ -369,7 +364,7 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
     NSColor *typeColor = [NSColor purpleColor];
     NSColor *quotedColor = [NSColor brownColor];
     NSColor *commentColor = [NSColor grayColor];
-    CFStringRef commentString = (CFStringRef)@"comment";
+    CFStringRef commentString = CFSTR("comment");
     
     CFIndex braceDepth = 0;
      
