@@ -50,6 +50,7 @@
     BibDocument *document;
     NSString *fileName;
     int uniqueNumber;
+    unsigned int invalidSyntaxHighlightMark;
     BOOL enableSyntaxHighlighting;
     BOOL isEditing;
     BOOL isPasteDrag;

@@ -63,6 +63,7 @@
         uniqueNumber = 0;
         enableSyntaxHighlighting = YES;
         isPasteDrag = NO;
+        invalidSyntaxHighlightMark = NSNotFound;
     }
     return self;
 }
@@ -285,10 +286,12 @@
     enableSyntaxHighlighting = !enableSyntaxHighlighting;
         
     NSTextStorage *textStorage = [textView textStorage];
-    if(enableSyntaxHighlighting == NO)
+    if(enableSyntaxHighlighting == NO){
         [textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:NSMakeRange(0, [textStorage length])];
-    else
+    }else{
+        invalidSyntaxHighlightMark = NSNotFound;
         [textStorage edited:NSTextStorageEditedAttributes range:NSMakeRange(0, [textStorage length]) changeInLength:0];
+    }
 }
 
 #pragma mark Syntax highlighting
@@ -302,12 +305,13 @@ static inline Boolean isBackslash(UniChar ch) { return ch == '\\'; }
 static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isEqual:[NSColor brownColor]] || [color isEqual:[NSColor grayColor]]; }
 
 // extend the edited range of the textview to include the previous and next newline; including the previous/next delimiter is less reliable
-static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange proposedRange){
+- (NSRange)invalidatedRange:(NSRange)proposedRange{
     
     static NSCharacterSet *delimSet = nil;
     if(delimSet == nil)
          delimSet = [[NSCharacterSet characterSetWithCharactersInString:@"@{}\"%"] retain];
     
+    NSTextStorage *textStorage = [textView textStorage];
     NSString *string = [textStorage string];
     
     // see if we need to extend the range; coloring won't change unless this is a delimiter
@@ -315,9 +319,10 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
         return proposedRange;
     
     NSCharacterSet *newlineSet = [NSCharacterSet newlineCharacterSet];
-    NSColor *quotedColor = [NSColor brownColor];
     
-    unsigned start = proposedRange.location;
+    unsigned start = MIN(proposedRange.location, invalidSyntaxHighlightMark);
+    unsigned end = NSMaxRange(proposedRange);
+    unsigned length = [string length];
     
     // quoted or commented text can have multiple lines
     do {
@@ -326,7 +331,13 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
             start = 0;
     } while (start > 0 && isCommentOrQuotedColor([textStorage attribute:NSForegroundColorAttributeName atIndex:start - 1 effectiveRange:NULL]));
         
-    return NSMakeRange(start, [string length] - start);
+    do {
+        end = NSMaxRange([string rangeOfCharacterFromSet:newlineSet options:NSLiteralSearch range:NSMakeRange(end, length - end)]);
+        if(end == NSNotFound)
+            end = length;
+    } while (end < length && isCommentOrQuotedColor([textStorage attribute:NSForegroundColorAttributeName atIndex:end effectiveRange:NULL]));
+    
+    return NSMakeRange(start, end - start);
 }
     
 #define SetColor(color, start, length) [textStorage addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(editedRange.location + start, length)];
@@ -334,16 +345,22 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
 
 - (void)textStorageDidProcessEditing:(NSNotification *)notification{
     
+    if(enableSyntaxHighlighting == NO)
+        return;
+    
     NSCharacterSet *newlineSet = [NSCharacterSet newlineCharacterSet];
     
     NSTextStorage *textStorage = [notification object];    
     CFStringRef string = (CFStringRef)[textStorage string];
     CFIndex length = CFStringGetLength(string);
-
+    
     NSRange editedRange = [textStorage editedRange];
     
+    if(invalidSyntaxHighlightMark != NSNotFound && editedRange.location < invalidSyntaxHighlightMark)
+        invalidSyntaxHighlightMark = MAX(invalidSyntaxHighlightMark + [textStorage changeInLength], editedRange.location);
+    
     // see what range we should actually invalidate; if we're not adding any special characters, the default edited range is probably fine
-    editedRange = invalidatedRange(textStorage, editedRange);
+    editedRange = [self invalidatedRange:editedRange];
     
     CFIndex cnt = editedRange.location;
     
@@ -351,9 +368,6 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
     CFStringInitInlineBuffer(string, &inlineBuffer, CFRangeMake(cnt, editedRange.length));
     
     SetColor([NSColor blackColor], 0, editedRange.length)
-    
-    if(enableSyntaxHighlighting == NO)
-        return;
     
     // inline buffer only covers the edited range, starting from 0; adjust length to length of buffer
     length = editedRange.length;
@@ -456,6 +470,11 @@ static inline NSRange invalidatedRange(NSTextStorage *textStorage, NSRange propo
         }else if(isRightBrace(ch)){
             SetColor(braceColor, cnt, 1);
         }
+    }
+    if(braceDepth > 0){
+        invalidSyntaxHighlightMark = editedRange.location + length;
+    } else if(invalidSyntaxHighlightMark <= editedRange.location + length){
+        invalidSyntaxHighlightMark = NSNotFound;
     }
 }
 
