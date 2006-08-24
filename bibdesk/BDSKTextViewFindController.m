@@ -169,10 +169,6 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
     if ([[findTypePopUp selectedItem] tag] == 0) {
         pattern = [[OAFindPattern alloc] initWithString:findString ignoreCase:[ignoreCaseButton state] wholeWord:[wholeWordButton state] backwards:backwardsFlag];
     } else {
-        int subexpression;
-        
-        [self controlTextDidEndEditing:nil]; // make sure the subexpressionPopUp is set correctly
-        subexpression = [subexpressionPopUp indexOfSelectedItem] - 1;
         pattern = [[BDSKRegExFindPattern alloc] initWithString:findString ignoreCase:[ignoreCaseButton state] backwards:backwardsFlag];
     }
     
