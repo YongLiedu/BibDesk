@@ -64,6 +64,7 @@
         enableSyntaxHighlighting = YES;
         isPasteDrag = NO;
         invalidSyntaxHighlightMark = NSNotFound;
+        changeCount = 0;
     }
     return self;
 }
@@ -78,6 +79,7 @@
 
 - (void)dealloc;
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [document release];
     [fileName release];
     [super dealloc];
@@ -121,6 +123,18 @@
 											 selector:@selector(handleSelectionDidChangeNotification:)
 												 name:NSTextViewDidChangeSelectionNotification
 											   object:textView];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(handleUndoManagerChangeUndoneNotification:)
+												 name:NSUndoManagerDidUndoChangeNotification
+											   object:[[self window] undoManager]];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(handleUndoManagerChangeDoneNotification:)
+												 name:NSUndoManagerDidRedoChangeNotification
+											   object:[[self window] undoManager]];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(handleUndoManagerChangeDoneNotification:)
+												 name:NSUndoManagerWillCloseUndoGroupNotification
+											   object:[[self window] undoManager]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -207,6 +221,9 @@
         [textView setString:fileStr];
         [fileStr release];
     }
+    if (changeCount != 0)
+        [[self window] setDocumentEdited:NO];
+    changeCount = 0;
 }
 
 - (IBAction)reopenDocument:(id)sender{
@@ -219,6 +236,19 @@
     [fileData writeToFile:expandedFileName atomically:YES];
     
     [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:expandedFileName display:YES];
+}
+
+- (IBAction)changeSyntaxHighlighting:(id)sender;
+{
+    enableSyntaxHighlighting = !enableSyntaxHighlighting;
+        
+    NSTextStorage *textStorage = [textView textStorage];
+    if(enableSyntaxHighlighting == NO){
+        [textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:NSMakeRange(0, [textStorage length])];
+    }else{
+        invalidSyntaxHighlightMark = NSNotFound;
+        [textStorage edited:NSTextStorageEditedAttributes range:NSMakeRange(0, [textStorage length]) changeInLength:0];
+    }
 }
 
 - (IBAction)changeLineNumber:(id)sender{
@@ -281,17 +311,18 @@
     [lineNumberField setIntValue:lineNumber];
 }
 
-- (IBAction)changeSyntaxHighlighting:(id)sender;
+- (void)handleUndoManagerChangeUndoneNotification:(NSNotification *)notification;
 {
-    enableSyntaxHighlighting = !enableSyntaxHighlighting;
-        
-    NSTextStorage *textStorage = [textView textStorage];
-    if(enableSyntaxHighlighting == NO){
-        [textStorage addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:NSMakeRange(0, [textStorage length])];
-    }else{
-        invalidSyntaxHighlightMark = NSNotFound;
-        [textStorage edited:NSTextStorageEditedAttributes range:NSMakeRange(0, [textStorage length]) changeInLength:0];
-    }
+    changeCount++;
+    if(changeCount == 0) [[self window] setDocumentEdited:NO];
+    if(changeCount == 1) [[self window] setDocumentEdited:YES];
+}
+
+- (void)handleUndoManagerChangeDoneNotification:(NSNotification *)notification;
+{
+    changeCount--;
+    if(changeCount == 0) [[self window] setDocumentEdited:NO];
+    if(changeCount == -1) [[self window] setDocumentEdited:YES];
 }
 
 #pragma mark Syntax highlighting

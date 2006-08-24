@@ -50,6 +50,7 @@
     BibDocument *document;
     NSString *fileName;
     int uniqueNumber;
+    int changeCount;
     unsigned int invalidSyntaxHighlightMark;
     BOOL enableSyntaxHighlighting;
     BOOL isEditing;
@@ -79,6 +80,9 @@
 - (IBAction)changeLineNumber:(id)sender;
 
 - (void)gotoLine:(int)lineNumber;
+
 - (void)handleSelectionDidChangeNotification:(NSNotification *)notification;
+- (void)handleUndoManagerChangeUndoneNotification:(NSNotification *)notification;
+- (void)handleUndoManagerChangeDoneNotification:(NSNotification *)notification;
 
 @end
