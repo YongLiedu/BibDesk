@@ -223,6 +223,7 @@
     }
     if (changeCount != 0)
         [[self window] setDocumentEdited:NO];
+	[[[self window] undoManager] removeAllActions];
     changeCount = 0;
 }
 
