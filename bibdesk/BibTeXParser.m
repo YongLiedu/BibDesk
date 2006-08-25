@@ -590,11 +590,13 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
         [errorObject setValue:[[pub document] fileName] forKey:@"fileName"];
         [errorObject setValue:[NSNumber numberWithInt:-1] forKey:@"lineNumber"];
-        [errorObject setValue:NSLocalizedString(@"Error", @"") forKey:@"errorClassName"];
+        [errorObject setValue:NSLocalizedString(@"error", @"") forKey:@"errorClassName"];
         [errorObject setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]] forKey:@"errorMessage"];
         
+        [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[pub document]];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
                                                             object:errorObject];
+        [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[pub document]];
         [errorObject release];
         // make sure the error panel is displayed, regardless of prefs
         [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
