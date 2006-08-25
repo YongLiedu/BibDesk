@@ -43,7 +43,6 @@
 #import "BDSKCiteKeyFormatter.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKEdgeView.h"
-#import <WebKit/WebKit.h>
 #import "BibDocument.h"
 #import "BDSKImagePopUpButtonCell.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -84,6 +83,7 @@
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (BOOL)editSelectedCellAsMacro;
+- (void)autoDiscoverDataFromFrame:(WebFrame *)frame;
 
 @end
 
@@ -1015,6 +1015,8 @@
 	[self setLoading:NO];
 	[backButton setEnabled:[sender canGoBack]];
 	[forwardButton setEnabled:[sender canGoForward]];
+
+    [self autoDiscoverDataFromFrame:frame];
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
@@ -1414,6 +1416,112 @@
 
 - (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset{
 	return proposedMax - 200.0;
+}
+
+#pragma mark Auto-Discovery methods
+
+- (void)autoDiscoverDataFromFrame:(WebFrame *)frame{
+        
+    // This only reads Dublin Core for now.
+    // In the future, we should handle other HTML encodings like a nascent microformat.
+    // perhaps then a separate HTML parser would be useful to keep this file small.
+    
+    DOMDocument *domDoc = [frame DOMDocument];
+    
+    DOMNodeList *headList = [domDoc getElementsByTagName:@"head"];
+    if([headList length] != 1) return;
+    DOMNode *headNode = [headList item:0];
+    DOMNodeList *headChildren = [headNode childNodes];
+    unsigned i = 0;
+    unsigned length = [headChildren length];
+    NSMutableDictionary *metaTagDict = [NSMutableDictionary dictionaryWithCapacity:length];    
+    
+    
+	for (i = 0; i < length; i++) {
+		DOMNode *node = [headChildren item:i];
+		DOMNamedNodeMap *attributes = [node attributes];
+        
+        NSString *nodeName = [node nodeName];
+        if([nodeName isEqualToString:@"META"]){
+            
+            NSString *metaName = [[attributes getNamedItem:@"name"] nodeValue];
+            NSString *metaVal = [[attributes getNamedItem:@"content"] nodeValue];
+            
+            if(!metaVal) continue;
+
+            // Catch repeated DC.creator or contributor and append them: 
+            if([metaName isEqualToString:@"DC.creator"] ||
+               [metaName isEqualToString:@"DC.contributor"]){
+                NSString *currentVal = [metaTagDict objectForKey:metaName];
+                if(currentVal != nil){
+                    metaVal = [NSString stringWithFormat:@"%@ and %@", currentVal, metaVal];
+                }
+            }
+            
+            // Catch repeated DC.type and store them separately:
+            if([metaName isEqualToString:@"DC.type"]){
+                NSString *currentVal = [metaTagDict objectForKey:metaName];
+                if(currentVal != nil){
+                    int index = 1;
+                    while([metaTagDict objectForKey:[NSString stringWithFormat:@"DC.type.%d", index]]){
+                        index++;
+                    }
+                    metaName = [NSString stringWithFormat:@"DC.type.%d", index];
+                }
+            }
+            
+            [metaTagDict setObject:metaVal
+                            forKey:metaName];
+
+            
+        }else if([nodeName isEqualToString:@"LINK"]){
+            // it might be the link rel="alternate" class="fulltext"
+            NSString *classVal = [[attributes getNamedItem:@"class"] nodeValue];
+            NSString *relVal = [[attributes getNamedItem:@"rel"] nodeValue];
+            
+            if( [classVal isEqualToString:@"fulltext"] &&
+                [relVal isEqualToString:@"alternate"]){
+                DOMNode *hrefAttr = [attributes getNamedItem:@"href"];
+                [metaTagDict setObject:[hrefAttr nodeValue]
+                                forKey:BDSKUrlString];
+            }
+        }
+    }// for child of HEAD
+    
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSEnumerator *metaTagKeyE = [metaTagDict keyEnumerator];
+    NSString *metaName = nil;
+    
+    while(metaName = [metaTagKeyE nextObject]){
+        NSString *fieldName = [typeMan fieldNameForDublinCoreTerm:metaName];
+        fieldName = (fieldName ? fieldName : metaName);
+        NSString *fieldValue = [metaTagDict objectForKey:metaName];
+        
+        // Special-case DC.date to get month and year, but still insert "DC.date"
+        //  to capture the day, which may be useful.
+        if([fieldName isEqualToString:@"Date"]){
+            NSCalendarDate *date = [NSCalendarDate dateWithString:fieldValue
+                                                   calendarFormat:@"%Y-%m-%d"];
+            [item setField:BDSKYearString
+                   toValue:[date descriptionWithCalendarFormat:@"%Y"]];
+            [item setField:BDSKMonthString
+                   toValue:[date descriptionWithCalendarFormat:@"%m"]];
+            // fieldName is "Date" here, don't just insert that.
+            // we use "Date" to generate a nice table column, and we shouldn't override that.
+            [item setField:@"DC.date"
+                   toValue:fieldValue];
+        }else{
+            [item setField:fieldName
+                   toValue:fieldValue];
+        }
+
+        
+    }
+
+    NSString *bibtexType = [typeMan bibtexTypeForDublinCoreType:[metaTagDict objectForKey:@"DC.type"]];
+    [self setType:(bibtexType ? bibtexType : @"misc")];
+
+    [itemTableView reloadData];
 }
 
 @end

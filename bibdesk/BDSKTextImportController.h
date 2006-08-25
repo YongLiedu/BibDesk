@@ -44,6 +44,7 @@
 #import "BDSKImagePopUpButton.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "BDSKTypeSelectHelper.h"
+#import <WebKit/WebKit.h>
 
 @class BibDocument;
 @class BDSKEdgeView;
