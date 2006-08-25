@@ -55,6 +55,8 @@
 #define FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY   @"FieldDescriptionsForWebOfScienceTags"
 #define BIBTEX_TYPES_FOR_WOS_TYPES_KEY        @"BibTeXTypesForWebOfScienceTypes"
 #define MODS_GENRES_FOR_BIBTEX_TYPES_KEY      @"MODSGenresForBibTeXType"
+#define BIBTEX_TYPES_FOR_DC_TYPES_KEY         @"BibTeXTypesForDublinCoreTypes"
+#define BIBTEX_FIELDS_FOR_DC_TERMS_KEY        @"BibTeXFieldNamesForDublinCoreTerms"
 
 @interface BibTypeManager : NSObject {
 	NSDictionary *fileTypesDict;
@@ -67,6 +69,8 @@
     NSDictionary *fieldNameForWebOfScienceTagDict;
     NSDictionary *fieldDescriptionForWebOfScienceTagDict;
     NSDictionary *bibtexTypeForWebOfScienceTypeDict;
+    NSDictionary *bibtexTypeForDublinCoreTypeDict;
+    NSDictionary *fieldNameForDublinCoreTermDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
 	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
@@ -110,6 +114,8 @@
 - (void)setFieldNameForWebOfScienceTagDict:(NSDictionary *)dict;
 - (void)setFieldDescriptionForWebOfScienceTagDict:(NSDictionary *)dict;
 - (void)setBibtexTypeForWebOfScienceTypeDict:(NSDictionary *)dict;
+- (void)setBibtexTypeForDublinCoreTypeDict:(NSDictionary *)dict;
+- (void)setFieldNameForDublinCoreTermDict:(NSDictionary *)dict;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
 - (NSSet *)allFieldNames;
@@ -123,6 +129,26 @@
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
 - (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type;
+
+
+/*!
+    @method     fieldNameForDublinCoreTerm:
+    @abstract   translates between Dublin Core Terms and bibtex fields.
+    @discussion Is probably incomplete, but doesn't ignore qualifiers - DC.Title.Alternate will become Title-Alternate.
+    @param      term - a Dublin Core term like "DC.title"
+    @result     a string that can be used as a key to a BibItem field like "Title" (note capitalization!)
+*/
+- (NSString *)fieldNameForDublinCoreTerm:(NSString *)term;
+
+/*!
+    @method     bibtexTypeForDublinCoreType:
+    @abstract   translates between Dublin Core types and bibtex terms
+    @discussion This is likely to be messy since I couldn't find a good reference for DC types.
+    @param      type - A DC.Type value
+    @result     a bibtex type
+*/
+- (NSString *)bibtexTypeForDublinCoreType:(NSString *)type;
+
 
 - (BOOL)isURLField:(NSString *)field;
 - (BOOL)isRemoteURLField:(NSString *)field;
@@ -156,15 +182,7 @@
     @result     (description)
 */
 - (NSString *)RISTypeForBibTeXType:(NSString *)type;
-    
-/*!
-    @method     MODSGenreForBibTeXType:
-	@abstract   returns the appropriate MODS genre and level (like "Conference Publication") for known bibtex types (like "inproceedings")
-	@discussion 
-	@param      type The bibtex type.
-	@result     A dictionary that includes genre tags organized by whether they belong in the item or its host. The dictionary has two keys: 'self' and 'host', and when not nil, the values of those keys are arrays. See TypeInfo.plist for the whole story.
-     */
-
+  
 - (NSString *)fieldNameForJSTORTag:(NSString *)tag;
 
 - (NSString *)fieldNameForJSTORDescription:(NSString *)name;
@@ -173,6 +191,13 @@
 
 - (NSString *)fieldNameForWebOfScienceDescription:(NSString *)name;
 
+    /*!
+              @method     MODSGenresForBibTeXType:
+     @abstract   returns the appropriate MODS genre and level (like "Conference Publication") for known bibtex types (like "inproceedings")
+     @discussion 
+     @param      type The bibtex type.
+     @result     A dictionary that includes genre tags organized by whether they belong in the item or its host. The dictionary has two keys: 'self' and 'host', and when not nil, the values of those keys are arrays. See TypeInfo.plist for the whole story.
+     */
 - (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type;
 
 /*!

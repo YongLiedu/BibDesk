@@ -136,6 +136,8 @@ static BibTypeManager *sharedInstance = nil;
     [fieldNameForWebOfScienceTagDict release];
     [fieldDescriptionForWebOfScienceTagDict release];
     [bibtexTypeForWebOfScienceTypeDict release];
+    [bibtexTypeForDublinCoreTypeDict release];
+    [fieldNameForDublinCoreTermDict release];
 	[MODSGenresForBibTeXTypeDict release];
 	[allFieldNames release];
 	[invalidCiteKeyCharSet release];
@@ -187,6 +189,8 @@ static BibTypeManager *sharedInstance = nil;
         [self setFieldNameForWebOfScienceTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_WOS_TAGS_KEY]];
         [self setFieldDescriptionForWebOfScienceTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_WOS_TAGS_KEY]];
         [self setBibtexTypeForWebOfScienceTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY]];
+        [self setBibtexTypeForDublinCoreTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY]];        
+        [self setFieldNameForDublinCoreTermDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_DC_TERMS_KEY]];
     }
 	
 	[self reloadAllFieldNames];
@@ -295,13 +299,6 @@ static BibTypeManager *sharedInstance = nil;
     }
 }
 
-- (void)setBibtexTypeForWebOfScienceTypeDict:(NSDictionary *)dict{
-    if(bibtexTypeForWebOfScienceTypeDict != dict){
-        [bibtexTypeForWebOfScienceTypeDict release];
-        bibtexTypeForWebOfScienceTypeDict = [dict copy];
-    }
-}
-
 - (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames{
     if(fieldNameForPubMedTagDict != newNames){
         [fieldNameForPubMedTagDict release];
@@ -323,6 +320,13 @@ static BibTypeManager *sharedInstance = nil;
     }
 }
 
+- (void)setBibtexTypeForWebOfScienceTypeDict:(NSDictionary *)dict{
+    if(bibtexTypeForWebOfScienceTypeDict != dict){
+        [bibtexTypeForWebOfScienceTypeDict release];
+        bibtexTypeForWebOfScienceTypeDict = [dict copy];
+    }
+}
+
 - (void)setFieldNameForWebOfScienceTagDict:(NSDictionary *)dict{
     if(fieldNameForWebOfScienceTagDict != dict){
         [fieldNameForWebOfScienceTagDict release];
@@ -336,6 +340,21 @@ static BibTypeManager *sharedInstance = nil;
         fieldDescriptionForWebOfScienceTagDict = [dict copy];
     }
 }
+
+- (void)setBibtexTypeForDublinCoreTypeDict:(NSDictionary *)dict{
+    if(bibtexTypeForDublinCoreTypeDict != dict){
+        [bibtexTypeForDublinCoreTypeDict release];
+        bibtexTypeForDublinCoreTypeDict = [dict copy];
+    }
+}
+
+- (void)setFieldNameForDublinCoreTermDict:(NSDictionary *)dict{
+    if(fieldNameForDublinCoreTermDict != dict){
+        [fieldNameForDublinCoreTermDict release];
+        fieldNameForDublinCoreTermDict = [dict copy];
+    }
+}
+
 
 - (void)setFileTypesDict:(NSDictionary *)newTypes{
     if(fileTypesDict != newTypes){
@@ -420,8 +439,12 @@ static BibTypeManager *sharedInstance = nil;
     return [bibtexTypeForPubMedTypeDict objectForKey:type];
 }
 
-- (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type{
-    return [bibtexTypeForWebOfScienceTypeDict objectForKey:type];
+- (NSString *)fieldNameForDublinCoreTerm:(NSString *)term{
+    [fieldNameForDublinCoreTermDict objectForKey:term];
+}
+
+- (NSString *)bibtexTypeForDublinCoreType:(NSString *)type{
+    [bibtexTypeForDublinCoreTypeDict objectForKey:type];
 }
 
 - (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type{
@@ -458,6 +481,10 @@ static BibTypeManager *sharedInstance = nil;
     if([tags count])
 		return [fieldNameForJSTORTagDict objectForKey:[tags objectAtIndex:0]];
 	return [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+}
+
+- (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type{
+    return [bibtexTypeForWebOfScienceTypeDict objectForKey:type];
 }
 
 - (NSString *)fieldNameForWebOfScienceTag:(NSString *)tag{
@@ -537,8 +564,6 @@ static BibTypeManager *sharedInstance = nil;
         persons = [[NSSet alloc] initWithObjects:BDSKAuthorString, BDSKEditorString, nil];
     return persons;
 }
-
-#pragma mark Character sets
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
