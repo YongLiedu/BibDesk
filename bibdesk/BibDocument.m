@@ -764,10 +764,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     BOOL success = YES;
     NSString *error = nil;
+    NSError *nsError;
     @try{
         // @@ 10.3 compatibility; should use super after we remove the call to writeToFile:ofType:, but that causes an endless loop on 10.4; revisit this if we need to support file wrappers
-        NSData *data = [self dataOfType:docType error:outError];
+        NSData *data = [self dataOfType:docType error:&nsError];
         success = nil == data ? NO : [data writeToURL:fileURL atomically:YES];
+        if(!success && outError)
+            *outError = nsError;
     }
     @catch(id exception){
         if([exception isKindOfClass:[NSException class]] && [[exception name] isEqualToString:BDSKTeXifyException]){
