@@ -1436,7 +1436,7 @@ static int numberOfOpenEditors = 0;
 		if (rv == NSAlertAlternateReturn) {
 			return NO;
 		} else if (rv == NSAlertOtherReturn) {
-			[self openParentItem:self];
+			[self openParentItemForField:field];
 			return NO;
 		}
 	}
@@ -2021,10 +2021,13 @@ static int numberOfOpenEditors = 0;
 }
 
 // these methods are for crossref interaction with the form
-- (void)openParentItem:(id)sender{
+- (void)openParentItemForField:(NSString *)field{
     BibItem *parent = [publication crossrefParent];
-    if(parent)
-        [[self document] editPub:parent];
+    if(parent){
+        BibEditor *editor = [[self document] editPub:parent];
+        if(editor && field)
+            [editor makeKeyField:field];
+    }
 }
 
 - (IBAction)selectCrossrefParentAction:(id)sender{
@@ -2068,7 +2071,8 @@ static int numberOfOpenEditors = 0;
 #pragma mark BDSKForm delegate methods
 
 - (void)arrowClickedInFormCell:(id)cell{
-	[self openParentItem:nil];
+    NSString *field = [cell title];
+	[self openParentItemForField:[field isEqualToString:BDSKCrossrefString] ? nil : field];
 }
 
 - (void)iconClickedInFormCell:(id)cell{

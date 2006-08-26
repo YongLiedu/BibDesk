@@ -1729,7 +1729,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 }
 
 //@@ notifications - when adding pub notifications is fully implemented we won't need this.
-- (void)editPub:(BibItem *)pub{
+- (BibEditor *)editPub:(BibItem *)pub{
     BibEditor *e = nil;
 	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
 	NSWindowController *wc;
@@ -1746,6 +1746,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
         [e release];
     }
     [e show];
+    return e;
 }
 
 - (void)showPerson:(BibAuthor *)person{

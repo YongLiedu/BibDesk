@@ -421,11 +421,11 @@
 - (void)bibWillBeRemoved:(NSNotification *)notification;
 
 /*!
-	@method     openParentItem:
+	@method     openParentItemForField:
 	@abstract   opens an editor for the crossref parent item.
 	@discussion (description)
 */
-- (void)openParentItem:(id)sender;
+- (void)openParentItemForField:(NSString *)field;
 
 - (IBAction)selectCrossrefParentAction:(id)sender;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;

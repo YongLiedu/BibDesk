@@ -433,7 +433,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
  @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
  @param pub The BibItem that should be edited.
 */
-- (void)editPub:(BibItem *)pub;
+- (BibEditor *)editPub:(BibItem *)pub;
 
 /*!
     @method showPerson:
