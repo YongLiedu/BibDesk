@@ -28,22 +28,7 @@
 #include "btparse.h"
 #include "error.h"
 #include "my_dmalloc.h"
-
-NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
-NSString *BDSKParserHarmlessWarningString = @"harmless";
-NSString *BDSKParserWarningString = @"warning";
-
-@implementation BDSKErrObj
-+ (BOOL)accessInstanceVariablesDirectly{ return YES; }
-
-- (NSString *)description{
-    return [NSString stringWithFormat:@"File name: %@, Editor: %@, line number: %d \n\t item: %@, error class: %@, error message: %@", fileName, editor, lineNumber, itemDescription, errorClassName, errorMessage];
-}
-
-@end
-//
-// ----------------------------------------------------------------------------------------
-
+#include "BDSKErrorObject.h"
 
 #define NUM_ERRCLASSES ((int) BTERR_INTERNAL + 1)
 
@@ -99,7 +84,7 @@ void print_error (bt_error *err)
    char *  name;
    boolean something_printed;
    NSMutableString *errString = [NSMutableString string];
-   BDSKErrObj *errObj = [[[BDSKErrObj alloc] init] autorelease];
+   BDSKErrorObject *errObj = [[[BDSKErrorObject alloc] init] autorelease];
    
    something_printed = FALSE;
 
@@ -107,7 +92,7 @@ void print_error (bt_error *err)
    {
        NSString *fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
        if(fileName) [errString appendString:fileName];
-       [errObj setValue:fileName forKey:@"fileName"];
+       [errObj setFileName:fileName];
        something_printed = TRUE;
    }
    if (err->line > 0)                   /* going to print a line number? */
@@ -118,7 +103,7 @@ void print_error (bt_error *err)
        }
 
        [errString appendString:[NSString stringWithFormat:@"line %d", err->line]];
-       [errObj setValue:[NSNumber numberWithInt:err->line] forKey:@"lineNumber"];
+       [errObj setLineNumber:err->line];
        something_printed = TRUE;
    }
    else
@@ -127,7 +112,7 @@ void print_error (bt_error *err)
            [errString appendString:@", "];
        
        [errString appendString:@"Unknown"];
-       [errObj setValue:[NSNumber numberWithInt:-1] forKey:@"lineNumber"];
+       [errObj setLineNumber:-1];
        something_printed = TRUE;
    }
    if (err->item_desc && err->item > 0) /* going to print an item number? */
@@ -138,8 +123,8 @@ void print_error (bt_error *err)
        }
 
        [errString appendString:[NSString stringWithFormat:@"%s %d", err->item_desc, err->item]];
-       [errObj setValue:[NSString stringWithCString:err->item_desc] forKey:@"itemDescription"];
-       [errObj setValue:[NSNumber numberWithInt:err->item] forKey:@"itemNumber"];
+       [errObj setItemDescription:[NSString stringWithCString:err->item_desc]];
+       [errObj setItemNumber:err->item];
       something_printed = TRUE;
    }
 
@@ -154,7 +139,7 @@ void print_error (bt_error *err)
        }
 
        [errString appendString:[NSString stringWithCString:name]];
-       [errObj setValue:[NSString stringWithCString:name] forKey:@"errorClassName"];
+       [errObj setErrorClassName:[NSString stringWithCString:name]];
       something_printed = TRUE;
    }
 
@@ -164,11 +149,9 @@ void print_error (bt_error *err)
    }
 
    [errString appendString:[NSString stringWithCString:err->message]];
-   [errObj setValue:[NSString stringWithCString:err->message] forKey:@"errorMessage"];
+   [errObj setErrorMessage:[NSString stringWithCString:err->message]];
 
-   NSNotification *errNotif = [NSNotification notificationWithName:BDSKParserErrorNotification object:errObj];
-
-   [[NSNotificationCenter defaultCenter] postNotification:errNotif];
+   [errObj report];
    
 } /* print_error() */
 

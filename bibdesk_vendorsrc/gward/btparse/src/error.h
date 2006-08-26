@@ -21,26 +21,6 @@
 #include <stdarg.h>
 #include "btparse.h"                    /* for AST typedef */
 
-#import <Cocoa/Cocoa.h>
-
-extern NSString *BDSKParserErrorNotification;
-extern NSString *BDSKParserHarmlessWarningString;
-extern NSString *BDSKParserWarningString;
-
-@interface BDSKErrObj : NSObject{
-    NSString *fileName;
-	id editor;
-    int lineNumber;
-    
-    NSString *itemDescription;
-    int itemNumber;
-    
-    NSString *errorClassName;
-    NSString *errorMessage;
-}
-@end
-
-
 #define MAX_ERROR 1024
 
 #define ERRFUNC_BODY(class,filename,line,item_desc,item,format)            \
