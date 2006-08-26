@@ -288,7 +288,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 // remove a document
-- (void)handleRemoveDocument:(NSNotification *)notification{
+- (void)handleRemoveDocumentNotification:(NSNotification *)notification{
     BibDocument *document = [notification object];
     // clear reference to document in its editor and close it when it is not editing
     BDSKErrorEditor *editor = [self editorForDocument:document create:NO]; // there should be at most one

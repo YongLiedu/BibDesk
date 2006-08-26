@@ -81,7 +81,7 @@
 // called after a failed load
 - (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
 // called when a document is removed
-- (void)handleRemoveDocument:(NSNotification *)notification;
+- (void)handleRemoveDocumentNotification:(NSNotification *)notification;
 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
