@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
+		CE5895360AA046CE000733B6 /* BDSKErrorObject.h in Headers */ = {isa = PBXBuildFile; fileRef = CE5895340AA046CE000733B6 /* BDSKErrorObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CE5895370AA046CE000733B6 /* BDSKErrorObject.m in Sources */ = {isa = PBXBuildFile; fileRef = CE5895350AA046CE000733B6 /* BDSKErrorObject.m */; };
 		F9281247086E0EDC00E8900E /* ast.c in Headers */ = {isa = PBXBuildFile; fileRef = F99630DA086E0D9600872609 /* ast.c */; };
 		F9963119086E0D9600872609 /* antlr.h in Headers */ = {isa = PBXBuildFile; fileRef = F99630D9086E0D9600872609 /* antlr.h */; };
 		F996311B086E0D9600872609 /* ast.h in Headers */ = {isa = PBXBuildFile; fileRef = F99630DB086E0D9600872609 /* ast.h */; };
@@ -71,6 +73,8 @@
 		32DBCF5E0370ADEE00C91783 /* BTParse_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTParse_Prefix.pch; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* BTParse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE5895340AA046CE000733B6 /* BDSKErrorObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorObject.h; sourceTree = "<group>"; };
+		CE5895350AA046CE000733B6 /* BDSKErrorObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorObject.m; sourceTree = "<group>"; };
 		F99630D9086E0D9600872609 /* antlr.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; path = antlr.h; sourceTree = "<group>"; };
 		F99630DA086E0D9600872609 /* ast.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; path = ast.c; sourceTree = "<group>"; };
 		F99630DB086E0D9600872609 /* ast.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; path = ast.h; sourceTree = "<group>"; };
@@ -240,6 +244,8 @@
 				F9963114086E0D9600872609 /* tokens.h */,
 				F9963115086E0D9600872609 /* traversal.c */,
 				F9963117086E0D9600872609 /* util.c */,
+				CE5895340AA046CE000733B6 /* BDSKErrorObject.h */,
+				CE5895350AA046CE000733B6 /* BDSKErrorObject.m */,
 			);
 			name = src;
 			path = ../../bibdesk_vendorsrc/gward/btparse/src;
@@ -273,6 +279,7 @@
 				F996314B086E0D9600872609 /* stdpccts.h in Headers */,
 				F996314F086E0D9600872609 /* sym.h in Headers */,
 				F9963153086E0D9600872609 /* tokens.h in Headers */,
+				CE5895360AA046CE000733B6 /* BDSKErrorObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,6 +357,7 @@
 				F9963154086E0D9600872609 /* traversal.c in Sources */,
 				F9963156086E0D9600872609 /* util.c in Sources */,
 				F9E43AE608AD8C1A00A0354B /* parse_auxiliary.c in Sources */,
+				CE5895370AA046CE000733B6 /* BDSKErrorObject.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
