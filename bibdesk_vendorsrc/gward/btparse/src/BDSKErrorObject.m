@@ -48,6 +48,7 @@ NSString *BDSKParserWarningString = @"warning";
 - (void)dealloc {
     [fileName release];
     [editor release];
+    [publication release];
     [errorClassName release];
     [errorMessage release];
     [super dealloc];
@@ -76,6 +77,17 @@ NSString *BDSKParserWarningString = @"warning";
     if (editor != newEditor) {
         [editor release];
         editor = [newEditor retain];
+    }
+}
+
+- (id)publication {
+    return [[publication retain] autorelease];
+}
+
+- (void)setPublication:(id)newPublication{
+    if (publication != newPublication) {
+        [publication release];
+        publication = [newPublication retain];
     }
 }
 

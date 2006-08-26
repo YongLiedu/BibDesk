@@ -45,6 +45,8 @@ extern NSString *BDSKParserWarningString;
 @interface BDSKErrorObject : NSObject {
     NSString *fileName;
 	id editor;
+	id publication;
+    
     int lineNumber;
     
     NSString *itemDescription;
@@ -60,6 +62,8 @@ extern NSString *BDSKParserWarningString;
 - (id)editor;
 - (void)setEditor:(id)newEditor;
 
+- (id)publication;
+- (void)setPublication:(id)newPublication;
 
 - (int)lineNumber;
 - (void)setLineNumber:(int)newLineNumber;
