@@ -82,50 +82,27 @@ static char error_buf[MAX_ERROR+1];
 void print_error (bt_error *err)
 {
    char *  name;
-   boolean something_printed;
-   NSMutableString *errString = [NSMutableString string];
-   BDSKErrorObject *errObj = [[[BDSKErrorObject alloc] init] autorelease];
+   BDSKErrorObject *errObj = [[BDSKErrorObject alloc] init];
    
-   something_printed = FALSE;
-
    if (err->filename)
    {
        NSString *fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
-       if(fileName) [errString appendString:fileName];
        [errObj setFileName:fileName];
-       something_printed = TRUE;
    }
+   
    if (err->line > 0)                   /* going to print a line number? */
    {
-       if (something_printed){
-
-           [errString appendString:@", "];
-       }
-
-       [errString appendString:[NSString stringWithFormat:@"line %d", err->line]];
        [errObj setLineNumber:err->line];
-       something_printed = TRUE;
    }
    else
    {
-       if(something_printed)
-           [errString appendString:@", "];
-       
-       [errString appendString:@"Unknown"];
        [errObj setLineNumber:-1];
-       something_printed = TRUE;
    }
+   
    if (err->item_desc && err->item > 0) /* going to print an item number? */
    {
-       if (something_printed){
-
-           [errString appendString:@", "];
-       }
-
-       [errString appendString:[NSString stringWithFormat:@"%s %d", err->item_desc, err->item]];
        [errObj setItemDescription:[NSString stringWithCString:err->item_desc]];
        [errObj setItemNumber:err->item];
-      something_printed = TRUE;
    }
 
    name = errclass_names[(int) err->class];
@@ -133,25 +110,13 @@ void print_error (bt_error *err)
        name = (char *)[BDSKParserHarmlessWarningString cString]; /* BTERR_NOTIFY used for lexical buffer overflow warnings */
    if (name)
    {
-       if (something_printed){
-
-           [errString appendString:@", "];
-       }
-
-       [errString appendString:[NSString stringWithCString:name]];
        [errObj setErrorClassName:[NSString stringWithCString:name]];
-      something_printed = TRUE;
    }
 
-   if (something_printed){
-
-       [errString appendString:@": "];
-   }
-
-   [errString appendString:[NSString stringWithCString:err->message]];
    [errObj setErrorMessage:[NSString stringWithCString:err->message]];
 
    [errObj report];
+   [errObj release];
    
 } /* print_error() */
 
