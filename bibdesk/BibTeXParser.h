@@ -128,9 +128,9 @@
     @abstract   Splits an author name
     @discussion (comprehensive description)
     @param      aString The author name
-    @param      aDocument (description)
+    @param      pub (description)
     @result     A dictionary of containing the 4 name parts firstName, vonPart, lastName, jrPart
 */
-+ (NSDictionary *)splitAuthorName:(NSString *)name document:(BibDocument *)aDocument;
++ (NSDictionary *)splitAuthorName:(NSString *)name publication:(BibItem *)pub;
 
 @end

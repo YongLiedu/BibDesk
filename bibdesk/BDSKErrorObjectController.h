@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import <BTParse/BDSKErrorObject.h>
 
-@class BibDocument, BDSKErrorEditor, BDSKFilteringArrayController;
+@class BibDocument, BibItem, BDSKErrorEditor, BDSKFilteringArrayController;
 
 @interface BDSKErrorObjectController : NSWindowController {
     NSMutableArray *errors;
@@ -82,6 +82,8 @@
 - (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
 // called when a document is removed
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification;
+- (void)handleRemovePublicationNotification:(NSNotification *)notification;
+- (void)removePublications:(NSArray *)pubs;
 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
@@ -91,9 +93,11 @@
 - (IBAction)copy:(id)sender;
 - (IBAction)gotoError:(id)sender;
 
-// any use of btparse should be bracketed by these two calls
+// any use of btparse should be bracketed by any pof the following pairs
 - (void)startObservingErrorsForDocument:(BibDocument *)document;
 - (void)endObservingErrorsForDocument:(BibDocument *)document;
+- (void)startObservingErrorsForDocument:(BibDocument *)document publication:(BibItem *)pub;
+- (void)endObservingErrorsForDocument:(BibDocument *)document publication:(BibItem *)pub;
 
 - (void)handleErrorNotification:(NSNotification *)notification;
 

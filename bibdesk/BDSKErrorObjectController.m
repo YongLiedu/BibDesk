@@ -41,6 +41,8 @@
 #import "BDSKErrorEditor.h"
 #import "BibPrefController.h"
 #import "BibDocument.h"
+#import "BibItem.h"
+#import "BibEditor.h"
 
 // put it here because IB chokes on it
 @interface BDSKLineNumberTransformer : NSValueTransformer @end
@@ -86,6 +88,10 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(handleRemoveDocumentNotification:)
                                                          name:BDSKDocumentControllerRemoveDocumentNotification
+                                                       object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(BDSKDocDelItemNotification:)
+                                                         name:BDSKDocDelItemNotification
                                                        object:nil];
         }
     }
@@ -254,16 +260,19 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj{
     NSString *fileName = [errObj fileName];
     
-    if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString] || [fileName isEqualToString:BDSKAuthorString] || [[NSFileManager defaultManager] fileExistsAtPath:fileName] == NO) {
-        // paste/drag or author parsing errors
+    if ([fileName isEqualToString:BDSKParserPasteDragString]) {
         NSBeep();
-        return;
-    }
-    
-    BDSKErrorEditor *editor = [errObj editor];
-    
-    [editor showWindow:self];
-    [editor gotoLine:[errObj lineNumber]];
+    } else if ([fileName isEqualToString:BDSKAuthorString]) {
+        BibItem *pub = [errObj publication];
+        if(pub) {
+            BibEditor *editor = [[pub document] editPub:pub];
+            [editor makeKeyField:BDSKAuthorString];
+        } else NSBeep();
+    } else if ([[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
+        BDSKErrorEditor *editor = [errObj editor];
+        [editor showWindow:self];
+        [editor gotoLine:[errObj lineNumber]];
+    } else NSBeep();
 }
 
 // failed load of a document
@@ -285,6 +294,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             [self removeEditor:editor];
         }
     }
+    
+    [self removePublications:[document publications]];
 }
 
 // remove a document
@@ -297,6 +308,26 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         [editor setSourceDocument:nil];
         if([editor isEditing] == NO)
             [self removeEditor:editor];
+    }
+    
+    [self removePublications:[document publications]];
+}
+
+// remove a publication
+- (void)handleRemovePublicationNotification:(NSNotification *)notification{
+    NSArray *pubs = [[notification userInfo] objectForKey:@"pubs"];
+    [self removePublications:pubs];
+}
+
+- (void)removePublications:(NSArray *)pubs{
+    NSEnumerator*errEnum = [errors objectEnumerator];
+    BDSKErrorObject *errObj;
+    BibItem *pub;
+    
+    while(errObj = [errEnum nextObject]){
+        pub = [errObj publication];
+        if([pubs containsObject:pub])
+            [errObj setPublication:nil];
     }
 }
 
@@ -380,6 +411,10 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 #pragma mark Error notification handling
 
 - (void)startObservingErrorsForDocument:(BibDocument *)document{
+    [self startObservingErrorsForDocument:document publication:nil];
+}
+
+- (void)startObservingErrorsForDocument:(BibDocument *)document publication:(BibItem *)pub{
     if(currentErrors == nil){
         currentErrors = [[NSMutableArray alloc] initWithCapacity:10];
     } else {
@@ -389,11 +424,17 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)endObservingErrorsForDocument:(BibDocument *)document{
+    [self endObservingErrorsForDocument:document publication:nil];
+}
+
+- (void)endObservingErrorsForDocument:(BibDocument *)document publication:(BibItem *)pub{
     if([currentErrors count]){
         // document shouldn't be nil, but just be sure
         OBASSERT(document != nil);
         id editor =  (document == nil) ? nil : [self editorForDocument:document create:YES];
         [currentErrors makeObjectsPerformSelector:@selector(setEditor:) withObject:editor];
+        if(pub)
+            [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
         [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
         [currentErrors removeAllObjects];
         if([[self window] isVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])

@@ -593,9 +593,9 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
         [errorObject setErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]]];
         
-        [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[pub document]];
+        [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[pub document] publication:pub];
         [errorObject report];
-        [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[pub document]];
+        [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[pub document] publication:pub];
         [errorObject release];
         // make sure the error panel is displayed, regardless of prefs
         [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
@@ -617,8 +617,8 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 	return authors;
 }
 
-+ (NSDictionary *)splitAuthorName:(NSString *)name document:(BibDocument *)aDocument{
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
++ (NSDictionary *)splitAuthorName:(NSString *)name publication:(BibItem *)pub{
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[pub document] publication:pub];
 	
     NSMutableDictionary *nameDict = [NSMutableDictionary dictionaryWithCapacity:4];
     
@@ -701,7 +701,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 	
     bt_free_name(theName);
     
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[pub document] publication:pub];
     
     return nameDict;
 }

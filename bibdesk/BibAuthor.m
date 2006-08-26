@@ -385,7 +385,7 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
     
-    NSDictionary *nameDict = [BibTeXParser splitAuthorName:newName document:[[self publication] document]];
+    NSDictionary *nameDict = [BibTeXParser splitAuthorName:newName publication:[self publication]];
     
     [self setFirstName:[nameDict objectForKey:@"firstName"]];
     [self setVonPart:[nameDict objectForKey:@"vonPart"]];
