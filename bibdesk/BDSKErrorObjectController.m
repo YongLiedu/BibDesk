@@ -83,6 +83,10 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
                                                      selector:@selector(handleErrorNotification:)
                                                          name:BDSKParserErrorNotification
                                                        object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(handleRemoveDocumentNotification:)
+                                                         name:BDSKDocumentControllerRemoveDocumentNotification
+                                                       object:nil];
         }
     }
     
@@ -238,39 +242,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return editor;
 }
 
-// failed load of a document
-- (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit{
-    if(shouldEdit)
-        [self showErrorPanel:self];
-	
-    // remove any earlier failed load editors unless we're editing them
-    unsigned index = [editors count];
-    BDSKErrorEditor *editor;
-    
-    while (index--) {
-        editor = [editors objectAtIndex:index];
-        if([editor sourceDocument] == document){
-           [editor setSourceDocument:nil];
-           if(shouldEdit)
-                [editor showWindow:self];
-        }else if([editor isEditing] == NO){
-            [self removeEditor:editor];
-        }
-    }
-}
-
-// close a document
-- (void)documentWillBeRemoved:(BibDocument *)document{
-    // clear reference to document in its editor and close it when it is not editing
-    BDSKErrorEditor *editor = [self editorForDocument:document create:NO]; // there should be at most one
-    
-    if(editor){
-        [editor setSourceDocument:nil];
-        if([editor isEditing] == NO)
-            [self removeEditor:editor];
-    }
-}
-
 // edit failed paste/drag data
 - (void)showEditorForFileName:(NSString *)fileName{
     // we create a new editor without a document, because the data is not part of the document's source file
@@ -293,6 +264,40 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     [editor showWindow:self];
     [editor gotoLine:[errObj lineNumber]];
+}
+
+// failed load of a document
+- (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit{
+    if(shouldEdit)
+        [self showErrorPanel:self];
+	
+    // remove any earlier failed load editors unless we're editing them
+    unsigned index = [editors count];
+    BDSKErrorEditor *editor;
+    
+    while (index--) {
+        editor = [editors objectAtIndex:index];
+        if([editor sourceDocument] == document){
+           [editor setSourceDocument:nil];
+           if(shouldEdit)
+                [editor showWindow:self];
+        }else if([editor isEditing] == NO){
+            [self removeEditor:editor];
+        }
+    }
+}
+
+// remove a document
+- (void)handleRemoveDocument:(NSNotification *)notification{
+    BibDocument *document = [notification object];
+    // clear reference to document in its editor and close it when it is not editing
+    BDSKErrorEditor *editor = [self editorForDocument:document create:NO]; // there should be at most one
+    
+    if(editor){
+        [editor setSourceDocument:nil];
+        if([editor isEditing] == NO)
+            [self removeEditor:editor];
+    }
 }
 
 #pragma mark Actions

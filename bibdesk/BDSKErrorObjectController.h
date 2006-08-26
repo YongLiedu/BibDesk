@@ -73,15 +73,15 @@
 - (BDSKErrorEditor *)editorForDocument:(BibDocument *)document create:(BOOL)create;
 - (BDSKErrorEditor *)editorForFileName:(NSString *)fileName  create:(BOOL)create;
 
-// called after a failed load
-- (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
-// called when a document closes
-- (void)documentWillBeRemoved:(BibDocument *)document;
-
 // called to edit a failed parse/drag
 - (void)showEditorForFileName:(NSString *)fileName;
 // called from the tableView doubleclick
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj;
+
+// called after a failed load
+- (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
+// called when a document is removed
+- (void)handleRemoveDocument:(NSNotification *)notification;
 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;

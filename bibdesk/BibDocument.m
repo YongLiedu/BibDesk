@@ -3387,7 +3387,6 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
     isDocumentClosed = YES;
-    [[BDSKErrorObjectController sharedErrorObjectController] documentWillBeRemoved:self];
     [customCiteDrawer close];
     [self saveSortOrder];
     
