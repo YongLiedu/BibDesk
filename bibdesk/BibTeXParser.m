@@ -38,7 +38,7 @@
 
 #import "BibTeXParser.h"
 #import <BTParse/btparse.h>
-#import <BTParse/error.h>
+#import <BTParse/BDSKErrorObject.h>
 #import "BibAppController.h"
 #include <stdio.h>
 #import "BibItem.h"
@@ -587,15 +587,14 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     
     // shouldn't ever see this case as far as I know, as long as we're using btparse
     if(names == NULL){
-        BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
-        [errorObject setValue:[[pub document] fileName] forKey:@"fileName"];
-        [errorObject setValue:[NSNumber numberWithInt:-1] forKey:@"lineNumber"];
-        [errorObject setValue:NSLocalizedString(@"error", @"") forKey:@"errorClassName"];
-        [errorObject setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]] forKey:@"errorMessage"];
+        BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
+        [errorObject setFileName:[[pub document] fileName]];
+        [errorObject setLineNumber:-1];
+        [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
+        [errorObject setErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]]];
         
         [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[pub document]];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                            object:errorObject];
+        [errorObject report];
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[pub document]];
         [errorObject release];
         // make sure the error panel is displayed, regardless of prefs
@@ -717,14 +716,13 @@ static NSString * copyCheckedAndTranslatedString(NSString *s, int line, NSString
         NSString *type = NSLocalizedString(@"Error", @"");
         NSString *message = NSLocalizedString(@"Unable to convert characters to the specified encoding.", @"");
 
-        BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
-        [errorObject setValue:filePath forKey:@"fileName"];
-        [errorObject setValue:[NSNumber numberWithInt:line] forKey:@"lineNumber"];
-        [errorObject setValue:type forKey:@"errorClassName"];
-        [errorObject setValue:message forKey:@"errorMessage"];
+        BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
+        [errorObject setFileName:filePath];
+        [errorObject setLineNumber:line];
+        [errorObject setErrorClassName:type];
+        [errorObject setErrorMessage:message];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                            object:errorObject];
+        [errorObject report];
         [errorObject release];
         // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
         [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
@@ -833,14 +831,13 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
             NSString *type = NSLocalizedString(@"Error", @"");
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
             
-            BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
-            [errorObject setValue:filePath forKey:@"fileName"];
-            [errorObject setValue:[NSNumber numberWithInt:field->line] forKey:@"lineNumber"];
-            [errorObject setValue:type forKey:@"errorClassName"];
-            [errorObject setValue:message forKey:@"errorMessage"];
+            BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
+            [errorObject setFileName:filePath];
+            [errorObject setLineNumber:field->line];
+            [errorObject setErrorClassName:type];
+            [errorObject setErrorMessage:message];
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                                object:errorObject];
+            [errorObject report];
             [errorObject release];
             // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
             [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];

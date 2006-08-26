@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <BTParse/error.h>
+#import <BTParse/BDSKErrorObject.h>
 
 @class BibDocument, BDSKErrorEditor, BDSKFilteringArrayController;
 
@@ -81,7 +81,7 @@
 // called to edit a failed parse/drag
 - (void)showEditorForFileName:(NSString *)fileName;
 // called from the tableView doubleclick
-- (void)showEditorForErrorObject:(BDSKErrObj *)errObj;
+- (void)showEditorForErrorObject:(BDSKErrorObject *)errObj;
 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
@@ -101,31 +101,8 @@
 
 #pragma mark -
 
-@interface BDSKErrObj (Accessors)
-
-- (NSString *)fileName;
-- (void)setFileName:(NSString *)newFileName;
-
-- (id)editor;
-- (void)setEditor:(id)newEditor;
-
+@interface BDSKErrorObject (BDSKExtensions)
 - (NSString *)displayFileName;
-
-- (int)lineNumber;
-- (void)setLineNumber:(int)newLineNumber;
-
-- (NSString *)itemDescription;
-- (void)setItemDescription:(NSString *)newItemDescription;
-
-- (int)itemNumber;
-- (void)setItemNumber:(int)newItemNumber;
-
-- (NSString *)errorClassName;
-- (void)setErrorClassName:(NSString *)newErrorClassName;
-
-- (NSString *)errorMessage;
-- (void)setErrorMessage:(NSString *)newErrorMessage;
-
 @end
 
 #pragma mark -

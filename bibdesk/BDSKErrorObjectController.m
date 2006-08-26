@@ -178,7 +178,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)removeEditor:(BDSKErrorEditor *)editor{
     // remove all errors associated to this controller
 	unsigned index = [self countOfErrors];
-    BDSKErrObj *errObj;
+    BDSKErrorObject *errObj;
     
     while (index--) {
 		errObj = [self objectInErrorsAtIndex:index];
@@ -280,7 +280,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 // double click in the error tableview
-- (void)showEditorForErrorObject:(BDSKErrObj *)errObj{
+- (void)showEditorForErrorObject:(BDSKErrorObject *)errObj{
     NSString *fileName = [errObj fileName];
     
     if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString] || [fileName isEqualToString:BDSKAuthorString] || [[NSFileManager defaultManager] fileExistsAtPath:fileName] == NO) {
@@ -323,7 +323,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 		int lineNumber;
         
         // Columns order:  @"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
-		BDSKErrObj *errObj;
+		BDSKErrorObject *errObj;
 		
         while(errObj = [objEnumerator nextObject]){
             fileName = [errObj displayFileName];
@@ -397,7 +397,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
-    BDSKErrObj *errObj = [notification object];
+    BDSKErrorObject *errObj = [notification object];
     // don't show lexical buffer overflow warnings
     if ([[errObj errorClassName] isEqualToString:BDSKParserHarmlessWarningString] == NO)
 		[currentErrors addObject:errObj];
@@ -414,29 +414,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 #pragma mark -
 #pragma mark Error object accessors
 
-@implementation BDSKErrObj (Accessors)
-
-- (NSString *)fileName {
-    return [[fileName retain] autorelease];
-}
-
-- (void)setFileName:(NSString *)newFileName {
-    if (fileName != newFileName) {
-        [fileName release];
-        fileName = [newFileName copy];
-    }
-}
-
-- (id)editor {
-    return [[editor retain] autorelease];
-}
-
-- (void)setEditor:(id)newEditor {
-    if (editor != newEditor) {
-        [editor release];
-        editor = [newEditor retain];
-    }
-}
+@implementation BDSKErrorObject (BDSKExtensions)
 
 - (NSString *)displayFileName {
 	NSString *docFileName = [editor displayName];
@@ -447,59 +425,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     else if (fileName == nil || [fileName isEqualToString:BDSKParserPasteDragString] || [fileName isEqualToString:BDSKAuthorString])
         docFileName = [NSString stringWithFormat:@"[%@]", docFileName];
     return docFileName;
-}
-
-- (int)lineNumber {
-    return lineNumber;
-}
-
-- (void)setLineNumber:(int)newLineNumber {
-    if (lineNumber != newLineNumber) {
-        lineNumber = newLineNumber;
-    }
-}
-
-- (NSString *)itemDescription {
-    return [[itemDescription retain] autorelease];
-}
-
-- (void)setItemDescription:(NSString *)newItemDescription {
-    if (itemDescription != newItemDescription) {
-        [itemDescription release];
-        itemDescription = [newItemDescription copy];
-    }
-}
-
-- (int)itemNumber {
-    return itemNumber;
-}
-
-- (void)setItemNumber:(int)newItemNumber {
-    if (itemNumber != newItemNumber) {
-        itemNumber = newItemNumber;
-    }
-}
-
-- (NSString *)errorClassName {
-    return [[errorClassName retain] autorelease];
-}
-
-- (void)setErrorClassName:(NSString *)newErrorClassName {
-    if (errorClassName != newErrorClassName) {
-        [errorClassName release];
-        errorClassName = [newErrorClassName copy];
-    }
-}
-
-- (NSString *)errorMessage {
-    return [[errorMessage retain] autorelease];
-}
-
-- (void)setErrorMessage:(NSString *)newErrorMessage {
-    if (errorMessage != newErrorMessage) {
-        [errorMessage release];
-        errorMessage = [newErrorMessage copy];
-    }
 }
 
 @end
