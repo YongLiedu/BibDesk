@@ -1997,6 +1997,12 @@ static int numberOfOpenEditors = 0;
     [rssDescriptionViewUndoManager removeAllActions];
 }
 
+- (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem{
+    // fix a weird keyview loop bug
+    if([[tabViewItem identifier] isEqualToString:BDSKBibtexString])
+        [bibTypeButton setNextKeyView:bibFields];
+}
+
 // sent by the notesView and the abstractView
 - (void)textDidEndEditing:(NSNotification *)aNotification{
 	currentEditedView = nil;
