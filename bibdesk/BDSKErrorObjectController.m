@@ -89,6 +89,10 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
                                                      selector:@selector(handleRemoveDocumentNotification:)
                                                          name:BDSKDocumentControllerRemoveDocumentNotification
                                                        object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(handleRemovePublicationNotification:)
+                                                         name:BDSKDocDelItemNotification
+                                                       object:nil];
         }
     }
     
