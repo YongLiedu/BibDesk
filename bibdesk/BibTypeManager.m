@@ -440,11 +440,11 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSString *)fieldNameForDublinCoreTerm:(NSString *)term{
-    [fieldNameForDublinCoreTermDict objectForKey:term];
+    return [fieldNameForDublinCoreTermDict objectForKey:term];
 }
 
 - (NSString *)bibtexTypeForDublinCoreType:(NSString *)type{
-    [bibtexTypeForDublinCoreTypeDict objectForKey:type];
+    return [bibtexTypeForDublinCoreTypeDict objectForKey:type];
 }
 
 - (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type{
