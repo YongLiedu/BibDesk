@@ -513,6 +513,10 @@ static NSString *BDSKLastImportLocalizedString = nil;
     return NO;
 }
 
+- (BOOL)isValidDropTarget {
+    return NO;
+}
+
 @end
 
 #pragma mark -
