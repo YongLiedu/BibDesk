@@ -1321,6 +1321,13 @@
     [itemTableView reloadData];
 }
 
+- (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows{
+    if([rows count]){
+        NSString *field = [fields objectAtIndex:[[rows objectAtIndex:0] intValue]];
+        [item setField:field toValue:@""];
+    }
+}
+
 #pragma mark TableView delegate methods
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
@@ -1584,8 +1591,8 @@
         fieldNameCharSet = [[[[BibTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
     
     if ([[self dataSource] isInTemporaryTypeSelectMode]) {
-        if (c == NSDownArrowFunctionKey || c == NSUpArrowFunctionKey) {
-            // we allow navigation in the table using arrow keys
+        if (c == NSDownArrowFunctionKey || c == NSUpArrowFunctionKey || c == NSDeleteCharacter || c == NSBackspaceCharacter) {
+            // we allow navigation in the table using arrow keys, as well as deleting entries
         } else if (flags != 0) {
             NSBeep();
             return;
