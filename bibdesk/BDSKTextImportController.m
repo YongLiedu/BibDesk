@@ -1474,8 +1474,9 @@
                 }
             }
             
-            [metaTagDict setObject:metaVal
-                            forKey:metaName];
+            if(metaVal && metaName)
+                [metaTagDict setObject:metaVal
+                                forKey:metaName];
 
             
         }else if([nodeName isEqualToString:@"LINK"]){
@@ -1486,8 +1487,9 @@
             if( [classVal isEqualToString:@"fulltext"] &&
                 [relVal isEqualToString:@"alternate"]){
                 DOMNode *hrefAttr = [attributes getNamedItem:@"href"];
-                [metaTagDict setObject:[hrefAttr nodeValue]
-                                forKey:BDSKUrlString];
+                if(hrefAttr)
+                    [metaTagDict setObject:[hrefAttr nodeValue]
+                                    forKey:BDSKUrlString];
             }
         }
     }// for child of HEAD
