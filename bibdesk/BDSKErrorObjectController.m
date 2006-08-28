@@ -429,16 +429,16 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)endObservingErrorsForDocument:(BibDocument *)document publication:(BibItem *)pub{
     if([currentErrors count]){
-        // document shouldn't be nil, but just be sure
-        OBASSERT(document != nil);
-        id editor =  (document == nil) ? nil : [self editorForDocument:document create:YES];
-        [currentErrors makeObjectsPerformSelector:@selector(setEditor:) withObject:editor];
-        if(pub)
-            [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
-        [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
+        if(document != nil){ // this should happen only for temporary authors, which we ignore as they don't belong to any document
+            id editor =  (document == nil) ? nil : [self editorForDocument:document create:YES];
+            [currentErrors makeObjectsPerformSelector:@selector(setEditor:) withObject:editor];
+            if(pub)
+                [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
+            [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
+            if([[self window] isVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
+                [self showErrorPanel:self];
+        }
         [currentErrors removeAllObjects];
-        if([[self window] isVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
-            [self showErrorPanel:self];
     }
 }
 
