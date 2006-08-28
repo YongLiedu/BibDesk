@@ -379,15 +379,6 @@
         return nil;
 }
 
-- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
-    if (tv == tableView)
-        return BDSKMainTableViewFontChangedNotification;
-    else if (tv == groupTableView)
-        return BDSKGroupTableViewFontChangedNotification;
-    else 
-        return nil;
-}
-
 #pragma mark TableView dragging source
 
 // for 10.3 compatibility and OmniAppKit dataSource methods

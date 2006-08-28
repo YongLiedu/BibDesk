@@ -44,6 +44,7 @@
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
 #import "BibDocument.h"
+#import <OmniFoundation/OFPreference.h>
 
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
@@ -328,16 +329,16 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
         fileMacroDefinitions = nil; 
 		
-        [[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleMacroFilesChanged:)
-													 name:BDSKMacroFilesChangedNotification
-												   object:nil];
+        
+        [OFPreference addObserver:self
+                         selector:@selector(handleMacroFilesChanged:)
+                    forPreference:[OFPreference preferenceForKey:BDSKGlobalMacroFilesKey]];
     }
     return self;
 }
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
     [standardMacroDefinitions release];
     [fileMacroDefinitions release];
     [super dealloc];

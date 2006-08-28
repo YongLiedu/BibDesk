@@ -300,7 +300,6 @@ enum {
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];
             [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
         }
         [globalMacroFilesTableView reloadData];
     }
@@ -333,8 +332,6 @@ enum {
         [globalMacroFiles addObject:file];
     }
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
     
     [globalMacroFilesTableView reloadData];
     
@@ -496,7 +493,6 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
 }
 
 - (IBAction)delGlobalMacroFiles:(id)sender{
@@ -506,7 +502,6 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
 }
 
 @end

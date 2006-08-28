@@ -579,8 +579,4 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     return BDSKFileContentSearchTableViewFontSizeKey;
 }
 
-- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
-    return BDSKFileContentSearchTableViewFontChangedNotification;
-}
-
 @end

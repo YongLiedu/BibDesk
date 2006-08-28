@@ -265,13 +265,6 @@
         return nil;
 }
 
-- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
-    if (tv == pubsTableView)
-        return BDSKPersonTableViewFontChangedNotification;
-    else 
-        return nil;
-}
-
 #pragma mark Dragging delegate methods
 
 - (NSDragOperation)dragImageView:(BDSKDragImageView *)view validateDrop:(id <NSDraggingInfo>)sender {

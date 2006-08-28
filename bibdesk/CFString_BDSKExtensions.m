@@ -37,6 +37,7 @@
  */
 
 #import "CFString_BDSKExtensions.h"
+#import <OmniFoundation/OFPreference.h>
 
 // This object is a cache for our stop words, so we don't have to hit user defaults every time __BDDeleteArticlesForSorting() is called (which is fairly often).  Alternately, we could require users to quit/relaunch after changing the stop words in prefs, but that's not too nice.  Anyway, it's private to CFString functions.
 
@@ -67,7 +68,7 @@ static id sharedController = nil;
 - (id)init;
 {
     if(self = [super init]){
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleStopWordsChangedNotification:) name:BDSKStopWordsChangedNotification object:nil];
+        [OFPreference addObserver:self selector:@selector(handleStopWordsChangedNotification:) forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
         stopWords = CFPreferencesCopyAppValue((CFStringRef)BDSKIgnoredSortTermsKey, kCFPreferencesCurrentApplication);
     }
     return self;
@@ -86,7 +87,7 @@ static id sharedController = nil;
 
 - (void)dealloc;
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
     if(stopWords) CFRelease(stopWords);
     [super dealloc];
 }

@@ -44,6 +44,7 @@
 #import "BDSKFontManager.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
+#import <OmniFoundation/OFPreference.h>
 
 enum {
 	BDSKUnknownPreviewState = -1,
@@ -121,14 +122,13 @@ static BDSKPreviewer *thePreviewer;
 	[progressIndicator setUsesThreadedAnimation:YES];
 	
 	// register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handlePreviewNeedsUpdate:)
-												 name:BDSKPreviewNeedsUpdateNotification
-											   object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(handleApplicationWillTerminate:)
 												 name:NSApplicationWillTerminateNotification
 											   object:NSApp];
+    [OFPreference addObserver:self
+                     selector:@selector(handlePreviewNeedsUpdate:)
+                forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
 }
 
 - (NSString *)windowNibName
@@ -461,6 +461,7 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
     [messageQueue release];
 	[texTask release];
     OFSimpleLockFree(&stateLock);

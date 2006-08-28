@@ -39,6 +39,7 @@
 #import "BDSKEditorTextView.h"
 #import "NSURL_BDSKExtensions.h"
 #import "BibPrefController.h"
+#import <OmniFoundation/OFPreference.h>
 
 @interface BDSKEditorTextView (Private)
 
@@ -69,6 +70,7 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
     [super dealloc];
 }
 
@@ -79,14 +81,8 @@
     NSFont *font = [[NSFontManager sharedFontManager] convertFont:[self font]];
     
     // save it to prefs for next time
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:BDSKEditorFontSizeKey];
-    
-    // update the entire text storage
-    [self updateFontFromPreferences];
-    
-    // make sure other views know the font has changed
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKEditorTextViewFontChangedNotification object:self];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
 }
 
 - (void)textStorageDidProcessEditing:(NSNotification *)notification
@@ -124,9 +120,7 @@
 // We get this notification when some other textview changes the font prefs
 - (void)handleFontChangedNotification:(NSNotification *)note;
 {
-    // this shouldn't cause a notification loop, but let's be careful anyway
-    if([note object] != self)
-        [self updateFontFromPreferences];
+    [self updateFontFromPreferences];
 }
 
 // Determine if a % character is followed by two digits (valid in a URL)
@@ -255,7 +249,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
 
     [[self textStorage] setDelegate:self];
     [self updateFontFromPreferences];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFontChangedNotification:) name:BDSKEditorTextViewFontChangedNotification object:nil];
+    [OFPreference addObserver:self selector:@selector(handleFontChangedNotification:) forPreference:[OFPreference preferenceForKey:BDSKEditorFontNameKey]];
 }    
 
 @end

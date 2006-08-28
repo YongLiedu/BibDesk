@@ -144,36 +144,33 @@
 
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
-    return [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKIgnoredSortTermsKey] objectAtIndex:rowIndex];
+    return [[defaults arrayForKey:BDSKIgnoredSortTermsKey] objectAtIndex:rowIndex];
 }
 
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKIgnoredSortTermsKey] count];
+    return [[defaults arrayForKey:BDSKIgnoredSortTermsKey] count];
 }
 
 - (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
-    NSMutableArray *mutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    NSMutableArray *mutableArray = [[defaults arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
     [mutableArray replaceObjectAtIndex:rowIndex withObject:anObject];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKResortDocumentNotification object:nil];
 }
 
 - (IBAction)addTerm:(id)sender
 {
-    NSMutableArray *mutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    NSMutableArray *mutableArray = [[defaults arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
     if(!mutableArray)
         mutableArray = [[NSMutableArray alloc] initWithCapacity:1];
     [mutableArray addObject:NSLocalizedString(@"Edit or delete this text", @"")];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [tableView reloadData];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[mutableArray count] - 1] byExtendingSelection:NO];
     [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
     [mutableArray release];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStopWordsChangedNotification object:nil];
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
@@ -184,17 +181,15 @@
 - (IBAction)removeSelectedTerm:(id)sender
 {
     [[[BDSKPreferenceController sharedPreferenceController] window] makeFirstResponder:tableView];  // end editing 
-    NSMutableArray *mutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
+    NSMutableArray *mutableArray = [[defaults arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
     
     int selRow = [tableView selectedRow];
     NSAssert(selRow >= 0, @"row must be selected in order to delete");
     
     [mutableArray removeObjectAtIndex:selRow];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
+    [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
     [tableView reloadData];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKResortDocumentNotification object:nil];
 }
 
 - (IBAction)changeAuthorDisplay:(id)sender;
@@ -218,9 +213,6 @@
     OBPOSTCONDITION(prefKey);
     [defaults setBool:([clickedCell state] == NSOnState) forKey:prefKey];
     [self updateUI];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-    // all we really want to do is force a -[NSTableView reloadData] here
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKResortDocumentNotification object:nil];
 }
 
 
@@ -257,40 +249,35 @@
 - (void)setCurrentFont:(NSFont *)font{
     NSString *fontNameKey = nil;
     NSString *fontSizeKey = nil;
-    NSString *notificationName = nil;
     switch ([fontElementPopup indexOfSelectedItem]) {
         case 0:
             fontNameKey = BDSKMainTableViewFontNameKey;
             fontSizeKey = BDSKMainTableViewFontSizeKey;
-            notificationName = BDSKMainTableViewFontChangedNotification;
             break;
         case 1:
             fontNameKey = BDSKGroupTableViewFontNameKey;
             fontSizeKey = BDSKGroupTableViewFontSizeKey;
-            notificationName = BDSKGroupTableViewFontChangedNotification;
             break;
         case 2:
             fontNameKey = BDSKPersonTableViewFontNameKey;
             fontSizeKey = BDSKPersonTableViewFontSizeKey;
-            notificationName = BDSKPersonTableViewFontChangedNotification;
             break;
         case 3:
-            [defaults setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
+            // set the family last as that is observed
             [defaults setFloat:[font pointSize] forKey:BDSKPreviewBaseFontSizeKey];
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewPaneFontChangedNotification object:nil];
+            [defaults setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
             return;
         case 4:
             fontNameKey = BDSKEditorFontNameKey;
             fontSizeKey = BDSKEditorFontSizeKey;
-            notificationName = BDSKEditorTextViewFontChangedNotification;
             break;
         default:
             return;
     }
-    [defaults setObject:[font fontName] forKey:fontNameKey];
+    // set the name last, as that is observed for changes
     [defaults setFloat:[font pointSize] forKey:fontSizeKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:nil];
+    [defaults setObject:[font fontName] forKey:fontNameKey];
 }
 
 - (void)changeFont:(id)sender{

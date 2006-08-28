@@ -148,7 +148,6 @@
 
 - (IBAction)changeStyle:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewNeedsUpdateNotification object:self];
 }
 
 - (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode path:(void *)path{

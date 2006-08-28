@@ -193,11 +193,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 													 name:BDSKTableColumnChangedNotification
 												   object:nil];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleResortDocumentNotification:)
-													 name:BDSKResortDocumentNotification
-												   object:nil];        
-
 		//  register to observe for item change notifications here.
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleBibItemChangedNotification:)
@@ -271,6 +266,22 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                  selector:@selector(handleCustomFieldsDidChangeNotification:)
                                                      name:BDSKCustomFieldsChangedNotification
                                                    object:nil];
+        
+        [OFPreference addObserver:self
+                         selector:@selector(handleIgnoredSortTermsChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
+        
+        [OFPreference addObserver:self
+                         selector:@selector(handleNameDisplayChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayFirstNamesKey]];
+        
+        [OFPreference addObserver:self
+                         selector:@selector(handleNameDisplayChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKShouldAbbreviateFirstNamesKey]];
+        
+        [OFPreference addObserver:self
+                         selector:@selector(handleNameDisplayChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayLastNameFirstKey]];
         
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
@@ -465,6 +476,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [[self undoManager] removeAllActionsWithTarget:self];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
     [macroResolver release];
     [itemsForCiteKeys release];
     // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
@@ -2982,8 +2994,13 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     [groupTableView updateHighlights];
 }
 
-- (void)handleResortDocumentNotification:(NSNotification *)notification{
+- (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification{
     [self sortPubsByColumn:nil];
+}
+
+- (void)handleNameDisplayChangedNotification:(NSNotification *)notification{
+    [tableView reloadData];
+    [self handlePreviewDisplayChangedNotification:notification];
 }
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification{

@@ -50,7 +50,6 @@
 - (void)updateFontPanel:(NSNotification *)notification;
 - (NSString *)fontNamePreferenceKey;
 - (NSString *)fontSizePreferenceKey;
-- (NSString *)fontChangedNotificationName;
 
 - (void)removeAllTableColumns;
 
@@ -70,6 +69,5 @@
 
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)aTableView;
 - (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)aTableView;
-- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)aTableView;
 
 @end

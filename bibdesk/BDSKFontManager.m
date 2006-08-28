@@ -37,6 +37,7 @@
  */
 
 #import "BDSKFontManager.h"
+#import <OmniFoundation/OFPreference.h>
 
 @implementation NSFontManager (BDSKExtensions)
 
@@ -46,7 +47,7 @@ static NSDictionary *cachedFontsForPreviewPane = nil;
 {
     @try{
     OMNI_POOL_START {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setupFonts) name:BDSKPreviewPaneFontChangedNotification object:nil];
+        [OFPreference addObserver:self selector:@selector(setupFonts) forPreference:[OFPreference preferenceForKey:BDSKPreviewPaneFontFamilyKey]];
         [self setupFonts];
     } OMNI_POOL_END;
     }

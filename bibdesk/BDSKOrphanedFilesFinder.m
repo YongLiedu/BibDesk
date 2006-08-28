@@ -330,10 +330,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return BDSKOrphanedFilesTableViewFontSizeKey;
 }
 
-- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
-        return BDSKOrphanedFilesTableViewFontChangedNotification;
-}
-
 @end
 
 

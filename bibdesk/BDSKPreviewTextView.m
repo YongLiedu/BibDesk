@@ -57,10 +57,10 @@
 		selectedFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
 	NSFont *font = [fontManager convertFont:selectedFont];
     
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
+    // set the family last as that is observed
     [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:BDSKPreviewBaseFontSizeKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewPaneFontChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 }
 

@@ -41,6 +41,7 @@
 #import "BibPrefController.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniAppKit/OAApplication.h>
+#import <OmniFoundation/OFPreference.h>
 
 @interface NSTableView (BDSKExtensionsPrivate)
 - (void)rebuildToolTips;
@@ -162,23 +163,14 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     return nil;
 }
 
-- (NSString *)fontChangedNotificationName{
-    if ([[self delegate] respondsToSelector:@selector(tableViewFontChangedNotificationName:)])
-        return [[self delegate] tableViewFontChangedNotificationName:self];
-    return nil;
-}
-
 - (void)awakeFromNib {
     // there was no original awakeFromNib
-    NSString *fontChangedNoteName = [self fontChangedNotificationName];
+    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
     [self tableViewFontChanged:nil];
-    if (fontChangedNoteName != nil) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(tableViewFontChanged:)
-                                                     name:fontChangedNoteName
-                                                   object:nil];
-     }
-     if ([self fontNamePreferenceKey] != nil) {
+    if (fontNamePrefKey != nil) {
+        [OFPreference addObserver:self
+                         selector:@selector(tableViewFontChanged:)
+                    forPreference:[OFPreference preferenceForKey:fontNamePrefKey]];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(updateFontPanel:)
                                                      name:NSWindowDidBecomeKeyNotification
@@ -209,14 +201,9 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
         font = [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:[self cellControlSize]]];
     font = [fontManager convertFont:font];
     
-    [defaults setObject:[font fontName] forKey:fontNamePrefKey];
+    // set the name last, as that's what we observe
     [defaults setFloat:[font pointSize] forKey:fontSizePrefKey];
-    
-    NSString *fontChangedNoteName = [self fontChangedNotificationName];
-    if (fontChangedNoteName != nil) 
-        [[NSNotificationCenter defaultCenter] postNotificationName:fontChangedNoteName object:self];
-    else 
-        [self tableViewFontChanged:nil];
+    [defaults setObject:[font fontName] forKey:fontNamePrefKey];
 }
 
 - (void)tableViewFontChanged:(NSNotification *)notification {
@@ -334,6 +321,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 
 - (void)replacementDealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
     originalDealloc(self, _cmd);
 }
 
