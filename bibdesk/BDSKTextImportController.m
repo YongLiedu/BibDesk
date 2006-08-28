@@ -1447,6 +1447,7 @@
 	for (i = 0; i < length; i++) {
 		DOMNode *node = [headChildren item:i];
 		DOMNamedNodeMap *attributes = [node attributes];
+        int typeIndex = 0;
         
         NSString *nodeName = [node nodeName];
         if([nodeName isEqualToString:@"META"]){
@@ -1454,7 +1455,7 @@
             NSString *metaName = [[attributes getNamedItem:@"name"] nodeValue];
             NSString *metaVal = [[attributes getNamedItem:@"content"] nodeValue];
             
-            if(!metaVal) continue;
+            if(metaVal == nil) continue;
 
             // Catch repeated DC.creator or contributor and append them: 
             if([metaName isEqualToString:@"DC.creator"] ||
@@ -1469,11 +1470,7 @@
             if([metaName isEqualToString:@"DC.type"]){
                 NSString *currentVal = [metaTagDict objectForKey:metaName];
                 if(currentVal != nil){
-                    int index = 1;
-                    while([metaTagDict objectForKey:[NSString stringWithFormat:@"DC.type.%d", index]]){
-                        index++;
-                    }
-                    metaName = [NSString stringWithFormat:@"DC.type.%d", index];
+                    metaName = [NSString stringWithFormat:@"DC.type.%d", ++typeIndex];
                 }
             }
             
@@ -1501,7 +1498,7 @@
     
     while(metaName = [metaTagKeyE nextObject]){
         NSString *fieldName = [typeMan fieldNameForDublinCoreTerm:metaName];
-        fieldName = (fieldName ? fieldName : metaName);
+        fieldName = (fieldName ? fieldName : [metaName capitalizedString]);
         NSString *fieldValue = [metaTagDict objectForKey:metaName];
         
         // Special-case DC.date to get month and year, but still insert "DC.date"
@@ -1517,12 +1514,22 @@
             // we use "Date" to generate a nice table column, and we shouldn't override that.
             [item setField:@"DC.date"
                    toValue:fieldValue];
+        }else if([fieldName isEqualToString:BDSKAuthorString]){
+            // DC.creator and DC.contributor both map to Author, so append them in the appropriate order
+            NSString *currentVal = [item valueOfField:BDSKAuthorString];
+            if(currentVal != nil){
+                if([metaName isEqualToString:@"DC.creator"])
+                    [item setField:fieldName
+                           toValue:[NSString stringWithFormat:@"%@ and %@", fieldValue, currentVal]];
+                else
+                    [item setField:fieldName
+                           toValue:[NSString stringWithFormat:@"%@ and %@", currentVal, fieldValue]];
+            }
         }else{
             [item setField:fieldName
                    toValue:fieldValue];
         }
 
-        
     }
 
     NSString *bibtexType = [typeMan bibtexTypeForDublinCoreType:[metaTagDict objectForKey:@"DC.type"]];
