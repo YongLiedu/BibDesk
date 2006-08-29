@@ -649,23 +649,6 @@
 		F9FF241309E873A300BB1706 /* networkIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9FF241209E873A300BB1706 /* networkIcon.tiff */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildStyle section */
-		0D50C2280AA270FF008825DB /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-			};
-			name = Development;
-		};
-		0D50C2290AA270FF008825DB /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-			};
-			name = Deployment;
-		};
-/* End PBXBuildStyle section */
-
 /* Begin PBXContainerItemProxy section */
 		CE67E7CE092C9CCE00410758 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2707,12 +2690,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				0D50C2280AA270FF008825DB /* Development */,
-				0D50C2290AA270FF008825DB /* Deployment */,
-			);
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";

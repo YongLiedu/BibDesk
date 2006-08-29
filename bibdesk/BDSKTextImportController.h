@@ -60,7 +60,8 @@
     IBOutlet NSTextField* statusLine;
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *addAndCloseButton;
-    IBOutlet NSButton *CloseButton;
+    IBOutlet NSButton *closeButton;
+    IBOutlet NSButton *clearButton;
     IBOutlet NSPopUpButton* itemTypeButton;
     IBOutlet BDSKImagePopUpButton *actionMenuButton;
     IBOutlet NSSplitView* splitView;
@@ -115,6 +116,7 @@
 - (IBAction)addItemAction:(id)sender;
 - (IBAction)closeAction:(id)sender;
 - (IBAction)addItemAndCloseAction:(id)sender;
+- (IBAction)clearAction:(id)sender;
 - (IBAction)showHelpAction:(id)sender;
 - (IBAction)addTextToCurrentFieldAction:(id)sender;
 - (IBAction)changeTypeOfBibAction:(id)sender;

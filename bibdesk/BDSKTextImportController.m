@@ -64,6 +64,7 @@
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)autoDiscoverAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)setLoading:(BOOL)loading;
 
@@ -263,6 +264,14 @@
 - (IBAction)addItemAndCloseAction:(id)sender{
 	[self addItemAction:sender];
 	[self closeAction:sender];
+}
+
+- (IBAction)clearAction:(id)sender{
+    [item release];
+    item = [[BibItem alloc] init];
+    
+    [itemTypeButton selectItemWithTitle:[item pubType]];
+    [itemTableView reloadData];
 }
 
 - (IBAction)showHelpAction:(id)sender{
@@ -1441,7 +1450,7 @@
     DOMNodeList *headChildren = [headNode childNodes];
     unsigned i = 0;
     unsigned length = [headChildren length];
-    NSMutableDictionary *metaTagDict = [NSMutableDictionary dictionaryWithCapacity:length];    
+    NSMutableDictionary *metaTagDict = [[NSMutableDictionary alloc] initWithCapacity:length];    
     
     
 	for (i = 0; i < length; i++) {
@@ -1494,9 +1503,33 @@
         }
     }// for child of HEAD
     
+    if([metaTagDict count]){
+        if([item hasBeenEdited]){
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information",@"") 
+                                             defaultButton:NSLocalizedString(@"Yes", @"Yes")
+                                           alternateButton:NSLocalizedString(@"No", @"No")
+                                               otherButton:nil
+                                 informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"")];
+            [alert beginSheetModalForWindow:[self window]
+                              modalDelegate:self
+                             didEndSelector:@selector(autoDiscoverAlertDidEnd:returnCode:contextInfo:)
+                                contextInfo:metaTagDict];
+        }else{
+            [self autoDiscoverAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:metaTagDict];
+        }
+    }else{
+        [metaTagDict release];
+    }
+}
+
+- (void)autoDiscoverAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSDictionary *metaTagDict = [(NSDictionary *)contextInfo autorelease];
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
     NSEnumerator *metaTagKeyE = [metaTagDict keyEnumerator];
     NSString *metaName = nil;
+    
+    if(returnCode == NSAlertAlternateReturn)
+        return;
     
     while(metaName = [metaTagKeyE nextObject]){
         NSString *fieldName = [typeMan fieldNameForDublinCoreTerm:metaName];

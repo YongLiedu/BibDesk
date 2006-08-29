@@ -24,6 +24,7 @@
                 bookmarkPage = id; 
                 changeTypeOfBibAction = id; 
                 chooseBookmarkAction = id; 
+                clearAction = id; 
                 closeAction = id; 
                 copyLinkedLocationAsRemoteUrl = id; 
                 copyLocationAsRemoteUrl = id; 
@@ -48,6 +49,7 @@
                 backButton = NSButton; 
                 bookmarkField = NSTextField; 
                 bookmarkPopUpButton = NSPopUpButton; 
+                clearButton = NSButton; 
                 closeButton = NSButton; 
                 forwardButton = NSButton; 
                 itemTableView = NSTableView; 
