@@ -49,6 +49,7 @@
     BDSKErrorObjectController *errorController;
     BibDocument *document;
     NSString *fileName;
+    NSData *data;
     int uniqueNumber;
     int changeCount;
     unsigned int invalidSyntaxHighlightMark;
@@ -58,17 +59,19 @@
 }
 
 // designated initializer
-- (id)initWithFileName:(NSString *)aFileName andDocument:(id)aDocument;
-// for editing temporary file with Paste/Drag data
-- (id)initWithFileName:(NSString *)aFileName;
+- (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+// for editing document source file, load and name errors
+- (id)initWithDocument:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+// for editing Paste/Drag data
+- (id)initWithPasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
 
 - (BDSKErrorObjectController *)errorController;
 - (void)setErrorController:(BDSKErrorObjectController *)controller;
 
 - (NSString *)fileName;
 - (int)uniqueNumber;
-- (void)setUniqueNumber:(int)newNumber;
 - (NSString *)displayName;
+- (NSData *)pasteDragData;
 - (BibDocument *)sourceDocument;
 - (void)setSourceDocument:(BibDocument *)document;
 - (BOOL)isEditing;

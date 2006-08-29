@@ -2281,9 +2281,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 			// the user said to keep going, so if they save, they might clobber data...
 		}else if(rv == NSAlertOtherReturn){
 			// they said to edit the file.
-			NSString * tempFileName = [[NSApp delegate] temporaryFilePath:[[self fileName] lastPathComponent] createDirectory:NO];
-			[data writeToFile:tempFileName atomically:YES];
-			[[BDSKErrorObjectController sharedErrorObjectController] showEditorForFileName:tempFileName];
+			[[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
 			newPubs = nil;	
 		}		
 	}

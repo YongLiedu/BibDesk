@@ -89,7 +89,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 }
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
 	if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
         return [NSMutableArray array];
@@ -238,7 +238,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
         [parserLock unlock];
     }
 	
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument pasteDragData:isPasteOrDrag ? inData : nil];
     
     return returnArray;
 }
@@ -246,7 +246,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 /* 
 // these were not used, might revisit error handling if we do
 + (NSDictionary *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems document:(BibDocument *)aDocument{
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
 	NSMutableDictionary *retDict = [NSMutableDictionary dictionary];
     AST *entry = NULL;
@@ -291,14 +291,14 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
     [parserLock unlock];
     fclose(stream);
     
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument pasteDragData:nil];
     
     return retDict;
 }
 
 // these were not used, might revisit error handling if we do
 + (NSString *)stringFromBibTeXValue:(NSString *)value error:(NSError **)outError document:(BibDocument *)aDocument{
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
 	
 	NSString *entryString = [NSString stringWithFormat:@"@dummyentry{dummykey, dummyfield = %@}", value];
 	NSString *valueString = @"";
@@ -329,7 +329,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 	bt_cleanup();
 	[parserLock unlock];
     
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument pasteDragData:nil];
     
 	return [valueString autorelease];
 }
@@ -593,9 +593,9 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
         [errorObject setErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]]];
         
-        [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[pub document] publication:pub];
+        [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
         [errorObject report];
-        [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[pub document] publication:pub];
+        [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
         [errorObject release];
         // make sure the error panel is displayed, regardless of prefs
         [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
@@ -618,7 +618,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 }
 
 + (NSDictionary *)splitAuthorName:(NSString *)name publication:(BibItem *)pub{
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrorsForDocument:[pub document] publication:pub];
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
 	
     NSMutableDictionary *nameDict = [NSMutableDictionary dictionaryWithCapacity:4];
     
@@ -701,7 +701,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 	
     bt_free_name(theName);
     
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:[pub document] publication:pub];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
     
     return nameDict;
 }

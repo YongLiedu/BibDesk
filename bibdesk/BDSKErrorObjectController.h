@@ -71,19 +71,18 @@
 - (void)removeEditor:(BDSKErrorEditor *)editorr;
 
 - (BDSKErrorEditor *)editorForDocument:(BibDocument *)document create:(BOOL)create;
-- (BDSKErrorEditor *)editorForFileName:(NSString *)fileName  create:(BOOL)create;
+- (BDSKErrorEditor *)editorForPasteDragData:(NSData *)data document:(BibDocument *)document;
 
-// called to edit a failed parse/drag
-- (void)showEditorForFileName:(NSString *)fileName;
+// called to edit a failed paste/drag
+- (void)showEditorForLastPasteDragError;
 // called from the tableView doubleclick
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj;
 
 // called after a failed load
 - (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
-// called when a document is removed
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification;
 - (void)handleRemovePublicationNotification:(NSNotification *)notification;
-- (void)removePublications:(NSArray *)pubs;
+- (void)removeErrorsForPublications:(NSArray *)pubs;
 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
@@ -93,11 +92,10 @@
 - (IBAction)copy:(id)sender;
 - (IBAction)gotoError:(id)sender;
 
-// any use of btparse should be bracketed by any pof the following pairs
-- (void)startObservingErrorsForDocument:(BibDocument *)document;
-- (void)endObservingErrorsForDocument:(BibDocument *)document;
-- (void)startObservingErrorsForDocument:(BibDocument *)document publication:(BibItem *)pub;
-- (void)endObservingErrorsForDocument:(BibDocument *)document publication:(BibItem *)pub;
+// any use of btparse should be bracketed by a pair of startObservingErrors/endObservingErrorsFor... calls
+- (void)startObservingErrors;
+- (void)endObservingErrorsForPublication:(BibItem *)pub;
+- (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data;
 
 - (void)handleErrorNotification:(NSNotification *)notification;
 

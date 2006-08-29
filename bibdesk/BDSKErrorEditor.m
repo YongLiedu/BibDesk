@@ -44,6 +44,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument.h"
+#import "BibAppController.h"
 
 
 @implementation BDSKErrorEditor
@@ -54,24 +55,31 @@
     [self setKeys:[NSArray arrayWithObjects:@"document", @"fileName", @"uniqueNumber", nil] triggerChangeNotificationsForDependentKey:@"displayName"];
 }
 
-- (id)initWithFileName:(NSString *)aFileName andDocument:(id)aDocument;
+- (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
 {
     if(self = [super init]){
         errorController = nil;
         document = [aDocument retain];
         fileName = [aFileName retain];
-        uniqueNumber = 0;
-        enableSyntaxHighlighting = YES;
+        data = [aData copy];
+        uniqueNumber = aNumber;
         isPasteDrag = NO;
+        enableSyntaxHighlighting = YES;
         invalidSyntaxHighlightMark = NSNotFound;
         changeCount = 0;
     }
     return self;
 }
 
-- (id)initWithFileName:(NSString *)aFileName;
+- (id)initWithDocument:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
 {
-    if(self = [self initWithFileName:aFileName andDocument:nil]){
+    self = [self initWithFileName:[aDocument fileName] pasteDragData:nil document:aDocument uniqueNumber:aNumber];
+    return self;
+}
+
+- (id)initWithPasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+{
+    if(self = [self initWithFileName:nil pasteDragData:aData document:aDocument uniqueNumber:aNumber]){
         isPasteDrag = YES;
     }
     return self;
@@ -82,6 +90,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [document release];
     [fileName release];
+    [data release];
     [super dealloc];
 }
 
@@ -92,11 +101,6 @@
 
 - (void)awakeFromNib;
 {
-    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
-    
-    [[self window] setRepresentedFilename:fileName];
-	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [self displayName]]];
-    
     // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
     [[self window] setFrameUsingName:@"Edit Source Window"];
     // we should only cascade windows if we have multiple documents open; bug #1299305
@@ -116,6 +120,12 @@
     [syntaxHighlightCheckbox setState:NSOnState];
     
     [self loadFile:self];
+    
+    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
+    
+    OBASSERT(fileName);
+    [[self window] setRepresentedFilename:fileName];
+	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [self displayName]]];
     
     isEditing = YES;
     
@@ -167,14 +177,16 @@
     return uniqueNumber;
 }
 
-- (void)setUniqueNumber:(int)newNumber;
+- (NSData *)pasteDragData;
 {
-    uniqueNumber = newNumber;
+    return data;
 }
 
 - (NSString *)displayName;
 {
     NSString *displayName = [fileName lastPathComponent];
+    if(displayName == nil)
+        displayName = [[document fileName] lastPathComponent];
     if(displayName == nil)
         displayName = @"?";
     return (uniqueNumber == 0) ? displayName : [NSString stringWithFormat:@"%@ (%d)", displayName, uniqueNumber];
@@ -208,6 +220,14 @@
 - (id <OAFindControllerTarget>)omniFindControllerTarget { return textView; }
 
 - (IBAction)loadFile:(id)sender{
+    if(fileName == nil){
+        OBASSERT(data != nil && document != nil);
+        fileName = [[[NSApp delegate] temporaryFilePath:[[document fileName] lastPathComponent] createDirectory:NO] retain];
+        [data writeToFile:fileName atomically:YES];
+        [data release];
+        data = nil;
+    }
+    
     NSFileManager *dfm = [NSFileManager defaultManager];
     if (!fileName) return;
     
