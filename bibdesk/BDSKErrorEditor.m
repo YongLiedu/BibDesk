@@ -127,8 +127,6 @@
     [[self window] setRepresentedFilename:fileName];
 	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [self displayName]]];
     
-    isEditing = YES;
-    
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(handleSelectionDidChangeNotification:)
 												 name:NSTextViewDidChangeSelectionNotification
@@ -148,7 +146,6 @@
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    isEditing = NO;
     if (document == nil)
         [errorController removeEditor:self];
 }
@@ -207,7 +204,8 @@
 
 - (BOOL)isEditing;
 {
-    return isEditing;
+    // check isWindowLoaded first, so we don't unnecessarily load the nib
+    return [self isWindowLoaded] && [[self window] isVisible];
 }
 
 - (BOOL)isPasteDrag;
