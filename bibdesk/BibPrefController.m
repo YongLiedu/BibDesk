@@ -293,7 +293,6 @@ NSString *BDSKBibTypeInfoChangedNotification = @"TypeInfo Changed Notification";
 NSString *BDSKCustomFieldsChangedNotification = @"Custom Fields Changed Notification";
 NSString *BDSKFilterChangedNotification = @"Filter Changed Notification";
 NSString *BDSKStaticGroupChangedNotification = @"BDSKStaticGroupChangedNotification";
-NSString *BDSKSharingChangedNotification = @"BDSKSharingChangedNotification";
 NSString *BDSKSharedGroupsChangedNotification = @"BDSKSharedGroupsChangedNotification";
 NSString *BDSKSharedGroupUpdatedNotification = @"BDSKSharedGroupUpdatedNotification";
 NSString *BDSKSharingNameChangedNotification = @"BDSKSharingNameChangedNotification";

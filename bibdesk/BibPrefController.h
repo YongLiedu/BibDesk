@@ -277,7 +277,6 @@ extern NSString *BDSKBibTypeInfoChangedNotification;
 extern NSString *BDSKCustomFieldsChangedNotification;
 extern NSString *BDSKFilterChangedNotification;
 extern NSString *BDSKStaticGroupChangedNotification;
-extern NSString *BDSKSharingChangedNotification;
 extern NSString *BDSKSharedGroupsChangedNotification;
 extern NSString *BDSKSharedGroupUpdatedNotification;
 extern NSString *BDSKClientConnectionsChangedNotification;
