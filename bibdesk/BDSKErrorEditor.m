@@ -310,6 +310,9 @@
     }
     
     [lineNumberField setIntValue:lineNumber];
+    
+    if(enableSyntaxHighlighting && invalidSyntaxHighlightMark < NSMaxRange(selectedRange))
+        [[textView textStorage] edited:NSTextStorageEditedAttributes range:selectedRange changeInLength:0];
 }
 
 - (void)handleUndoManagerChangeUndoneNotification:(NSNotification *)notification;
@@ -333,6 +336,7 @@ static inline Boolean isRightBrace(UniChar ch) { return ch == '}'; }
 static inline Boolean isDoubleQuote(UniChar ch) { return ch == '"'; }
 static inline Boolean isAt(UniChar ch) { return ch == '@'; }
 static inline Boolean isPercent(UniChar ch) { return ch == '%'; }
+static inline Boolean isHash(UniChar ch) { return ch == '#'; }
 static inline Boolean isBackslash(UniChar ch) { return ch == '\\'; }
 static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isEqual:[NSColor brownColor]] || [color isEqual:[NSColor grayColor]]; }
 
@@ -410,6 +414,7 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
     NSColor *typeColor = [NSColor purpleColor];
     NSColor *quotedColor = [NSColor brownColor];
     NSColor *commentColor = [NSColor grayColor];
+    NSColor *hashColor = [NSColor magentaColor];
     CFStringRef commentString = CFSTR("comment");
     
     CFIndex braceDepth = 0;
@@ -501,6 +506,8 @@ static inline Boolean isCommentOrQuotedColor(NSColor *color) { return [color isE
             SetColor(quotedColor, lbmark, cnt - lbmark);
         }else if(isRightBrace(ch)){
             SetColor(braceColor, cnt, 1);
+        }else if(isHash(ch)){
+            SetColor(hashColor, cnt, 1);
         }
     }
     if(braceDepth > 0){
