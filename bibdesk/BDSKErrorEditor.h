@@ -54,7 +54,6 @@
     int changeCount;
     unsigned int invalidSyntaxHighlightMark;
     BOOL enableSyntaxHighlighting;
-    BOOL isEditing;
     BOOL isPasteDrag;
 }
 
