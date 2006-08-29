@@ -247,6 +247,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)showEditorForLastPasteDragError{
     BDSKErrorObject *errObj = [errors lastObject];
     OBASSERT([[errObj editor] isPasteDrag]);
+    [self showErrorPanel:self];
     [self showEditorForErrorObject:errObj];
 }
 
@@ -261,7 +262,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             BibEditor *pubEditor = [[pub document] editPub:pub];
             [pubEditor makeKeyField:BDSKAuthorString];
         } else NSBeep();
-    } else if ([editor pasteDragData] != nil || [[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
+    } else if (fileName == nil || [[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
         [editor showWindow:self];
         [editor gotoLine:[errObj lineNumber]];
     } else NSBeep();
