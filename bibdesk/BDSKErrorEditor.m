@@ -122,7 +122,7 @@
     
     OBASSERT(fileName);
     [[self window] setRepresentedFilename:fileName];
-	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [self displayName]]];
+	[[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
     
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(handleSelectionDidChangeNotification:)
