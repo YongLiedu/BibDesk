@@ -169,10 +169,10 @@
 - (void)removeEditor:(BDSKErrorEditor *)editor;
 {
     [errorController removeErrorsForEditor:editor];
-    [editor setManager:nil];
-    [editors removeObject:editor];
     if(mainEditor == editor)
         mainEditor = nil;
+    [editor setManager:nil];
+    [editors removeObject:editor];
     if([editors count] == 0)
         [errorController removeManager:self];
 }
