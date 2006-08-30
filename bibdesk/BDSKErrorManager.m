@@ -150,7 +150,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     uniqueNumber = 0;
     
     while(manager = [mEnum nextObject]){
-        if([[manager documentDisplayName] isEqualToString:documentDisplayName])
+        if(manager != self && [[manager documentDisplayName] isEqualToString:documentDisplayName])
             uniqueNumber = MAX(uniqueNumber, [manager uniqueNumber] + 1);
     }
     
