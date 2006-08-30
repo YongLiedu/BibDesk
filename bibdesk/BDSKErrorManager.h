@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKErrorObjectController, BDSKErrorEditor, BibDocument;
+@class BDSKErrorObjectController, BDSKErrorObject, BDSKErrorEditor, BibDocument;
 
 @interface BDSKErrorManager : NSObject {
     BDSKErrorObjectController *errorController;
@@ -49,7 +49,11 @@
     int uniqueNumber;
 }
 
++ (id)allItemsErrorManager;
+
 - (id)initWithDocument:(BibDocument *)aDocument;
+
+- (BOOL)isAllItems;
 
 - (BDSKErrorObjectController *)errorController;
 - (void)setErrorController:(BDSKErrorObjectController *)newController;
@@ -71,5 +75,7 @@
 - (void)addEditor:(BDSKErrorEditor *)editor isMain:(BOOL)isMain;
 - (void)removeEditor:(BDSKErrorEditor *)editor;
 - (void)removeClosedEditors;
+
+- (BOOL)managesError:(BDSKErrorObject *)errObj;
 
 @end

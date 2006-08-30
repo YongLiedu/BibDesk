@@ -100,32 +100,13 @@
 
 #pragma mark -
 
-@interface BDSKPlaceHolderFilterItem : NSObject {
-	NSString *displayName;
-}
-+ (BDSKPlaceHolderFilterItem *)allItemsPlaceHolderFilterItem;
-+ (BDSKPlaceHolderFilterItem *)emptyItemsPlaceHolderFilterItem;
-- (id)initWithDisplayName:(NSString *)name;
-@end
-
-#pragma mark -
-
 @interface BDSKFilteringArrayController : NSArrayController {
-    id filterValue;
-	NSString *filterKey;
-    NSString *warningKey;
-    NSString *warningValue;
+    BDSKErrorManager *filterManager;
     BOOL hideWarnings;
 }
 
-- (id)filterValue;
-- (void)setFilterValue:(id)newValue;
-- (NSString *)filterKey;
-- (void)setFilterKey:(NSString *)newKey;
-- (NSString *)warningKey;
-- (void)setWarningKey:(NSString *)newKey;
-- (NSString *)warningValue;
-- (void)setWarningValue:(NSString *)newKey;
+- (BDSKErrorManager *)filterManager;
+- (void)setFilterManager:(BDSKErrorManager *)manager;
 - (BOOL)hideWarnings;
 - (void)setHideWarnings:(BOOL)flag;
 

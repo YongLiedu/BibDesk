@@ -78,7 +78,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             errors = [[NSMutableArray alloc] initWithCapacity:10];
             managers = [[NSMutableArray alloc] initWithCapacity:4];
             
-            [managers addObject:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
+            [managers addObject:[BDSKErrorManager allItemsErrorManager]];
             
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(handleErrorNotification:)
@@ -117,10 +117,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 {
     [errorTableView setDoubleAction:@selector(gotoError:)];
     
-    [errorsController setFilterKey:@"editor.manager"];
-    [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
-    [errorsController setWarningKey:@"errorClassName"];
-    [errorsController setWarningValue:BDSKParserWarningString];
+    [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];
     [errorsController setHideWarnings:NO];
 }
 
@@ -176,8 +173,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeManager:(BDSKErrorManager *)manager{
-    if ([errorsController filterValue] == manager)
-        [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
+    if ([errorsController filterManager] == manager)
+        [errorsController setFilterManager:[BDSKErrorManager allItemsErrorManager]];
     [manager setErrorController:nil];
     [self removeObjectFromManagersAtIndex:[managers indexOfObject:manager]];
 }
@@ -189,7 +186,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     BDSKErrorManager *manager = nil;
     
     while(manager = [mEnum nextObject]){
-        if([manager isKindOfClass:[BDSKPlaceHolderFilterItem class]]) continue;
         if(document == [manager sourceDocument])
                 break;
     }
@@ -266,12 +262,11 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     while (index--) {
         manager = [managers objectAtIndex:index];
-        if([manager isKindOfClass:[BDSKPlaceHolderFilterItem class]]) continue;
         if([manager sourceDocument] == document){
             [manager setSourceDocument:nil];
             if(shouldEdit)
                 [[manager mainEditor] showWindow:self];
-        }else if([manager sourceDocument] == nil){
+        }else if([manager sourceDocument] == nil && [manager isAllItems] == NO){
             [manager removeClosedEditors];
         }
     }
@@ -289,7 +284,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     while (index--) {
         manager = [managers objectAtIndex:index];
-        if([manager isKindOfClass:[BDSKPlaceHolderFilterItem class]]) continue;
         if([manager sourceDocument] == document){
             [manager setSourceDocument:nil];
             [manager removeClosedEditors];
@@ -453,54 +447,22 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 @end
 
 #pragma mark -
-#pragma mark Placeholder objects for filter menu
-
-@implementation BDSKPlaceHolderFilterItem
-
-static BDSKPlaceHolderFilterItem *allItemsPlaceHolderFilterItem = nil;
-static BDSKPlaceHolderFilterItem *emptyItemsPlaceHolderFilterItem = nil;
-
-+ (void)initialize {
-	allItemsPlaceHolderFilterItem = [[BDSKPlaceHolderFilterItem alloc] initWithDisplayName:NSLocalizedString(@"All", @"All")];
-	emptyItemsPlaceHolderFilterItem = [[BDSKPlaceHolderFilterItem alloc] initWithDisplayName:NSLocalizedString(@"Empty", @"Empty")];
-}
-
-+ (BDSKPlaceHolderFilterItem *)allItemsPlaceHolderFilterItem { return allItemsPlaceHolderFilterItem; };
-+ (BDSKPlaceHolderFilterItem *)emptyItemsPlaceHolderFilterItem { return emptyItemsPlaceHolderFilterItem; };
-
-- (id)valueForUndefinedKey:(NSString *)keyPath {
-	return displayName;
-}
-
-- (id)initWithDisplayName:(NSString *)name {
-	if (self = [super init]) {
-		displayName = [name copy];
-	}
-	return self;
-}
-
-@end
-
-#pragma mark -
 #pragma mark Array controller for error objects
 
 @implementation BDSKFilteringArrayController
 
 - (NSArray *)arrangeObjects:(NSArray *)objects {
-	BOOL filterByKey = (filterValue != nil && filterValue != [BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem] && [NSString isEmptyString:filterKey] == NO);
-    BOOL filterWarnings = (hideWarnings == YES && [NSString isEmptyString:warningKey] == NO && [NSString isEmptyString:warningValue] == NO);
-    
-    if(filterByKey || filterWarnings){
+    if(hideWarnings || filterManager){
         NSMutableArray *matchedObjects = [NSMutableArray arrayWithCapacity:[objects count]];
         
         NSEnumerator *itemEnum = [objects objectEnumerator];
         id item;	
         while (item = [itemEnum nextObject]) {
-            id value = [item valueForKeyPath:filterKey];
-            if ((filterByKey == NO || (filterValue == [BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem] && value == nil) || [value isEqual:filterValue]) &&
-                (filterWarnings == NO || [warningValue isEqual:[item valueForKey:warningKey]] == NO) ) {
-                [matchedObjects addObject:item];
-            }
+            if(filterManager && [filterManager managesError:item] == NO)
+                continue;
+            if(hideWarnings && [BDSKParserWarningString isEqual:[item valueForKey:@"errorClassName"]])
+                continue;
+            [matchedObjects addObject:item];
         }
         
         objects = matchedObjects;
@@ -509,55 +471,18 @@ static BDSKPlaceHolderFilterItem *emptyItemsPlaceHolderFilterItem = nil;
 }
 
 - (void)dealloc {
-    [self setFilterValue: nil];    
-    [self setFilterKey: nil];    
+    [self setFilterManager: nil];    
     [super dealloc];
 }
 
-- (id)filterValue {
-	return filterValue;
+- (BDSKErrorManager *)filterManager {
+	return filterManager;
 }
 
-- (void)setFilterValue:(id)newValue {
-    if (filterValue != newValue) {
-        [filterValue autorelease];
-        filterValue = [newValue retain];
-		[self rearrangeObjects];
-    }
-}
-
-- (NSString *)filterKey {
-    return [[filterKey retain] autorelease];
-}
-
-- (void)setFilterKey:(NSString *)newKey {
-    if (filterKey != newKey) {
-        [filterKey release];
-        filterKey = [newKey retain];
-		[self rearrangeObjects];
-    }
-}
-
-- (NSString *)warningKey {
-    return [[warningKey retain] autorelease];
-}
-
-- (void)setWarningKey:(NSString *)newKey {
-    if (warningKey != newKey) {
-        [warningKey autorelease];
-        warningKey = [newKey retain];
-		[self rearrangeObjects];
-    }
-}
-
-- (NSString *)warningValue {
-    return [[warningValue retain] autorelease];
-}
-
-- (void)setWarningValue:(NSString *)newValue {
-    if (warningValue != newValue) {
-        [warningValue autorelease];
-        warningValue = [newValue retain];
+- (void)setFilterManager:(BDSKErrorManager *)manager {
+    if (filterManager != manager) {
+        [filterManager autorelease];
+        filterManager = [manager retain];
 		[self rearrangeObjects];
     }
 }

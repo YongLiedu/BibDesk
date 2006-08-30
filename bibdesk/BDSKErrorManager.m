@@ -38,11 +38,24 @@
 
 #import "BDSKErrorManager.h"
 #import "BDSKErrorObjectController.h"
+#import <BTParse/BDSKErrorObject.h>
 #import "BDSKErrorEditor.h"
 #import "BibDocument.h"
 
 
+@interface BDSKAllItemsErrorManager : BDSKErrorManager @end
+
+static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
+
+
 @implementation BDSKErrorManager 
+
++ (id)allItemsErrorManager;
+{
+    if(allItemsErrorManager == nil)
+        allItemsErrorManager = [[BDSKAllItemsErrorManager alloc] init];
+    return allItemsErrorManager;
+}
 
 - (id)initWithDocument:(BibDocument *)aDocument;
 {
@@ -62,6 +75,8 @@
     [documentDisplayName release];
     [super dealloc];
 }
+
+- (BOOL)isAllItems { return NO; }
 
 - (BDSKErrorObjectController *)errorController;
 {
@@ -135,7 +150,6 @@
     uniqueNumber = 0;
     
     while(manager = [mEnum nextObject]){
-        if([manager isKindOfClass:[BDSKPlaceHolderFilterItem class]] || manager == self) continue;
         if([[manager documentDisplayName] isEqualToString:documentDisplayName])
             uniqueNumber = MAX(uniqueNumber, [manager uniqueNumber] + 1);
     }
@@ -188,5 +202,27 @@
             [self removeEditor:editor];
     }
 }
+
+- (BOOL)managesError:(BDSKErrorObject *)errObj;
+{
+    return [[errObj editor] manager] == self;
+}
+
+@end
+
+
+@implementation BDSKAllItemsErrorManager
+
+- (id)init;
+{
+    if(self = [super initWithDocument:nil]){
+        documentDisplayName = [NSLocalizedString(@"All", @"All") retain];
+    }
+    return self;
+}
+
+- (BOOL)isAllItems{ return YES; }
+
+- (BOOL)managesError:(BDSKErrorObject *)errObj{ return YES; }
 
 @end
