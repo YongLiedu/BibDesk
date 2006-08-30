@@ -39,12 +39,11 @@
 #import <Cocoa/Cocoa.h>
 #import <BTParse/BDSKErrorObject.h>
 
-@class BibDocument, BibItem, BDSKErrorEditor, BDSKFilteringArrayController;
+@class BibDocument, BibItem, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController;
 
 @interface BDSKErrorObjectController : NSWindowController {
     NSMutableArray *errors;
     NSMutableArray *managers;
-    NSMutableArray *editors;
     NSMutableArray *currentErrors;
     
     // error-handling stuff:
@@ -65,24 +64,22 @@
 - (id)objectInManagersAtIndex:(unsigned)theIndex;
 - (void)insertObject:(id)obj inManagersAtIndex:(unsigned)theIndex;
 - (void)removeObjectFromManagersAtIndex:(unsigned)theIndex;
-
-- (NSArray *)editors;
-- (void)addEditor:(BDSKErrorEditor *)editor;
-- (void)removeEditor:(BDSKErrorEditor *)editorr;
+- (void)addManager:(BDSKErrorManager *)manager;
+- (void)removeManager:(BDSKErrorManager *)manager;
 
 - (BDSKErrorEditor *)editorForDocument:(BibDocument *)document create:(BOOL)create;
 - (BDSKErrorEditor *)editorForPasteDragData:(NSData *)data document:(BibDocument *)document;
 
-// called to edit a failed paste/drag
-- (void)showEditorForLastPasteDragError;
 // called from the tableView doubleclick
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj;
+// called to edit a failed paste/drag
+- (void)showEditorForLastPasteDragError;
 
-// called after a failed load
 - (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit;
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification;
 - (void)handleRemovePublicationNotification:(NSNotification *)notification;
 - (void)removeErrorsForPublications:(NSArray *)pubs;
+- (void)removeErrorsForEditor:(BDSKErrorEditor *)editor;
 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
@@ -99,12 +96,6 @@
 
 - (void)handleErrorNotification:(NSNotification *)notification;
 
-@end
-
-#pragma mark -
-
-@interface BDSKErrorObject (BDSKExtensions)
-- (NSString *)displayFileName;
 @end
 
 #pragma mark -

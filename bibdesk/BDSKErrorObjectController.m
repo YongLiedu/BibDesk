@@ -38,6 +38,7 @@
 
 #import "BDSKErrorObjectController.h"
 #import <OmniBase/assertions.h>
+#import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
 #import "BibPrefController.h"
 #import "BibDocument.h"
@@ -76,10 +77,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         } else {
             errors = [[NSMutableArray alloc] initWithCapacity:10];
             managers = [[NSMutableArray alloc] initWithCapacity:4];
-            editors = [[NSMutableArray alloc] initWithCapacity:2];
             
             [managers addObject:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
-            [managers addObject:[BDSKPlaceHolderFilterItem emptyItemsPlaceHolderFilterItem]];
             
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(handleErrorNotification:)
@@ -110,7 +109,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [errors release];
     [managers release];
-    [editors release];
     [currentErrors release];
     [super dealloc];
 }
@@ -119,7 +117,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 {
     [errorTableView setDoubleAction:@selector(gotoError:)];
     
-    [errorsController setFilterKey:@"editor"];
+    [errorsController setFilterKey:@"editor.manager"];
     [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
     [errorsController setWarningKey:@"errorClassName"];
     [errorsController setWarningValue:BDSKParserWarningString];
@@ -128,7 +126,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 #pragma mark Accessors
 
-// errors
+#pragma mark | errors
 
 - (NSArray *)errors {
     return [[errors retain] autorelease];
@@ -150,7 +148,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [errors removeObjectAtIndex:index];
 }
 
-// managers
+#pragma mark | managers
 
 - (NSArray *)managers {
     return [[managers retain] autorelease];
@@ -172,83 +170,62 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [managers removeObjectAtIndex:theIndex];
 }
 
-// editors
-
-- (NSArray *)editors{
-    return editors;
+- (void)addManager:(BDSKErrorManager *)manager{
+    [manager setErrorController:self];
+    [self insertObject:manager inManagersAtIndex:[self countOfManagers]];
 }
 
-#pragma mark Error editors
-
-- (void)addEditor:(BDSKErrorEditor *)editor{
-    [editor setErrorController:self];
-    [editors addObject:editor];
+- (void)removeManager:(BDSKErrorManager *)manager{
+    if ([errorsController filterValue] == manager)
+        [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
+    [manager setErrorController:nil];
+    [self removeObjectFromManagersAtIndex:[managers indexOfObject:manager]];
 }
 
-- (void)removeEditor:(BDSKErrorEditor *)editor{
-    // remove all errors associated to this controller
-	unsigned index = [self countOfErrors];
-    BDSKErrorObject *errObj;
+#pragma mark Getting managers and editors
+
+- (BDSKErrorManager *)managerForDocument:(BibDocument *)document create:(BOOL)create{
+    NSEnumerator *mEnum = [managers objectEnumerator];
+    BDSKErrorManager *manager = nil;
     
-    while (index--) {
-		errObj = [self objectInErrorsAtIndex:index];
-        if ([errObj editor] == editor) {
-            [self removeObjectFromErrorsAtIndex:index];
-    	}
+    while(manager = [mEnum nextObject]){
+        if([manager isKindOfClass:[BDSKPlaceHolderFilterItem class]]) continue;
+        if(document == [manager sourceDocument])
+                break;
     }
     
-    if ([errorsController filterValue] == editor)
-        [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
-	if ([managers containsObject:editor])
-		[self removeObjectFromManagersAtIndex:[managers indexOfObject:editor]];
-    [editor setErrorController:nil];
-    [editors removeObject:editor];
+    if(manager == nil && create){
+        manager = [(BDSKErrorManager *)[BDSKErrorManager alloc] initWithDocument:document];
+        [self addManager:manager];
+        [manager release];
+    }
+    
+    return manager;
 }
 
 - (BDSKErrorEditor *)editorForDocument:(BibDocument *)document create:(BOOL)create{
-    NSEnumerator *eEnum = [editors objectEnumerator];
-    BDSKErrorEditor *editor = nil;
-    BDSKErrorEditor *docEditor = nil;
-    int number = 0;
-    NSString *fileName = [[document fileName] lastPathComponent];
+    BDSKErrorManager *manager = [self managerForDocument:document create:create];
+    BDSKErrorEditor *editor = [manager mainEditor];
     
-    while(editor = [eEnum nextObject]){
-        // we want the main editor with load and name errors
-        if([editor isPasteDrag] == NO){
-            if(document == [editor sourceDocument])
-                docEditor = editor;
-            else if(create && [fileName isEqualToString:[[editor fileName] lastPathComponent]])
-                number = MAX(number, [editor uniqueNumber] + 1);
-        }
+    if(editor == nil && create){
+        editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[document fileName]];
+        [manager addEditor:editor isMain:YES];
+        [editor release];
     }
     
-    if(docEditor == nil && create){
-        docEditor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithDocument:document uniqueNumber:number];
-        [self addEditor:docEditor];
-        [docEditor release];
-        [self insertObject:docEditor inManagersAtIndex:[self countOfManagers]];
-    }
-    
-    return docEditor;
+    return editor;
 }
 
 - (BDSKErrorEditor *)editorForPasteDragData:(NSData *)data document:(BibDocument *)document{
     OBASSERT(document != nil);
     
-    int number = [[self editorForDocument:document create:NO] uniqueNumber];
-    BDSKErrorEditor *editor = [[BDSKErrorEditor alloc] initWithPasteDragData:data document:document uniqueNumber:number];
-    [self addEditor:editor];
+    BDSKErrorManager *manager = [self managerForDocument:document create:YES];
+    
+    BDSKErrorEditor *editor = [[BDSKErrorEditor alloc] initWithPasteDragData:data];
+    [manager addEditor:editor isMain:NO];
     [editor release];
     
     return editor;
-}
-
-// edit paste/drag error
-- (void)showEditorForLastPasteDragError{
-    BDSKErrorObject *errObj = [errors lastObject];
-    OBASSERT([[errObj editor] isPasteDrag]);
-    [self showErrorPanel:self];
-    [self showEditorForErrorObject:errObj];
 }
 
 // double click in the error tableview
@@ -268,27 +245,34 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     } else NSBeep();
 }
 
+// edit paste/drag error
+- (void)showEditorForLastPasteDragError{
+    BDSKErrorObject *errObj = [errors lastObject];
+    OBASSERT([[errObj editor] isPasteDrag]);
+    [self showErrorPanel:self];
+    [self showEditorForErrorObject:errObj];
+}
+
+#pragma mark Managing managers, editors and errors
+
 // failed load of a document
 - (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit{
     if(shouldEdit)
         [self showErrorPanel:self];
 	
     // remove any earlier failed load editors unless we're editing them
-    unsigned index = [editors count];
-    BDSKErrorEditor *editor;
+    unsigned index = [managers count];
+    BDSKErrorManager *manager;
     
     while (index--) {
-        editor = [editors objectAtIndex:index];
-        if([editor sourceDocument] == document){
-            [editor setSourceDocument:nil];
-            if([editor isPasteDrag]){
-                if([editor isEditing] == NO)
-                    [self removeEditor:editor];
-            }else if(shouldEdit){
-                [editor showWindow:self];
-            }
-        }else if([editor isEditing] == NO){
-            [self removeEditor:editor];
+        manager = [managers objectAtIndex:index];
+        if([manager isKindOfClass:[BDSKPlaceHolderFilterItem class]]) continue;
+        if([manager sourceDocument] == document){
+            [manager setSourceDocument:nil];
+            if(shouldEdit)
+                [[manager mainEditor] showWindow:self];
+        }else if([manager sourceDocument] == nil){
+            [manager removeClosedEditors];
         }
     }
     
@@ -300,15 +284,15 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification{
     BibDocument *document = [notification object];
     // clear reference to document in its editors and close it when it is not editing
-    unsigned index = [editors count];
-    BDSKErrorEditor *editor;
+    unsigned index = [managers count];
+    BDSKErrorManager *manager;
     
     while (index--) {
-        editor = [editors objectAtIndex:index];
-        if([editor sourceDocument] == document){
-            [editor setSourceDocument:nil];
-            if([editor isEditing] == NO)
-                [self removeEditor:editor];
+        manager = [managers objectAtIndex:index];
+        if([manager isKindOfClass:[BDSKPlaceHolderFilterItem class]]) continue;
+        if([manager sourceDocument] == document){
+            [manager setSourceDocument:nil];
+            [manager removeClosedEditors];
         }
     }
     
@@ -323,12 +307,24 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)removeErrorsForPublications:(NSArray *)pubs{
 	unsigned index = [self countOfErrors];
+    BibItem *pub;
+    
+    while (index--) {
+		pub = [[self objectInErrorsAtIndex:index] publication];
+        if(pub && [pubs containsObject:pub])
+            [self removeObjectFromErrorsAtIndex:index];
+    }
+}
+
+- (void)removeErrorsForEditor:(BDSKErrorEditor *)editor{
+	unsigned index = [self countOfErrors];
     BDSKErrorObject *errObj;
     
     while (index--) {
 		errObj = [self objectInErrorsAtIndex:index];
-        if([pubs containsObject:[errObj publication]])
+        if ([errObj editor] == editor) {
             [self removeObjectFromErrorsAtIndex:index];
+    	}
     }
 }
 
@@ -356,15 +352,13 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
         NSMutableString *s = [[NSMutableString string] retain];
         NSEnumerator *objEnumerator = [[errorsController selectedObjects] objectEnumerator];
-        NSString *fileName;
 		int lineNumber;
         
         // Columns order:  @"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
 		BDSKErrorObject *errObj;
 		
         while(errObj = [objEnumerator nextObject]){
-            fileName = [errObj displayFileName];
-            [s appendString:fileName ? fileName : @""];
+            [s appendString:[[errObj editor] displayName]];
             [s appendString:@"\t\t"];
             
 			lineNumber = [errObj lineNumber];
@@ -454,24 +448,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (NSString *)tableView:(NSTableView *)aTableView toolTipForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
 	return [[[errorsController arrangedObjects] objectAtIndex:rowIndex] errorMessage];
-}
-
-@end
-
-#pragma mark -
-#pragma mark Error object accessors
-
-@implementation BDSKErrorObject (BDSKExtensions)
-
-- (NSString *)displayFileName {
-	NSString *docFileName = [editor displayName];
-    if (docFileName == nil)
-		docFileName = [fileName lastPathComponent];
-	if (docFileName == nil)
-        docFileName = @"?";
-    else if (fileName == nil || [fileName isEqualToString:BDSKAuthorString])
-        docFileName = [NSString stringWithFormat:@"[%@]", docFileName];
-    return docFileName;
 }
 
 @end

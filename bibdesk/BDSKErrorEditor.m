@@ -39,7 +39,7 @@
 #import "BDSKErrorEditor.h"
 #import <OmniBase/assertions.h>
 #import <OmniAppKit/OAFindControllerTargetProtocol.h>
-#import "BDSKErrorObjectController.h"
+#import "BDSKErrorManager.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -52,17 +52,15 @@
 + (void)initialize;
 {
     OBINITIALIZE;
-    [self setKeys:[NSArray arrayWithObjects:@"document", @"fileName", @"uniqueNumber", nil] triggerChangeNotificationsForDependentKey:@"displayName"];
+    [self setKeys:[NSArray arrayWithObjects:@"manager", nil] triggerChangeNotificationsForDependentKey:@"displayName"];
 }
 
-- (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+- (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData;
 {
     if(self = [super init]){
-        errorController = nil;
-        document = [aDocument retain];
+        manager = nil;
         fileName = [aFileName retain];
         data = [aData copy];
-        uniqueNumber = aNumber;
         isPasteDrag = NO;
         enableSyntaxHighlighting = YES;
         invalidSyntaxHighlightMark = NSNotFound;
@@ -71,15 +69,15 @@
     return self;
 }
 
-- (id)initWithDocument:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+- (id)initWithFileName:(NSString *)aFileName;
 {
-    self = [self initWithFileName:[aDocument fileName] pasteDragData:nil document:aDocument uniqueNumber:aNumber];
+    self = [self initWithFileName:aFileName pasteDragData:nil];
     return self;
 }
 
-- (id)initWithPasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+- (id)initWithPasteDragData:(NSData *)aData;
 {
-    if(self = [self initWithFileName:nil pasteDragData:aData document:aDocument uniqueNumber:aNumber]){
+    if(self = [self initWithFileName:nil pasteDragData:aData]){
         isPasteDrag = YES;
     }
     return self;
@@ -88,7 +86,6 @@
 - (void)dealloc;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [document release];
     [fileName release];
     [data release];
     [super dealloc];
@@ -146,21 +143,25 @@
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    if (document == nil)
-        [errorController removeEditor:self];
+    if ([manager sourceDocument] == nil)
+        [manager removeEditor:self];
 }
 
 #pragma mark Accessors
 
-- (BDSKErrorObjectController *)errorController;
+- (BDSKErrorManager *)manager;
 {
-    return errorController;
+    return manager;
 }
 
-- (void)setErrorController:(BDSKErrorObjectController *)newController;
+- (void)setManager:(BDSKErrorManager *)newManager;
 {
-    if(errorController != newController){
-        errorController = newController;
+    if(manager != newManager){
+        if(manager)
+            [manager removeObserver:self forKeyPath:@"displayName"];
+        manager = newManager;
+        if(manager)
+            [manager addObserver:self forKeyPath:@"displayName" options:0 context:NULL];
     }
 }
 
@@ -169,37 +170,33 @@
     return fileName;
 }
 
-- (int)uniqueNumber;
+- (void)setFileName:(NSString *)newFileName;
 {
-    return uniqueNumber;
+    if (fileName != newFileName) {
+        [fileName release];
+        fileName = [newFileName retain];
+    }
+}
+
+- (NSString *)displayName;
+{
+    NSString *displayName = [manager displayName];
+    return (isPasteDrag) ? [NSString stringWithFormat:@"[%@]", displayName] : displayName;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    if(object == manager && [keyPath isEqualToString:@"displayName"]){
+        [self willChangeValueForKey:@"displayName"];
+        [self didChangeValueForKey:@"displayName"];
+        
+        NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
+        [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
+    }
 }
 
 - (NSData *)pasteDragData;
 {
     return data;
-}
-
-- (NSString *)displayName;
-{
-    NSString *displayName = [fileName lastPathComponent];
-    if(displayName == nil)
-        displayName = [[document fileName] lastPathComponent];
-    if(displayName == nil)
-        displayName = @"?";
-    return (uniqueNumber == 0) ? displayName : [NSString stringWithFormat:@"%@ (%d)", displayName, uniqueNumber];
-}
-
-- (BibDocument *)sourceDocument;
-{
-    return document;
-}
-
-- (void)setSourceDocument:(BibDocument *)newDocument;
-{
-    if (document != newDocument) {
-        [document release];
-        document = [newDocument retain];
-    }
 }
 
 - (BOOL)isEditing;
@@ -218,9 +215,11 @@
 - (id <OAFindControllerTarget>)omniFindControllerTarget { return textView; }
 
 - (IBAction)loadFile:(id)sender{
+    BibDocument *document = [manager sourceDocument];
+    
     if(fileName == nil){
         OBASSERT(data != nil && document != nil);
-        fileName = [[[NSApp delegate] temporaryFilePath:[[document fileName] lastPathComponent] createDirectory:NO] retain];
+        [self setFileName:[[NSApp delegate] temporaryFilePath:[document displayName] createDirectory:NO]];
         [data writeToFile:fileName atomically:YES];
         [data release];
         data = nil;

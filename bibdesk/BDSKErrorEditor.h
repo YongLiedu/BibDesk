@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKErrorObjectController, BibDocument;
+@class BDSKErrorManager, BibDocument;
 
 @interface BDSKErrorEditor : NSWindowController {
     IBOutlet NSTextView *textView;
@@ -46,11 +46,9 @@
     IBOutlet NSButton *reopenButton;
     IBOutlet NSButton *reloadButton;
     IBOutlet NSTextField *lineNumberField;
-    BDSKErrorObjectController *errorController;
-    BibDocument *document;
+    BDSKErrorManager *manager;
     NSString *fileName;
     NSData *data;
-    int uniqueNumber;
     int changeCount;
     unsigned int invalidSyntaxHighlightMark;
     BOOL enableSyntaxHighlighting;
@@ -58,21 +56,19 @@
 }
 
 // designated initializer
-- (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+- (id)initWithFileName:(NSString *)aFileName pasteDragData:(NSData *)aData;
 // for editing document source file, load and name errors
-- (id)initWithDocument:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+- (id)initWithFileName:(NSString *)aFileName;
 // for editing Paste/Drag data
-- (id)initWithPasteDragData:(NSData *)aData document:(BibDocument *)aDocument uniqueNumber:(int)aNumber;
+- (id)initWithPasteDragData:(NSData *)aData;
 
-- (BDSKErrorObjectController *)errorController;
-- (void)setErrorController:(BDSKErrorObjectController *)controller;
+- (BDSKErrorManager *)manager;
+- (void)setManager:(BDSKErrorManager *)newManager;
 
 - (NSString *)fileName;
-- (int)uniqueNumber;
+- (void)setFileName:(NSString *)newFileName;
 - (NSString *)displayName;
 - (NSData *)pasteDragData;
-- (BibDocument *)sourceDocument;
-- (void)setSourceDocument:(BibDocument *)document;
 - (BOOL)isEditing;
 - (BOOL)isPasteDrag;
 
