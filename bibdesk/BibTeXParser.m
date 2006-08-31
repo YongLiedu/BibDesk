@@ -206,7 +206,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];
 
-                        tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];NSLog(@"%@ %@",entryType,tmpStr);
+                        tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
                         [newBI setCiteKeyString:tmpStr];
                         [tmpStr release];
                         
