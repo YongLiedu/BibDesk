@@ -153,14 +153,16 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                 entryType = [tmpStr lowercaseString];
                 [tmpStr release];
                 
-                if ((bt_entry_metatype (entry) != BTE_REGULAR) && nil != frontMatter){
-                    // put @preamble etc. into the frontmatter string so we carry them along.
-                    if ([entryType isEqualToString:@"preamble"]){
-                        appendPreambleToFrontmatter(entry, frontMatter, parserEncoding);
-                    }else if([entryType isEqualToString:@"string"]){
-                        addMacroToResolver(entry, macroResolver, filePath, parserEncoding, &error);
-                    }else if([entryType isEqualToString:@"comment"]){
-                        appendCommentToFrontmatterOrAddGroups(entry, frontMatter, aDocument, parserEncoding);
+                if (bt_entry_metatype (entry) != BTE_REGULAR){
+                    if(nil != frontMatter){
+                        // put @preamble etc. into the frontmatter string so we carry them along.
+                        if ([entryType isEqualToString:@"preamble"]){
+                            appendPreambleToFrontmatter(entry, frontMatter, parserEncoding);
+                        }else if([entryType isEqualToString:@"string"]){
+                            addMacroToResolver(entry, macroResolver, filePath, parserEncoding, &error);
+                        }else if([entryType isEqualToString:@"comment"]){
+                            appendCommentToFrontmatterOrAddGroups(entry, frontMatter, aDocument, parserEncoding);
+                        }
                     }
                     
                 }else{
@@ -204,7 +206,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];
 
-                        tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
+                        tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];NSLog(@"%@ %@",entryType,tmpStr);
                         [newBI setCiteKeyString:tmpStr];
                         [tmpStr release];
                         
