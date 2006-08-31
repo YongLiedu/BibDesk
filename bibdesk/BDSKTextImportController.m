@@ -64,7 +64,8 @@
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)autoDiscoverAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)setLoading:(BOOL)loading;
 
@@ -85,6 +86,7 @@
 
 - (BOOL)editSelectedCellAsMacro;
 - (void)autoDiscoverDataFromFrame:(WebFrame *)frame;
+- (void)autoDiscoverDataFromString:(NSString *)string;
 
 @end
 
@@ -556,7 +558,9 @@
 		}else {
 			
 			[sourceTextView setString:NSLocalizedString(@"Sorry, BibDesk can't read this data type.", @"warning message when choosing \"new publication from pasteboard\" for an unsupported type")];
+            return;
 		}
+        [self autoDiscoverDataFromString:[sourceTextView string]];
 	}
 }
 
@@ -684,6 +688,8 @@
 		[text endEditing];
 		[text addLayoutManager:layoutManager];	// Hook layout manager back up
 		[layoutManager release];
+        
+        [self autoDiscoverDataFromString:[text string]];
 
     }        
 }
@@ -1512,17 +1518,17 @@
                                  informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"")];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:self
-                             didEndSelector:@selector(autoDiscoverAlertDidEnd:returnCode:contextInfo:)
+                             didEndSelector:@selector(autoDiscoverFromFrameAlertDidEnd:returnCode:contextInfo:)
                                 contextInfo:metaTagDict];
         }else{
-            [self autoDiscoverAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:metaTagDict];
+            [self autoDiscoverFromFrameAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:metaTagDict];
         }
     }else{
         [metaTagDict release];
     }
 }
 
-- (void)autoDiscoverAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSDictionary *metaTagDict = [(NSDictionary *)contextInfo autorelease];
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
     NSEnumerator *metaTagKeyE = [metaTagDict keyEnumerator];
@@ -1571,6 +1577,42 @@
     [self setType:(bibtexType ? bibtexType : @"misc")];
 
     [itemTableView reloadData];
+}
+
+- (void)autoDiscoverDataFromString:(NSString *)string{
+    int type = [string contentStringType];
+    
+    if(type == BDSKUnknownStringType)
+        return;
+		
+    NSError *error = nil;
+    NSArray *pubs = [document newPublicationsForString:string type:type error:&error];
+    
+    if(error || [pubs count] == 0)
+        return;
+    
+    if([item hasBeenEdited]){
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information",@"") 
+                                         defaultButton:NSLocalizedString(@"Yes", @"Yes")
+                                       alternateButton:NSLocalizedString(@"No", @"No")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from the text? This may overwrite fields that are already set.", @"")];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self
+                         didEndSelector:@selector(autoDiscoverFromStringAlertDidEnd:returnCode:contextInfo:)
+                            contextInfo:[[pubs objectAtIndex:0] retain]];
+    }else{
+        [self autoDiscoverFromStringAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:[[pubs objectAtIndex:0] retain]];
+    }
+}
+
+- (void)autoDiscoverFromStringAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    BibItem *pub = [(BibItem *)contextInfo autorelease];
+    
+    if(returnCode == NSAlertDefaultReturn){
+        [item setFields:[pub pubFields]];
+        [item setPubType:[pub pubType]];
+    }
 }
 
 @end
