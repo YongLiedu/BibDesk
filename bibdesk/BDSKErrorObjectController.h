@@ -46,6 +46,8 @@
     NSMutableArray *managers;
     NSMutableArray *currentErrors;
     
+    unsigned int lastIndex;
+    
     // error-handling stuff:
     IBOutlet NSTableView *errorTableView;
     IBOutlet BDSKFilteringArrayController *errorsController;
