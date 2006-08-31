@@ -77,6 +77,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         } else {
             errors = [[NSMutableArray alloc] initWithCapacity:10];
             managers = [[NSMutableArray alloc] initWithCapacity:4];
+            lastIndex = 0;
             
             [managers addObject:[BDSKErrorManager allItemsErrorManager]];
             
@@ -243,10 +244,14 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 // edit paste/drag error
 - (void)showEditorForLastPasteDragError{
-    BDSKErrorObject *errObj = [errors lastObject];
-    OBASSERT([[errObj editor] isPasteDrag]);
-    [self showErrorPanel:self];
-    [self showEditorForErrorObject:errObj];
+    if(lastIndex < [self countOfErrors]){
+        BDSKErrorObject *errObj = [self objectInErrorsAtIndex:lastIndex];
+        OBASSERT([[errObj editor] isPasteDrag]);
+        [self showErrorPanel:self];
+        [self showEditorForErrorObject:errObj];
+        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(lastIndex, [self countOfErrors] - lastIndex)];
+        [errorTableView selectRowIndexes:indexes byExtendingSelection:NO];
+    }else NSBeep();
 }
 
 #pragma mark Managing managers, editors and errors
@@ -406,6 +411,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         OBASSERT([currentErrors count] == 0);
         [currentErrors removeAllObjects];
     }
+    lastIndex = [self countOfErrors];
 }
 
 - (void)endObservingErrorsForDocument:(BibDocument *)document pasteDragData:(NSData *)data publication:(BibItem *)pub{
