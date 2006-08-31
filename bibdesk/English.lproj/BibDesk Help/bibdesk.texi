@@ -532,7 +532,7 @@ files, and will display an error message when you attempt to open them.
 
 To work around this problem, you can use BibDesk's
 @menutitle{Import BibTeX Using Temporary Cite Keys...} menu item, found under
-the @menutitle{File > Import} menu.  This uses a
+the @menutitle{File} menu.  This uses a
 regular expression to replace empty cite keys with a temporary key, in
 a new BibTeX document.
 
