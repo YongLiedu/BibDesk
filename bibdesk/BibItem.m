@@ -149,7 +149,6 @@ static CFDictionaryRef selectorTable = NULL;
     
     NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
     [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
-    // ?        [defaultStyle setAlignment:NSLeftTextAlignment];
     keyParagraphStyle = [defaultStyle copy];
     [defaultStyle setHeadIndent:50];
     [defaultStyle setFirstLineHeadIndent:50];
@@ -177,17 +176,22 @@ static CFDictionaryRef selectorTable = NULL;
     CFRelease(table);
 }
 
+// for creating an empty item
 - (id)init
 {
-	NSString *defaultType = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey];
-	self = [self initWithType:defaultType fileType:BDSKBibtexString pubFields:nil isNew:YES];
+	self = [self initWithType:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] 
+                     fileType:BDSKBibtexString 
+                    pubFields:nil 
+                        isNew:YES];
 	if (self) {
-        [self setHasBeenEdited:NO]; // for new, empty bibs:  set this here, since makeType: and updateMetadataForKey set it to YES in our call to initWithType: above
+        // reset this here, since designated init's updateMetadataForKey set it to YES
+        [self setHasBeenEdited:NO];
 	}
 	return self;
 }
 
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ // this is the designated initializer.
+// this is the designated initializer.
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
     if (self = [super init]){
 		if(fieldsDict){
 			pubFields = [fieldsDict mutableCopy];
@@ -219,12 +223,12 @@ static CFDictionaryRef selectorTable = NULL;
         [self updateMetadataForKey:nil];
     }
 
-    //NSLog(@"bibitem init");
     return self;
 }
 
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
+    // @@ why is isNew set to YES here?  does this fit isEqualToItem: semantics?
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType pubFields:pubFields isNew:YES];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
@@ -291,7 +295,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"%@ %@", [self citeKey], [[self pubFields] description]];
+    return [NSString stringWithFormat:@"citeKey = \"%@\"\n%@", [self citeKey], [[self pubFields] description]];
 }
 
 - (BOOL)isEqual:(BibItem *)aBI{ 
@@ -369,7 +373,8 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (unsigned int)hash{
-    // http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html has a discussion on hashing; apparently using [citeKey hash] will cause serious problems if this object is in a hashing collection (NSSet, NSDictionary) and the hash changes.
+    // optimized hash from http://www.mulle-kybernetik.com/artikel/Optimization/opti-7.html
+    // note that BibItems are used in hashing collections and so -hash must not depend on mutable state
     return( ((unsigned int) self >> 4) | 
             (unsigned int) self << (32 - 4));
 }
