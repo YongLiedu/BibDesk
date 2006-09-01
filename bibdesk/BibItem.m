@@ -228,7 +228,8 @@ static CFDictionaryRef selectorTable = NULL;
 
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
-    // @@ why is isNew set to YES here?  does this fit isEqualToItem: semantics?
+    // we set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset
+    // note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType pubFields:pubFields isNew:YES];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
