@@ -531,16 +531,19 @@ cite keys to the references.  Unfortunately, BibDesk will fail to open such
 files, and will display an error message when you attempt to open them.
 
 To work around this problem, you can use BibDesk's
-@menutitle{Import BibTeX Using Temporary Cite Keys...} menu item, found under
-the @menutitle{File} menu.  This uses a
-regular expression to replace empty cite keys with a temporary key, in
-a new BibTeX document.
+@menutitle{Open BibTeX Using Temporary Cite Keys@dots{}} menu item, found under
+the @menutitle{File} menu.  This uses a regular expression to replace empty cite keys 
+with a temporary key in a new BibTeX document. 
+Make sure the file has a .bib file extension. 
 
-After opening the file, a search for the temporary key is automatically performed,
-to you can immediately see the items which were modified.  At present, the key
-used is @samp{FixMe}, in case you need to search for it manually.  Proper cite keys
-can then be generated for these items using @menutitle{Generate Cite Key} from the
-@menutitle{Publication} menu.
+After opening the file, you are offered the choice to replace the temporary 
+cite keys by proper keys generated from the bibliography data, 
+based on the @ref{Cite Key Preferences,Cite Key Preferences}. 
+If you choose not to generate the cite keys immediately, a search for the temporary key 
+is automatically performed, so you can immediately see the items which were modified.  
+At present the key @samp{FixMe} is used, in case you need to search for it manually. 
+Proper cite keys for these items can then be generated using 
+@menutitle{Generate Cite Key} from the @menutitle{Publication} menu.
 
 @c ======================================================================================
 
