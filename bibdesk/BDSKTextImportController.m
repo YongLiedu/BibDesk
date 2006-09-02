@@ -1443,10 +1443,38 @@
 #pragma mark Auto-Discovery methods
 
 - (void)autoDiscoverDataFromFrame:(WebFrame *)frame{
+    
+    WebDataSource *dataSource = [frame dataSource];
+    NSString *MIMEType = [[dataSource mainResource] MIMEType];
+    
+    if ([MIMEType isEqualToString:@"text/plain"]) { 
+        // @@ should we also try other MIME types, such as text/richtext?
+        
+        NSString *string = [[dataSource representation] documentSource];
+        
+        if(string == nil) {
+            NSString *encodingName = [dataSource textEncodingName];
+            CFStringEncoding cfEncoding = kCFStringEncodingInvalidId;
+            NSStringEncoding nsEncoding = NSUTF8StringEncoding;
+            
+            if (encodingName != nil)
+                cfEncoding = CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName);
+            if (cfEncoding != kCFStringEncodingInvalidId)
+                nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+            string = [[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding];
+        }
+        
+        if (string != nil) 
+            [self autoDiscoverDataFromString:string];
+        [string release];
+        return;
+    }
         
     // This only reads Dublin Core for now.
     // In the future, we should handle other HTML encodings like a nascent microformat.
     // perhaps then a separate HTML parser would be useful to keep this file small.
+    
+    // @@ Should we check for the MIME type, text/html or application/xhtml+xml
     
     DOMDocument *domDoc = [frame DOMDocument];
     
@@ -1610,8 +1638,10 @@
     BibItem *pub = [(BibItem *)contextInfo autorelease];
     
     if(returnCode == NSAlertDefaultReturn){
-        [item setFields:[pub pubFields]];
         [item setPubType:[pub pubType]];
+        [item setFields:[pub pubFields]];
+        
+        [itemTableView reloadData];
     }
 }
 
