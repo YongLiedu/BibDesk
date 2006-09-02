@@ -39,8 +39,6 @@
 #import <Foundation/Foundation.h>
 
 extern NSString *BDSKParserErrorNotification;
-extern NSString *BDSKParserHarmlessWarningString;
-extern NSString *BDSKParserWarningString;
 
 @interface BDSKErrorObject : NSObject {
     NSString *fileName;
@@ -54,6 +52,7 @@ extern NSString *BDSKParserWarningString;
     
     NSString *errorClassName;
     NSString *errorMessage;
+    BOOL isIgnorableWarning;
 }
 
 - (NSString *)fileName;
@@ -79,6 +78,9 @@ extern NSString *BDSKParserWarningString;
 
 - (NSString *)errorMessage;
 - (void)setErrorMessage:(NSString *)newErrorMessage;
+
+- (void)setIsIgnorableWarning:(BOOL)flag;
+- (BOOL)isIgnorableWarning;
 
 - (void)report;
 

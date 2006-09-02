@@ -20,6 +20,7 @@
 
 #include <stdarg.h>
 #include "btparse.h"                    /* for AST typedef */
+#import <BTParse/BDSKErrorObject.h>
 
 #define MAX_ERROR 1024
 

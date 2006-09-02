@@ -40,8 +40,6 @@
 #import "BDSKErrorObject.h"
 
 NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
-NSString *BDSKParserHarmlessWarningString = @"harmless";
-NSString *BDSKParserWarningString = @"warning";
 
 @implementation BDSKErrorObject
 
@@ -59,7 +57,7 @@ NSString *BDSKParserWarningString = @"warning";
 }
 
 - (NSString *)fileName {
-    return [[fileName retain] autorelease];
+    return fileName;
 }
 
 - (void)setFileName:(NSString *)newFileName {
@@ -70,7 +68,7 @@ NSString *BDSKParserWarningString = @"warning";
 }
 
 - (id)editor {
-    return [[editor retain] autorelease];
+    return editor;
 }
 
 - (void)setEditor:(id)newEditor {
@@ -81,7 +79,7 @@ NSString *BDSKParserWarningString = @"warning";
 }
 
 - (id)publication {
-    return [[publication retain] autorelease];
+    return publication;
 }
 
 - (void)setPublication:(id)newPublication{
@@ -96,13 +94,11 @@ NSString *BDSKParserWarningString = @"warning";
 }
 
 - (void)setLineNumber:(int)newLineNumber {
-    if (lineNumber != newLineNumber) {
-        lineNumber = newLineNumber;
-    }
+    lineNumber = newLineNumber;
 }
 
 - (NSString *)itemDescription {
-    return [[itemDescription retain] autorelease];
+    return itemDescription;
 }
 
 - (void)setItemDescription:(NSString *)newItemDescription {
@@ -117,13 +113,11 @@ NSString *BDSKParserWarningString = @"warning";
 }
 
 - (void)setItemNumber:(int)newItemNumber {
-    if (itemNumber != newItemNumber) {
-        itemNumber = newItemNumber;
-    }
+    itemNumber = newItemNumber;
 }
 
 - (NSString *)errorClassName {
-    return [[errorClassName retain] autorelease];
+    return errorClassName;
 }
 
 - (void)setErrorClassName:(NSString *)newErrorClassName {
@@ -134,7 +128,7 @@ NSString *BDSKParserWarningString = @"warning";
 }
 
 - (NSString *)errorMessage {
-    return [[errorMessage retain] autorelease];
+    return errorMessage;
 }
 
 - (void)setErrorMessage:(NSString *)newErrorMessage {
@@ -142,6 +136,14 @@ NSString *BDSKParserWarningString = @"warning";
         [errorMessage release];
         errorMessage = [newErrorMessage copy];
     }
+}
+
+- (void)setIsIgnorableWarning:(BOOL)flag {
+    isIgnorableWarning = flag;
+}
+
+- (BOOL)isIgnorableWarning {
+    return isIgnorableWarning;
 }
 
 - (void)report {

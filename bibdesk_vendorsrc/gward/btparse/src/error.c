@@ -81,42 +81,48 @@ static char error_buf[MAX_ERROR+1];
 
 void print_error (bt_error *err)
 {
-   char *  name;
-   BDSKErrorObject *errObj = [[BDSKErrorObject alloc] init];
-   
-   if (err->filename)
-   {
-       NSString *fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
-       [errObj setFileName:fileName];
-   }
-   
-   if (err->line > 0)                   /* going to print a line number? */
-   {
-       [errObj setLineNumber:err->line];
-   }
-   else
-   {
-       [errObj setLineNumber:-1];
-   }
-   
-   if (err->item_desc && err->item > 0) /* going to print an item number? */
-   {
-       [errObj setItemDescription:[NSString stringWithCString:err->item_desc]];
-       [errObj setItemNumber:err->item];
-   }
-
-   name = errclass_names[(int) err->class];
-   if (name == NULL)
-       name = (char *)[BDSKParserHarmlessWarningString cString]; /* BTERR_NOTIFY used for lexical buffer overflow warnings */
-   if (name)
-   {
-       [errObj setErrorClassName:[NSString stringWithCString:name]];
-   }
-
-   [errObj setErrorMessage:[NSString stringWithCString:err->message]];
-
-   [errObj report];
-   [errObj release];
+    if (err->class != BTERR_NOTIFY) /* do nothing in the case of a harmless lexical buffer warning */
+    {
+        char *  name;
+        BDSKErrorObject *errObj = [[BDSKErrorObject alloc] init];
+        
+        if (err->filename)
+        {
+            NSString *fileName = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:err->filename  length:strlen(err->filename)];
+            [errObj setFileName:fileName];
+        }
+        
+        if (err->line > 0)                   /* going to print a line number? */
+        {
+            [errObj setLineNumber:err->line];
+        }
+        else
+        {
+            [errObj setLineNumber:-1];
+        }
+        
+        if (err->item_desc && err->item > 0) /* going to print an item number? */
+        {
+            [errObj setItemDescription:[NSString stringWithCString:err->item_desc]];
+            [errObj setItemNumber:err->item];
+        }
+        
+        name = errclass_names[(int) err->class];
+        if (name)
+        {
+            [errObj setErrorClassName:[NSString stringWithCString:name]];
+        }
+        
+        if (err->class > BTERR_USAGEWARN)
+            [errObj setIsIgnorableWarning:NO];
+        else
+            [errObj setIsIgnorableWarning:YES];
+        
+        [errObj setErrorMessage:[NSString stringWithCString:err->message]];
+        
+        [errObj report];
+        [errObj release];
+    }
    
 } /* print_error() */
 
