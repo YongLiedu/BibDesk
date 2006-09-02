@@ -52,6 +52,10 @@
 static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharacterSet *baseCharacterSetForTeX, NSCharacterSet *accentCharSet, NSDictionary *texifyAccents);
 @end
 
+@interface OFStringScanner (BDSKExtensions)
+- initCaseSensitiveWithString:(NSString *)aString;
+@end
+
 @implementation BDSKConverter
 
 + (BDSKConverter *)sharedConverter{
@@ -176,7 +180,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     NSString *TEXString = nil;
     NSString *logString = nil;
 
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:precomposedString];
+    OFStringScanner *scanner = [[OFStringScanner alloc] initCaseSensitiveWithString:precomposedString];
     [precomposedString release];
     
     UniChar ch;
@@ -287,55 +291,56 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
-    NSString *tmpPass;
-    NSString *tmpConv;
-    NSString *tmpConvB;
-    NSString *TEXString;
+    NSString *tmpPass = nil;
+    NSString *tmpConv = nil;
+    NSString *TEXString = nil;
 
     NSMutableString *convertedSoFar = [[NSMutableString alloc] initWithCapacity:[s length]];
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:s];
+    OFStringScanner *scanner = [[OFStringScanner alloc] initCaseSensitiveWithString:s];
     
     do {
-        if(tmpPass = [scanner readFullTokenUpToString:@"{\\"])
-            [convertedSoFar appendString:tmpPass];
         
-        if(scannerHasData(scanner) && (tmpConv = [scanner readFullTokenUpToString:@"}"])){
-			NSRange range = [tmpConv rangeOfString:@"{\\" options:(NSLiteralSearch | NSBackwardsSearch)];
-			while(range.location != NSNotFound){
-				// we have a {\, now look for the matching closing brace
-                if(!scannerReadString(scanner, @"}")) // the closing brace does not follow immediately, don't convert
-					break;
-				tmpConv = [tmpConv stringByAppendingString:@"}"];
-				tmpConvB = [tmpConv substringFromIndex:range.location]; // this holds the possible TeX char at the end of tmpConv
-				if((TEXString = [detexifyConversions objectForKey:tmpConvB]) ||
-					(TEXString = [self composedStringFromTeXString:tmpConvB])){
-					// we could convert the last part, so replace that part
-					tmpConv = [[tmpConv substringToIndex:range.location] stringByAppendingString:TEXString];
-				} else { // we couldn't convert
-					break;
-				}
-				/* look for another {\ */
-				range = [tmpConv rangeOfString:@"{\\" options:(NSLiteralSearch | NSBackwardsSearch)];
-			}
-			[convertedSoFar appendString:tmpConv];
+        // scan everything before a {\ into tmpPass; if we don't find a {\, tmpPass has the full string
+        if(tmpPass = [scanner readFullTokenUpToString:@"{\\"]){
+            [convertedSoFar appendString:tmpPass];
+                    
+            // if we scanned to the end without finding a {\ or if we don't see a closing }, do nothing
+            if(scannerHasData(scanner) && (tmpConv = [scanner readFullTokenUpToString:@"}"])){
+                
+                // update the scanner's position to skip the }
+                scannerSkipPeekedCharacter(scanner);
+                
+                // this holds the possible TeX sequence
+                tmpConv = [tmpConv stringByAppendingString:@"}"];
+                  
+                // see if it's something we can convert
+                if((TEXString = [detexifyConversions objectForKey:tmpConv]) ||
+                    (TEXString = [self composedStringFromTeXString:tmpConv])){
+                    tmpConv = TEXString;
+                }
+                    
+                // either append the conversion or re-create the original sequence
+                [convertedSoFar appendString:tmpConv];
+            }
         }
+        
     } while(scannerHasData(scanner));
     [scanner release];
     return convertedSoFar; 
 }
 
 - (NSString *)composedStringFromTeXString:(NSString *)texString{
+    
+    // check this before creating a scanner
+    if(nil == texString || CFStringHasPrefix((CFStringRef)texString, CFSTR("{\\")) == FALSE)
+        return nil;
+    
 	NSString *texAccent = nil;
 	NSString *accent = nil;
     NSString *character = nil;
      
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:texString];
+    OFStringScanner *scanner = [[OFStringScanner alloc] initCaseSensitiveWithString:texString];
         	
-    if(!scannerReadString(scanner, @"{\\")){
-        [scanner release];
-        return nil;
-    }
-    
     UniChar accentCh = scannerReadCharacter(scanner);
     
     if(!scannerReadString(scanner, @" ") && [[NSCharacterSet letterCharacterSet] characterIsMember:accentCh]){
@@ -429,3 +434,73 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 
 @end
 
+// Shark shows that the constant case conversion buffer creation/disposal adds up; since we never use the case-insensitive features of OFStringScanner, we'll provide an alternate implementation.  Should ask Omni to add this feature to avoid the code duplication.
+
+@interface OFCharacterScanner (BDSKExtensions)
+- initCaseSensitive;
+@end
+
+@implementation OFCharacterScanner (BDSKExtensions)
+
+// use [super init] instead of [self init] so we bypass designated init (which always creates a caseBuffer)
+
+- initCaseSensitive;
+{
+    if ([super init] == nil)
+        return nil;
+    
+    inputBuffer = NULL;
+    scanEnd = inputBuffer;
+    scanLocation = scanEnd;
+    inputStringPosition = 0;
+    firstNonASCIIOffset = NSNotFound;
+    
+    // set the case conversion buffer size to zero, since we don't need it
+    caseBuffer.bufferSize = 0;
+    caseBuffer.string = NULL;
+    caseBuffer.buffer = NULL;
+    
+    return self;
+}
+
+// category override of dealloc
+- (void)dealloc;
+{
+    if (freeInputBuffer) {
+        OBASSERT(inputBuffer != NULL);
+        NSZoneFree(NULL, inputBuffer);
+    }
+    
+    // check case buffer; if buffer is NULL, it's uninitialized
+    if(caseBuffer.buffer != NULL)
+        OFCaseConversionBufferDestroy(&caseBuffer);
+    [super dealloc];
+}
+
+@end
+
+@implementation OFStringScanner (BDSKExtensions)
+
+- initCaseSensitiveWithString:(NSString *)aString;
+{
+    self = [super initCaseSensitive];
+    if(self){
+        targetString = [aString retain];
+        [self fetchMoreDataFromString:aString];
+    }
+    return self;
+}
+
+#if OMNI_FORCE_ASSERTIONS
+
+// we only instantiate OFCharacterScanners with OFStringScanner (and don't call this method at present); in case we ever do, here's a debug check to see if the scanner can be used case-insensitively
+- (BOOL)scanStringCaseInsensitive:(NSString *)string peek:(BOOL)doPeek;
+{
+    
+    NSAssert(caseBuffer.buffer != NULL, @"Error: this scanner was explicitly created as case-sensitive");
+    return [super scanStringCaseInsensitive:string peek:doPeek];
+}
+
+#endif
+
+@end
