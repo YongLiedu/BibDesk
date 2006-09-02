@@ -585,15 +585,15 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     
     // check brace depth; corporate authors such as {Someone and Someone Else, Inc} use braces, so this parsing is BibTeX-specific, rather than general string handling
     CFArrayRef names = __BDCreateArrayOfNamesByCheckingBraceDepth(array);
-    CFRelease(array);
     
     // shouldn't ever see this case as far as I know, as long as we're using btparse
     if(names == NULL){
         BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
-        [errorObject setFileName:[[pub document] fileName]];
+        [errorObject setFileName:BDSKAuthorString]; // hack to make errors use the publication
         [errorObject setLineNumber:-1];
         [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
         [errorObject setErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]]];
+        CFRelease(array);
         
         [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
         [errorObject report];
@@ -605,6 +605,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         // @@ return the empty array or nil?
         return authors;
     }
+    CFRelease(array);
     
     CFIndex i = 0, iMax = CFArrayGetCount(names);
     BibAuthor *anAuthor;
