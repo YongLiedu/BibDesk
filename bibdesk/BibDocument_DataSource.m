@@ -1209,6 +1209,26 @@
     return promiseDragColumnIdentifier;
 }
 
+#pragma mark Tracking rects
+
+- (BOOL)tableView:(NSTableView *)tv shouldTrackTableColumn:(NSTableColumn *)tableColumn row:(int)row;
+{
+    NSString *tcID = [tableColumn identifier];
+    return [[BibTypeManager sharedManager] isURLField:tcID];
+}
+
+- (void)tableView:(NSTableView *)tv mouseEnteredTableColumn:(NSTableColumn *)tableColumn row:(int)row;
+{
+    NSString *tcID = [tableColumn identifier];
+    BibItem *pub = [[self publications] objectAtIndex:row];
+    NSURL *url = [pub URLForField:tcID];
+    [self setStatus:[url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString]];
+}
+
+- (void)tableView:(NSTableView *)tv mouseExitedTableColumn:(NSTableColumn *)tableColumn row:(int)row;
+{
+    [self updateUI];
+}
 
 @end
 
