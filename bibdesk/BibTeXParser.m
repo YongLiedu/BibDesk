@@ -589,7 +589,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     // shouldn't ever see this case as far as I know, as long as we're using btparse
     if(names == NULL){
         BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
-        [errorObject setFileName:BDSKAuthorString]; // hack to make errors use the publication
+        [errorObject setFileName:nil];
         [errorObject setLineNumber:-1];
         [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
         [errorObject setErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]]];
@@ -600,7 +600,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
         [errorObject release];
         // make sure the error panel is displayed, regardless of prefs
-        [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
+        [[BDSKErrorObjectController sharedErrorObjectController] performSelector:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
         
         // @@ return the empty array or nil?
         return authors;
@@ -636,7 +636,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
     name = [name fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines];
     
     // pass the name as a UTF8 string, since btparse doesn't work with UniChars
-    theName = bt_split_name((char *)[name UTF8String],(char *)[BDSKAuthorString UTF8String],0,0);
+    theName = bt_split_name((char *)[name UTF8String], NULL, 0, 0);
     
     [mutableString setString:@""];
     

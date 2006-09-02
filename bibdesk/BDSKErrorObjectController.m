@@ -127,7 +127,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 #pragma mark | errors
 
 - (NSArray *)errors {
-    return [[errors retain] autorelease];
+    return errors;
 }
 
 - (unsigned)countOfErrors {
@@ -149,7 +149,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 #pragma mark | managers
 
 - (NSArray *)managers {
-    return [[managers retain] autorelease];
+    return managers;
 }
 
 - (unsigned)countOfManagers {
@@ -229,20 +229,19 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)showEditorForErrorObject:(BDSKErrorObject *)errObj{
     NSString *fileName = [errObj fileName];
     BDSKErrorEditor *editor = [errObj editor];
-    
-    if ([fileName isEqualToString:BDSKAuthorString]) {
-        BibItem *pub = [errObj publication];
-        if(pub) {
-            BibEditor *pubEditor = [[pub document] editPub:pub];
-            [pubEditor makeKeyField:BDSKAuthorString];
-        } else NSBeep();
-    } else if (fileName == nil || [[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
+    BibItem *pub = [errObj publication];
+
+    // fileName is nil for paste/drag and author parsing errors; check for a pub first, since that's the best way to edit
+    if (pub) {
+        BibEditor *pubEditor = [[pub document] editPub:pub];
+        [pubEditor makeKeyField:BDSKAuthorString];
+    } else if (nil == fileName || [[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
         [editor showWindow:self];
         [editor gotoLine:[errObj lineNumber]];
     } else NSBeep();
 }
 
-// edit paste/drag error
+// edit paste/drag error; sent via document error panel displayed when paste fails
 - (void)showEditorForLastPasteDragError{
     if(lastIndex < [self countOfErrors]){
         BDSKErrorObject *errObj = [self objectInErrorsAtIndex:lastIndex];
@@ -438,10 +437,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
-    BDSKErrorObject *errObj = [notification object];
-    // don't show lexical buffer overflow warnings
-    if ([[errObj errorClassName] isEqualToString:BDSKParserHarmlessWarningString] == NO)
-		[currentErrors addObject:errObj];
+    [currentErrors addObject:[notification object]];
 }
 
 #pragma mark TableView tooltips
@@ -466,7 +462,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         while (item = [itemEnum nextObject]) {
             if(filterManager && [filterManager managesError:item] == NO)
                 continue;
-            if(hideWarnings && [BDSKParserWarningString isEqual:[item valueForKey:@"errorClassName"]])
+            if(hideWarnings && [item isIgnorableWarning])
                 continue;
             [matchedObjects addObject:item];
         }
@@ -487,7 +483,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 - (void)setFilterManager:(BDSKErrorManager *)manager {
     if (filterManager != manager) {
-        [filterManager autorelease];
+        [filterManager release];
         filterManager = [manager retain];
 		[self rearrangeObjects];
     }
