@@ -35,6 +35,7 @@
 
 #import "BDSKMainTableView.h"
 #import <OmniFoundation/OFPreference.h>
+#import <OmniFoundation/CFArray-OFExtensions.h>
 #import "BibPrefController.h"
 #import "BibDocument.h"
 #import "BDSKTypeSelectHelper.h"
@@ -53,6 +54,7 @@
 - (void)dealloc{
     [typeSelectHelper setDataSource:nil];
     [typeSelectHelper release];
+    [trackingRects release];
     [super dealloc];
 }
 
@@ -103,9 +105,83 @@
     }
 }
 
+#pragma mark Tracking rects
+
 - (void)reloadData{
     [super reloadData];
     [typeSelectHelper queueSelectorOnce:@selector(rebuildTypeSelectSearchCache)]; // if we resorted or searched, the cache is stale
+	[self rebuildTrackingRects];
+}
+
+- (void)resetCursorRects {
+	[super resetCursorRects];
+    [self rebuildTrackingRects];
+}
+
+- (void)setDataSource:(id)anObject {
+	[super setDataSource:anObject];
+	[self rebuildTrackingRects];
+}
+
+- (void)noteNumberOfRowsChanged {
+	[super noteNumberOfRowsChanged];
+	[self rebuildTrackingRects];
+}
+
+- (void)rebuildTrackingRects {
+    if ([[self delegate] respondsToSelector:@selector(tableView:shouldTrackTableColumn:row:)] == NO)
+        return;
+    
+    if(trackingRects == nil){
+       trackingRects = OFCreateIntegerArray();
+    }else{
+        CFIndex idx = [trackingRects count];
+        while(idx--){
+            [self removeTrackingRect:(NSTrackingRectTag)[trackingRects objectAtIndex:idx]];
+            [trackingRects removeObjectAtIndex:idx];
+        }
+    }
+    
+    NSRange rowRange = [self rowsInRect:[self visibleRect]];
+    NSRange columnRange = [self columnsInRect:[self visibleRect]];
+    int rowIndex, columnIndex;
+	NSTableColumn *tableColumn;
+    NSTrackingRectTag tag;
+    BOOL assumeInside = [[self delegate] respondsToSelector:@selector(tableView:mouseEnteredTableColumn:row:)];
+    
+    for (columnIndex = columnRange.location; columnIndex < NSMaxRange(columnRange); columnIndex++) {
+        tableColumn = [[self tableColumns] objectAtIndex:columnIndex];
+		for (rowIndex = rowRange.location; rowIndex < NSMaxRange(rowRange); rowIndex++) {
+            if ([[self delegate] tableView:self shouldTrackTableColumn:tableColumn row:rowIndex]) {
+                tag = [self addTrackingRect:[self frameOfCellAtColumn:columnIndex row:rowIndex] owner:self userData:NULL assumeInside:assumeInside];
+                [trackingRects addObject:(id)tag];
+            }
+        }
+    }
+}
+
+- (void)mouseEntered:(NSEvent *)theEvent{
+    if ([[self delegate] respondsToSelector:@selector(tableView:mouseEnteredTableColumn:row:)]) {
+        NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+		int column = [self columnAtPoint:point];
+		int row = [self rowAtPoint:point];
+        if (column != -1 && row != -1) {
+            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+            [[self delegate] tableView:self mouseEnteredTableColumn:tableColumn row:row];
+        }
+	}
+}
+
+- (void)mouseExited:(NSEvent *)theEvent{
+    if ([[self delegate] respondsToSelector:@selector(tableView:mouseExitedTableColumn:row:)]) {
+        NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+		int column = [self columnAtPoint:point];
+		int row = [self rowAtPoint:point];
+        if (column != -1 && row != -1) {
+            NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+            [[self delegate] tableView:self mouseExitedTableColumn:tableColumn row:row];
+        }
+	}
 }
 
 @end

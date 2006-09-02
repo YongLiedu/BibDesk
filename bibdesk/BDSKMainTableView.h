@@ -46,7 +46,16 @@
     // for supporting type-ahead in the tableview:
     // datasource methods to support this are over in BibDocument_DataSource
     BDSKTypeSelectHelper *typeSelectHelper;
+    NSMutableArray *trackingRects;
 }
 
 - (BDSKTypeSelectHelper *)typeSelectHelper;
+- (void)rebuildTrackingRects;
+@end
+
+
+@interface NSObject (BDSKMainTableViewDelegate)
+- (BOOL)tableView:(NSTableView *)aTableView shouldTrackTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+- (void)tableView:(NSTableView *)aTableView mouseEnteredTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+- (void)tableView:(NSTableView *)aTableView mouseExitedTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 @end
