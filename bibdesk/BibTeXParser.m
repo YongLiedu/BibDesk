@@ -600,7 +600,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
         [errorObject release];
         // make sure the error panel is displayed, regardless of prefs
-        [[BDSKErrorObjectController sharedErrorObjectController] performSelector:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
+        [[BDSKErrorObjectController sharedErrorObjectController] performSelector:@selector(showErrorPanel:) withObject:nil afterDelay:0.0];
         
         // @@ return the empty array or nil?
         return authors;
