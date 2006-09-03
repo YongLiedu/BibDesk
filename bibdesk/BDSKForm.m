@@ -45,7 +45,8 @@
 
 // private methods for getting the rect(s) of each cell in the matrix
 @interface BDSKForm (Private)
-- (id)cellAtPoint:(NSPoint)point usingButton:(BOOL)usingButton;
+- (id)cellForButtonAtPoint:(NSPoint)point;
+- (id)cellForTitleAtPoint:(NSPoint)point;
 - (void)setDragSourceCell:(id)cell;
 @end
 
@@ -123,7 +124,7 @@
     
     NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     // NSLog(@"the point is at x = %f and y = %f", point.x, point.y);
-    BDSKFormCell *cell = (BDSKFormCell *)[self cellAtPoint:mouseLoc usingButton:YES];
+    BDSKFormCell *cell = (BDSKFormCell *)[self cellForButtonAtPoint:mouseLoc];
     if(cell){
 		[cell setButtonHighlighted:YES];
 		BOOL keepOn = YES;
@@ -131,7 +132,7 @@
 		while (keepOn) {
 			theEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
 			mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-			isInside = ([self cellAtPoint:mouseLoc usingButton:YES] == cell);
+			isInside = ([self cellForButtonAtPoint:mouseLoc] == cell);
 			switch ([theEvent type]) {
 				case NSLeftMouseDragged:
 					[cell setButtonHighlighted:isInside];
@@ -184,8 +185,10 @@
 					break;
 			}
 		}
-    }else{
-		[super mouseDown:theEvent];
+    }else if ((cell = [self cellForTitleAtPoint:mouseLoc]) && [theEvent clickCount] == 2){
+        [[self delegate] doubleClickedTitleOfFormCell:cell];
+	}else{
+    	[super mouseDown:theEvent];
 	}
 }
 
@@ -326,27 +329,45 @@
 // This method returns the cell at point. If there is no cell, or usingButton is YES and the point 
 // is not in the button rect, nil is returned. 
 
-- (id)cellAtPoint:(NSPoint)point usingButton:(BOOL)usingButton{
+- (id)cellForButtonAtPoint:(NSPoint)point{
     int row, column;
+    id cell = nil;
 	
-	if (![self getRow:&row column:&column forPoint:point]) 
-		return nil;
+	if ([self getRow:&row column:&column forPoint:point]) {
 	
-	BDSKFormCell *cell = (BDSKFormCell *)[self cellAtRow:row column:column];
-	
-	// if we use a button, we have to see if it is in the button rect
-	if(usingButton){ 
-		// see if there is an arrow button
-		if([[self delegate] formCellHasArrowButton:cell] || [[self delegate] formCellHasFileIcon:cell]){
-			NSRect aRect = [self cellFrameAtRow:row column:column];
-			// check if point is in the button rect
-			if( NSMouseInRect(point, [cell buttonRectForBounds:aRect], [self isFlipped]) )
-				return cell;
-		}            
-		// there is no button, or point was outside its rect
-		return nil;
+        // see if it is in the button rect
+        if(cell = [self cellAtRow:row column:column]){ 
+            // see if there is an arrow button
+            if([[self delegate] formCellHasArrowButton:cell] || [[self delegate] formCellHasFileIcon:cell]){
+                NSRect aRect = [self cellFrameAtRow:row column:column];
+                // check if point is in the button rect
+                if( NSMouseInRect(point, [cell buttonRectForBounds:aRect], [self isFlipped]) == NO)
+                    cell = nil;
+            }  else{
+                // there is no button, or point was outside its rect
+                cell = nil;
+            }
+        }
 	}
+    
+	return cell;
+}
+
+- (id)cellForTitleAtPoint:(NSPoint)point{
+    int row, column;
+    id cell = nil;
 	
+	if ([self getRow:&row column:&column forPoint:point]) {
+	
+        // see if it is in the button rect
+        if(cell = [self cellAtRow:row column:column]){ 
+            NSRect aRect = [self cellFrameAtRow:row column:column];
+            // check if point is in the title rect
+            if( NSMouseInRect(point, [cell titleRectForBounds:aRect], [self isFlipped]) == NO)
+                cell = nil;
+        }
+	}
+    
 	return cell;
 }
 
