@@ -2176,7 +2176,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if(citeSeerBaseURL == nil)
             citeSeerBaseURL = [[NSURL alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteseerHostKey]];
         baseURL = citeSeerBaseURL;
+    } else if([value hasPrefix:@"\\url{"] && [value hasSuffix:@"}"]){
+        // URLs are often enclosed in a \url tex command in bibtex
+        value = [value substringWithRange:NSMakeRange(5, [value length] - 6)];
     }
+
     return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
 
