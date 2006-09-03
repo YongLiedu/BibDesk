@@ -1396,7 +1396,8 @@ static int numberOfOpenEditors = 0;
 	NSString *oldField = [oldFieldNamePopUp titleOfSelectedItem];
     NSString *newField = [[newFieldNameComboBox stringValue] capitalizedString];
     
-    if(returnCode == NSCancelButton || [NSString isEmptyString:newField] || [newField isEqualToString:oldField])
+    if(returnCode == NSCancelButton || [NSString isEmptyString:newField] || 
+       [newField isEqualToString:oldField] || [[publication allFieldNames] containsObject:newField])
         return;
     
     [tabView selectFirstTabViewItem:nil];
