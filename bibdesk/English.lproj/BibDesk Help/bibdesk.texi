@@ -1156,21 +1156,9 @@ is more informative to the user. Below we discuss some of these special fields.
 @cindex Title
 
 Normally, the Title column will display the content of a Title field, if it exists. 
-There is one exception however, where BibDesk tries to `do the right thing' 
-because of a BibTeX quirck. The inbook type uses Title to refer to the title of 
-the whole work and the Chapter field to refer to the specific part of the 
-work that is cited.  For the inbook type, then, if there is a Chapter field
-that is displayed along with the Book title, thus:
-
-@example
-Chapter : Title
-@end example
-
-If Chapter is empty, Pages must be present so the Title column will display
-
-@example
-Title (pp Pages)
-@end example
+For inbook type items, the Title refers to the title of the whole work. 
+Therefore the Chapter field is added to the title displayed in the Title column. 
+If this is empty, the Pages field is used, if available. 
 
 @subheading Container 
 @cindex Container
@@ -1227,14 +1215,20 @@ in your default browser application.
 @subheading Date
 @cindex Date
 
-The Date column displays the date of the item, which is guessed from the Year and Month 
-fields of the item. 
+The Date column displays the date of the item, which is constructed from the Year and Month 
+fields of the item. However if a Date field is set, that is used instead. 
 
 @subheading Item Number 
 @cindex Item Number
 
 The Item Number column shows a little #-mark in the header. The column displays the 
 order of the item as it appears in the file. 
+
+@subheading BibTeX Type
+@cindex BibTeX Type
+
+The BibTeX Type column displays the publication type of the item. 
+Be aware that Type is a different BibTeX field, unrelated to the BibTeX Type.
 
 @c --------------------------------------------------------------------------------------
 
