@@ -280,6 +280,10 @@ static int numberOfOpenEditors = 0;
 	// Update the statusbar message and icons
     [self needsToBeFiledDidChange:nil];
 	[self updateCiteKeyAutoGenerateStatus];
+    
+    BDSKCiteKeyFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
+    [newFieldNameComboBox setFormatter:fieldNameFormatter];
+    [fieldNameFormatter release];
 	
 	windowLoaded = YES;
     
@@ -1369,7 +1373,6 @@ static int numberOfOpenEditors = 0;
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
                                                                                                        fieldsArray:removableFields];
-	[removableFields release];
     
     NSString *selectedCellTitle = [[bibFields selectedCell] title];
     if([removableFields containsObject:selectedCellTitle]){
@@ -1377,12 +1380,78 @@ static int numberOfOpenEditors = 0;
         // if we don't deselect this cell, we can't remove it from the form
         [self finalizeChangesPreservingSelection:NO];
     }
+    
+	[removableFields release];
 	
 	[removeFieldController beginSheetModalForWindow:[self window]
                                       modalDelegate:self
                                      didEndSelector:@selector(removeFieldSheetDidEnd:returnCode:contextInfo:)
                                         contextInfo:NULL];
     [removeFieldController release];
+}
+
+#pragma mark Change field name
+
+- (void)changeFieldNameSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	NSString *oldField = [oldFieldNamePopUp titleOfSelectedItem];
+    NSString *newField = [[newFieldNameComboBox stringValue] capitalizedString];
+    
+    if(returnCode == NSCancelButton || [NSString isEmptyString:newField] || [newField isEqualToString:oldField])
+        return;
+    
+    [tabView selectFirstTabViewItem:nil];
+    [publication addField:newField];
+    [publication setField:newField toValue:[publication valueOfField:oldField]];
+    [publication removeField:oldField];
+    [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name",@"")];
+    [self setupForm];
+    [self makeKeyField:newField];
+}
+
+- (IBAction)raiseChangeFieldName:(id)sender{
+    NSString *currentType = [publication pubType];
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *currentFields = [publication allFieldNames];
+    NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
+	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
+	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
+	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
+	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];
+	[removableFields removeObjectsInArray:[typeMan userDefaultFieldsForType:currentType]];
+    
+    if([removableFields count] == 0){
+        NSBeep();
+        [removableFields release];
+        return;
+    }
+    
+    [oldFieldNamePopUp removeAllItems];
+    [oldFieldNamePopUp addItemsWithTitles:removableFields];
+    [newFieldNameComboBox removeAllItems];
+    [newFieldNameComboBox addItemsWithObjectValues:fieldNames];
+    
+    NSString *selectedCellTitle = [[bibFields selectedCell] title];
+    if([removableFields containsObject:selectedCellTitle]){
+        [oldFieldNamePopUp selectItemWithTitle:selectedCellTitle];
+        // if we don't deselect this cell, we can't remove it from the form
+        [self finalizeChangesPreservingSelection:NO];
+    }else if(sender == self){
+        // double clicked title of a field we cannot change
+        return;
+    }
+    
+	[removableFields release];
+    
+	[NSApp beginSheet:changeFieldNameSheet
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(changeFieldNameSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:NULL];
+}
+
+- (IBAction)dismissChangeFieldNameSheet:(id)sender{
+    [changeFieldNameSheet orderOut:sender];
+    [NSApp endSheet:changeFieldNameSheet returnCode:[sender tag]];
 }
 
 #pragma mark Text Change handling
@@ -2075,6 +2144,10 @@ static int numberOfOpenEditors = 0;
 }
 
 #pragma mark BDSKForm delegate methods
+
+- (void)doubleClickedTitleOfFormCell:(id)cell{
+    [self raiseChangeFieldName:self];
+}
 
 - (void)arrowClickedInFormCell:(id)cell{
     NSString *field = [cell title];

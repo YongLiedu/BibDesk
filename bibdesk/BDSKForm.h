@@ -46,6 +46,7 @@
 - (NSImage *)fileIconForFormCell:(id)cell;
 - (NSImage *)dragIconForFormCell:(id)cell;
 - (void)iconClickedInFormCell:(id)cell;
+- (void)doubleClickedTitleOfFormCell:(id)cell;
 - (BOOL)writeDataToPasteboard:(NSPasteboard *)pasteboard forFormCell:(id)cell;
 - (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forFormCell:(id)cell;
 - (void)cleanUpAfterDragOperation:(NSDragOperation)operation forFormCell:(id)cell;
@@ -102,6 +103,9 @@
     return nil;                                                                                      \
 }                                                                                                    \
 - (void)iconClickedInFormCell:(id)cell;                                                              \
+{                                                                                                    \
+}                                                                                                    \
+- (void)doubleClickedTitleOfFormCell:(id)cell;                                                              \
 {                                                                                                    \
 }                                                                                                    \
 - (BOOL)control:(NSControl *)control textShouldStartEditing:(NSText *)fieldEditor;                   \

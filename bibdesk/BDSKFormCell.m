@@ -108,6 +108,13 @@ static NSSize fileIconSize;
 }
 
 // returns the rect in which the cell's value text is drawn
+- (NSRect)titleRectForBounds:(NSRect)theRect{
+    NSRect ignored, rect = [self drawingRectForBounds:theRect];
+    NSDivideRect(rect, &rect, &ignored, [self titleWidth], NSMinXEdge);
+    return rect;
+}
+
+// returns the rect in which the cell's value text is drawn
 - (NSRect)textRectForBounds:(NSRect)theRect{
     NSRect ignored, rect = [self drawingRectForBounds:theRect];
     NSDivideRect(rect, &ignored, &rect, [self titleWidth], NSMinXEdge);
