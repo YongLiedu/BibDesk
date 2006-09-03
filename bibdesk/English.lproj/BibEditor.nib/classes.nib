@@ -33,6 +33,7 @@
                 consolidateLinkedFiles = id; 
                 createNewPubUsingCrossrefAction = id; 
                 deletePub = id; 
+                dismissChangeFieldNameSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 duplicateTitleToBooktitle = id; 
                 editSelectedFieldAsRawBibTeX = id; 
@@ -42,6 +43,7 @@
                 openParentItem = id; 
                 openRemoteURL = id; 
                 raiseAddField = id; 
+                raiseChangeFieldName = id; 
                 raiseDelField = id; 
                 revealLinkedFile = id; 
                 saveFileAsLocalUrl = id; 
@@ -65,6 +67,7 @@
                 authorTableView = NSTableView; 
                 bibFields = BDSKForm; 
                 bibTypeButton = NSPopUpButton; 
+                changeFieldNameSheet = NSPanel; 
                 citeKeyField = NSTextField; 
                 citeKeyTitle = NSTextField; 
                 citeKeyWarningButton = NSButton; 
@@ -76,7 +79,9 @@
                 extraBibFields = NSMatrix; 
                 fieldsAccessoryView = NSView; 
                 fieldsPopUpButton = NSPopUpButton; 
+                newFieldNameComboBox = NSComboBox; 
                 notesView = NSTextView; 
+                oldFieldNamePopUp = NSPopUpButton; 
                 pdfSnoopContainerView = NSView; 
                 remoteSnoopWebView = WebView; 
                 rssDescriptionView = NSTextView; 

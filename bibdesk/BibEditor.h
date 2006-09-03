@@ -96,6 +96,10 @@
 	IBOutlet BDSKImagePopUpButton *actionButton;
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
+	
+    IBOutlet NSPanel *changeFieldNameSheet;
+    IBOutlet NSPopUpButton *oldFieldNamePopUp;
+    IBOutlet NSComboBox *newFieldNameComboBox;
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
 // ----------------------------------------------------------------------------------------
@@ -185,6 +189,9 @@
 // Delete-field sheet support
 // ----------------------------------------------------------------------------------------
 - (IBAction)raiseDelField:(id)sender;
+
+- (IBAction)raiseChangeFieldName:(id)sender;
+- (IBAction)dismissChangeFieldNameSheet:(id)sender;
 
 /*!
     @method     editSelectedFieldAsRawBibTeX:
