@@ -1706,8 +1706,9 @@ static int numberOfOpenEditors = 0;
 	    ([value isEqualAsComplexString:prevValue] || [value isEqualAsComplexString:@""]) ) {
 		// make sure we keep the original inherited string value
 		[cell setObjectValue:prevValue];
-	} else if (![value isEqualAsComplexString:prevValue]) {
-		[self recordChangingField:title toValue:value];
+	} else if (prevValue != nil && ![value isEqualAsComplexString:prevValue]) {
+		// if prevValue == nil, the field was removed and we're finalizing an edit for a field we should ignore
+        [self recordChangingField:title toValue:value];
     }
 	// do this here, the order is important!
 	[formCellFormatter setEditAsComplexString:NO];
