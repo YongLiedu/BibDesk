@@ -71,6 +71,10 @@
 				<string>text</string>
 				<string>*</string>
 			</array>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.plain-text</string>
+            </array>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
 				<string>text/plain</string>
@@ -97,6 +101,10 @@
 			<string>Viewer</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>net.sourceforge.bibdesk.webofscience</string>
+            </array>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
@@ -919,7 +927,7 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>public.plain-text</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>bibTeX database</string>
@@ -938,7 +946,7 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>public.plain-text</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>RIS/Medline File</string>
@@ -965,7 +973,7 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>public.plain-text</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>BibDesk Item</string>
@@ -981,6 +989,25 @@
 				</array>
 			</dict>
 		</dict>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.plain-text</string>
+            </array>
+            <key>UTTypeDescription</key>
+            <string>Web of Science File</string>
+            <key>UTTypeIdentifier</key>
+            <string>net.sourceforge.bibdesk.webofscience</string>
+            <key>UTTypeReferenceURL</key>
+            <string>http://portal.isiknowledge.com/ISI/help/h_markwosa.htm</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.mime-type</key>
+                <array>
+                    <string>application/x-Inst-for-Scientific-Info</string>
+                </array>
+            </dict>
+        </dict>
 	</array>
 </dict>
 </plist>
