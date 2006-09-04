@@ -248,7 +248,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     if(lastIndex < [self countOfErrors]){
         BDSKErrorObject *errObj = [self objectInErrorsAtIndex:lastIndex];
         OBASSERT([[errObj editor] isPasteDrag]);
-        [self showErrorPanel:self];
+        [self showWindow:self];
         [self showEditorForErrorObject:errObj];
         NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(lastIndex, [self countOfErrors] - lastIndex)];
         [errorTableView selectRowIndexes:indexes byExtendingSelection:NO];
@@ -260,7 +260,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 // failed load of a document
 - (void)documentFailedLoad:(BibDocument *)document shouldEdit:(BOOL)shouldEdit{
     if(shouldEdit)
-        [self showErrorPanel:self];
+        [self showWindow:self];
 	
     // remove any earlier failed load editors unless we're editing them
     unsigned index = [managers count];
@@ -329,22 +329,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 #pragma mark Actions
-
-- (IBAction)toggleShowingErrorPanel:(id)sender{
-    if (![self isWindowVisible]) {
-        [self showErrorPanel:sender];
-    }else{
-        [self hideErrorPanel:sender];
-    }
-}
-
-- (IBAction)hideErrorPanel:(id)sender{
-    [[self window] orderOut:sender];
-}
-
-- (IBAction)showErrorPanel:(id)sender{
-    [[self window] makeKeyAndOrderFront:sender];
-}
 
 // copy error messages
 - (IBAction)copy:(id)sender{
@@ -424,7 +408,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
                 [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
             if([self isWindowVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
-                [self showErrorPanel:self];
+                [self showWindow:self];
         }
         [currentErrors removeAllObjects];
     }

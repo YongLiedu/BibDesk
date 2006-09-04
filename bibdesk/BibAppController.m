@@ -309,7 +309,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         [BDSKPreviewer sharedPreviewer];
 	
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowingPreviewKey])
-		[[BDSKPreviewer sharedPreviewer] showPreviewPanel:self];
+		[[BDSKPreviewer sharedPreviewer] showWindow:self];
     
     // copy files to application support
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -954,15 +954,15 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 }
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
-    [[BDSKErrorObjectController sharedErrorObjectController] toggleShowingErrorPanel:sender];
+    [[BDSKErrorObjectController sharedErrorObjectController] toggleShowingWindow:sender];
 }
 
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
-    [[BDSKPreviewer sharedPreviewer] toggleShowingPreviewPanel:sender];
+    [[BDSKPreviewer sharedPreviewer] toggleShowingWindow:sender];
 }
 
 - (IBAction)toggleShowingOrphanedFilesPanel:(id)sender{
-    [[BDSKOrphanedFilesFinder sharedFinder] toggleShowingOrphanedFilesPanel:sender];
+    [[BDSKOrphanedFilesFinder sharedFinder] toggleShowingWindow:sender];
 }
 
 #pragma mark Service code

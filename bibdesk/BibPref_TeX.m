@@ -37,6 +37,7 @@
 #import "BibPref_TeX.h"
 #import "BDSKPreviewer.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 #define BDSK_TEX_DOWNLOAD_URL @"http://ii2.sourceforge.net/tex-index.html"
 
@@ -81,7 +82,7 @@
         [defaults setBool:NO forKey:BDSKUsesTeXKey];
 		
 		// hide preview panel if necessary
-		[[BDSKPreviewer sharedPreviewer] hidePreviewPanel:self];
+		[[BDSKPreviewer sharedPreviewer] hideWindow:self];
     }else{
 		// Check that executable paths are valid
 	    if ([self checkBibTexBinPath] && [self checkTexBinPath]) {

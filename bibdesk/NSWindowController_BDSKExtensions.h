@@ -42,5 +42,7 @@
 @interface NSWindowController (BDSKExtensions)
 
 - (BOOL)isWindowVisible;
+- (IBAction)hideWindow:(id)sender;
+- (IBAction)toggleShowingWindow:(id)sender;
 
 @end

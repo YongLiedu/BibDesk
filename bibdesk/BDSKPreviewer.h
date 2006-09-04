@@ -77,27 +77,6 @@
 */
 + (BDSKPreviewer *)sharedPreviewer;
 
-/*!
-    @method toggleShowingPreviewPanel:
-    @abstract Action to toggle the visibility of the previewer
-    @param sender The sender of the action
-*/
-- (IBAction)toggleShowingPreviewPanel:(id)sender;
-
-/*!
-    @method showPreviewPanel:
-    @abstract Action to show the previewer
-    @param sender The sender of the action
-*/
-- (IBAction)showPreviewPanel:(id)sender;
-
-/*!
-    @method hidePreviewPanel:
-    @abstract Action to hide the previewer
-    @param sender The sender of the action
-*/
-- (IBAction)hidePreviewPanel:(id)sender;
-
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification;
 

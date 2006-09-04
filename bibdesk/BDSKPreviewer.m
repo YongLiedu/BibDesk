@@ -154,16 +154,10 @@ static BDSKPreviewer *thePreviewer;
 
 #pragma mark Actions
 
-- (IBAction)toggleShowingPreviewPanel:(id)sender{
-    if([self isWindowVisible]){
-		[self hidePreviewPanel:sender];
-    }else{
-		[self showPreviewPanel:sender];
-    }
-}
-
-- (IBAction)showPreviewPanel:(id)sender{
-	[self showWindow:self];
+- (IBAction)showWindow:(id)sender{
+	[super showWindow:self];
+	[progressOverlay orderFront:sender];
+	[self handlePreviewNeedsUpdate:nil];
     if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey])
         NSBeginAlertSheet(NSLocalizedString(@"Previewing is Disabled.", @"TeX preview is disabled"),
                           NSLocalizedString(@"Yes", @""),
@@ -181,18 +175,8 @@ static BDSKPreviewer *thePreviewer;
         [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
         [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
     }else{
-		[self hidePreviewPanel:nil];
+		[self hideWindow:nil];
 	}
-}
-
-- (IBAction)hidePreviewPanel:(id)sender{
-	[[self window] close];
-}
-
-- (IBAction)showWindow:(id)sender{
-	[super showWindow:sender];
-	[progressOverlay orderFront:sender];
-	[self handlePreviewNeedsUpdate:nil];
 }
 
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification {

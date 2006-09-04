@@ -82,10 +82,6 @@
 - (void)removeErrorsForPublications:(NSArray *)pubs;
 - (void)removeErrorsForEditor:(BDSKErrorEditor *)editor;
 
-- (IBAction)toggleShowingErrorPanel:(id)sender;
-- (IBAction)hideErrorPanel:(id)sender;
-- (IBAction)showErrorPanel:(id)sender;
-
 // tableView actions
 - (IBAction)copy:(id)sender;
 - (IBAction)gotoError:(id)sender;

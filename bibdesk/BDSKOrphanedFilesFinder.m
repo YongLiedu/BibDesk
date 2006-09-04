@@ -93,20 +93,11 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     return @"BDSKOrphanedFilesFinder";
 }
 
-- (IBAction)toggleShowingOrphanedFilesPanel:(id)sender{
-    if([self isWindowVisible]){
-		[self hideOrphanedFilesPanel:sender];
-    }else{
-		[self showOrphanedFilesPanel:sender];
-    }
-}
-
-- (IBAction)showOrphanedFilesPanel:(id)sender{
-    if (wasLaunched) {
-        [self showWindow:sender];
-    } else {
+- (IBAction)showWindow:(id)sender{
+    [super showWindow:sender];
+    if (wasLaunched == NO) {
         wasLaunched = YES;
-        [self showOrphanedFiles:sender];
+        [self refreshOrphanedFiles:sender];
     }
 }
 
@@ -114,13 +105,10 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [self stopRefreshing:nil];
 }
 
-- (IBAction)hideOrphanedFilesPanel:(id)sender{
-	[[self window] close];
-}
-
 - (IBAction)showOrphanedFiles:(id)sender{
-    [self showWindow:sender];
+    [super showWindow:sender];
     [self refreshOrphanedFiles:nil];
+    wasLaunched = YES;
 }
 
 - (NSURL *)baseURL

@@ -46,4 +46,16 @@
     return [self isWindowLoaded] && [[self window] isVisible];
 }
 
+- (IBAction)hideWindow:(id)sender{
+	[[self window] close];
+}
+
+- (IBAction)toggleShowingWindow:(id)sender{
+    if([self isWindowVisible]){
+		[self hideWindow:sender];
+    }else{
+		[self showWindow:sender];
+    }
+}
+
 @end

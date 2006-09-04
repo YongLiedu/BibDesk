@@ -42,6 +42,7 @@
 #import "BDSKConverter.h"
 #import "BDSKErrorObjectController.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 @implementation BibPref_Files
 
@@ -98,9 +99,9 @@
 - (IBAction)toggleShowWarnings:(id)sender{
     [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKShowWarningsKey];
     if ([sender state] == NSOnState) {
-        [[BDSKErrorObjectController sharedErrorObjectController] showErrorPanel:self];
+        [[BDSKErrorObjectController sharedErrorObjectController] showWindow:self];
     }else{
-        [[BDSKErrorObjectController sharedErrorObjectController] hideErrorPanel:self];
+        [[BDSKErrorObjectController sharedErrorObjectController] hideWindow:self];
     }        
 }
 
