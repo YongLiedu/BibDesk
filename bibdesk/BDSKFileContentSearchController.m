@@ -252,7 +252,6 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
         return YES;
     
     currentSearchIndex = [[BDSKSearchIndex alloc] initWithDocument:document];
-    [currentSearchIndex setDelegate:self];
     CFDictionaryAddValue(indexDictionary, document, currentSearchIndex);
     [currentSearchIndex release];
     

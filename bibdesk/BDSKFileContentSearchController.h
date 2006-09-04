@@ -70,7 +70,7 @@
 - (void)restoreDocumentStateByRemovingSearchView:(NSView *)view;
 @end
 
-@interface BDSKFileContentSearchController : NSWindowController <BDSKSearchIndexDelegate>
+@interface BDSKFileContentSearchController : NSWindowController
 {
     NSMutableArray *results;
     SKSearchRef currentSearch;
