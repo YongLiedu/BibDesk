@@ -111,8 +111,6 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
  
     OBPRECONDITION(aDocument);
     [self setDocument:aDocument];
-    
-    NSAssert1([self window], @"Failed to load nib %@", [self windowNibName]);
 
     return self;
 }
@@ -185,6 +183,8 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 
 - (NSView *)searchContentView
 {
+    if(searchContentView == nil)
+        [self window]; // this forces a load of the nib
     return searchContentView;
 }
 
@@ -275,17 +275,15 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 
 - (void)updateSearchIfNeeded
 {
-    if(![[self window] isVisible] || [currentSearchKey isEqualToString:@""] || [self document] == nil)
-        return;
-    
-    [self rebuildResultsWithNewSearch:currentSearchKey];
+    if([searchContentView window] && [self document] && [currentSearchKey isEqualToString:@""] == NO)
+        [self rebuildResultsWithNewSearch:currentSearchKey];
 }
 
 - (void)restoreDocumentState:(id)sender
 {
     [self saveSortDescriptors];
     [self cancelCurrentSearch:nil];
-    [[self document] restoreDocumentStateByRemovingSearchView:searchContentView];
+    [[self document] restoreDocumentStateByRemovingSearchView:[self searchContentView]];
 }
 
 #pragma mark -
