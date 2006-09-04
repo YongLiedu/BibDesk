@@ -71,9 +71,9 @@ typedef struct _BibAuthorFlags {
     BibItem *publication;
     unsigned hash;
    
-    @private
-    NSArray *firstNames;
-    NSString *fuzzyName;
+@private
+    NSArray *firstNames;  // always non-nil
+    NSString *fuzzyName;  // always non-nil
     BibAuthorFlags flags; // do not archive
 }
 
@@ -86,7 +86,7 @@ typedef struct _BibAuthorFlags {
 - (void)dealloc;
 
 - (NSComparisonResult)compare:(BibAuthor *)otherAuth;
-- (NSComparisonResult)fuzzyCompare:(BibAuthor *)otherAuth;
+- (BOOL)fuzzyEqual:(BibAuthor *)otherAuth;
 
 /*!
     @method     sortCompare:

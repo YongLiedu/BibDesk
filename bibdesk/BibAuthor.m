@@ -39,6 +39,8 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "BibPrefController.h"
 #import "BibTeXParser.h"
+#import <BTParse/btparse.h>
+#import "BDSKErrorObjectController.h"
 
 @interface BibAuthor (Private)
 
@@ -104,7 +106,7 @@ static BibAuthor *emptyAuthorInstance = nil;
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
 	if (self = [super init]) {
         // zero the flags
-        memset(&flags, 0, sizeof(BibAuthorFlags));
+        memset(&flags, (BOOL)0, sizeof(BibAuthorFlags));
 
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
@@ -138,9 +140,10 @@ static BibAuthor *emptyAuthorInstance = nil;
 - (id)initWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
         self = [super init];
-        memset(&flags, 0, sizeof(BibAuthorFlags));
-        [self splitName:[coder decodeObjectForKey:@"name"]]; // this should take care of the rest of the ivars, right?
+        memset(&flags, (BOOL)0, sizeof(BibAuthorFlags));
         publication = [coder decodeObjectForKey:@"publication"];
+        // this should take care of the rest of the ivars
+        [self splitName:[coder decodeObjectForKey:@"name"]];
     } else {
         [[super init] release];
         self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
@@ -162,10 +165,10 @@ static BibAuthor *emptyAuthorInstance = nil;
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
 
-- (BOOL)isEqual:(BibAuthor *)otherAuth{
-    if (![otherAuth isKindOfClass:[self class]])
+- (BOOL)isEqual:(id)obj{
+    if (![obj isKindOfClass:[self class]])
 		return NO;
-    return otherAuth == self ? YES : [normalizedName isEqualToString:otherAuth->normalizedName];
+    return obj == self ? YES : [normalizedName isEqualToString:[obj normalizedName]];
 }
 
 - (unsigned int)hash{
@@ -190,9 +193,12 @@ static BibAuthor *emptyAuthorInstance = nil;
 // Knuth, Donald E.   Knuth, Donald Ervin
 //
 
-static inline NSComparisonResult
-__BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames)
+static inline BOOL
+__BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames)
 {
+    OBASSERT(myFirstNames);
+    OBASSERT(otherFirstNames);
+    
     CFIndex i, cnt = MIN(CFArrayGetCount(myFirstNames), CFArrayGetCount(otherFirstNames));
     CFStringRef myName;
     CFStringRef otherName;
@@ -206,41 +212,42 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
         otherName = CFArrayGetValueAtIndex(otherFirstNames, i);
         
         range.length = MIN(CFStringGetLength(myName), CFStringGetLength(otherName));
-        myName = CFStringCreateWithSubstring(allocator, myName, range);
+        
+        // CFStringCompareWithOptions only applies the range argument to the first string, so make sure they're the same length
         otherName = CFStringCreateWithSubstring(allocator, otherName, range);
         
-        result = CFStringCompare(myName, otherName, kCFCompareCaseInsensitive|kCFCompareLocalized);
-        CFRelease(myName);
+        result = CFStringCompareWithOptions(myName, otherName, range, kCFCompareCaseInsensitive|kCFCompareLocalized);
         CFRelease(otherName);
         
-        if(result != NSOrderedSame)
-            return result;
+        // all it takes is one false match
+        if(result != kCFCompareEqualTo)
+            return NO;
     }
     
     // all prefixes of all first name strings compared the same
-    return NSOrderedSame;
+    return YES;
 }
 
 - (NSComparisonResult)compare:(BibAuthor *)otherAuth{
-	return [[self normalizedName] compare:[otherAuth normalizedName] options:NSCaseInsensitiveSearch];
+	return [normalizedName compare:[otherAuth normalizedName] options:NSCaseInsensitiveSearch];
 }
 
 // fuzzy tries to match despite common omissions.
 // currently can't handle spelling errors.
-- (NSComparisonResult)fuzzyCompare:(BibAuthor *)otherAuth{
-    NSComparisonResult result;
+- (BOOL)fuzzyEqual:(BibAuthor *)otherAuth{
     
+    // required for access to flags; could also raise an exception
+    OBASSERT([otherAuth isKindOfClass:[self class]]); 
+        
     // check to see if last names match; if not, we can return immediately
-    result = CFStringCompare((CFStringRef)fuzzyName, (CFStringRef)[otherAuth fuzzyName], kCFCompareCaseInsensitive|kCFCompareLocalized);
+    if(CFStringCompare((CFStringRef)fuzzyName, (CFStringRef)otherAuth->fuzzyName, kCFCompareCaseInsensitive|kCFCompareLocalized) != kCFCompareEqualTo)
+        return NO;
     
-    if(result != kCFCompareEqualTo)
-        return result;
-
     // if one of the first names is empty, no point in doing anything more sophisticated (unless we want to force the order here)
-    if(BDIsEmptyString((CFStringRef)firstName) || BDIsEmptyString((CFStringRef)[otherAuth firstName]))
-        return CFStringCompare((CFStringRef)firstName, (CFStringRef)[otherAuth firstName], kCFCompareCaseInsensitive|kCFCompareLocalized);
+    if(flags.hasFirst == NO && otherAuth->flags.hasFirst == NO)
+        return YES;
     else 
-        return __BibAuthorCompareFirstNames((CFArrayRef)[self firstNames], (CFArrayRef)[otherAuth firstNames]);
+        return __BibAuthorsHaveEqualFirstNames((CFArrayRef)firstNames, (CFArrayRef)otherAuth->firstNames);
 }
 
 - (NSComparisonResult)sortCompare:(BibAuthor *)otherAuth{ // used for tableview sorts; omits von and jr parts
@@ -248,7 +255,7 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
         return (otherAuth == emptyAuthorInstance ? NSOrderedSame : NSOrderedDescending);
     if(otherAuth == emptyAuthorInstance)
         return NSOrderedAscending;
-    return [[self sortableName] localizedCaseInsensitiveCompare:[otherAuth sortableName]];
+    return [sortableName localizedCaseInsensitiveCompare:[otherAuth sortableName]];
 }
 
 
@@ -378,54 +385,118 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
 
 @implementation BibAuthor (Private)
 
+// creates an NSString from the given bt_name and bt_namepart, which were parsed with the given encoding; returns nil if no such name component exists
+static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *theName, bt_namepart thePart, CFStringEncoding encoding)
+{
+    int i, numberOfTokens = theName->part_len[thePart];
+    CFStringRef theString = NULL;
+ 
+    // typical for some parts; let's not bother with a mutable string in this case
+    if (numberOfTokens == 1){
+        theString = CFStringCreateWithCString(alloc, theName->parts[thePart][0], encoding);
+    } else if (numberOfTokens > 1){
+        CFMutableStringRef mutableString = CFStringCreateMutable(alloc, 0);
+        int stopTokenIndex = numberOfTokens - 1;
+        
+        for (i = 0; i < numberOfTokens; i++){
+            theString = CFStringCreateWithCString(alloc, theName->parts[thePart][i], encoding);
+            CFStringAppend(mutableString, theString);
+            CFRelease(theString);
+    
+            if (i < stopTokenIndex)
+                CFStringAppend(mutableString, CFSTR(" "));
+        }
+        theString = mutableString;
+    }
+    return (NSString *)theString;
+}
+
 - (void)splitName:(NSString *)newName{
     
     NSParameterAssert(newName != nil);
     // @@ this is necessary because the hash method depends on the internal state of the object (which is itself necessary since we can have multiple author instances of the same author)
     if(name != nil)
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Attempt to modify non-nil attribute of immutable object %@", self] userInfo:nil];
+        
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
     
-    NSDictionary *nameDict = [BibTeXParser splitAuthorName:newName publication:[self publication]];
+    // we need to remove newlines and collapse whitespace before using bt_split_name 
+    newName = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(alloc, (CFStringRef)newName);
     
-    [self setFirstName:[nameDict objectForKey:@"firstName"]];
-    [self setVonPart:[nameDict objectForKey:@"vonPart"]];
-    [self setLastName:[nameDict objectForKey:@"lastName"]];
-    [self setJrPart:[nameDict objectForKey:@"jrPart"]];
+    // get the fastest encoding, since it usually allows us to get a pointer to the contents
+    // the main reason for using CFString here is that it offers cString create/get for any encoding
+    CFStringEncoding encoding = CFStringGetFastestEncoding((CFStringRef)newName);   
     
-    // create the name as "First Middle von Last, Jr", which is more readable and less sortable
-    // @@ This will potentially alter data if BibItem ever saves based on -[BibAuthor name] instead of the original string it keeps in pubFields
-    NSMutableString *mutableString = [[NSMutableString alloc] initWithCapacity:14];
+    // if it's Unicode, switch to UTF-8 to avoid data loss (btparse doesn't like unichars)
+    if(encoding >= kCFStringEncodingUnicode)
+        encoding = kCFStringEncodingUTF8;
     
-    flags.hasFirst = !BDIsEmptyString((CFStringRef)firstName);
-	flags.hasVon = !BDIsEmptyString((CFStringRef)vonPart);
-	flags.hasLast = !BDIsEmptyString((CFStringRef)lastName);
-    flags.hasJr = !BDIsEmptyString((CFStringRef)jrPart);
-   
-    // first and middle are associated
-    if(flags.hasFirst){
-        [mutableString appendString:firstName];
-        [mutableString appendString:@" "];
+    const char *name_cstring = NULL;
+    name_cstring = CFStringGetCStringPtr((CFStringRef)newName, encoding);
+    BOOL shouldFree = NO;
+    CFIndex fullLength = CFStringGetLength((CFStringRef)newName);
+    
+    // CFStringGetCStringPtr will probably always fail for UTF-8, but it may fail regardless
+    if(NULL == name_cstring){
+        shouldFree = YES;
+        
+        // this length is probably excessive, but it's returned quickly
+        CFIndex requiredLength = CFStringGetMaximumSizeForEncoding(fullLength, encoding);
+        
+        // malloc a buffer, then set our const pointer to it if the conversion succeeds; this may be slightly more efficient than -[NSString UTF8String] because it's not adding an NSData to the autorelease pool
+        char *buffer = (char *)CFAllocatorAllocate(alloc, (requiredLength + 1) * sizeof(char), 0);
+        if(FALSE == CFStringGetCString((CFStringRef)newName, buffer, requiredLength, encoding)){
+            CFAllocatorDeallocate(alloc, buffer);
+            shouldFree = NO;
+        } else {
+            name_cstring = buffer;
+        }
     }
     
-    if(flags.hasVon){
-        [mutableString appendString:vonPart];
-        [mutableString appendString:@" "];
+    bt_name *theName;
+    
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
+    // pass the name as a C string; note that btparse will not work with unichars
+    theName = bt_split_name((char *)name_cstring, NULL, 0, 0);
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:publication];
+
+    [newName release];
+    if(shouldFree)
+        CFAllocatorDeallocate(alloc, (void *)name_cstring);
+    
+    NSString *nameString = nil;
+    
+    nameString = createNameStringForComponent(alloc, theName, BTN_FIRST, encoding);
+    if (nameString) {
+        [self setFirstName:nameString];
+        [nameString release];
+        flags.hasFirst = YES;
     }
     
-    if(flags.hasLast) [mutableString appendString:lastName];
-    
-    if(flags.hasJr){
-        [mutableString appendString:@", "];
-        [mutableString appendString:jrPart];
+    nameString = createNameStringForComponent(alloc, theName, BTN_VON, encoding);
+    if (nameString) {
+        [self setVonPart:nameString];
+        [nameString release];
+        flags.hasVon = YES;
     }
     
-    OBPRECONDITION(name == nil);
-    name = [mutableString copy];
+    nameString = createNameStringForComponent(alloc, theName, BTN_LAST, encoding);
+    if (nameString) {
+        [self setLastName:nameString];
+        [nameString release];
+        flags.hasLast = YES;
+    }
     
-    [mutableString release];
-	
-    [self cacheNames];
-    // we create abbreviated forms lazily as we might not always need them
+    nameString = createNameStringForComponent(alloc, theName, BTN_JR, encoding);
+    if (nameString) {
+        [self setJrPart:nameString];
+        [nameString release];
+        flags.hasJr = YES;
+    }
+    
+    bt_free_name(theName);
+        
+    [self cacheNames];    
 }
 
 - (void)setVonPart:(NSString *)newVonPart{
@@ -464,11 +535,11 @@ __BibAuthorCompareFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNames
 }
 
 // This follows the recommendations from Oren Patashnik's btxdoc.tex:
-/*To summarize, BibTEX allows three possible forms for the name: 
+/*To summarize, BibTeX allows three possible forms for the name: 
 "First von Last" 
 "von Last, First" 
 "von Last, Jr, First" 
-You may almost always use the first form; you shouldn’t if either there’s a Jr part, or the Last part has multiple tokens but there’s no von part. 
+You may almost always use the first form; you shouldn't if either there's a Jr part, or the Last part has multiple tokens but there's no von part. 
 */
 // Note that if there is only one word/token, it is the lastName, so that's assumed to always be there.
 
@@ -477,8 +548,33 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
 	// temporary string storage
     NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
     
-    // create the normalized name (see comment above method)
+    // create the name ivar as "First Middle von Last, Jr", which is more readable and less sortable
+    // @@ This will potentially alter data if BibItem ever saves based on -[BibAuthor name] instead of the original string it keeps in pubFields    
+
+    // first and middle are associated
+    if(flags.hasFirst){
+        [theName appendString:firstName];
+        [theName appendString:@" "];
+    }
     
+    if(flags.hasVon){
+        [theName appendString:vonPart];
+        [theName appendString:@" "];
+    }
+    
+    if(flags.hasLast) [theName appendString:lastName];
+    
+    if(flags.hasJr){
+        [theName appendString:@", "];
+        [theName appendString:jrPart];
+    }
+    
+    name = [theName copy];
+    
+    // create the normalized name (see comment above method)
+
+    [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
+
     if(flags.hasVon){
         [theName appendString:vonPart];
         [theName appendString:@" "];
@@ -504,7 +600,8 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
     // create the sortable name
     // "Lastname Firstname" (no comma, von, or jr), with braces removed
         
-    [theName setString:@""];
+    [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
+
     [theName appendString:(flags.hasLast ? lastName : @"")];
     [theName appendString:(flags.hasFirst ? @" " : @"")];
     [theName appendString:(flags.hasFirst ? firstName : @"")];
@@ -518,12 +615,13 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
         separatorSet = CFCharacterSetCreateWithCharactersInString(CFAllocatorGetDefault(), CFSTR(" ."));
     
     // @@ see note on firstLetterCharacterString() function for possible issues with this
-    firstNames = (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)firstName, separatorSet, FALSE);
+    firstNames = flags.hasFirst ? (id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)firstName, separatorSet, FALSE) : [[NSArray alloc] init];
 
     // fuzzy comparison  name
     // don't bother with spaces for this comparison (and whitespace is already collapsed)
     
-    [theName setString:@""];
+    [theName replaceCharactersInRange:NSMakeRange(0, [theName length]) withString:@""];
+
     if(flags.hasVon) [theName appendString:vonPart];
 	if(flags.hasLast) [theName appendString:lastName];
     [self setFuzzyName:theName];
@@ -550,13 +648,6 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
     }
 }
 
-// Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
-static inline NSString *firstLetterCharacterString(NSString *string)
-{
-    NSRange range = [string rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
-    return (range.location != NSNotFound) ? [string substringWithRange:range] : nil;
-}
-
 - (void)setAbbreviatedName:(NSString *)aName{
     if(aName != abbreviatedName){
         [abbreviatedName release];
@@ -571,58 +662,90 @@ static inline NSString *firstLetterCharacterString(NSString *string)
     }
 }
 
-- (void)setupAbbreviatedNames{
-    CFArrayRef theFirstNames = (CFArrayRef)[self firstNames];
-    CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
-    NSString *fragment = nil;
-    NSString *firstLetter = nil;
-    NSMutableString *abbrevName = [[NSMutableString alloc] initWithCapacity:[name length]];
-    NSMutableString *abbrevFirstName = [[NSMutableString alloc] initWithCapacity:3 * firstNameCount];
-    NSMutableString *abbrevLastName = [[NSMutableString alloc] initWithCapacity:[name length]];
+// Bug #1436631 indicates that "Pomies, M.-P." was displayed as "M. -. Pomies", so we'll grab the first letter character instead of substringToIndex:1.  The technically correct solution may be to use "M. Pomies" in this case, but we split the first name at "." boundaries to generate the firstNames array.
+static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, CFStringRef string)
+{
+    CFRange letterRange;
+    Boolean hasChar = CFStringFindCharacterFromSet(string, (CFCharacterSetRef)[NSCharacterSet letterCharacterSet], CFRangeMake(0, CFStringGetLength(string)), 0, &letterRange);
+    return hasChar ? CFStringCreateWithSubstring(alloc, string, letterRange) : NULL;
+}
 
-    for(idx = 0; idx < firstNameCount; idx++){
-        fragment = (NSString *)CFArrayGetValueAtIndex(theFirstNames, idx);
-        firstLetter = firstLetterCharacterString(fragment);
-        if (firstLetter != nil) {
-            [abbrevFirstName appendString:firstLetter];
-            [abbrevFirstName appendString:idx == firstNameCount - 1 ? @"." : @". "];
+- (void)setupAbbreviatedNames
+{
+    CFArrayRef theFirstNames = (CFArrayRef)firstNames;
+    CFIndex idx, firstNameCount = CFArrayGetCount(theFirstNames);
+    CFStringRef fragment = nil;
+    CFStringRef firstLetter = nil;
+    
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    CFIndex nameLength = CFStringGetLength((CFStringRef)name);
+    CFIndex firstNameMaxLength = 3 * firstNameCount;
+    
+    // use fixed-size mutable strings; allow for extra ". "
+    CFMutableStringRef abbrevName = CFStringCreateMutable(alloc, nameLength + firstNameMaxLength);
+    
+    // last name should never exceed the length of the full name
+    CFMutableStringRef fullLastName = CFStringCreateMutable(alloc, nameLength);
+    CFMutableStringRef abbrevFirstName = NULL;
+    
+    if(flags.hasFirst){
+        
+        // allow for ". " around each character
+        abbrevFirstName = CFStringCreateMutable(alloc, firstNameMaxLength);
+        
+        // loop through the first name parts (which includes middle names)
+        CFIndex lastIdx = firstNameCount - 1;
+        for(idx = 0; idx <= lastIdx; idx++){
+            fragment = CFArrayGetValueAtIndex(theFirstNames, idx);
+            firstLetter = copyFirstLetterCharacterString(alloc, fragment);
+            if (firstLetter != nil) {
+                CFStringAppend(abbrevFirstName, firstLetter);
+                CFStringAppend(abbrevFirstName, (idx < lastIdx ? CFSTR(". ") : CFSTR(".")) );
+                CFRelease(firstLetter);
+            }
         }
     }
     
-    // abbrevName should be empty or have a single trailing space
+    // start creating the last name; fullLastName is now empty
     if(flags.hasVon){
-        [abbrevLastName appendString:vonPart];
-        [abbrevLastName appendString:@" "];
+        CFStringAppend(fullLastName, (CFStringRef)vonPart);
+        CFStringAppend(fullLastName, CFSTR(" "));
     }
     
     if(flags.hasLast)
-        [abbrevLastName appendString:lastName];
+        CFStringAppend(fullLastName, (CFStringRef)lastName);
     
     if(flags.hasJr){
-        [abbrevLastName appendString:@", "];
-        [abbrevLastName appendString:jrPart];
+        CFStringAppend(fullLastName, CFSTR(", "));
+        CFStringAppend(fullLastName, (CFStringRef)jrPart);
     }
     
-    // first for the abbreviated form
+    // abbrevName is now empty; set it to the first name
     if(flags.hasFirst){
-        [abbrevName appendString:abbrevFirstName];
-        [abbrevName appendString:@" "];
+        CFStringAppend(abbrevName, abbrevFirstName);
+        CFStringAppend(abbrevName, CFSTR(" "));
     }
     
-    [abbrevName appendString:abbrevLastName];
+    CFStringAppend(abbrevName, fullLastName);
     
-    [self setAbbreviatedName:abbrevName];
+    [self setAbbreviatedName:(NSString *)abbrevName];
     
-    // now for the normalized abbreviated form
-    [abbrevName setString:abbrevLastName];
+    // now for the normalized abbreviated form; start with only the last name
+    CFStringReplaceAll(abbrevName, fullLastName);
+    
+    // all done with last name
+    CFRelease(fullLastName);
     
     if(flags.hasFirst){
-        [abbrevName appendString:@", "];
-        [abbrevName appendString:abbrevFirstName];
+        CFStringAppend(abbrevName, CFSTR(", "));
+        CFStringAppend(abbrevName, abbrevFirstName);
+        
+        // first name was non-NULL, and we're done with it
+        CFRelease(abbrevFirstName);
     }
     
-    [self setAbbreviatedNormalizedName:abbrevName];
-    [abbrevName release];
+    [self setAbbreviatedNormalizedName:(NSString *)abbrevName];
+    CFRelease(abbrevName);
 }
 
 @end
@@ -639,7 +762,7 @@ CFHashCode BibAuthorFuzzyHash(const void *item)
 Boolean BibAuthorFuzzyEqual(const void *value1, const void *value2)
 {        
     OBASSERT([(id)value1 isKindOfClass:[BibAuthor class]] && [(id)value2 isKindOfClass:[BibAuthor class]]);
-    return [(BibAuthor *)value1 fuzzyCompare:(BibAuthor *)value2] == NSOrderedSame ? TRUE : FALSE;
+    return [(BibAuthor *)value1 fuzzyEqual:(BibAuthor *)value2];
 }
 
 const CFSetCallBacks BDSKAuthorFuzzySetCallbacks = {
