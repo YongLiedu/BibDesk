@@ -71,17 +71,6 @@
 						 document:(BibDocument *)aDocument;
 
 /*!
-    @method     macrosFromBibTeXString:hadProblems:document:
-    @abstract   Parses a BibTeX string as @string{} declarations, and returns a dictionary of keys and definitions.
-    @discussion The returned macros can contain circular macro definitions.
-    @param      aString BibTeX as NSString
-    @param      hadProblems (description)
-    @param      aDocument (description)
-    @result     (description)
-*/
-//+ (NSDictionary *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems document:(BibDocument *)aDocument;
-
-/*!
     @method     macrosFromBibTeXString:document:
     @abstract   Returns a dictionary of macro definitions from a BibTeX file (.bib extension).
     @discussion The definitions take the form <tt>@STRING {ibmjrd = "IBM Journal of Research and Development"}</tt>
@@ -103,17 +92,6 @@
 */
 + (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents document:(BibDocument *)aDocument;
     
-/*!
-    @method     stringFromBibTeXValue:error:frontMatter:document:
-    @abstract   Parsing method that returns a complex nor simple string for a value entered as BibTeX string, using libbtparse; needs a document to act as macro resolver.
-    @discussion (comprehensive description)
-    @param      value (description)
-    @param      hadProblems (description)
-    @param      aDocument (description)
-    @result     (description)
-*/
-//+ (NSString *)stringFromBibTeXValue:(NSString *)value error:(NSError **)outError document:(BibDocument *)aDocument;
-
 /*!
     @method     authorsFromBibtexString:document:
     @abstract   Parses a BibTeX author string (separates components joined by the string "and")
