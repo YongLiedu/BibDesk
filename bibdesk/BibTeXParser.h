@@ -123,14 +123,4 @@
 */
 + (NSArray *)authorsFromBibtexString:(NSString *)aString withPublication:(BibItem *)pub;
 
-/*!
-    @method     splitAuthorName:document:
-    @abstract   Splits an author name
-    @discussion (comprehensive description)
-    @param      aString The author name
-    @param      pub (description)
-    @result     A dictionary of containing the 4 name parts firstName, vonPart, lastName, jrPart
-*/
-+ (NSDictionary *)splitAuthorName:(NSString *)name publication:(BibItem *)pub;
-
 @end

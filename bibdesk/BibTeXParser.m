@@ -174,6 +174,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                 [tmpStr release];
                 
                 if (bt_entry_metatype (entry) != BTE_REGULAR){
+                    // without frontMatter, e.g. with paste or drag, we just ignore these entries
                     if(nil != frontMatter){
                         // put @preamble etc. into the frontmatter string so we carry them along.
                         if ([entryType isEqualToString:@"preamble"]){
@@ -217,8 +218,9 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                         
                     }// end while field - process next bt field                    
                     
-                    if([entryType isEqualToString:@"bibdesk_info"] && nil != frontMatter){
-                        [aDocument setDocumentInfoWithoutUndo:dictionary];
+                    if([entryType isEqualToString:@"bibdesk_info"]){
+                        if(nil != frontMatter)
+                            [aDocument setDocumentInfoWithoutUndo:dictionary];
                     }else{
                         
                         newBI = [[BibItem alloc] initWithType:entryType
@@ -640,96 +642,6 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 	return authors;
 }
 
-+ (NSDictionary *)splitAuthorName:(NSString *)name publication:(BibItem *)pub{
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
-	
-    NSMutableDictionary *nameDict = [NSMutableDictionary dictionaryWithCapacity:4];
-    
-    bt_name *theName;
-    int i = 0;
-    
-    // use this as a buffer for appending separators
-    NSMutableString *mutableString = [[NSMutableString alloc] initWithCapacity:14];
-    NSString *tmpStr = nil;
-    
-    // we need to remove newlines and collapse whitespace before using bt_split_name 
-    name = [name fastStringByCollapsingWhitespaceAndNewlinesAndRemovingSurroundingWhitespaceAndNewlines];
-    
-    // pass the name as a UTF8 string, since btparse doesn't work with UniChars
-    theName = bt_split_name((char *)[name UTF8String], NULL, 0, 0);
-    
-    [mutableString setString:@""];
-    
-    // get tokens from first part
-    for (i = 0; i < theName->part_len[BTN_FIRST]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_FIRST][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
-            [mutableString appendString:@" "];
-    }
-    tmpStr = [mutableString copy];
-    [nameDict setObject:tmpStr forKey:@"firstName"];
-    [tmpStr release];
-    
-    [mutableString setString:@""];
-    // get tokens from von part
-    for (i = 0; i < theName->part_len[BTN_VON]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_VON][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_VON]-1)
-            [mutableString appendString:@" "];
-        
-    }
-    tmpStr = [mutableString copy];
-    [nameDict setObject:tmpStr forKey:@"vonPart"];
-    [tmpStr release];
-	
-    [mutableString setString:@""];
-	// get tokens from last part
-    for (i = 0; i < theName->part_len[BTN_LAST]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_LAST][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
-            [mutableString appendString:@" "];
-    }
-    tmpStr = [mutableString copy];
-    [nameDict setObject:tmpStr forKey:@"lastName"];
-    [tmpStr release];
-	
-    [mutableString setString:@""];
-    // get tokens from jr part
-    for (i = 0; i < theName->part_len[BTN_JR]; i++)
-    {
-        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_JR][i])];
-        [mutableString appendString:tmpStr];
-        [tmpStr release];
-        
-        if(i >= 0 && i < theName->part_len[BTN_JR]-1)
-            [mutableString appendString:@" "];
-    }
-    tmpStr = [mutableString copy];
-    [nameDict setObject:tmpStr forKey:@"jrPart"];
-    [tmpStr release];
-    
-    [mutableString release];
-	
-    bt_free_name(theName);
-    
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
-    
-    return nameDict;
-}
-
-
 @end
 
 /// private functions used with libbtparse code
@@ -887,13 +799,17 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     const char *staticGroupStr = "BibDesk Static Groups";
     size_t staticGroupStrLength = strlen(staticGroupStr);
     Boolean isStaticGroup = FALSE;
+    Boolean firstValue = TRUE;
     
     while(field = bt_next_value(entry, field, NULL, &text)){
         if(text){
-            if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
-                isSmartGroup = TRUE;
-            else if(strlen(text) >= staticGroupStrLength && strncmp(text, staticGroupStr, staticGroupStrLength) == 0)
-                isStaticGroup = TRUE;
+            if(firstValue == TRUE){
+                firstValue = FALSE;
+                if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
+                    isSmartGroup = TRUE;
+                else if(strlen(text) >= staticGroupStrLength && strncmp(text, staticGroupStr, staticGroupStrLength) == 0)
+                    isStaticGroup = TRUE;
+            }
             
             // encoding will be UTF-8 for the plist, so make sure we use it for each line
             tmpStr = [[NSString alloc] initWithCString:text usingEncoding:((isSmartGroup || isStaticGroup)? NSUTF8StringEncoding : encoding)];
