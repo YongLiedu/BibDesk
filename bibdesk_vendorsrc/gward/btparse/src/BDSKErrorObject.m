@@ -43,6 +43,16 @@ NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
 
 @implementation BDSKErrorObject
 
+- (id)init {
+    self = [super init];
+    if (self) {
+        isIgnorableWarning = NO;
+        itemNumber = -1;
+        lineNumber = -1;
+    }
+    return self;
+}
+
 - (void)dealloc {
     [fileName release];
     [editor release];
