@@ -64,8 +64,6 @@
         publications = nil;
         
         [person setPersonController:self];
-        
-        [[self window] setDelegate:self];
 	}
 	return self;
 
