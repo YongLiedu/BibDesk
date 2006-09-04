@@ -45,6 +45,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
 #import <OmniFoundation/OFPreference.h>
+#import "NSWindowController_BDSKExtensions.h"
 
 enum {
 	BDSKUnknownPreviewState = -1,
@@ -142,7 +143,7 @@ static BDSKPreviewer *thePreviewer;
 	if (act == @selector(toggleShowingPreviewPanel:)){ 
 		// menu item for toggling the preview panel
 		// set the on/off state according to the panel's visibility
-		if ([[self window] isVisible]) {
+		if ([self isWindowVisible]) {
 			[menuItem setState:NSOnState];
 		}else {
 			[menuItem setState:NSOffState];
@@ -154,7 +155,7 @@ static BDSKPreviewer *thePreviewer;
 #pragma mark Actions
 
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
-    if([[self window] isVisible]){
+    if([self isWindowVisible]){
 		[self hidePreviewPanel:sender];
     }else{
 		[self showPreviewPanel:sender];
@@ -241,7 +242,7 @@ static BDSKPreviewer *thePreviewer;
 		[progressIndicator stopAnimation:nil];
 	
     // if we're offscreen, no point in doing any extra work; we want to be able to reset offscreen though
-    if(![[self window] isVisible] && state != BDSKEmptyPreviewState){
+    if(![self isWindowVisible] && state != BDSKEmptyPreviewState){
         return;
     }
 	
@@ -383,21 +384,21 @@ static BDSKPreviewer *thePreviewer;
 #pragma mark Data accessors
 
 - (NSData *)PDFData{
-	if([texTask hasPDFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [[self window] isVisible]){
+	if([texTask hasPDFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isWindowVisible]){
 		return [texTask PDFData];
 	}
 	return nil;
 }
 
 - (NSData *)RTFData{
-	if([texTask hasRTFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [[self window] isVisible]){
+	if([texTask hasRTFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isWindowVisible]){
 		return [texTask RTFData];
 	}
 	return nil;
 }
 
 - (NSString *)LaTeXString{
-	if([texTask hasLaTeX] && ![self isEmpty] && ![messageQueue hasInvocations] && [[self window] isVisible]){
+	if([texTask hasLaTeX] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isWindowVisible]){
 		return [texTask LaTeXString];
 	}
 	return nil;
@@ -434,7 +435,7 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification{
 	// save the visibility of the previewer
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[[self window] isVisible] forKey:BDSKShowingPreviewKey];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
     // save the scalefactors of the views
     volatile float scaleFactor = 0.0;
     if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)

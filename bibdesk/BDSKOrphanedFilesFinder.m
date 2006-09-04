@@ -49,6 +49,7 @@
 #import "BDSKOrphanedFileServer.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKFile.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -93,7 +94,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (IBAction)toggleShowingOrphanedFilesPanel:(id)sender{
-    if([[self window] isVisible]){
+    if([self isWindowVisible]){
 		[self hideOrphanedFilesPanel:sender];
     }else{
 		[self showOrphanedFilesPanel:sender];
@@ -201,7 +202,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     if (act == @selector(toggleShowingOrphanedFilesPanel:)){ 
 		// menu item for toggling the orphaned files panel
 		// set the on/off state according to the panel's visibility
-		if ([[self window] isVisible]) {
+		if ([self isWindowVisible]) {
 			[menuItem setState:NSOnState];
 		}else {
 			[menuItem setState:NSOffState];

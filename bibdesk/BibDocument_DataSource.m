@@ -59,6 +59,7 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "BDSKTypeSelectHelper.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 @implementation BibDocument (DataSource)
 
@@ -557,7 +558,7 @@
 		case BDSKPDFDragCopyType:
 			mainType = NSPDFPboardType;
 			if([pubs isEqualToArray:[self selectedPublications]] &&
-			   [[[BDSKPreviewer sharedPreviewer] window] isVisible]){
+			   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
 				// we are copying, and the previewer is showing, so we reuse it's PDF data if available
 				data = [[BDSKPreviewer sharedPreviewer] PDFData];
 			}
@@ -565,7 +566,7 @@
 		case BDSKRTFDragCopyType:
 			mainType = NSRTFPboardType;
 			if([pubs isEqualToArray:[self selectedPublications]] &&
-			   [[[BDSKPreviewer sharedPreviewer] window] isVisible]){
+			   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
 				// we are copying, and the previewer is showing, so we reuse it's RTF data if available
 				data = [[BDSKPreviewer sharedPreviewer] RTFData];
 			}
@@ -573,7 +574,7 @@
 		case BDSKLaTeXDragCopyType:
 			mainType = NSStringPboardType;
 			if([pubs isEqualToArray:[self selectedPublications]] &&
-			   [[[BDSKPreviewer sharedPreviewer] window] isVisible]){
+			   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
 				// we are copying, and the previewer is showing, so we reuse it's LaTeX string if available
 				string = [[BDSKPreviewer sharedPreviewer] LaTeXString];
 			}

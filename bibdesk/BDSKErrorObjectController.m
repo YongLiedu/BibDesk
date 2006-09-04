@@ -45,6 +45,7 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import "BibEditor.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 // put it here because IB chokes on it
 @interface BDSKLineNumberTransformer : NSValueTransformer @end
@@ -330,7 +331,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 #pragma mark Actions
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
-    if (![[self window] isVisible]) {
+    if (![self isWindowVisible]) {
         [self showErrorPanel:sender];
     }else{
         [self hideErrorPanel:sender];
@@ -393,7 +394,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 	if (act == @selector(toggleShowingErrorPanel:)){ 
 		// menu item for toggling the error panel
 		// set the on/off state according to the panel's visibility
-		if ([[self window] isVisible]) {
+		if ([self isWindowVisible]) {
 			[menuItem setState:NSOnState];
 		}else {
 			[menuItem setState:NSOffState];
@@ -422,7 +423,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             if(pub)
                 [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
-            if([[self window] isVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
+            if([self isWindowVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
                 [self showErrorPanel:self];
         }
         [currentErrors removeAllObjects];

@@ -41,6 +41,7 @@
 #import <BTParse/BDSKErrorObject.h>
 #import "BDSKErrorEditor.h"
 #import "BibDocument.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 
 @interface BDSKAllItemsErrorManager : BDSKErrorManager @end
@@ -198,7 +199,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     
     while(index--){
         editor = [editors objectAtIndex:index];
-        if([editor isEditing] == NO)
+        if([editor isWindowVisible] == NO)
             [self removeEditor:editor];
     }
 }

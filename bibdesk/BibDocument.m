@@ -104,6 +104,7 @@
 #import "BDSKFileContentSearchController.h"
 #import "BDSKTemplateParser.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"bibTeX database";
@@ -3040,7 +3041,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     [self displayPreviewForItems:selPubs];
 
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
-	   [[[BDSKPreviewer sharedPreviewer] window] isVisible]){
+	   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
 
 		if(!selPubs){
 			// clear the previews
@@ -3406,7 +3407,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
-       [[[BDSKPreviewer sharedPreviewer] window] isVisible] &&
+       [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
        [tableView selectedRow] != -1 )
         [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 	

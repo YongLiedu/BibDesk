@@ -199,12 +199,6 @@
     return data;
 }
 
-- (BOOL)isEditing;
-{
-    // check isWindowLoaded first, so we don't unnecessarily load the nib
-    return [self isWindowLoaded] && [[self window] isVisible];
-}
-
 - (BOOL)isPasteDrag;
 {
     return isPasteDrag;

@@ -39,6 +39,7 @@
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKBackgroundView.h"
 #import <OmniBase/assertions.h>
+#import "NSWindowController_BDSKExtensions.h"
 
 @interface MacroTextFieldWindowController (Private)
 
@@ -239,7 +240,7 @@
 	lowerEdgeRect = NSIntersectionRect(lowerEdgeRect, [contentView visibleRect]);
 	// see if the cell's lower edge is scrolled out of sight
 	if (NSIsEmptyRect(lowerEdgeRect)) {
-		if ([[self window] isVisible] == YES) 
+		if ([self isWindowVisible] == YES) 
 			[self hideWindow];
 		return;
 	}
@@ -251,7 +252,7 @@
 	winFrame = NSInsetRect(winFrame, -margin, 0.0);
 	[[self window] setFrame:winFrame display:YES];
 	
-	if ([[self window] isVisible] == NO) 
+	if ([self isWindowVisible] == NO) 
 		[self attachWindow];
 }
 

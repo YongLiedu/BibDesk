@@ -72,6 +72,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "BDSKReadMeController.h"
 #import "BDSKOrphanedFilesFinder.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 @implementation BibAppController
 
@@ -497,7 +498,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	if (act == @selector(toggleShowingPreviewPanel:)){ 
 		// menu item for toggling the preview panel
 		// set the on/off state according to the panel's visibility
-		if ([[[BDSKPreviewer sharedPreviewer] window] isVisible]) {
+		if ([[BDSKPreviewer sharedPreviewer] isWindowVisible]) {
 			[menuItem setState:NSOnState];
 		}else {
 			[menuItem setState:NSOffState];
@@ -507,7 +508,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	else if (act == @selector(toggleShowingErrorPanel:)){ 
 		// menu item for toggling the error panel
 		// set the on/off state according to the panel's visibility
-		if ([[[BDSKErrorObjectController sharedErrorObjectController] window] isVisible]) {
+		if ([[BDSKErrorObjectController sharedErrorObjectController] isWindowVisible]) {
 			[menuItem setState:NSOnState];
 		}else {
 			[menuItem setState:NSOffState];
@@ -522,7 +523,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         
 		// menu item for toggling the orphaned files panel
 		// set the on/off state according to the panel's visibility
-		if ([[[BDSKOrphanedFilesFinder sharedFinder] window] isVisible]) {
+		if ([[BDSKOrphanedFilesFinder sharedFinder] isWindowVisible]) {
 			[menuItem setState:NSOnState];
 		}else {
 			[menuItem setState:NSOffState];

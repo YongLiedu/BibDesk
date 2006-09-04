@@ -69,7 +69,6 @@
 - (void)setFileName:(NSString *)newFileName;
 - (NSString *)displayName;
 - (NSData *)pasteDragData;
-- (BOOL)isEditing;
 - (BOOL)isPasteDrag;
 
 - (IBAction)loadFile:(id)sender;
