@@ -2517,7 +2517,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[oldString length] - [[groupName lastName] length] - 5];
 		BOOL first = YES;
 		while(auth = [authEnum nextObject]){
-			if([auth fuzzyCompare:groupName] != NSOrderedSame){
+			if([auth fuzzyEqual:groupName] == NO){
 				if(first == YES) 
                     first = NO;
 				else 
@@ -2638,7 +2638,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		while(auth = [authEnum nextObject]){
 			if(first == YES) first = NO;
 			else [string appendString:@" and "];
-			if([auth fuzzyCompare:groupName] == NSOrderedSame){
+			if([auth fuzzyEqual:groupName]){
 				[string appendString:newGroupName];
 			}else{
 				[string appendString:[auth name]];
@@ -2772,21 +2772,21 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (void)setDate: (NSCalendarDate *)newDate{
     if(newDate != pubDate){
         [pubDate release];
-        pubDate = [newDate copy];
+        pubDate = [newDate retain];
     }
 }
 
 - (void)setDateAdded:(NSCalendarDate *)newDateAdded {
     if(newDateAdded != dateAdded){
         [dateAdded release];
-        dateAdded = [newDateAdded copy];
+        dateAdded = [newDateAdded retain];
     }
 }
 
 - (void)setDateModified:(NSCalendarDate *)newDateModified {
     if(newDateModified != dateModified){
         [dateModified release];
-        dateModified = [newDateModified copy];
+        dateModified = [newDateModified retain];
     }
 }
 
