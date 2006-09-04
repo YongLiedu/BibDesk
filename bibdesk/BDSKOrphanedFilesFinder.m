@@ -184,21 +184,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [server stopEnumerating];
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
-	SEL act = [menuItem action];
-
-    if (act == @selector(toggleShowingOrphanedFilesPanel:)){ 
-		// menu item for toggling the orphaned files panel
-		// set the on/off state according to the panel's visibility
-		if ([self isWindowVisible]) {
-			[menuItem setState:NSOnState];
-		}else {
-			[menuItem setState:NSOffState];
-		}
-	}
-    return YES;
-}
-
 - (IBAction)search:(id)sender{
     [arrayController setSearchString:[sender stringValue]];
     [arrayController rearrangeObjects];

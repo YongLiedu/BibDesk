@@ -137,21 +137,6 @@ static BDSKPreviewer *thePreviewer;
     return @"Previewer";
 }
 
-- (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
-	SEL act = [menuItem action];
-
-	if (act == @selector(toggleShowingPreviewPanel:)){ 
-		// menu item for toggling the preview panel
-		// set the on/off state according to the panel's visibility
-		if ([self isWindowVisible]) {
-			[menuItem setState:NSOnState];
-		}else {
-			[menuItem setState:NSOffState];
-		}
-	}
-    return YES;
-}
-
 #pragma mark Actions
 
 - (IBAction)showWindow:(id)sender{

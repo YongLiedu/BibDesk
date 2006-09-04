@@ -370,23 +370,6 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         [self showEditorForErrorObject:[[errorsController arrangedObjects] objectAtIndex:clickedRow]];
 }
 
-#pragma mark Menu validation
-
-- (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
-	SEL act = [menuItem action];
-
-	if (act == @selector(toggleShowingErrorPanel:)){ 
-		// menu item for toggling the error panel
-		// set the on/off state according to the panel's visibility
-		if ([self isWindowVisible]) {
-			[menuItem setState:NSOnState];
-		}else {
-			[menuItem setState:NSOffState];
-		}
-	}
-    return YES;
-}
-
 #pragma mark Error notification handling
 
 - (void)startObservingErrors{
