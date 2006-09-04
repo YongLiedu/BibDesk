@@ -56,7 +56,7 @@
  @discussion This was a pain to write, and more of a pain to link. :)
 */
 @interface BDSKConverter : NSObject {
-     OFCharacterSet *finalCharSet;
+     NSCharacterSet *finalCharSet;
      NSCharacterSet *accentCharSet;
      NSDictionary *detexifyConversions;
      NSDictionary *texifyConversions;

@@ -52,10 +52,6 @@
 static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharacterSet *baseCharacterSetForTeX, NSCharacterSet *accentCharSet, NSDictionary *texifyAccents);
 @end
 
-@interface OFStringScanner (BDSKExtensions)
-- initCaseSensitiveWithString:(NSString *)aString;
-@end
-
 @implementation BDSKConverter
 
 + (BDSKConverter *)sharedConverter{
@@ -166,65 +162,53 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
-    // we expect to find composed accented characters, this is also what we use in the CharacterConversion plist
+    // we expect to find composed accented characters, as this is also what we use in the CharacterConversion plist
     NSMutableString *precomposedString = [s mutableCopy];
     CFStringNormalize((CFMutableStringRef)precomposedString, kCFStringNormalizationFormC);
     
     NSMutableString *tmpConv = nil;
     NSMutableString *convertedSoFar = [precomposedString mutableCopy];
 
-    unsigned sLength = [precomposedString length];
-    
     int offset = 0;
-    unsigned index = 0;
     NSString *TEXString = nil;
-    NSString *logString = nil;
-
-    OFStringScanner *scanner = [[OFStringScanner alloc] initCaseSensitiveWithString:precomposedString];
-    [precomposedString release];
     
     UniChar ch;
+    unsigned int index, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
+    CFStringInlineBuffer inlineBuffer;
+    CFStringInitInlineBuffer((CFStringRef)precomposedString, &inlineBuffer, CFRangeMake(0, numberOfCharacters));
     
-    while(scannerHasData(scanner)){
-    
-        // scan up to an unreadable character; logString can be used for debug logging
-        logString = [scanner readTokenFragmentWithDelimiterOFCharacterSet:finalCharSet];
+    for (index = 0; index < numberOfCharacters; index++) {
+            
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, index);
         
-        index = scannerScanLocation(scanner);
-		if(index >= sLength) // don't go past the end
-			break;
-		
-        ch = scannerReadCharacter(scanner);
-        tmpConv = [[NSMutableString alloc] initWithCharactersNoCopy:&ch length:1 freeWhenDone:NO];
-
-        // try the dictionary first
-		if((TEXString = [texifyConversions objectForKey:tmpConv])){
-			[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
-										  withString:TEXString];
-			// we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-            offset += [TEXString length] - 1;
-            
-        // fall back to Unicode decomposition/conversion of the mutable string
-		} else if(convertComposedCharacterToTeX(tmpConv, baseCharacterSetForTeX, accentCharSet, texifyAccents)){
-            [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
-                                          withString:tmpConv];
-			// we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-            offset += [tmpConv length] - 1;
-            
-        // if tmpConv is non-nil and decomposition failed, throw an exception
-        } else if(tmpConv != nil){
-            NSString *charString = [NSString unicodeNameOfCharacter:ch];
-            NSLog(@"unable to convert \"%@\" (unichar %@)", charString, [NSString hexStringForCharacter:ch]);
-            // raise exception after moving the scanner past the offending char
-            [NSException raise:BDSKTeXifyException format:@"%@", charString]; 
+        if ([finalCharSet characterIsMember:ch]){
+        
+            tmpConv = [[NSMutableString alloc] initWithCharactersNoCopy:&ch length:1 freeWhenDone:NO];
+    
+            // try the dictionary first
+            if((TEXString = [texifyConversions objectForKey:tmpConv])){
+                [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1) withString:TEXString];
+                // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+                offset += [TEXString length] - 1;
+                
+            // fall back to Unicode decomposition/conversion of the mutable string
+            } else if(convertComposedCharacterToTeX(tmpConv, baseCharacterSetForTeX, accentCharSet, texifyAccents)){
+                [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1) withString:tmpConv];
+                // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+                offset += [tmpConv length] - 1;
+                
+            // if tmpConv is non-nil and decomposition failed, throw an exception
+            } else if(tmpConv != nil){
+                NSString *charString = [NSString unicodeNameOfCharacter:ch];
+                NSLog(@"unable to convert \"%@\" (unichar %@)", charString, [NSString hexStringForCharacter:ch]);
+                // raise exception after moving the scanner past the offending char
+                [NSException raise:BDSKTeXifyException format:@"%@", charString]; 
+            }
+            [tmpConv release];
         }
-        [tmpConv release];
     }
-		
     
-    //clean up
-    [scanner release];
-    
+    [precomposedString release];
     return convertedSoFar;
 }
 
@@ -291,82 +275,128 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
-    NSString *tmpPass = nil;
     NSString *tmpConv = nil;
     NSString *TEXString = nil;
 
-    NSMutableString *convertedSoFar = [[NSMutableString alloc] initWithCapacity:[s length]];
-    OFStringScanner *scanner = [[OFStringScanner alloc] initCaseSensitiveWithString:s];
+    NSMutableString *convertedSoFar = nil;
+    unsigned int start, length = [s length];
+    NSRange range = [s rangeOfString:@"{\\" options:0 range:NSMakeRange(0, length)];
     
-    do {
+    if (range.length){
         
-        // scan everything before a {\ into tmpPass; if we don't find a {\, tmpPass has the full string
-        if(tmpPass = [scanner readFullTokenUpToString:@"{\\"]){
-            [convertedSoFar appendString:tmpPass];
-                    
-            // if we scanned to the end without finding a {\ or if we don't see a closing }, do nothing
-            if(scannerHasData(scanner) && (tmpConv = [scanner readFullTokenUpToString:@"}"])){
+        NSRange closingRange, replaceRange;
+        convertedSoFar = [s mutableCopy];
+        
+        while (range.length) {
+            
+            start = NSMaxRange(range);
+            closingRange = [convertedSoFar rangeOfString:@"}" options:0 range:NSMakeRange(start, length - start)];
+            
+            if (closingRange.length) {
                 
-                // update the scanner's position to skip the }
-                scannerSkipPeekedCharacter(scanner);
+                replaceRange = NSMakeRange(range.location, closingRange.location - range.location + 1);
+                tmpConv = (NSString *)CFStringCreateWithSubstring(NULL, (CFStringRef)convertedSoFar, CFRangeMake(replaceRange.location, replaceRange.length));
                 
-                // this holds the possible TeX sequence
-                tmpConv = [tmpConv stringByAppendingString:@"}"];
-                  
-                // see if it's something we can convert
+                // see if the dictionary has a conversion, or try Unicode composition
                 if((TEXString = [detexifyConversions objectForKey:tmpConv]) ||
                     (TEXString = [self composedStringFromTeXString:tmpConv])){
-                    tmpConv = TEXString;
+                    [convertedSoFar replaceCharactersInRange:replaceRange withString:TEXString];
                 }
-                    
-                // either append the conversion or re-create the original sequence
-                [convertedSoFar appendString:tmpConv];
+                [tmpConv release];
+                
+                // advance the starting search range by a single character, so if replacement failed we don't start at {\ again
+                // this is inside the if() since if there were no closing braces, there's no point in repeating the search
+                length = [convertedSoFar length];
+                range = [convertedSoFar rangeOfString:@"{\\" options:0 range:NSMakeRange(replaceRange.location + 1, length - replaceRange.location - 1)];
             }
+            
         }
+    } else {
         
-    } while(scannerHasData(scanner));
-    [scanner release];
+        // if there was no character, we don't bother creating a mutable copy of the string
+        convertedSoFar = [s copy];
+    }
+    OBPOSTCONDITION(nil != convertedSoFar);
     return convertedSoFar; 
 }
 
+// takes a sequence such as "{\'i}" (no quotes) and converts to appropriate composed characters
+// returns nil if unable to convert
 - (NSString *)composedStringFromTeXString:(NSString *)texString{
-    
-    // check this before creating a scanner
-    if(nil == texString || CFStringHasPrefix((CFStringRef)texString, CFSTR("{\\")) == FALSE)
-        return nil;
-    
+        
 	NSString *texAccent = nil;
 	NSString *accent = nil;
-    NSString *character = nil;
-     
-    OFStringScanner *scanner = [[OFStringScanner alloc] initCaseSensitiveWithString:texString];
-        	
-    UniChar accentCh = scannerReadCharacter(scanner);
+    unsigned int idx = 0, length = [texString length];
     
-    if(!scannerReadString(scanner, @" ") && [[NSCharacterSet letterCharacterSet] characterIsMember:accentCh]){
-        [scanner release];
+    CFStringInlineBuffer inlineBuffer;
+    CFStringInitInlineBuffer((CFStringRef)texString, &inlineBuffer, CFRangeMake(0, length));
+    
+    // check this before creating a scanner
+    if (nil == texString)
         return nil;
-    }
-
+    
+    // check for {\ prefix
+    if (CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx++) != '{' ||
+        CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx++) != '\\')
+        return nil;
+    
+    UniChar ch, accentCh = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx++);
+    
+    ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
+    
+    // @@ why is this check here?  may be incorrect idx if ch == ' '; need example
+    if (ch != ' ' && [[NSCharacterSet letterCharacterSet] characterIsMember:accentCh])
+        return nil;
+    
     texAccent = [[NSString alloc] initWithCharactersNoCopy:&accentCh length:1 freeWhenDone:NO];
     accent = [detexifyAccents objectForKey:texAccent];
     [texAccent release];
     
-    character = [scanner readTokenFragmentWithDelimiterCharacter:'}'];
+    if (nil == accent)
+        return nil;
     
-    if(accent && character){
-		if ([character isEqualToString:@"\\i"])
-			character = @"i";
-		else if ([character isEqualToString:@"\\j"])
-			character = @"j";
-		if ([character length] == 1){
-            [scanner release];
-			return [[character stringByAppendingString:accent] precomposedStringWithCanonicalMapping];
+    unsigned letterStart = idx;
+    NSString *character = nil;
+    
+    for (idx = letterStart; idx < length; idx++) {
+        
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
+
+        // scan up to the closing brace, since we don't know the character substring length beforehand
+        if (ch == '}') {
+
+            CFAllocatorRef alloc = CFAllocatorGetDefault();
+            character = (NSString *)CFStringCreateWithSubstring(alloc, (CFStringRef)texString, CFRangeMake(letterStart, idx - letterStart));
+            
+            // special cases for old style i, j
+            if ([character isEqualToString:@"\\i"]) {
+                [character release];
+                character = [@"i" retain];
+            } else if ([character isEqualToString:@"\\j"]) {
+                [character release];
+                character = [@"j" retain];
+            }
+            
+            if ([character length] == 1) {
+                CFMutableStringRef mutableCharacter = CFStringCreateMutableCopy(alloc, 0, (CFStringRef)character);
+                CFRelease(character);
+                CFStringAppend(mutableCharacter, (CFStringRef)accent);
+                CFStringNormalize(mutableCharacter, kCFStringNormalizationFormC);
+                character = [(id)mutableCharacter autorelease];
+                
+                // should be at idx = length anyway
+                break;
+            } else {
+                
+                // incorrect length of the character
+                [character release];
+                character = nil;
+                break;
+            }
         }
-	}
+    }
     
-    [scanner release];
-    return nil;
+    return character;
 }
 
 @end
@@ -402,8 +432,10 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 }
 
 - (void)setFinalCharSet:(NSCharacterSet *)charSet{
-    [finalCharSet release];
-    finalCharSet = [[OFCharacterSet alloc] initWithCharacterSet:charSet];
+    if(finalCharSet != charSet){
+        [finalCharSet release];
+        finalCharSet = [charSet copy];
+    }
 }
 
 - (void)setTexifyConversions:(NSDictionary *)newConversions{
@@ -431,76 +463,5 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 - (NSString *)initTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:aString]; }
 
 - (NSString *)initDeTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByDeTeXifyingString:aString]; }
-
-@end
-
-// Shark shows that the constant case conversion buffer creation/disposal adds up; since we never use the case-insensitive features of OFStringScanner, we'll provide an alternate implementation.  Should ask Omni to add this feature to avoid the code duplication.
-
-@interface OFCharacterScanner (BDSKExtensions)
-- initCaseSensitive;
-@end
-
-@implementation OFCharacterScanner (BDSKExtensions)
-
-// use [super init] instead of [self init] so we bypass designated init (which always creates a caseBuffer)
-
-- initCaseSensitive;
-{
-    if ([super init] == nil)
-        return nil;
-    
-    inputBuffer = NULL;
-    scanEnd = inputBuffer;
-    scanLocation = scanEnd;
-    inputStringPosition = 0;
-    firstNonASCIIOffset = NSNotFound;
-    
-    // set the case conversion buffer size to zero, since we don't need it
-    caseBuffer.bufferSize = 0;
-    caseBuffer.string = NULL;
-    caseBuffer.buffer = NULL;
-    
-    return self;
-}
-
-// category override of dealloc
-- (void)dealloc;
-{
-    if (freeInputBuffer) {
-        OBASSERT(inputBuffer != NULL);
-        NSZoneFree(NULL, inputBuffer);
-    }
-    
-    // check case buffer; if buffer is NULL, it's uninitialized
-    if(caseBuffer.buffer != NULL)
-        OFCaseConversionBufferDestroy(&caseBuffer);
-    [super dealloc];
-}
-
-@end
-
-@implementation OFStringScanner (BDSKExtensions)
-
-- initCaseSensitiveWithString:(NSString *)aString;
-{
-    self = [super initCaseSensitive];
-    if(self){
-        targetString = [aString retain];
-        [self fetchMoreDataFromString:aString];
-    }
-    return self;
-}
-
-#if OMNI_FORCE_ASSERTIONS
-
-// we only instantiate OFCharacterScanners with OFStringScanner (and don't call this method at present); in case we ever do, here's a debug check to see if the scanner can be used case-insensitively
-- (BOOL)scanStringCaseInsensitive:(NSString *)string peek:(BOOL)doPeek;
-{
-    
-    NSAssert(caseBuffer.buffer != NULL, @"Error: this scanner was explicitly created as case-sensitive");
-    return [super scanStringCaseInsensitive:string peek:doPeek];
-}
-
-#endif
 
 @end
