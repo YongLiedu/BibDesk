@@ -86,15 +86,6 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 - (id)init
 {
     if(self = [super init]){
-        NSWindow *theWindow = [self window];
-        overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
-        [overlay setReleasedWhenClosed:NO];
-
-        NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:[[theWindow contentView] frame] delegate:self];
-        [overlay setContentView:view];
-        [view release];
-        [overlay overlayView:[theWindow contentView]];
-        [theWindow setShowsToolbarButton:NO];
         isSearchActive = NO;
         NSString *path = [[NSBundle mainBundle] pathForResource:@"PreferenceSearchTerms" ofType:@"plist"];
         if(nil == path)
@@ -110,6 +101,19 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
     [searchTerm release];
     [overlay release];
     [super dealloc];
+}
+
+- (void)awakeFromNib;
+{
+    NSWindow *theWindow = [self window];
+    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
+    [overlay setReleasedWhenClosed:NO];
+
+    NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:[[theWindow contentView] frame] delegate:self];
+    [overlay setContentView:view];
+    [view release];
+    [overlay overlayView:[theWindow contentView]];
+    [theWindow setShowsToolbarButton:NO];
 }
 
 - (void)iconView:(OAPreferencesIconView *)iconView buttonHitAtIndex:(unsigned int)index;

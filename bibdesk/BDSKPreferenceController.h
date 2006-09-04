@@ -50,6 +50,7 @@
     NSDictionary *clientIdentiferSearchTerms;
 }
 
+- (void)awakeFromNib;
 - (IBAction)search:(id)sender;
 
 @end
