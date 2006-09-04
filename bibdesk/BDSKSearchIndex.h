@@ -38,10 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@protocol BDSKSearchIndexDelegate <NSObject>
-- (void)updateSearchIfNeeded;
-@end
-
 // I think a union guarantees correct alignment; is that true for a struct as well?
 typedef struct _BDSKSearchIndexFlags
 {
@@ -53,7 +49,6 @@ typedef struct _BDSKSearchIndexFlags
     SKIndexRef index;
     id document;
     
-    id delegate;
     NSArray *initialObjectsToIndex;
     
     NSMutableArray *notificationQueue;
@@ -70,6 +65,5 @@ typedef struct _BDSKSearchIndexFlags
 - (SKIndexRef)index;
 - (void)cancel;
 - (BOOL)isIndexing;
-- (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
 
 @end

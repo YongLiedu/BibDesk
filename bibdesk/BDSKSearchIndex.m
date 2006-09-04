@@ -82,7 +82,6 @@ void *setupThreading(void *anObject);
         CFRelease(indexData); // @@ doc bug: is this owned by the index now?  seems to be...
             
         document = [aDocument retain];
-        delegate = nil;
         [self setInitialObjectsToIndex:[[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)]];
         
         flags.isIndexing = 0;
@@ -132,14 +131,6 @@ void *setupThreading(void *anObject);
 {
     uint32_t isIndexing = flags.isIndexing;
     return isIndexing == 1;
-}
-
-- (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject
-{
-    if(anObject)
-        NSAssert1([(id)anObject conformsToProtocol:@protocol(BDSKSearchIndexDelegate)], @"%@ does not conform to BDSKSearchIndexDelegate protocol", [anObject class]);
-
-    delegate = anObject;
 }
 
 @end
@@ -292,8 +283,6 @@ void *setupThreading(void *anObject)
             
 	while (pub = [pubEnum nextObject])
 		[self indexFilesForItem:pub];
-        
-    [delegate performSelectorOnMainThread:@selector(updateSearchIfNeeded) withObject:nil waitUntilDone:NO];
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
@@ -337,8 +326,6 @@ void *setupThreading(void *anObject)
 	}
     swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
-	
-    [delegate performSelectorOnMainThread:@selector(updateSearchIfNeeded) withObject:nil waitUntilDone:NO];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -347,9 +334,6 @@ void *setupThreading(void *anObject)
 
     // reindex all the files; unless you have many local files attached to the item, there won't be much savings vs. just adding the one that changed
     [self indexFilesForItem:[note userInfo]];
-    
-    // we used to remove the old object from the array, but it's a) not thread safe and b) having an extra document in the index isn't that bad
-    [delegate performSelectorOnMainThread:@selector(updateSearchIfNeeded) withObject:nil waitUntilDone:NO];
 }    
 
 - (void)handleMachMessage:(void *)msg
