@@ -109,7 +109,6 @@
     IBOutlet NSScrollView* documentSnoopScrollView;
 	int drawerState;
 	int drawerButtonState;
-	BOOL drawerLoaded;
 	// doc textpreview stuff
     IBOutlet PDFImageView *documentSnoopImageView;
     IBOutlet NSView* pdfSnoopContainerView;
@@ -144,7 +143,6 @@
 	BOOL forceEndEditing;
     NSMutableDictionary *toolbarItems;
 
-    BOOL windowLoaded;
     BOOL didSetupForm;
 	
 	NSTextView *dragFieldEditor;

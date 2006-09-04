@@ -132,9 +132,6 @@ static int numberOfOpenEditors = 0;
         drawerState = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey] | BDSKDrawerStateRightMask;
         drawerButtonState = BDSKDrawerUnknownState;
         
-        windowLoaded = NO;
-        drawerLoaded = NO;
-        
         forceEndEditing = NO;
         didSetupForm = NO;
     }
@@ -155,28 +152,6 @@ static int numberOfOpenEditors = 0;
 - (void)encodeWithCoder:(NSCoder *)coder{}
 
 - (void)windowDidLoad{
-    [[self window] setDelegate:self];
-    [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
-	[self setCiteKeyDuplicateWarning:![publication isValidCiteKey:[publication citeKey]]];
-    [documentSnoopButton setIconImage:nil];
-    [self fixURLs];
-}
-
-- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    return [publication displayTitle];
-}
-
-- (BibItem *)publication{
-    return publication;
-}
-
-- (void)awakeFromNib{
-	
-	if (windowLoaded == YES) {
-		// we must be loading the drawer
-		[self setupDrawer];
-		return;
-	}
 	
     // we should have a document at this point, as the nib is not loaded before -window is called, which shouldn't happen before the document shows us
     OBASSERT([self document]);
@@ -284,12 +259,35 @@ static int numberOfOpenEditors = 0;
     BDSKCiteKeyFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     [newFieldNameComboBox setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
-	
-	windowLoaded = YES;
     
     [self registerForNotifications];
     
     [bibFields setDelegate:self];
+    
+    [[self window] setDelegate:self];
+    [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
+	
+    [self setCiteKeyDuplicateWarning:![publication isValidCiteKey:[publication citeKey]]];
+    
+    [documentSnoopButton setIconImage:nil];
+    
+    [self fixURLs];
+}
+
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
+    return [publication displayTitle];
+}
+
+- (BibItem *)publication{
+    return publication;
+}
+
+- (void)awakeFromNib{
+	
+	if (documentSnoopDrawer != nil) {
+		// we must be loading the drawer
+		[self setupDrawer];
+	}
     
 }
 
@@ -2851,10 +2849,8 @@ static int numberOfOpenEditors = 0;
 	int requiredContent = [sender tag];
 	int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
 	
-	if (drawerLoaded == NO) {
-		if ([NSBundle loadNibNamed:@"BibEditorDrawer" owner:self]) {
-			drawerLoaded = YES;
-		}  else {
+	if (documentSnoopDrawer == nil) {
+		if ([NSBundle loadNibNamed:@"BibEditorDrawer" owner:self] == NO) {
 			[statusBar setStringValue:NSLocalizedString(@"Unable to load the drawer.",@"")];
 			return;
 		}
