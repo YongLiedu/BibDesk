@@ -105,11 +105,17 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 
 - (void)awakeFromNib;
 {
+    // OAPreferenceController may implement this in future
+    if ([[self superclass] instancesRespondToSelector:_cmd])
+        [super awakeFromNib];
+    
     NSWindow *theWindow = [self window];
-    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
+    NSRect contentRect = [theWindow contentRectForFrameRect:[theWindow frame]];
+        
+    overlay = [[BDSKOverlayWindow alloc] initWithContentRect:contentRect styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
     [overlay setReleasedWhenClosed:NO];
 
-    NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:[[theWindow contentView] frame] delegate:self];
+    NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:contentRect delegate:self];
     [overlay setContentView:view];
     [view release];
     [overlay overlayView:[theWindow contentView]];

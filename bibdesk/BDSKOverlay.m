@@ -133,7 +133,7 @@
 @end
 
 //
-// This is an identical subclass to the NSPanel version, except that it accounts for a toolbar in the height calculation.
+// This is identical to the NSPanel version, except that it accounts for a toolbar in the height calculation, and won't hide when the application is in the background.
 //
 
 @implementation BDSKOverlayWindow
@@ -164,17 +164,18 @@
 }
 
 - (void)parentViewFrameChanged:(NSNotification *)notification {
-	NSRect viewRect = [parentView convertRect:[parentView bounds] toView:nil];
-	NSPoint windowOrigin = [[parentView window] frame].origin;
-	
-	viewRect.origin.x += windowOrigin.x;
-	viewRect.origin.y += windowOrigin.y;
-	
+	NSWindow *parentWindow = [parentView window];
+    NSRect viewRect = [parentWindow contentRectForFrameRect:[parentWindow frame]];
 	[self setFrame:viewRect display:YES];
 }
 
 - (void)parentWindowWillClose:(NSNotification *)notification {
 	[self orderOut:nil];
+}
+
+- (void)orderFront:(id)sender{
+    [super orderFront:sender];
+    [self parentViewFrameChanged:nil];
 }
 
 - (void)overlayView:(NSView *)aView {
