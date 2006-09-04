@@ -57,9 +57,6 @@ static NSLock *parserLock = nil;
 
 @interface BibTeXParser (Private)
 
-// private function to do ASCII checking.
-static NSString * copyCheckedAndTranslatedString(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
-
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
 static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding);
@@ -89,11 +86,13 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 }
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
-    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
-	if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
+    // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
+    if ([inData length] == 0)
         return [NSMutableArray array];
-		
+    
+    [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
+    		
     int ok = 1;
     
     BibItem *newBI = nil;
@@ -122,6 +121,29 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
     
     NSStringEncoding parserEncoding = (aDocument == nil || isPasteOrDrag ? NSUTF8StringEncoding : [(BibDocument *)aDocument documentStringEncoding]);
     
+    NSError *error = nil;
+
+    // check the entire string for encoding problems; this avoids checking each field value separately
+    NSString *encodingTestString = [[NSString alloc] initWithData:inData encoding:parserEncoding];
+    
+    // checking -[NSString canBeConvertedToEncoding] seems strange in this case, since we're not actually converting it to data; however, it catches the case where a file is opened with the wrong encoding
+    if (nil == encodingTestString || [encodingTestString canBeConvertedToEncoding:parserEncoding] == NO) {
+        BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
+        [errorObject setFileName:filePath];
+        [errorObject setLineNumber:0];
+        [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
+        [errorObject setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data using encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]]];
+        
+        [errorObject report];
+        [errorObject release];
+        // make sure the error panel is displayed, regardless of prefs
+        [[BDSKErrorObjectController sharedErrorObjectController] performSelector:@selector(showErrorPanel:) withObject:nil afterDelay:0.0];
+        
+        // this will cause a partial data warning to be displayed
+        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to Interpret Using Encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]], nil);
+    }
+    [encodingTestString release];
+    
     if( !(isPasteOrDrag) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
         infile = fopen(fs_path, "r");
@@ -129,8 +151,6 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
         infile = [inData openReadOnlyStandardIOFile];
         fs_path = NULL; // used for error context in libbtparse
     }    
-
-    NSError *error = nil;
 
     buf = (const char *) [inData bytes];
 
@@ -183,7 +203,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                                 bt_free_ast(entry);
                                 @throw BibTeXParserInternalException;
                             }
-                            complexString = copyCheckedAndTranslatedString(tmpStr, field->line, filePath, parserEncoding);
+                            complexString = [[NSString alloc] initDeTeXifiedStringWithString:tmpStr];
                             [tmpStr release];
                         }else{
                             complexString = copyStringFromBTField(field, filePath, macroResolver, parserEncoding);
@@ -714,29 +734,19 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
 
 /// private functions used with libbtparse code
 
-static NSString * copyCheckedAndTranslatedString(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
-    if(![s canBeConvertedToEncoding:parserEncoding]){
-        NSString *type = NSLocalizedString(@"Error", @"");
-        NSString *message = NSLocalizedString(@"Unable to convert characters to the specified encoding.", @"");
-
-        BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
-        [errorObject setFileName:filePath];
-        [errorObject setLineNumber:line];
-        [errorObject setErrorClassName:type];
-        [errorObject setErrorMessage:message];
-        
-        [errorObject report];
-        [errorObject release];
-        // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
-        [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
+static inline int numberOfValuesInField(AST *field)
+{
+    AST *simple_value = field->down;
+    int cnt = 0;
+    while (simple_value && simple_value->text) {
+        simple_value = simple_value->right;
+        cnt++;
     }
-    
-    //deTeXify it
-    return [[NSString alloc] initDeTeXifiedStringWithString:s];
+    return cnt;
 }
-
+    
 static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){
-    NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:5];
+            
     NSString *s = nil;
     BDSKStringNode *sNode = nil;
     AST *simple_value;
@@ -744,15 +754,29 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
 	if(field->nodetype != BTAST_FIELD){
 		NSLog(@"error! expected field here");
 	}
+    
 	simple_value = field->down;
-		
+    
+    // traverse the AST and find out how many fields we have
+    int nodeCount = numberOfValuesInField(field);
+    
+    // from profiling: optimize for the single quoted string node case; avoids the array, node, and complex string overhead
+    if (1 == nodeCount && simple_value->nodetype == BTAST_STRING) {
+        s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
+        NSString *translatedString = [[NSString alloc] initDeTeXifiedStringWithString:s];
+        [s release];
+        
+        return translatedString;
+    }
+    
+    // create a fixed-size mutable array, since we've counted the number of nodes
+    NSMutableArray *nodes = (NSMutableArray *)CFArrayCreateMutable(CFAllocatorGetDefault(), nodeCount, &kCFTypeArrayCallBacks);
+
 	while(simple_value){
         if (simple_value->text){
             switch (simple_value->nodetype){
                 case BTAST_MACRO:
                     s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
-                    if(!s)
-                        NSLog(@"possible encoding conversion failure for \"%s\" at line %d", simple_value->text, field->line);
                     
                     // We parse the macros in itemsFromData, but for reference, if we wanted to get the 
                     // macro value we could do this:
@@ -762,17 +786,14 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
                     break;
                 case BTAST_STRING:
                     s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
-                    if(!s)
-                        NSLog(@"possible encoding conversion failure for \"%s\" at line %d", simple_value->text, field->line);
-                    NSString *translatedString = copyCheckedAndTranslatedString(s, field->line, filePath, parserEncoding);
+
+                    NSString *translatedString = [[NSString alloc] initDeTeXifiedStringWithString:s];
                     sNode = [[BDSKStringNode alloc] initWithQuotedString:translatedString];
                     [translatedString release];
 
                     break;
                 case BTAST_NUMBER:
                     s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
-                    if(!s)
-                        NSLog(@"possible encoding conversion failure for \"%s\" at line %d", simple_value->text, field->line);
 
                     sNode = [[BDSKStringNode alloc] initWithNumberString:s];
 
@@ -780,7 +801,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
                 default:
                     [NSException raise:@"bad node type exception" format:@"Node type %d is unexpected.", simple_value->nodetype];
             }
-            [stringValueArray addObject:sNode];
+            [nodes addObject:sNode];
             [s release];
             [sNode release];
         }
@@ -789,8 +810,8 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
 	} // while simple_value
 	
     // This will return a single string-type node as a non-complex string.
-    NSString *returnValue = [[NSString alloc] initWithNodes:stringValueArray macroResolver:macroResolver];
-    [stringValueArray release];
+    NSString *returnValue = [[NSString alloc] initWithNodes:nodes macroResolver:macroResolver];
+    [nodes release];
     
     return returnValue;
 }
