@@ -114,8 +114,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 
-#import <BTParse/btparse.h>
-
 @implementation BibDocument
 
 - (id)init{
