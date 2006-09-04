@@ -38,6 +38,7 @@
 
 #import "BDSKErrorObjectController.h"
 #import <OmniBase/assertions.h>
+#import <BTParse/BDSKErrorObject.h>
 #import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
 #import "BibPrefController.h"

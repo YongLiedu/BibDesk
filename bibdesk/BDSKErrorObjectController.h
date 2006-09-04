@@ -37,9 +37,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <BTParse/BDSKErrorObject.h>
 
-@class BibDocument, BibItem, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController;
+@class BibDocument, BibItem, BDSKErrorObject, BDSKErrorManager, BDSKErrorEditor, BDSKFilteringArrayController;
 
 @interface BDSKErrorObjectController : NSWindowController {
     NSMutableArray *errors;
