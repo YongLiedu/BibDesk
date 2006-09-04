@@ -80,6 +80,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             errors = [[NSMutableArray alloc] initWithCapacity:10];
             managers = [[NSMutableArray alloc] initWithCapacity:4];
             lastIndex = 0;
+            handledNonIgnorableError = NO;
             
             [managers addObject:[BDSKErrorManager allItemsErrorManager]];
             
@@ -390,8 +391,9 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             if(pub)
                 [currentErrors makeObjectsPerformSelector:@selector(setPublication:) withObject:pub];
             [[self mutableArrayValueForKey:@"errors"] addObjectsFromArray:currentErrors];
-            if([self isWindowVisible] == NO && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey])
+            if([self isWindowVisible] == NO && (handledNonIgnorableError || [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey]))
                 [self showWindow:self];
+            handledNonIgnorableError = NO;
         }
         [currentErrors removeAllObjects];
     }
@@ -406,7 +408,13 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
-    [currentErrors addObject:[notification object]];
+    BDSKErrorObject *obj = [notification object];
+    [currentErrors addObject:obj];
+    
+    // set a flag so we know that the window should be displayed after endObserving:...
+    if (NO == handledNonIgnorableError && [obj isIgnorableWarning] == NO)
+        handledNonIgnorableError = YES;
+    
 }
 
 #pragma mark TableView tooltips

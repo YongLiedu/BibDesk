@@ -50,6 +50,7 @@
     // error-handling stuff:
     IBOutlet NSTableView *errorTableView;
     IBOutlet BDSKFilteringArrayController *errorsController;
+    BOOL handledNonIgnorableError;
 }
 
 + (BDSKErrorObjectController *)sharedErrorObjectController;

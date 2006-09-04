@@ -136,8 +136,6 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
         
         [errorObject report];
         [errorObject release];
-        // make sure the error panel is displayed, regardless of prefs
-        [[BDSKErrorObjectController sharedErrorObjectController] performSelector:@selector(showErrorPanel:) withObject:nil afterDelay:0.0];
         
         // this will cause a partial data warning to be displayed
         OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to Interpret Using Encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]], nil);
@@ -529,8 +527,6 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [errorObject report];
         [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForPublication:pub];
         [errorObject release];
-        // make sure the error panel is displayed, regardless of prefs
-        [[BDSKErrorObjectController sharedErrorObjectController] performSelector:@selector(showErrorPanel:) withObject:nil afterDelay:0.0];
         
         // @@ return the empty array or nil?
         return authors;
@@ -683,8 +679,6 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
             
             [errorObject report];
             [errorObject release];
-            // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
-            [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
             
             OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
         }else{
