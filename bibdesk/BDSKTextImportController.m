@@ -115,7 +115,7 @@
 				[bookmarks addObject:[[bm mutableCopy] autorelease]];
 			}
 		}
-		macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+		macroTextFieldWC = nil;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleFlagsChangedNotification:)
@@ -1231,6 +1231,8 @@
 	int row = [itemTableView selectedRow];
 	if ([macroTextFieldWC isEditing] || row == -1 || [[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString]) 
 		return NO;
+	if (macroTextFieldWC == nil)
+    	macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
 	NSString *value = [item valueOfField:[fields objectAtIndex:row]];
 	NSText *fieldEditor = [itemTableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];

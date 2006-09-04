@@ -66,7 +66,7 @@
         macros = [[NSMutableArray alloc] initWithCapacity:5];
                 
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
-		macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+		macroTextFieldWC = nil;
         
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
@@ -228,6 +228,8 @@
 	int row = [tableView selectedRow];
 	if ([macroTextFieldWC isEditing] || row == -1) 
 		return NO;
+	if(macroTextFieldWC == nil)
+        macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
 	NSString *value = [macroDefinitions objectForKey:key];
