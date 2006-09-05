@@ -180,7 +180,7 @@
     if (result == NSOKButton) {
         NSString *shellCommand = [openUsingFilterComboBox stringValue];
         NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
-        NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil] encoding:&encoding] objectEnumerator];
+        NSEnumerator *fileEnum = [[oPanel filenames] objectEnumerator];
         NSString *fileName;
         
         while (fileName = [fileEnum nextObject]) {
