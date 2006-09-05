@@ -1390,7 +1390,12 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 #pragma mark Opening and Loading Files
 
 - (BOOL)revertToSavedFromFile:(NSString *)fileName ofType:(NSString *)type{
-	if([super revertToSavedFromFile:fileName ofType:type]){
+	// first remove all editor windows, as they will be invalid afterwards
+    unsigned int index = [[self windowControllers] count];
+    while(--index)
+        [[[self windowControllers] objectAtIndex:index] close];
+    
+    if([super revertToSavedFromFile:fileName ofType:type]){
 		[tableView deselectAll:self]; // clear before resorting
 		[self searchFieldAction:searchField]; // redo the search
         [self sortPubsByColumn:nil]; // resort
@@ -1400,6 +1405,11 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 }
 
 - (BOOL)revertToSavedFromURL:(NSURL *)aURL ofType:(NSString *)type{
+	// first remove all editor windows, as they will be invalid afterwards
+	unsigned int index = [[self windowControllers] count];
+    while(--index)
+        [[[self windowControllers] objectAtIndex:index] close];
+    
 	if([super revertToSavedFromURL:aURL ofType:type]){
         [tableView deselectAll:self]; // clear before resorting
 		[self searchFieldAction:searchField]; // redo the search
