@@ -30,7 +30,7 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>bibDocIcon.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>bibTeX database</string>
+			<string>BibTeX Database</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSItemContentTypes</key>
@@ -45,7 +45,7 @@
 			<array>
 				<string>ris</string>
 				<string>fcgi</string>
-                <string>refman</string>
+				<string>refman</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>risDocIcon.icns</string>
@@ -71,10 +71,6 @@
 				<string>text</string>
 				<string>*</string>
 			</array>
-            <key>LSItemContentTypes</key>
-            <array>
-                <string>public.plain-text</string>
-            </array>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
 				<string>text/plain</string>
@@ -87,18 +83,22 @@
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
-            <key>NSExportableAs</key>
-            <array>
-                <string>bibTeX database</string>
-                <string>RIS/Medline File</string>
-            </array>
-            <key>NSExportableTypes</key>
-            <array>
-                <string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
-                <string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
-            </array>
+			<key>NSExportableAs</key>
+			<array>
+				<string>bibTeX database</string>
+				<string>RIS/Medline File</string>
+			</array>
+			<key>NSExportableTypes</key>
+			<array>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
+			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeMIMETypes</key>
@@ -109,22 +109,22 @@
 			<string>Web of Science File</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>net.sourceforge.bibdesk.webofscience</string>
+			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
-            <key>LSItemContentTypes</key>
-            <array>
-                <string>net.sourceforge.bibdesk.webofscience</string>
-            </array>
-            <key>NSExportableAs</key>
-            <array>
-                <string>bibTeX database</string>
-                <string>RIS/Medline File</string>
-            </array>
-            <key>NSExportableTypes</key>
-            <array>
-                <string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
-                <string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
-            </array>
+			<key>NSExportableAs</key>
+			<array>
+				<string>bibTeX database</string>
+				<string>RIS/Medline File</string>
+			</array>
+			<key>NSExportableTypes</key>
+			<array>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
+			</array>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
@@ -467,8 +467,6 @@
 					<dict/>
 					<key>BDSKGlobalMacroFilesKey</key>
 					<array/>
-					<key>Macro definitions from bib style file</key>
-					<dict/>
 					<key>BDSKTableHeaderImages</key>
 					<dict/>
 					<key>BDSKTableHeaderTitles</key>
@@ -489,6 +487,8 @@
 					<array>
 						<string>Local-Url</string>
 					</array>
+					<key>Macro definitions from bib style file</key>
+					<dict/>
 					<key>Rating fields</key>
 					<array>
 						<string>Rating</string>
@@ -496,8 +496,8 @@
 					<key>Remote URL Fields</key>
 					<array>
 						<string>Url</string>
-                        <string>Doi</string>
-                        <string>Citeseerurl</string>
+						<string>Doi</string>
+						<string>Citeseerurl</string>
 					</array>
 					<key>Three state fields</key>
 					<array/>
@@ -525,56 +525,56 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>Default table column sort order</key>
-					<false/>
-					<key>Default table column to sort new documents</key>
-					<string>Title</string>
-					<key>BDSKSortGroupsDescendingKey</key>
-					<false/>
-					<key>BDSKSortGroupsKey</key>
-					<string>stringValue</string>
-					<key>Font family to use for RTF preview display</key>
-					<string>Gill Sans</string>
-					<key>Font size for preview pane in document view</key>
-					<real>12.0</real>
-					<key>Preview Pane Displays What?</key>
-					<integer>1</integer>
-					<key>Maximum Number of Items in Preview Pane</key>
-					<integer>0</integer>
-					<key>BDSKPreviewTemplateStyleKey</key>
-					<string>Default RSS template</string>
-					<key>BDSKMainTableViewFontNameKey</key>
+					<key>BDSKEditorFontNameKey</key>
+					<string>Helvetica</string>
+					<key>BDSKEditorFontSizeKey</key>
+					<real>0.0</real>
+					<key>BDSKFileContentSearchTableViewFontNameKey</key>
 					<string>LucidaGrande</string>
-					<key>BDSKMainTableViewFontSizeKey</key>
+					<key>BDSKFileContentSearchTableViewFontSizeKey</key>
 					<real>0.0</real>
 					<key>BDSKGroupTableViewFontNameKey</key>
 					<string>LucidaGrande</string>
 					<key>BDSKGroupTableViewFontSizeKey</key>
 					<real>0.0</real>
+					<key>BDSKMainTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKMainTableViewFontSizeKey</key>
+					<real>0.0</real>
+					<key>BDSKOrphanedFilesTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKOrphanedFilesTableViewFontSizeKey</key>
+					<real>0.0</real>
 					<key>BDSKPersonTableViewFontNameKey</key>
 					<string>LucidaGrande</string>
 					<key>BDSKPersonTableViewFontSizeKey</key>
 					<real>0.0</real>
-                    <key>BDSKEditorFontNameKey</key>
-                    <string>Helvetica</string>
-                    <key>BDSKEditorFontSizeKey</key>
-                    <real>0.0</real>
-                    <key>BDSKFileContentSearchTableViewFontNameKey</key>
-                    <string>LucidaGrande</string>
-                    <key>BDSKFileContentSearchTableViewFontSizeKey</key>
-                    <real>0.0</real>
-                    <key>BDSKOrphanedFilesTableViewFontNameKey</key>
-                    <string>LucidaGrande</string>
-                    <key>BDSKOrphanedFilesTableViewFontSizeKey</key>
-                    <real>0.0</real>
+					<key>BDSKPreviewTemplateStyleKey</key>
+					<string>Default RSS template</string>
+					<key>BDSKShouldAbbreviateFirstNamesKey</key>
+					<true/>
+					<key>BDSKShouldDisplayFirstNamesKey</key>
+					<true/>
+					<key>BDSKShouldDisplayLastNameFirstKey</key>
+					<false/>
+					<key>BDSKSortGroupsDescendingKey</key>
+					<false/>
+					<key>BDSKSortGroupsKey</key>
+					<string>stringValue</string>
+					<key>Default table column sort order</key>
+					<false/>
+					<key>Default table column to sort new documents</key>
+					<string>Title</string>
+					<key>Font family to use for RTF preview display</key>
+					<string>Gill Sans</string>
+					<key>Font size for preview pane in document view</key>
+					<real>12</real>
+					<key>Maximum Number of Items in Preview Pane</key>
+					<integer>0</integer>
+					<key>Preview Pane Displays What?</key>
+					<integer>1</integer>
 					<key>Terms ignored when sorting</key>
 					<array/>
-                    <key>BDSKShouldDisplayFirstNamesKey</key>
-                    <true/>
-                    <key>BDSKShouldAbbreviateFirstNamesKey</key>
-                    <true/>
-                    <key>BDSKShouldDisplayLastNameFirstKey</key>
-                    <false/>
 				</dict>
 				<key>helpURL</key>
 				<string>Display-Preferences</string>
@@ -590,6 +590,38 @@
 				<string>Display</string>
 				<key>title</key>
 				<string>Display</string>
+			</dict>
+			<key>BibPref_Export</key>
+			<dict>
+				<key>category</key>
+				<string>Data Preferences</string>
+				<key>categoryPriority</key>
+				<integer>2</integer>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>BDSKExportTemplateStyleKey</key>
+					<string>Default HTML template</string>
+					<key>BDSKExportTemplateTree</key>
+					<data>
+					</data>
+					<key>BDSKServiceTemplateTree</key>
+					<data>
+					</data>
+				</dict>
+				<key>helpURL</key>
+				<string>Template-Preferences</string>
+				<key>icon</key>
+				<string>exportPrefs.tiff</string>
+				<key>identifier</key>
+				<string>bp_export</string>
+				<key>nib</key>
+				<string>BibPref_Export</string>
+				<key>ordering</key>
+				<string>5</string>
+				<key>shortTitle</key>
+				<string>Templates</string>
+				<key>title</key>
+				<string>Template Files</string>
 			</dict>
 			<key>BibPref_Files</key>
 			<dict>
@@ -645,6 +677,8 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKCiteseerHostKey</key>
+					<string>http://citeseer.ist.psu.edu/</string>
 					<key>BDSKCurrentGroupFieldKey</key>
 					<string>Keywords</string>
 					<key>BDSKDefaultGroupFieldSeparatorKey</key>
@@ -656,44 +690,44 @@
 					</array>
 					<key>BDSKIntersectGroupsKey</key>
 					<false/>
+					<key>BDSKReadExtendedAttributesKey</key>
+					<false/>
+					<key>BDSKShouldUsePDFMetadata</key>
+					<false/>
+					<key>BDSKShouldWritePDFMetadata</key>
+					<false/>
+					<key>BDSKWarnOnCiteKeyChangeKey</key>
+					<true/>
 					<key>BDSKWarnOnDelete</key>
 					<true/>
 					<key>BDSKWarnOnRemovalFromGroupKey</key>
 					<true/>
 					<key>BDSKWarnOnRenameGroup</key>
 					<true/>
-                    <key>BDSKWarnOnCiteKeyChangeKey</key>
-                    <true/>
+					<key>BibEditor window autosave name</key>
+					<string></string>
 					<key>BlueComponentColor of alternating rows Key</key>
 					<string>1.010918794815856e-310</string>
 					<key>Check for updates when starting</key>
 					<true/>
 					<key>Check spelling continuously while editing</key>
 					<false/>
-                    <key>BibEditor window autosave name</key>
-                    <string></string>
-                    <key>BDSKReadExtendedAttributesKey</key>
-                    <false/>
-                    <key>BDSKShouldUsePDFMetadata</key>
-                    <false/>
-                    <key>BDSKShouldWritePDFMetadata</key>
-                    <false/>
-                    <key>BDSKCiteseerHostKey</key>
-                    <string>http://citeseer.ist.psu.edu/</string>
 					<key>Column Widths by Name</key>
 					<dict>
 						<key>1st Author</key>
 						<real>80</real>
-						<key>2nd Author</key>
-						<real>80</real>
-						<key>3rd Author</key>
-						<real>80</real>
 						<key>1st Author or Editor</key>
+						<real>80</real>
+						<key>2nd Author</key>
 						<real>80</real>
 						<key>2nd Author or Editor</key>
 						<real>80</real>
+						<key>3rd Author</key>
+						<real>80</real>
 						<key>3rd Author or Editor</key>
 						<real>80</real>
+						<key>BibTeX Type</key>
+						<real>55</real>
 						<key>Cite Key</key>
 						<real>85</real>
 						<key>Date</key>
@@ -710,8 +744,6 @@
 						<real>30</real>
 						<key>Title</key>
 						<real>300</real>
-						<key>BibTeX Type</key>
-						<real>55</real>
 						<key>Url</key>
 						<real>23</real>
 					</dict>
@@ -725,12 +757,12 @@
 					<string></string>
 					<key>GreenComponentColor of alternating rows Key</key>
 					<string>1.093888830242598e-310</string>
+					<key>Last Open FileNames</key>
+					<array/>
 					<key>Last field for find and replace</key>
 					<string>Title</string>
 					<key>Last launched version number</key>
 					<string>0</string>
-					<key>Last Open FileNames</key>
-					<array/>
 					<key>NSToolbar Configuration OAPreferences</key>
 					<string></string>
 					<key>Preview PDF Scale Factor</key>
@@ -842,6 +874,38 @@
 				<key>title</key>
 				<string>Script Hooks</string>
 			</dict>
+			<key>BibPref_Sharing</key>
+			<dict>
+				<key>category</key>
+				<string>Application Preferences</string>
+				<key>categoryPriority</key>
+				<integer>2</integer>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>BDSKBrowsingRequiresPasswordKey</key>
+					<false/>
+					<key>BDSKSharingNameKey</key>
+					<string></string>
+					<key>BDSKShouldLookForSharedFilesKey</key>
+					<false/>
+					<key>BDSKShouldShareFilesKey</key>
+					<false/>
+				</dict>
+				<key>helpURL</key>
+				<string>Sharing-Preferences</string>
+				<key>icon</key>
+				<string>networkIcon.tiff</string>
+				<key>identifier</key>
+				<string>bp_sharing</string>
+				<key>nib</key>
+				<string>BibPref_Sharing</string>
+				<key>ordering</key>
+				<string>5</string>
+				<key>shortTitle</key>
+				<string>Sharing</string>
+				<key>title</key>
+				<string>Sharing Files</string>
+			</dict>
 			<key>BibPref_TeX</key>
 			<dict>
 				<key>category</key>
@@ -876,69 +940,7 @@
 				<key>title</key>
 				<string>TeX - Typeset Preview</string>
 			</dict>
-            <key>BibPref_Sharing</key>
-            <dict>
-                <key>category</key>
-                <string>Application Preferences</string>
-                <key>categoryPriority</key>
-                <integer>2</integer>
-                <key>defaultsDictionary</key>
-                <dict>
-                    <key>BDSKShouldLookForSharedFilesKey</key>
-                    <false/>
-                    <key>BDSKShouldShareFilesKey</key>
-                    <false/>
-                    <key>BDSKBrowsingRequiresPasswordKey</key>
-                    <false/>
-                    <key>BDSKSharingNameKey</key>
-                    <string></string>
-                </dict>
-                <key>helpURL</key>
-                <string>Sharing-Preferences</string>
-                <key>icon</key>
-                <string>networkIcon.tiff</string>
-                <key>identifier</key>
-                <string>bp_sharing</string>
-                <key>nib</key>
-                <string>BibPref_Sharing</string>
-                <key>ordering</key>
-                <string>5</string>
-                <key>shortTitle</key>
-                <string>Sharing</string>
-                <key>title</key>
-                <string>Sharing Files</string>
-            </dict>
-            <key>BibPref_Export</key>
-            <dict>
-                <key>category</key>
-                <string>Data Preferences</string>
-                <key>categoryPriority</key>
-                <integer>2</integer>
-                <key>defaultsDictionary</key>
-                <dict>
-                    <key>BDSKExportTemplateStyleKey</key>
-                    <string>Default HTML template</string>
-                    <key>BDSKExportTemplateTree</key>
-                    <data></data>
-                    <key>BDSKServiceTemplateTree</key>
-                    <data></data>
-                </dict>
-                <key>helpURL</key>
-                <string>Template-Preferences</string>
-                <key>icon</key>
-                <string>exportPrefs.tiff</string>
-                <key>identifier</key>
-                <string>bp_export</string>
-                <key>nib</key>
-                <string>BibPref_Export</string>
-                <key>ordering</key>
-                <string>5</string>
-                <key>shortTitle</key>
-                <string>Templates</string>
-                <key>title</key>
-                <string>Template Files</string>
-            </dict>
-        </dict>
+		</dict>
 	</dict>
 	<key>OSAScriptingDefinition</key>
 	<string>BibDesk.sdef</string>
@@ -982,7 +984,7 @@
 				<array>
 					<string>ris</string>
 					<string>fcgi</string>
-                    <string>refman</string>
+					<string>refman</string>
 				</array>
 				<key>public.mime-type</key>
 				<array>
@@ -1009,25 +1011,25 @@
 				</array>
 			</dict>
 		</dict>
-        <dict>
-            <key>UTTypeConformsTo</key>
-            <array>
-                <string>public.plain-text</string>
-            </array>
-            <key>UTTypeDescription</key>
-            <string>Web of Science File</string>
-            <key>UTTypeIdentifier</key>
-            <string>net.sourceforge.bibdesk.webofscience</string>
-            <key>UTTypeReferenceURL</key>
-            <string>http://portal.isiknowledge.com/ISI/help/h_markwosa.htm</string>
-            <key>UTTypeTagSpecification</key>
-            <dict>
-                <key>public.mime-type</key>
-                <array>
-                    <string>application/x-Inst-for-Scientific-Info</string>
-                </array>
-            </dict>
-        </dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Web of Science File</string>
+			<key>UTTypeIdentifier</key>
+			<string>net.sourceforge.bibdesk.webofscience</string>
+			<key>UTTypeReferenceURL</key>
+			<string>http://portal.isiknowledge.com/ISI/help/h_markwosa.htm</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-Inst-for-Scientific-Info</string>
+				</array>
+			</dict>
+		</dict>
 	</array>
 </dict>
 </plist>
