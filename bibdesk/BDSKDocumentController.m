@@ -149,8 +149,6 @@
         return;
     
     int result;
-    NSString *filterOutput = nil;
-    NSString *fileInputString = nil;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
