@@ -320,7 +320,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     return convertedSoFar; 
 }
 
-// takes a sequence such as "{\'i}" (no quotes) and converts to appropriate composed characters
+// takes a sequence such as "{\'i}" or "{\v S}" (no quotes) and converts to appropriate composed characters
 // returns nil if unable to convert
 - (NSString *)composedStringFromTeXString:(NSString *)texString{
         
@@ -342,18 +342,21 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     
     UniChar ch, accentCh = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx++);
     
-    ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
-    
-    // @@ why is this check here?  may be incorrect idx if ch == ' '; need example
-    if (ch != ' ' && [[NSCharacterSet letterCharacterSet] characterIsMember:accentCh])
-        return nil;
-    
+    // convert the TeX form of the accent to a string and see if we can convert it
     texAccent = [[NSString alloc] initWithCharactersNoCopy:&accentCh length:1 freeWhenDone:NO];
     accent = [detexifyAccents objectForKey:texAccent];
     [texAccent release];
     
     if (nil == accent)
-        return nil;
+        return nil;    
+    
+    // get the character immediately following the accent
+    ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
+    
+    if ([[NSCharacterSet letterCharacterSet] characterIsMember:accentCh] && ch != ' ')
+        return nil; // error: if accentCh was a letter (e.g. {\v S}), it must be followed by a space
+    else if (ch == ' ')
+        idx++;      // TeX accepts {\' i} or {\'i}, but space shouldn't be included in the letter token
     
     unsigned letterStart = idx;
     NSString *character = nil;
