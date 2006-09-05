@@ -344,8 +344,6 @@ static inline NSString *sepTagWithTag(NSString *tag){
 @implementation NSObject (BDSKTemplateParser)
 
 - (NSString *)stringDescription {
-    if ([self isKindOfClass:[NSString class]])
-        return (NSString *)self;
     if ([self respondsToSelector:@selector(stringValue)])
         return [self performSelector:@selector(stringValue)];
     if ([self respondsToSelector:@selector(string)])
@@ -382,6 +380,11 @@ static inline NSString *sepTagWithTag(NSString *tag){
 @end
 
 @implementation NSString (BDSKTemplateParser)
+
+- (NSString *)stringDescription
+{
+    return self;
+}
 
 - (NSString *)stringBySurroundingWithSpacesIfNotEmpty 
 { 
