@@ -1544,10 +1544,6 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     if([publications count] == 0)
         return;
     
-    // set date-added for imports
-    NSCalendarDate *importDate = [NSCalendarDate date];
-    [[self publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
-    
     NSArray *tmpKeyItems = [self allPublicationsForCiteKey:tmpKey];
     
     if([tmpKeyItems count] == 0)

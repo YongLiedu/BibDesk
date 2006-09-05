@@ -64,23 +64,32 @@
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
 
 /*!
-    @method     openFile:ofType:withEncoding:
-    @abstract   Creates a new document with given file of a givven document type and string encoding.
+    @method     openDocumentWithContentsOfFile:encoding:
+    @abstract   Creates a new document with given file and string encoding.
     @discussion (comprehensive description)
-    @param      filePath (description)
-    @param      docType (description)
-    @param      encoding (description)
+    @param      fileName The file to open
+    @param      encoding File's character encoding
 */
-- (id)openFile:(NSString *)filePath ofType:(NSString *)docType withEncoding:(NSStringEncoding)encoding;
+- (id)openDocumentWithContentsOfFile:(NSString*)fileName encoding:(NSStringEncoding)encoding;
 
 /*!
-    @method     openBibTeXFileUsingPhonyCiteKeys:withEncoding:
+    @method     openDocumentFromFileUsingPhonyCiteKeys:encoding:
     @abstract   Generates temporary cite keys in order to keep btparse from choking on files exported from Endnote or BookEnds.
     @discussion Uses a regular expression to find and replace empty cite keys, according to a fairly limited pattern.
                 A new, untitled document is created, and a warning about the invalid temporary keys is shown after opening.
-    @param      filePath The file to open
+    @param      fileName The file to open
     @param      encoding File's character encoding
 */
-- (id)openBibTeXFileUsingPhonyCiteKeys:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
+- (id)openDocumentFromFileUsingPhonyCiteKeys:(NSString *)fileName encoding:(NSStringEncoding)encoding;
+
+/*!
+    @method     openDocumentFromFile:usingFilter:encoding:
+    @abstract   Applies a filter to the file content before openening a new document.
+    @discussion (comprehensive description)
+    @param      fileName The file to open
+    @param      shellCommand The shell command to use to filter the file content
+    @param      encoding File's character encoding
+*/
+- (id)openDocumentFromFile:(NSString*)fileName usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
 
 @end

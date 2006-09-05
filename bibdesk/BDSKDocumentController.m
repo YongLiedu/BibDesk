@@ -103,32 +103,44 @@
     }
 }
 
-- (id)openUntitledBibTeXDocumentWithString:(NSString *)fileString encoding:(NSStringEncoding)encoding error:(NSError **)outError{
-    // @@ we could also use [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
-    // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
-    // or move aside the original file
-    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
-    NSData *data = [fileString dataUsingEncoding:encoding];
-    if([data writeToFile:tmpFilePath atomically:YES] == NO)
-        NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFilePath);
+- (NSArray *)fileNamesFromRunningOpenPanelForTypes:(NSArray *)types encoding:(NSStringEncoding *)encoding{
+	if (isOpening)
+        return nil;
     
-    // make a fresh document, and don't display it until we can set its name.
-    BibDocument *doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
-    [doc setFileName:tmpFilePath]; // required for error handling; mark it dirty, so it's obviously modified
-    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    BOOL success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:outError];
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:YES];
+    [oPanel setAccessoryView:openTextEncodingAccessoryView];
+    NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:*encoding];
+    [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+		
+	isOpening = YES;
+    int result = [oPanel runModalForDirectory:nil file:nil types:types];
+	isOpening = NO;
+    if(result == NSOKButton){
+        *encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+        return [oPanel filenames];
+    }else 
+        return nil;
+}
+
+- (void)openDocument:(id)sender{
+    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
+    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil] encoding:&encoding] objectEnumerator];
+    NSString *fileName;
     
-    if (success == NO) {
-        [self removeDocument:doc];
-        doc = nil;
-    } else {
-        [doc setFileName:nil];
-        [doc showWindows];
-        // mark as dirty, since we've changed the cite keys
-        [doc updateChangeCount:NSChangeDone];
-    }
+	while (fileName = [fileEnum nextObject]) {
+        [self openDocumentWithContentsOfFile:fileName encoding:encoding];
+	}
+}
+
+- (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
+    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
+    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[NSArray arrayWithObjects:@"bib", nil] encoding:&encoding] objectEnumerator];
+    NSString *fileName;
     
-    return doc;
+	while (fileName = [fileEnum nextObject]) {
+        [self openDocumentFromFileUsingPhonyCiteKeys:fileName encoding:encoding];
+	}
 }
 
 - (IBAction)openDocumentUsingFilter:(id)sender
@@ -137,8 +149,6 @@
         return;
     
     int result;
-    NSString *fileToOpen = nil;
-    NSString *shellCommand = nil;
     NSString *filterOutput = nil;
     NSString *fileInputString = nil;
     
@@ -164,119 +174,90 @@
         [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
     }
     isOpening = YES;
-    result = [oPanel runModalForDirectory:nil
-                                     file:nil
-                                    types:nil];
+    result = [oPanel runModalForDirectory:nil file:nil types:nil];
     isOpening = NO;
+    
     if (result == NSOKButton) {
-        fileToOpen = [oPanel filename];
-        shellCommand = [openUsingFilterComboBox stringValue];
+        NSString *shellCommand = [openUsingFilterComboBox stringValue];
+        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+        NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil] encoding:&encoding] objectEnumerator];
+        NSString *fileName;
+        
+        while (fileName = [fileEnum nextObject]) {
+            [self openDocumentFromFile:fileName usingFilter:shellCommand encoding:encoding];
+        }
         
         unsigned commandIndex = [commandHistory indexOfObject:shellCommand];
         if(commandIndex != NSNotFound && commandIndex != 0)
             [commandHistory removeObject:shellCommand];
         [commandHistory insertObject:shellCommand atIndex:0];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
-
-        NSData *fileInputData = [[NSData alloc] initWithContentsOfFile:fileToOpen];
-
-        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
-        fileInputString = [[NSString alloc] initWithData:fileInputData encoding:encoding];
-        [fileInputData release];
-        
-        if ([NSString isEmptyString:fileInputString]){
-            NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter",@""),
-                                    NSLocalizedString(@"The file could not be read correctly. Please try again, possibly using a different character encoding such as UTF-8.",@""),
-                                    NSLocalizedString(@"OK",@""),
-                                    nil, nil, nil, nil);
-        } else {
-			filterOutput = [[BDSKShellTask shellTask] runShellCommand:shellCommand
-													  withInputString:fileInputString];
-            
-            if ([NSString isEmptyString:filterOutput]){
-                NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter",@""),
-                                        NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.",@""),
-                                        NSLocalizedString(@"OK",@""),
-                                        nil, nil, nil, nil);
-            } else {
-                // the original file could be any format, but the ouput is supposed to be bibtex
-                fileToOpen = [[fileToOpen stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-                id theDocument = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:NULL];
-                
-                // set date-added for imports
-                if(nil != theDocument){
-                    NSCalendarDate *importDate = [NSCalendarDate date];
-                    [[theDocument publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
-                }
-
-            }
-		}
-        [fileInputString release];
     }
 }
 
-- (void)openDocumentCreatingPhonyCiteKeys:(BOOL)phony{
-	if (isOpening)
-        return;
+- (id)openDocumentWithContentsOfFile:(NSString*)fileName encoding:(NSStringEncoding)encoding{
+	// first see if we already have this document open
+    BibDocument *doc = [self documentForFileName:fileName];
     
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAccessoryView:openTextEncodingAccessoryView];
-    NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
-    [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
-		
-	NSArray *types = (phony ? [NSArray arrayWithObject:@"bib"] : [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil]);
-	
-	isOpening = YES;
-    int result = [oPanel runModalForDirectory:nil
-                                     file:nil
-                                    types:types];
-	isOpening = NO;
-	if (result == NSOKButton) {
-        id document = nil;
-        NSString *fileToOpen = [oPanel filename];
-        NSString *docType = [self typeFromFileExtension:[fileToOpen pathExtension]];
-        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
-
-        if(phony){
-            document = [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
-        }else{
-            document = [self openFile:fileToOpen ofType:docType withEncoding:encoding];		
+    if(doc == nil){
+        NSString *docType = [self typeFromFileExtension:[fileName pathExtension]];
+        BOOL success;
+        // make a fresh document, and don't display it until we can set its name.
+        doc = [self openUntitledDocumentOfType:docType display:NO];
+        [doc setFileName:fileName]; // this effectively makes it not an untitled document anymore.
+        [doc setFileType:docType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+        success = [doc readFromURL:[NSURL fileURLWithPath:fileName] ofType:docType encoding:encoding error:NULL];
+        if (success == NO) {
+            [self removeDocument:doc];
+            doc = nil;
         }
-        [document showWindows];
-        // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
-        if([document respondsToSelector:@selector(updateAllSmartGroups)])
-           [document performSelector:@selector(updateAllSmartGroups)];
-	}
-	
-}
-
-- (IBAction)openDocument:(id)sender{
-    [self openDocumentCreatingPhonyCiteKeys:NO];
-}
-
-- (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
-    [self openDocumentCreatingPhonyCiteKeys:YES];
-}
-
-- (id)openFile:(NSString *)filePath ofType:(NSString *)docType withEncoding:(NSStringEncoding)encoding{
-	
-	BibDocument *doc = nil;
-	BOOL success;
-    
-    // make a fresh document, and don't display it until we can set its name.
-    doc = [self openUntitledDocumentOfType:docType display:NO];
-    [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
-    [doc setFileType:docType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    success = [doc readFromURL:[NSURL fileURLWithPath:filePath] ofType:docType encoding:encoding error:NULL];
-    if (success == NO) {
-        [self removeDocument:doc];
-        doc = nil;
     }
+    
+    [doc showWindows];
+    // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
+    if([doc respondsToSelector:@selector(updateAllSmartGroups)])
+        [doc performSelector:@selector(updateAllSmartGroups)];
+    
     return doc;
 }
 
-- (id)openBibTeXFileUsingPhonyCiteKeys:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
-	NSData *data = [NSData dataWithContentsOfFile:filePath];
+- (id)openUntitledBibTeXDocumentWithString:(NSString *)fileString encoding:(NSStringEncoding)encoding error:(NSError **)outError{
+    // @@ we could also use [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
+    // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
+    // or move aside the original file
+    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
+    NSData *data = [fileString dataUsingEncoding:encoding];
+    if([data writeToFile:tmpFilePath atomically:YES] == NO)
+        NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFilePath);
+    
+    // make a fresh document, and don't display it until we can set its name.
+    BibDocument *doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
+    [doc setFileName:tmpFilePath]; // required for error handling; mark it dirty, so it's obviously modified
+    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    BOOL success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:outError];
+    
+    if (success == NO) {
+        [self removeDocument:doc];
+        doc = nil;
+    } else {
+        [doc setFileName:nil];
+        // set date-added for imports
+        NSCalendarDate *importDate = [NSCalendarDate date];
+        [[doc publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+        [[doc undoManager] removeAllActions];
+        [doc showWindows];
+        // mark as dirty, since we've changed the content
+        [doc updateChangeCount:NSChangeDone];
+        // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
+        if([doc respondsToSelector:@selector(updateAllSmartGroups)])
+           [doc performSelector:@selector(updateAllSmartGroups)];
+    }
+    
+    return doc;
+}
+
+- (id)openDocumentFromFileUsingPhonyCiteKeys:(NSString *)fileName encoding:(NSStringEncoding)encoding{
+	NSData *data = [NSData dataWithContentsOfFile:fileName];
     NSString *stringFromFile = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
 
     // ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get
@@ -320,6 +301,36 @@
 	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:mutableFileString encoding:encoding error:NULL];
     
     [doc reportTemporaryCiteKeys:@"FixMe"];
+    
+    return doc;
+}
+
+- (id)openDocumentFromFile:(NSString *)fileName usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding{
+    NSData *fileInputData = [[NSData alloc] initWithContentsOfFile:fileName];
+    NSString *fileInputString = [[NSString alloc] initWithData:fileInputData encoding:encoding];
+    BibDocument *doc = nil;
+    
+    [fileInputData release];
+    
+    if ([NSString isEmptyString:fileInputString]){
+        NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter",@""),
+                        NSLocalizedString(@"The file could not be read correctly. Please try again, possibly using a different character encoding such as UTF-8.",@""),
+                        NSLocalizedString(@"OK",@""),
+                        nil, nil, nil, nil);
+    } else {
+        NSString *filterOutput = [[BDSKShellTask shellTask] runShellCommand:shellCommand
+                                                            withInputString:fileInputString];
+        
+        if ([NSString isEmptyString:filterOutput]){
+            NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter",@""),
+                            NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.",@""),
+                            NSLocalizedString(@"OK",@""),
+                            nil, nil, nil, nil);
+        } else {
+            doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:NULL];
+        }
+    }
+    [fileInputString release];
     
     return doc;
 }
