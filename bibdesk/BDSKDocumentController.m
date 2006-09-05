@@ -153,7 +153,7 @@
     NSString *fileInputString = nil;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setAllowsMultipleSelection:YES];
 
     NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
     [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
