@@ -62,7 +62,7 @@ static NSString *xattrError(int err, const char *path);
     
     NSZone *zone = NSDefaultMallocZone();
     bufSize = status;
-    char *namebuf = NSZoneMalloc(zone, sizeof(char) * bufSize);
+    char *namebuf = (char *)NSZoneMalloc(zone, sizeof(char) * bufSize);
     NSAssert(namebuf != NULL, @"unable to allocate memory");
     status = listxattr(fsPath, namebuf, bufSize, xopts);
     
@@ -171,7 +171,7 @@ static NSString *xattrError(int err, const char *path);
     }
     
     bufSize = status;
-    char *namebuf = NSZoneMalloc(NSDefaultMallocZone(), sizeof(char) * bufSize);
+    char *namebuf = (char *)NSZoneMalloc(NSDefaultMallocZone(), sizeof(char) * bufSize);
     NSAssert(namebuf != NULL, @"unable to allocate memory");
     status = getxattr(fsPath, attrName, namebuf, bufSize, 0, xopts);
     

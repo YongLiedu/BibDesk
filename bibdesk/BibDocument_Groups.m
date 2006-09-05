@@ -667,7 +667,7 @@ The groupedPublications array is a subset of the publications array, developed b
     static id *groupValues = NULL;
     static int groupValueMaxSize = 10;
     if(NULL == groupValues)
-        groupValues = NSZoneMalloc(NSDefaultMallocZone(), groupValueMaxSize * sizeof(id));
+        groupValues = (id *)NSZoneMalloc(NSDefaultMallocZone(), groupValueMaxSize * sizeof(id));
     int groupCount = 0;
     
     // we could iterate the dictionary in the outer loop and publications in the inner loop, but there are generally more publications than groups (and we only check visible groups), so this should be more efficient
@@ -1116,9 +1116,10 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSArray *)mergeInPublications:(NSArray *)items{
     // first construct a set of current items to compare based on BibItem equality callbacks
     CFIndex countOfItems = [publications count];
-    BibItem **pubs = NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
+    BibItem **pubs = (BibItem **)NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
     [publications getObjects:pubs];
     NSSet *currentPubs = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEqualityCallBacks);
+    NSZoneFree([self zone], pubs);
     
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[items count]];
     NSEnumerator *pubEnum = [items objectEnumerator];

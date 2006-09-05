@@ -3705,19 +3705,19 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     
     NSMutableArray *pubsToRemove = [[self publications] mutableCopy];
     CFIndex countOfItems = [pubsToRemove count];
-    BibItem **pubs = NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
+    BibItem **pubs = (BibItem **)NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
     [pubsToRemove getObjects:pubs];
     
     // Tests equality based on standard fields (high probability that these will be duplicates)
     NSSet *uniquePubs = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEqualityCallBacks);
     [pubsToRemove removeIdenticalObjectsFromArray:[uniquePubs allObjects]]; // remove all unique ones based on pointer equality
     [uniquePubs release];
-    NSZoneFree(zone, pubs);
     
+    // original buffer should be large enough, since we've only removed items from pubsToRemove
     countOfItems = [pubsToRemove count];
-    pubs = NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
     [pubsToRemove getObjects:pubs];
     NSSet *removeSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEqualityCallBacks);
+    
     NSZoneFree(zone, pubs);
     
     [pubsToRemove removeAllObjects];

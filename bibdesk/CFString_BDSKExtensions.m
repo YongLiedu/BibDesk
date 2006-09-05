@@ -164,7 +164,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
     
     allocator = (allocator == NULL) ? CFAllocatorGetDefault() : allocator;
     if(buffer == NULL){
-        buffer = CFAllocatorAllocate(allocator, bufSize, 0);
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, bufSize, 0);
         isLarge = YES; // too large for the stack
     }
     
@@ -253,7 +253,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAlloc
     
     allocator = (allocator == NULL) ? CFAllocatorGetDefault() : allocator;
     if(buffer == NULL){
-        buffer = CFAllocatorAllocate(allocator, bufSize, 0);
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, bufSize, 0);
         isLarge = YES; // too large for the stack
     }
     
@@ -475,7 +475,7 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
     buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
     
     if(buffer == NULL){
-        buffer = CFAllocatorAllocate(allocator, sizeof(UniChar) * (length + 1), 0);
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, sizeof(UniChar) * (length + 1), 0);
         isLarge = YES; // too large for the stack
     }
     
@@ -615,7 +615,7 @@ CFArrayRef BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAlloc
     buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
 
     Boolean isLarge = (buffer == NULL);
-    if(isLarge) buffer = CFAllocatorAllocate(allocator, length * sizeof(UniChar), 0);
+    if(isLarge) buffer = (UniChar *)CFAllocatorAllocate(allocator, length * sizeof(UniChar), 0);
 
     NSCAssert1(buffer != NULL, @"Unable to allocate buffer for %@", string);
     CFIndex bufCnt = 0;

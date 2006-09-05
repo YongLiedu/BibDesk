@@ -289,7 +289,7 @@ static Class BDSKFileClass = Nil;
     fileRef = NULL;
     
     if(self && aRef){
-        FSRef *newRef = NSZoneMalloc([self zone], sizeof(FSRef));
+        FSRef *newRef = (FSRef *)NSZoneMalloc([self zone], sizeof(FSRef));
         if(newRef)
             bcopy(aRef, newRef, sizeof(FSRef));
         fileRef = newRef;
