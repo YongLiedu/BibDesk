@@ -3804,15 +3804,18 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 }
 
 - (void)performSortForCrossrefs{
-	NSEnumerator *pubEnum = [publications objectEnumerator];
+    NSArray *copyOfPubs = [publications copy];
+	NSEnumerator *pubEnum = [copyOfPubs objectEnumerator];
 	BibItem *pub = nil;
 	BibItem *parent;
 	NSString *key;
 	NSMutableSet *prevKeys = [NSMutableSet set];
 	BOOL moved = NO;
 	NSArray *selectedPubs = [self selectedPublications];
+    
+    [copyOfPubs release];
 	
-	// We only move parents that come after a child.
+	// We only move parents that come before a child.
 	while (pub = [pubEnum nextObject]){
 		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
 		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
