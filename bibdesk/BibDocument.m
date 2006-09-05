@@ -1462,20 +1462,20 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
         int rv;
         // run a modal dialog asking if we want to use partial data or give up
         rv = NSRunCriticalAlertPanel([error localizedDescription] ? [error localizedDescription] : NSLocalizedString(@"Error reading file!",@""),
-                                     [NSString stringWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.",@""), [error localizedDescription]],
+                                     [NSString stringWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.",@""), [error localizedDescription]],
                                      NSLocalizedString(@"Give Up",@""),
-                                     NSLocalizedString(@"Keep Going",@""),
-                                     NSLocalizedString(@"Edit File", @""));
+                                     NSLocalizedString(@"Edit File", @""),
+                                     NSLocalizedString(@"Keep Going",@""));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
             [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors
         }else if (rv == NSAlertAlternateReturn){
+            // the user said to edit the file.
+            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:YES]; // this hands the errors to a new error editor and sets that as the documentForErrors
+        }else if(rv == NSAlertOtherReturn){
             // the user said to keep going, so if they save, they might clobber data...
             // if we don't return YES, NSDocumentController puts up its lame alert saying the document could not be opened, and we get no partial data
             success = YES;
-        }else if(rv == NSAlertOtherReturn){
-            // they said to edit the file.
-            [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:YES]; // this hands the errors to a new error editor and sets that as the documentForErrors
         }
     }
     if(outError) *outError = error;
@@ -1510,11 +1510,6 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
         [self setFileName:nil];
     
     return error == nil;
-}
-
-- (BOOL)loadRSSDataRepresentation:(NSData *)data error:(NSError **)outError {
-    if(outError != NULL) *outError = [NSError errorWithDomain:@"BDSKUnimplementedError" code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Loading RSS files is not supported at this time.", @"") forKey:NSLocalizedDescriptionKey]];
-    return NO;
 }
 
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding{
@@ -2273,19 +2268,19 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 		// run a modal dialog asking if we want to use partial data or give up
 		int rv = 0;
 		rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
-							 NSLocalizedString(@"There was a problem inserting the data. Do you want to keep going and use everything that BibDesk could analyse or open a window containing the data to edit it and remove the errors?\n(It's likely that choosing \"Keep Going\" will lose some data.)",@""),
+							 NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could analyse?\n(It's likely that choosing \"Keep Going\" will lose some data.)",@""),
 							 NSLocalizedString(@"Cancel",@""),
-							 NSLocalizedString(@"Keep going",@""),
-							 NSLocalizedString(@"Edit data", @""));
+							 NSLocalizedString(@"Edit data", @""),
+							 NSLocalizedString(@"Keep going",@""));
 		if (rv == NSAlertDefaultReturn) {
 			// the user said to give up
 			newPubs = nil;
 		}else if (rv == NSAlertAlternateReturn){
-			// the user said to keep going, so if they save, they might clobber data...
-		}else if(rv == NSAlertOtherReturn){
 			// they said to edit the file.
 			[[BDSKErrorObjectController sharedErrorObjectController] showEditorForLastPasteDragError];
 			newPubs = nil;	
+		}else if(rv == NSAlertOtherReturn){
+			// the user said to keep going, so if they save, they might clobber data...
 		}		
 	}
 
