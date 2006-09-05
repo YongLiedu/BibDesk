@@ -141,11 +141,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 }
 
 - (IBAction)searchFieldChangeKey:(id)sender{
-	if([sender isKindOfClass:[NSPopUpButton class]]){
-		[self setSelectedSearchFieldKey:[sender titleOfSelectedItem]];
-	}else{
-		[self setSelectedSearchFieldKey:[sender title]];
-	}
+    [self setSelectedSearchFieldKey:[sender title]];
 }
 
 - (void)setSelectedSearchFieldKey:(NSString *)newKey{
