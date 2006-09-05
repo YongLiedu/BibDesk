@@ -89,6 +89,16 @@
 			<string>Viewer</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
+            <key>NSExportableAs</key>
+            <array>
+                <string>bibTeX database</string>
+                <string>RIS/Medline File</string>
+            </array>
+            <key>NSExportableTypes</key>
+            <array>
+                <string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+                <string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
+            </array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeMIMETypes</key>
@@ -104,6 +114,16 @@
             <key>LSItemContentTypes</key>
             <array>
                 <string>net.sourceforge.bibdesk.webofscience</string>
+            </array>
+            <key>NSExportableAs</key>
+            <array>
+                <string>bibTeX database</string>
+                <string>RIS/Medline File</string>
+            </array>
+            <key>NSExportableTypes</key>
+            <array>
+                <string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+                <string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
             </array>
 		</dict>
 	</array>

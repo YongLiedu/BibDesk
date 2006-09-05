@@ -717,29 +717,28 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 // to set the document's encoding before writing to the file
 - (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
     if([super prepareSavePanel:savePanel]){
-        if([[self fileType] isEqualToString:BDSKBibTeXDocumentType] || [[self fileType] isEqualToString:BDSKRISDocumentType]){
-            NSView *oldAccessoryView = [[savePanel accessoryView] retain];
-            if(oldAccessoryView == nil){
-                [savePanel setAccessoryView:saveEncodingAccessoryView];
-            }else{
-                NSRect sevFrame, ignored, avFrame = [oldAccessoryView frame];
-                float height = NSHeight([saveEncodingAccessoryView frame]);
-                avFrame.size.height += height - SAVE_ENCODING_VIEW_OFFSET;
-                NSView *accessoryView = [[NSView alloc] initWithFrame:avFrame];
-                NSDivideRect([accessoryView bounds], &sevFrame, &ignored, height, NSMaxYEdge);
-                [saveEncodingAccessoryView setFrame:sevFrame];
-                [accessoryView addSubview:saveEncodingAccessoryView];
-                [savePanel setAccessoryView:accessoryView];
-                [oldAccessoryView setFrameOrigin:NSZeroPoint];
-                [accessoryView addSubview:oldAccessoryView];
-                [oldAccessoryView release];
-                [accessoryView release];
-            }
-            // set the popup to reflect the document's present string encoding
-            NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
-            [saveTextEncodingPopupButton selectItemWithTitle:defaultEncName];
-            [[savePanel accessoryView] setNeedsDisplay:YES];
-        } return YES;
+        NSView *oldAccessoryView = [[savePanel accessoryView] retain];
+        if(oldAccessoryView == nil){
+            [savePanel setAccessoryView:saveEncodingAccessoryView];
+        }else{
+            NSRect sevFrame, ignored, avFrame = [oldAccessoryView frame];
+            float height = NSHeight([saveEncodingAccessoryView frame]);
+            avFrame.size.height += height - SAVE_ENCODING_VIEW_OFFSET;
+            NSView *accessoryView = [[NSView alloc] initWithFrame:avFrame];
+            NSDivideRect([accessoryView bounds], &sevFrame, &ignored, height, NSMaxYEdge);
+            [saveEncodingAccessoryView setFrame:sevFrame];
+            [accessoryView addSubview:saveEncodingAccessoryView];
+            [savePanel setAccessoryView:accessoryView];
+            [oldAccessoryView setFrameOrigin:NSZeroPoint];
+            [accessoryView addSubview:oldAccessoryView];
+            [oldAccessoryView release];
+            [accessoryView release];
+        }
+        // set the popup to reflect the document's present string encoding
+        NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
+        [saveTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+        [[savePanel accessoryView] setNeedsDisplay:YES];
+        return YES;
     } else return NO; // if super failed
 }
 
@@ -749,10 +748,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
           delegate:(id)delegate 
    didSaveSelector:(SEL)didSaveSelector 
        contextInfo:(void *)contextInfo{
-    // set the string encoding according to the popup if it's a plain text type
-    if([[self fileType] isEqualToString:BDSKBibTeXDocumentType] || [[self fileType] isEqualToString:BDSKRISDocumentType])
-        [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] 
-                                            stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
+	// set the string encoding according to the popup
+	[self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
     [super saveToFile:fileName saveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
@@ -829,7 +826,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (IBAction)saveDocument:(id)sender{
     [super saveDocument:sender];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState && ![[self fileType] isEqualToString:@"Rich Site Summary file"])
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState)
         [self exportAsFileType:BDSKRSSExportFileType selected:NO];
     [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
                                                  forPublications:publications
@@ -1047,13 +1044,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSData *data = nil;
     NSError *error;
     
-    if ([aType isEqualToString:BDSKBibTeXDocumentType]){
+    if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         if([self documentStringEncoding] == 0)
             [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
         data = [self bibTeXDataForPublications:publications encoding:[self documentStringEncoding] droppingInternal:NO error:&error];
-    }else if ([aType isEqualToString:BDSKRISDocumentType]){
+    }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
         data = [self RISDataForPublications:publications];
     }
     
@@ -1426,16 +1423,13 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType encoding:(NSStringEncoding)encoding error:(NSError **)outError
 {
-	// for types we only view, we set the file type to BibTeX as that retains the complete information in the file
-	if([aType isEqualToString:BDSKRISDocumentType] == NO)
-        [self setFileType:BDSKBibTeXDocumentType];
     BOOL success;
     NSData *data = [NSData dataWithContentsOfURL:absoluteURL];
     
     NSError *error = nil;
-	if ([aType isEqualToString:BDSKBibTeXDocumentType]){
+	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
-    }else if([aType isEqualToString:BDSKRISDocumentType]){
+    }else if([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
 		success = [self loadDataRepresentation:data ofStringType:BDSKRISStringType fromURL:absoluteURL encoding:encoding error:&error];
     }else{
 		// sniff the string to see what format we got
