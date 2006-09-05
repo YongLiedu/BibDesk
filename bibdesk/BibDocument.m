@@ -1534,6 +1534,40 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 }
 
 #pragma mark -
+
+- (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertDefaultReturn)
+        [self generateCiteKeysForSelectedPublications];
+}
+
+- (void)reportTemporaryCiteKeys:(NSString *)tmpKey{
+    if([publications count] == 0)
+        return;
+    
+    // set date-added for imports
+    NSCalendarDate *importDate = [NSCalendarDate date];
+    [[self publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+    
+    NSArray *tmpKeyItems = [self allPublicationsForCiteKey:tmpKey];
+    
+    if([tmpKeyItems count] == 0)
+        return;
+    
+    [self highlightBibs:tmpKeyItems];
+    
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
+                                     defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
+                                   alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"This document was opened using the temporary cite key \"%@\" for the selected publications.  In order to use your file with BibTeX, you must generate valid cite keys for all of these items.  Do you want me to do this now?", @""), tmpKey];
+
+    [alert beginSheetModalForWindow:documentWindow
+                      modalDelegate:self
+                     didEndSelector:@selector(temporaryCiteKeysAlertDidEnd:returnCode:contextInfo:)
+                        contextInfo:nil];
+}
+
+#pragma mark -
 #pragma mark Publication actions
 
 - (IBAction)newPub:(id)sender{

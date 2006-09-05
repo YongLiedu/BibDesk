@@ -352,6 +352,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 - (BOOL)loadDataRepresentation:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
+- (void)reportTemporaryCiteKeys:(NSString *)tmpKey;
+
 // Responses to UI actions
 
 /*!
@@ -649,6 +651,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem;
 
 - (IBAction)generateCiteKey:(id)sender;
+- (void)generateCiteKeysForSelectedPublications;
 
 /* Paste related methods */
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)error;
