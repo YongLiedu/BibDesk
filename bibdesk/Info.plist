@@ -91,7 +91,7 @@
 			<string>BibDocument</string>
 			<key>NSExportableAs</key>
 			<array>
-				<string>bibTeX database</string>
+				<string>BibTeX Database</string>
 				<string>RIS/Medline File</string>
 			</array>
 			<key>NSExportableTypes</key>
@@ -117,7 +117,7 @@
 			<string>BibDocument</string>
 			<key>NSExportableAs</key>
 			<array>
-				<string>bibTeX database</string>
+				<string>BibTeX Database</string>
 				<string>RIS/Medline File</string>
 			</array>
 			<key>NSExportableTypes</key>
@@ -952,7 +952,7 @@
 				<string>public.plain-text</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>bibTeX database</string>
+			<string>BibTeX Database</string>
 			<key>UTTypeIconFile</key>
 			<string>bibDocIcon.icns</string>
 			<key>UTTypeIdentifier</key>

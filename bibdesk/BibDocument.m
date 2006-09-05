@@ -107,7 +107,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 
 // these are the same as in Info.plist
-NSString *BDSKBibTeXDocumentType = @"bibTeX database";
+NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
 NSString *BDSKRISDocumentType = @"RIS/Medline File";
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
