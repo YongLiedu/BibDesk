@@ -49,6 +49,16 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     return sharedEncodingManager;
 }
 
++ (NSStringEncoding)defaultEncoding;
+{
+    return [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
+}
+
++ (NSString *)defaultEncodingDisplayName;
+{
+    return [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self defaultEncoding]];
+}
+
 -(id)init{
     if(sharedEncodingManager != nil){
         [sharedEncodingManager release];

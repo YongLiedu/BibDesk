@@ -52,6 +52,9 @@
 */
 + (BDSKStringEncodingManager *)sharedEncodingManager;
 
++ (NSStringEncoding)defaultEncoding;
++ (NSString *)defaultEncodingDisplayName;
+
 /*!
     @method     availableEncodings
     @abstract   Returns a dictionary of all available encodings, stored as NSNumber objects.  Keys are the display names for each encoding.

@@ -97,21 +97,22 @@
     
     NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
     
-    if(encoding == NSASCIIStringEncoding || encoding == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]){
+    if(encoding == NSASCIIStringEncoding || encoding == [BDSKStringEncodingManager defaultEncoding]){
         // NSLog(@"adding to recents list");
         [super noteNewRecentDocument:aDocument]; // only add it to the list of recent documents if it can be opened without manually selecting an encoding
     }
 }
 
 - (NSArray *)fileNamesFromRunningOpenPanelForTypes:(NSArray *)types encoding:(NSStringEncoding *)encoding{
+    
+    NSParameterAssert(encoding);
 	if (isOpening)
         return nil;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
-    NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:*encoding];
-    [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+    [openTextEncodingPopupButton selectItemWithTitle:[BDSKStringEncodingManager defaultEncodingDisplayName]];
 		
 	isOpening = YES;
     int result = [oPanel runModalForDirectory:nil file:nil types:types];
@@ -124,8 +125,8 @@
 }
 
 - (void)openDocument:(id)sender{
-    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
-    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil] encoding:&encoding] objectEnumerator];
+    NSStringEncoding encoding;
+    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[BibDocument readableTypes] encoding:&encoding] objectEnumerator];
     NSString *fileName;
     
 	while (fileName = [fileEnum nextObject]) {
@@ -134,7 +135,7 @@
 }
 
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
-    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
+    NSStringEncoding encoding;
     NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[NSArray arrayWithObjects:@"bib", nil] encoding:&encoding] objectEnumerator];
     NSString *fileName;
     
@@ -153,8 +154,7 @@
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
 
-    NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
-    [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+    [openTextEncodingPopupButton selectItemWithTitle:[BDSKStringEncodingManager defaultEncodingDisplayName]];
     [openTextEncodingAccessoryView setFrameOrigin:NSZeroPoint];
     [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
@@ -194,6 +194,7 @@
 }
 
 - (id)openDocumentWithContentsOfFile:(NSString*)fileName encoding:(NSStringEncoding)encoding{
+    NSParameterAssert(encoding != 0);
 	// first see if we already have this document open
     BibDocument *doc = [self documentForFileName:fileName];
     
@@ -208,6 +209,7 @@
         if (success == NO) {
             [self removeDocument:doc];
             doc = nil;
+#warning presentError: here?
         }
     }
     

@@ -286,7 +286,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
         
         // need to set this for new documents
-        [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]]; 
+        [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
 
 		sortDescending = NO;
 		sortGroupsDescending = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSortGroupsDescendingKey];
@@ -735,8 +735,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             [accessoryView release];
         }
         // set the popup to reflect the document's present string encoding
-        NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
-        [saveTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+        NSString *documentEncodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
+        [saveTextEncodingPopupButton selectItemWithTitle:documentEncodingName];
         [[savePanel accessoryView] setNeedsDisplay:YES];
         return YES;
     } else return NO; // if super failed
@@ -1427,7 +1427,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
 
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
-    NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
+    NSStringEncoding encoding = [BDSKStringEncodingManager defaultEncoding];
     return [self readFromURL:absoluteURL ofType:aType encoding:encoding error:outError];
 }
 

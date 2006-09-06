@@ -45,7 +45,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument.h"
 #import "BibAppController.h"
-
+#import "BDSKStringEncodingManager.h"
 
 @implementation BDSKErrorEditor
 
@@ -244,7 +244,7 @@
     expandedFileName = [[NSFileManager defaultManager] uniqueFilePath:expandedFileName createDirectory:NO];
     
     // write this out with the user's default encoding, so the openDocumentWithContentsOfFile is more likely to succeed
-    NSData *fileData = [[textView string] dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey] allowLossyConversion:NO];
+    NSData *fileData = [[textView string] dataUsingEncoding:[BDSKStringEncodingManager defaultEncoding] allowLossyConversion:NO];
     [fileData writeToFile:expandedFileName atomically:YES];
     
     [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:expandedFileName display:YES];
