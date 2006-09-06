@@ -105,6 +105,7 @@
 #import "BDSKTemplateParser.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSData_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1069,27 +1070,25 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return data;    
 }
 
-#define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSUTF8StringEncoding]]
-
 - (NSData *)atomDataForPublications:(NSArray *)items{
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
     NSMutableData *d = [NSMutableData data];
     
-    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><feed xmlns=\"http://purl.org/atom/ns#\">");
+    [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><feed xmlns=\"http://purl.org/atom/ns#\">"];
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
     // TODO: output general feed info
     
 	while(pub = [e nextObject]){
-        AddDataFromString(@"<entry><title>foo</title><description>foo-2</description>");
-        AddDataFromString(@"<content type=\"application/xml+mods\">");
-        AddDataFromString([pub MODSString]);
-        AddDataFromString(@"</content>");
-        AddDataFromString(@"</entry>\n");
+        [d appendUTF8DataFromString:@"<entry><title>foo</title><description>foo-2</description>"];
+        [d appendUTF8DataFromString:@"<content type=\"application/xml+mods\">"];
+        [d appendUTF8DataFromString:[pub MODSString]];
+        [d appendUTF8DataFromString:@"</content>"];
+        [d appendUTF8DataFromString:@"</entry>\n"];
     }
-    AddDataFromString(@"</feed>");
+    [d appendUTF8DataFromString:@"</feed>"];
     
     return d;    
 }
@@ -1101,12 +1100,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><modsCollection xmlns=\"http://www.loc.gov/mods/v3\">");
+    [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><modsCollection xmlns=\"http://www.loc.gov/mods/v3\">"];
 	while(pub = [e nextObject]){
-        AddDataFromString([pub MODSString]);
-        AddDataFromString(@"\n");
+        [d appendUTF8DataFromString:[pub MODSString]];
+        [d appendUTF8DataFromString:@"\n"];
     }
-    AddDataFromString(@"</modsCollection>");
+    [d appendUTF8DataFromString:@"</modsCollection>"];
     
     return d;
 }
@@ -1118,21 +1117,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n");
+    [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n"];
 	while(pub = [e nextObject]){
-        AddDataFromString([pub endNoteString]);
+        [d appendUTF8DataFromString:[pub endNoteString]];
     }
-    AddDataFromString(@"</records>\n</xml>\n");
+    [d appendUTF8DataFromString:@"</records>\n</xml>\n"];
     
     return d;
-}
-
-static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
-{
-    if(nil != src)
-        [dst appendData:src];
-    else
-        @throw @"BDSKEncodingConversionException";
 }
 
 - (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop{
@@ -1144,7 +1135,6 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
     NSMutableData *outputData = [NSMutableData dataWithCapacity:4096];
-    NSData *data = nil;
     NSError *error = nil;
     
     if(encoding == 0)
@@ -1172,38 +1162,34 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
                 shouldAppendFrontMatter = NO;
             }
             
-            appendDataOrRaise(outputData, [templateFile dataUsingEncoding:encoding]);
+            [outputData appendDataFromString:templateFile useEncoding:encoding];
         }
         
         NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding];
 
         // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
         if(shouldAppendFrontMatter){
-            appendDataOrRaise(outputData, [frontMatter dataUsingEncoding:encoding]);
+            [outputData appendDataFromString:frontMatter useEncoding:encoding];
             [outputData appendData:doubleNewlineData];
         }
             
         if([documentInfo count]){
-            appendDataOrRaise(outputData, [[self documentInfoString] dataUsingEncoding:encoding]);
+            [outputData appendDataFromString:[self documentInfoString] useEncoding:encoding];
         }
         
         // output the document's macros:
-        appendDataOrRaise(outputData, [[[self macroResolver] bibTeXString] dataUsingEncoding:encoding]);
+        [outputData appendDataFromString:[[self macroResolver] bibTeXString] useEncoding:encoding];
         
         // output the bibs
         
         if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-
-        CFAllocatorRef alloc = CFAllocatorGetDefault();
-        CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
 
         while(pub = [e nextObject]){
             
             // run inside another exception handler since -[BibItem bibTeXString...] may raise
             @try{                    
                 [outputData appendData:doubleNewlineData];
-                data = (NSData *)CFStringCreateExternalRepresentation(alloc, (CFStringRef)[pub bibTeXStringDroppingInternal:drop], cfEncoding, 0);
-                appendDataOrRaise(outputData, data);
+                [outputData appendDataFromString:[pub bibTeXStringDroppingInternal:drop] useEncoding:encoding];
             }
             @catch(id exception){
                 // don't return partial data for a save
@@ -1211,32 +1197,25 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
                 // could be TeXify or encoding conversion if it's ours
                 @throw;
             }
-            @finally{
-                // this is executed on every pass through the loop
-                if(nil != data){
-                    CFRelease(data);
-                    data = nil;
-                }
-            }
         }
         
-        // no need to check for nil data here, since the data from groups is always UTF-8, and we shouldn't convert it; the comment key strings should be representable in any encoding
+        // The data from groups is always UTF-8, and we shouldn't convert it; the comment key strings should be representable in any encoding
         if([staticGroups count] > 0){
-            [outputData appendData:[@"\n\n@comment{BibDesk Static Groups{\n" dataUsingEncoding:encoding]];
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" useEncoding:encoding];
             [outputData appendData:[self serializedStaticGroupsData]];
-            [outputData appendData:[@"}}" dataUsingEncoding:encoding]];
+            [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         if([smartGroups count] > 0){
-            [outputData appendData:[@"\n\n@comment{BibDesk Smart Groups{\n" dataUsingEncoding:encoding]];
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" useEncoding:encoding];
             [outputData appendData:[self serializedSmartGroupsData]];
-            [outputData appendData:[@"}}" dataUsingEncoding:encoding]];
+            [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
-        [outputData appendData:[@"\n" dataUsingEncoding:encoding]];
+        [outputData appendDataFromString:@"\n" useEncoding:encoding];
         
     }
     
     @catch(id exception){
-        if([exception isEqual:@"BDSKEncodingConversionException"]){
+        if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKEncodingConversionException]){
             NSLog(@"Unable to save file with encoding %@", encodingName);
             // @@ 10.3 compatibility: convert these to AppKit constant strings
             OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
@@ -1255,7 +1234,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
         [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
+#warning allow lossy conversion?
 	return [[self RISStringForPublications:items] dataUsingEncoding:encoding allowLossyConversion:YES];
         
 }
@@ -1283,6 +1262,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     NSMutableString *s = [NSMutableString stringWithString:@"\\documentclass{article}\n\\usepackage{amsrefs}\n\\begin{document}\n\n"];
 	[s appendString:[texTask LTBString]];
 	[s appendString:@"\n\\end{document}\n"];
+#warning allow lossy conversion?
 	return [s dataUsingEncoding:encoding allowLossyConversion:YES];
 }
 
@@ -1301,7 +1281,7 @@ static inline void appendDataOrRaise(NSMutableData *dst, NSData *src)
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
     
     NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
-    
+#warning allow lossy conversion?    
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
 }
 
