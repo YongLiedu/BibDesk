@@ -1069,6 +1069,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return data;    
 }
 
+#define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSUTF8StringEncoding]]
+
 - (NSData *)atomDataForPublications:(NSArray *)items{
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
