@@ -8,8 +8,6 @@
 	<dict>
 		<key>277</key>
 		<string>660 477 120 328 0 0 1440 938 </string>
-		<key>324</key>
-		<string>523 475 394 331 0 0 1440 938 </string>
 		<key>433</key>
 		<string>786 107 264 351 0 0 1440 938 </string>
 		<key>641</key>
@@ -36,9 +34,9 @@
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>819</integer>
-		<integer>277</integer>
 		<integer>933</integer>
 		<integer>5</integer>
+		<integer>277</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>8J135</string>

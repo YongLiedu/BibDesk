@@ -143,9 +143,6 @@
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
                 removeCustomCiteStringButton = NSButton; 
-                rssExportAccessoryView = NSView; 
-                rssExportForm = NSForm; 
-                rssExportTextField = NSTextField; 
                 saveEncodingAccessoryView = NSView; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
                 searchField = NSSearchField; 

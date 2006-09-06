@@ -1069,53 +1069,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return data;    
 }
 
-#define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSUTF8StringEncoding]]
-#define AddDataFromFormCellWithTag(n) [d appendData:[[[rssExportForm cellAtIndex:[rssExportForm indexOfCellWithTag:n]] stringValue] dataUsingEncoding:NSUTF8StringEncoding]]
-
-// @@ templating: use template to write rss? Then make accessory view data accessible through a temporary dictionary accessor
-- (NSData *)rssDataForPublications:(NSArray *)items{
-    NSEnumerator *e = [items objectEnumerator];
-	BibItem *pub = nil;
-    NSMutableData *d = [NSMutableData data];
-
-    //  NSString *RSSTemplateFileName = [applicationSupportPath stringByAppendingPathComponent:@"rssTemplate.txt"];
-    
-    // add boilerplate RSS
-    //    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rdf:RDF\nxmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\nxmlns:bt=\"http://purl.org/rss/1.0/modules/bibtex/\"\nxmlns=\"http://purl.org/rss/1.0/\">\n<channel>\n");
-    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rss version=\"0.92\">\n<channel>\n");
-    AddDataFromString(@"<title>");
-    AddDataFromFormCellWithTag(0);
-    AddDataFromString(@"</title>\n");
-    AddDataFromString(@"<link>");
-    AddDataFromFormCellWithTag(1);
-    AddDataFromString(@"</link>\n");
-    AddDataFromString(@"<description>");
-    [d appendData:[[rssExportTextField stringValue] dataUsingEncoding:NSUTF8StringEncoding]];
-    AddDataFromString(@"</description>\n");
-    AddDataFromString(@"<language>");
-    AddDataFromFormCellWithTag(2);
-    AddDataFromString(@"</language>\n");
-    AddDataFromString(@"<copyright>");
-    AddDataFromFormCellWithTag(3);
-    AddDataFromString(@"</copyright>\n");
-    AddDataFromString(@"<editor>");
-    AddDataFromFormCellWithTag(4);
-    AddDataFromString(@"</editor>\n");
-    AddDataFromString(@"<lastBuildDate>");
-    [d appendData:[[[NSCalendarDate calendarDate] descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %Z"] dataUsingEncoding:NSUTF8StringEncoding]];
-    AddDataFromString(@"</lastBuildDate>\n");
-    
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    NSData *doubleLineFeed = [[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSUTF8StringEncoding];
-	while(pub = [e nextObject]){
-		[d appendData:doubleLineFeed];
-        [d appendData:[[pub RSSValue] dataUsingEncoding:NSUTF8StringEncoding]];
-    }
-	
-    [d appendData:[@"</channel>\n</rss>" dataUsingEncoding:NSUTF8StringEncoding]];
-    return d;
-}
-
 - (NSData *)atomDataForPublications:(NSArray *)items{
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;

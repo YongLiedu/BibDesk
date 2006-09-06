@@ -158,10 +158,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	IBOutlet NSMenuItem * actionMenuFirstItem;
 
     // ----------------------------------------------------------------------------------------
-    // stuff for the accessory view for the exportAsRSS
-    IBOutlet NSView *rssExportAccessoryView;
-    IBOutlet NSForm *rssExportForm;
-    IBOutlet NSTextField* rssExportTextField;
+    // stuff for the accessory views
     IBOutlet NSView *templateExportAccessoryView;
     IBOutlet NSPopUpButton *templateStylePopUpButton;
     IBOutlet NSView *dropInternalAccessoryView;
@@ -291,8 +288,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion (comprehensive description)
 */
 - (void)clearChangeCount;
-
-- (NSData *)rssDataForPublications:(NSArray *)items;
 
 - (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
 - (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
