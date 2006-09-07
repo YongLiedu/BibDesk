@@ -58,9 +58,9 @@ static NSLock *parserLock = nil;
 @interface BibTeXParser (Private)
 
 // private function to check the string for encoding.
-static BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
-// private function to do create a string from a c-string with ASCII checking.
-static NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding);
+static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
+// private function to do create a string from a c-string with encoding checking.
+static inline NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding);
 
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
@@ -547,7 +547,7 @@ static inline int numberOfValuesInField(AST *field)
     return cnt;
 }
 
-static BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
+static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
     if(![s canBeConvertedToEncoding:parserEncoding]){
         NSString *type = NSLocalizedString(@"error", @"");
         NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert characters to encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]];
@@ -559,17 +559,14 @@ static BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NS
         [errorObject setErrorMessage:message];
         
         [errorObject report];
-        [errorObject release];
-        // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
-        [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
-        
+        [errorObject release];        
         return NO;
     } 
     
     return YES;
 }
 
-static NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding){
+static inline NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding){
     NSString *s = [[NSString alloc] initWithCString:cString encoding:parserEncoding];
     checkStringForEncoding(s, line, filePath, parserEncoding);
     return s;
