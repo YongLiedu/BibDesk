@@ -57,17 +57,22 @@ static NSLock *parserLock = nil;
 
 @interface BibTeXParser (Private)
 
+// private function to check the string for encoding.
+static BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
+// private function to do create a string from a c-string with ASCII checking.
+static NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding);
+
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
 static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding);
 
 // private functions for handling different entry types; these functions do not do any locking around the parser
-static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSStringEncoding encoding);
+static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSString *filePath, NSStringEncoding encoding);
 static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding encoding, NSError **error);
-static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, BibDocument *document, NSStringEncoding encoding);
+static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding);
 
 // private function for preserving newlines in annote/abstract fields; does not lock the parser
-static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringEncoding encoding, NSError **error);
+static NSString *copyStringFromNoteField(AST *field, const char *data, NSString *filePath, NSStringEncoding encoding, NSError **error);
 
 @end
 
@@ -122,25 +127,6 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
     NSStringEncoding parserEncoding = (aDocument == nil || isPasteOrDrag ? NSUTF8StringEncoding : [(BibDocument *)aDocument documentStringEncoding]);
     
     NSError *error = nil;
-
-    // check the entire string for encoding problems; this avoids checking each field value separately
-    NSString *encodingTestString = [[NSString alloc] initWithData:inData encoding:parserEncoding];
-    
-    // checking -[NSString canBeConvertedToEncoding] seems strange in this case, since we're not actually converting it to data; however, it catches the case where a file is opened with the wrong encoding
-    if (nil == encodingTestString || [encodingTestString canBeConvertedToEncoding:parserEncoding] == NO) {
-        BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
-        [errorObject setFileName:filePath];
-        [errorObject setLineNumber:0];
-        [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
-        [errorObject setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data using encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]]];
-        
-        [errorObject report];
-        [errorObject release];
-        
-        // this will cause a partial data warning to be displayed
-        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to Interpret Using Encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]], nil);
-    }
-    [encodingTestString release];
     
     if( !(isPasteOrDrag) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
@@ -167,7 +153,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
 
             if (ok){
                 // Adding a new BibItem
-                tmpStr = [[NSString alloc] initWithCString:bt_entry_type(entry) usingEncoding:parserEncoding];
+                tmpStr = copyCheckedString(bt_entry_type(entry), entry->line, filePath, parserEncoding);
                 entryType = [tmpStr lowercaseString];
                 [tmpStr release];
                 
@@ -176,11 +162,11 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                     if(nil != frontMatter){
                         // put @preamble etc. into the frontmatter string so we carry them along.
                         if ([entryType isEqualToString:@"preamble"]){
-                            appendPreambleToFrontmatter(entry, frontMatter, parserEncoding);
+                            appendPreambleToFrontmatter(entry, frontMatter, filePath, parserEncoding);
                         }else if([entryType isEqualToString:@"string"]){
                             addMacroToResolver(entry, macroResolver, filePath, parserEncoding, &error);
                         }else if([entryType isEqualToString:@"comment"]){
-                            appendCommentToFrontmatterOrAddGroups(entry, frontMatter, aDocument, parserEncoding);
+                            appendCommentToFrontmatterOrAddGroups(entry, frontMatter, filePath, aDocument, parserEncoding);
                         }
                     }
                     
@@ -190,13 +176,13 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
                         //Get fieldname as a capitalized NSString
-                        tmpStr = [[NSString alloc] initWithCString:fieldname usingEncoding:parserEncoding];
+                        tmpStr = copyCheckedString(fieldname, field->line, filePath, parserEncoding);
                         sFieldName = [tmpStr capitalizedString];
                         [tmpStr release];
                         
                         // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
                         if([[BibTypeManager sharedManager] isNoteField:sFieldName]){
-                            tmpStr = copyStringFromNoteField(field, buf, parserEncoding, &error);
+                            tmpStr = copyStringFromNoteField(field, buf, filePath, parserEncoding, &error);
                             if(nil == tmpStr){
                                 // this can happen with badly formed annote/abstract fields, and leads to data loss
                                 bt_free_ast(entry);
@@ -226,7 +212,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];
 
-                        tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
+                        tmpStr = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
                         [newBI setCiteKeyString:tmpStr];
                         [tmpStr release];
                         
@@ -560,7 +546,35 @@ static inline int numberOfValuesInField(AST *field)
     }
     return cnt;
 }
+
+static BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
+    if(![s canBeConvertedToEncoding:parserEncoding]){
+        NSString *type = NSLocalizedString(@"error", @"");
+        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert characters to encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]];
+
+        BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
+        [errorObject setFileName:filePath];
+        [errorObject setLineNumber:line];
+        [errorObject setErrorClassName:type];
+        [errorObject setErrorMessage:message];
+        
+        [errorObject report];
+        [errorObject release];
+        // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
+        [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
+        
+        return NO;
+    } 
     
+    return YES;
+}
+
+static NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding){
+    NSString *s = [[NSString alloc] initWithCString:cString encoding:parserEncoding];
+    checkStringForEncoding(s, line, filePath, parserEncoding);
+    return s;
+}
+
 static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){
             
     NSString *s = nil;
@@ -578,7 +592,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
     
     // from profiling: optimize for the single quoted string node case; avoids the array, node, and complex string overhead
     if (1 == nodeCount && simple_value->nodetype == BTAST_STRING) {
-        s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
+        s = copyCheckedString(simple_value->text, field->line, filePath, parserEncoding);
         NSString *translatedString = [[NSString alloc] initDeTeXifiedStringWithString:s];
         [s release];
         
@@ -592,7 +606,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
         if (simple_value->text){
             switch (simple_value->nodetype){
                 case BTAST_MACRO:
-                    s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
+                    s = copyCheckedString(simple_value->text, field->line, filePath, parserEncoding);
                     
                     // We parse the macros in itemsFromData, but for reference, if we wanted to get the 
                     // macro value we could do this:
@@ -601,15 +615,15 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
             
                     break;
                 case BTAST_STRING:
-                    s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
-
+                    s = copyCheckedString(simple_value->text, field->line, filePath, parserEncoding);
+                    
                     NSString *translatedString = [[NSString alloc] initDeTeXifiedStringWithString:s];
                     sNode = [[BDSKStringNode alloc] initWithQuotedString:translatedString];
                     [translatedString release];
 
                     break;
                 case BTAST_NUMBER:
-                    s = [[NSString alloc] initWithCString:simple_value->text usingEncoding:parserEncoding];
+                    s = copyCheckedString(simple_value->text, field->line, filePath, parserEncoding);
 
                     sNode = [[BDSKStringNode alloc] initWithNumberString:s];
 
@@ -632,7 +646,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
     return returnValue;
 }
 
-static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSStringEncoding encoding)
+static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter, NSString *filePath, NSStringEncoding encoding)
 {
     
     [frontMatter appendString:@"\n@preamble{\""];
@@ -646,7 +660,7 @@ static void appendPreambleToFrontmatter(AST *entry, NSMutableString *frontMatter
         char *text = field->text;
         if(text){
             if(paste) [frontMatter appendString:@"\" #\n   \""];
-            tmpStr = [[NSString alloc] initWithCString:text usingEncoding:encoding];
+            tmpStr = copyCheckedString(text, field->line, filePath, encoding);
             if(tmpStr) 
                 [frontMatter appendString:tmpStr];
             else
@@ -665,8 +679,8 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
     char *fieldname = NULL;
     
     while (field = bt_next_field (entry, field, &fieldname)){
-        NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:encoding];
-        NSString *macroString = [copyStringFromBTField(field, filePath, macroResolver, encoding) autorelease]; // handles TeXification
+        NSString *macroKey = copyCheckedString(field->text, field->line, filePath, encoding);
+        NSString *macroString = copyStringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
         if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
             NSString *type = NSLocalizedString(@"Error", @"");
             NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
@@ -684,10 +698,12 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
         }else{
             [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
         }
+        [macroKey release];
+        [NSString release];
     } // end while field - process next macro    
 }
 
-static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, BibDocument *document, NSStringEncoding encoding)
+static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding)
 {
     NSMutableString *commentStr = [[NSMutableString alloc] init];
     AST *field = NULL;
@@ -714,7 +730,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             }
             
             // encoding will be UTF-8 for the plist, so make sure we use it for each line
-            tmpStr = [[NSString alloc] initWithCString:text usingEncoding:((isSmartGroup || isStaticGroup)? NSUTF8StringEncoding : encoding)];
+            tmpStr = copyCheckedString(text, field->line, filePath, ((isSmartGroup || isStaticGroup)? NSUTF8StringEncoding : encoding));
             
             if(tmpStr) 
                 [commentStr appendString:tmpStr];
@@ -746,7 +762,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     [commentStr release];    
 }
 
-static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringEncoding encoding, NSError **error)
+static NSString *copyStringFromNoteField(AST *field, const char *data, NSString *filePath, NSStringEncoding encoding, NSError **error)
 {
     NSString *returnString = nil;
     long cidx = 0; // used to scan through buf for annotes.
@@ -772,6 +788,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSStringE
             OFError(error, BDSKParserError, NSLocalizedDescriptionKey, errorString, nil);
         }
         returnString = [[NSString alloc] initWithBytes:&data[field->down->offset] length:(cidx- (field->down->offset)) encoding:encoding];
+        checkStringForEncoding(returnString, field->line, filePath, encoding);
     }else{
         OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
     }
