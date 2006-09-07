@@ -45,6 +45,10 @@ NSString *BDSKAllFieldsString = nil;
 + (void)didLoad
 {
     BDSKAllFieldsString = [NSLocalizedString(@"Any Field", @"string specifying a search in all fields of an item") copy];
+    
+    // Hidden default to allow for JabRef interoperability; (RFE #1546931) this is an all-or-nothing switch.  Alternate would be to use a script hook to copy annote->review when closing an editor, but then you have lots of duplication.
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] != nil)
+        BDSKAnnoteString = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] copy];
 }
 
 - (IBAction)showHelpForClient:(id)sender;
