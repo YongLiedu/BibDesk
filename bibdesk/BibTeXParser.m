@@ -567,7 +567,7 @@ static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *fileP
 }
 
 static inline NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding){
-    NSString *s = [[NSString alloc] initWithCString:cString encoding:parserEncoding];
+    NSString *s = [[NSString alloc] initWithCString:cString usingEncoding:parserEncoding];
     checkStringForEncoding(s, line, filePath, parserEncoding);
     return s;
 }
