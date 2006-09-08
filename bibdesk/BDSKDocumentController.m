@@ -58,6 +58,7 @@
         // @@ NSDocumentController autosave is 10.4 only
 		if([self respondsToSelector:@selector(setAutosavingDelay:)] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
 		    [self setAutosavingDelay:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutosaveTimeIntervalKey]];
+        // @@ do we need this?  it seems only to be used for app-modal panel...
         isOpening = NO;
     }
     return self;
@@ -103,6 +104,17 @@
     }
 }
 
+- (NSArray *)readableFileExtensions {
+    NSMutableArray *extensions = [NSMutableArray array];
+    // @@ 10.3: iterate documentClassNames instead of BibDocument
+    NSEnumerator *typeE = [[BibDocument readableTypes] objectEnumerator];
+    NSString *type;
+    while (type = [typeE nextObject]) {
+        [extensions addObjectsFromArray:[self fileExtensionsFromType:type]];
+    }
+    return extensions;
+}
+
 - (NSArray *)fileNamesFromRunningOpenPanelForTypes:(NSArray *)types encoding:(NSStringEncoding *)encoding{
     
     NSParameterAssert(encoding);
@@ -125,8 +137,9 @@
 }
 
 - (void)openDocument:(id)sender{
+    // @@ should we use the types parameter?  default implementation doesn't seem to
     NSStringEncoding encoding;
-    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[BibDocument readableTypes] encoding:&encoding] objectEnumerator];
+    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[self readableFileExtensions] encoding:&encoding] objectEnumerator];
     NSString *fileName;
     
 	while (fileName = [fileEnum nextObject]) {
