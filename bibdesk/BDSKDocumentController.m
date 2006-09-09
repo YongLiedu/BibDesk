@@ -104,6 +104,17 @@
     }
 }
 
+- (NSArray *)fileExtensionsFromType:(NSString *)aType {
+    NSArray *types = [super fileExtensionsFromType:aType];
+    if ([types count])
+        return types;
+    
+    // @@ hack for UTI compatibility with open panel
+    NSDictionary *dict = [(id)UTTypeCopyDeclaration((CFStringRef)aType) autorelease];
+    types = [[dict objectForKey:(id)kUTTypeTagSpecificationKey] objectForKey:(id)kUTTagClassFilenameExtension];
+    return types;    
+}
+
 - (NSArray *)readableFileExtensions {
     NSMutableArray *extensions = [NSMutableArray array];
     // @@ 10.3: iterate documentClassNames instead of BibDocument
