@@ -1330,6 +1330,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     while(--index)
         [[[self windowControllers] objectAtIndex:index] close];
     
+    // invalidate static groups so they will be reloaded
+    [staticGroups release];
+    staticGroups = nil;
+    
     if([super revertToSavedFromFile:fileName ofType:type]){
 		[tableView deselectAll:self]; // clear before resorting
 		[self searchFieldAction:searchField]; // redo the search
@@ -1344,6 +1348,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	unsigned int index = [[self windowControllers] count];
     while(--index)
         [[[self windowControllers] objectAtIndex:index] close];
+    
+    // invalidate static groups so they will be reloaded
+    [staticGroups release];
+    staticGroups = nil;
     
 	if([super revertToSavedFromURL:aURL ofType:type]){
         [tableView deselectAll:self]; // clear before resorting
