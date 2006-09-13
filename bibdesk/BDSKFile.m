@@ -298,7 +298,7 @@ static Class BDSKFileClass = Nil;
         // this should be unique per file for our purposes, even across volumes (since FSRefs are not valid across volumes)
         // nodeID is preserved when using Carbon FileManager or NSFileManager to move a file, whereas parentDirID would change
         FSCatalogInfo catalogInfo;
-        OSErr err =  (fileRef, kFSCatInfoNodeID, &catalogInfo, NULL, NULL, NULL);
+        OSErr err = FSGetCatalogInfo(fileRef, kFSCatInfoNodeID, &catalogInfo, NULL, NULL, NULL);
         if (noErr == err)
             hash = catalogInfo.nodeID;
     }
