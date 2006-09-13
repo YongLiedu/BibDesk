@@ -800,7 +800,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 - (OFVersionNumber *)latestReleasedVersionNumber:(NSError **)error{
     
     NSError *downloadError;
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
+    
+    // make sure we ignore the cache policy; use default timeout of 60 seconds
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
     NSURLResponse *response;
     
     // load it synchronously; either the user requested this on the main thread, or this is the update thread
@@ -814,10 +816,16 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
                                                              mutabilityOption:NSPropertyListImmutable
                                                                        format:NULL
                                                              errorDescription:&err];
-        if(nil != err){
+        if(nil == versionDictionary || nil != err){
             // add the parsing error as underlying error, if the retrieval actually succeeded
             OFError(&downloadError, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create property list from update check download", @""), NSUnderlyingErrorKey, err, nil);
             [err release];
+            
+            // see if we have a web server error page and log it to the console; NSUnderlyingErrorKey has \n literals when logged
+            NSAttributedString *attrString = [[NSAttributedString alloc] initWithHTML:theData documentAttributes:NULL];
+            if (attrString)
+                NSLog(@"retrieved HTML data instead of property list: \n\"%@\"", [attrString string]);
+            [attrString release];
         } else {
             remoteVersion = [[[OFVersionNumber alloc] initWithVersionString:[versionDictionary valueForKey:@"BibDesk"]] autorelease];
         }
