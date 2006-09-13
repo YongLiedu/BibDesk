@@ -2006,7 +2006,7 @@ open the edit window for an item you have pasted or dragged in.
 See @ref{Getting More Help} for information on the Error panel.
 
 @prefitem{Warnings} These options allow you to activate or deactivate warnings before 
-deleting items, removing items from a group, or renaming groups. 
+deleting items, removing items from a group, renaming groups, or generating cite keys. 
 These warnings can also be deactivated from the warning dialog. 
 
 @c --------------------------------------------------------------------------------------
