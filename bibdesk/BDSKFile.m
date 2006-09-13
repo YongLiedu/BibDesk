@@ -238,7 +238,7 @@ static Class BDSKFileClass = Nil;
     BOOL isEqual = NO;
     if(self == other){
         isEqual = YES;
-    } else if([other isKindOfClass:[self class]]){
+    } else if([other fsRef] != NULL){
         // always return NO if comparing against an instance with a valid FSRef, since self isn't a valid file (or wasn't when instantiated) and hashes aren't guaranteed to be the same for differend subclasses
         isEqual = [fileURL isEqualToFileURL:[other fileURL]];
     }
@@ -272,6 +272,7 @@ static Class BDSKFileClass = Nil;
 @interface BDSKFSRefFile : BDSKFile <NSCopying>
 {
     const FSRef *fileRef;
+    UInt32 hash;
 }
 @end
 
@@ -293,6 +294,13 @@ static Class BDSKFileClass = Nil;
         if(newRef)
             bcopy(aRef, newRef, sizeof(FSRef));
         fileRef = newRef;
+        
+        // this should be unique per file for our purposes, even across volumes (since FSRefs are not valid across volumes)
+        // nodeID is preserved when using Carbon FileManager or NSFileManager to move a file, whereas parentDirID would change
+        FSCatalogInfo catalogInfo;
+        OSErr err =  (fileRef, kFSCatInfoNodeID, &catalogInfo, NULL, NULL, NULL);
+        if (noErr == err)
+            hash = catalogInfo.nodeID;
     }
     return self;    
 }
@@ -306,10 +314,12 @@ static Class BDSKFileClass = Nil;
 - (BOOL)isEqual:(id)other
 {
     BOOL isEqual = NO;
+    const FSRef *otherFSRef;
     if(self == other){
         isEqual = YES;
-    } else if([other isKindOfClass:[self class]]){
-        const FSRef *otherFSRef = [other fsRef];
+    } else if(NULL != (otherFSRef = [other fsRef]) ){
+        
+        // only compare with a subclass that has an fsRef; URL variant always returns NULL
         isEqual = (noErr == FSCompareFSRefs(fileRef, otherFSRef));
     }
 #if OMNI_FORCE_ASSERTIONS
@@ -319,22 +329,9 @@ static Class BDSKFileClass = Nil;
     return isEqual;
 }
 
-// Knuth hash from http://www.partow.net/programming/hashfunctions/index.html
-unsigned int DEKHash(char *str, unsigned int len)
-{
-    unsigned int hash = len;
-    unsigned int i    = 0;
-    
-    for(i = 0; i < len; str++, i++)
-    {
-        hash = ((hash << 5) ^ (hash >> 27)) ^ (*str);
-    }
-    return (hash & 0x7FFFFFFF);
-}
-
 - (unsigned int)hash
 {
-    return DEKHash((void *)fileRef, sizeof(FSRef)/sizeof(char));
+    return hash;
 }
 
 - (id)copyWithZone:(NSZone *)aZone
