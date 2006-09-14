@@ -836,10 +836,29 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     return remoteVersion;
 }
 
+- (void)displayAlertForUpdateCheckFailure:(NSError *)error{
+    // the error generally has too much information to display in an alert, but it's likely the most useful part for debugging; hence we'll give the user a chance to see it
+    NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription]
+                                     defaultButton:nil
+                                   alternateButton:NSLocalizedString(@"Open Console", @"")
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"The console log may contain more detailed information about the failure.  Would you like to open it?", @"")];
+    
+    // alertWithMessageText:... uses constants from NSPanel.h, alertWithError: uses constants from NSAlert.h
+    int rv = [alert runModal];
+    if (rv == NSAlertAlternateReturn) {
+        BOOL didLaunch = [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:@"com.apple.console" options:0 additionalEventParamDescriptor:nil launchIdentifier:NULL];
+        if (NO == didLaunch)
+            NSBeep();
+    }
+    NSLog(@"%@", [error description]);
+}    
+
 - (void)checkForUpdatesInBackground{
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+    // don't bother displaying network availability warnings for an automatic check
     if([self checkForNetworkAvailability:NULL] == NO){
         [pool release];
         return;
@@ -854,10 +873,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     if(remoteVersion && [remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
         [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:) forObject:self withObject:[remoteVersion cleanVersionString]];
         
-    } else if(nil == remoteVersion){
-        if(nil != error && [NSApplication instancesRespondToSelector:@selector(presentError:)])
-            [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:error waitUntilDone:YES];
-        NSLog(@"Unable to contact server for version check due to error %@", error);
+    } else if(nil == remoteVersion && nil != error){
+        
+        // we'll display this warning, since it may indicate a more serious problem than just being disconnected
+        [self performSelectorOnMainThread:@selector(displayAlertForUpdateCheckFailure:) withObject:error waitUntilDone:YES];
     }
     [pool release];
     
@@ -879,29 +898,30 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     // check for network availability and display a warning if it's down
     NSError *error = nil;
     if([self checkForNetworkAvailability:&error] == NO){
-        [[NSDocumentController sharedDocumentController] presentError:error];
-    } else {
-        [self checkForUpdatesInBackground];
+        
+        // display a warning based on the error and bail out now
+        [self displayAlertForUpdateCheckFailure:error];
+        return;
     }
     
     OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber:&error];
-    if(nil == remoteVersion){
-        NSRunAlertPanel(NSLocalizedString(@"Error", @"Title of alert when an error happens"),
-                        NSLocalizedString(@"There was an error checking for updates.", @"Alert text when the error happens."),
-                        NSLocalizedString(@"Give up", @"Accept & give up"), nil, nil);
-        return;
-    }
         
-    NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    OFVersionNumber *localVersion = [[[OFVersionNumber alloc] initWithVersionString:currVersionNumber] autorelease];
-    
-    if([remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
-        [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString]];
+    if (nil != remoteVersion) {
+        NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+        OFVersionNumber *localVersion = [[[OFVersionNumber alloc] initWithVersionString:currVersionNumber] autorelease];
+        
+        if([remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
+            [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString]];
+        } else {
+            // tell user software is up to date
+            NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
+                            NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
+                            nil, nil, nil);                
+        }
     } else {
-        // tell user software is up to date
-        NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
-                        NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
-                        nil, nil, nil);                
+        
+        // likely an error page or other download failure
+        [self displayAlertForUpdateCheckFailure:error];
     }
     
 }
