@@ -3143,10 +3143,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 NSAttributedString *templateString;
                 
                 // make sure this is really one of the attributed string types...
-                if([template templateFormat] != BDSKTextTemplateFormat){
+                if([template templateFormat] & BDSKRichTextTemplateFormat){
                     templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
                     [textStorage appendAttributedString:templateString];
-                } else {
+                } else if([template templateFormat] & BDSKTextTemplateFormat){
                     // parse as plain text, so the HTML is interpreted properly by NSAttributedString
                     NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
                     // we generally assume UTF-8 encoding for all template-related files
