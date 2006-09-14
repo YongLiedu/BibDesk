@@ -130,7 +130,7 @@
 	<key>CFBundleExecutable</key>
 	<string>BibDesk</string>
 	<key>CFBundleGetInfoString</key>
-	<string>BibDesk 1.2.7 (v${CURRENT_PROJECT_VERSION}), Copyright 2001-06 Michael O. McCracken.</string>
+	<string>BibDesk 1.2.8 (v${CURRENT_PROJECT_VERSION}), Copyright 2001-06 Michael O. McCracken.</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -146,7 +146,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2.7</string>
+	<string>1.2.8</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
