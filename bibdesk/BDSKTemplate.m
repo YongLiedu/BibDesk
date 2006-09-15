@@ -282,7 +282,7 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     } else if ([extension isEqualToString:@"doc"]) {
         format = BDSKDocTemplateFormat;
     } else if ([extension isEqualToString:@"html"] || [extension isEqualToString:@"htm"]) {
-        NSString *htmlString = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL];
+        NSString *htmlString = [[[NSString alloc] initWithData:[NSData dataWithContentsOfURL:url] encoding:NSUTF8StringEncoding] autorelease];
         if (htmlString == nil)
             format = BDSKUnknownTemplateFormat;
         else if ([htmlString rangeOfString:@"<$"].location != NSNotFound)
