@@ -1229,23 +1229,16 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         return;
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
-
     NSSet *items = [self itemsMatchingCiteKey:pboardString];
-	BibItem *item = nil;
-    NSMutableString *retStr = [NSMutableString string];
-    BOOL yn = NO;    
-    NSEnumerator *itemE = [items objectEnumerator];
-    int count = [items count];
     
-    while(item = [itemE nextObject]){
-        [retStr appendString:[item citeKey]];
-        if(count > 1)
-            [retStr appendString:@" "];
+    // if no matches, we'll return the original string unchanged
+    if ([items count]) {
+        pboardString = [[[[items allObjects] arrayByPerformingSelector:@selector(citeKey)] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] componentsJoinedByComma];
     }
     
     types = [NSArray arrayWithObject:NSStringPboardType];
     [pboard declareTypes:types owner:nil];
-    yn = [pboard setString:retStr forType:NSStringPboardType];
+    [pboard setString:pboardString forType:NSStringPboardType];
 }
 
 - (void)showPubWithKey:(NSPasteboard *)pboard
