@@ -47,6 +47,7 @@
 static NSMutableParagraphStyle *BDSKGroupCellStringParagraphStyle = nil;
 static NSMutableParagraphStyle *BDSKGroupCellCountParagraphStyle = nil;
 static NSLayoutManager *layoutManager = nil;
+static CFMutableDictionaryRef integerStringDictionary = NULL;
 
 // names of these globals were changed to support key-value coding on BDSKGroup
 NSString *BDSKGroupCellStringKey = @"stringValue";
@@ -69,6 +70,12 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
     [BDSKGroupCellCountParagraphStyle setLineBreakMode:NSLineBreakByClipping];
     layoutManager = [[NSLayoutManager alloc] init];
     [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
+    
+    if (NULL == integerStringDictionary) {
+        integerStringDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &OFIntegerDictionaryKeyCallbacks, &kCFTypeDictionaryValueCallBacks);
+        CFDictionaryAddValue(integerStringDictionary,  (const void *)0, CFSTR(""));
+    }
+    
 }
 
 - (id)init {
@@ -161,6 +168,19 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
     [self recacheCountAttributes];
 }
 
+
+// all the -[NSNumber stringValue] does is create a string with a localized format description, so we'll cache more strings than Foundation does, since this shows up in Shark as a bottleneck
+static NSString *stringWithInteger(int count)
+{
+    CFStringRef string;
+    if (CFDictionaryGetValueIfPresent(integerStringDictionary, (const void *)count, (const void **)&string) == FALSE) {
+        string = CFStringCreateWithFormat(CFAllocatorGetDefault(), NULL, CFSTR("%d"), count);
+        CFDictionaryAddValue(integerStringDictionary, (const void *)count, (const void *)string);
+        CFRelease(string);
+    }
+    return (NSString *)string;
+}
+
 // BDSKGroup and NSString respond to these messages (see global keys in this file)
 
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj {
@@ -174,13 +194,9 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
         NSString *stringValue = [groupValue stringValue];
         // super's object value needs to be an NSString
         [super setObjectValue:stringValue];
-        [[label mutableString] setString:stringValue];
+        [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:stringValue];
 
-        // all the -[NSNumber stringValue] does is create a string with a localized format description, so we'll call the underlying functions directly, since this shows up in Shark as a bottleneck
-        int count = [groupValue count];
-        CFStringRef countStr = (count ? CFStringCreateWithFormat(CFAllocatorGetDefault(), NULL, CFSTR("%d"), count) : CFRetain(CFSTR("")) );
-        [[countString mutableString] setString:(NSString *)countStr];
-        CFRelease(countStr);
+        [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
     }
 }
 
