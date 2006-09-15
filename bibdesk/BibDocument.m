@@ -1305,6 +1305,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     } else if (format & BDSKRichHTMLTemplateFormat) {
         [mutableAttributes setObject:NSHTMLTextDocumentType forKey:@"DocumentType"]; /* @@ 10.3: NSDocumentTypeDocumentAttribute */
         NSError *error = nil;
+#warning 10.4 only feature
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else if (format & BDSKDocTemplateFormat) {
         return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
