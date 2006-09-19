@@ -839,10 +839,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 - (void)displayAlertForUpdateCheckFailure:(NSError *)error{
     // the error generally has too much information to display in an alert, but it's likely the most useful part for debugging; hence we'll give the user a chance to see it
     NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription]
-                                     defaultButton:nil
+                                     defaultButton:NSLocalizedString(@"Ignore", @"")
                                    alternateButton:NSLocalizedString(@"Open Console", @"")
                                        otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"The console log may contain more detailed information about the failure.  Would you like to open it?", @"")];
+                         informativeTextWithFormat:NSLocalizedString(@"You may safely ignore this warning, or open the console log to view additional information about the failure.  If this problem continues, please file a bug report or e-mail bibdesk-develop@lists.sourceforge.net with details.", @"")];
     
     // alertWithMessageText:... uses constants from NSPanel.h, alertWithError: uses constants from NSAlert.h
     int rv = [alert runModal];
