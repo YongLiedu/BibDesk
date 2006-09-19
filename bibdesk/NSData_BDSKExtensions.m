@@ -56,7 +56,13 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     // try this first; generally locale-specific, but it's really fast if it works
     const char *cstringPtr = CFStringGetCStringPtr((CFStringRef)string, cfEncoding);
     if (cstringPtr) {
-        [self appendBytes:cstringPtr length:strlen(cstringPtr)];
+        // Omni uses strlen, but it returns incorrect length for some strings with strange Unicode characters (bug #1558548)
+        CFIndex length = CFStringGetLength((CFStringRef)string);
+        CFIndex bufLen;
+        CFIndex convertedLength = CFStringGetBytes((CFStringRef)string, CFRangeMake(0, length), cfEncoding, 0, FALSE, NULL, UINT_MAX, &bufLen);
+        if (convertedLength != length)
+            [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
+        [self appendBytes:cstringPtr length:bufLen];
     } else {
         CFDataRef data = CFStringCreateExternalRepresentation(CFAllocatorGetDefault(), (CFStringRef)string, cfEncoding, 0);
      
