@@ -1040,6 +1040,10 @@ static int numberOfOpenEditors = 0;
     if(returnCode == NSAlertAlternateReturn)
         return;
     
+    // could use [[alert window] orderOut:nil] here, but we're using the didDismissSelector instead
+    // This is problematic, since finalizeChangesPreservingSelection: ends up triggering a format failure sheet if the user deleted the citekey and then chose to generate (this might be common in case of duplicating an item, for instance).  Therefore, we'll catch that case here and reset the control to the publication's current value, since we're going to generate a new one anyway.
+    if ([NSString isEmptyString:[citeKeyField stringValue]])
+        [citeKeyField setStringValue:[publication citeKey]];
 	[self finalizeChangesPreservingSelection:YES];
 	
 	BDSKScriptHook *scriptHook = nil;
@@ -1095,9 +1099,12 @@ static int numberOfOpenEditors = 0;
                                  informativeTextWithFormat:NSLocalizedString(@"This action will generate a new cite key for the publication.  This action is undoable.", @"")];
         [alert setHasCheckButton:YES];
         [alert setCheckValue:NO];
+           
+        // use didDismissSelector or else we can have sheets competing for the window
         [alert beginSheetModalForWindow:[self window] 
                           modalDelegate:self 
-                         didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
+                         didEndSelector:NULL
+                     didDismissSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
                             contextInfo:NULL];
     } else {
         [self generateCiteKeyAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
