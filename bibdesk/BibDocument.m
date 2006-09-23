@@ -782,11 +782,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             *outError = nsError;
     }
     @catch(id exception){
+
         if([exception isKindOfClass:[NSException class]] && [[exception name] isEqualToString:BDSKTeXifyException]){
             success = NO;
             error = [exception reason];
             if([[exception userInfo] valueForKey:@"item"])
-                [self highlightBib:[[exception userInfo] valueForKey:@"item"]];
+                [self highlightBib:[[exception userInfo] valueForKey:@"item"]];   
+            
+            // NSDocumentController will crash if we don't set this to nil when returning NO
+            *outError = nil;
         } else {
             @throw;
         }
@@ -796,6 +800,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	if(success && currentSaveOperationType != 3)
         [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
     else if(error != nil){
+        
+        // @@ 10.3: we run a sheet so this is displayed on 10.3, but could convert to using NSError on 10.4
         NSString *errTitle = currentSaveOperationType == 3 ? NSLocalizedString(@"Unable to Autosave File", @"") : NSLocalizedString(@"Unable to Save File", @"");
         NSString *errMsg = [NSString stringWithFormat:@"%@  %@", error, NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")];
         // log in case the sheet crashes us for some reason
@@ -804,8 +810,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         NSBeginCriticalAlertSheet(errTitle, nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, errMsg);
     }
 
-    // rebuild metadata cache for this document whenever we save
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 && [self fileURL]){
+    // rebuild metadata cache for this document whenever we save successfully
+    if(success && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 && [self fileURL]){
         NSEnumerator *pubsE = [[self publications] objectEnumerator];
         NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
         BibItem *anItem;
