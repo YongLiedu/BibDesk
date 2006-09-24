@@ -3,7 +3,6 @@
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 6/8/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
 //
 /*
  This software is Copyright (c) 2005,2006
@@ -44,6 +43,7 @@
 #import "BibAppController.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "UKDirectoryEnumerator.h"
+#import "BDSKShellCommandFormatter.h"
 
 @interface BDSKTeXTask (Private) 
 
@@ -562,27 +562,31 @@
 }
 
 - (BOOL)runPDFTeXTask{
-    NSString *pdftexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
+    NSString *command = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
+
+    NSString *argString = [BDSKShellCommandFormatter argumentsFromCommand:command];
+    NSString *pdftexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
+    NSMutableArray *args = [NSMutableArray arrayWithObject:@"-interaction=batchmode"];
+    if (argString)
+        [args addObject:argString];
+    [args addObject:fileName];
     
-    if(![[NSFileManager defaultManager] objectExistsAtFileURL:[NSURL fileURLWithPath:pdftexbinpath]]){
-        NSLog(@"runPDFTeXTask cannot continue: %@ not found", pdftexbinpath);
-        return NO;    
-    }
-    
-    // This task runs the latex on our tex file 
-    return [self runTask:pdftexbinpath withArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", fileName, nil ]];
+    // This task runs latex on our tex file 
+    return [self runTask:pdftexbinpath withArguments:args];
 }
 
 - (BOOL)runBibTeXTask{
-    NSString *bibtexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
-
-    if(![[NSFileManager defaultManager] objectExistsAtFileURL:[NSURL fileURLWithPath:bibtexbinpath]]){        
-        NSLog(@"runBibTeXTask cannot continue: %@ not found", bibtexbinpath);
-        return NO;     
-    }    
+    NSString *command = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
 	
+    NSString *argString = [BDSKShellCommandFormatter argumentsFromCommand:command];
+    NSString *bibtexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
+    NSMutableArray *args = [NSMutableArray array];
+    if (argString)
+        [args addObject:argString];
+    [args addObject:fileName];
+    
     // This task runs bibtex on our bib file 
-    return [self runTask:bibtexbinpath withArguments:[NSArray arrayWithObject:fileName]];
+    return [self runTask:bibtexbinpath withArguments:args];
 }
 
 - (BOOL)runLaTeX2RTFTask{

@@ -43,9 +43,9 @@
 @interface BibPref_TeX : OAPreferenceClient
 {
     IBOutlet NSButton *usesTeXButton;
-    IBOutlet NSTextField *texBinaryPath;
-    IBOutlet NSTextField *bibtexBinaryPath;
-    IBOutlet NSTextField *bibTeXStyle;
+    IBOutlet NSTextField *texBinaryPathField;
+    IBOutlet NSTextField *bibtexBinaryPathField;
+    IBOutlet NSComboBox *bibTeXStyleField;
     IBOutlet NSPopUpButton *encodingPopUpButton;
     BDSKStringEncodingManager *encodingManager;
 }
@@ -53,10 +53,7 @@
 - (IBAction)changeUsesTeX:(id)sender;
 - (IBAction)changeTexBinPath:(id)sender;
 - (IBAction)changeBibTexBinPath:(id)sender;
-- (BOOL) checkTexBinPath;
-- (BOOL) checkBibTexBinPath;
-- (void) warnAndDisablePreview:(NSTextField *)textField;
-- (void)alertSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)control;
+
 - (IBAction)changeStyle:(id)sender;
 - (IBAction)resetTeXPreviewFile:(id)sender;
 - (IBAction)openTeXPreviewFile:(id)sender;

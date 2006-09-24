@@ -14,10 +14,10 @@
             CLASS = "BibPref_TeX"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                bibTeXStyle = NSTextField; 
-                bibtexBinaryPath = NSTextField; 
+                bibTeXStyleField = NSComboBox; 
+                bibtexBinaryPathField = NSTextField; 
                 encodingPopUpButton = NSPopUpButton; 
-                texBinaryPath = NSTextField; 
+                texBinaryPathField = NSTextField; 
                 usesTeXButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 

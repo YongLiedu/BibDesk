@@ -3,7 +3,6 @@
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 6/8/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
 //
 /*
  This software is Copyright (c) 2005,2006

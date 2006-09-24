@@ -38,8 +38,10 @@
 #import "BDSKPreviewer.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKShellCommandFormatter.h"
 
 #define BDSK_TEX_DOWNLOAD_URL @"http://ii2.sourceforge.net/tex-index.html"
+
 
 @implementation BibPref_TeX
 
@@ -48,103 +50,68 @@
     encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
     [encodingPopUpButton removeAllItems];
     [encodingPopUpButton addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
+    
+    [texBinaryPathField setFormatter:[[[BDSKShellCommandFormatter alloc] init] autorelease]];
+    [texBinaryPathField setDelegate:self];
+    [bibtexBinaryPathField setFormatter:[[[BDSKShellCommandFormatter alloc] init] autorelease]];
+    [bibtexBinaryPathField setDelegate:self];
 }
 
 - (void)updateUI{
     [usesTeXButton setState:[defaults boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
   
-    [texBinaryPath setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
-    [bibtexBinaryPath setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
-    [bibTeXStyle setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
+    [texBinaryPathField setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
+    [bibtexBinaryPathField setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
+    [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
     [encodingPopUpButton selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]]];
-
-	//This has to follow the lines above because it checks their validity
-	[self changeUsesTeX:usesTeXButton]; // this makes sure the fields are set enabled / disabled properly
-
+    [bibTeXStyleField setEnabled:[defaults boolForKey:BDSKUsesTeXKey]];
+    
+    if ([BDSKShellCommandFormatter isValidExecutableCommand:[defaults objectForKey:BDSKTeXBinPathKey]])
+        [texBinaryPathField setTextColor:[NSColor blackColor]];
+    else
+        [texBinaryPathField setTextColor:[NSColor redColor]];
+    
+    if ([BDSKShellCommandFormatter isValidExecutableCommand:[defaults objectForKey:BDSKBibTeXBinPathKey]])
+        [bibtexBinaryPathField setTextColor:[NSColor blackColor]];
+    else
+        [bibtexBinaryPathField setTextColor:[NSColor redColor]];
+    
 }
 
 -(IBAction)changeTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
+    [self updateUI];
 }
 
 - (IBAction)changeBibTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
+    [self updateUI];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
-    if ([sender state] == NSOffState) {
-        [bibTeXStyle setEnabled:NO];
-		
-		//These are left enabled so that the user can fix errors.
-        [texBinaryPath setEnabled:YES];
-        [bibtexBinaryPath setEnabled:YES];
-		
+    if ([sender state] == NSOffState) {		
         [defaults setBool:NO forKey:BDSKUsesTeXKey];
 		
 		// hide preview panel if necessary
 		[[BDSKPreviewer sharedPreviewer] hideWindow:self];
     }else{
-		// Check that executable paths are valid
-	    if ([self checkBibTexBinPath] && [self checkTexBinPath]) {
-		
-			// Ensure that paths don't change while previewing is enabled.
-			// so that we can reliably validate them.
-			[bibtexBinaryPath setEnabled:NO];
-			[texBinaryPath setEnabled:NO];
-		
-			// Enable the style changing interface
-			[bibTeXStyle setEnabled:YES];
-			
-			[defaults setBool:YES forKey:BDSKUsesTeXKey];
-		}
+        [defaults setBool:YES forKey:BDSKUsesTeXKey];
     }
 }
 
-- (BOOL) checkTexBinPath { 
-  //Ensure that the fields to be validated have finished editing and thus called changeTexPath
-  [self changeTexBinPath:texBinaryPath];
-
-  if( ![[NSFileManager defaultManager] isExecutableFileAtPath:[defaults objectForKey:BDSKTeXBinPathKey]] ) {
-       [self warnAndDisablePreview:texBinaryPath];
-       return NO;
-   } else {
-       return YES;
-   }
-}
-
-- (BOOL) checkBibTexBinPath { 
-  //Ensure that the fields to be validated have finished editing and thus called changeTexPath
-  [self changeBibTexBinPath:bibtexBinaryPath];
-
-  if( ![[NSFileManager defaultManager] isExecutableFileAtPath:[defaults objectForKey:BDSKBibTeXBinPathKey]] ) {
-       [self warnAndDisablePreview:bibtexBinaryPath];
-       return NO;
-   } else {
-       return YES;
-   }
-}
-		
-- (void) warnAndDisablePreview:(NSTextField *)textField {
-	NSBeep();
+- (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
+{
 	NSBeginAlertSheet(NSLocalizedString(@"Invalid Path",@"Invalid binary path for TeX preview"), 
-					  nil, nil, nil, 
-					  [[self controlBox] window], 
-					  self, 
-					  @selector(alertSheetDidEnd:returnCode:contextInfo:), 
-					  NULL, 
-					  textField, 
-					  NSLocalizedString(@"The file %@ does not exist or is not executable. Previewing is disabled. Please set an appropriate path and re-enable previewing.",@""), 
-					  [textField stringValue]);
-	
-	//Disable previewing
-	[usesTeXButton setState:NSOffState];
-	[self changeUsesTeX:usesTeXButton];
-}
-
-- (void)alertSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)control{
-    NSText *fe = [[[self controlBox] window] fieldEditor:YES forObject:control];
-    [(NSTextField *)control selectText:nil];
-    [fe setSelectedRange:NSMakeRange([[fe string] length], 0)];
+    nil, nil, nil, 
+    [[self controlBox] window], 
+    self, 
+    NULL, 
+    NULL, 
+    nil, 
+    error);
+        
+    // allow the user to end editing and ignore the warning, since TeX may not be installed
+    return YES;
 }
 
 - (IBAction)changeStyle:(id)sender{
@@ -205,8 +172,6 @@
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
     NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
-    
-    // NSLog(@"set encoding to %i for tag %i", [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue], [sender indexOfSelectedItem]);    
     [defaults setInteger:encoding forKey:BDSKTeXPreviewFileEncodingKey];        
 }
 
