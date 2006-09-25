@@ -2924,7 +2924,24 @@ static int numberOfOpenEditors = 0;
     return contentSize;
 }
 
+- (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    switch (returnCode){
+        case NSAlertOtherReturn:
+            break; // do nothing
+        case NSAlertAlternateReturn:
+            [[publication retain] autorelease]; // make sure it stays around till we're closed
+            [[self document] removePublication:publication]; // now fall through to default
+        default:
+            [sheet orderOut:nil];
+            [self close];
+    }
+}
+
 - (BOOL)windowShouldClose:(id)sender{
+	
+    // User may have started editing some field, e.g. deleted the citekey and not tabbed out; if the user then chooses to discard, the finalizeChangesPreservingSelection: in windowWillClose: ultimately results in a crash due to OAApplication's sheet queue interaction with modal BDSKAlerts.
+    [self finalizeChangesPreservingSelection:NO];
+
     NSString *errMsg = nil;
     NSString *discardMsg = NSLocalizedString(@"Discard", @"");
     
@@ -2953,7 +2970,7 @@ static int numberOfOpenEditors = 0;
                       NSLocalizedString(@"Cancel", @""), //middle button NSAlertOtherReturn
                       [self window],
                       self, // modal delegate
-                      @selector(shouldCloseSheetDidEnd:returnCode:contextInfo:),
+                      @selector(shouldCloseSheetDidEnd:returnCode:contextInfo:), 
                       NULL, // did dismiss sel
                       NULL,
                       errMsg);
@@ -2961,23 +2978,12 @@ static int numberOfOpenEditors = 0;
 
 }
 
-- (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    switch (returnCode){
-        case NSAlertOtherReturn:
-            break; // do nothing
-        case NSAlertAlternateReturn:
-            [[publication retain] autorelease]; // make sure it stays around till we're closed
-            [[self document] removePublication:publication]; // now fall through to default
-        default:
-            [sheet orderOut:nil];
-            [self close];
-    }
-}
-
 - (void)windowWillClose:(NSNotification *)notification{
+        
 	[self finalizeChangesPreservingSelection:NO];
     [macroTextFieldWC close]; // close so it's not hanging around by itself; this works if the doc window closes, also
-    [documentSnoopDrawer close];
+    [documentSnoopDrawer close]; 
+    
 	// this can give errors when the application quits when an editor window is open
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
 												 forPublications:[NSArray arrayWithObject:publication]
