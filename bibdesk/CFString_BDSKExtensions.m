@@ -162,7 +162,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
     if(bufSize < SAFE_ALLOCA_SIZE)
         buffer = alloca(bufSize);
     
-    allocator = (allocator == NULL) ? CFAllocatorGetDefault() : allocator;
+    allocator = (allocator == NULL) ? CFGetAllocator(aString) : allocator;
     if(buffer == NULL){
         buffer = (UniChar *)CFAllocatorAllocate(allocator, bufSize, 0);
         isLarge = YES; // too large for the stack
@@ -188,7 +188,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
     if(buffer[(bufCnt-1)] == ' ') // we've collapsed any trailing whitespace, so disregard it
         bufCnt--;
     
-    retStr = CFStringCreateWithCharacters(CFAllocatorGetDefault(), buffer, bufCnt);
+    retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
     if(isLarge) CFAllocatorDeallocate(allocator, buffer);
     return retStr;
 }
@@ -251,7 +251,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAlloc
     if(bufSize < SAFE_ALLOCA_SIZE)
         buffer = alloca(bufSize);
     
-    allocator = (allocator == NULL) ? CFAllocatorGetDefault() : allocator;
+    allocator = (allocator == NULL) ? CFGetAllocator(aString) : allocator;
     if(buffer == NULL){
         buffer = (UniChar *)CFAllocatorAllocate(allocator, bufSize, 0);
         isLarge = YES; // too large for the stack
@@ -277,7 +277,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAlloc
     if(buffer[(bufCnt-1)] == ' ') // we've collapsed any trailing whitespace, so disregard it
         bufCnt--;
     
-    retStr = CFStringCreateWithCharacters(CFAllocatorGetDefault(), buffer, bufCnt);
+    retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
     if(isLarge) CFAllocatorDeallocate(allocator, buffer);
     return retStr;
 }
@@ -293,7 +293,7 @@ void __BDDeleteTeXCharactersForSorting(CFMutableStringRef texString)
     if(BDIsEmptyString(texString))
         return;
     
-    CFAllocatorRef allocator = CFAllocatorGetDefault();
+    CFAllocatorRef allocator = CFGetAllocator(texString);
 
     CFStringInlineBuffer inlineBuffer;
     CFIndex length = CFStringGetLength(texString);
@@ -405,7 +405,7 @@ uint32_t __BDFastHash(CFStringRef aString)
         size_t bufSize = l * sizeof(UniChar);
         buf = bufSize < SAFE_ALLOCA_SIZE ? (UniChar *)alloca(bufSize) : NULL;
         if(buf == NULL){
-            allocator = CFAllocatorGetDefault();
+            allocator = CFGetAllocator(aString);
             buf = (UniChar *)CFAllocatorAllocate(allocator, l * sizeof(UniChar), 0);;
             NSCAssert(buf != NULL, @"unable to allocate memory");
             shouldFree = YES;
@@ -500,7 +500,7 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
         }
     }
     
-    retStr = CFStringCreateWithCharacters(CFAllocatorGetDefault(), buffer, bufCnt);
+    retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
     if(isLarge) CFAllocatorDeallocate(allocator, buffer);
     return retStr;
 }
@@ -654,7 +654,7 @@ CFHashCode BDCaseInsensitiveStringHash(const void *value)
 {
     if(value == NULL) return 0;
     
-    CFAllocatorRef allocator = CFAllocatorGetDefault();
+    CFAllocatorRef allocator = CFGetAllocator(value);
     CFIndex len = CFStringGetLength(value);
     
     // use a generous length, in case the lowercase changes the number of characters
