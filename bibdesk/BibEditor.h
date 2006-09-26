@@ -142,6 +142,7 @@
 	// edit field stuff
 	BOOL forceEndEditing;
     NSMutableDictionary *toolbarItems;
+    BOOL windowHasSheet;
 
     BOOL didSetupForm;
 	

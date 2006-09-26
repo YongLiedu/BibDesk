@@ -1766,6 +1766,7 @@ static int numberOfOpenEditors = 0;
                                                otherButton:nil
                                  informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"") ];
 
+            // info is released in callback
             NSArray *info = [[NSDictionary alloc] initWithObjectsAndKeys:publication, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", fieldName, @"fieldName", nil];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:self
@@ -2937,11 +2938,25 @@ static int numberOfOpenEditors = 0;
     }
 }
 
+// ivar to allow us to determine if the window has a sheet, and hence should wait for user input before closing
+- (void)windowWillBeginSheet:(NSNotification *)aNotification
+{
+    windowHasSheet = YES;
+}
+- (void)windowDidEndSheet:(NSNotification *)aNotification
+{
+    windowHasSheet = NO;
+}
+
 - (BOOL)windowShouldClose:(id)sender{
 	
-    // User may have started editing some field, e.g. deleted the citekey and not tabbed out; if the user then chooses to discard, the finalizeChangesPreservingSelection: in windowWillClose: ultimately results in a crash due to OAApplication's sheet queue interaction with modal BDSKAlerts.
+    // User may have started editing some field, e.g. deleted the citekey and not tabbed out; if the user then chooses to discard, the finalizeChangesPreservingSelection: in windowWillClose: ultimately results in a crash due to OAApplication's sheet queue interaction with modal BDSKAlerts.  Hence, we need to call it earlier.
     [self finalizeChangesPreservingSelection:NO];
-
+    
+    // finalizeChangesPreservingSelection: may end up triggering other sheets, as well (move file, for example; bug #1565645), and we don't want to close the window when it has a sheet attached, since it's waiting for user input at that point.  This is sort of a hack, but there's too much state for us to keep track of and decide if the window should really close.
+    if (windowHasSheet)
+        return NO;
+    
     NSString *errMsg = nil;
     NSString *discardMsg = NSLocalizedString(@"Discard", @"");
     
@@ -2980,8 +2995,11 @@ static int numberOfOpenEditors = 0;
 
 - (void)windowWillClose:(NSNotification *)notification{
         
+    // @@ this finalizeChanges seems redundant now that it's in windowShouldClose:
 	[self finalizeChangesPreservingSelection:NO];
-    [macroTextFieldWC close]; // close so it's not hanging around by itself; this works if the doc window closes, also
+    
+    // close so it's not hanging around by itself; this works if the doc window closes, also
+    [macroTextFieldWC close];
     [documentSnoopDrawer close]; 
     
 	// this can give errors when the application quits when an editor window is open
