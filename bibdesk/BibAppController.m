@@ -886,7 +886,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     int button;
     button = NSRunAlertPanel(NSLocalizedString(@"A New Version is Available", @"Alert when new version is available"),
                              NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version"),
-                             nil, NSLocalizedString(@"Cancel",@"Cancel"), latestVersionNumber, nil);
+                             NSLocalizedString(@"Download", @""), NSLocalizedString(@"Ignore",@"Ignore"), nil, latestVersionNumber, nil);
     if (button == NSOKButton) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
     }
