@@ -874,9 +874,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:) forObject:self withObject:[remoteVersion cleanVersionString]];
         
     } else if(nil == remoteVersion && nil != error){
-        
-        // we'll display this warning, since it may indicate a more serious problem than just being disconnected
-        [self performSelectorOnMainThread:@selector(displayAlertForUpdateCheckFailure:) withObject:error waitUntilDone:YES];
+        // was showing an alert for this, but apparently it's really common for the check to fail
+        NSLog(@"%@", [error description]);
     }
     [pool release];
     
