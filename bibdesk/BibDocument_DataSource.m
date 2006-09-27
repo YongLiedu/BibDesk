@@ -124,12 +124,16 @@
 			return [[pub authorAtIndex:1] displayName]; 
         }else if([tcID isEqualToString: BDSKThirdAuthorString] ){
 			return [[pub authorAtIndex:2] displayName];
+        }else if([tcID isEqualToString:BDSKLastAuthorString] ){
+			return [[pub lastAuthor] displayName];
         }else if([tcID isEqualToString: BDSKFirstAuthorEditorString] ){
 			return [[pub authorOrEditorAtIndex:0] displayName];
         }else if([tcID isEqualToString: BDSKSecondAuthorEditorString] ){
 			return [[pub authorOrEditorAtIndex:1] displayName]; 
         }else if([tcID isEqualToString: BDSKThirdAuthorEditorString] ){
 			return [[pub authorOrEditorAtIndex:2] displayName];
+        }else if([tcID isEqualToString:BDSKLastAuthorEditorString] ){
+			return [[pub lastAuthorOrEditor] displayName];
 		} else if([tcID isEqualToString:BDSKAuthorString]) {
 			return [pub pubAuthorsForDisplay];
 		} else if([tcID isEqualToString:BDSKAuthorEditorString]){

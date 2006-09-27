@@ -220,6 +220,14 @@ enum {
 - (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit;
 
 /*!
+    @method     lastAuthor
+    @abstract   Returns the last author in the array of authors.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BibAuthor *)lastAuthor;
+
+/*!
     @method bibTeXAuthorString
     @abstract Calls bibTeXAuthorStringNormalized:inherit: with normalized set to NO and inherit set to YES.
     @discussion (discussion)
@@ -290,6 +298,14 @@ enum {
     
 */
 - (NSArray *)pubAuthorsOrEditorsInheriting:(BOOL)inherit;
+
+/*!
+    @method     lastAuthorOrEditor
+    @abstract   Returns last object of pubAuthorsOrEditors.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BibAuthor *)lastAuthorOrEditor;
 
 /*!
     @method     pubAuthorsOreditorsForDisplay

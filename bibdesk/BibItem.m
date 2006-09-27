@@ -638,6 +638,10 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	return [self authorAtIndex:2]; 
 }
 
+- (BibAuthor *)lastAuthor{
+    return [[self pubAuthors] lastObject];
+}
+
 - (NSArray *)pubAuthors{
 	return [self pubAuthorsInheriting:YES];
 }
@@ -733,6 +737,10 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 
 - (BibAuthor *)thirdAuthorOrEditor{ 
 	return [self authorOrEditorAtIndex:2]; 
+}
+
+- (BibAuthor *)lastAuthorOrEditor{
+    return [[self pubAuthorsOrEditors] lastObject];
 }
 
 - (NSArray *)pubAuthorsOrEditors{
