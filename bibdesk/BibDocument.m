@@ -1071,7 +1071,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         // see if this was an encoding failure; if so, we can suggest how to fix it
         // @@ 10.4 only error keys; should use real constant strings
         if([[error userInfo] valueForKey:@"NSStringEncoding"]){
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), @"NSLocalizedRecoverySuggestion", NSLocalizedString(@"The document cannot be saved using the specified encoding.  You should ensure that TeX conversion is enabled in the Files preferences, and/or save using an encoding such as UTF-8", @""), nil);
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), @"NSLocalizedRecoverySuggestion", NSLocalizedString(@"The document cannot be saved using the specified encoding.  You should ensure that TeX conversion is enabled in the Files preferences, and/or save using an encoding such as UTF-8.", @""), nil);
         } else {
             // even with all of this, NSDocumentController still presents a standard (lame) error message
             OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to save the document", @""), nil);
@@ -1197,18 +1197,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
         while(pub = [e nextObject]){
-            
-            // run inside another exception handler since -[BibItem bibTeXString...] may raise
-            @try{                    
-                [outputData appendData:doubleNewlineData];
-                [outputData appendDataFromString:[pub bibTeXStringDroppingInternal:drop] useEncoding:encoding];
-            }
-            @catch(id exception){
-                // don't return partial data for a save
-                outputData = nil;
-                // could be TeXify or encoding conversion if it's ours
-                @throw;
-            }
+            [outputData appendData:doubleNewlineData];
+            [outputData appendDataFromString:[pub bibTeXStringDroppingInternal:drop] useEncoding:encoding];
         }
         
         // The data from groups is always UTF-8, and we shouldn't convert it; the comment key strings should be representable in any encoding
@@ -1233,8 +1223,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
             if(outError) *outError = error;
             outputData = nil;
+        } else {
+            // this code path gets hit when we throw during TeXification; since this propagates an NSError back up the chain without doing anything with it, we should set it to nil in case a caller tries to use it
+            if (outError) *outError = nil;
+            @throw;
         }
-        else @throw;
     }
 	
     return outputData;
