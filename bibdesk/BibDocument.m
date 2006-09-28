@@ -811,13 +811,19 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 
     // rebuild metadata cache for this document whenever we save successfully
+    // note that this also gets called for autosave operations, so Spotlight should always be current
     if(success && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 && [self fileURL]){
         NSEnumerator *pubsE = [[self publications] objectEnumerator];
         NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
         BibItem *anItem;
+        NSDictionary *cacheInfo;
+        
         while(anItem = [pubsE nextObject]){
             OMNI_POOL_START {
-                [pubsInfo addObject:[anItem metadataCacheInfo]];
+                // will be nil if the item hasn't changed since we last asked for the cache info
+                cacheInfo = [anItem metadataCacheInfo];
+                if (cacheInfo)
+                    [pubsInfo addObject:cacheInfo];
             } OMNI_POOL_END;
         }
         

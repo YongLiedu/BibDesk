@@ -58,20 +58,21 @@ enum {
 
 */
 @interface BibItem : OFObject <NSCopying, NSCoding, BDSKParseableItem>{
-    NSString *fileType; // thread safe
-    NSString *citeKey; // thread safe
-	NSString *pubType; // thread safe
-    NSMutableDictionary *pubFields; // thread safe
-    NSMutableDictionary *people; // thread safe
-    NSCalendarDate *pubDate; // thread safe
-	NSCalendarDate *dateAdded; // thread safe
-	NSCalendarDate *dateModified; // thread safe
+    NSString *fileType;
+    NSString *citeKey;
+	NSString *pubType;
+    NSMutableDictionary *pubFields;
+    NSMutableDictionary *people;
+    NSCalendarDate *pubDate;
+	NSCalendarDate *dateAdded;
+	NSCalendarDate *dateModified;
 	NSMutableDictionary *groups;
-    BOOL hasBeenEdited; // thread safe
+    BOOL hasBeenEdited;
 	BOOL needsToBeFiled;
 	BibDocument *document;
     BDSKFieldCollection *templateFields;
     int currentIndex;
+    BOOL spotlightMetadataChanged;
 }
 
 /*!

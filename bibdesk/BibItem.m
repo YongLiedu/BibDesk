@@ -186,6 +186,9 @@ static CFDictionaryRef selectorTable = NULL;
 	if (self) {
         // reset this here, since designated init's updateMetadataForKey set it to YES
         [self setHasBeenEdited:NO];
+        
+        // new items need to be updated on the next save
+        spotlightMetadataChanged = YES;
 	}
 	return self;
 }
@@ -221,6 +224,9 @@ static CFDictionaryRef selectorTable = NULL;
         templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
         [self updateMetadataForKey:nil];
+        
+        // used for determining if we need to re-save Spotlight metadata
+        spotlightMetadataChanged = NO;
     }
 
     return self;
@@ -252,6 +258,8 @@ static CFDictionaryRef selectorTable = NULL;
             // set by the document, which we don't archive
             document = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
+            // we don't bother encoding this
+            spotlightMetadataChanged = NO;
         }
     } else {       
         [[super init] release];
@@ -1378,6 +1386,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSDictionary *)metadataCacheInfo{
+    
+    if (NO == spotlightMetadataChanged)
+        return nil;
+    
+    // signify that this item is now current
+    spotlightMetadataChanged = NO;
+    
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:11];
     NSString *value;
     NSArray *array;
@@ -2812,7 +2827,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (void)updateMetadataForKey:(NSString *)key{
     
 	[self setHasBeenEdited:YES];
-        
+    spotlightMetadataChanged = YES;    
+    
     // invalidate people (authors, editors, etc.) if necessary
     if ([BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key]) {
         [people release];
