@@ -47,4 +47,13 @@
     return (NSMutableDictionary *)CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFNSObjectDictionaryValueCallbacks);
 }
 
+// ARM:  Apple's implementation of -[NSDictionary valueForKey:] doesn't check [key length]
+// before using characterAtIndex:, so an empty string will raise an exception.  We reimplement
+// it as specified in the docs to avoid this problem.  rdar://problem/4759413
+
+- (id)valueForKey:(NSString *)key
+{
+    return ([key length] && [key characterAtIndex:0] == '@') ? [super valueForKey:[key substringFromIndex:1]] : [self objectForKey:key];
+}
+
 @end
