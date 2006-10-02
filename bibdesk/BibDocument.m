@@ -772,7 +772,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
 
     BOOL success = YES;
-    NSString *error = nil;
+    NSString *errorString = nil;
     NSError *nsError;
     @try{
         // @@ 10.3 compatibility; should use super after we remove the call to writeToFile:ofType:, but that causes an endless loop on 10.4; revisit this if we need to support file wrappers
@@ -785,12 +785,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
         if([exception isKindOfClass:[NSException class]] && [[exception name] isEqualToString:BDSKTeXifyException]){
             success = NO;
-            error = [exception reason];
+            errorString = [exception reason];
             if([[exception userInfo] valueForKey:@"item"])
                 [self highlightBib:[[exception userInfo] valueForKey:@"item"]];   
             
             // NSDocumentController will crash if we don't set this to nil when returning NO
-            *outError = nil;
+            if (outError) *outError = nil;
         } else {
             @throw;
         }
@@ -799,11 +799,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
 	if(success && currentSaveOperationType != 3)
         [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
-    else if(error != nil){
+    else if(errorString != nil){
         
         // @@ 10.3: we run a sheet so this is displayed on 10.3, but could convert to using NSError on 10.4
         NSString *errTitle = currentSaveOperationType == 3 ? NSLocalizedString(@"Unable to Autosave File", @"") : NSLocalizedString(@"Unable to Save File", @"");
-        NSString *errMsg = [NSString stringWithFormat:@"%@  %@", error, NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")];
+        NSString *errMsg = [NSString stringWithFormat:@"%@  %@", errorString, NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")];
         // log in case the sheet crashes us for some reason
         NSLog(@"%@!  %@", errTitle, errMsg);
         // we present a special sheet if the save failed due to texification; NSDocument still puts up its own save failed sheet, at least for save-as
@@ -1055,6 +1055,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
     NSData *data = nil;
+    
+    // @@ hack: if something we call raises an exception, outError will be uninitialized and our caller has a garbage pointer
+    if (outError) *outError = nil;
+    
     NSError *error;
     
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
@@ -3097,12 +3101,15 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BibItem *pub = nil;
     NSString *fieldValue;
     BOOL isFirst = YES;
+    static NSAttributedString *attributedFormFeed = nil;
+    if (nil == attributedFormFeed)
+        attributedFormFeed = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%C", NSFormFeedCharacter] attributes:nil];
     
     switch(displayType){
         case 0:
             while(pub = [enumerator nextObject]){
                 if (isFirst == YES) isFirst = NO;
-                else [[textStorage mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't display
+                else [textStorage appendAttributedString:attributedFormFeed]; // page break for printing; doesn't display
                 [textStorage appendAttributedString:[pub attributedStringValue]];
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
