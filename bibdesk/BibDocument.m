@@ -773,42 +773,36 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     BOOL success = YES;
     NSString *errorString = nil;
-    NSError *nsError;
-    @try{
-        // @@ 10.3 compatibility; should use super after we remove the call to writeToFile:ofType:, but that causes an endless loop on 10.4; revisit this if we need to support file wrappers
-        NSData *data = [self dataOfType:docType error:&nsError];
-        success = nil == data ? NO : [data writeToURL:fileURL atomically:YES];
-        if(!success && outError)
-            *outError = nsError;
-    }
-    @catch(id exception){
+    NSError *nsError = nil;
 
-        if([exception isKindOfClass:[NSException class]] && [[exception name] isEqualToString:BDSKTeXifyException]){
-            success = NO;
-            errorString = [exception reason];
-            if([[exception userInfo] valueForKey:@"item"])
-                [self highlightBib:[[exception userInfo] valueForKey:@"item"]];   
-            
-            // NSDocumentController will crash if we don't set this to nil when returning NO
-            if (outError) *outError = nil;
-        } else {
-            @throw;
-        }
-    }
+    // @@ 10.3 compatibility; should use super after we remove the call to writeToFile:ofType:, but that causes an endless loop on 10.4; revisit this if we need to support file wrappers
+    NSData *data = [self dataOfType:docType error:&nsError];
+    success = nil == data ? NO : [data writeToURL:fileURL atomically:YES];
     
-    // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
-	if(success && currentSaveOperationType != 3)
-        [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
-    else if(errorString != nil){
+    if (NO == success) {
+        
+        // get offending BibItem if possible
+        BibItem *theItem = [[nsError userInfo] valueForKey:@"item"];
+        if (theItem)
+            [self highlightBib:theItem];
         
         // @@ 10.3: we run a sheet so this is displayed on 10.3, but could convert to using NSError on 10.4
         NSString *errTitle = currentSaveOperationType == 3 ? NSLocalizedString(@"Unable to Autosave File", @"") : NSLocalizedString(@"Unable to Save File", @"");
-        NSString *errMsg = [NSString stringWithFormat:@"%@  %@", errorString, NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")];
+        
+        // @@ do this in dataOfType:error:?  should just use error localizedDescription
+        NSString *errMsg = [[nsError userInfo] valueForKey:@"NSLocalizedRecoverySuggestion"];
+        if (nil == errMsg)
+            errMsg = NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"");
+        
         // log in case the sheet crashes us for some reason
         NSLog(@"%@!  %@", errTitle, errMsg);
-        // we present a special sheet if the save failed due to texification; NSDocument still puts up its own save failed sheet, at least for save-as
-        NSBeginCriticalAlertSheet(errTitle, nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, errMsg);
+        
+        // we present a special sheet if the save failed for 10.3 compatibility; NSDocument still puts up its own save failed sheet, at least for save-as
+        NSBeginCriticalAlertSheet(errTitle, nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, errMsg);            
     }
+    // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
+    else if (currentSaveOperationType != 3 /*NSAutosaveOperation*/) // @@ 10.3
+        [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
 
     // rebuild metadata cache for this document whenever we save successfully
     // note that this also gets called for autosave operations, so Spotlight should always be current
@@ -834,6 +828,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [infoDict release];
     }
         
+    // setting to nil is okay
+    if (outError) *outError = nsError;
+    
     return success;
 }
 
@@ -1056,10 +1053,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                       userInfo:[NSDictionary dictionary]];
     NSData *data = nil;
     
-    // @@ hack: if something we call raises an exception, outError will be uninitialized and our caller has a garbage pointer
-    if (outError) *outError = nil;
-    
-    NSError *error;
+    NSError *error = nil;
     
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         if([self documentStringEncoding] == 0)
@@ -1074,11 +1068,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if(nil == data && outError){
         // see if this was an encoding failure; if so, we can suggest how to fix it
         // @@ 10.4 only error keys; should use real constant strings
+        // NSLocalizedRecoverySuggestion is appropriate for display as error message in alert
         if([[error userInfo] valueForKey:@"NSStringEncoding"]){
             OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), @"NSLocalizedRecoverySuggestion", NSLocalizedString(@"The document cannot be saved using the specified encoding.  You should ensure that TeX conversion is enabled in the Files preferences, and/or save using an encoding such as UTF-8.", @""), nil);
-        } else {
-            // even with all of this, NSDocumentController still presents a standard (lame) error message
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to save the document", @""), nil);
+        } else if([[error userInfo] valueForKey:@"item"]) {
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), @"NSLocalizedRecoverySuggestion", [NSString stringWithFormat:@"%@  %@", [error localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")], @"item", [[error userInfo] valueForKey:@"item"], nil);
         }
         *outError = error;
     }
@@ -1221,19 +1215,28 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
     
     @catch(id exception){
+        
+        // We used to throw the exception back up, but that caused major grief with the NSErrors.  Since we had multiple call levels adding a local NSError, when we jumped to the handler in writeToURL:ofType:error:, it had an uninitialized error (since dataOfType:error: never returned).  This would occasionally cause a crash when saving or autosaving, since NSDocumentController would apparently try to use the error.  It's much safer just to catch and discard the exception here, then propagate the NSError back up and return nil.
+        
         if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKEncodingConversionException]){
             NSLog(@"Unable to save file with encoding %@", encodingName);
             // @@ 10.3 compatibility: convert these to AppKit constant strings
             OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
-            if(outError) *outError = error;
-            outputData = nil;
+        } else if([exception isKindOfClass:[NSException class]] && [[exception name] isEqual:BDSKTeXifyException]){
+            if ([[exception userInfo] valueForKey:@"item"])
+                OFError(&error, "BDSKTeXifyError", NSLocalizedDescriptionKey, [exception reason], @"item", [[exception userInfo] valueForKey:@"item"], nil);
+            else
+                OFError(&error, "BDSKTeXifyError", NSLocalizedDescriptionKey, [exception reason], nil);
         } else {
-            // this code path gets hit when we throw during TeXification; since this propagates an NSError back up the chain without doing anything with it, we should set it to nil in case a caller tries to use it
-            if (outError) *outError = nil;
-            @throw;
+            // some unknown exception
+            NSLog(@"Exception %@ in %@", exception, NSStringFromSelector(_cmd));
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [exception description], nil);
         }
+        outputData = nil;
     }
 	
+    if (outError) *outError = error;
+
     return outputData;
         
 }
