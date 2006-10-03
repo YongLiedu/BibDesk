@@ -110,6 +110,30 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     NSString *name = [NSString localizedNameOfStringEncoding:nsEncoding];
     [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
     
+    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_2312_80);
+    name = [NSString localizedNameOfStringEncoding:nsEncoding];
+    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
+
+    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGBK_95);
+    name = [NSString localizedNameOfStringEncoding:nsEncoding];
+    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
+    
+    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_JP);
+    name = [NSString localizedNameOfStringEncoding:nsEncoding];
+    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
+  
+    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_CN);
+    name = [NSString localizedNameOfStringEncoding:nsEncoding];
+    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
+    
+    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_TW);
+    name = [NSString localizedNameOfStringEncoding:nsEncoding];
+    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
+    
+    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_KR);
+    name = [NSString localizedNameOfStringEncoding:nsEncoding];
+    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
+    
     return dictionary;
 }
 
