@@ -644,7 +644,8 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (BibAuthor *)lastAuthor{
-    return [[self pubAuthors] lastObject];
+    BibAuthor *author = [[self pubAuthors] lastObject];
+    return author == nil ? [BibAuthor emptyAuthor] : author;
 }
 
 - (NSArray *)pubAuthors{
@@ -745,7 +746,8 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (BibAuthor *)lastAuthorOrEditor{
-    return [[self pubAuthorsOrEditors] lastObject];
+    BibAuthor *author = [[self pubAuthorsOrEditors] lastObject];
+    return author == nil ? [BibAuthor emptyAuthor] : author;
 }
 
 - (NSArray *)pubAuthorsOrEditors{
