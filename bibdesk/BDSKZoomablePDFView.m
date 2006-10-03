@@ -304,11 +304,6 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (void)setScaleFactor:(float)newScaleFactor adjustPopup:(BOOL)flag {
     
-    if(!newScaleFactor)
-        [self setAutoScales:YES];
-    else
-        [super setScaleFactor:newScaleFactor];
-    
 	if (flag) {
 		unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
 		
@@ -318,6 +313,13 @@ static float BDSKScaleMenuFontSize = 11.0;
 		[scalePopUpButton selectItemAtIndex:cnt];
 		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
     }
+    
+    if(!newScaleFactor)
+        [self setAutoScales:YES];
+    else
+        [super setScaleFactor:newScaleFactor];
+    
+    scaleFactor = newScaleFactor;
 	
 }
 
