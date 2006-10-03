@@ -184,4 +184,10 @@
 	}
 }
 
+- (IBAction)deleteForward:(id)sender{
+    // we use the same for Delete and the Backspace
+    // Omni's implementation of deleteForward: selects the next item, which selects the wrong item too early because we may delay for the warning
+    [self deleteBackward:sender];
+}
+
 @end
