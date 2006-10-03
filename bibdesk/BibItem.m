@@ -186,9 +186,6 @@ static CFDictionaryRef selectorTable = NULL;
 	if (self) {
         // reset this here, since designated init's updateMetadataForKey set it to YES
         [self setHasBeenEdited:NO];
-        
-        // new items need to be updated on the next save
-        spotlightMetadataChanged = YES;
 	}
 	return self;
 }
@@ -226,7 +223,8 @@ static CFDictionaryRef selectorTable = NULL;
         [self updateMetadataForKey:nil];
         
         // used for determining if we need to re-save Spotlight metadata
-        spotlightMetadataChanged = NO;
+        // set to YES initially so the first save after opening a file always writes the metadata, since we don't know beforehand if it's been written
+        spotlightMetadataChanged = YES;
     }
 
     return self;
@@ -234,8 +232,7 @@ static CFDictionaryRef selectorTable = NULL;
 
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
-    // we set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset
-    // note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
+    // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType pubFields:pubFields isNew:YES];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
@@ -259,7 +256,7 @@ static CFDictionaryRef selectorTable = NULL;
             document = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
-            spotlightMetadataChanged = NO;
+            spotlightMetadataChanged = YES;
         }
     } else {       
         [[super init] release];
