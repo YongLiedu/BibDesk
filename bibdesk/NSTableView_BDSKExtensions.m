@@ -251,6 +251,35 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     }
 }
 
+
+// copied from -[NSTableView (OAExtensions) scrollSelectedRowsToVisibility:]
+- (void)scrollRowToCenter:(unsigned int)row;
+{
+    NSRect rowRect = [self rectOfRow:row];
+    
+    if (NSEqualRects(rowRect, NSZeroRect))
+        return;
+    
+    NSRect visibleRect;
+    float heightDifference;
+    
+    visibleRect = [self visibleRect];
+    
+    // don't change the scroll position if it's already in view, since that would be unexpected
+    if (NSContainsRect(visibleRect, rowRect))
+        return;
+    
+    heightDifference = NSHeight(visibleRect) - NSHeight(rowRect);
+    if (heightDifference > 0) {
+        // scroll to a rect equal in height to the visible rect but centered on the selected rect
+        rowRect = NSInsetRect(rowRect, 0.0, -(heightDifference / 2.0));
+    } else {
+        // force the top of the selectionRect to the top of the view
+        rowRect.size.height = NSHeight(visibleRect);
+    }
+    [self scrollRectToVisible:rowRect];
+}
+
 @end
 
 #pragma mark -

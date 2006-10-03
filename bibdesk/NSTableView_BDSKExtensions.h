@@ -52,6 +52,7 @@
 - (NSString *)fontSizePreferenceKey;
 
 - (void)removeAllTableColumns;
+- (void)scrollRowToCenter:(unsigned int)row;
 
 @end
 

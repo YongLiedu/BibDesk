@@ -45,6 +45,7 @@
 #import "BDSKSplitView.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKGroupTableView.h"
+#import "NSTableView_BDSKExtensions.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
 NSString *BDSKDocumentFormatForSearchingDates = nil;
@@ -498,7 +499,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
             if([titlesToSelect containsObject:[item title]]) 
                 [pubsToSelect addObject:item];
 		[self highlightBibs:pubsToSelect];
-        [tableView scrollRowToVisible:[tableView selectedRow]];
+        [tableView scrollRowToCenter:[tableView selectedRow]];
     } 
     
 }

@@ -2599,7 +2599,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     // fix the selection
     [self highlightBibs:pubsToSelect];
-    [tableView scrollRowToVisible:[tableView selectedRow]]; // just go to the last one
+    [tableView scrollRowToCenter:[tableView selectedRow]]; // just go to the last one
 
     // reset ourself as delegate
     [tableView setDelegate:self];
@@ -3255,7 +3255,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     if([indexes count]){
         [tableView selectRowIndexes:indexes byExtendingSelection:NO];
-        [tableView scrollRowToVisible:[indexes firstIndex]];
+        [tableView scrollRowToCenter:[indexes firstIndex]];
     }
 }
 
@@ -3645,7 +3645,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     if(countOfItems){
         [tableView selectRowIndexes:rowsToSelect byExtendingSelection:NO];
-        [tableView scrollRowToVisible:[rowsToSelect firstIndex]];  // make sure at least one item is visible
+        [tableView scrollRowToCenter:[rowsToSelect firstIndex]];  // make sure at least one item is visible
     }else
         NSBeep();
     
@@ -3693,7 +3693,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [pubsToRemove release];
 
     if(countOfItems)
-        [tableView scrollRowToVisible:[tableView selectedRow]];  // make sure at least one item is visible
+        [tableView scrollRowToCenter:[tableView selectedRow]];  // make sure at least one item is visible
     else
         NSBeep();
     
@@ -3838,7 +3838,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BibItem *parent = [self publicationForCiteKey:crossref];
     if(crossref && parent){
         [self highlightBib:parent];
-        [tableView scrollRowToVisible:[tableView selectedRow]];
+        [tableView scrollRowToCenter:[tableView selectedRow]];
     } else
         NSBeep(); // if no parent found
 }
