@@ -1013,20 +1013,21 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 fileData = [self atomDataForPublications:items];
                 break;
             case BDSKBibTeXExportFileType:
+#warning encoding errors not handled
                 encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
                 if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey]){
                     [self performSortForCrossrefs];
                     items = (selected ? [self selectedPublications] : publications);
                 }
-                fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:([dropInternalCheckButton state] == NSOnState)];
+                    fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:([dropInternalCheckButton state] == NSOnState) error:NULL];
                 break;
             case BDSKRISExportFileType:
                 encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-                fileData = [self RISDataForPublications:items encoding:encoding];
+                fileData = [self RISDataForPublications:items encoding:encoding error:NULL];
                 break;
             case BDSKLTBExportFileType:
                 encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-                fileData = [self LTBDataForPublications:items encoding:encoding];
+                fileData = [self LTBDataForPublications:items encoding:encoding error:NULL];
                 break;
         }
         [fileData writeToFile:fileName atomically:YES];
@@ -1061,7 +1062,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             [self performSortForCrossrefs];
         data = [self bibTeXDataForPublications:publications encoding:[self documentStringEncoding] droppingInternal:NO error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
-        data = [self RISDataForPublications:publications];
+        data = [self RISDataForPublications:publications encoding:[self documentStringEncoding] error:&error];
     }
     
     if(nil == data && outError){
@@ -1133,11 +1134,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [d appendUTF8DataFromString:@"</records>\n</xml>\n"];
     
     return d;
-}
-
-- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop{
-    OB_WARN_OBSOLETE_METHOD;
-    return [self bibTeXDataForPublications:items encoding:encoding droppingInternal:drop error:NULL];
 }
 
 - (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError{
@@ -1240,26 +1236,21 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
 }
 
-- (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding{
+- (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error{
     if(encoding == 0)
         [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-#warning allow lossy conversion?
-	return [[self RISStringForPublications:items] dataUsingEncoding:encoding allowLossyConversion:YES];
-        
+    NSString *RISString = [self RISStringForPublications:items];
+    NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
+    if (nil == data && error) {
+        // @@ 10.3 error keys
+        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
+    }
+	return data;
 }
 
-- (NSData *)RISDataForPublications:(NSArray *)items{
-    
-    if([self documentStringEncoding] == 0)
-        [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
-    
-    return [self RISDataForPublications:items encoding:[self documentStringEncoding]];
-    
-}
-
-- (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding{
+- (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error{
     if(encoding == 0)
         [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
     
@@ -1268,22 +1259,21 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	NSString *bibString = [self previewBibTeXStringForPublications:items];
 	if(bibString == nil || 
 	   [texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateLTB] == NO || 
-	   [texTask hasLTB] == NO)
+	   [texTask hasLTB] == NO) {
+        if (error) OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to run TeX processes for these publications", @""), nil);
 		return nil;
+    }
+    
     NSMutableString *s = [NSMutableString stringWithString:@"\\documentclass{article}\n\\usepackage{amsrefs}\n\\begin{document}\n\n"];
 	[s appendString:[texTask LTBString]];
 	[s appendString:@"\n\\end{document}\n"];
-#warning allow lossy conversion?
-	return [s dataUsingEncoding:encoding allowLossyConversion:YES];
-}
-
-- (NSData *)LTBDataForPublications:(NSArray *)items{
     
-    if([self documentStringEncoding] == 0)
-        [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
-    
-    return [self LTBDataForPublications:items encoding:[self documentStringEncoding]];
-    
+    NSData *data = [s dataUsingEncoding:encoding allowLossyConversion:NO];
+    if (nil == data && error) {
+        // @@ 10.3 error keys
+        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
+    }        
+	return data;
 }
 
 - (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
@@ -1292,8 +1282,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     OBPRECONDITION(nil != template && ([template templateFormat] & BDSKTextTemplateFormat));
     
     NSString *fileTemplate = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
-#warning allow lossy conversion?    
-    return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+    return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
 }
 
 - (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template{
