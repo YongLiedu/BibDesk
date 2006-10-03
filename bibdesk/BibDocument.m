@@ -940,7 +940,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
 		[NSNumber numberWithInt:exportFileType], @"exportFileType", [NSNumber numberWithBool:selected], @"selected", nil];
     [sp beginSheetForDirectory:nil
-                          file:( [self fileName] == nil ? nil : [[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent])
+                          file:( [self fileName] == nil ? nil : [[[self fileName] stringByDeletingPathExtension] lastPathComponent])
                 modalForWindow:documentWindow
                  modalDelegate:self
                 didEndSelector:@selector(exportPanelDidEnd:returnCode:contextInfo:)
@@ -953,12 +953,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSData *fileData = nil;
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
-    NSDictionary *dict = (NSDictionary *)contextInfo;
+    NSDictionary *dict = [(NSDictionary *)contextInfo autorelease];
     int exportFileType = [[dict objectForKey:@"exportFileType"] intValue];
     BOOL selected = [[dict objectForKey:@"selected"] boolValue];
     NSArray *items = (selected ? [self selectedPublications] : publications);
-    NSStringEncoding encoding;
-	
+
 	// first we make sure all edits are committed
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
@@ -967,6 +966,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if(returnCode == NSOKButton){
         fileName = [sp filename];
         NSString *templateStyle = nil;
+        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
+        NSError *nsError = nil;
+        
         switch (exportFileType) {
             case BDSKRSSExportFileType:
             case BDSKHTMLExportFileType:
@@ -1013,28 +1015,31 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                 fileData = [self atomDataForPublications:items];
                 break;
             case BDSKBibTeXExportFileType:
-#warning encoding errors not handled
-                encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
                 if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey]){
                     [self performSortForCrossrefs];
+                    // get items again, since they've been resorted
                     items = (selected ? [self selectedPublications] : publications);
                 }
-                    fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:([dropInternalCheckButton state] == NSOnState) error:NULL];
+                fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:([dropInternalCheckButton state] == NSOnState) error:&nsError];
                 break;
             case BDSKRISExportFileType:
-                encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-                fileData = [self RISDataForPublications:items encoding:encoding error:NULL];
+                fileData = [self RISDataForPublications:items encoding:encoding error:&nsError];
                 break;
             case BDSKLTBExportFileType:
-                encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-                fileData = [self LTBDataForPublications:items encoding:encoding error:NULL];
+                fileData = [self LTBDataForPublications:items encoding:encoding error:&nsError];
                 break;
+            default:
+                [NSException raise:BDSKUnimplementedException format:@"case %d in %@ no recognized", exportFileType, NSStringFromSelector(_cmd)];
         }
-        [fileData writeToFile:fileName atomically:YES];
+        if (fileData) {
+            [fileData writeToFile:fileName atomically:YES];
+        } else if (nsError) {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Export", @"") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:[nsError localizedDescription]];
+            [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        }
     }
     [sp setRequiredFileType:@"bib"]; // just in case...
     [sp setAccessoryView:nil];
-	[dict release];
 }
 
 #pragma mark Data representations
