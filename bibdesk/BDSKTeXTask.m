@@ -305,18 +305,26 @@
     NSData *data = [[NSData alloc] initWithContentsOfFile:logFilePath];
     pthread_rwlock_unlock(&dataFileLock);
 
+    // @@ log files written using defaultCStringEncoding?  likely always ascii anyway...
     NSString *string = [[NSString alloc] initWithData:data encoding:[NSString defaultCStringEncoding]];
     [data release];
     
     return [string autorelease];
 }
 
+#warning how is LaTeXString different from LTBString?
+// it looks like we could reduce LTBString and LaTeXString into a single method and also
+// eliminate some ivars in the process; if not, the differences should be documented, since
+// both are returning identical data
 - (NSString *)LTBString{
 	if (![self hasLTB])
 		return nil;
     if(pthread_rwlock_tryrdlock(&dataFileLock))
         return nil;
-    NSString *string = [NSString stringWithContentsOfFile:bblFilePath];
+    NSData *data = [[NSData alloc] initWithContentsOfFile:bblFilePath];
+    NSString *string = [[[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] autorelease];
+    [data release];
+    pthread_rwlock_unlock(&dataFileLock);
     return string;
 }
 
@@ -325,7 +333,9 @@
 		return nil;
     if(pthread_rwlock_tryrdlock(&dataFileLock))
         return nil;
-    NSString *string = [NSString stringWithContentsOfFile:bblFilePath];
+    NSData *data = [[NSData alloc] initWithContentsOfFile:bblFilePath];
+    NSString *string = [[[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] autorelease];
+    [data release];
     pthread_rwlock_unlock(&dataFileLock);
     return string;
 }
