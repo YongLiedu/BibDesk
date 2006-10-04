@@ -312,10 +312,8 @@
     return [string autorelease];
 }
 
-#warning how is LaTeXString different from LTBString?
-// it looks like we could reduce LTBString and LaTeXString into a single method and also
-// eliminate some ivars in the process; if not, the differences should be documented, since
-// both are returning identical data
+// the .bbl file contains either a LaTeX style bilbiography or an Amsrefs ltb style bibliography
+// which one was generated depends on the generatedTypes argument, and can be seen from the hasLTB and hasLaTeX flags
 - (NSString *)LTBString{
 	if (![self hasLTB])
 		return nil;
