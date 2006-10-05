@@ -1,4 +1,4 @@
-//  DraggableScrollView.h
+//  BDSKZoomableScrollView.h
 
 //  Copyright (c) 2003, Apple Computer, Inc. All rights reserved.
 
@@ -7,7 +7,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface DraggableScrollView : NSScrollView {
+@interface BDSKZoomableScrollView : NSScrollView {
     NSPopUpButton *scalePopUpButton;
     float scaleFactor;
 }

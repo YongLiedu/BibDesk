@@ -366,7 +366,7 @@
 		F9022CAA0758038000C3F701 /* BibPrefController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C940758038000C3F701 /* BibPrefController.m */; };
 		F9022CAB0758038000C3F701 /* BibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C960758038000C3F701 /* BibTeXParser.m */; };
 		F9022CAC0758038000C3F701 /* BibTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C980758038000C3F701 /* BibTypeManager.m */; };
-		F9022CAD0758038000C3F701 /* DraggableScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9A0758038000C3F701 /* DraggableScrollView.m */; };
+		F9022CAD0758038000C3F701 /* BDSKZoomableScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */; };
 		F9022CAE0758038000C3F701 /* NSImage+Toolbox.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9D0758038000C3F701 /* NSImage+Toolbox.m */; };
 		F9022CAF0758038000C3F701 /* NSString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9F0758038000C3F701 /* NSString_BDSKExtensions.m */; };
 		F9022CB00758038000C3F701 /* NSTextView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022CA10758038000C3F701 /* NSTextView_BDSKExtensions.m */; };
@@ -485,7 +485,7 @@
 		F918103207583A5B00CF822D /* BibPrefController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C930758038000C3F701 /* BibPrefController.h */; };
 		F918103307583A5B00CF822D /* BibTeXParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C950758038000C3F701 /* BibTeXParser.h */; };
 		F918103407583A5B00CF822D /* BibTypeManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C970758038000C3F701 /* BibTypeManager.h */; };
-		F918103607583A5B00CF822D /* DraggableScrollView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C990758038000C3F701 /* DraggableScrollView.h */; };
+		F918103607583A5B00CF822D /* BDSKZoomableScrollView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C990758038000C3F701 /* BDSKZoomableScrollView.h */; };
 		F918103707583A5B00CF822D /* html2tex.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C9B0758038000C3F701 /* html2tex.h */; };
 		F918103807583A5B00CF822D /* NSImage+Toolbox.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C9C0758038000C3F701 /* NSImage+Toolbox.h */; };
 		F918103B07583A5B00CF822D /* NSString_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C9E0758038000C3F701 /* NSString_BDSKExtensions.h */; };
@@ -1110,6 +1110,8 @@
 		CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAToolbarItem_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingBrowser.h; sourceTree = "<group>"; };
 		CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSharingBrowser.m; sourceTree = "<group>"; };
+		CE7102B70AD52EFE00491613 /* DraggableScrollView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DraggableScrollView.h; sourceTree = "<group>"; };
+		CE7102BB0AD52F0B00491613 /* DraggableScrollView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = DraggableScrollView.m; sourceTree = "<group>"; };
 		CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableView_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAction.tiff; path = Images/GroupAction.tiff; sourceTree = "<group>"; };
@@ -1231,8 +1233,8 @@
 		F9022C960758038000C3F701 /* BibTeXParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibTeXParser.m; sourceTree = "<group>"; };
 		F9022C970758038000C3F701 /* BibTypeManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibTypeManager.h; sourceTree = "<group>"; };
 		F9022C980758038000C3F701 /* BibTypeManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibTypeManager.m; sourceTree = "<group>"; };
-		F9022C990758038000C3F701 /* DraggableScrollView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DraggableScrollView.h; sourceTree = "<group>"; };
-		F9022C9A0758038000C3F701 /* DraggableScrollView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = DraggableScrollView.m; sourceTree = "<group>"; };
+		F9022C990758038000C3F701 /* BDSKZoomableScrollView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKZoomableScrollView.h; sourceTree = "<group>"; };
+		F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomableScrollView.m; sourceTree = "<group>"; };
 		F9022C9B0758038000C3F701 /* html2tex.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = html2tex.h; sourceTree = "<group>"; };
 		F9022C9C0758038000C3F701 /* NSImage+Toolbox.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "NSImage+Toolbox.h"; sourceTree = "<group>"; };
 		F9022C9D0758038000C3F701 /* NSImage+Toolbox.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "NSImage+Toolbox.m"; sourceTree = "<group>"; };
@@ -1826,7 +1828,8 @@
 				F9DCEA4E094B7D1100AEE662 /* BDSKTextWithIconCell.m */,
 				F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */,
 				F9022C5C075802E300C3F701 /* BDSKZoomImageView.m */,
-				F9022C9A0758038000C3F701 /* DraggableScrollView.m */,
+				CE7102BB0AD52F0B00491613 /* DraggableScrollView.m */,
+				F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */,
 				F9A6772C07D2D57F00782ACD /* MultiplePageView.m */,
 				F9022CA50758038000C3F701 /* PDFImageView.m */,
 			);
@@ -2271,7 +2274,8 @@
 				F9022C970758038000C3F701 /* BibTypeManager.h */,
 				F9025F2E0969D66F008A551C /* CFString_BDSKExtensions.h */,
 				CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */,
-				F9022C990758038000C3F701 /* DraggableScrollView.h */,
+				CE7102B70AD52EFE00491613 /* DraggableScrollView.h */,
+				F9022C990758038000C3F701 /* BDSKZoomableScrollView.h */,
 				F9022C9B0758038000C3F701 /* html2tex.h */,
 				2730077907CF20B500F2E485 /* MacroTextFieldWindowController.h */,
 				2730077B07CF20B500F2E485 /* MacroWindowController.h */,
@@ -2469,7 +2473,7 @@
 				F918103207583A5B00CF822D /* BibPrefController.h in Headers */,
 				F918103307583A5B00CF822D /* BibTeXParser.h in Headers */,
 				F918103407583A5B00CF822D /* BibTypeManager.h in Headers */,
-				F918103607583A5B00CF822D /* DraggableScrollView.h in Headers */,
+				F918103607583A5B00CF822D /* BDSKZoomableScrollView.h in Headers */,
 				F918103707583A5B00CF822D /* html2tex.h in Headers */,
 				F918103807583A5B00CF822D /* NSImage+Toolbox.h in Headers */,
 				F918103B07583A5B00CF822D /* NSString_BDSKExtensions.h in Headers */,
@@ -2718,7 +2722,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -2756,8 +2759,6 @@
 					ProjectRef = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
 				},
 			);
-			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8D1107260486CEB800E47090 /* BibDesk */,
 				3D8A5779082D3077008E818C /* BibDesk Help */,
@@ -3293,7 +3294,7 @@
 				F9022CAA0758038000C3F701 /* BibPrefController.m in Sources */,
 				F9022CAB0758038000C3F701 /* BibTeXParser.m in Sources */,
 				F9022CAC0758038000C3F701 /* BibTypeManager.m in Sources */,
-				F9022CAD0758038000C3F701 /* DraggableScrollView.m in Sources */,
+				F9022CAD0758038000C3F701 /* BDSKZoomableScrollView.m in Sources */,
 				F9022CAE0758038000C3F701 /* NSImage+Toolbox.m in Sources */,
 				F9022CAF0758038000C3F701 /* NSString_BDSKExtensions.m in Sources */,
 				F9022CB00758038000C3F701 /* NSTextView_BDSKExtensions.m in Sources */,

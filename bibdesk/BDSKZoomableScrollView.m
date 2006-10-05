@@ -1,14 +1,14 @@
-//  DraggableScrollView.h
+//  BDSKZoomableScrollView.h
 
 //  Copyright (c) 2003, Apple Computer, Inc. All rights reserved.
 
 // See legal notice below.
 
-#import "DraggableScrollView.h"
+#import "BDSKZoomableScrollView.h"
 #import <OmniAppKit/NSView-OAExtensions.h>
 #import "BDSKHeaderPopUpButton.h"
 
-@implementation DraggableScrollView
+@implementation BDSKZoomableScrollView
 
 /* For genstrings:
     NSLocalizedStringFromTable(@"10%", @"ZoomValues", @"Zoom popup entry")
