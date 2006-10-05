@@ -37,7 +37,7 @@
 #import "BDSKPreviewer.h"
 #import "BibPrefController.h"
 #import "BibAppController.h"
-#import "DraggableScrollView.h"
+#import "BDSKZoomableScrollView.h"
 #import "BDSKPreviewMessageQueue.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "BibDocument.h"
@@ -93,12 +93,12 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)awakeFromNib{
     volatile float scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
-    DraggableScrollView *scrollView;
+    BDSKZoomableScrollView *scrollView;
 	
 	[self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
     
     if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-		scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
+		scrollView = (BDSKZoomableScrollView*)[imagePreviewView enclosingScrollView];
 		[scrollView setScaleFactor:scaleFactor];
         
         [self drawPreviewsForState:BDSKEmptyPreviewState];
@@ -113,7 +113,7 @@ static BDSKPreviewer *thePreviewer;
         [pdfView setScaleFactor:scaleFactor];
     }
     	
-    scrollView = (DraggableScrollView*)[rtfPreviewView enclosingScrollView];
+    scrollView = (BDSKZoomableScrollView*)[rtfPreviewView enclosingScrollView];
 	scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
 	[scrollView setScaleFactor:scaleFactor];
 	
@@ -408,13 +408,13 @@ static BDSKPreviewer *thePreviewer;
     // save the scalefactors of the views
     volatile float scaleFactor = 0.0;
     if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        scaleFactor = [(DraggableScrollView*)[imagePreviewView enclosingScrollView] scaleFactor];
+        scaleFactor = [(BDSKZoomableScrollView*)[imagePreviewView enclosingScrollView] scaleFactor];
     else
         scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
 
 	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey])
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
-	scaleFactor = [(DraggableScrollView*)[rtfPreviewView enclosingScrollView] scaleFactor];
+	scaleFactor = [(BDSKZoomableScrollView*)[rtfPreviewView enclosingScrollView] scaleFactor];
 	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey])
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     

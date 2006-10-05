@@ -5,7 +5,7 @@
 // See legal notice below.
 
 #import "PDFImageView.h"
-#import "DraggableScrollView.h"
+#import "BDSKZoomableScrollView.h"
 
 
 @implementation PDFImageView
@@ -112,7 +112,7 @@
     scrollView = [self enclosingScrollView];
 
     if ([scrollView respondsToSelector: @selector(dragDocumentWithMouseDown:)])
-        [(DraggableScrollView*)scrollView dragDocumentWithMouseDown: theEvent];
+        [(BDSKZoomableScrollView*)scrollView dragDocumentWithMouseDown: theEvent];
     else
         [super mouseDown: theEvent];
 }

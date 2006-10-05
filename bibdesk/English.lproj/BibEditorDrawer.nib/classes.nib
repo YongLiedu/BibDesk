@@ -1,6 +1,12 @@
 {
     IBClasses = (
         {
+            ACTIONS = {scalePopUpAction = id; }; 
+            CLASS = BDSKZoomableScrollView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSScrollView; 
+        }, 
+        {
             ACTIONS = {
                 bibTypeDidChange = id; 
                 changeRating = id; 
@@ -72,12 +78,6 @@
                 webSnoopContainerView = NSView; 
             }; 
             SUPERCLASS = NSWindowController; 
-        }, 
-        {
-            ACTIONS = {scalePopUpAction = id; }; 
-            CLASS = DraggableScrollView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSScrollView; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }

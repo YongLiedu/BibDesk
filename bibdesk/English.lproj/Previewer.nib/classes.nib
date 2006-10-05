@@ -15,13 +15,13 @@
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = BDSKZoomImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
+        {CLASS = BDSKZoomableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
         {
             ACTIONS = {showFindPanel = id; showPreferencePanel = id; }; 
             CLASS = BibAppController; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = DraggableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }
     ); 
