@@ -121,7 +121,7 @@ static float BDSKScaleMenuFontSize = 11.0;
                 if ( (abs (xDelta) > 1) || (abs (yDelta) > 1) )
                     result = YES;
 
-                newVisibleRect = NSOffsetRect (visibleRect, xDelta, yDelta);
+                newVisibleRect = NSOffsetRect (visibleRect, xDelta / scaleFactor, yDelta / scaleFactor);
                 [[self documentView] scrollRectToVisible: newVisibleRect];
             }
             break;
