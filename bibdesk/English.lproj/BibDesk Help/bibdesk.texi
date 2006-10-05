@@ -3441,7 +3441,7 @@ Key value coding is used in templates for BibDesk's templated export feature. An
 certain special @emph{template tags}, which are similar to HTML tags, and are named by a key path. 
 The main idea of the templating feature is that the tags are replaced by the value of the 
 property described by the key path. 
-There are two types of template tags: @emph{value tags} and @emph{collection tags}. 
+There are three types of template tags: @emph{value tags}, @emph{collection tags} and @emph{condition tags}. 
 
 @subheading Value tags
 
@@ -3510,6 +3510,31 @@ Or you can use @emph{collection value keys}. As these returns a single value, it
 @example
 <$collectionKey.@@collectionValueKey/>
 @end example
+
+@subheading Condition tags
+
+Another template tag is used to include part of a template depending on whether a value is empty or not. 
+For example, you might want to write out some property, and perhaps some more text around it, only when it is set. 
+Condition tags consist of two tags, just as collection tags, but the key should be a value key.
+@example
+<$conditionKey?>
+template for non empty condition
+</$conditionKey?>
+@end example
+
+You can also supply a template when the value for the conditionKey is empty.
+For this you need to insert a third template tag between the start and end template tags as follows. 
+@example
+<$conditionKey?>
+template for non empty condition
+<?$conditionKey?>
+template for empty condition
+</$conditionKey?>
+@end example
+
+As for collection template tags, if a condition template tag appears by itself on a further empty line, 
+this whole line will be ignored, including the newline at the end of the line. Moreover you can use 
+key paths as well, as long as the combined key path returns a value key.
 
 @subheading Properties of @emph{which} object?
 
