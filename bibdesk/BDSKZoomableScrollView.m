@@ -229,8 +229,9 @@ static float BDSKScaleMenuFontSize = 11.0;
 	
 	if (scaleFactor != newScaleFactor) {
 		NSSize curDocFrameSize, newDocBoundsSize;
-		NSView *clipView = [[self documentView] superview];
-        NSPoint scrollPoint = [self scrollPositionAsPercentage];
+		NSView *documentView = [self documentView];
+		NSView *clipView = [documentView superview];
+        NSPoint scrollPoint = [documentView scrollPositionAsPercentage];
 		
 		scaleFactor = newScaleFactor;
 		
@@ -243,7 +244,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 		
 		[clipView setBoundsSize:newDocBoundsSize];
 		
-		[self setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
+		[documentView setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
     }
 }
 
