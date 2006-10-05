@@ -45,11 +45,14 @@
 #define SEPTAG_OPEN_DELIM @"<?$"
 #define SINGLETAG_CLOSE_DELIM @"/>"
 #define MULTITAG_CLOSE_DELIM @">"
+#define CONDITIONTAG_CLOSE_DELIM @"?>"
 
 /*
-    single tag: <$key/>
-     multi tag: <$key> </$key> 
-            or: <$key> <?$key> </$key>
+       single tag: <$key/>
+        multi tag: <$key> </$key> 
+               or: <$key> <?$key> </$key>
+    condition tag: <$key?> </$key?> 
+               or: <$key?> <?$key?> </$key?>
 */
 
 @implementation BDSKTemplateParser
@@ -74,28 +77,54 @@ static NSCharacterSet *invertedKeyCharacterSet = nil;
     return [self stringByParsingTemplate:template usingObject:object delegate:nil];
 }
 
-static NSMutableDictionary *endDict = nil;
-static inline NSString *endTagWithTag(NSString *tag){
-    if(nil == endDict)
-        endDict = [[NSMutableDictionary alloc] init];
+static NSMutableDictionary *endMultiDict = nil;
+static inline NSString *endMultiTagWithTag(NSString *tag){
+    if(nil == endMultiDict)
+        endMultiDict = [[NSMutableDictionary alloc] init];
     
-    NSString *endTag = [endDict objectForKey:tag];
+    NSString *endTag = [endMultiDict objectForKey:tag];
     if(nil == endTag){
         endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
-        [endDict setObject:endTag forKey:tag];
+        [endMultiDict setObject:endTag forKey:tag];
     }
     return endTag;
 }
 
-static NSMutableDictionary *sepDict = nil;
-static inline NSString *sepTagWithTag(NSString *tag){
-    if(nil == sepDict)
-        sepDict = [[NSMutableDictionary alloc] init];
+static NSMutableDictionary *sepMultiDict = nil;
+static inline NSString *sepMultiTagWithTag(NSString *tag){
+    if(nil == sepMultiDict)
+        sepMultiDict = [[NSMutableDictionary alloc] init];
     
-    NSString *sepTag = [sepDict objectForKey:tag];
+    NSString *sepTag = [sepMultiDict objectForKey:tag];
     if(nil == sepTag){
         sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, MULTITAG_CLOSE_DELIM];
-        [sepDict setObject:sepTag forKey:tag];
+        [sepMultiDict setObject:sepTag forKey:tag];
+    }
+    return sepTag;
+}
+
+static NSMutableDictionary *endConditionDict = nil;
+static inline NSString *endConditionTagWithTag(NSString *tag){
+    if(nil == endConditionDict)
+        endConditionDict = [[NSMutableDictionary alloc] init];
+    
+    NSString *endTag = [endConditionDict objectForKey:tag];
+    if(nil == endTag){
+        endTag = [NSString stringWithFormat:@"%@%@%@", ENDTAG_OPEN_DELIM, tag, CONDITIONTAG_CLOSE_DELIM];
+        [endConditionDict setObject:endTag forKey:tag];
+    }
+    return endTag;
+}
+
+static NSMutableDictionary *sepConditionDict = nil;
+static inline NSString *sepConditionTagWithTag(NSString *tag){
+    if(nil == sepConditionDict)
+        sepConditionDict = [[NSMutableDictionary alloc] init];
+    
+    NSString *sepTag = [sepConditionDict objectForKey:tag];
+    if(nil == sepTag){
+        sepTag = [NSString stringWithFormat:@"%@%@%@", SEPTAG_OPEN_DELIM, tag, CONDITIONTAG_CLOSE_DELIM];
+        [sepConditionDict setObject:sepTag forKey:tag];
     }
     return sepTag;
 }
@@ -109,15 +138,8 @@ static inline NSString *sepTagWithTag(NSString *tag){
     while (![scanner isAtEnd]) {
         NSString *beforeText = nil;
         NSString *tag = nil;
-        NSString *itemTemplate = nil;
-        NSString *lastItemTemplate;
-        NSString *endTag = nil;
-        NSString *sepTag = nil;
-        NSRange sepTagRange;
-        NSMutableString *tmpString;
         id keyValue = nil;
         int start;
-        NSRange wsRange;
                 
         if ([scanner scanUpToString:STARTTAG_OPEN_DELIM intoString:&beforeText])
             [result appendString:beforeText];
@@ -138,7 +160,65 @@ static inline NSString *sepTagWithTag(NSString *tag){
                 if (keyValue != nil) 
                     [result appendString:[keyValue stringDescription]];
                 
+            } else if ([scanner scanString:CONDITIONTAG_CLOSE_DELIM intoString:nil]) {
+                
+                NSString *nonEmptyTemplate = nil, *emptyTemplate = nil;
+                NSString *endTag, *sepTag;
+                NSRange sepTagRange, wsRange;
+                
+                // condition template tag
+                // ignore whitespace before the tag. Should we also remove a newline?
+                wsRange = [result rangeOfTrailingEmptyLine];
+                if (wsRange.location != NSNotFound)
+                    [result deleteCharactersInRange:wsRange];
+                
+                endTag = endConditionTagWithTag(tag);
+                sepTag = sepConditionTagWithTag(tag);
+                // ignore the rest of an empty line after the tag
+                [scanner scanEmptyLine];
+                if ([scanner scanString:endTag intoString:nil])
+                    continue;
+                if ([scanner scanUpToString:endTag intoString:&nonEmptyTemplate] && [scanner scanString:endTag intoString:nil]) {
+                    // ignore whitespace before the tag. Should we also remove a newline?
+                    wsRange = [nonEmptyTemplate rangeOfTrailingEmptyLine];
+                    if (wsRange.location != NSNotFound)
+                        nonEmptyTemplate = [nonEmptyTemplate substringToIndex:wsRange.location];
+                    
+                    sepTagRange = [nonEmptyTemplate rangeOfString:sepTag];
+                    if (sepTagRange.location != NSNotFound) {
+                        // ignore whitespaces before and after the tag, including a trailing newline 
+                        wsRange = [nonEmptyTemplate rangeOfTrailingEmptyLineInRange:NSMakeRange(0, sepTagRange.location)];
+                        if (wsRange.location != NSNotFound) 
+                            sepTagRange = NSMakeRange(wsRange.location, NSMaxRange(sepTagRange) - wsRange.location);
+                        wsRange = [nonEmptyTemplate rangeOfLeadingEmptyLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [nonEmptyTemplate length] - NSMaxRange(sepTagRange))];
+                        if (wsRange.location != NSNotFound)
+                            sepTagRange.length = NSMaxRange(wsRange) - sepTagRange.location;
+                        emptyTemplate = [nonEmptyTemplate substringFromIndex:NSMaxRange(sepTagRange)];
+                        nonEmptyTemplate = [nonEmptyTemplate substringToIndex:sepTagRange.location];
+                    }
+                    
+                    @try{ keyValue = [object valueForKeyPath:tag]; }
+                    @catch (id exception) { keyValue = nil; }
+                    if (keyValue && [keyValue isEqual:@""] == NO && [keyValue isEqual:[NSNumber numberWithBool:NO]] == NO) {
+                        keyValue = [self stringByParsingTemplate:nonEmptyTemplate usingObject:object delegate:delegate];
+                    } else if (emptyTemplate != nil) {
+                        keyValue = [self stringByParsingTemplate:emptyTemplate usingObject:object delegate:delegate];
+                    } else {
+                        keyValue = nil;
+                    }
+                    if (keyValue != nil)
+                        [result appendString:keyValue];
+                    // ignore the the rest of an empty line after the tag
+                    [scanner scanEmptyLine];
+                    
+                }
+                
             } else if ([scanner scanString:MULTITAG_CLOSE_DELIM intoString:nil]) {
+                
+                NSString *itemTemplate = nil, *lastItemTemplate = nil;
+                NSMutableString *tmpString;
+                NSString *endTag, *sepTag;
+                NSRange sepTagRange, wsRange;
                 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
@@ -146,8 +226,8 @@ static inline NSString *sepTagWithTag(NSString *tag){
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
-                endTag = endTagWithTag(tag);
-                sepTag = sepTagWithTag(tag);
+                endTag = endMultiTagWithTag(tag);
+                sepTag = sepMultiTagWithTag(tag);
                 // ignore the rest of an empty line after the tag
                 [scanner scanEmptyLine];
                 if ([scanner scanString:endTag intoString:nil])
@@ -158,7 +238,6 @@ static inline NSString *sepTagWithTag(NSString *tag){
                     if (wsRange.location != NSNotFound)
                         itemTemplate = [itemTemplate substringToIndex:wsRange.location];
                     
-                    lastItemTemplate = nil;
                     sepTagRange = [itemTemplate rangeOfString:sepTag];
                     if (sepTagRange.location != NSNotFound) {
                         // ignore whitespaces before and after the tag, including a trailing newline 
@@ -223,17 +302,10 @@ static inline NSString *sepTagWithTag(NSString *tag){
     while (![scanner isAtEnd]) {
         NSString *beforeText = nil;
         NSString *tag = nil;
-        NSString *itemTemplateString = nil;
-        NSAttributedString *itemTemplate = nil;
-        NSAttributedString *lastItemTemplate = nil;
-        NSString *endTag = nil;
-        NSString *sepTag = nil;
-        NSRange sepTagRange;
-        NSDictionary *attr = nil;
-        NSAttributedString *tmpAttrStr = nil;
         id keyValue = nil;
         int start;
-        NSRange wsRange;
+        NSDictionary *attr = nil;
+        NSAttributedString *tmpAttrStr = nil;
         
         start = [scanner scanLocation];
                 
@@ -264,7 +336,67 @@ static inline NSString *sepTagWithTag(NSString *tag){
                     [tmpAttrStr release];
                 }
                 
+            } else if ([scanner scanString:CONDITIONTAG_CLOSE_DELIM intoString:nil]) {
+                
+                NSString *nonEmptyTemplateString = nil;
+                NSAttributedString *nonEmptyTemplate = nil, *emptyTemplate = nil;
+                NSString *endTag, *sepTag;
+                NSRange sepTagRange, wsRange;
+                
+                // condition template tag
+                // ignore whitespace before the tag. Should we also remove a newline?
+                wsRange = [[result string] rangeOfTrailingEmptyLine];
+                if (wsRange.location != NSNotFound)
+                    [result deleteCharactersInRange:wsRange];
+                
+                endTag = endConditionTagWithTag(tag);
+                sepTag = sepConditionTagWithTag(tag);
+                // ignore the rest of an empty line after the tag
+                [scanner scanEmptyLine];
+                if ([scanner scanString:endTag intoString:nil])
+                    continue;
+                start = [scanner scanLocation];
+                if ([scanner scanUpToString:endTag intoString:&nonEmptyTemplateString] && [scanner scanString:endTag intoString:nil]) {
+                    // ignore whitespace before the tag. Should we also remove a newline?
+                    wsRange = [nonEmptyTemplateString rangeOfTrailingEmptyLine];
+                    nonEmptyTemplate = [template attributedSubstringFromRange:NSMakeRange(start, [nonEmptyTemplateString length] - wsRange.length)];
+                    
+                    emptyTemplate = nil;
+                    sepTagRange = [[nonEmptyTemplate string] rangeOfString:sepTag];
+                    if (sepTagRange.location != NSNotFound) {
+                        // ignore whitespaces before and after the tag, including a trailing newline 
+                        wsRange = [[nonEmptyTemplate string] rangeOfTrailingEmptyLineInRange:NSMakeRange(0, sepTagRange.location)];
+                        if (wsRange.location != NSNotFound) 
+                            sepTagRange = NSMakeRange(wsRange.location, NSMaxRange(sepTagRange) - wsRange.location);
+                        wsRange = [[nonEmptyTemplate string] rangeOfLeadingEmptyLineInRange:NSMakeRange(NSMaxRange(sepTagRange), [nonEmptyTemplate length] - NSMaxRange(sepTagRange))];
+                        if (wsRange.location != NSNotFound)
+                            sepTagRange.length = NSMaxRange(wsRange) - sepTagRange.location;
+                        emptyTemplate = [nonEmptyTemplate attributedSubstringFromRange:NSMakeRange(NSMaxRange(sepTagRange), [nonEmptyTemplate length] - NSMaxRange(sepTagRange))];
+                        nonEmptyTemplate = [nonEmptyTemplate attributedSubstringFromRange:NSMakeRange(0, sepTagRange.location)];
+                    }
+                    
+                    @try{ keyValue = [object valueForKeyPath:tag]; }
+                    @catch (id exception) { keyValue = nil; }
+                    if (keyValue && [keyValue isEqual:@""] == NO && [keyValue isEqual:[NSNumber numberWithBool:NO]] == NO) {
+                        tmpAttrStr = [self attributedStringByParsingTemplate:nonEmptyTemplate usingObject:object delegate:delegate];
+                    } else if (emptyTemplate != nil) {
+                        tmpAttrStr = [self attributedStringByParsingTemplate:emptyTemplate usingObject:object delegate:delegate];
+                    } else {
+                        tmpAttrStr = nil;
+                    }
+                    if (tmpAttrStr != nil)
+                        [result appendAttributedString:tmpAttrStr];
+                    // ignore the the rest of an empty line after the tag
+                    [scanner scanEmptyLine];
+                    
+                }
+                
             } else if ([scanner scanString:MULTITAG_CLOSE_DELIM intoString:nil]) {
+                
+                NSString *itemTemplateString = nil;
+                NSAttributedString *itemTemplate = nil, *lastItemTemplate = nil;
+                NSString *endTag, *sepTag;
+                NSRange sepTagRange, wsRange;
                 
                 // collection template tag
                 // ignore whitespace before the tag. Should we also remove a newline?
@@ -272,8 +404,8 @@ static inline NSString *sepTagWithTag(NSString *tag){
                 if (wsRange.location != NSNotFound)
                     [result deleteCharactersInRange:wsRange];
                 
-                endTag = endTagWithTag(tag);
-                sepTag = sepTagWithTag(tag);
+                endTag = endMultiTagWithTag(tag);
+                sepTag = sepMultiTagWithTag(tag);
                 // ignore the rest of an empty line after the tag
                 [scanner scanEmptyLine];
                 if ([scanner scanString:endTag intoString:nil])
