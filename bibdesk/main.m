@@ -24,7 +24,7 @@ int main(int argc, const char *argv[])
     long version;
     OSStatus err = Gestalt(gestaltSystemVersion, &version);
     
-    if (noErr != err || version < 0x00001039) {
+    if (noErr != err || version < 0x00001040) {
         DialogRef alert;
         OSStatus err;
         
