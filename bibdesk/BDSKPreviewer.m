@@ -103,7 +103,7 @@ static BDSKPreviewer *thePreviewer;
         
         [self drawPreviewsForState:BDSKEmptyPreviewState];
     } else {
-        NSRect frameRect = [imagePreviewView frame];
+        NSRect frameRect = [[imagePreviewView enclosingScrollView] frame];
         pdfView = [[NSClassFromString(@"BDSKZoomablePDFView") alloc] initWithFrame:frameRect];
         [[tabView tabViewItemAtIndex:0] setView:pdfView];
         id pdfDocument = [[NSClassFromString(@"PDFDocument") alloc] initWithData:[self PDFDataWithString:@"" color:[NSColor blackColor]]];
