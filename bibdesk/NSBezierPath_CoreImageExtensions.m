@@ -50,9 +50,14 @@
 
 - (void)fillPathVertically:(BOOL)isVertical withStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
 {
+    OB_WARN_OBSOLETE_METHOD;
     CIColor *startColor = [CIColor colorWithNSColor:inStartColor];
     CIColor *endColor = [CIColor colorWithNSColor:inEndColor];
-    
+    [self fillPathVertically:isVertical withStartCIColor:startColor endCIColor:endColor];
+}
+
+- (void)fillPathVertically:(BOOL)isVertical withStartCIColor:(CIColor *)startColor endCIColor:(CIColor *)endColor;
+{
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
     CGPoint startPoint = aRect.origin;
@@ -75,8 +80,14 @@
     [nsContext restoreGraphicsState];
 }
 
+- (void)fillPathVerticallyWithStartCIColor:(CIColor *)inStartColor endCIColor:(CIColor *)inEndColor;
+{
+    [self fillPathVertically:YES withStartCIColor:inStartColor endCIColor:inEndColor];
+}
+
 - (void)fillPathVerticallyWithStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
 {
+    OB_WARN_OBSOLETE_METHOD;
 	[self fillPathVertically:YES withStartColor:inStartColor endColor:inEndColor];
 }
 
@@ -90,7 +101,11 @@
     CIColor *fgEndColor = [CIColor colorWithNSColor:inFgEndColor];
     CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
     CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
-    
+    [self fillPathWithHorizontalGradientFromCIColor:fgStartColor toCIColor:fgEndColor blendedAtTop:top ofVerticalGradientFromCIColor:bgStartColor toCIColor:bgEndColor];
+}
+
+- (void)fillPathWithHorizontalGradientFromCIColor:(CIColor *)fgStartColor toCIColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromCIColor:(CIColor *)bgStartColor toCIColor:(CIColor *)bgEndColor;
+{
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
     
@@ -107,11 +122,16 @@
 }
 
 - (void)fillPathWithVerticalGradientFromColor:(NSColor *)inFgStartColor toColor:(NSColor *)inFgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
+    OB_WARN_OBSOLETE_METHOD;
     CIColor *fgStartColor = [CIColor colorWithNSColor:inFgStartColor];
     CIColor *fgEndColor = [CIColor colorWithNSColor:inFgEndColor];
     CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
     CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
-    
+    [self fillPathWithVerticalGradientFromCIColor:fgStartColor toCIColor:fgEndColor blendedAtRight:right ofHorizontalGradientFromCIColor:bgStartColor toCIColor:bgEndColor];
+}
+
+- (void)fillPathWithVerticalGradientFromCIColor:(CIColor *)fgStartColor toCIColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromCIColor:(CIColor *)bgStartColor toCIColor:(CIColor *)bgEndColor;
+{
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
     
@@ -128,10 +148,15 @@
 }
 
 - (void)fillPathWithColor:(NSColor *)inFgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
+    OB_WARN_OBSOLETE_METHOD;
     CIColor *fgColor = [CIColor colorWithNSColor:inFgColor];
     CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
     CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
-    
+    [self fillPathWithCIColor:fgColor blendedAtRight:right ofVerticalGradientFromCIColor:bgStartColor toCIColor:bgEndColor];
+}
+
+- (void)fillPathWithCIColor:(CIColor *)fgColor blendedAtRight:(BOOL)right ofVerticalGradientFromCIColor:(CIColor *)bgStartColor toCIColor:(CIColor *)bgEndColor;
+{
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
     

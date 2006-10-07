@@ -55,8 +55,8 @@ typedef enum {
     float textOffset;
 }
 
-+ (NSColor *)lowerColor;
-+ (NSColor *)upperColor;
++ (CIColor *)lowerColor;
++ (CIColor *)upperColor;
 
 /*!
 	@method toggleBelowView:offset:

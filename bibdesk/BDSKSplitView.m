@@ -39,23 +39,24 @@
 #import "BDSKSplitView.h"
 #import "BDSKStatusBar.h"
 #import "NSBezierPath_CoreImageExtensions.h"
+#import "CIImage_BDSKExtensions.h"
 
 #define END_JOIN_WIDTH 3.0f
 #define END_JOIN_HEIGHT 20.0f
 
 @implementation BDSKSplitView
 
-+ (NSColor *)startColor{
-    static NSColor *startColor = nil;
++ (CIColor *)startColor{
+    static CIColor *startColor = nil;
     if (startColor == nil)
-        startColor = [[NSColor colorWithCalibratedWhite:0.85 alpha:1.0] retain];
+        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
     return startColor;
 }
 
-+ (NSColor *)endColor{
-    static NSColor *endColor = nil;
++ (CIColor *)endColor{
+    static CIColor *endColor = nil;
     if (endColor == nil)
-        endColor = [[NSColor colorWithCalibratedWhite:0.95 alpha:1.0] retain];
+        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
    return endColor;
 }
 
@@ -68,19 +69,20 @@
 
 - (void)drawBlendedJoinEndAtLeftInRect:(NSRect)rect {
     // this blends us smoothly with the a vertical divider on our left
-    [[NSBezierPath bezierPathWithRect:rect] fillPathWithColor:[[self class] startColor]
-                                               blendedAtRight:NO
-                                  ofVerticalGradientFromColor:[[self class] startColor]
-                                                      toColor:[[self class] endColor]];
+    Class svClass = [self class];
+    [[NSBezierPath bezierPathWithRect:rect] fillPathWithCIColor:[svClass startColor]
+                                                 blendedAtRight:NO
+                                  ofVerticalGradientFromCIColor:[svClass startColor]
+                                                      toCIColor:[svClass endColor]];
 }
 
 - (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
     // this blends us smoothly with the status bar
-    [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
-                                                                            toColor:[[self class] endColor]
-                                                                       blendedAtTop:NO
-                                                        ofVerticalGradientFromColor:[BDSKStatusBar lowerColor]
-                                                                            toColor:[BDSKStatusBar upperColor]];
+    [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromCIColor:[[self class] startColor]
+                                                                            toCIColor:[[self class] endColor]
+                                                                         blendedAtTop:NO
+                                                        ofVerticalGradientFromCIColor:[BDSKStatusBar lowerColor]
+                                                                            toCIColor:[BDSKStatusBar upperColor]];
 }
 
 - (void)drawRect:(NSRect)rect {
@@ -102,7 +104,7 @@
 			divRect.size.width = [self dividerThickness];
 		}
 		if (NSIntersectsRect(rect, divRect)) {
-			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
+			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartCIColor:[[self class] startColor] endCIColor:[[self class] endColor]];
             if (drawEnd) {
                 NSRect endRect, ignored;
                 if ([self isVertical]) {

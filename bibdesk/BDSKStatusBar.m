@@ -39,6 +39,7 @@
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
+#import "CIImage_BDSKExtensions.h"
 
 #define LEFT_MARGIN				5.0
 #define RIGHT_MARGIN			15.0
@@ -47,17 +48,17 @@
 
 @implementation BDSKStatusBar
 
-+ (NSColor *)lowerColor{
-    static NSColor *lowerColor = nil;
++ (CIColor *)lowerColor{
+    static CIColor *lowerColor = nil;
     if (lowerColor == nil)
-        lowerColor = [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] retain];
+        lowerColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]] retain];
     return lowerColor;
 }
 
-+ (NSColor *)upperColor{
-    static NSColor *upperColor = nil;
++ (CIColor *)upperColor{
+    static CIColor *upperColor = nil;
     if (upperColor == nil)
-        upperColor = [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] retain];
+        upperColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]] retain];
     return upperColor;
 }
 
@@ -76,7 +77,7 @@
 		delegate = nil;
         
         textOffset = 0.0;
-		
+
     }
     return self;
 }
@@ -88,12 +89,12 @@
 	[super dealloc];
 }
 
-- (NSColor *)upperColor
+- (CIColor *)upperColor
 {
     return [[self class] upperColor];
 }
 
-- (NSColor *)lowerColor
+- (CIColor *)lowerColor
 {
     return [[self class] lowerColor];
 }

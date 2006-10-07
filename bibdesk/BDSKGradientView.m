@@ -38,6 +38,7 @@
 
 #import "BDSKGradientView.h"
 #import "NSBezierPath_CoreImageExtensions.h"
+#import "CIImage_BDSKExtensions.h"
 
 @interface BDSKGradientView (Private)
 
@@ -54,30 +55,33 @@
     return self;
 }
 
+- (void)dealloc
+{
+    [endColor release];
+    [startColor release];
+    [super dealloc];
+}
+
 - (void)drawRect:(NSRect)aRect
 {
     // fill entire view, not just the (possibly clipped) aRect
-    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
+    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartCIColor:[self upperColor] endCIColor:[self lowerColor]];
 }
 
 - (void)setLowerColor:(NSColor *)color
 {
-    if(endColor != color){
-        [endColor release];
-        endColor = [color retain];
-    }
+    [endColor autorelease];
+    endColor = [[CIColor colorWithNSColor:color] retain];
 }
 
 - (void)setUpperColor:(NSColor *)color
 {
-    if(startColor != color){
-        [startColor release];
-        startColor = [color retain];
-    }
+    [startColor autorelease];
+    startColor = [[CIColor colorWithNSColor:color] retain];
 }    
 
-- (NSColor *)lowerColor { return endColor; }
-- (NSColor *)upperColor { return startColor; }
+- (CIColor *)lowerColor { return endColor; }
+- (CIColor *)upperColor { return startColor; }
 
 // required in order for redisplay to work properly with the controls
 - (BOOL)isOpaque{  return YES; }
