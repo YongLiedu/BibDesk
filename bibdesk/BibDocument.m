@@ -250,12 +250,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                      name:NSApplicationWillTerminateNotification
                                                    object:nil];
         
-        // @@ ARM: required for 10.3.9 as of 2 December 2005; the delegate notification isn't received by the document
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(windowWillClose:)
-                                                     name:NSWindowWillCloseNotification
-                                                   object:nil];
-        
         // observe these on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleTypeInfoDidChangeNotification:)
@@ -388,23 +382,20 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [saveTextEncodingPopupButton removeAllItems];
     [saveTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
         
-    if([documentWindow respondsToSelector:@selector(setAutorecalculatesKeyViewLoop:)])
-        [documentWindow setAutorecalculatesKeyViewLoop:YES];
+    [documentWindow setAutorecalculatesKeyViewLoop:YES];
     
     // array of BDSKSharedGroup objects and zeroconf support; 10.4 only for now
     // doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
     sharedGroups = nil;
     sharedGroupSpinners = nil;
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
-            [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
-            // force an initial update of the tableview, if browsing is already in progress
-            [self handleSharedGroupsChangedNotification:nil];
-        }
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
-            [[BDSKSharingServer defaultServer] enableSharing];
-    }    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
+        [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
+        // force an initial update of the tableview, if browsing is already in progress
+        [self handleSharedGroupsChangedNotification:nil];
+    }
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
+        [[BDSKSharingServer defaultServer] enableSharing];
     
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
     [self updateGroupsPreservingSelection:NO];
@@ -418,25 +409,24 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)showWindows{
     [super showWindows];
+    
     // Get the search string keyword if available (Spotlight passes this)
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
-        NSString *searchString = [[event descriptorForKeyword:keyAESearchText] stringValue];
+    NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
+    NSString *searchString = [[event descriptorForKeyword:keyAESearchText] stringValue];
+    
+    if([event eventID] == kAEOpenDocuments && searchString != nil){
+        // We want to handle open events for our Spotlight cache files differently; rather than setting the search field, we can jump to them immediately since they have richer context.  This code gets the path of the document being opened in order to check the file extension.
+        NSString *hfsPath = [[[event descriptorForKeyword:keyAEResult] coerceToDescriptorType:typeFileURL] stringValue];
         
-        if([event eventID] == kAEOpenDocuments && searchString != nil){
-            // We want to handle open events for our Spotlight cache files differently; rather than setting the search field, we can jump to them immediately since they have richer context.  This code gets the path of the document being opened in order to check the file extension.
-            NSString *hfsPath = [[[event descriptorForKeyword:keyAEResult] coerceToDescriptorType:typeFileURL] stringValue];
-            
-            // hfsPath will be nil for under some conditions, which seems strange; possibly because I wasn't checking eventID == 'odoc'?
-            if(hfsPath == nil) NSLog(@"No path available from event %@ (descriptor %@)", event, [event descriptorForKeyword:keyAEResult]);
-            NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
-            
-            OBPOSTCONDITION(fileURL != nil);
-            if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
-                [self selectGroup:allPublicationsGroup];
-                [self setSelectedSearchFieldKey:BDSKAllFieldsString];
-                [self setFilterField:searchString];
-            }
+        // hfsPath will be nil for under some conditions, which seems strange; possibly because I wasn't checking eventID == 'odoc'?
+        if(hfsPath == nil) NSLog(@"No path available from event %@ (descriptor %@)", event, [event descriptorForKeyword:keyAEResult]);
+        NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
+        
+        OBPOSTCONDITION(fileURL != nil);
+        if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
+            [self selectGroup:allPublicationsGroup];
+            [self setSelectedSearchFieldKey:BDSKAllFieldsString];
+            [self setFilterField:searchString];
         }
     }
 }
@@ -522,14 +512,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	return YES;
 }
 
-// implement for 10.3 compatibility
-- (NSURL *)fileURL{
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        return [NSURL fileURLWithPath:[self fileName]];
-    else
-        return [super fileURL];
-}
-
 #pragma mark Publications acessors
 
 - (void)setPublications:(NSArray *)newPubs undoable:(BOOL)undo{
@@ -608,8 +590,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
 	[pubs makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
 	[self removeFromItemsForCiteKeys:pubs];
-	if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
-		[[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
+    [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
@@ -743,26 +724,26 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     } else return NO; // if super failed
 }
 
-// overriden in order to set the string encoding before writing out to disk, in case it was changed in the save-as panel
-- (void)saveToFile:(NSString *)fileName 
-     saveOperation:(NSSaveOperationType)saveOperation 
-          delegate:(id)delegate 
-   didSaveSelector:(SEL)didSaveSelector 
-       contextInfo:(void *)contextInfo{
-	// set the string encoding according to the popup
-	[self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
-    [super saveToFile:fileName saveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+- (void)saveToURL:(NSURL *)absoluteURL 
+           ofType:(NSString *)typeName 
+ forSaveOperation:(NSSaveOperationType)saveOperation 
+         delegate:(id)delegate
+  didSaveSelector:(SEL)didSaveSelector
+      contextInfo:(void *)contextInfo {
+	// set the string encoding according to the popup in case it was changed in the save-as panel
+    if (NSSaveAsOperation == saveOperation)
+        [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
+    [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
-- (BOOL)writeToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation originalContentsURL:(NSURL *)absoluteOriginalContentsURL error:(NSError **)outError {
+- (BOOL)writeToURL:(NSURL *)absoluteURL 
+            ofType:(NSString *)typeName 
+  forSaveOperation:(NSSaveOperationType)saveOperation 
+originalContentsURL:(NSURL *)absoluteOriginalContentsURL 
+             error:(NSError **)outError {
     // Override so we can determine if this is an autosave in writeToFile:ofType:, since saveToFile... will never be called with NSAutosaveOperation for backwards compatibility.  This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
     currentSaveOperationType = saveOperation;
     return [super writeToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteOriginalContentsURL error:outError];
-}
-
-// @@ 10.3 compatibility only
-- (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
-    return [self writeToURL:[NSURL fileURLWithPath:fileName] ofType:docType error:NULL];
 }
 
 // we override this method only to catch exceptions raised during TeXification of BibItems
@@ -774,7 +755,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     BOOL success = YES;
     NSError *nsError = nil;
 
-    // @@ 10.3 compatibility; should use super after we remove the call to writeToFile:ofType:, but that causes an endless loop on 10.4; revisit this if we need to support file wrappers
+    // @@ revisit this if we need to support file wrappers
     NSData *data = [self dataOfType:docType error:&nsError];
     success = nil == data ? NO : [data writeToURL:fileURL atomically:YES];
     
@@ -789,7 +770,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         NSString *errTitle = currentSaveOperationType == 3 ? NSLocalizedString(@"Unable to Autosave File", @"") : NSLocalizedString(@"Unable to Save File", @"");
         
         // @@ do this in dataOfType:error:?  should just use error localizedDescription
-        NSString *errMsg = [[nsError userInfo] valueForKey:@"NSLocalizedRecoverySuggestion"];
+        NSString *errMsg = [[nsError userInfo] valueForKey:NSLocalizedRecoverySuggestionErrorKey];
         if (nil == errMsg)
             errMsg = NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"");
         
@@ -800,12 +781,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         NSBeginCriticalAlertSheet(errTitle, nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, errMsg);            
     }
     // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
-    else if (currentSaveOperationType != 3 /*NSAutosaveOperation*/) // @@ 10.3
+    else if (currentSaveOperationType != NSAutosaveOperation)
         [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
 
     // rebuild metadata cache for this document whenever we save successfully
     // note that this also gets called for autosave operations, so Spotlight should always be current
-    if(success && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 && [self fileURL]){
+    if(success && [self fileURL]){
         NSEnumerator *pubsE = [[self publications] objectEnumerator];
         NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
         BibItem *anItem;
@@ -1044,12 +1025,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 #pragma mark Data representations
 
-// this is only called for Save (As) menu actions, not for Export (and is only called on 10.3)
-- (NSData *)dataRepresentationOfType:(NSString *)aType
-{
-    return [self dataOfType:aType error:NULL];
-}
-
 - (NSData *)dataOfType:(NSString *)aType error:(NSError **)outError
 {
     // first we make sure all edits are committed
@@ -1072,12 +1047,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     if(nil == data && outError){
         // see if this was an encoding failure; if so, we can suggest how to fix it
-        // @@ 10.4 only error keys; should use real constant strings
         // NSLocalizedRecoverySuggestion is appropriate for display as error message in alert
-        if([[error userInfo] valueForKey:@"NSStringEncoding"]){
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), @"NSLocalizedRecoverySuggestion", NSLocalizedString(@"The document cannot be saved using the specified encoding.  You should ensure that TeX conversion is enabled in the Files preferences, and/or save using an encoding such as UTF-8.", @""), nil);
+        if([[error userInfo] valueForKey:NSStringEncodingErrorKey]){
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"The document cannot be saved using the specified encoding.  You should ensure that TeX conversion is enabled in the Files preferences, and/or save using an encoding such as UTF-8.", @""), nil);
         } else if([[error userInfo] valueForKey:@"item"]) {
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), @"NSLocalizedRecoverySuggestion", [NSString stringWithFormat:@"%@  %@", [error localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")], @"item", [[error userInfo] valueForKey:@"item"], nil);
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:@"%@  %@", [error localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")], @"item", [[error userInfo] valueForKey:@"item"], nil);
         }
         *outError = error;
     }
@@ -1220,8 +1194,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKEncodingConversionException]){
             NSLog(@"Unable to save file with encoding %@", encodingName);
-            // @@ 10.3 compatibility: convert these to AppKit constant strings
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
         } else if([exception isKindOfClass:[NSException class]] && [[exception name] isEqual:BDSKTeXifyException]){
             if ([[exception userInfo] valueForKey:@"item"])
                 OFError(&error, "BDSKTeXifyError", NSLocalizedDescriptionKey, [exception reason], @"item", [[exception userInfo] valueForKey:@"item"], nil);
@@ -1249,8 +1222,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSString *RISString = [self RISStringForPublications:items];
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        // @@ 10.3 error keys
-        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
+        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }
 	return data;
 }
@@ -1275,8 +1247,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     NSData *data = [s dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        // @@ 10.3 error keys
-        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], @"NSStringEncoding", [NSNumber numberWithInt:encoding], nil);
+        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }        
 	return data;
 }
@@ -1301,14 +1272,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionaryWithDictionary:docAttributes];
     
     // create some useful metadata, with an option to disable for the paranoid
-    if((floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3) && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExportAttributesKey"]){
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExportAttributesKey"]){
         [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"") stringByAppendingString:[[self fileName] lastPathComponent]], NSTitleDocumentAttribute, nil]];
     }
     
     if (format & BDSKRTFTemplateFormat) {
         return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes];
     } else if (format & BDSKRichHTMLTemplateFormat) {
-        [mutableAttributes setObject:NSHTMLTextDocumentType forKey:@"DocumentType"]; /* @@ 10.3: NSDocumentTypeDocumentAttribute */
+        [mutableAttributes setObject:NSHTMLTextDocumentType forKey:NSDocumentTypeDocumentAttribute];
         NSError *error = nil;
         return [fileTemplate dataFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:mutableAttributes error:&error];
     } else if (format & BDSKDocTemplateFormat) {
@@ -1716,7 +1687,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
 }
 
-//@@ notifications - when adding pub notifications is fully implemented we won't need this.
 - (BibEditor *)editPub:(BibItem *)pub{
     BibEditor *e = nil;
 	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
@@ -1782,11 +1752,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         while (pub = [e nextObject]) {
             fileURL = [pub URLForField:field];
             if(fileURL == nil) continue;
-            if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-                [[NSWorkspace sharedWorkspace] openURL:fileURL];
-            } else {
-                [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
-            }
+            [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
         }
     }
     [field release];
@@ -2326,7 +2292,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             NSError *xerror = nil;
 			NSData *btData = nil;
             
-            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey] && (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3))
+            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey])
                 btData = [[NSFileManager defaultManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
 
             if(btData == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
@@ -2697,10 +2663,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 			
 			// it is a new column, so create it
 			tc = [[[NSTableColumn alloc] initWithIdentifier:colName] autorelease];
-            if([tc respondsToSelector:@selector(setResizingMask:)])
-                [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
-            else
-                [tc setResizable:YES];
+            [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
 			[tc setEditable:NO];
 			[[tc dataCell] setDrawsBackground:NO]; // this is necessary for the alternating row background before Tiger
             if([typeManager isURLField:colName]){
@@ -3077,13 +3040,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
     NSRange zeroRange = NSMakeRange(0, 0);
-    if([previewField respondsToSelector:@selector(setSelectedRanges:)]){
-        static NSArray *zeroRanges = nil;
-        if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
-        [previewField setSelectedRanges:zeroRanges];
-    } else {
-        [previewField setSelectedRange:zeroRange];
-    }
+    static NSArray *zeroRanges = nil;
+    if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
+    [previewField setSelectedRanges:zeroRanges];
             
     NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
     [layoutManager retain];
