@@ -379,12 +379,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         return NSBeep();
     
     // open... methods automatically call addDocument, so we don't have to
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES];
-    } else {
-        NSError *error;
-        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error];
-    }
+    NSError *error;
+    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:url display:YES error:&error];
 }    
 
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender{
@@ -511,11 +507,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 		return YES;
 	}
     else if (act == @selector(toggleShowingOrphanedFilesPanel:)){ 
-        
-        // @@ BDSKAsynchronousDOServer is 10.4 only due to OSAtomic functions
-        if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-            return NO;
-        
+                
 		// menu item for toggling the orphaned files panel
 		// set the on/off state according to the panel's visibility
 		if ([[BDSKOrphanedFilesFinder sharedFinder] isWindowVisible]) {
@@ -1297,10 +1289,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
 
-- (void)rebuildMetadataCache:(id)userInfo{
-        
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
-        [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forObject:self withObject:userInfo];
+- (void)rebuildMetadataCache:(id)userInfo{        
+    [metadataMessageQueue queueSelector:@selector(privateRebuildMetadataCache:) forObject:self withObject:userInfo];
 }
 
 - (void)privateRebuildMetadataCache:(id)userInfo{

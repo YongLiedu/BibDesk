@@ -175,7 +175,7 @@ NSString *BDSKComputerName() {
 
 + (id)defaultServer;
 {
-    if(sharedInstance == nil && (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3))
+    if(sharedInstance == nil)
         sharedInstance = [[self alloc] init];
     return sharedInstance;
 }

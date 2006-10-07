@@ -53,11 +53,9 @@
     [encodingPopUp removeAllItems];
     [encodingPopUp addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
     
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-        [autosaveDocumentButton setEnabled:NO];
-        [autosaveTimeField setEnabled:NO];
-        [autosaveTimeStepper setEnabled:NO];
-    }
+    [autosaveDocumentButton setEnabled:NO];
+    [autosaveTimeField setEnabled:NO];
+    [autosaveTimeStepper setEnabled:NO];
 }
 
 - (void)dealloc{
@@ -81,11 +79,8 @@
     [autosaveTimeField setIntValue:saveDelay];
     [autosaveTimeStepper setIntValue:saveDelay];
     
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){}
-    else {
-        [autosaveTimeField setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
-        [autosaveTimeStepper setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
-    }
+    [autosaveTimeField setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
+    [autosaveTimeStepper setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
     
 }
 

@@ -89,10 +89,8 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [cellMenu addItemWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
     
     // add a separator if we have this option; it and "Any Field" are special (and "File Content" looks out of place between "Any Field" and "Author")
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        [cellMenu addItemWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-        [cellMenu addItem:[NSMenuItem separatorItem]];
-    }
+    [cellMenu addItemWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+    [cellMenu addItem:[NSMenuItem separatorItem]];
         
 	NSMutableArray *quickSearchKeys = [[NSMutableArray alloc] initWithObjects:BDSKAuthorString, BDSKDateString, BDSKTitleString, nil];
     [quickSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKQuickSearchKeys]];
@@ -255,7 +253,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 
     if(sender != nil){
         if([quickSearchKey isEqualToString:BDSKFileContentLocalizedString]){
-            OBASSERT((floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3) == NO);
             [self searchByContent:sender];
         } else {
             [self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];

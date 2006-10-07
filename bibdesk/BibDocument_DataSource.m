@@ -498,15 +498,13 @@
                         path = [pub localFilePathForField:dragColumnId];
                         if(path != nil){
                             [filePaths addObject:path];
-                            if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-                                NSError *xerror = nil;
-                                // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                                if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
-                                    NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
-                                // writing the standard PDF metadata alters the original file, so we'll make it a separate preference; this is also really slow
-                                if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadata])
-                                    [pub addPDFMetadataToFileForLocalURLField:dragColumnId];
-                            }
+                            NSError *xerror = nil;
+                            // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
+                            if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
+                                NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
+                            // writing the standard PDF metadata alters the original file, so we'll make it a separate preference; this is also really slow
+                            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadata])
+                                [pub addPDFMetadataToFileForLocalURLField:dragColumnId];
                         }
                         row = [rowIndexes indexGreaterThanIndex:row];
                     }
@@ -521,16 +519,9 @@
 					NSURL *url = [pub remoteURLForField:dragColumnId];
 					if(url != nil){
 						// put the URL and a webloc file promise on the pasteboard
-						if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-							// ARM: file promise drags from a tableview are really buggy on 10.3 and earlier, and I don't feel like fighting them right now for webloc files (which require a destination path for creation)
-							[pboard declareTypes:[NSArray arrayWithObjects:NSURLPboardType, nil] owner:self];
-							[url writeToPasteboard:pboard];
-							yn = YES;
-						} else {
-							[pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-							yn = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
-							[url writeToPasteboard:pboard];
-						}
+                        [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
+                        yn = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
+                        [url writeToPasteboard:pboard];
 						return yn;
 					}
 				}

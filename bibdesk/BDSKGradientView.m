@@ -56,10 +56,8 @@
 
 - (void)drawRect:(NSRect)aRect
 {
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        // fill entire view, not just the (possibly clipped) aRect
-		[[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
-	}
+    // fill entire view, not just the (possibly clipped) aRect
+    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
 }
 
 - (void)setLowerColor:(NSColor *)color
@@ -82,13 +80,7 @@
 - (NSColor *)upperColor { return startColor; }
 
 // required in order for redisplay to work properly with the controls
-- (BOOL)isOpaque{ 
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-		return YES;
-	}
-	return NO;
-}
-
+- (BOOL)isOpaque{  return YES; }
 - (BOOL)isFlipped { return NO; }
 
 @end

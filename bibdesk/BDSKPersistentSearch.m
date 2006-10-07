@@ -44,18 +44,13 @@ static id sharedSearch = nil;
 
 + (id)sharedSearch;
 {
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        return nil;
-    
     if(sharedSearch == nil)
         sharedSearch = [[BDSKPersistentSearch alloc] init];
     return sharedSearch;
 }
 
 - (id)init
-{
-    NSAssert(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3, @"Only available on 10.4 and later systems.");
-    
+{    
     if(self = [super init])
         queries = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     

@@ -961,8 +961,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", document, @"document", oldCiteKey, @"oldCiteKey", nil];
 
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
-        [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
+    [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
     [oldCiteKey release];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -2774,7 +2773,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 {
     NSParameterAssert([[BibTypeManager sharedManager] isLocalFileField:field]);
     
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata] && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata]){
         NSError *error = nil;
         if([[self PDFMetadata] addToURL:[self URLForField:field] error:&error] == NO && error != nil)
             [[self document] presentError:error];

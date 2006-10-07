@@ -84,10 +84,6 @@
 }
 
 - (void)drawRect:(NSRect)rect {
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-		[super drawRect:rect];
-		return;
-	}
 	
 	NSArray *subviews = [self subviews];
 	int i, count = [subviews count];
@@ -123,9 +119,6 @@
 }
 
 - (float)dividerThickness {
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-		return [super dividerThickness];
-	}
 	return 6.0;
 }
 
