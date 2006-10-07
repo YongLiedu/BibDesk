@@ -41,7 +41,6 @@
 #import "BibPrefController.h"
 #import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
-#import "FSCopyObject.h"
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -526,14 +525,9 @@ static OSType finderSignatureBytes = 'MACS';
     NSString *comment = [self commentForURL:srcURL];
     FSRef newObjectRef;
     
-    if(success){
-        // FSCopyObjectSync is only available on 10.4.  We use it on 10.4, though, because FSCopyObject loses xattrs rdar://problem/4531816
-        // unfortunately, neither function copies Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
-        if(FSCopyObjectSync != NULL)
-            err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
-        else
-            err = FSCopyObject(&srcFileRef, &dstDirRef, 0 /*recurse all directories*/, kFSCatInfoNone, kDupeActionStandard, NULL, FALSE, FALSE, NULL, NULL, &newObjectRef, NULL);
-    }
+
+    // unfortunately, FSCopyObjectSync does not copy Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
+    err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
     
     // set the file comment if necessary
     if(noErr == err && nil != comment){

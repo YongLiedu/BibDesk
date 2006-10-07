@@ -635,10 +635,6 @@
 		F9E5F6DD0A96AC01004A6D79 /* BDSKFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E5F6DC0A96AC01004A6D79 /* BDSKFile.h */; };
 		F9E6C5980999323D00A8B97D /* BDSKParserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */; };
 		F9E6C937099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */; };
-		F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DA80A0437E20048D912 /* FSCopyObject.c */; };
-		F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */ = {isa = PBXBuildFile; fileRef = F9ED4DA90A0437E20048D912 /* FSCopyObject.h */; };
-		F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */; };
-		F9ED4DAF0A0437E20048D912 /* GenLinkedList.h in Headers */ = {isa = PBXBuildFile; fileRef = F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */; };
 		F9EF21B608B1572500AAC9A9 /* BDSKScrollableTextField.h in Headers */ = {isa = PBXBuildFile; fileRef = F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B808B1572600AAC9A9 /* BDSKScrollableTextFieldCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */; };
@@ -1470,10 +1466,6 @@
 		F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKParserProtocol.h; sourceTree = "<group>"; };
 		F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_ExtendedAttributes.h; sourceTree = "<group>"; };
 		F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_ExtendedAttributes.m; sourceTree = "<group>"; };
-		F9ED4DA80A0437E20048D912 /* FSCopyObject.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 0; path = FSCopyObject.c; sourceTree = "<group>"; };
-		F9ED4DA90A0437E20048D912 /* FSCopyObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FSCopyObject.h; sourceTree = "<group>"; };
-		F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 0; path = GenLinkedList.c; sourceTree = "<group>"; };
-		F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenLinkedList.h; sourceTree = "<group>"; };
 		F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextField.h; sourceTree = "<group>"; };
 		F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextField.m; sourceTree = "<group>"; };
 		F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextFieldCell.h; sourceTree = "<group>"; };
@@ -1752,10 +1744,6 @@
 			children = (
 				F9022C1B0758013E00C3F701 /* BDAlias.h */,
 				F9022C1C0758013E00C3F701 /* BDAlias.m */,
-				F9ED4DA80A0437E20048D912 /* FSCopyObject.c */,
-				F9ED4DA90A0437E20048D912 /* FSCopyObject.h */,
-				F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */,
-				F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */,
 				F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */,
 				F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */,
 				F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */,
@@ -2569,8 +2557,6 @@
 				CE573D2609F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h in Headers */,
 				F946DCE809FDC4B600D471DF /* BDSKAsynchronousDOServer.h in Headers */,
 				CE34E9790A03C16B00222942 /* BDSKConditionsView.h in Headers */,
-				F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */,
-				F9ED4DAF0A0437E20048D912 /* GenLinkedList.h in Headers */,
 				F9DAC7A20A0A95BC0099117E /* BDSKPreferenceController.h in Headers */,
 				CE3448030A11302F0026A92A /* BDSKPreviewItem.h in Headers */,
 				CE3255FF0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h in Headers */,
@@ -3364,8 +3350,6 @@
 				CE573D2709F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m in Sources */,
 				F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */,
 				CE34E97A0A03C16B00222942 /* BDSKConditionsView.m in Sources */,
-				F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */,
-				F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */,
 				F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */,
 				CE3448020A11302F0026A92A /* BDSKPreviewItem.m in Sources */,
 				CE3256000A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m in Sources */,
