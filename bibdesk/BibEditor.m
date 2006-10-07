@@ -77,6 +77,7 @@
 #import "BDSKJSTORParser.h"
 #import "BDSKWebOfScienceParser.h"
 #import "NSArray_BDSKExtensions.h"
+#import "PDFDocument_BDSKExtensions.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
