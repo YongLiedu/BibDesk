@@ -44,8 +44,33 @@
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "NSURL_BDSKExtensions.h"
 
-@interface PDFView (BDSKApplePrivateOverride)
-- (void)adjustScrollbars:(id)obj;
+@interface NSScrollView (BDSKZoomablePDFViewExtensions)
+@end
+
+@implementation NSScrollView (BDSKZoomablePDFViewExtensions)
+
+static IMP originalTile;
+
++ (void)didLoad;
+{
+    originalTile = OBReplaceMethodImplementationWithSelector(self, @selector(tile), @selector(_replacementTile));
+}
+
+- (void)_replacementTile;
+{
+    // ARM: This is simpler than replacing the scrollview in the PDFView hierarchy, since we need to make sure the popup gets drawn at the right time in the scrollview, yet the popup action is handled by the PDFView.
+    // Further, using [self replaceSubview:] in the PDFView init method to reimplement -tile in a trivial NSScrollView subclass will crash with the following backtrace:
+    // 0   <<00000000>> 	0xfffeff18 objc_msgSend_rtp + 24
+    // 1   com.apple.PDFKit             	0x96441778 -[PDFView adjustScrollbars:] + 592
+    // 2   com.apple.Foundation         	0x9294d4c0 __NSFirePerformTimer + 308
+    
+    originalTile(self, _cmd);
+    NSView *superview = [self superview];
+        
+    if([superview respondsToSelector:@selector(layoutScrollView)])
+        [superview performSelector:@selector(layoutScrollView)];
+}
+
 @end
 
 @implementation BDSKZoomablePDFView
@@ -69,6 +94,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (id)initWithFrame:(NSRect)rect {
     if (self = [super initWithFrame:rect]) {
+		scaleFactor = 1.0;
         pasteboardInfo = [[NSMutableDictionary alloc] initWithCapacity:2];
     }
     return self;
@@ -76,6 +102,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super initWithCoder:coder]) {
+		scaleFactor = 1.0;
         pasteboardInfo = [[NSMutableDictionary alloc] initWithCapacity:2];
     }
     return self;
@@ -218,10 +245,7 @@ static float BDSKScaleMenuFontSize = 11.0;
             [curItem setRepresentedObject:(BDSKDefaultScaleMenuFactors[cnt] != 0.0 ? [NSNumber numberWithFloat:BDSKDefaultScaleMenuFactors[cnt]] : nil)];
         }
         // select the appropriate item, adjusting the scaleFactor if necessary
-        if([self autoScales])
-            [self setScaleFactor:0.0 adjustPopup:YES];
-        else
-            [self setScaleFactor:[self scaleFactor] adjustPopup:YES];
+		[self setScaleFactor:scaleFactor adjustPopup:YES];
 
         // hook it up
         [scalePopUpButton setTarget:self];
@@ -290,10 +314,13 @@ static float BDSKScaleMenuFontSize = 11.0;
 		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
     }
     
-    if(fabs(newScaleFactor) < 0.01)
+    if(!newScaleFactor)
         [self setAutoScales:YES];
     else
         [super setScaleFactor:newScaleFactor];
+    
+    scaleFactor = newScaleFactor;
+	
 }
 
 #pragma mark Scrollview
@@ -316,53 +343,34 @@ static float BDSKScaleMenuFontSize = 11.0;
 	}
 }
 
-- (void)adjustScrollbars:(id)obj;
-{
-    // since this private method is only called by PDFView, so super must implement it if it's called
-    [super adjustScrollbars:obj];
-    [self layoutScrollView];
-}
-
 - (void)layoutScrollView;
 {
     NSScrollView *scrollView = [self scrollView];
     
-    // Don't force scroller display on the scrollview; PDFView apparently uses a timer to call adjustScrollbars:, and preventing autohide will cause an endless loop if you zoom so that the vertical scroller is not displayed (regardless of whether we swizzle -[NSScrollView tile] or override -[PDFView adjustScrollbars:]).  Therefore, we always display the button,  even though it looks stupid without the scrollers.  Since it's not really readable anyway at 25%, this probably isn't a big deal, since this isn't supposed to be a thumbnail view.
-    
-    NSControlSize controlSize = NSRegularControlSize;
-    
-    if ([scrollView hasHorizontalScroller])
-        controlSize = [[scrollView horizontalScroller] controlSize];
-    else if ([scrollView hasVerticalScroller])
-        controlSize = [[scrollView verticalScroller] controlSize];
-    
-    float scrollerWidth = [NSScroller scrollerWidthForControlSize:controlSize];
+    // make sure we always have a scroller; disabling autohide isn't enough
+    [scrollView setHasHorizontalScroller:YES];
+    [scrollView setAutohidesScrollers:NO];
     
     if (!scalePopUpButton) [self makeScalePopUpButton];
-    
+
     NSRect horizScrollerFrame, buttonFrame;
     buttonFrame = [scalePopUpButton frame];
-    
-    NSScroller *horizScroller = [scrollView horizontalScroller];
-    
-    if (horizScroller) {
+	if (![scrollView hasHorizontalScroller]) {
+        if (scalePopUpButton) [scalePopUpButton removeFromSuperview];
+        scalePopUpButton = nil;
+    } else {
+        NSScroller *horizScroller;
+        horizScroller = [scrollView horizontalScroller];
         horizScrollerFrame = [horizScroller frame];
         
         // Now we'll just adjust the horizontal scroller size and set the button size and location.
-        // Set it based on our frame, not the scroller's frame, since this gets called repeatedly.
-        horizScrollerFrame.size.width = NSWidth([scrollView frame]) - NSWidth(buttonFrame) - scrollerWidth;
+        // Set it based on our frame, not the scroller's frame, since this gets called repeatedly; 15 is for the window's thumb.
+        horizScrollerFrame.size.width = [scrollView frame].size.width - buttonFrame.size.width - NSWidth([[scrollView verticalScroller] frame]) - 1.0;
         [horizScroller setFrameSize:horizScrollerFrame.size];
-    }
-    buttonFrame.size.height = scrollerWidth;
 
-    // @@ resolution independence: 2.0 may not work
-    if ([scrollView isFlipped]) {
-        buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMaxY([scrollView frame]) - NSHeight(buttonFrame) - 2.0;            
-    }
-    else {
-        buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMinY([scrollView frame]) + 2.0;
+        buttonFrame.origin.x = NSMaxX(horizScrollerFrame) + 1.0;
+        buttonFrame.origin.y = horizScrollerFrame.origin.y + 1.0;
+        buttonFrame.size.height = horizScrollerFrame.size.height - 1.0;
     }
     [scalePopUpButton setFrame:buttonFrame];
 }
