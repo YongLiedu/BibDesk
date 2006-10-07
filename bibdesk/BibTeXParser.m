@@ -238,7 +238,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
         if([exception isEqual:BibTeXParserInternalException] == NO)
             @throw;
         else
-            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Encoding conversion failure", @""), @"NSStringEncoding", [NSNumber numberWithInt:parserEncoding], nil);
+            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Encoding conversion failure", @""), NSStringEncodingErrorKey, [NSNumber numberWithInt:parserEncoding], nil);
     }
     
     @finally {
