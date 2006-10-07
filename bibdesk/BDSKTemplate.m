@@ -287,8 +287,8 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
             format = BDSKUnknownTemplateFormat;
         else if ([htmlString rangeOfString:@"<$"].location != NSNotFound)
             format = BDSKTextTemplateFormat;
-        else // @@ 10.3 not supported
-            format = (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3) ? BDSKRichHTMLTemplateFormat : BDSKUnknownTemplateFormat;
+        else
+            format = BDSKRichHTMLTemplateFormat;
     } else {
         format = BDSKTextTemplateFormat;
     }

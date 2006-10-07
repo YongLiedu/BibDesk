@@ -1262,9 +1262,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     } else {
         if(error)
             *error = nsError == nil ? NSLocalizedString(@"Unable to interpret text as bibliography data.", @"") : [nsError localizedDescription];
-        // @@ 10.3 compatibility
-        if([[NSDocumentController sharedDocumentController] respondsToSelector:@selector(presentError:)])
-            [[NSDocumentController sharedDocumentController] presentError:nsError];
+        [[NSDocumentController sharedDocumentController] presentError:nsError];
     }
 }
 

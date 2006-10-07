@@ -1338,12 +1338,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return NO;
 }
 
-// this is implemented for 10.3.9 compatibility only; override NSDocumentController to use the NSError-compatible methods?
-- (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)type
-{
-    return [self readFromURL:[NSURL fileURLWithPath:fileName] ofType:type error:NULL];
-}
-
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
     NSStringEncoding encoding = [BDSKStringEncodingManager defaultEncoding];

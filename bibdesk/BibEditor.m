@@ -2760,6 +2760,7 @@ static int numberOfOpenEditors = 0;
 
 - (void)updateSnoopDrawerContent{
     NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
 
 	if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
 
@@ -2774,7 +2775,6 @@ static int numberOfOpenEditors = 0;
             [[self window] presentError:readError];
         
         BOOL isPostScript = NO;
-        NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
         
         if(theUTI == nil){
             // some error occurred, so we'll assume it's PDF and carry on
@@ -2819,8 +2819,7 @@ static int numberOfOpenEditors = 0;
 	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
 		NSMutableString *path = [[[lurl path] mutableCopy] autorelease];
         
-        // @@ 10.3 should check the file's UTI against com.adobe.pdf, but 10.3 doesn't have a way to get a UTI
-        if([NSString isEmptyString:path] == NO){
+        if([NSString isEmptyString:path] == NO && [theUTI isEqualToUTI:@"com.adobe.pdf"]){
             // escape single quotes that may be in the path; other characters should be handled by quoting in the command string
             [path replaceOccurrencesOfString:@"\'" withString:@"\\\'" options:0 range:NSMakeRange(0, [path length])];
             
