@@ -31,53 +31,6 @@
 		4A33D42008A0191B003A3FA5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00E51C3EFE8AAE2511C9CC38 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildStyle section */
-		07F45147FEDD7C5311CB188F /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_CFLAGS = (
-					"\U0001-DDEBUG",
-					"-DDEBUG_$(USER)",
-				);
-				SECTORDER_FLAGS = "";
-				ZERO_LINK = YES;
-			};
-			name = Development;
-		};
-		07F45148FEDD7C5311CB188F /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DYLIB_INSTALLED_NAME_normal = "$(FRAMEWORK_INSTALLED_NAME)";
-				FRAMEWORK_INSTALLED_NAME = "$(OMNI_FRAMEWORK_TARGET_PATH)$(/)$(PRODUCT_NAME).$(WRAPPER_EXTENSION)$(/)Versions$(/)$(FRAMEWORK_VERSION)$(/)$(PRODUCT_NAME)";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				INSTALL_MODE_FLAG = "a+rX";
-				OMNI_FRAMEWORK_TARGET_PATH = "@executable_path/../Frameworks";
-				OTHER_LDFLAGS = "\U0001$(OMNI_PREBIND_FLAGS)";
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-		34A1593B0563FE300097A113 /* Coverage */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				OPTIMIZATION_CFLAGS = "\U0001-O0";
-				OTHER_CFLAGS = (
-					"\U0001-fprofile-arcs",
-					"-ftest-coverage",
-				);
-			};
-			name = Coverage;
-		};
-/* End PBXBuildStyle section */
-
 /* Begin PBXFileReference section */
 		00E51C1EFE8AAE2511C9CC38 /* NSData-OBObjectCompatibility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData-OBObjectCompatibility.m"; sourceTree = "<group>"; };
 		00E51C1FFE8AAE2511C9CC38 /* NSObject-OBObjectCompatibility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject-OBObjectCompatibility.m"; sourceTree = "<group>"; };
@@ -256,39 +209,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "";
-				FRAMEWORK_VERSION = 2001A;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(OMNI_INSTALLED_PRODUCTS)";
-				LIBRARY_SEARCH_PATHS = "";
-				OMNI_PREBIND_FLAGS = "-Wl,-prebind,-image_base,0x30000000";
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOL_FLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRINCIPAL_CLASS = "";
-				PRODUCT_NAME = OmniBase;
-				SECTORDER_FLAGS = (
-					"-sectorder",
-					__TEXT,
-					__text,
-					OmniBase.order,
-				);
-				WARNING_CFLAGS = (
-					"-Wall",
-					"-Werror",
-					"-Wno-#warnings",
-				);
-				WRAPPER_EXTENSION = framework;
-				_INFO_PLIST_FILE_PATH = "$(SRCROOT)/$(INFOPLIST_FILE)";
-			};
 			dependencies = (
 			);
 			name = OmniBase;
@@ -303,16 +223,12 @@
 		00E51C1BFE8AAE2511C9CC38 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4AA3CEDC08A01555004389CD /* Build configuration list for PBXProject "OmniBase" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				07F45147FEDD7C5311CB188F /* Development */,
-				07F45148FEDD7C5311CB188F /* Deployment */,
-				34A1593B0563FE300097A113 /* Coverage */,
-			);
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 00E51C1CFE8AAE2511C9CC38 /* OmniBase */;
 			projectDirPath = "";
+			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				4A33D40608A0191B003A3FA5 /* OmniBase */,
 			);
