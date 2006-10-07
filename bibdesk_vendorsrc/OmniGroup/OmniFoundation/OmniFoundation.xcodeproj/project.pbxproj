@@ -12,21 +12,6 @@
 			buildConfigurationList = 4A4E076108AA72B10098FF0F /* Build configuration list for PBXAggregateTarget "Tests" */;
 			buildPhases = (
 			);
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "";
-				HEADER_SEARCH_PATHS = "";
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = Tests;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				4A4E07E208AA72B10098FF0F /* PBXTargetDependency */,
 				4A4E07E408AA72B10098FF0F /* PBXTargetDependency */,
@@ -424,53 +409,6 @@
 		4AA353BA08AA7FFB002BAE3E /* OFVersionNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 34F4C0EC078F062000E8899E /* OFVersionNumber.m */; };
 		F220577108CF6059004B6007 /* OFTimeSpanFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F220577008CF6059004B6007 /* OFTimeSpanFormatterTest.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXBuildStyle section */
-		00FCA8A8FFE0540C11CB188F /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_CFLAGS = (
-					"\U0001-DDEBUG",
-					"-DDEBUG_$(USER)",
-				);
-				SECTORDER_FLAGS = "";
-				ZERO_LINK = YES;
-			};
-			name = Development;
-		};
-		00FCA8A9FFE0540C11CB188F /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DYLIB_INSTALLED_NAME_normal = "$(FRAMEWORK_INSTALLED_NAME)";
-				FRAMEWORK_INSTALLED_NAME = "$(OMNI_FRAMEWORK_TARGET_PATH)$(/)$(PRODUCT_NAME).$(WRAPPER_EXTENSION)$(/)Versions$(/)$(FRAMEWORK_VERSION)$(/)$(PRODUCT_NAME)";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				INSTALL_MODE_FLAG = "a+rX";
-				OMNI_FRAMEWORK_TARGET_PATH = "@executable_path/../Frameworks";
-				OTHER_LDFLAGS = "\U0001$(OMNI_PREBIND_FLAGS)";
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-		343D66ED051190830097A113 /* Coverage */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				OPTIMIZATION_CFLAGS = "\U0001-O0";
-				OTHER_CFLAGS = (
-					"\U0001-fprofile-arcs",
-					"-ftest-coverage",
-				);
-			};
-			name = Coverage;
-		};
-/* End PBXBuildStyle section */
 
 /* Begin PBXContainerItemProxy section */
 		4A4E07E108AA72B10098FF0F /* PBXContainerItemProxy */ = {
@@ -892,7 +830,7 @@
 		467ADC26003CE443C697A14B /* NSUndoManager-OFExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSUndoManager-OFExtensions.m"; sourceTree = "<group>"; };
 		49ED828C07D3A8C80097A137 /* OFAttributedStringExtensionsTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFAttributedStringExtensionsTest.m; sourceTree = "<group>"; };
 		4A4E075308AA72B10098FF0F /* OmniFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OmniFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4A4E077408AA72B10098FF0F /* OFSimpleLockTest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = OFSimpleLockTest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4E077408AA72B10098FF0F /* OFSimpleLockTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OFSimpleLockTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4E078508AA72B10098FF0F /* OFLowerCaseTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OFLowerCaseTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4E079608AA72B10098FF0F /* OFDedicatedThreadSchedulerTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OFDedicatedThreadSchedulerTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4E07A608AA72B10098FF0F /* OFClobberDetectionTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OFClobberDetectionTest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1916,39 +1854,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "";
-				FRAMEWORK_VERSION = 2001A;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(OMNI_INSTALLED_PRODUCTS)";
-				LIBRARY_SEARCH_PATHS = "";
-				OMNI_PREBIND_FLAGS = "-Wl,-prebind,-image_base,0x30040000";
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-lbz2";
-				OTHER_LIBTOOL_FLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRINCIPAL_CLASS = "";
-				PRODUCT_NAME = OmniFoundation;
-				SECTORDER_FLAGS = (
-					"-sectorder",
-					__TEXT,
-					__text,
-					OmniFoundation.order,
-				);
-				WARNING_CFLAGS = (
-					"-Wall",
-					"-Werror",
-					"-Wno-#warnings",
-				);
-				WRAPPER_EXTENSION = framework;
-				_INFO_PLIST_FILE_PATH = "$(SRCROOT)/$(INFOPLIST_FILE)";
-			};
 			dependencies = (
 			);
 			name = OmniFoundation;
@@ -1968,20 +1873,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "";
-				HEADER_SEARCH_PATHS = "";
-				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = OFSimpleLockTest;
-				REZ_EXECUTABLE = YES;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wall";
-			};
 			dependencies = (
 				4A4E07EE08AA72B10098FF0F /* PBXTargetDependency */,
 			);
@@ -2002,23 +1893,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "";
-				HEADER_SEARCH_PATHS = "";
-				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = OFLowerCaseTest;
-				REZ_EXECUTABLE = YES;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				4A4E07F008AA72B10098FF0F /* PBXTargetDependency */,
 			);
@@ -2039,21 +1913,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				INSTALL_PATH = /usr/local/bin;
-				OPTIMIZATION_CFLAGS = "-O3";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = OFDedicatedThreadSchedulerTest;
-				REZ_EXECUTABLE = YES;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				4A4E07F208AA72B10098FF0F /* PBXTargetDependency */,
 			);
@@ -2074,20 +1933,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				INSTALL_PATH = "$(OMNI_INSTALLED_PRODUCTS)";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = OFClobberDetectionTest;
-				REZ_EXECUTABLE = YES;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				4A4E07F408AA72B10098FF0F /* PBXTargetDependency */,
 			);
@@ -2110,16 +1955,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = OFUnitTests;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wall";
-				WRAPPER_EXTENSION = otest;
-			};
 			dependencies = (
 				4A4E07F608AA72B10098FF0F /* PBXTargetDependency */,
 			);
@@ -2140,20 +1975,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "";
-				HEADER_SEARCH_PATHS = "";
-				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = OFSimpleLockTest;
-				REZ_EXECUTABLE = YES;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wall";
-			};
 			dependencies = (
 				4A4E07F808AA72B10098FF0F /* PBXTargetDependency */,
 			);
@@ -2169,16 +1990,12 @@
 		00E51C5BFE8AAEA611C9CC38 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4AD1C16408A9803A00C087FE /* Build configuration list for PBXProject "OmniFoundation" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				00FCA8A8FFE0540C11CB188F /* Development */,
-				00FCA8A9FFE0540C11CB188F /* Deployment */,
-				343D66ED051190830097A113 /* Coverage */,
-			);
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 00E51C5CFE8AAEA611C9CC38 /* OmniFoundation */;
 			projectDirPath = "";
+			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				4A4E05FE08AA72B10098FF0F /* OmniFoundation */,
 				4A4E075408AA72B10098FF0F /* Tests */,
@@ -2295,7 +2112,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# 10.[34]'s NSCoreSuite has 'item' instead of 'Abstract object'.\nmkdir -p \"$DERIVED_SOURCES_DIR\"\ncase `uname -r` in\n  6.*)\n    echo Copying to \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    cp AppleScript/OmniFoundation.sdef \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    ;;\n  7.*)\n    echo Replacing to \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    sed 's/Abstract object/item/g' < AppleScript/OmniFoundation.sdef > \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    ;;\n  8.*)\n    # 10.4 updated the sdef format, so we use the xsl file the supply\n    echo Copying/sed to \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    sed 's/Abstract object/item/g' < AppleScript/OmniFoundation.sdef | xsltproc --novalid /usr/share/sdef/upgrade.xsl - > \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    ;;\n  *)\n    echo \\\"Unknown OS release\\\"; exit 1\n    ;;\nesac\n\n# 10.4 moves sdp from /Developer/Tools to /usr/bin\nPATH=$PATH:/Developer/Tools\nexport PATH\nsdp -fst -o $TARGET_BUILD_DIR/$PROJECT.framework/Resources -i '/Developer/Examples/Scripting Definitions/NSCoreSuite.sdef' \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"";
+			shellScript = "# 10.[34]'s NSCoreSuite has 'item' instead of 'Abstract object'.\nmkdir -p \"$DERIVED_SOURCES_DIR\"\ncase `uname -r` in\n  6.*)\n    echo Copying to \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    cp AppleScript/OmniFoundation.sdef \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    ;;\n  7.*)\n    echo Replacing to \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    sed 's/Abstract object/item/g' < AppleScript/OmniFoundation.sdef > \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    ;;\n  8.*)\n    # 10.4 updated the sdef format, so we use the xsl file the supply\n    echo Copying/sed to \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    sed 's/Abstract object/item/g' < AppleScript/OmniFoundation.sdef | xsltproc --novalid /usr/share/sdef/upgrade.xsl - > \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    ;;\n  9.*)\n    # 10.4 updated the sdef format, so we use the xsl file the supply\n    echo Copying/sed to \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    sed 's/Abstract object/item/g' < AppleScript/OmniFoundation.sdef | xsltproc --novalid /usr/share/sdef/upgrade.xsl - > \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"\n    ;;\n  *)\n    echo \\\"Unknown OS release\\\"; exit 1\n    ;;\nesac\n\n# 10.4 moves sdp from /Developer/Tools to /usr/bin\nPATH=$PATH:/Developer/Tools\nexport PATH\nsdp -fst -o $TARGET_BUILD_DIR/$PROJECT.framework/Resources -i '/Developer/Examples/Scripting Definitions/NSCoreSuite.sdef' \"$DERIVED_SOURCES_DIR/OmniFoundation.sdef\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2715,7 +2532,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OMNI_FRAMEWORK_TARGET_PATH = "@executable_path/../Frameworks";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = " $(OMNI_PREBIND_FLAGS)";
+				OTHER_LDFLAGS = "$(OMNI_PREBIND_FLAGS)";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = Tests;
 				SECTORDER_FLAGS = "";

@@ -8,6 +8,7 @@
 // $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFInvocation.h 68913 2005-10-03 19:36:19Z kc $
 
 #import <OmniFoundation/OFObject.h>
+#import <OmniFoundation/OFMessageQueuePriorityProtocol.h>
 
 @protocol OFMessageQueuePriority;
 
