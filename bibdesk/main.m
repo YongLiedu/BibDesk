@@ -44,7 +44,7 @@ int main(int argc, const char *argv[])
             0
         };
         
-        err = CreateStandardAlert(kAlertStopAlert, (CFStringRef)NSLocalizedString(@"Unsupported System Version", @""), (CFStringRef)NSLocalizedString(@"This version of BibDesk requires Mac OS X 10.3 or greater to run.  Older versions of BibDesk are still available for download.  Would you like to download an older version or quit now?", @""), &alertParamRec, &alert);
+        err = CreateStandardAlert(kAlertStopAlert, (CFStringRef)NSLocalizedString(@"Unsupported System Version", @""), (CFStringRef)NSLocalizedString(@"This version of BibDesk requires Mac OS X 10.4 or greater to run.  Older versions of BibDesk are still available for download.  Would you like to download an older version or quit now?", @""), &alertParamRec, &alert);
         DialogItemIndex index;
         
         if (noErr == err) {
