@@ -38,8 +38,8 @@
 
 #import "NSTextView_Bibdesk.h"
 #import <Foundation/Foundation.h>
-#import </usr/include/objc/objc-class.h>
-#import </usr/include/objc/Protocol.h>
+#import <objc/objc-class.h>
+#import <objc/Protocol.h>
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
