@@ -26,31 +26,6 @@
 		F93566920912D570002B6957 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F93566740912D56F002B6957 /* AGRegex.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildStyle section */
-		014CEA440018CDF011CA2923 /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				OPTIMIZATION_CFLAGS = "-O0";
-				ZERO_LINK = YES;
-			};
-			name = Development;
-		};
-		014CEA450018CDF011CA2923 /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-/* End PBXBuildStyle section */
-
 /* Begin PBXContainerItemProxy section */
 		F93566900912D570002B6957 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -93,7 +68,7 @@
 		F93566730912D56F002B6957 /* Info-AGRegex.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info-AGRegex.plist"; sourceTree = "<group>"; };
 		F93566740912D56F002B6957 /* AGRegex.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AGRegex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F935668D0912D56F002B6957 /* Info-RegexTest.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info-RegexTest.plist"; sourceTree = "<group>"; };
-		F935668E0912D570002B6957 /* RegexTest.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RegexTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F935668E0912D570002B6957 /* RegexTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegexTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F986DBD403876F3201A58F65 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		F98CF71E0387044501DE5C57 /* AGRegex.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AGRegex.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -217,28 +192,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "";
-				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "";
-				INSTALL_PATH = "@executable_path/../Frameworks/";
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = (
-					"-DSUPPORT_UTF8",
-					"-DPOSIX_MALLOC_THRESHOLD=10",
-				);
-				OTHER_LDFLAGS = "-Wl,-prebind,-image_base,0xC5000000";
-				PRODUCT_NAME = AGRegex;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				WRAPPER_EXTENSION = framework;
-			};
 			dependencies = (
 			);
 			name = AGRegex;
@@ -260,19 +213,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = RegexTest;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				WRAPPER_EXTENSION = app;
-			};
 			dependencies = (
 				F93566910912D570002B6957 /* PBXTargetDependency */,
 			);
@@ -288,16 +228,13 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F93566970912D572002B6957 /* Build configuration list for PBXProject "AGRegex" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				014CEA440018CDF011CA2923 /* Development */,
-				014CEA450018CDF011CA2923 /* Deployment */,
-			);
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* AGRegex */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
 			projectDirPath = "";
+			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				F935665E0912D56F002B6957 /* AGRegex */,
 				F93566790912D56F002B6957 /* RegexTest */,
