@@ -205,7 +205,6 @@
 		CE28346309176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE28346109176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h */; };
 		CE28346509176CA3006B4C63 /* BDSKGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9706DE409102DF500526FC8 /* BDSKGradientView.m */; };
 		CE28346609176CAF006B4C63 /* BDSKGradientView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9706DE309102DF500526FC8 /* BDSKGradientView.h */; };
-		CE28347309176CD0006B4C63 /* NSBezierPath_CoreImageExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */; };
 		CE2837410917D31D006B4C63 /* BDSKEdgeView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */; };
 		CE2837420917D31D006B4C63 /* BDSKEdgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2837400917D31D006B4C63 /* BDSKEdgeView.m */; };
 		CE2941010A7F8F2300A46D05 /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CE2941000A7F8F2300A46D05 /* RelNotes.rtf */; };
@@ -282,7 +281,6 @@
 		CE7E1C3B0A0B9E94009D04C3 /* GroupAdd_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1C390A0B9E94009D04C3 /* GroupAdd_Pressed.tiff */; };
 		CE7E207E0A0BF833009D04C3 /* GroupAddSmart_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E207C0A0BF833009D04C3 /* GroupAddSmart_Pressed.tiff */; };
 		CE7E207F0A0BF833009D04C3 /* GroupAddSmart.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */; };
-		CE7E29E00A0E84D6009D04C3 /* CIImage_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */; };
 		CE7EA95C0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7EA95A0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h */; };
 		CE7EA95D0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7EA95B0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m */; };
 		CE95A57B0A88883300334DFA /* BDSKReadMeController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE95A5790A88883300334DFA /* BDSKReadMeController.h */; };
@@ -493,11 +491,6 @@
 		F918103D07583A5B00CF822D /* BDSKTypeSelectHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA20758038000C3F701 /* BDSKTypeSelectHelper.h */; };
 		F918103E07583A5B00CF822D /* PDFImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA40758038000C3F701 /* PDFImageView.h */; };
 		F918103F07583A5B00CF822D /* PubMedParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA60758038000C3F701 /* PubMedParser.h */; };
-		F91A2D6E089A7D4B0009B1C1 /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
-		F91A2EBC089A7D670009B1C1 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
-		F91A2EBD089A7D670009B1C1 /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		F91A2EBE089A7D670009B1C1 /* OmniAppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
-		F91A2EBF089A7D670009B1C1 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B9E17E089479FC00C21B17 /* Quartz.framework */; };
 		F91B5C53076413620011ED22 /* About the Scripts Menu.scpt in CopyFiles */ = {isa = PBXBuildFile; fileRef = F91B5C510764135B0011ED22 /* About the Scripts Menu.scpt */; };
 		F91B5CC8076579830011ED22 /* previewtemplate.tex in Resources */ = {isa = PBXBuildFile; fileRef = F91B5CC7076579830011ED22 /* previewtemplate.tex */; };
 		F91B5CE0076579FE0011ED22 /* rssTemplate.txt in Resources */ = {isa = PBXBuildFile; fileRef = F91B5CDF076579FE0011ED22 /* rssTemplate.txt */; };
@@ -505,15 +498,12 @@
 		F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F91B7F27092BEB5A00976F6F /* AddressBook.framework */; };
 		F91B8027092BFF6100976F6F /* ILCrashReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F91B8026092BFF6100976F6F /* ILCrashReporter.framework */; };
 		F91B81DC092C0AED00976F6F /* ILCrashReporter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F91B8026092BFF6100976F6F /* ILCrashReporter.framework */; };
-		F91F275909A6467900419960 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		F91F286A09A6684900419960 /* PDFMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = F91F284709A661A700419960 /* PDFMetadata.m */; };
 		F920DAFF075C2B69000C5FCA /* BibAppController+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFA075C2B69000C5FCA /* BibAppController+Scripting.h */; };
 		F920DB00075C2B69000C5FCA /* BibAuthor+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFB075C2B69000C5FCA /* BibAuthor+Scripting.h */; };
 		F920DB01075C2B69000C5FCA /* BibDeskSearchForCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFC075C2B69000C5FCA /* BibDeskSearchForCommand.h */; };
 		F920DB02075C2B69000C5FCA /* BibDocument+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFD075C2B69000C5FCA /* BibDocument+Scripting.h */; };
 		F920DB03075C2B69000C5FCA /* BibItem+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */; };
-		F922A0600A0EAF8A00A8DB68 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DEB0758099D00C3F701 /* ApplicationServices.framework */; };
-		F9235009089A7F3700EFEB06 /* Tiger.bundle in Resources */ = {isa = PBXBuildFile; fileRef = F91A2D66089A7CF70009B1C1 /* Tiger.bundle */; };
 		F9235019089A813E00EFEB06 /* NSDate_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */; };
 		F923501A089A813E00EFEB06 /* NSDate_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */; };
 		F9252E2208F60D170045D563 /* BDSKFileContentSearchController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */; };
@@ -545,7 +535,6 @@
 		F9463F4609436F7500CC4549 /* NSSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */; };
 		F946DCE809FDC4B600D471DF /* BDSKAsynchronousDOServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */; };
 		F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */; };
-		F947A01C09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */; };
 		F9484D8D08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h in Headers */ = {isa = PBXBuildFile; fileRef = F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */; };
 		F9484D8E08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */; };
 		F9484D8F08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h in Headers */ = {isa = PBXBuildFile; fileRef = F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */; };
@@ -572,7 +561,6 @@
 		F96E21690794FE3400120AB3 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8D1107310486CEB800E47090 /* Info.plist */; };
 		F96F11960AAF4FD100815D06 /* NSData_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F96F11940AAF4FD100815D06 /* NSData_BDSKExtensions.h */; };
 		F96F11970AAF4FD100815D06 /* NSData_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */; };
-		F9706DE009102DCC00526FC8 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9706DB909102DA800526FC8 /* QuartzCore.framework */; };
 		F97073AF0911592000526FC8 /* NSWorkspace_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F97073AD0911592000526FC8 /* NSWorkspace_BDSKExtensions.h */; };
 		F97073B00911592000526FC8 /* NSWorkspace_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */; };
 		F97965E40869098200050427 /* BDSKFindPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = F97965E20869098200050427 /* BDSKFindPanel.nib */; };
@@ -590,9 +578,20 @@
 		F98AA6820971E3F400184BD8 /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */; };
 		F98DB3170A23C7730040D347 /* BDSKTemplate.h in Headers */ = {isa = PBXBuildFile; fileRef = F98DB3150A23C7730040D347 /* BDSKTemplate.h */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
+		F9937E220AD8268D001D1DFB /* BDSKZoomablePDFView.h in Headers */ = {isa = PBXBuildFile; fileRef = F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */; };
+		F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
+		F9937E240AD82690001D1DFB /* PDFDocument_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */; };
+		F9937E250AD82690001D1DFB /* PDFDocument_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */; };
+		F9937E260AD8269E001D1DFB /* CIImage_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */; };
+		F9937E270AD8269F001D1DFB /* BDSKSpotlightView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */; };
+		F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */; };
+		F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */; };
+		F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */; };
+		F9937E2C0AD826AF001D1DFB /* NSFileManager_ExtendedAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */; };
+		F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B9E17E089479FC00C21B17 /* Quartz.framework */; };
+		F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9706DB909102DA800526FC8 /* QuartzCore.framework */; };
 		F99BC25E095A5C7000E018C3 /* NSArray_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
-		F9A411F10A0B1FEF008493C0 /* BDSKSpotlightView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */; };
 		F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */; };
 		F9A6742A07D04E8000782ACD /* BDSKFontManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A6742807D04E8000782ACD /* BDSKFontManager.h */; };
 		F9A6742B07D04E8000782ACD /* BDSKFontManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6742907D04E8000782ACD /* BDSKFontManager.m */; };
@@ -636,7 +635,6 @@
 		F9E5F6DD0A96AC01004A6D79 /* BDSKFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E5F6DC0A96AC01004A6D79 /* BDSKFile.h */; };
 		F9E6C5980999323D00A8B97D /* BDSKParserProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */; };
 		F9E6C937099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */; };
-		F9E6C9BA099A99ED00A8B97D /* NSFileManager_ExtendedAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */; };
 		F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DA80A0437E20048D912 /* FSCopyObject.c */; };
 		F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */ = {isa = PBXBuildFile; fileRef = F9ED4DA90A0437E20048D912 /* FSCopyObject.h */; };
 		F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */; };
@@ -713,13 +711,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = ILCrashReporter;
-		};
-		F9234FF2089A7E0300EFEB06 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F91A2D65089A7CF70009B1C1;
-			remoteInfo = Tiger;
 		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1334,7 +1325,6 @@
 		F916E68F07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+ThreadSafety.m"; sourceTree = "<group>"; };
 		F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+ThreadSafety.h"; sourceTree = "<group>"; };
 		F916E6A507A9FB56009EF011 /* NSMutableArray+ThreadSafety.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+ThreadSafety.m"; sourceTree = "<group>"; };
-		F91A2D66089A7CF70009B1C1 /* Tiger.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tiger.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		F91A2D68089A7CF80009B1C1 /* Tiger-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tiger-Info.plist"; sourceTree = "<group>"; };
 		F91B5C510764135B0011ED22 /* About the Scripts Menu.scpt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.scpt; name = "About the Scripts Menu.scpt"; path = "Scripting/About the Scripts Menu.scpt"; sourceTree = SOURCE_ROOT; };
 		F91B5CC7076579830011ED22 /* previewtemplate.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = previewtemplate.tex; sourceTree = "<group>"; };
@@ -1530,6 +1520,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */,
+				F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				F9022DE70758095000C3F701 /* AGRegex.framework in Frameworks */,
 				F9022DE80758095000C3F701 /* OmniAppKit.framework in Frameworks */,
@@ -1543,20 +1535,6 @@
 				F91B8027092BFF6100976F6F /* ILCrashReporter.framework in Frameworks */,
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F91A2D64089A7CF70009B1C1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F922A0600A0EAF8A00A8DB68 /* ApplicationServices.framework in Frameworks */,
-				F91F275909A6467900419960 /* Cocoa.framework in Frameworks */,
-				F91A2EBF089A7D670009B1C1 /* Quartz.framework in Frameworks */,
-				F9706DE009102DCC00526FC8 /* QuartzCore.framework in Frameworks */,
-				F91A2EBC089A7D670009B1C1 /* OmniBase.framework in Frameworks */,
-				F91A2EBD089A7D670009B1C1 /* OmniFoundation.framework in Frameworks */,
-				F91A2EBE089A7D670009B1C1 /* OmniAppKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1606,7 +1584,6 @@
 				8D1107320486CEB800E47090 /* BibDesk.app */,
 				275E270707838EE30070398A /* TestBibItem.bundle */,
 				27CD032407D82C7400806B7E /* TestComplexString.bundle */,
-				F91A2D66089A7CF70009B1C1 /* Tiger.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2621,6 +2598,10 @@
 				CE7EA95C0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h in Headers */,
 				F96F11960AAF4FD100815D06 /* NSData_BDSKExtensions.h in Headers */,
 				F90C64060AC62B7B008B2DDA /* BDSKShellCommandFormatter.h in Headers */,
+				F9937E220AD8268D001D1DFB /* BDSKZoomablePDFView.h in Headers */,
+				F9937E240AD82690001D1DFB /* PDFDocument_BDSKExtensions.h in Headers */,
+				F9937E260AD8269E001D1DFB /* CIImage_BDSKExtensions.h in Headers */,
+				F9937E270AD8269F001D1DFB /* BDSKSpotlightView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2686,7 +2667,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				F9234FF3089A7E0300EFEB06 /* PBXTargetDependency */,
 				F9DE7867097F29D00033FBA8 /* PBXTargetDependency */,
 			);
 			name = BibDesk;
@@ -2694,23 +2674,6 @@
 			productName = BibDesk;
 			productReference = 8D1107320486CEB800E47090 /* BibDesk.app */;
 			productType = "com.apple.product-type.application";
-		};
-		F91A2D65089A7CF70009B1C1 /* Tiger */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F91A2D69089A7CF80009B1C1 /* Build configuration list for PBXNativeTarget "Tiger" */;
-			buildPhases = (
-				F91A2D62089A7CF70009B1C1 /* Resources */,
-				F91A2D63089A7CF70009B1C1 /* Sources */,
-				F91A2D64089A7CF70009B1C1 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = Tiger;
-			productName = Untitled;
-			productReference = F91A2D66089A7CF70009B1C1 /* Tiger.bundle */;
-			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
@@ -2765,7 +2728,6 @@
 				F9F14A47075811CF008BA22F /* BuildMeFirst */,
 				275E270607838EE30070398A /* TestBibItem */,
 				27CD032307D82C7400806B7E /* TestComplexString */,
-				F91A2D65089A7CF70009B1C1 /* Tiger */,
 			);
 		};
 /* End PBXProject section */
@@ -2925,7 +2887,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9235009089A7F3700EFEB06 /* Tiger.bundle in Resources */,
 				F9022D9B0758073F00C3F701 /* latex2rtf in Resources */,
 				8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */,
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
@@ -3055,13 +3016,6 @@
 				CE23916A0A3348B2009F3A5B /* DocumentInfoWindow.nib in Resources */,
 				CE22E1D50A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib in Resources */,
 				CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F91A2D62089A7CF70009B1C1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3439,19 +3393,12 @@
 				CE7EA95D0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.m in Sources */,
 				F96F11970AAF4FD100815D06 /* NSData_BDSKExtensions.m in Sources */,
 				F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F91A2D63089A7CF70009B1C1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F947A01C09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m in Sources */,
-				CE28347309176CD0006B4C63 /* NSBezierPath_CoreImageExtensions.m in Sources */,
-				F91A2D6E089A7D4B0009B1C1 /* BDSKZoomablePDFView.m in Sources */,
-				F9E6C9BA099A99ED00A8B97D /* NSFileManager_ExtendedAttributes.m in Sources */,
-				F9A411F10A0B1FEF008493C0 /* BDSKSpotlightView.m in Sources */,
-				CE7E29E00A0E84D6009D04C3 /* CIImage_BDSKExtensions.m in Sources */,
+				F9937E230AD8268E001D1DFB /* BDSKZoomablePDFView.m in Sources */,
+				F9937E250AD82690001D1DFB /* PDFDocument_BDSKExtensions.m in Sources */,
+				F9937E290AD826AA001D1DFB /* BDSKSpotlightView.m in Sources */,
+				F9937E2A0AD826AB001D1DFB /* CIImage_BDSKExtensions.m in Sources */,
+				F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */,
+				F9937E2C0AD826AF001D1DFB /* NSFileManager_ExtendedAttributes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3472,11 +3419,6 @@
 			isa = PBXTargetDependency;
 			name = ILCrashReporter;
 			targetProxy = F91B8024092BFEE100976F6F /* PBXContainerItemProxy */;
-		};
-		F9234FF3089A7E0300EFEB06 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F91A2D65089A7CF70009B1C1 /* Tiger */;
-			targetProxy = F9234FF2089A7E0300EFEB06 /* PBXContainerItemProxy */;
 		};
 		F98870D807580EA1001D4D49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3939,166 +3881,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		F91A2D6A089A7CF80009B1C1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(FRAMEWORK_SEARCH_PATHS)",
-					"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Versions/A/Frameworks",
-				);
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_SYMBOL_SEPARATION = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "Tiger-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				LIBRARY_STYLE = BUNDLE;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "-ggdb";
-				OTHER_LDFLAGS = (
-					"-lSystem",
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-					"-framework",
-					Quartz,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Tiger;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Debug;
-		};
-		F91A2D6B089A7CF80009B1C1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(FRAMEWORK_SEARCH_PATHS)",
-					"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Versions/A/Frameworks",
-				);
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "Tiger-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				LIBRARY_STYLE = BUNDLE;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-lSystem",
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-					"-framework",
-					Quartz,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Tiger;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Release;
-		};
-		F91A2D6C089A7CF80009B1C1 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(FRAMEWORK_SEARCH_PATHS)",
-					"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Versions/A/Frameworks",
-				);
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "Tiger-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				LIBRARY_STYLE = BUNDLE;
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-lSystem",
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-					"-framework",
-					Quartz,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Untitled;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Test;
-		};
-		F91A2D6D089A7CF80009B1C1 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(FRAMEWORK_SEARCH_PATHS)",
-					"$(SYSTEM_LIBRARY_DIR)/Frameworks/Quartz.framework/Versions/A/Frameworks",
-				);
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "Tiger-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				LIBRARY_STYLE = BUNDLE;
-				OPTIMIZATION_CFLAGS = "-O0";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-lSystem",
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-					"-framework",
-					Quartz,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Untitled;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Default;
-		};
 		F993F1BD08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4129,7 +3911,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_CFLAGS = "-ggdb";
 				OTHER_LDFLAGS = "-lSystem";
 				PREBINDING = NO;
@@ -4182,7 +3964,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = BibDesk;
@@ -4217,7 +3999,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = "-lSystem";
 				PRODUCT_NAME = BibDesk;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
@@ -4247,7 +4029,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = "-lSystem";
 				PRODUCT_NAME = BibDesk;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -5051,17 +4833,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F91A2D69089A7CF80009B1C1 /* Build configuration list for PBXNativeTarget "Tiger" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F91A2D6A089A7CF80009B1C1 /* Debug */,
-				F91A2D6B089A7CF80009B1C1 /* Release */,
-				F91A2D6C089A7CF80009B1C1 /* Test */,
-				F91A2D6D089A7CF80009B1C1 /* Default */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
-		};
 		F993F1BC08553A61007A7657 /* Build configuration list for PBXNativeTarget "BibDesk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

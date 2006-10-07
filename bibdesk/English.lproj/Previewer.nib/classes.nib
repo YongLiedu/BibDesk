@@ -5,8 +5,7 @@
             CLASS = BDSKPreviewer; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                imagePreviewView = PDFImageView; 
-                pdfView = id; 
+                pdfView = BDSKZoomablePDFView; 
                 progressIndicator = NSProgressIndicator; 
                 progressOverlay = BDSKOverlay; 
                 rtfPreviewView = NSTextView; 
@@ -15,6 +14,7 @@
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = BDSKZoomImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
+        {CLASS = BDSKZoomablePDFView; LANGUAGE = ObjC; SUPERCLASS = PDFView; }, 
         {CLASS = BDSKZoomableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
         {
             ACTIONS = {showFindPanel = id; showPreferencePanel = id; }; 

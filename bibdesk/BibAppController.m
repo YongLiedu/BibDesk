@@ -109,12 +109,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 + (void)initialize
 {
     OBINITIALIZE;
-    
-    // since Quartz.framework doesn't exist on < 10.4, we can't link against it
-    // http://www.cocoabuilder.com/archive/message/cocoa/2004/1/31/99969
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
-        [[NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"Tiger" ofType:@"bundle"]] load];
-    
+        
     // make sure we use Spotlight's plugins on 10.4 and later
     SKLoadDefaultExtractorPlugIns();
 

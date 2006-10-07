@@ -72,9 +72,6 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 
 + (id)sharedPreferenceController;
 {
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        return [OAPreferenceController sharedPreferenceController];
-    
     static id sharedController = nil;
 
     if(nil == sharedController)
@@ -115,7 +112,7 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
     overlay = [[BDSKOverlayWindow alloc] initWithContentRect:contentRect styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
     [overlay setReleasedWhenClosed:NO];
 
-    NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:contentRect delegate:self];
+    NSView *view = [[BDSKSpotlightView alloc] initWithFrame:contentRect delegate:self];
     [overlay setContentView:view];
     [view release];
     [overlay overlayView:[theWindow contentView]];

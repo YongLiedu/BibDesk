@@ -54,6 +54,7 @@
 @class BDSKStatusBar;
 @class BDSKAlert;
 @class BibAuthor;
+@class BDSKZoomablePDFView;
 
 /*!
     @class BibEditor
@@ -106,11 +107,10 @@
 // doc preview stuff
 // ----------------------------------------------------------------------------------------
     IBOutlet NSDrawer* documentSnoopDrawer;
-    IBOutlet NSScrollView* documentSnoopScrollView;
 	int drawerState;
 	int drawerButtonState;
 	// doc textpreview stuff
-    IBOutlet PDFImageView *documentSnoopImageView;
+    IBOutlet BDSKZoomablePDFView *documentSnoopPDFView;
     IBOutlet NSView* pdfSnoopContainerView;
 	BOOL pdfSnoopViewLoaded;
 	// doc textpreview stuff

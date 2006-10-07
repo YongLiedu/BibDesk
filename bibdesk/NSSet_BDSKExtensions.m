@@ -41,27 +41,6 @@
 #import <OmniFoundation/CFSet-OFExtensions.h>
 #import "BDSKCountedSet.h"
 
-@interface BDSKSet : NSSet {} @end
-
-@implementation BDSKSet
-
-+ (void)performPosing;
-{
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        class_poseAs(self, NSClassFromString(@"NSSet"));
-}
-
-/* We replace this method so we can use @count with NSSet, which doesn't implement that key on 10.3.x (which really sucks).
-*/
-- (id)valueForUndefinedKey:(NSString *)key
-{
-    if([key isEqualToString:@"@count"])
-        return [NSNumber numberWithInt:[self count]];
-    return [super valueForUndefinedKey:key];
-}
-
-@end
-
 @implementation NSSet (BDSKExtensions)
 
 + (id)caseInsensitiveStringSetWithObjects:(id)object, ...;

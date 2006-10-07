@@ -206,7 +206,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         id curItem;
 
         // create it        
-        scalePopUpButton = [[NSClassFromString(@"BDSKHeaderPopUpButton") allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
+        scalePopUpButton = [[BDSKHeaderPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         
         NSControlSize controlSize = [[scrollView horizontalScroller] controlSize];
         [[scalePopUpButton cell] setControlSize:controlSize];

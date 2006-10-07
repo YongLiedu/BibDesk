@@ -1,5 +1,7 @@
 {
     IBClasses = (
+        {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
+        {CLASS = BDSKZoomablePDFView; LANGUAGE = ObjC; SUPERCLASS = PDFView; }, 
         {
             ACTIONS = {scalePopUpAction = id; }; 
             CLASS = BDSKZoomableScrollView; 
@@ -9,63 +11,60 @@
         {
             ACTIONS = {
                 bibTypeDidChange = id; 
+                changeFlag = id; 
                 changeRating = id; 
-                changeWarnOnEditInherited = id; 
                 chooseLocalURL = id; 
                 citeKeyDidChange = id; 
-                dismissAddAuthorSheet = id; 
-                dismissAddField = id; 
-                dismissDelField = id; 
-                dismissEditInheritedSheet = id; 
+                consolidateLinkedFiles = id; 
+                createNewPubUsingCrossrefAction = id; 
+                deletePub = id; 
+                dismissChangeFieldNameSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 duplicateTitleToBooktitle = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 generateCiteKey = id; 
-                generateLocalUrl = id; 
-                openParentItem = id; 
+                moveLinkedFile = id; 
+                openLinkedFile = id; 
+                openRemoteURL = id; 
                 raiseAddField = id; 
+                raiseChangeFieldName = id; 
                 raiseDelField = id; 
+                revealLinkedFile = id; 
                 saveFileAsLocalUrl = id; 
+                selectCrossrefParentAction = id; 
                 setLocalURLPathFromMenuItem = id; 
                 setRemoteURLFromMenuItem = id; 
                 showCiteKeyWarning = id; 
                 showPersonDetailCmd = id; 
                 toggleSnoopDrawer = id; 
                 toggleStatusBar = id; 
-                viewLocal = id; 
-                viewRemote = id; 
             }; 
             CLASS = BibEditor; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 abstractView = NSTextView; 
-                actionMenuButton = RYZImagePopUpButton; 
-                addAuthorSheet = NSPanel; 
-                addAuthorTextView = NSTextView; 
+                actionButton = BDSKImagePopUpButton; 
+                actionMenu = NSMenu; 
+                actionMenuButton = BDSKImagePopUpButton; 
+                addFieldButton = NSButton; 
                 authorScrollView = NSScrollView; 
                 authorTableView = NSTableView; 
                 bibFields = BDSKForm; 
                 bibTypeButton = NSPopUpButton; 
+                changeFieldNameSheet = NSPanel; 
                 citeKeyField = NSTextField; 
+                citeKeyTitle = NSTextField; 
                 citeKeyWarningButton = NSButton; 
-                delFieldButtonCancel = NSButton; 
-                delFieldButtonOK = NSButton; 
-                delFieldPopUp = NSPopUpButton; 
-                delFieldWindow = NSWindow; 
-                documentSnoopButton = RYZImagePopUpButton; 
+                documentSnoopButton = BDSKImagePopUpButton; 
                 documentSnoopDrawer = NSDrawer; 
-                documentSnoopImageView = PDFImageView; 
-                documentSnoopScrollView = NSScrollView; 
+                documentSnoopPDFView = BDSKZoomablePDFView; 
                 documentSnoopTextView = NSTextView; 
-                dontWarnOnEditInheritedCheckButton = NSButton; 
-                editInheritedWarningSheet = NSPanel; 
                 extraBibFields = NSMatrix; 
-                fieldsScrollView = NSScrollView; 
-                newFieldButtonCancel = NSButton; 
-                newFieldButtonOK = NSButton; 
-                newFieldName = NSTextField; 
-                newFieldWindow = NSWindow; 
+                fieldsAccessoryView = NSView; 
+                fieldsPopUpButton = NSPopUpButton; 
+                newFieldNameComboBox = NSComboBox; 
                 notesView = NSTextView; 
+                oldFieldNamePopUp = NSPopUpButton; 
                 pdfSnoopContainerView = NSView; 
                 remoteSnoopWebView = WebView; 
                 rssDescriptionView = NSTextView; 
@@ -73,8 +72,8 @@
                 statusBar = BDSKStatusBar; 
                 tabView = NSTabView; 
                 textSnoopContainerView = NSView; 
-                viewLocalButton = RYZImagePopUpButton; 
-                viewRemoteButton = RYZImagePopUpButton; 
+                viewLocalButton = BDSKImagePopUpButton; 
+                viewRemoteButton = BDSKImagePopUpButton; 
                 webSnoopContainerView = NSView; 
             }; 
             SUPERCLASS = NSWindowController; 

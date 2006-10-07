@@ -76,6 +76,7 @@
 #import "PubMedParser.h"
 #import "BDSKJSTORParser.h"
 #import "BDSKWebOfScienceParser.h"
+#import "NSArray_BDSKExtensions.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -89,11 +90,6 @@ enum{
 
 // offset of the form from the left window edge
 #define FORM_OFFSET 13.0
-
-// this is a PDFDocument method; we can't link with it because the framework doesn't exist on pre-10.4 systems
-@interface NSObject (PantherCompatibilityKludge)
-- (id)initWithPostScriptData:(NSData *)data;
-@end
 
 @interface BibEditor (Private)
 
@@ -2768,60 +2764,55 @@ static int numberOfOpenEditors = 0;
 
 		if (!lurl || pdfSnoopViewLoaded) return;
 
-        if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-            [documentSnoopImageView loadData:[NSData dataWithContentsOfURL:lurl]];
-            [documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
-        } else {
-            // see what type this is; we can open PDF or PS
-            // check the UTI instead of the file extension (10.4 only)
+        // see what type this is; we can open PDF or PS
+        // check the UTI instead of the file extension (10.4 only)
+        
+        NSError *readError = nil;
+        NSData *fileData = [NSData dataWithContentsOfURL:lurl options:NSUncachedRead error:&readError];
+        if(fileData == nil)
+            [[self window] presentError:readError];
+        
+        BOOL isPostScript = NO;
+        NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
+        
+        if(theUTI == nil){
+            // some error occurred, so we'll assume it's PDF and carry on
+            NSLog(@"%@: error occurred getting UTI of %@", __FILENAMEASNSSTRING__, lurl);
+        } else if([theUTI isEqualToUTI:@"com.adobe.postscript"]){
+            isPostScript = YES;
+        } else if([theUTI isEqualToUTI:@"com.pkware.zip-archive"] || [theUTI isEqualToUTI:@"org.gnu.gnu-zip-archive"]){    
+            // OmniFoundation supports zip, gzip, and bzip2, AFAICT, but we have no UTI for bzip2
+            OBPRECONDITION([fileData mightBeCompressed]);
             
-            NSError *readError = nil;
-            NSData *fileData = [NSData dataWithContentsOfURL:lurl options:NSUncachedRead error:&readError];
-            if(fileData == nil)
-                [[self window] presentError:readError];
+            // try to decompress; OmniFoundation raises a variety of exceptions if this fails, so we'll just discard all of them
+            @try {
+                fileData = [fileData decompressedData];
+            }
+            @catch( id exception ){
+                NSLog(@"discarding exception %@ raised while attempting to decompress file at %@", exception, [lurl path]);
+                fileData = nil;
+            }
             
-            BOOL isPostScript = NO;
-            NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
+            // since we don't have an actual file on disk, we can't rely on LS to return the file type, so fall back to checking the extension
+            NSString *nextToLastExtension = [[[lurl path] stringByDeletingPathExtension] pathExtension];
+            OBPRECONDITION([NSString isEmptyString:nextToLastExtension] == NO);
             
-            if(theUTI == nil){
-                // some error occurred, so we'll assume it's PDF and carry on
-                NSLog(@"%@: error occurred getting UTI of %@", __FILENAMEASNSSTRING__, lurl);
-            } else if([theUTI isEqualToUTI:@"com.adobe.postscript"]){
+            theUTI = [[NSWorkspace sharedWorkspace] UTIForPathExtension:nextToLastExtension];
+            if([theUTI isEqualToUTI:@"com.adobe.postscript"])
                 isPostScript = YES;
-            } else if([theUTI isEqualToUTI:@"com.pkware.zip-archive"] || [theUTI isEqualToUTI:@"org.gnu.gnu-zip-archive"]){    
-                // OmniFoundation supports zip, gzip, and bzip2, AFAICT, but we have no UTI for bzip2
-                OBPRECONDITION([fileData mightBeCompressed]);
-                
-                // try to decompress; OmniFoundation raises a variety of exceptions if this fails, so we'll just discard all of them
-                @try {
-                    fileData = [fileData decompressedData];
-                }
-                @catch( id exception ){
-                    NSLog(@"discarding exception %@ raised while attempting to decompress file at %@", exception, [lurl path]);
-                    fileData = nil;
-                }
-                
-                // since we don't have an actual file on disk, we can't rely on LS to return the file type, so fall back to checking the extension
-                NSString *nextToLastExtension = [[[lurl path] stringByDeletingPathExtension] pathExtension];
-                OBPRECONDITION([NSString isEmptyString:nextToLastExtension] == NO);
-                
-                theUTI = [[NSWorkspace sharedWorkspace] UTIForPathExtension:nextToLastExtension];
-                if([theUTI isEqualToUTI:@"com.adobe.postscript"])
-                    isPostScript = YES;
-            }
-            
-            id pdfDocument = isPostScript ? [[NSClassFromString(@"PDFDocument") alloc] initWithPostScriptData:fileData] : [[NSClassFromString(@"PDFDocument") alloc] initWithData:fileData];
-            
-            // if unable to create a PDFDocument from the given URL, display a warning message
-            if(pdfDocument == nil){
-                NSData *pdfData = [[BDSKPreviewer sharedPreviewer] PDFDataWithString:NSLocalizedString(@"Unable to determine file type, or an error occurred reading the file.  Only PDF and PostScript files can be displayed in the drawer at present.", @"") color:[NSColor redColor]];
-                pdfDocument = [[NSClassFromString(@"PDFDocument") alloc] initWithData:pdfData];
-            }
-            
-            id pdfView = [[pdfSnoopContainerView subviews] objectAtIndex:0];
-            [(BDSKZoomablePDFView *)pdfView setDocument:pdfDocument];
-            [pdfDocument release];
         }
+        
+        PDFDocument *pdfDocument = isPostScript ? [[PDFDocument alloc] initWithPostScriptData:fileData] : [[PDFDocument alloc] initWithData:fileData];
+        
+        // if unable to create a PDFDocument from the given URL, display a warning message
+        if(pdfDocument == nil){
+            NSData *pdfData = [[BDSKPreviewer sharedPreviewer] PDFDataWithString:NSLocalizedString(@"Unable to determine file type, or an error occurred reading the file.  Only PDF and PostScript files can be displayed in the drawer at present.", @"") color:[NSColor redColor]];
+            pdfDocument = [[PDFDocument alloc] initWithData:pdfData];
+        }
+        
+        id pdfView = [[pdfSnoopContainerView subviews] objectAtIndex:0];
+        [(BDSKZoomablePDFView *)pdfView setDocument:pdfDocument];
+        [pdfDocument release];
         pdfSnoopViewLoaded = YES;
 	}
 	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
@@ -2905,7 +2896,7 @@ static int numberOfOpenEditors = 0;
 	
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSizeKey] != nil)
         [documentSnoopDrawer setContentSize:NSSizeFromString([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSizeKey])];
-    [documentSnoopScrollView scrollToTop];
+    [[[[documentSnoopDrawer contentView] subviews] firstObject] scrollToTop];
 }
 
 - (void)drawerDidOpen:(NSNotification *)notification{
@@ -3238,19 +3229,7 @@ static int numberOfOpenEditors = 0;
     else
         [documentSnoopDrawer setContentView:pdfSnoopContainerView];
     
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3) {
-        NSSize drawerContentSize = [documentSnoopDrawer contentSize];
-        id pdfView = [[NSClassFromString(@"BDSKZoomablePDFView") alloc] initWithFrame:NSMakeRect(0, 0, drawerContentSize.width, drawerContentSize.height)];
-        
-        // release the old scrollview/PDFImageView combination and replace with the PDFView
-        [pdfSnoopContainerView replaceSubview:documentSnoopScrollView with:pdfView];
-        [pdfView release];
-        [pdfView setAutoresizingMask:(NSViewHeightSizable | NSViewWidthSizable)];
-        
-        [pdfView setScrollerSize:NSSmallControlSize];
-        documentSnoopScrollView = nil;
-    }
-    
+    [documentSnoopPDFView setScrollerSize:NSSmallControlSize];    
 }
 
 - (void)setupButtons {

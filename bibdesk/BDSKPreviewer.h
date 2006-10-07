@@ -48,6 +48,7 @@
 
 @class BibDocument;
 @class BDSKPreviewMessageQueue;
+@class BDSKZoomablePDFView;
 
 /*!
     @class BDSKPreviewer
@@ -57,8 +58,7 @@
 @interface BDSKPreviewer : NSWindowController {
 	BDSKTeXTask *texTask;
 	
-    id pdfView;
-    IBOutlet PDFImageView *imagePreviewView;
+    IBOutlet BDSKZoomablePDFView *pdfView;
     IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSProgressIndicator *progressIndicator;

@@ -368,7 +368,7 @@ static NSString *xattrError(int err, const char *myPath)
         
         if(attributes){
             // have to use NSClassFromString unless we link with PDFMetadata
-            metadata = [[[NSClassFromString(@"PDFMetadata") alloc] init] autorelease];
+            metadata = [[[PDFMetadata alloc] init] autorelease];
             [metadata setDictionary:attributes];
         } else {
             errMsg = NSLocalizedString(@"No PDF document attributes for file.", @"");

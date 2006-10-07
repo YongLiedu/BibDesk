@@ -38,6 +38,7 @@
 #import "BibPrefController.h"
 #import "BibAppController.h"
 #import "BDSKZoomableScrollView.h"
+#import "BDSKZoomablePDFView.h"
 #import "BDSKPreviewMessageQueue.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "BibDocument.h"
@@ -96,25 +97,15 @@ static BDSKPreviewer *thePreviewer;
     BDSKZoomableScrollView *scrollView;
 	
 	[self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
+        
+    // empty document to avoid problem when zoom is set to auto
+    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:[self PDFDataWithString:@"" color:nil]] autorelease];
+    [pdfView setDocument:pdfDoc];
     
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-		scrollView = (BDSKZoomableScrollView*)[imagePreviewView enclosingScrollView];
-		[scrollView setScaleFactor:scaleFactor];
-        
-        [self drawPreviewsForState:BDSKEmptyPreviewState];
-    } else {
-        NSRect frameRect = [[imagePreviewView enclosingScrollView] frame];
-        pdfView = [[NSClassFromString(@"BDSKZoomablePDFView") alloc] initWithFrame:frameRect];
-        [[tabView tabViewItemAtIndex:0] setView:pdfView];
-        id pdfDocument = [[NSClassFromString(@"PDFDocument") alloc] initWithData:[self PDFDataWithString:@"" color:[NSColor blackColor]]];
-        [(PDFView *)pdfView setDocument:pdfDocument];
-        [pdfDocument release];
-        [pdfView release];
-        [self drawPreviewsForState:BDSKEmptyPreviewState];
-        
-        // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
-        [pdfView setScaleFactor:scaleFactor];
-    }
+    // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
+    [pdfView setScaleFactor:scaleFactor];
+    
+    [self drawPreviewsForState:BDSKEmptyPreviewState];
     	
     scrollView = (BDSKZoomableScrollView*)[rtfPreviewView enclosingScrollView];
 	scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
@@ -264,13 +255,9 @@ static BDSKPreviewer *thePreviewer;
 	OBPOSTCONDITION(pdfData != nil);
 	
 	// draw the PDF preview
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-        [imagePreviewView loadData:pdfData];
-    } else {
-        id pdfDocument = [[NSClassFromString(@"PDFDocument") alloc] initWithData:pdfData];
-        [(PDFView *)pdfView setDocument:pdfDocument];
-        [pdfDocument release];
-    }    
+    PDFDocument *pdfDocument = [[PDFDocument alloc] initWithData:pdfData];
+    [pdfView setDocument:pdfDocument];
+    [pdfDocument release];
     
     // draw the RTF preview
 	[rtfPreviewView setString:@""];
@@ -409,11 +396,7 @@ static BDSKPreviewer *thePreviewer;
 	// save the visibility of the previewer
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
     // save the scalefactors of the views
-    volatile float scaleFactor = 0.0;
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-        scaleFactor = [(BDSKZoomableScrollView*)[imagePreviewView enclosingScrollView] scaleFactor];
-    else
-        scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
+    volatile float scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
 
 	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey])
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
