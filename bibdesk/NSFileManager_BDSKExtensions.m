@@ -808,7 +808,7 @@ static OSType finderSignatureBytes = 'MACS';
     Handle dataHandle;
     PtrToHand(data, &dataHandle, [contentData length]);
     Str255 dst;
-    CopyCStringToPascal("OFResourceForkData", dst);
+    CFStringGetPascalString(CFSTR("OFResourceForkData"), dst, 256, kCFStringEncodingASCII);
     AddResource(dataHandle, resType, resID, dst);
     
     UpdateResFile(refNum);
