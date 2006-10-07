@@ -354,56 +354,6 @@
 		50A5C89708C5505500B1C5E4 /* NSEvent-OAExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A5C89508C5505500B1C5E4 /* NSEvent-OAExtensions.m */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildStyle section */
-		07F45149FEDD7CA911CB188F /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				OPTIMIZATION_CFLAGS = "\U0001$(OPTIMIZATION_CFLAGS_FULL)";
-				OPTIMIZATION_CFLAGS_FULL = "-O2";
-				OPTIMIZATION_CFLAGS_ZERO = "-O0 -fno-inline-functions";
-				OTHER_CFLAGS = (
-					"\U0001-DDEBUG",
-					"-DDEBUG_$(USER)",
-				);
-				SECTORDER_FLAGS = "";
-				ZERO_LINK = YES;
-			};
-			name = Development;
-		};
-		07F4514AFEDD7CA911CB188F /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DYLIB_INSTALLED_NAME_normal = "$(FRAMEWORK_INSTALLED_NAME)";
-				FRAMEWORK_INSTALLED_NAME = "$(OMNI_FRAMEWORK_TARGET_PATH)$(/)$(PRODUCT_NAME).$(WRAPPER_EXTENSION)$(/)Versions$(/)$(FRAMEWORK_VERSION)$(/)$(PRODUCT_NAME)";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				INSTALL_MODE_FLAG = "a+rX";
-				OMNI_FRAMEWORK_TARGET_PATH = "@executable_path/../Frameworks";
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_LDFLAGS = "\U0001$(OMNI_PREBIND_FLAGS)";
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-		34508DFC0510F9670097A113 /* Coverage */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				OPTIMIZATION_CFLAGS = "\U0001-O0";
-				OTHER_CFLAGS = (
-					"\U0001-fprofile-arcs",
-					"-ftest-coverage",
-				);
-			};
-			name = Coverage;
-		};
-/* End PBXBuildStyle section */
-
 /* Begin PBXContainerItemProxy section */
 		4AA1E82D08AA764700E2FF6B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -629,7 +579,7 @@
 		4A9FDD380655955D0097A149 /* OAController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAController.m; sourceTree = "<group>"; };
 		4AA1E7F908AA764600E2FF6B /* OmniAppKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OmniAppKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1E81108AA764700E2FF6B /* OAUnitTests.otest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OAUnitTests.otest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4AA1E81E08AA764700E2FF6B /* OAMakeImageSizeIntegral */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = OAMakeImageSizeIntegral; sourceTree = BUILT_PRODUCTS_DIR; };
+		4AA1E81E08AA764700E2FF6B /* OAMakeImageSizeIntegral */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OAMakeImageSizeIntegral; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1E82C08AA764700E2FF6B /* OAPatternColorPicker.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OAPatternColorPicker.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1EBCD08AA772700E2FF6B /* Omni-Application-Coverage.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "Omni-Application-Coverage.xcconfig"; sourceTree = "<group>"; };
 		4AA1EBCE08AA772700E2FF6B /* Omni-Application-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "Omni-Application-Debug.xcconfig"; sourceTree = "<group>"; };
@@ -2040,42 +1990,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"";
-				FRAMEWORK_VERSION = 2004A;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(OMNI_INSTALLED_PRODUCTS)";
-				LIBRARY_SEARCH_PATHS = "";
-				OMNI_PREBIND_FLAGS = "-Wl,-prebind,-image_base,0x313f0000";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOL_FLAGS = "";
-				OTHER_REZFLAGS = "";
-				PFE_FILE_C_DIALECTS = "objective-c";
-				PREBINDING = NO;
-				PRECOMPILE_PREFIX_HEADER = YES;
-				PREFIX_HEADER = OmniAppKit_Prefix.h;
-				PRINCIPAL_CLASS = "";
-				PRODUCT_NAME = OmniAppKit;
-				SECTORDER_FLAGS = (
-					"-sectorder",
-					__TEXT,
-					__text,
-					OmniAppKit.order,
-				);
-				WARNING_CFLAGS = (
-					"-Wall",
-					"-Werror",
-					"-Wno-#warnings",
-					"-Wno-trigraphs",
-				);
-				WRAPPER_EXTENSION = framework;
-				_INFO_PLIST_FILE_PATH = "$(SRCROOT)/$(INFOPLIST_FILE)";
-			};
 			dependencies = (
 			);
 			name = "OmniAppKit (Framework)";
@@ -2096,18 +2010,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRECOMPILE_PREFIX_HEADER = YES;
-				PREFIX_HEADER = Tests/UnitTests/OAUnitTests.h;
-				PRODUCT_NAME = OAUnitTests;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wall";
-				WRAPPER_EXTENSION = otest;
-			};
 			dependencies = (
 				4AA1E82E08AA764700E2FF6B /* PBXTargetDependency */,
 			);
@@ -2128,19 +2030,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = OAMakeImageSizeIntegral;
-				REZ_EXECUTABLE = YES;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = OAMakeImageSizeIntegral;
@@ -2161,20 +2050,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				OPTIMIZATION_CFLAGS = "-O2";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-undefined",
-					error,
-					"-Wl,-twolevel_namespace_hints",
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = OAPatternColorPicker;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wall";
-				WRAPPER_EXTENSION = bundle;
-			};
 			dependencies = (
 			);
 			name = OAPatternColorPicker;
@@ -2189,16 +2064,12 @@
 		00E51EF1FE8AB2E911C9CC38 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4A4E085608AA75E90098FF0F /* Build configuration list for PBXProject "OmniAppKit" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				07F45149FEDD7CA911CB188F /* Development */,
-				07F4514AFEDD7CA911CB188F /* Deployment */,
-				34508DFC0510F9670097A113 /* Coverage */,
-			);
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 00E51EF2FE8AB2E911C9CC38 /* OmniAppKit */;
 			projectDirPath = "";
+			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				4AA1E67A08AA764600E2FF6B /* OmniAppKit (Framework) */,
 				4AA1E7FA08AA764600E2FF6B /* OAUnitTests */,

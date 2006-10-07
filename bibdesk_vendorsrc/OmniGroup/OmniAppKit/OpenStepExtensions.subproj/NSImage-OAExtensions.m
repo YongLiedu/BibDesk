@@ -33,7 +33,7 @@ static id (*original_initWithContentsOfFile)(id self, SEL _cmd, NSString *fileNa
 static id (*original_initByReferencingFile)(id self, SEL _cmd, NSString *fileName);
 static id (*original_initWithSize)(id self, SEL _cmd, NSSize size);
 static id (*original_setSize)(id self, SEL _cmd, NSSize size);
-
+/*
 + (void)performPosing;
 {
     original_initByReferencingFile = (typeof(original_initWithContentsOfFile))OBReplaceMethodImplementationWithSelector(self, @selector(initByReferencingFile:), @selector(replacement_initByReferencingFile:));
@@ -41,7 +41,7 @@ static id (*original_setSize)(id self, SEL _cmd, NSSize size);
     original_initWithSize = (typeof(original_initWithSize))OBReplaceMethodImplementationWithSelector(self, @selector(initWithSize:), @selector(replacement_initWithSize:));
     original_setSize = (typeof(original_setSize))OBReplaceMethodImplementationWithSelector(self, @selector(setSize:), @selector(replacement_setSize:));
 }
-
+*/
 // If you run into these assertions, consider running the OAMakeImageSizeIntegral command line tool in your image (probably only reasonable for TIFF right now).
 
 - (id)replacement_initWithContentsOfFile:(NSString *)fileName;

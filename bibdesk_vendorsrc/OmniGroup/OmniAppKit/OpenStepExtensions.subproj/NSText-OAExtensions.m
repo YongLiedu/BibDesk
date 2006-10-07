@@ -120,6 +120,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelea
     } NS_HANDLER {
 	return @"";
     } NS_ENDHANDLER;
+    
+    return nil; // keep compiler happy; not reached
 }
 
 // OAFindControllerAware informal protocol
