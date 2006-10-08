@@ -110,11 +110,20 @@
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
 NSString *BDSKRISDocumentType = @"RIS/Medline File";
+NSString *BDSKMinimalBibTeXDocumentType = @"Minimal BibTeX Database";
+NSString *BDSKWOSDocumentType = @"Web of Science File";
+NSString *BDSKLTBDocumentType = @"Amsrefs LTB";
+NSString *BDSKAtomDocumentType = @"Atom XML";
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
+
+@interface NSDocument (BDSKPrivateExtensions)
+// declare a private NSDocument method so we can override it
+- (void)changeSaveType:(id)sender;
+@end
 
 @implementation BibDocument
 
@@ -692,48 +701,129 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark -
 #pragma mark  Document Saving
 
-#define SAVE_ENCODING_VIEW_OFFSET 10.0
-
-// if the user is saving in one of our plain text formats, give them an encoding option as well
-// this also requires overriding saveToFile:saveOperation:delegate:didSaveSelector:contextInfo:
-// to set the document's encoding before writing to the file
-- (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
-    if([super prepareSavePanel:savePanel]){
-        NSView *oldAccessoryView = [[savePanel accessoryView] retain];
-        if(oldAccessoryView == nil){
-            [savePanel setAccessoryView:saveEncodingAccessoryView];
-        }else{
-            NSRect sevFrame, ignored, avFrame = [oldAccessoryView frame];
-            float height = NSHeight([saveEncodingAccessoryView frame]);
-            avFrame.size.height += height - SAVE_ENCODING_VIEW_OFFSET;
-            NSView *accessoryView = [[NSView alloc] initWithFrame:avFrame];
-            NSDivideRect([accessoryView bounds], &sevFrame, &ignored, height, NSMaxYEdge);
-            [saveEncodingAccessoryView setFrame:sevFrame];
-            [accessoryView addSubview:saveEncodingAccessoryView];
-            [savePanel setAccessoryView:accessoryView];
-            [oldAccessoryView setFrameOrigin:NSZeroPoint];
-            [accessoryView addSubview:oldAccessoryView];
-            [oldAccessoryView release];
-            [accessoryView release];
-        }
-        // set the popup to reflect the document's present string encoding
-        NSString *documentEncodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
-        [saveTextEncodingPopupButton selectItemWithTitle:documentEncodingName];
-        [[savePanel accessoryView] setNeedsDisplay:YES];
-        return YES;
-    } else return NO; // if super failed
++ (NSArray *)writableTypes
+{
+    NSMutableArray *writableTypes = [[[super writableTypes] mutableCopy] autorelease];
+    [writableTypes addObjectsFromArray:[BDSKTemplate allStyleNames]];
+    return writableTypes;
 }
 
-- (void)saveToURL:(NSURL *)absoluteURL 
-           ofType:(NSString *)typeName 
- forSaveOperation:(NSSaveOperationType)saveOperation 
-         delegate:(id)delegate
-  didSaveSelector:(SEL)didSaveSelector
-      contextInfo:(void *)contextInfo {
-	// set the string encoding according to the popup in case it was changed in the save-as panel
-    if (NSSaveAsOperation == saveOperation)
+#define SAVE_ENCODING_VIEW_OFFSET 30.0
+#define SAVE_FORMAT_POPUP_OFFSET 31.0
+
+static NSPopUpButton *popUpButtonSubview(NSView *view)
+{
+	if ([view isKindOfClass:[NSPopUpButton class]])
+		return (NSPopUpButton *)view;
+	
+	NSEnumerator *viewEnum = [[view subviews] objectEnumerator];
+	NSView *subview;
+	NSPopUpButton *popup;
+	
+	while (subview = [viewEnum nextObject]) {
+		if (popup = popUpButtonSubview(subview))
+			return popup;
+	}
+	return nil;
+}
+
+// if the user is saving in one of our plain text formats, give them an encoding option as well
+// this also requires overriding saveToURL:ofType:forSaveOperation:error:
+// to set the document's encoding before writing to the file
+- (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
+    if([super prepareSavePanel:savePanel] == NO)
+        return NO;
+    
+    NSView *accessoryView = [savePanel accessoryView];
+    NSPopUpButton *saveFormatPopupButton = popUpButtonSubview(accessoryView);
+    OBASSERT(saveFormatPopupButton != nil);
+    NSRect popupFrame = [saveTextEncodingPopupButton frame];
+    popupFrame.origin.y += SAVE_FORMAT_POPUP_OFFSET;
+    [saveFormatPopupButton setFrame:popupFrame];
+    [saveAccessoryView addSubview:saveFormatPopupButton];
+    NSRect savFrame = [saveAccessoryView frame];
+    savFrame.size.width = NSWidth([accessoryView frame]);
+    
+    if(NSSaveToOperation == currentSaveOperationType){
+        savFrame.origin = NSMakePoint(0.0, SAVE_ENCODING_VIEW_OFFSET);
+        [saveAccessoryView setFrame:savFrame];
+        [exportAccessoryView addSubview:saveAccessoryView];
+        accessoryView = exportAccessoryView;
+    }else{
+        [saveAccessoryView setFrame:savFrame];
+        accessoryView = saveAccessoryView;
+    }
+    [savePanel setAccessoryView:accessoryView];
+    
+    // set the popup to reflect the document's present string encoding
+    NSString *documentEncodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
+    [saveTextEncodingPopupButton selectItemWithTitle:documentEncodingName];
+    [accessoryView setNeedsDisplay:YES];
+    
+    if(NSSaveToOperation == currentSaveOperationType){
+        [exportSelectionCheckButton setState:NSOffState];
+        [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0];
+    }
+    
+    return YES;
+}
+
+// this is a private method, the action of the file format poup
+- (void)changeSaveType:(id)sender{
+    NSSet *typesWithEncoding = [NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, BDSKAtomDocumentType, nil];
+    NSString *selectedType = [[sender selectedItem] representedObject];
+    [saveTextEncodingPopupButton setEnabled:[typesWithEncoding containsObject:selectedType]];
+    if ([[self superclass] instancesRespondToSelector:@selector(changeSaveType:)])
+        [super changeSaveType:sender];
+}
+
+- (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+    currentSaveOperationType = saveOperation;
+    [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+}
+
+- (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
+    // set the string encoding according to the popup
+    if (NSSaveOperation == saveOperation || NSSaveAsOperation == saveOperation)
         [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
-    [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+    
+    BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
+    if(success == NO)
+        return NO;
+    
+    if(saveOperation == NSSaveToOperation){
+        // write template accessory files if necessary
+        BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:typeName];
+        if(selectedTemplate){
+            NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
+            NSURL *accessoryURL = nil;
+            NSURL *destDirURL = [NSURL fileURLWithPath:[[absoluteURL path] stringByDeletingLastPathComponent]];
+            while(accessoryURL = [accessoryFileEnum nextObject]){
+                [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+            }
+        }
+    }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
+        [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
+                                                     forPublications:publications
+                                                            document:self];
+    }
+    
+    // rebuild metadata cache for this document whenever we save
+    NSEnumerator *pubsE = [[self publications] objectEnumerator];
+    NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
+    BibItem *anItem;
+    while(anItem = [pubsE nextObject]){
+        OMNI_POOL_START {
+            [pubsInfo addObject:[anItem metadataCacheInfo]];
+        } OMNI_POOL_END;
+    }
+    
+    NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
+    [pubsInfo release];
+    [[NSApp delegate] rebuildMetadataCache:infoDict];
+    [infoDict release];
+    
+    return YES;
 }
 
 - (BOOL)writeToURL:(NSURL *)absoluteURL 
@@ -754,10 +844,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
     BOOL success = YES;
     NSError *nsError = nil;
-
-    // @@ revisit this if we need to support file wrappers
-    NSData *data = [self dataOfType:docType error:&nsError];
-    success = nil == data ? NO : [data writeToURL:fileURL atomically:YES];
+    NSArray *items = publications;
+    
+    if(currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
+        items = [self selectedPublications];
+    
+    NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
+    success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:YES updateFilenames:NO];
     
     if (NO == success) {
         
@@ -783,266 +876,95 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
     else if (currentSaveOperationType != NSAutosaveOperation)
         [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
-
-    // rebuild metadata cache for this document whenever we save successfully
-    // note that this also gets called for autosave operations, so Spotlight should always be current
-    if(success && [self fileURL]){
-        NSEnumerator *pubsE = [[self publications] objectEnumerator];
-        NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
-        BibItem *anItem;
-        NSDictionary *cacheInfo;
-        
-        while(anItem = [pubsE nextObject]){
-            OMNI_POOL_START {
-                // will be nil if the item hasn't changed since we last asked for the cache info
-                cacheInfo = [anItem metadataCacheInfo];
-                if (cacheInfo)
-                    [pubsInfo addObject:cacheInfo];
-            } OMNI_POOL_END;
-        }
-        
-        // don't pass the fileName parameter, since it's likely a temp file somewhere due to the atomic save operation
-        NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", [self fileURL], @"fileURL", nil];
-        [pubsInfo release];
-        [[NSApp delegate] rebuildMetadataCache:infoDict];
-        [infoDict release];
-    }
-        
+    
     // setting to nil is okay
     if (outError) *outError = nsError;
     
     return success;
 }
 
-- (IBAction)saveDocument:(id)sender{
-    [super saveDocument:sender];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState)
-        [self exportAsFileType:BDSKRSSExportFileType selected:NO];
-    [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
-                                                 forPublications:publications
-                                                        document:self];
-}
-
 - (void)clearChangeCount{
 	[self updateChangeCount:NSChangeCleared];
 }
 
-#pragma mark Document Exporting
-
-- (IBAction)exportAsAction:(id)sender{
-    [self exportAsFileType:[sender tag] selected:NO];
-}
-
-- (IBAction)exportSelectionAsAction:(id)sender{
-    [self exportAsFileType:[sender tag] selected:YES];
-}
-
-- (IBAction)changeCurrentExportTemplateStyle:(id)sender{
-    NSString *currentSyle = [sender titleOfSelectedItem];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentSyle forKey:BDSKExportTemplateStyleKey];
-    
-    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentSyle];
-    [(NSSavePanel *)[sender window] setRequiredFileType:[selectedTemplate fileExtension]];
-}
-
-- (BOOL)prepareExportPanel:(NSSavePanel *)savePanel{
-    NSArray *styles = [BDSKTemplate allStyleNames];
-    NSString *currentStyle = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKExportTemplateStyleKey];
-    if(currentStyle == nil || [styles containsObject:currentStyle] == NO){
-        currentStyle = [styles objectAtIndex:0];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentStyle forKey:BDSKExportTemplateStyleKey];
-    }
-    
-    [templateStylePopUpButton removeAllItems];
-    [templateStylePopUpButton addItemsWithTitles:styles];
-    [templateStylePopUpButton setAction:@selector(changeCurrentExportTemplateStyle:)];
-    [templateStylePopUpButton setTarget:self];
-    [templateStylePopUpButton selectItemWithTitle:currentStyle];
-    
-    [savePanel setAccessoryView:templateExportAccessoryView];
-    
-    return YES;
-}
-
-- (void)exportAsFileType:(int)exportFileType selected:(BOOL)selected{
-    NSSavePanel *sp = [NSSavePanel savePanel];
-    NSString *fileType = nil;
-    switch (exportFileType) {
-        case BDSKTemplateExportFileType:
-            if ([self prepareExportPanel:sp] == NO) {
-                NSBeep();
-                return;
-            }
-            fileType = [[BDSKTemplate templateForStyle:[templateStylePopUpButton titleOfSelectedItem]] fileExtension];
-            break;
-        case BDSKRSSExportFileType:
-            fileType = @"rss";
-            break;
-        case BDSKHTMLExportFileType:
-            fileType = @"html";
-            break;
-        case BDSKRTFExportFileType:
-            fileType = @"rtf";
-            break;
-        case BDSKRTFDExportFileType:
-            fileType = @"rtfd";
-            break;
-        case BDSKDocExportFileType:
-            fileType = @"doc";
-            break;
-        case BDSKBibTeXExportFileType:
-            [sp setAccessoryView:dropInternalAccessoryView];
-            [dropInternalCheckButton setState:NSOffState];
-            [self prepareSavePanel:sp]; // adds the encoding popup
-            fileType = @"bib";
-            break;
-        case BDSKRISExportFileType:
-            [self prepareSavePanel:sp]; // adds the encoding popup
-            fileType = @"ris";
-            break;
-        case BDSKLTBExportFileType:
-            [self prepareSavePanel:sp]; // adds the encoding popup
-            fileType = @"ltb";
-            break;
-        case BDSKMODSExportFileType:
-            fileType = @"mods";
-            break;
-        case BDSKEndNoteExportFileType:
-            fileType = @"xml";
-            break;
-        case BDSKAtomExportFileType:
-            fileType = @"atom";
-            break;
-    }
-    [sp setRequiredFileType:fileType];
-    [sp setCanCreateDirectories:YES];
-    [sp setCanSelectHiddenExtension:YES];
-    [sp setDelegate:self];
-    NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSNumber numberWithInt:exportFileType], @"exportFileType", [NSNumber numberWithBool:selected], @"selected", nil];
-    [sp beginSheetForDirectory:nil
-                          file:( [self fileName] == nil ? nil : [[[self fileName] stringByDeletingPathExtension] lastPathComponent])
-                modalForWindow:documentWindow
-                 modalDelegate:self
-                didEndSelector:@selector(exportPanelDidEnd:returnCode:contextInfo:)
-                   contextInfo:contextInfo];
-
-}
-
-// this is only called by export actions, and isn't part of the regular save process
-- (void)exportPanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSData *fileData = nil;
-    NSString *fileName = nil;
-    NSSavePanel *sp = (NSSavePanel *)sheet;
-    NSDictionary *dict = [(NSDictionary *)contextInfo autorelease];
-    int exportFileType = [[dict objectForKey:@"exportFileType"] intValue];
-    BOOL selected = [[dict objectForKey:@"selected"] boolValue];
-    NSArray *items = (selected ? [self selectedPublications] : publications);
-
-	// first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-	
-    if(returnCode == NSOKButton){
-        fileName = [sp filename];
-        NSString *templateStyle = nil;
-        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-        NSError *nsError = nil;
-        
-        switch (exportFileType) {
-            case BDSKRSSExportFileType:
-            case BDSKHTMLExportFileType:
-            case BDSKRTFExportFileType:
-            case BDSKRTFDExportFileType:
-            case BDSKDocExportFileType:
-                do {
-                    templateStyle = [BDSKTemplate defaultStyleNameForFileType:[sp requiredFileType]];
-                    if (templateStyle == nil)   
-                        break;
-                } while (0);
-            case BDSKTemplateExportFileType:
-                do {
-                    if (templateStyle == nil) 
-                        templateStyle = [templateStylePopUpButton titleOfSelectedItem];
-                    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:templateStyle];
-                    BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
-                    NSString *extension = [selectedTemplate fileExtension];
-                    fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
-                    NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
-                    NSURL *accessoryURL = nil;
-                    NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
-                    while(accessoryURL = [accessoryFileEnum nextObject]){
-                        [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
-                    }
-                    if (templateFormat & BDSKRTFDTemplateFormat) {
-                        NSFileWrapper *fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
-                        [fileWrapper writeToFile:fileName atomically:YES updateFilenames:NO];
-                        fileData = nil;
-                    } else if (templateFormat & BDSKTextTemplateFormat) {
-                        fileData = [self stringDataForPublications:items usingTemplate:selectedTemplate];
-                    } else {
-                        fileData = [self attributedStringDataForPublications:items usingTemplate:selectedTemplate];
-                    }
-                } while (0);
-                break;
-            case BDSKMODSExportFileType:
-                fileData = [self MODSDataForPublications:items];
-                break;
-            case BDSKEndNoteExportFileType:
-                fileData = [self endNoteDataForPublications:items];
-                break;
-            case BDSKAtomExportFileType:
-                fileData = [self atomDataForPublications:items];
-                break;
-            case BDSKBibTeXExportFileType:
-                if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey]){
-                    [self performSortForCrossrefs];
-                    // get items again, since they've been resorted
-                    items = (selected ? [self selectedPublications] : publications);
-                }
-                fileData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:([dropInternalCheckButton state] == NSOnState) error:&nsError];
-                break;
-            case BDSKRISExportFileType:
-                fileData = [self RISDataForPublications:items encoding:encoding error:&nsError];
-                break;
-            case BDSKLTBExportFileType:
-                fileData = [self LTBDataForPublications:items encoding:encoding error:&nsError];
-                break;
-            default:
-                [NSException raise:BDSKUnimplementedException format:@"case %d in %@ no recognized", exportFileType, NSStringFromSelector(_cmd)];
-        }
-        if (fileData) {
-            [fileData writeToFile:fileName atomically:YES];
-        } else if (nsError) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Export", @"") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:[nsError localizedDescription]];
-            [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-        }
-    }
-    [sp setRequiredFileType:@"bib"]; // just in case...
-    [sp setAccessoryView:nil];
-}
-
 #pragma mark Data representations
 
-- (NSData *)dataOfType:(NSString *)aType error:(NSError **)outError
+- (NSFileWrapper *)fileWrapperOfType:(NSString *)aType error:(NSError **)outError
+{
+    return [self fileWrapperOfType:aType forPublications:publications error:outError];
+}
+
+- (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError
 {
     // first we make sure all edits are committed
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
+    
+    NSFileWrapper *fileWrapper = nil;
+    
+    // check if we need a fileWrapper; only needed for RTFD templates
+    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
+    if([selectedTemplate templateFormat] & BDSKRTFDTemplateFormat){
+        fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
+        if(fileWrapper == nil){
+            // @@ report error?
+        }
+    }else{
+        NSError *error = nil;
+        NSData *data = [self dataOfType:aType forPublications:items error:&error];
+        if(data != nil && error == nil){
+            fileWrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
+        } else {
+            if(outError != NULL)
+                *outError = error;
+        }
+    }
+    return fileWrapper;
+}
+
+- (NSData *)dataOfType:(NSString *)aType error:(NSError **)outError
+{
+    return [self dataOfType:aType forPublications:publications error:outError];
+}
+
+- (NSData *)dataOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError
+{
     NSData *data = nil;
-    
     NSError *error = nil;
-    
+    NSStringEncoding encoding = [self documentStringEncoding];
+    if(NSSaveToOperation == currentSaveOperationType)
+        encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
+        
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
-        if([self documentStringEncoding] == 0)
+        if(encoding == 0)
             [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
-        data = [self bibTeXDataForPublications:publications encoding:[self documentStringEncoding] droppingInternal:NO error:&error];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
-        data = [self RISDataForPublications:publications encoding:[self documentStringEncoding] error:&error];
+        data = [self RISDataForPublications:items encoding:encoding error:&error];
+    }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
+        if(encoding == 0)
+            [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
+        data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES error:&error];
+    }else if ([aType isEqualToString:BDSKLTBDocumentType]){
+        if(encoding == 0)
+            [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
+        data = [self LTBDataForPublications:items encoding:encoding error:&error];
+    }else if ([aType isEqualToString:BDSKAtomDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"atom"]]){
+        data = [self atomDataForPublications:items];
+    }else{
+        BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
+        BDSKTemplateFormat templateFormat = [selectedTemplate templateFormat];
+        
+        if (templateFormat & BDSKRTFDTemplateFormat) {
+            // @@ shouldn't reach here, should have already redirected to fileWrapperOfType:forPublications:error:
+        } else if (templateFormat & BDSKTextTemplateFormat) {
+            data = [self stringDataForPublications:items usingTemplate:selectedTemplate];
+        } else {
+            data = [self attributedStringDataForPublications:items usingTemplate:selectedTemplate];
+        }
     }
     
     if(nil == data && outError){

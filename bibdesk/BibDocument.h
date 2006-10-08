@@ -86,6 +86,10 @@ enum {
 // our main document types
 extern NSString *BDSKBibTeXDocumentType;
 extern NSString *BDSKRISDocumentType;
+extern NSString *BDSKMinimalBibTeXDocumentType;
+extern NSString *BDSKWOSDocumentType;
+extern NSString *BDSKLTBDocumentType;
+extern NSString *BDSKAtomDocumentType;
 
 // Some pasteboard types used by the document for dragging and copying.
 extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Reference Miner, determined using Pasteboard Peeker
@@ -159,13 +163,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory views
-    IBOutlet NSView *templateExportAccessoryView;
-    IBOutlet NSPopUpButton *templateStylePopUpButton;
-    IBOutlet NSView *dropInternalAccessoryView;
-    IBOutlet NSButton *dropInternalCheckButton;
-    
-    IBOutlet NSView *saveEncodingAccessoryView;
+    IBOutlet NSView *saveAccessoryView;
+    IBOutlet NSView *exportAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
+    IBOutlet NSButton *exportSelectionCheckButton;
     NSStringEncoding documentStringEncoding;
 	
     BDSKMacroResolver *macroResolver;
@@ -244,50 +245,14 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor;
 
 /*!
-    @method     exportAsAction:
-    @abstract   Action method to export in a particular format.
-    @discussion  This calls exportAsFileType:selected:. The fileType is determined by the sender's tag.
-    @param      sender anything
-*/
-- (IBAction)exportAsAction:(id)sender;
-
-/*!
-    @method     exportSelectionAsAction:
-    @abstract   Action method to export the selection in a particular format.
-    @discussion  This calls exportAsFileType:selected:. The fileType is determined by the sender's tag.
-    @param      sender anything
-*/
-- (IBAction)exportSelectionAsAction:(id)sender;
-
-/*!
-    @method     exportAsFileType:selected:
-    @abstract   Export the document's contents.
-    @discussion Exports the entire document to one of many file types. 
- This method just opens a save panel, with the appropriate accessory view.
- On return from the save panel, Cocoa calls our method savePanelDidEnd:returnCode:contextInfo:
- @param      fileType An enum representing the type to export.
- @param      selected A boolean specifying whether to use the selection or all the publications. 
-*/
-- (void)exportAsFileType:(int)exportFileType selected:(BOOL)selected;
-
-/*!
-    @method     exportPanelDidEnd:returnCode:contextInfo:
- @abstract   Called after a export panel is closed.
- @discussion If the user chose to export, this calls the appropriate *DataRepresentation 
- method to get the data to save. Otherwise, it just returns without doing anything.
-
-    @param      sheet The save panel
-    @param      returnCode what happened
-    @param      contextInfo ...
-*/
-- (void)exportPanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
-/*!
     @method     clearChangeCount
     @abstract   needed because of finalize changes in BibEditor
     @discussion (comprehensive description)
 */
 - (void)clearChangeCount;
+
+- (NSFileWrapper *)fileWrapperOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
+- (NSData *)dataOfType:(NSString *)aType forPublications:(NSArray *)items error:(NSError **)outError;
 
 - (NSData *)stringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
 - (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
