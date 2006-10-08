@@ -126,8 +126,8 @@
                 ctxCopyTex = NSMenuItem; 
                 customCiteDrawer = NSDrawer; 
                 documentWindow = NSWindow; 
-                dropInternalAccessoryView = NSView; 
-                dropInternalCheckButton = NSButton; 
+                exportAccessoryView = NSView; 
+                exportSelectionCheckButton = NSButton; 
                 fileMenu = NSMenu; 
                 fileSearchController = id; 
                 groupActionButton = BDSKImagePopUpButton; 
@@ -143,14 +143,12 @@
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
                 removeCustomCiteStringButton = NSButton; 
-                saveEncodingAccessoryView = NSView; 
+                saveAccessoryView = NSView; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
                 searchField = NSSearchField; 
                 splitView = BDSKSplitView; 
                 statusBar = BDSKStatusBar; 
                 tableView = BDSKDragTableView; 
-                templateExportAccessoryView = NSView; 
-                templateStylePopUpButton = NSPopUpButton; 
             }; 
             SUPERCLASS = NSDocument; 
         }, 
