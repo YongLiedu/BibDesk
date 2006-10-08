@@ -49,6 +49,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BibItem.h"
+#import "BDSKTemplate.h"
 
 @implementation BDSKDocumentController
 
@@ -400,6 +401,61 @@
             NSBeep();
     
     return document;
+}
+
+#pragma mark Document types
+
+- (NSArray *)fileExtensionsFromType:(NSString *)documentTypeName
+{
+    NSArray *fileExtensions = [super fileExtensionsFromType:documentTypeName];
+    if([fileExtensions count] == 0){
+    	NSString *fileExtension = [[BDSKTemplate templateForStyle:documentTypeName] fileExtension];
+        if(fileExtension != nil)
+            fileExtensions = [NSArray arrayWithObject:fileExtension];
+    }
+	return fileExtensions;
+}
+
+- (NSString *)typeFromFileExtension:(NSString *)fileExtensionOrHFSFileType
+{
+	NSString *type = [super typeFromFileExtension:fileExtensionOrHFSFileType];
+    if(type == nil){
+        type = [[BDSKTemplate defaultStyleNameForFileType:fileExtensionOrHFSFileType] valueForKey:BDSKTemplateNameString];
+    }else if ([type isEqualToString:BDSKMinimalBibTeXDocumentType]){
+        // fix of bug when reading a .bib file
+        // this is interpreted as Minimal BibTeX, even though we don't declare that as a readable type
+        type = BDSKBibTeXDocumentType;
+    }
+	return type;
+}
+
+- (Class)documentClassForType:(NSString *)documentTypeName
+{
+	Class docClass = [super documentClassForType:documentTypeName];
+    if (docClass == Nil){
+        [[BDSKTemplate allStyleNames] containsObject:documentTypeName];
+            docClass = [BibDocument class];
+    }
+    return docClass;
+}
+
+- (NSString *)displayNameForType:(NSString *)documentTypeName{
+    NSString *displayName = nil;
+    if([documentTypeName isEqualToString:BDSKMinimalBibTeXDocumentType])
+        displayName = NSLocalizedString(@"Minimal BibTeX", @"Minimal BibTeX");
+    else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"html"]])
+        displayName = @"HTML";
+    else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"rss"]])
+        displayName = @"RSS";
+    else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]])
+        displayName = NSLocalizedString(@"Rich Text (RTF)", @"Rich Text (RTF)");
+    else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"rtfd"]])
+        displayName = NSLocalizedString(@"Rich Text with Graphics (RTFD)", @"Rich Text (RTFD)");
+    else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"doc"]])
+        displayName = NSLocalizedString(@"Word Format (Doc)", @"Word Format (Doc)");
+    else
+        displayName = [super displayNameForType:documentTypeName];
+    return displayName;
 }
 
 @end
