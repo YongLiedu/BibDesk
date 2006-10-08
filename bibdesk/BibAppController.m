@@ -347,7 +347,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         case 1:
             return NO;
         case 2:
-            [[NSDocumentController sharedDocumentController] openDocument:nil];   
+            [[NSDocumentController sharedDocumentController] modalOpenDocument];   
             return NO;
         case 3:
             [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:

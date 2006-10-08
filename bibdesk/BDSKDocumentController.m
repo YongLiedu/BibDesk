@@ -128,6 +128,18 @@
         return nil;
 }
 
+// -[BibAppController applicationShouldOpenUntitledFile:] will end up calling this each time
+// the dock icon is clicked if BDSKStartupBehaviorKey == 2
+- (void)modalOpenDocument;
+{
+    static BOOL isOpening = NO;
+    if(NO == isOpening) {
+        isOpening = YES;
+        [self openDocument:nil];
+        isOpening = NO;
+    }
+}
+
 - (void)openDocument:(id)sender{
 
     NSStringEncoding encoding;
