@@ -758,12 +758,13 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     // set the popup to reflect the document's present string encoding
     NSString *documentEncodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
     [saveTextEncodingPopupButton selectItemWithTitle:documentEncodingName];
-    [accessoryView setNeedsDisplay:YES];
+    [saveTextEncodingPopupButton setEnabled:YES];
     
     if(NSSaveToOperation == currentSaveOperationType){
         [exportSelectionCheckButton setState:NSOffState];
         [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0];
     }
+    [accessoryView setNeedsDisplay:YES];
     
     return YES;
 }
