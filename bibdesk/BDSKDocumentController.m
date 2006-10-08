@@ -247,7 +247,7 @@
     NSError *error;
     
     // bail out if we can't write the temp file
-    if([data writeToFile:tmpFilePath options:0 error:&error] == NO) {
+    if([data writeToFile:tmpFilePath options:NSAtomicWrite error:&error] == NO) {
         if (outError) *outError = error;
         return nil;
     }
