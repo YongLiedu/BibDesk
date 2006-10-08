@@ -1358,16 +1358,24 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
 		if(string == nil){
-            error = [NSError errorWithDomain:OMNI_BUNDLE_IDENTIFIER @"NSCocoaErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"This document type could not be converted to a text format.", @""), NSLocalizedDescriptionKey, nil]];
-            // if we don't give *outError a valid pointer, the second time you drop an unparseable file on the dock icon will cause a crash
+            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This document does not appear to be a text file.", @""), nil);
             if(outError) *outError = error;
+            
+            // bypass the partial data warning, since we have no data
 			return NO;
         }
         int type = [string contentStringType];
         if(type == BDSKBibTeXStringType)
             success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
-		else
+		else if (type == BDSKUnknownStringType) {
+            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @""), nil);
+            if (outError) *outError = error;
+            
+            // bypass the partial data warning; we have no data in this case
+            return NO;
+        } else 
             success = [self loadDataRepresentation:data ofStringType:type fromURL:absoluteURL encoding:encoding error:&error];
+
 	}
     
     // @@ move this to NSDocumentController; need to figure out where to add it, though
@@ -1396,19 +1404,19 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (BOOL)loadDataRepresentation:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
+    
+    NSAssert(type == BDSKRISStringType || type == BDSKJSTORStringType || type == BDSKWOSStringType, @"Unknown data type");
+
+    NSError *error = nil;    
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
     NSMutableArray *newPubs = nil;
     
-    if(dataString == nil){
-        NSString *encStr = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
-        [NSException raise:BDSKStringEncodingException 
-                    format:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", 
-                                             @"need a single NSString format specifier"), encStr];
+    if(dataString == nil && outError){
+        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Interpret", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"need a single NSString format specifier"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        *outError = error;
+        return NO;
     }
     
-    OBASSERT(type == BDSKRISStringType || type == BDSKJSTORStringType || type == BDSKWOSStringType);
-    
-    NSError *error = nil;
 	newPubs = [BDSKParserForStringType(type) itemsFromString:dataString
                                                        error:&error
                                                  frontMatter:frontMatter
