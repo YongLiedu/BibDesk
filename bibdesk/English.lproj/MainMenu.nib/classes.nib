@@ -112,8 +112,6 @@
                 editPubCmd = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 emailPubCmd = id; 
-                exportAsAction = id; 
-                exportSelectionAsAction = id; 
                 find = id; 
                 generateCiteKey = id; 
                 importFromFileAction = id; 
