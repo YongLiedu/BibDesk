@@ -39,6 +39,35 @@
 			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
+			<key>NSExportableAs</key>
+			<array>
+				<string>Minimal BibTeX Database</string>
+				<string>RIS/Medline File</string>
+				<string>Amsrefs LTB</string>
+				<string>Atom XML</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>bib</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>bibDocIcon.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Minimal BibTeX Database</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>NSDocumentClass</key>
+			<string>BibDocument</string>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -63,6 +92,13 @@
 			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
+			<key>NSExportableAs</key>
+			<array>
+				<string>Minimal BibTeX Database</string>
+				<string>RIS/Medline File</string>
+				<string>Amsrefs LTB</string>
+				<string>Atom XML</string>
+			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -125,6 +161,38 @@
 				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
 				<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
 			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ltb</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Amsrefs LTB</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>atom</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/atom+xml</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Atom XML</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
