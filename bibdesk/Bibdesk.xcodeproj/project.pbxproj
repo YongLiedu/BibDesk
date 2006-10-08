@@ -1321,7 +1321,6 @@
 		F916E68F07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+ThreadSafety.m"; sourceTree = "<group>"; };
 		F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+ThreadSafety.h"; sourceTree = "<group>"; };
 		F916E6A507A9FB56009EF011 /* NSMutableArray+ThreadSafety.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+ThreadSafety.m"; sourceTree = "<group>"; };
-		F91A2D68089A7CF80009B1C1 /* Tiger-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tiger-Info.plist"; sourceTree = "<group>"; };
 		F91B5C510764135B0011ED22 /* About the Scripts Menu.scpt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.scpt; name = "About the Scripts Menu.scpt"; path = "Scripting/About the Scripts Menu.scpt"; sourceTree = SOURCE_ROOT; };
 		F91B5CC7076579830011ED22 /* previewtemplate.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = previewtemplate.tex; sourceTree = "<group>"; };
 		F91B5CDF076579FE0011ED22 /* rssTemplate.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = rssTemplate.txt; sourceTree = SOURCE_ROOT; };
@@ -1632,7 +1631,6 @@
 				F98F307A088E0F2800C1427D /* Subprojects */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				F91A2D68089A7CF80009B1C1 /* Tiger-Info.plist */,
 			);
 			name = BibDesk;
 			sourceTree = "<group>";
