@@ -55,21 +55,12 @@
 - (id)init
 {
     if(self = [super init]){
-        // @@ NSDocumentController autosave is 10.4 only
-		if([self respondsToSelector:@selector(setAutosavingDelay:)] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
 		    [self setAutosavingDelay:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutosaveTimeIntervalKey]];
-        // @@ do we need this?  it seems only to be used for app-modal panel...
-        isOpening = NO;
     }
     return self;
 }
 
-
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
-}
 
 - (void)awakeFromNib{
     [openUsingFilterAccessoryView retain];
@@ -104,75 +95,63 @@
     }
 }
 
-- (NSArray *)fileExtensionsFromType:(NSString *)aType {
-    NSArray *types = [super fileExtensionsFromType:aType];
-    if ([types count])
-        return types;
+- (NSArray *)allReadableTypesForOpenPanel {
+    NSMutableArray *types = [NSMutableArray array];
+    NSEnumerator *classNamesEnumerator = [[self documentClassNames] objectEnumerator];
+    NSString *className;
+    while (className = [classNamesEnumerator nextObject])
+        [types addObjectsFromArray:[NSClassFromString(className) readableTypes]];
     
-    // @@ hack for UTI compatibility with open panel
-    NSDictionary *dict = [(id)UTTypeCopyDeclaration((CFStringRef)aType) autorelease];
-    types = [[dict objectForKey:(id)kUTTypeTagSpecificationKey] objectForKey:(id)kUTTagClassFilenameExtension];
-    return types;    
-}
-
-- (NSArray *)readableFileExtensions {
-    NSMutableArray *extensions = [NSMutableArray array];
-    // @@ 10.3: iterate documentClassNames instead of BibDocument
-    NSEnumerator *typeE = [[BibDocument readableTypes] objectEnumerator];
+    NSMutableArray *openPanelTypes = [NSMutableArray array];
+    NSEnumerator *typeE = [types objectEnumerator];
     NSString *type;
-    while (type = [typeE nextObject]) {
-        [extensions addObjectsFromArray:[self fileExtensionsFromType:type]];
-    }
-    return extensions;
+    while (type = [typeE nextObject])
+        [openPanelTypes addObjectsFromArray:[self fileExtensionsFromType:type]];
+    
+    return [openPanelTypes count] ? openPanelTypes : types;
 }
 
-- (NSArray *)fileNamesFromRunningOpenPanelForTypes:(NSArray *)types encoding:(NSStringEncoding *)encoding{
+- (NSArray *)URLsFromRunningOpenPanelForTypes:(NSArray *)types encoding:(NSStringEncoding *)encoding{
     
     NSParameterAssert(encoding);
-	if (isOpening)
-        return nil;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
     [openTextEncodingPopupButton selectItemWithTitle:[BDSKStringEncodingManager defaultEncodingDisplayName]];
 		
-	isOpening = YES;
-    int result = [oPanel runModalForDirectory:nil file:nil types:types];
-	isOpening = NO;
+    int result = [self runModalOpenPanel:oPanel forTypes:types];
     if(result == NSOKButton){
         *encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
-        return [oPanel filenames];
+        return [oPanel URLs];
     }else 
         return nil;
 }
 
 - (void)openDocument:(id)sender{
-    // @@ should we use the types parameter?  default implementation doesn't seem to
+
     NSStringEncoding encoding;
-    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[self readableFileExtensions] encoding:&encoding] objectEnumerator];
-    NSString *fileName;
-    
-	while (fileName = [fileEnum nextObject]) {
-        [self openDocumentWithContentsOfFile:fileName encoding:encoding];
+    NSEnumerator *fileEnum = [[self URLsFromRunningOpenPanelForTypes:[self allReadableTypesForOpenPanel] encoding:&encoding] objectEnumerator];
+    NSURL *aURL;
+
+	while (aURL = [fileEnum nextObject]) {
+        if (nil == [self openDocumentWithContentsOfURL:aURL encoding:encoding])
+            break;
 	}
 }
 
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender{
     NSStringEncoding encoding;
-    NSEnumerator *fileEnum = [[self fileNamesFromRunningOpenPanelForTypes:[NSArray arrayWithObjects:@"bib", nil] encoding:&encoding] objectEnumerator];
-    NSString *fileName;
+    NSEnumerator *fileEnum = [[self URLsFromRunningOpenPanelForTypes:[NSArray arrayWithObject:@"bib"] encoding:&encoding] objectEnumerator];
+    NSURL *aURL;
     
-	while (fileName = [fileEnum nextObject]) {
-        [self openDocumentFromFileUsingPhonyCiteKeys:fileName encoding:encoding];
+	while (aURL = [fileEnum nextObject]) {
+        [self openDocumentWithContentsOfURLUsingPhonyCiteKeys:aURL encoding:encoding];
 	}
 }
 
 - (IBAction)openDocumentUsingFilter:(id)sender
 {
-    if (isOpening) 
-        return;
-    
     int result;
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -195,18 +174,16 @@
         [openUsingFilterComboBox selectItemAtIndex:0];
         [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
     }
-    isOpening = YES;
-    result = [oPanel runModalForDirectory:nil file:nil types:nil];
-    isOpening = NO;
+    result = [self runModalOpenPanel:oPanel forTypes:nil];
     
     if (result == NSOKButton) {
         NSString *shellCommand = [openUsingFilterComboBox stringValue];
         NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
-        NSEnumerator *fileEnum = [[oPanel filenames] objectEnumerator];
-        NSString *fileName;
+        NSEnumerator *fileEnum = [[oPanel URLs] objectEnumerator];
+        NSURL *aURL;
         
-        while (fileName = [fileEnum nextObject]) {
-            [self openDocumentFromFile:fileName usingFilter:shellCommand encoding:encoding];
+        while (aURL = [fileEnum nextObject]) {
+            [self openDocumentWithContentsOfURL:aURL usingFilter:shellCommand encoding:encoding];
         }
         
         unsigned commandIndex = [commandHistory indexOfObject:shellCommand];
@@ -217,27 +194,43 @@
     }
 }
 
-- (id)openDocumentWithContentsOfFile:(NSString*)fileName encoding:(NSStringEncoding)encoding{
+- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding{
     NSParameterAssert(encoding != 0);
 	// first see if we already have this document open
-    BibDocument *doc = [self documentForFileName:fileName];
+    id doc = [self documentForURL:fileURL];
     
     if(doc == nil){
-        NSString *docType = [self typeFromFileExtension:[fileName pathExtension]];
         BOOL success;
         // make a fresh document, and don't display it until we can set its name.
-        doc = [self openUntitledDocumentOfType:docType display:NO];
-        [doc setFileName:fileName]; // this effectively makes it not an untitled document anymore.
-        [doc setFileType:docType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-        success = [doc readFromURL:[NSURL fileURLWithPath:fileName] ofType:docType encoding:encoding error:NULL];
+        
+        NSError *error;
+        doc = [self openUntitledDocumentAndDisplay:NO error:&error];
+        
+        if (nil == doc) {
+            [self presentError:error];
+            return nil;
+        }
+        
+        NSString *type = [self typeForContentsOfURL:fileURL error:&error];
+        
+        if (nil == type) {
+            [self presentError:error];
+            return nil;
+        }
+
+        [doc setFileURL:fileURL]; // this effectively makes it not an untitled document anymore.
+        [doc setFileType:type];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+        success = [doc readFromURL:fileURL ofType:type encoding:encoding error:&error];
         if (success == NO) {
             [self removeDocument:doc];
-            doc = nil;
-#warning presentError: here?
+            [self presentError:error];
+            return nil;
         }
     }
     
+    [doc makeWindowControllers];
     [doc showWindows];
+    
     // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
     if([doc respondsToSelector:@selector(updateAllSmartGroups)])
         [doc performSelector:@selector(updateAllSmartGroups)];
@@ -251,11 +244,16 @@
     // or move aside the original file
     NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
     NSData *data = [fileString dataUsingEncoding:encoding];
-    if([data writeToFile:tmpFilePath atomically:YES] == NO)
-        NSLog(@"Unable to write data to file %@; continuing anyway.", tmpFilePath);
+    NSError *error;
+    
+    // bail out if we can't write the temp file
+    if([data writeToFile:tmpFilePath options:0 error:&error] == NO) {
+        if (outError) *outError = error;
+        return nil;
+    }
     
     // make a fresh document, and don't display it until we can set its name.
-    BibDocument *doc = [self openUntitledDocumentOfType:BDSKBibTeXDocumentType display:NO];
+    BibDocument *doc = [self openUntitledDocumentAndDisplay:NO error:outError];    
     [doc setFileName:tmpFilePath]; // required for error handling; mark it dirty, so it's obviously modified
     [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     BOOL success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:outError];
@@ -269,6 +267,7 @@
         NSCalendarDate *importDate = [NSCalendarDate date];
         [[doc publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
         [[doc undoManager] removeAllActions];
+        [doc makeWindowControllers];
         [doc showWindows];
         // mark as dirty, since we've changed the content
         [doc updateChangeCount:NSChangeDone];
@@ -280,9 +279,9 @@
     return doc;
 }
 
-- (id)openDocumentFromFileUsingPhonyCiteKeys:(NSString *)fileName encoding:(NSStringEncoding)encoding{
-	NSData *data = [NSData dataWithContentsOfFile:fileName];
-    NSString *stringFromFile = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
+- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding;
+{
+    NSString *stringFromFile = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:NULL];
 
     // ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get
     // from Bookends and EndNote, respectively.
@@ -322,25 +321,24 @@
                         
     } while(scannerHasData(scanner));
     
-	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:mutableFileString encoding:encoding error:NULL];
+    NSError *error;
+	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:mutableFileString encoding:encoding error:&error];
+    if (nil == doc)
+        [self presentError:error];
     
     [doc reportTemporaryCiteKeys:@"FixMe"];
     
     return doc;
 }
 
-- (id)openDocumentFromFile:(NSString *)fileName usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding{
-    NSData *fileInputData = [[NSData alloc] initWithContentsOfFile:fileName];
-    NSString *fileInputString = [[NSString alloc] initWithData:fileInputData encoding:encoding];
+- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
+{
+    NSError *error;
+    NSString *fileInputString = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:NULL];
     BibDocument *doc = nil;
-    
-    [fileInputData release];
-    
-    if ([NSString isEmptyString:fileInputString]){
-        NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter",@""),
-                        NSLocalizedString(@"The file could not be read correctly. Please try again, possibly using a different character encoding such as UTF-8.",@""),
-                        NSLocalizedString(@"OK",@""),
-                        nil, nil, nil, nil);
+        
+    if (nil == fileInputString){
+        [self presentError:error];
     } else {
         NSString *filterOutput = [[BDSKShellTask shellTask] runShellCommand:shellCommand
                                                             withInputString:fileInputString];
@@ -351,11 +349,11 @@
                             NSLocalizedString(@"OK",@""),
                             nil, nil, nil, nil);
         } else {
-            doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:NULL];
+            doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:&error];
+            if (nil == doc)
+                [self presentError:error];
         }
-    }
-    [fileInputString release];
-    
+    }    
     return doc;
 }
 
