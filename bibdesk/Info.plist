@@ -706,8 +706,6 @@
 					<true/>
 					<key>BibEditor window autosave name</key>
 					<string></string>
-					<key>BlueComponentColor of alternating rows Key</key>
-					<string>1.010918794815856e-310</string>
 					<key>Check for updates when starting</key>
 					<true/>
 					<key>Check spelling continuously while editing</key>
@@ -755,8 +753,6 @@
 					<dict/>
 					<key>Default Bib File</key>
 					<string></string>
-					<key>GreenComponentColor of alternating rows Key</key>
-					<string>1.093888830242598e-310</string>
 					<key>Last Open FileNames</key>
 					<array/>
 					<key>Last field for find and replace</key>
@@ -774,8 +770,6 @@
 						<string>Keywords</string>
 						<string>Pub Type</string>
 					</array>
-					<key>RedComponentColor of alternating rows Key</key>
-					<string>1.156487706076073e-310</string>
 					<key>Saved size of BibEditor document snoop drawer</key>
 					<string></string>
 					<key>Show Editor Status Bar</key>

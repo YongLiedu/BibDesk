@@ -134,7 +134,6 @@ extern NSString *BDSKRSSDescriptionFieldKey;
 extern NSString *BDSKExportTemplateStyleKey;
 
 extern NSString *BDSKColumnWidthsKey;
-extern NSString *BDSKColumnOrderKey;
 extern NSString *BDSKDefaultSortedTableColumnKey;
 extern NSString *BDSKDefaultSortedTableColumnIsDescendingKey;
 extern NSString *BDSKSortGroupsKey;
@@ -149,10 +148,6 @@ extern NSString *BDSKWarnOnRemovalFromGroupKey;
 extern NSString *BDSKCurrentQuickSearchKey;
 extern NSString *BDSKCurrentQuickSearchTextDictKey;
 extern NSString *BDSKQuickSearchKeys;
-
-extern NSString *BDSKRowColorRedKey;
-extern NSString *BDSKRowColorGreenKey;
-extern NSString *BDSKRowColorBlueKey;
 
 extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;
@@ -170,13 +165,7 @@ extern NSString *BDSKBibStyleMacroDefinitionsKey;
 extern NSString *BDSKGlobalMacroDefinitionsKey;
 extern NSString *BDSKGlobalMacroFilesKey;
 
-extern NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey;
-extern NSString *BDSKFindControllerSearchScopeKey;
-extern NSString *BDSKFindControllerCaseInsensitiveFindAndReplaceKey;
-extern NSString *BDSKFindControllerFindAndReplaceSelectedItemsKey;
 extern NSString *BDSKFindControllerLastFindAndReplaceFieldKey;
-extern NSString *BDSKFindControllerFindAsMacroKey;
-extern NSString *BDSKFindControllerReplaceAsMacroKey;
 extern NSString *BDSKPreviewBaseFontSizeKey;
 extern NSString *BDSKShouldAutosaveDocumentKey;
 extern NSString *BDSKAutosaveTimeIntervalKey;

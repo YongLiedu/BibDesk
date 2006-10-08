@@ -110,7 +110,6 @@ NSString *BDSKCiteKeyCleanOptionKey = @"Cite Key Clean Braces or TeX";
 
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
-NSString *BDSKColumnOrderKey = @"Column Names in Order";
 NSString *BDSKDefaultSortedTableColumnKey = @"Default table column to sort new documents";
 NSString *BDSKDefaultSortedTableColumnIsDescendingKey = @"Default table column sort order";
 NSString *BDSKSortGroupsKey = @"BDSKSortGroupsKey";
@@ -162,9 +161,6 @@ NSString *BDSKWarnOnRemovalFromGroupKey = @"BDSKWarnOnRemovalFromGroupKey";
 NSString *BDSKCurrentQuickSearchKey = @"Current Quick Search Key";
 NSString *BDSKCurrentQuickSearchTextDictKey = @"Current Quick Search Text Dictionary";
 NSString *BDSKQuickSearchKeys = @"Quick Search Keys";
-NSString *BDSKRowColorRedKey = @"RedComponentColor of alternating rows Key";
-NSString *BDSKRowColorGreenKey = @"GreenComponentColor of alternating rows Key";
-NSString *BDSKRowColorBlueKey = @"BlueComponentColor of alternating rows Key";
 
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";
@@ -188,13 +184,8 @@ NSString *BDSKBibStyleMacroDefinitionsKey = @"Macro definitions from bib style f
 NSString *BDSKGlobalMacroDefinitionsKey = @"BDSKGlobalMacroDefinitionsKey";
 NSString *BDSKGlobalMacroFilesKey = @"BDSKGlobalMacroFilesKey";
 
-NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey = @"Default field for find and replace";
-NSString *BDSKFindControllerSearchScopeKey = @"Search scope for find and replace";
-NSString *BDSKFindControllerCaseInsensitiveFindAndReplaceKey = @"Use case sensitive search for find and replace";
-NSString *BDSKFindControllerFindAndReplaceSelectedItemsKey = @"Search only selected items for find and replace";
 NSString *BDSKFindControllerLastFindAndReplaceFieldKey = @"Last field for find and replace";
-NSString *BDSKFindControllerFindAsMacroKey = @"Find text as macro for replacement";
-NSString *BDSKFindControllerReplaceAsMacroKey = @"Replace found text as macro";
+
 NSString *BDSKPreviewBaseFontSizeKey = @"Font size for preview pane in document view";
 NSString *BDSKShouldAutosaveDocumentKey = @"BDSKShouldAutosaveDocumentKey";
 NSString *BDSKAutosaveTimeIntervalKey = @"BDSKAutosaveTimeIntervalKey";
