@@ -1347,9 +1347,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)aType encoding:(NSStringEncoding)encoding error:(NSError **)outError
 {
     BOOL success;
-    NSData *data = [NSData dataWithContentsOfURL:absoluteURL];
-    
     NSError *error = nil;
+    NSData *data = [NSData dataWithContentsOfURL:absoluteURL options:NSUncachedRead error:&error];
+    if (nil == data) {
+        if (outError) *outError = error;
+        return NO;
+    }
+    
 	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
     }else if([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
