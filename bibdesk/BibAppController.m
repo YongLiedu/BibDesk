@@ -73,6 +73,7 @@
 #import "BDSKReadMeController.h"
 #import "BDSKOrphanedFilesFinder.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKDocumentController.h"
 
 @implementation BibAppController
 
