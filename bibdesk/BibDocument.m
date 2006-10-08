@@ -1300,37 +1300,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark Opening and Loading Files
 
-- (BOOL)revertToSavedFromFile:(NSString *)fileName ofType:(NSString *)type{
+- (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
+{
 	// first remove all editor windows, as they will be invalid afterwards
     unsigned int index = [[self windowControllers] count];
     while(--index)
         [[[self windowControllers] objectAtIndex:index] close];
     
-    // invalidate static groups so they will be reloaded
-    [staticGroups release];
-    staticGroups = nil;
-    
-    if([super revertToSavedFromFile:fileName ofType:type]){
+    if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
+        [staticGroups release];
+        staticGroups = nil;
 		[tableView deselectAll:self]; // clear before resorting
-		[self searchFieldAction:searchField]; // redo the search
-        [self sortPubsByColumn:nil]; // resort
-		return YES;
-	}
-	return NO;
-}
-
-- (BOOL)revertToSavedFromURL:(NSURL *)aURL ofType:(NSString *)type{
-	// first remove all editor windows, as they will be invalid afterwards
-	unsigned int index = [[self windowControllers] count];
-    while(--index)
-        [[[self windowControllers] objectAtIndex:index] close];
-    
-    // invalidate static groups so they will be reloaded
-    [staticGroups release];
-    staticGroups = nil;
-    
-	if([super revertToSavedFromURL:aURL ofType:type]){
-        [tableView deselectAll:self]; // clear before resorting
 		[self searchFieldAction:searchField]; // redo the search
         [self sortPubsByColumn:nil]; // resort
 		return YES;
@@ -1355,9 +1335,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     }
     
 	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
-        success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
+        success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
     }else if([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
-		success = [self loadDataRepresentation:data ofStringType:BDSKRISStringType fromURL:absoluteURL encoding:encoding error:&error];
+		success = [self readFromData:data ofStringType:BDSKRISStringType fromURL:absoluteURL encoding:encoding error:&error];
     }else{
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
@@ -1370,7 +1350,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         }
         int type = [string contentStringType];
         if(type == BDSKBibTeXStringType)
-            success = [self loadBibTeXDataRepresentation:data fromURL:absoluteURL encoding:encoding error:&error];
+            success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		else if (type == BDSKUnknownStringType) {
             OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @""), nil);
             if (outError) *outError = error;
@@ -1378,7 +1358,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             // bypass the partial data warning; we have no data in this case
             return NO;
         } else 
-            success = [self loadDataRepresentation:data ofStringType:type fromURL:absoluteURL encoding:encoding error:&error];
+            success = [self readFromData:data ofStringType:type fromURL:absoluteURL encoding:encoding error:&error];
 
 	}
     
@@ -1407,7 +1387,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return success;        
 }
 
-- (BOOL)loadDataRepresentation:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
+- (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
+    NSMutableArray *newPubs;
+
+    [self setDocumentStringEncoding:encoding];
+
+    NSError *error = nil;
+	newPubs = [BibTeXParser itemsFromData:data error:&error frontMatter:frontMatter filePath:[absoluteURL path] document:self];
+	if(outError) *outError = error;	
+    [self setPublications:newPubs undoable:NO];
+
+    return error == nil;
+}
+
+- (BOOL)readFromData:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     
     NSAssert(type == BDSKRISStringType || type == BDSKJSTORStringType || type == BDSKWOSStringType, @"Unknown data type");
 
@@ -1443,19 +1436,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSStringEncoding)documentStringEncoding{
     return documentStringEncoding;
-}
-
-- (BOOL)loadBibTeXDataRepresentation:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
-    NSMutableArray *newPubs;
-
-    [self setDocumentStringEncoding:encoding];
-
-    NSError *error = nil;
-	newPubs = [BibTeXParser itemsFromData:data error:&error frontMatter:frontMatter filePath:[absoluteURL path] document:self];
-	if(outError) *outError = error;	
-    [self setPublications:newPubs undoable:NO];
-
-    return error == nil;
 }
 
 #pragma mark -
