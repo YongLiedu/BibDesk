@@ -827,6 +827,8 @@
 					<string>0</string>
 					<key>NSToolbar Configuration OAPreferences</key>
 					<string></string>
+					<key>Open using filter command history</key>
+					<array/>
 					<key>Preview PDF Scale Factor</key>
 					<real>1</real>
 					<key>Preview RTF Scale Factor</key>
