@@ -43,6 +43,7 @@
 enum {
 	BDSKUnknownStringType = -1, 
 	BDSKBibTeXStringType, 
+	BDSKNoKeyBibTeXStringType, 
 	BDSKRISStringType, 
 	BDSKJSTORStringType, 
 	BDSKWOSStringType
@@ -222,6 +223,14 @@ An inline buffer is used for speed in accessing each character.
 - (BOOL)isBibTeXString;
 
 /*!
+    @method     isNoKeyBibTeXString
+    @abstract   Tries to determine if a string is BibTex but without a citekey, based on the openWithPhoneyKeys regex
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isNoKeyBibTeXString;
+
+/*!
     @method     isJSTORString
     @abstract   Tries to determine if a string is JSTOR or not, based on the first line
     @discussion (comprehensive description)
@@ -247,6 +256,14 @@ An inline buffer is used for speed in accessing each character.
 @result     (description)
 */
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
+
+/*!
+@method     stringWithPhoneyCiteKeys
+@abstract   Adds temporary cite keys to the string, which should be a BibTeX string without citekeys.  uses code from openWithPhoneyKeys
+@discussion (comprehensive description)
+@result     Returns an altered NSString
+*/
+- (NSString *)stringWithPhoneyCiteKeys;
 
 /*!
 @method     stringByAddingRISEndTagsToPubMedString

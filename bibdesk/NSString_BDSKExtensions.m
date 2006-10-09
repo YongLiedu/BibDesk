@@ -332,6 +332,18 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return found;
 }
 
+- (BOOL)isNoKeyBibTeXString{
+	// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get from Bookends and EndNote, respectively.
+	AGRegex *theRegex = [[AGRegex alloc]  initWithPattern:@"^@[[:alpha:]]+{,?$" options:AGRegexMultiline];
+    
+    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
+    NSString *normalizedString = [self stringByNormalizingSpacesAndLineBreaks];
+    BOOL found = ([theRegex findInString:normalizedString] != nil);
+    [theRegex release];
+				
+    return found;
+}
+
 - (BOOL)isWebOfScienceString{
     // remove leading newlines in case this originates from copy/paste
     return [[self stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] hasPrefix:@"FN ISI Export Format"];
@@ -340,6 +352,8 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 - (int)contentStringType{
 	if([self isBibTeXString])
 		return BDSKBibTeXStringType;
+	if([self isNoKeyBibTeXString])
+		return BDSKNoKeyBibTeXStringType;
 	if([self isRISString])
 		return BDSKRISStringType;
 	if([self isJSTORString])
@@ -347,6 +361,53 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 	if([self isWebOfScienceString])
 		return BDSKWOSStringType;
 	return BDSKUnknownStringType;
+}
+
+// transforms a bibtex string to have temp cite keys, using the method in openWithPhoneyKeys.
+- (NSString *)stringWithPhoneyCiteKeys{
+		// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get
+		// from Bookends and EndNote, respectively.
+		AGRegex *theRegex = [AGRegex regexWithPattern:@"^(@[[:alpha:]]+[ \t]*{)[ \t]*,?$" options:AGRegexCaseInsensitive];
+
+		// should assert that the noKeysString matches theRegex
+		//NSAssert([theRegex findInString:self] != nil, @"stringWithPhoneyCiteKeys called on non-matching string");
+
+		// replace with "@type{FixMe,eol" (add the comma in, since we remove it if present)
+		NSCharacterSet *newlineCharacterSet = [NSCharacterSet newlineCharacterSet];
+		
+		// do not use NSCharacterSets with OFStringScanners!
+		OFCharacterSet *newlineOFCharset = [[[OFCharacterSet alloc] initWithCharacterSet:newlineCharacterSet] autorelease];
+		
+		OFStringScanner *scanner = [[[OFStringScanner alloc] initWithString:self] autorelease];
+		NSMutableString *mutableFileString = [NSMutableString stringWithCapacity:[self length]];
+		NSString *tmp = nil;
+		int scanLocation = 0;
+		
+		// we scan up to an (newline@) sequence, then to a newline; we then replace only in that line using theRegex, which is much more efficient than using AGRegex to find/replace in the entire string
+		do {
+			// append the previous part to the mutable string
+			tmp = [scanner readFullTokenWithDelimiterCharacter:'@'];
+			if(tmp) [mutableFileString appendString:tmp];
+			
+			scanLocation = scannerScanLocation(scanner);
+			if(scanLocation == 0 || [newlineCharacterSet characterIsMember:[self characterAtIndex:scanLocation - 1]]){
+				
+				tmp = [scanner readFullTokenWithDelimiterOFCharacterSet:newlineOFCharset];
+				
+				// if we read something between the @ and newline, see if we can do the regex find/replace
+				if(tmp){
+					// this should be a noop if the pattern isn't matched
+					tmp = [theRegex replaceWithString:@"$1FixMe," inString:tmp];
+					[mutableFileString appendString:tmp]; // guaranteed non-nil result from AGRegex
+				}
+			} else
+				scannerReadCharacter(scanner);
+                        
+		} while(scannerHasData(scanner));
+		
+		NSString *toReturn = [NSString stringWithString:mutableFileString];
+		
+		return toReturn;
 }
 
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;

@@ -1265,16 +1265,23 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			return NO;
         }
         int type = [string contentStringType];
-        if(type == BDSKBibTeXStringType)
+        if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
-		else if (type == BDSKUnknownStringType) {
+		}else if (type == BDSKNoKeyBibTeXStringType){
+            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"The BibTeX in this file is invalid because of missing cite keys. Try to open using temporary cite keys to fix this.", @""), nil);
+            if (outError) *outError = error;
+            
+            // bypass the partial data warning; we have no data in this case
+            return NO;
+		}else if (type == BDSKUnknownStringType){
             OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @""), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
             return NO;
-        } else 
+        }else{
             success = [self readFromData:data ofStringType:type fromURL:absoluteURL encoding:encoding error:&error];
+        }
 
 	}
     
@@ -2100,14 +2107,19 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)outError {
     NSArray *newPubs = nil;
-    NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = nil;
     NSError *parseError = nil;
     
-    if(type == BDSKBibTeXStringType)
+    if(type == BDSKBibTeXStringType){
+        data = [string dataUsingEncoding:NSUTF8StringEncoding];
         newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
-	else if (type != BDSKUnknownStringType)
+    }else if(type == BDSKNoKeyBibTeXStringType){
+        data = [[string stringWithPhoneyCiteKeys] dataUsingEncoding:NSUTF8StringEncoding];
+        newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
+	}else if (type != BDSKUnknownStringType){
         newPubs = [BDSKParserForStringType(type) itemsFromString:string error:&parseError];
-
+    }
+    
     // The parser methods may return a non-empty array (partial data) if they failed; we check for parseError != nil as an error condition, then, although that's generally not correct
 	if(parseError != nil) {
 
