@@ -805,29 +805,29 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             }
         }
     }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
-        // @@ should we save as RSS if that was set in the prefs?
         [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
                                                      forPublications:publications
                                                             document:self];
+        
+        // rebuild metadata cache for this document whenever we save
+        NSEnumerator *pubsE = [[self publications] objectEnumerator];
+        NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
+        BibItem *anItem;
+        NSDictionary *info;
+        BOOL update = (saveOperation == NSSaveOperation); // for saveTo we should update all items, as our path changes
+        
+        while(anItem = [pubsE nextObject]){
+            OMNI_POOL_START {
+                if(info = [anItem metadataCacheInfoForUpdate:update])
+                    [pubsInfo addObject:info];
+            } OMNI_POOL_END;
+        }
+        
+        NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
+        [pubsInfo release];
+        [[NSApp delegate] rebuildMetadataCache:infoDict];
+        [infoDict release];
     }
-    
-    // rebuild metadata cache for this document whenever we save
-    NSEnumerator *pubsE = [[self publications] objectEnumerator];
-    NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
-    BibItem *anItem;
-    NSDictionary *info;
-    while(anItem = [pubsE nextObject]){
-        OMNI_POOL_START {
-            info = [anItem metadataCacheInfo];
-            if (info != nil)
-                [pubsInfo addObject:info];
-        } OMNI_POOL_END;
-    }
-    
-    NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:pubsInfo, @"publications", absoluteURL, @"fileURL", nil];
-    [pubsInfo release];
-    [[NSApp delegate] rebuildMetadataCache:infoDict];
-    [infoDict release];
     
     return YES;
 }
@@ -837,7 +837,8 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
   forSaveOperation:(NSSaveOperationType)saveOperation 
 originalContentsURL:(NSURL *)absoluteOriginalContentsURL 
              error:(NSError **)outError {
-    // Override so we can determine if this is an autosave in writeToURL:ofType:error:, since saveToFile... will never be called with NSAutosaveOperation for backwards compatibility.  This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
+    // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
+    // This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
     currentSaveOperationType = saveOperation;
     return [super writeToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteOriginalContentsURL error:outError];
 }

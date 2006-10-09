@@ -650,7 +650,7 @@ enum {
 - (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 
 - (NSDictionary *)searchIndexInfo;
-- (NSDictionary *)metadataCacheInfo;
+- (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;
 
 /*!
     @method bibTeXString

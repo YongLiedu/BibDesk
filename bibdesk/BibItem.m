@@ -1383,9 +1383,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return info;
 }
 
-- (NSDictionary *)metadataCacheInfo{
+- (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update{
     
-    if (NO == spotlightMetadataChanged)
+    // if we're updating, we only return if something changed
+    if (update && NO == spotlightMetadataChanged)
         return nil;
     
     // signify that this item is now current
