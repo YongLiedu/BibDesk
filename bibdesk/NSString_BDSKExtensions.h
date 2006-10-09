@@ -258,12 +258,13 @@ An inline buffer is used for speed in accessing each character.
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
 
 /*!
-@method     stringWithPhoneyCiteKeys
+@method     stringWithPhoneyCiteKeys:
 @abstract   Adds temporary cite keys to the string, which should be a BibTeX string without citekeys.  uses code from openWithPhoneyKeys
 @discussion (comprehensive description)
+@param      tmpKey (description)
 @result     Returns an altered NSString
 */
-- (NSString *)stringWithPhoneyCiteKeys;
+- (NSString *)stringWithPhoneyCiteKeys:(NSString *)tmpKey;
 
 /*!
 @method     stringByAddingRISEndTagsToPubMedString

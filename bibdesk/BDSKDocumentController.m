@@ -50,6 +50,7 @@
 #import "BDSKAlert.h"
 #import "BibItem.h"
 #import "BDSKTemplate.h"
+#import "NSString_BDSKExtensions.h"
 
 @implementation BDSKDocumentController
 
@@ -283,47 +284,10 @@
 - (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding;
 {
     NSString *stringFromFile = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:NULL];
-
-    // ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get
-    // from Bookends and EndNote, respectively.
-    AGRegex *theRegex = [AGRegex regexWithPattern:@"^(@[[:alpha:]]+[ \t]*{)[ \t]*,?$" options:AGRegexCaseInsensitive];
-
-    // replace with "@type{FixMe,eol" (add the comma in, since we remove it if present)
-    NSCharacterSet *newlineCharacterSet = [NSCharacterSet newlineCharacterSet];
-    
-    // do not use NSCharacterSets with OFStringScanners!
-    OFCharacterSet *newlineOFCharset = [[[OFCharacterSet alloc] initWithCharacterSet:newlineCharacterSet] autorelease];
-    
-    OFStringScanner *scanner = [[[OFStringScanner alloc] initWithString:stringFromFile] autorelease];
-    NSMutableString *mutableFileString = [NSMutableString stringWithCapacity:[stringFromFile length]];
-    NSString *tmp = nil;
-    int scanLocation = 0;
-    
-    // we scan up to an (newline@) sequence, then to a newline; we then replace only in that line using theRegex, which is much more efficient than using AGRegex to find/replace in the entire string
-    do {
-        
-        // append the previous part to the mutable string
-        tmp = [scanner readFullTokenWithDelimiterCharacter:'@'];
-        if(tmp) [mutableFileString appendString:tmp];
-        
-        scanLocation = scannerScanLocation(scanner);
-        if(scanLocation == 0 || [newlineCharacterSet characterIsMember:[stringFromFile characterAtIndex:scanLocation - 1]]){
-            
-            tmp = [scanner readFullTokenWithDelimiterOFCharacterSet:newlineOFCharset];
-            
-            // if we read something between the @ and newline, see if we can do the regex find/replace
-            if(tmp){
-                // this should be a noop if the pattern isn't matched
-                tmp = [theRegex replaceWithString:@"$1FixMe," inString:tmp];
-                [mutableFileString appendString:tmp]; // guaranteed non-nil result from AGRegex
-            }
-        } else
-            scannerReadCharacter(scanner);
-                        
-    } while(scannerHasData(scanner));
+    stringFromFile = [stringFromFile stringWithPhoneyCiteKeys:@"FixMe"];
     
     NSError *error;
-	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:mutableFileString encoding:encoding error:&error];
+	BibDocument *doc = [self openUntitledBibTeXDocumentWithString:stringFromFile encoding:encoding error:&error];
     if (nil == doc)
         [self presentError:error];
     

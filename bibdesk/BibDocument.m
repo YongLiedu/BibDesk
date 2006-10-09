@@ -2114,7 +2114,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         data = [string dataUsingEncoding:NSUTF8StringEncoding];
         newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
     }else if(type == BDSKNoKeyBibTeXStringType){
-        data = [[string stringWithPhoneyCiteKeys] dataUsingEncoding:NSUTF8StringEncoding];
+        data = [[string stringWithPhoneyCiteKeys:@"FixMe"] dataUsingEncoding:NSUTF8StringEncoding];
         newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
 	}else if (type != BDSKUnknownStringType){
         newPubs = [BDSKParserForStringType(type) itemsFromString:string error:&parseError];

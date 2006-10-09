@@ -364,7 +364,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 // transforms a bibtex string to have temp cite keys, using the method in openWithPhoneyKeys.
-- (NSString *)stringWithPhoneyCiteKeys{
+- (NSString *)stringWithPhoneyCiteKeys:(NSString *)tmpKey{
 		// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get
 		// from Bookends and EndNote, respectively.
 		AGRegex *theRegex = [AGRegex regexWithPattern:@"^(@[[:alpha:]]+[ \t]*{)[ \t]*,?$" options:AGRegexCaseInsensitive];
@@ -382,6 +382,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 		NSMutableString *mutableFileString = [NSMutableString stringWithCapacity:[self length]];
 		NSString *tmp = nil;
 		int scanLocation = 0;
+        NSString *replaceRegex = [NSString stringWithFormat:@"$1%@,", tmpKey];
 		
 		// we scan up to an (newline@) sequence, then to a newline; we then replace only in that line using theRegex, which is much more efficient than using AGRegex to find/replace in the entire string
 		do {
@@ -397,7 +398,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 				// if we read something between the @ and newline, see if we can do the regex find/replace
 				if(tmp){
 					// this should be a noop if the pattern isn't matched
-					tmp = [theRegex replaceWithString:@"$1FixMe," inString:tmp];
+					tmp = [theRegex replaceWithString:replaceRegex inString:tmp];
 					[mutableFileString appendString:tmp]; // guaranteed non-nil result from AGRegex
 				}
 			} else
