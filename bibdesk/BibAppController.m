@@ -351,20 +351,22 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
             [[NSDocumentController sharedDocumentController] modalOpenDocument];   
             return NO;
         case 3:
-            [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:
-                [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultBibFilePathKey] display:YES];
+            do{
+                NSURL *fileURL = [NSURL fileURLWithPath:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultBibFilePathKey]];
+                [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
+            }while(0);
             return NO;
         case 4:
             do{
                 NSArray *files = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastOpenFileNamesKey];
                 NSEnumerator *fileEnum = [files objectEnumerator];
                 NSDictionary *dict;
-                NSString *file;
+                NSURL *fileURL;
                 while (dict = [fileEnum nextObject]){ 
-                    file = [[BDAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fullPath];
-                    if(file == nil)
-                        file = [dict objectForKey:@"fileName"];
-                    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:file display:YES];
+                    fileURL = [[BDAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fileURL];
+                    if(fileURL == nil)
+                        fileURL = [NSURL fileURLWithPath:[dict objectForKey:@"fileName"]];
+                    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL display:YES error:NULL];
                 }
             }while(0);
             return NO;
