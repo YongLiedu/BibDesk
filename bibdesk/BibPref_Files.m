@@ -52,10 +52,6 @@
     encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
     [encodingPopUp removeAllItems];
     [encodingPopUp addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
-    
-    [autosaveDocumentButton setEnabled:NO];
-    [autosaveTimeField setEnabled:NO];
-    [autosaveTimeStepper setEnabled:NO];
 }
 
 - (void)dealloc{
