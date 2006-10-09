@@ -771,7 +771,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 // this is a private method, the action of the file format poup
 - (void)changeSaveType:(id)sender{
-    NSSet *typesWithEncoding = [NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, BDSKAtomDocumentType, nil];
+    NSSet *typesWithEncoding = [NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, nil];
     NSString *selectedType = [[sender selectedItem] representedObject];
     [saveTextEncodingPopupButton setEnabled:[typesWithEncoding containsObject:selectedType]];
     if ([[self superclass] instancesRespondToSelector:@selector(changeSaveType:)])
