@@ -73,7 +73,6 @@
 #import "BDSKReadMeController.h"
 #import "BDSKOrphanedFilesFinder.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "BDSKDocumentController.h"
 
 @implementation BibAppController
 
@@ -348,7 +347,15 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         case 1:
             return NO;
         case 2:
-            [[NSDocumentController sharedDocumentController] modalOpenDocument];   
+            do{
+                // this will be called each time the dock icon is clicked, but we only want to show the open dialog once
+                static BOOL isOpening = NO;
+                if(NO == isOpening){
+                    isOpening = YES;
+                    [[NSDocumentController sharedDocumentController] openDocument:nil];
+                    isOpening = NO;
+                }
+            }while(0);
             return NO;
         case 3:
             do{

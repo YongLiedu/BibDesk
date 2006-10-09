@@ -46,13 +46,6 @@
 }
 
 /*!
-    @method     modalOpenDocument
-    @abstract   Presents an open dialog, of which there can be only one on-screen per application.  Used on startup.
-    @discussion (comprehensive description)
-*/
-- (void)modalOpenDocument;
-
-/*!
     @method openDocumentUsingFilter:
     @abstract Lets user specify a command-line to read from stdin and give us stdout.
     @discussion «discussion»
