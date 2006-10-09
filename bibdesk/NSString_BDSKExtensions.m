@@ -352,14 +352,14 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 - (int)contentStringType{
 	if([self isBibTeXString])
 		return BDSKBibTeXStringType;
-	if([self isNoKeyBibTeXString])
-		return BDSKNoKeyBibTeXStringType;
 	if([self isRISString])
 		return BDSKRISStringType;
 	if([self isJSTORString])
 		return BDSKJSTORStringType;
 	if([self isWebOfScienceString])
 		return BDSKWOSStringType;
+	if([self isNoKeyBibTeXString])
+		return BDSKNoKeyBibTeXStringType;
 	return BDSKUnknownStringType;
 }
 
