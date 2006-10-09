@@ -934,24 +934,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSData *data = nil;
     NSError *error = nil;
     NSStringEncoding encoding = [self documentStringEncoding];
+    NSParameterAssert(encoding != 0);
+    
     if(NSSaveToOperation == currentSaveOperationType)
         encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
         
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
-        if(encoding == 0)
-            [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
             [self performSortForCrossrefs];
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO error:&error];
     }else if ([aType isEqualToString:BDSKRISDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"ris"]]){
         data = [self RISDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKMinimalBibTeXDocumentType]){
-        if(encoding == 0)
-            [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES error:&error];
     }else if ([aType isEqualToString:BDSKLTBDocumentType]){
-        if(encoding == 0)
-            [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
         data = [self LTBDataForPublications:items encoding:encoding error:&error];
     }else if ([aType isEqualToString:BDSKAtomDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"atom"]]){
         data = [self atomDataForPublications:items];
@@ -1039,14 +1035,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop error:(NSError **)outError{
+    NSParameterAssert(encoding != 0);
+
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
     NSMutableData *outputData = [NSMutableData dataWithCapacity:4096];
     NSError *error = nil;
-    
-    if(encoding == 0)
-        [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
-    
+        
     BOOL shouldAppendFrontMatter = YES;
     NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
 
@@ -1138,8 +1133,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error{
-    if(encoding == 0)
-        [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
+
+    NSParameterAssert(encoding);
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     NSString *RISString = [self RISStringForPublications:items];
@@ -1151,8 +1146,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)LTBDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding error:(NSError **)error{
-    if(encoding == 0)
-        [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
+
+    NSParameterAssert(encoding);
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
