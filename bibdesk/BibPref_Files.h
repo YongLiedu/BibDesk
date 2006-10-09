@@ -49,7 +49,6 @@
     IBOutlet NSButton *saveAnnoteAndAbstractAtEndButton;
     IBOutlet NSButton *useNormalizedNamesButton;
     IBOutlet NSButton *useTemplateFileButton;
-    IBOutlet NSButton* autoSaveAsRSSButton;
     IBOutlet NSButton *outputTemplateFileButton;
     
     IBOutlet NSButton *autosaveDocumentButton;
@@ -63,7 +62,6 @@
 - (IBAction)toggleShouldUseNormalizedNames:(id)sender;
 - (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender;
 - (IBAction)toggleShouldUseTemplateFile:(id)sender;
-- (IBAction)toggleAutoSaveAsRSSChanged:(id)sender;
 - (IBAction)editTemplateFile:(id)sender;
 - (IBAction)resetTemplateFile:(id)sender;
 - (IBAction)showConversionEditor:(id)sender;

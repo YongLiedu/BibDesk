@@ -70,7 +70,6 @@
     [saveAnnoteAndAbstractAtEndButton setState:([defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] == YES) ? NSOnState : NSOffState];
     [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
     [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFile] ? NSOnState : NSOffState];
-    [autoSaveAsRSSButton setState:[defaults boolForKey:BDSKAutoSaveAsRSSKey] ? NSOnState : NSOffState];
     
     [autosaveDocumentButton setState:[defaults boolForKey:BDSKShouldAutosaveDocumentKey] ? NSOnState : NSOffState];
     
@@ -112,10 +111,6 @@
 - (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey];
     [self updateUI];
-}
-
-- (IBAction)toggleAutoSaveAsRSSChanged:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKAutoSaveAsRSSKey];
 }
 
 - (IBAction)toggleShouldUseTemplateFile:(id)sender{

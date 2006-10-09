@@ -9,7 +9,6 @@
                 setDefaultStringEncoding = id; 
                 setShouldAutosave = id; 
                 showConversionEditor = id; 
-                toggleAutoSaveAsRSSChanged = id; 
                 toggleSaveAnnoteAndAbstractAtEnd = id; 
                 toggleShouldTeXify = id; 
                 toggleShouldUseNormalizedNames = id; 
@@ -19,7 +18,6 @@
             CLASS = "BibPref_Files"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                autoSaveAsRSSButton = NSButton; 
                 autosaveDocumentButton = NSButton; 
                 autosaveTimeField = NSTextField; 
                 autosaveTimeStepper = NSStepper; 
