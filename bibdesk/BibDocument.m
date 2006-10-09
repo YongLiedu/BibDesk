@@ -779,6 +779,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
+    // Override so we can determine if this is a save, saveAs or export operation, so we can prepare the correct accessory view
     currentSaveOperationType = saveOperation;
     [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
@@ -804,6 +805,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
             }
         }
     }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
+        // @@ should we save as RSS if that was set in the prefs?
         [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
                                                      forPublications:publications
                                                             document:self];
@@ -832,15 +834,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
   forSaveOperation:(NSSaveOperationType)saveOperation 
 originalContentsURL:(NSURL *)absoluteOriginalContentsURL 
              error:(NSError **)outError {
-    // Override so we can determine if this is an autosave in writeToFile:ofType:, since saveToFile... will never be called with NSAutosaveOperation for backwards compatibility.  This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
+    // Override so we can determine if this is an autosave in writeToURL:ofType:error:, since saveToFile... will never be called with NSAutosaveOperation for backwards compatibility.  This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
     currentSaveOperationType = saveOperation;
     return [super writeToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteOriginalContentsURL error:outError];
 }
 
-// we override this method only to catch exceptions raised during TeXification of BibItems
-// returning NO keeps the document window from closing if the save was initiated by a close
-// action, so the user gets a second chance at fixing the problem
-// this method eventually gets called for save or save-as operations
 - (BOOL)writeToURL:(NSURL *)fileURL ofType:(NSString *)docType error:(NSError **)outError{
 
     BOOL success = YES;
@@ -860,19 +858,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if (theItem)
             [self highlightBib:theItem];
         
-        // @@ 10.3: we run a sheet so this is displayed on 10.3, but could convert to using NSError on 10.4
-        NSString *errTitle = currentSaveOperationType == 3 ? NSLocalizedString(@"Unable to Autosave File", @"") : NSLocalizedString(@"Unable to Save File", @"");
+        NSString *errTitle = NSAutosaveOperation == currentSaveOperationType ? NSLocalizedString(@"Unable to Autosave File", @"") : NSLocalizedString(@"Unable to Save File", @"");
         
-        // @@ do this in dataOfType:error:?  should just use error localizedDescription
+        // @@ do this in fileWrapperOfType:forPublications:error:?  should just use error localizedDescription
         NSString *errMsg = [[nsError userInfo] valueForKey:NSLocalizedRecoverySuggestionErrorKey];
         if (nil == errMsg)
             errMsg = NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"");
         
-        // log in case the sheet crashes us for some reason
-        NSLog(@"%@!  %@", errTitle, errMsg);
+        OFError(&nsError, "BDSKSaveError", NSLocalizedDescriptionKey, errTitle, NSLocalizedRecoverySuggestionErrorKey, errMsg, nil);
         
-        // we present a special sheet if the save failed for 10.3 compatibility; NSDocument still puts up its own save failed sheet, at least for save-as
-        NSBeginCriticalAlertSheet(errTitle, nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, errMsg);            
     }
     // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
     else if (currentSaveOperationType != NSAutosaveOperation)
