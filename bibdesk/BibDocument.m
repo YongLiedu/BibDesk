@@ -815,9 +815,12 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSEnumerator *pubsE = [[self publications] objectEnumerator];
     NSMutableArray *pubsInfo = [[NSMutableArray alloc] initWithCapacity:[publications count]];
     BibItem *anItem;
+    NSDictionary *info;
     while(anItem = [pubsE nextObject]){
         OMNI_POOL_START {
-            [pubsInfo addObject:[anItem metadataCacheInfo]];
+            info = [anItem metadataCacheInfo];
+            if (info != nil)
+                [pubsInfo addObject:info];
         } OMNI_POOL_END;
     }
     
