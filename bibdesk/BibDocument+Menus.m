@@ -824,12 +824,6 @@
 	else if (act == @selector(editPubCmd:)) {
 		return [self validateEditSelectionMenuItem:menuItem];
 	}
-	else if (act == @selector(exportAsAction:)) {
-		return [self validateExportMenuItem:menuItem];
-	}
-	else if (act == @selector(exportSelectionAsAction:)) {
-		return [self validateExportSelectionMenuItem:menuItem];
-	}
 	else if (act == @selector(duplicateTitleToBooktitle:)) {
 		return [self validateDuplicateTitleToBooktitleMenuItem:menuItem];
 	}
