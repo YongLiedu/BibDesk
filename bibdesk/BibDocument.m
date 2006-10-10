@@ -2141,8 +2141,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		}else if(rv == NSAlertOtherReturn){
 			// the user said to keep going, so if they save, they might clobber data...
 		}		
-	}else if(type == BDSKNoKeyBibTeXStringType){
+	}else if(type == BDSKNoKeyBibTeXStringType && outError != NULL){
 
+        // run a modal alert to warn about temporary cite keys
+        // if we have no error, we shouldn't be interested in warnings
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
                                          defaultButton:nil
                                        alternateButton:nil
@@ -2189,9 +2191,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(contentString != nil){
             type = [contentString contentStringType];
     
-            if(type >= 0)
-                [array addObjectsFromArray:[self newPublicationsForString:contentString type:type error:NULL]];
-            else {
+            if(type >= 0){
+                NSError *error = nil;
+                [array addObjectsFromArray:[self newPublicationsForString:contentString type:type error:&error]];
+            } else {
                 [contentString release];
                 contentString = nil;
             }
