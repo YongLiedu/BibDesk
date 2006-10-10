@@ -243,6 +243,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (void)drawRect:(NSRect)rect {
+    [self layoutScrollView];
     [super drawRect:rect];
 
     if ([scalePopUpButton superview]) {
