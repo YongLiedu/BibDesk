@@ -41,6 +41,14 @@ static float BDSKScaleMenuFontSize = 11.0;
     return self;
 }
 
+- (void)awakeFromNib
+{
+    // make sure we have a horizontal scroller to show the popup
+    [self setHasHorizontalScroller:YES];
+    if([self respondsToSelector:@selector(setAutohidesScrollers:)])
+       [self setAutohidesScrollers:NO];
+}
+
 #pragma mark Instance methods - scaling related
 
 - (void)makeScalePopUpButton {
