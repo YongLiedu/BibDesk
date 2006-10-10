@@ -103,6 +103,7 @@
 #import "BDSKGroupTableView.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKTemplateParser.h"
+#import "BDSKTemplateObjectProxy.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
@@ -3966,98 +3967,5 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 // just create this setter to avoid a run time warning
 - (void)setDisplayName:(NSString *)newName{}
-
-@end
-
-
-@implementation BDSKTemplateObjectProxy
-
-+ (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items {
-    NSString *string = [template mainPageString];
-    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
-    string = [BDSKTemplateParser stringByParsingTemplate:string usingObject:objectProxy delegate:objectProxy];
-    [objectProxy release];
-    return string;
-}
-
-+ (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items documentAttributes:(NSDictionary **)docAttributes {
-    NSAttributedString *string = [template mainPageAttributedStringWithDocumentAttributes:docAttributes];
-    BDSKTemplateObjectProxy *objectProxy = [[self alloc] initWithObject:anObject publications:items template:template];
-    string = [BDSKTemplateParser attributedStringByParsingTemplate:string usingObject:objectProxy delegate:objectProxy];
-    [objectProxy release];
-    return string;
-}
-
-- (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate {
-    if (self = [super init]) {
-        object = [anObject retain];
-        publications = [items copy];
-        template = [aTemplate retain];
-        currentIndex = 0;
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [object release];
-    [publications release];
-    [template release];
-    [super dealloc];
-}
-
-- (id)valueForUndefinedKey:(NSString *)key { return [object valueForKey:key]; }
-
-- (NSArray *)publications { return publications; }
-
-- (id)publicationsUsingTemplate{
-    NSEnumerator *e = [publications objectEnumerator];
-    BibItem *pub = nil;
-    
-    OBPRECONDITION(nil != template);
-    BDSKTemplateFormat format = [template templateFormat];
-    id returnString = nil;
-    NSAutoreleasePool *pool = nil;
-    
-    if (format & BDSKTextTemplateFormat) {
-        
-        returnString = [NSMutableString stringWithString:@""];        
-        while(pub = [e nextObject]){
-            pool = [NSAutoreleasePool new];
-            [pub setItemIndex:++currentIndex];
-            [returnString appendString:[pub stringValueUsingTemplate:template]];
-            [pool release];
-        }
-        
-    } else if (format & BDSKRichTextTemplateFormat) {
-        
-        returnString = [[[NSMutableAttributedString alloc] init] autorelease];
-        while(pub = [e nextObject]){
-            pool = [NSAutoreleasePool new];
-            [pub setItemIndex:++currentIndex];
-            [returnString appendAttributedString:[pub attributedStringValueUsingTemplate:template]];
-            [pool release];
-        }
-    }
-    
-    return returnString;
-}
-
-// legacy method, as it may appear as a key in older templates
-- (id)publicationsAsHTML{ return [self publicationsUsingTemplate]; }
-
-- (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
-
-// BDSKTemplateParserDelegate protocol
-- (void)templateParserWillParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {
-    if ([anObject isKindOfClass:[BibItem class]]) {
-        [(BibItem *)anObject setItemIndex:++currentIndex];
-        [(BibItem *)anObject prepareForTemplateParsing];
-    }
-}
-
-- (void)templateParserDidParseTemplate:(id)template usingObject:(id)anObject isAttributed:(BOOL)flag {
-    if ([anObject isKindOfClass:[BibItem class]]) 
-        [(BibItem *)anObject cleanupAfterTemplateParsing];
-}
 
 @end

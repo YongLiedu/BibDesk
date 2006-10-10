@@ -780,23 +780,3 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)saveSortOrder;
 
 @end
-
-
-@interface BDSKTemplateObjectProxy : NSObject <BDSKTemplateParserDelegate> {
-    id object;
-    NSArray *publications;
-    BDSKTemplate *template;
-    int currentIndex;
-}
-
-+ (NSString *)stringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items;
-+ (NSAttributedString *)attributedStringByParsingTemplate:(BDSKTemplate *)template withObject:(id)anObject publications:(NSArray *)items documentAttributes:(NSDictionary **)docAttributes;
-
-- (id)initWithObject:(id)anObject publications:(NSArray *)items template:(BDSKTemplate *)aTemplate;
-
-- (NSArray *)publications;
-- (id)publicationsUsingTemplate;
-
-- (NSCalendarDate *)currentDate;
-
-@end

@@ -58,6 +58,7 @@
 #import "BDSKSharedGroup.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "BDSKTemplate.h"
+#import "BDSKTemplateObjectProxy.h"
 #import "BDSKTypeSelectHelper.h"
 #import "NSWindowController_BDSKExtensions.h"
 

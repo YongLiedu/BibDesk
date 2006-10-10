@@ -39,6 +39,7 @@
 #import "BibDeskTemplatedTextCommand.h"
 #import "BibDocument.h"
 #import "BDSKTemplate.h"
+#import "BDSKTemplateObjectProxy.h"
 
 
 @implementation BibDeskTemplatedTextCommand
