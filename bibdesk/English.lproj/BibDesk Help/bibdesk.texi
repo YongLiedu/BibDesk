@@ -1158,6 +1158,22 @@ For inbook type items, the Title refers to the title of the whole work.
 Therefore the Chapter field is added to the title displayed in the Title column. 
 If this is empty, the Pages field is used, if available. 
 
+@subheading Authors and Editors 
+@cindex Authors and Editors
+
+You have the option of showing Authors together or separately.  If you simply
+select 'Author' you will get all the authors connected by 'and', if you choose 
+First Author, well, you just get the First Author.
+
+References can have both Authors and Editors.  Most of the time the Authors are of primary
+interest, but some books don't have Authors, just Editors.  If you select one of the Author
+options (eg First Author) and there is only an Editor, then the field will be blank.
+To avoid this choose the equivalent Author or Editor column (eg First Author or Editor),
+and the Editors will only be shown if there are no Authors.
+
+In some academic fields the last author is the head of the lab, and users find it convenient
+to sort their papers by the last author.  This can be done by adding the Last Author [or Editor] field.
+
 @subheading Container 
 @cindex Container
 
