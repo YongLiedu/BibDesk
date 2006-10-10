@@ -239,11 +239,6 @@ static float BDSKScaleMenuFontSize = 11.0;
         // put it in the scrollview
         [scrollView addSubview:scalePopUpButton];
         [scalePopUpButton release];
-        
-        NSRect frameRect = [scrollView frame];
-        frameRect.origin.y += 3;
-        frameRect.size.height -= 3;
-        [scrollView setFrame:frameRect];
     }
 }
 
@@ -350,19 +345,19 @@ static float BDSKScaleMenuFontSize = 11.0;
         
         // Now we'll just adjust the horizontal scroller size and set the button size and location.
         // Set it based on our frame, not the scroller's frame, since this gets called repeatedly.
-        horizScrollerFrame.size.width = NSWidth([scrollView frame]) - NSWidth(buttonFrame) - scrollerWidth;
+        horizScrollerFrame.size.width = NSWidth([scrollView frame]) - NSWidth(buttonFrame) - scrollerWidth - 1.0;
         [horizScroller setFrameSize:horizScrollerFrame.size];
     }
-    buttonFrame.size.height = scrollerWidth;
+    buttonFrame.size.height = scrollerWidth - 1.0;
 
     // @@ resolution independence: 2.0 may not work
     if ([scrollView isFlipped]) {
         buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMaxY([scrollView frame]) - NSHeight(buttonFrame) - 2.0;            
+        buttonFrame.origin.y = NSMaxY([scrollView frame]) - NSHeight(buttonFrame);            
     }
     else {
         buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMinY([scrollView frame]) + 2.0;
+        buttonFrame.origin.y = NSMinY([scrollView frame]);
     }
     [scalePopUpButton setFrame:buttonFrame];
 }
