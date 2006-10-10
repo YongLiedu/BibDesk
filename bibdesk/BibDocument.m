@@ -2124,13 +2124,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if(parseError != nil) {
 
 		// run a modal dialog asking if we want to use partial data or give up
-		int rv = 0;
-		rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
-							 NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could analyse?\n(It's likely that choosing \"Keep Going\" will lose some data.)",@""),
-							 NSLocalizedString(@"Cancel",@""),
-							 NSLocalizedString(@"Edit data", @""),
-							 NSLocalizedString(@"Keep going",@""));
-		if (rv == NSAlertDefaultReturn) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error reading file!",@"")
+                                         defaultButton:NSLocalizedString(@"Cancel",@"")
+                                       alternateButton:NSLocalizedString(@"Edit data", @"")
+                                           otherButton:NSLocalizedString(@"Keep going",@"")
+                             informativeTextWithFormat:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could analyse?\n(It's likely that choosing \"Keep Going\" will lose some data.)",@"")];
+		int rv = [alert runModal];
+        
+		if(rv == NSAlertDefaultReturn){
 			// the user said to give up
 			newPubs = nil;
 		}else if (rv == NSAlertAlternateReturn){
@@ -2140,7 +2141,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		}else if(rv == NSAlertOtherReturn){
 			// the user said to keep going, so if they save, they might clobber data...
 		}		
-	}
+	}else if(type == BDSKNoKeyBibTeXStringType){
+
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The new items are added using the temporary cite key \"FixMe\".  In order to use these with BibTeX, you must generate valid cite keys for these items.", @"")];
+
+        [alert runModal];
+    }
 
     // we reach this for unsupported data types (BDSKUnknownStringType)
 	if ([newPubs count] == 0 && parseError == nil)
