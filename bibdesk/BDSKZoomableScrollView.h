@@ -16,12 +16,6 @@
 - (float)scaleFactor;
 - (void)setScaleFactor:(float)factor;
 - (void)setScaleFactor:(float)factor adjustPopup:(BOOL)flag;
-- (void)clipViewBoundsDidChange;
-
-//	dragDocumentWithMouseDown: -- Given a mousedown event, which should be in
-//	our document view, track the mouse to let the user drag the document.
-- (BOOL) dragDocumentWithMouseDown:	// RETURN: YES => user dragged (not clicked)
-    (NSEvent *) theEvent;
 
 @end
 

@@ -103,20 +103,6 @@
     }
 }
 
-//	mouseDown: -- If we have an enclosing scroll-view which knows how to drag,
-//	hand the event off to that scroll-view.
-- (void) mouseDown:(NSEvent *) theEvent
-{
-    NSScrollView	*scrollView;
-
-    scrollView = [self enclosingScrollView];
-
-    if ([scrollView respondsToSelector: @selector(dragDocumentWithMouseDown:)])
-        [(BDSKZoomableScrollView*)scrollView dragDocumentWithMouseDown: theEvent];
-    else
-        [super mouseDown: theEvent];
-}
-
 //	-setFrameSize: -- Override this method to make sure we keep our aspect ratio.
 //	This assumes -setFrameSize: is a primitive method (i.e., -setFrame: invokes it)
 - (void) setFrameSize: (NSSize) newSize
