@@ -1268,7 +1268,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		}else if (type == BDSKNoKeyBibTeXStringType){
-            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"The BibTeX in this file is invalid because of missing cite keys. Try to open using temporary cite keys to fix this.", @""), nil);
+            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @""), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
@@ -1366,8 +1366,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *tmpKey = [(NSString *)contextInfo autorelease];
     if(returnCode == NSAlertDefaultReturn){
+        NSArray *selItems = [self selectedPublications];
         [self highlightBibs:[self allPublicationsForCiteKey:tmpKey]];
         [self generateCiteKeysForSelectedPublications];
+        [self highlightBibs:selItems];
     }
 }
 
