@@ -1364,11 +1364,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 
 - (void)temporaryCiteKeysAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSAlertDefaultReturn)
+    NSString *tmpKey = [(NSString *)contextInfo autorelease];
+    if(returnCode == NSAlertDefaultReturn){
+        [self highlightBibs:[self allPublicationsForCiteKey:tmpKey]];
         [self generateCiteKeysForSelectedPublications];
+    }
 }
 
-- (void)reportTemporaryCiteKeys:(NSString *)tmpKey{
+- (void)reportTemporaryCiteKeys:(NSString *)tmpKey forNewDocument:(BOOL)isNew{
     if([publications count] == 0)
         return;
     
@@ -1377,18 +1380,22 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([tmpKeyItems count] == 0)
         return;
     
-    [self highlightBibs:tmpKeyItems];
+    if(isNew)
+        [self highlightBibs:tmpKeyItems];
+    
+    NSString *infoFormat = isNew ? NSLocalizedString(@"This document was opened using the temporary cite key \"%@\" for the selected publications.  In order to use your file with BibTeX, you must generate valid cite keys for all of these items.  Do you want me to do this now?", @"")
+                            : NSLocalizedString(@"New items are added using the temporary cite key \"%@\".  In order to use your file with BibTeX, you must generate valid cite keys for these items.  Do you want me to do this now?", @"");
     
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
                                      defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
                                    alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
                                        otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"This document was opened using the temporary cite key \"%@\" for the selected publications.  In order to use your file with BibTeX, you must generate valid cite keys for all of these items.  Do you want me to do this now?", @""), tmpKey];
+                         informativeTextWithFormat:infoFormat, tmpKey];
 
     [alert beginSheetModalForWindow:documentWindow
                       modalDelegate:self
                      didEndSelector:@selector(temporaryCiteKeysAlertDidEnd:returnCode:contextInfo:)
-                        contextInfo:nil];
+                        contextInfo:[tmpKey retain]];
 }
 
 #pragma mark -
@@ -2013,6 +2020,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSArray *newPubs = nil;
     NSArray *newFilePubs = nil;
 	NSError *error = nil;
+    NSString *temporaryCiteKey = nil;
     
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
@@ -2020,17 +2028,23 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     } else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
         NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [self newPublicationsForString:pbString type:1 error:&error];
+		newPubs = [self newPublicationsForString:pbString type:BDSKRISStringType error:&error];
+        if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
+            error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSStringPboardType]){
         NSString *pbString = [pb stringForType:NSStringPboardType]; 	
 		// sniff the string to see what its type is
 		newPubs = [self newPublicationsForString:pbString type:[pbString contentStringType] error:&error];
+        if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
+            error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSFilenamesPboardType]){
 		NSArray *pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         // try this first, in case these files are a type we can open
         NSMutableArray *unparseableFiles = [[NSMutableArray alloc] initWithCapacity:[pbArray count]];
-        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:unparseableFiles];
-		if ([unparseableFiles count] > 0) {
+        newPubs = [self extractPublicationsFromFiles:pbArray unparseableFiles:unparseableFiles error:&error];
+		if(temporaryCiteKey = [[error userInfo] objectForKey:@"temporaryCiteKey"])
+            error = nil; // accept temporary cite keys, but show a warning later
+        if ([unparseableFiles count] > 0) {
             newFilePubs = [self newPublicationsForFiles:unparseableFiles error:&error];
             newPubs = [newPubs arrayByAddingObjectsFromArray:newFilePubs];
         }
@@ -2052,7 +2066,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"BibDesk couldn't find any files or bibliography information in the data it received."), nil);
 	}
 	
-	if (newPubs == nil || error != nil){
+    if (newPubs == nil || error != nil){
         if(outError) *outError = error;
 		return NO;
     }
@@ -2084,6 +2098,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:newPubs];
     else 
         [lastImportGroup setPublications:newPubs];
+    
+    if(temporaryCiteKey != nil)
+        [self reportTemporaryCiteKeys:temporaryCiteKey forNewDocument:NO];
     
     return YES;
 }
@@ -2141,17 +2158,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		}else if(rv == NSAlertOtherReturn){
 			// the user said to keep going, so if they save, they might clobber data...
 		}		
-	}else if(type == BDSKNoKeyBibTeXStringType && outError != NULL){
+	}else if(type == BDSKNoKeyBibTeXStringType && parseError == nil){
 
-        // run a modal alert to warn about temporary cite keys
-        // if we have no error, we shouldn't be interested in warnings
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The new items are added using the temporary cite key \"FixMe\".  In order to use these with BibTeX, you must generate valid cite keys for these items.", @"")];
-
-        [alert runModal];
+        // return an error when we inserted temporary keys, let the caller decide what to do with it
+        // don't override a parseError though, as that is probably more relevant
+        OFError(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys"), @"temporaryCiteKey", @"FixMe", nil);
     }
 
     // we reach this for unsupported data types (BDSKUnknownStringType)
@@ -2163,7 +2174,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles {
+- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles error:(NSError **)outError {
     
     NSParameterAssert(unparseableFiles != nil);
     NSParameterAssert([unparseableFiles count] == 0);
@@ -2192,8 +2203,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             type = [contentString contentStringType];
     
             if(type >= 0){
-                NSError *error = nil;
-                [array addObjectsFromArray:[self newPublicationsForString:contentString type:type error:&error]];
+                NSError *parseError = nil;
+                [array addObjectsFromArray:[self newPublicationsForString:contentString type:type error:&parseError]];
+                if(parseError && outError) *outError = parseError;
             } else {
                 [contentString release];
                 contentString = nil;

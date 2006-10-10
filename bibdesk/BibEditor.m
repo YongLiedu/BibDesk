@@ -2413,11 +2413,18 @@ static int numberOfOpenEditors = 0;
     NSPasteboard *pboard = [sender draggingPasteboard];
 	NSString *pboardType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSURLPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
 	NSArray *draggedPubs = nil;
+    BOOL hasTemporaryCiteKey = NO;
     
 	if([pboardType isEqualToString:NSStringPboardType]){
 		NSString *pbString = [pboard stringForType:NSStringPboardType];
+        NSError *error = nil;
         // this returns nil when there was a parser error and the user didn't decide to proceed anyway
-        draggedPubs = [[self document] newPublicationsForString:pbString type:[pbString contentStringType] error:NULL];
+        draggedPubs = [[self document] newPublicationsForString:pbString type:[pbString contentStringType] error:&error];
+        // we ignore warnings for parsing with temporary keys, but we want to ignore the cite key in that case
+        if([[error userInfo] objectForKey:@"temporaryCiteKey"] != nil){
+            hasTemporaryCiteKey = YES;
+            error = nil;
+        }
 	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
 		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
         // we can't just unarchive, as this gives complex strings with the wrong macroResolver
@@ -2501,7 +2508,7 @@ static int numberOfOpenEditors = 0;
         
         // check cite key here in case we didn't autogenerate, or we're supposed to overwrite
         if((shouldOverwrite || [publication hasEmptyOrDefaultCiteKey]) && 
-           [tempBI hasEmptyOrDefaultCiteKey] == NO &&
+           [tempBI hasEmptyOrDefaultCiteKey] == NO && hasTemporaryCiteKey == NO && 
            [publication canSetCrossref:[publication valueOfField:BDSKCrossrefString inherit:NO] andCiteKey:[tempBI citeKey]] == BDSKNoCrossrefError) {
             [publication setCiteKey:[tempBI citeKey]];
         }

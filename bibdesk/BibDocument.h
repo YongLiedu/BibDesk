@@ -270,7 +270,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 - (BOOL)readFromData:(NSData *)data ofStringType:(int)type fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError;
 
-- (void)reportTemporaryCiteKeys:(NSString *)tmpKey;
+- (void)reportTemporaryCiteKeys:(NSString *)tmpKey forNewDocument:(BOOL)isNewFile;
 
 // Responses to UI actions
 
@@ -576,7 +576,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSArray *)newPublicationsFromArchivedData:(NSData *)data;
 - (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)error;
 - (NSArray *)newPublicationsForFiles:(NSArray *)filenames error:(NSError **)error;
-- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles;
+- (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles error:(NSError **)error;
 - (NSArray *)newPublicationForURL:(NSURL *)url error:(NSError **)error;
 
 // Private methods

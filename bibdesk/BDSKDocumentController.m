@@ -291,7 +291,7 @@
     if (nil == doc)
         [self presentError:error];
     
-    [doc reportTemporaryCiteKeys:@"FixMe"];
+    [doc reportTemporaryCiteKeys:@"FixMe" forNewDocument:YES];
     
     return doc;
 }
