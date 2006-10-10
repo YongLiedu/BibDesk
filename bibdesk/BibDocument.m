@@ -786,8 +786,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 }
 
 - (BOOL)saveToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation error:(NSError **)outError{
-    // set the string encoding according to the popup
-    if (NSSaveOperation == saveOperation || NSSaveAsOperation == saveOperation)
+    
+    // Set the string encoding according to the popup.  NB: the popup has the incorrect encoding if it wasn't displayed, so don't reset encoding unless we're actually modifying this document.
+    if (NSSaveAsOperation == saveOperation)
         [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
     
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
@@ -935,6 +936,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSStringEncoding encoding = [self documentStringEncoding];
     NSParameterAssert(encoding != 0);
     
+    // export operations need their own encoding
     if(NSSaveToOperation == currentSaveOperationType)
         encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
         
@@ -967,8 +969,27 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // see if this was an encoding failure; if so, we can suggest how to fix it
         // NSLocalizedRecoverySuggestion is appropriate for display as error message in alert
         if([[error userInfo] valueForKey:NSStringEncodingErrorKey]){
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"The document cannot be saved using the specified encoding.  You should ensure that TeX conversion is enabled in the Files preferences, and/or save using an encoding such as UTF-8.", @""), nil);
+            // encoding conversion failure (string to data)
+            NSStringEncoding usedEncoding = [[[error userInfo] valueForKey:NSStringEncodingErrorKey] intValue];
+            NSString *usedName = [NSString localizedNameOfStringEncoding:usedEncoding];
+            NSString *UTF8Name = [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding];
+            NSString *suggestion;
+            
+            // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
+            if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
+                suggestion = [NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @""), usedName, UTF8Name];
+            } else if (NSUTF8StringEncoding != usedEncoding){
+                // could suggest disabling TeX conversion, but the error might be from something out of the range of what we try to convert, so combining TeXify && UTF-8 would work
+                suggestion = [NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should save using an encoding such as %@.", @""), usedName, UTF8Name];
+            } else {
+                // if UTF-8 fails, you're hosed...
+                suggestion = [NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Please report this error to BibDesk's developers.", @""), UTF8Name];
+            }
+            
+            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), NSLocalizedRecoverySuggestionErrorKey, suggestion, nil);
+            
         } else if([[error userInfo] valueForKey:@"item"]) {
+            // TeXification error; this has a specific item
             OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:@"%@  %@", [error localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")], @"item", [[error userInfo] valueForKey:@"item"], nil);
         }
         *outError = error;
