@@ -162,13 +162,3 @@
 - (BOOL)removeExtendedAttribute:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 
 @end
-
-@class PDFMetadata;
-
-@interface NSFileManager (PDFMetadata)
-
-- (id)PDFMetadataForURL:(NSURL *)fileURL error:(NSError **)outError;
-- (BOOL)addPDFMetadata:(PDFMetadata *)attributes toURL:(NSURL *)fileURL error:(NSError **)outError;
-
-@end
-

@@ -44,14 +44,14 @@ extern NSString *BDSKPDFDocumentCreationDateAttribute;
 extern NSString *BDSKPDFDocumentKeywordsAttribute;			
 
 @interface PDFMetadata : NSObject {
-    NSMutableDictionary *metadata;
+    NSMutableDictionary *dictionary;
 }
 
 + (id)metadataWithBibItem:(id)anItem;
 + (id)metadataForURL:(NSURL *)fileURL error:(NSError **)outError;
 
 - (NSDictionary *)dictionary;
-- (void)setDictionary:(NSDictionary *)dictionary;
+- (void)setDictionary:(NSDictionary *)newDictionary;
 
 - (BOOL)addToURL:(NSURL *)fileURL error:(NSError **)outError;
 
