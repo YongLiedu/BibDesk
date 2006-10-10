@@ -56,7 +56,6 @@
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
 #import "BibAppController.h"
-#import "PDFImageView.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 #import "MacroTextFieldWindowController.h"

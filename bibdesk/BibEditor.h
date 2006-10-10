@@ -44,7 +44,6 @@
 
 @class BDSKRatingButton;
 @class BDSKRatingButtonCell;
-@class PDFImageView;
 @class BDSKFieldNameFormatter;
 @class BDSKComplexStringFormatter;
 @class BDSKCrossrefFormatter;

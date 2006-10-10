@@ -39,7 +39,6 @@
 */
 
 #import <Cocoa/Cocoa.h>
-#import "PDFImageView.h"
 #import "BibPrefController.h"
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 #import "BDSKTeXTask.h"
