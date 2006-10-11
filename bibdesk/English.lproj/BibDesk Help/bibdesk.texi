@@ -894,11 +894,16 @@ You can then fill in the appropriate fields for your reference. The
 type pop-up menu lets you choose from the canonical BibTeX publication
 types (e.g., article, book, phdthesis). Field titles highlighted in
 red represent required fields for the chosen reference type (article
-in the case of the above screenshot). Fields can be added and removed
-with the plus and minus buttons to the right of the reference-type
-pop-up menu.  Also, BibDesk verifies that
-cite keys are unique before committing a reference to the
-bibliography.
+in the case of the above screenshot). 
+
+Fields can be added with the @menutitle{+} button in the status bar. 
+You can also add or remove field using the appropriate menu item in the 
+action pop-up menu in the status bar (the button with the little gear icon.) 
+You can also change the name of any custom field using the action menu. 
+This can also be done by double-clicking the field name. 
+Note that this is not allowed for standard fields.  
+Also, BibDesk verifies that cite keys are unique before committing 
+a reference to the bibliography.
 
 When editing, you can use a key sequence (@opt{}-esc) to pop up a list
 of similar items in your bibliography for autocompletion, just as you
@@ -1919,12 +1924,11 @@ in the @ref{System Service} help topic.
 Templates allow you to export your database to a large variety of formats. It also allows you to 
 customize to a great extent how the data is exported.
 
-To export using templates, choose one of the menu items in one of the @menutitle{Export} menus, 
-which can be found under the @menutitle{File} menu. You can either export the whole database, 
-or just the references which you have selected.
+To export using templates, choose the @menutitle{Export@dots{}} menu item, which can be found 
+under the @menutitle{File} menu. You can choose the template from the @buttontitle{File Format} 
+popup button. You can either export the whole database, or just the references which you have selected. 
 
 BibDesk provides several default templates, for export to HTML, RSS, Rich Text (RTF, RTFD) and to windows Doc format. 
-To use them, just choose the corresponding item from the export submenu.  
 
 In order to use a non-default template the last menu item @menutitle{Using Template} should be chosen. 
 This allows you to choose a template from a popup button in the save dialog window. 
