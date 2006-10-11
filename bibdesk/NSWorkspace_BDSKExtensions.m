@@ -162,7 +162,7 @@
     
     fileURL = [fileURL fileURLByResolvingAliases];
     FSRef fileRef;
-    OSStatus err;
+    OSStatus err = noErr;
     
     if (FALSE == CFURLGetFSRef((CFURLRef)fileURL, &fileRef))
         err = coreFoundationUnknownErr;
@@ -173,14 +173,18 @@
         err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
     
     if (noErr != err && NULL != error)
-        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObject:fileURL forKey:NSURLErrorKey]];
+        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:fileURL, NSURLErrorKey, NSLocalizedString(@"Unable to create UTI", @""), NSLocalizedDescriptionKey, nil]];
     
     return [(NSString *)theUTI autorelease];
 }
 
 - (NSString *)UTIForURL:(NSURL *)fileURL;
 {
-    return [self UTIForURL:fileURL error:NULL];
+    NSError *error;
+    NSString *theUTI = [self UTIForURL:fileURL error:&error];
+    if (nil == theUTI)
+        NSLog(@"%@", error);
+    return theUTI;
 }
 
 - (NSString *)UTIForPathExtension:(NSString *)extension;
