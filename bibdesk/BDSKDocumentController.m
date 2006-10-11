@@ -121,6 +121,7 @@
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
     [openTextEncodingPopupButton selectItemWithTitle:[BDSKStringEncodingManager defaultEncodingDisplayName]];
+    [oPanel setDirectory:[self currentDirectory]];
 		
     int result = [self runModalOpenPanel:oPanel forTypes:types];
     if(result == NSOKButton){
@@ -158,6 +159,7 @@
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
+    [oPanel setDirectory:[self currentDirectory]];
 
     [openTextEncodingPopupButton selectItemWithTitle:[BDSKStringEncodingManager defaultEncodingDisplayName]];
     [openTextEncodingAccessoryView setFrameOrigin:NSZeroPoint];
