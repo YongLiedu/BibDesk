@@ -3105,30 +3105,29 @@ static int numberOfOpenEditors = 0;
 - (NSUndoManager *)undoManager {
 	return [[self document] undoManager];
 }
-
-// we want to have the same undoManager as our document, so we use this 
-// NSWindow delegate method to return the doc's undomanager, except for
-// the abstract/annote/rss text views.
-- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
-    // work around for a bug(?) in Panther, as the main menu appears to use this method rather than -undoManagerForTextView:
-	id firstResponder = [sender firstResponder];
-	if(firstResponder == notesView){
-        if(notesViewUndoManager == nil)
-            notesViewUndoManager = [[NSUndoManager alloc] init];
-        return notesViewUndoManager;
-    }else if(firstResponder == abstractView){
-        if(abstractViewUndoManager == nil)
-            abstractViewUndoManager = [[NSUndoManager alloc] init];
-        return abstractViewUndoManager;
-    }else if(firstResponder == rssDescriptionView){
-        if(rssDescriptionViewUndoManager == nil)
-            rssDescriptionViewUndoManager = [[NSUndoManager alloc] init];
-        return rssDescriptionViewUndoManager;
-	}
     
+// we want to have the same undoManager as our document, so we use this 
+// NSWindow delegate method to return the doc's undomanager ...
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
 	return [self undoManager];
 }
 
+// ... except for the abstract/annote/rss text views.
+- (NSUndoManager *)undoManagerForTextView:(NSTextView *)aTextView {
+	if(aTextView == notesView){
+        if(notesViewUndoManager == nil)
+            notesViewUndoManager = [[NSUndoManager alloc] init];
+        return notesViewUndoManager;
+    }else if(aTextView == abstractView){
+        if(abstractViewUndoManager == nil)
+            abstractViewUndoManager = [[NSUndoManager alloc] init];
+        return abstractViewUndoManager;
+    }else if(aTextView == rssDescriptionView){
+        if(rssDescriptionViewUndoManager == nil)
+            rssDescriptionViewUndoManager = [[NSUndoManager alloc] init];
+        return rssDescriptionViewUndoManager;
+	}else return [self undoManager];
+}
 
 #pragma mark author table view datasource methods
 
