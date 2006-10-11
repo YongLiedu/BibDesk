@@ -1,6 +1,7 @@
 {
     IBClasses = (
-        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
         {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             ACTIONS = {makePlainText = id; }; 

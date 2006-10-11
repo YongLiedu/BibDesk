@@ -1,7 +1,8 @@
 {
     IBClasses = (
+        {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
-        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
         {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {CLASS = BDSKForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
         {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 

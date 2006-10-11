@@ -1,6 +1,11 @@
 {
     IBClasses = (
-        {CLASS = BDSKCollapsibleView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            CLASS = BDSKCollapsibleView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = BDSKContainerView; 
+        }, 
+        {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKDragImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
         {
             ACTIONS = {changeName = id; openSelectedPub = id; }; 
