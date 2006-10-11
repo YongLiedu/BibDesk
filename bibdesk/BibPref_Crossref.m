@@ -50,9 +50,11 @@
     [[[[tableView tableColumns] objectAtIndex:0] dataCell] setFormatter:typeNameFormatter];
     [typeNameFormatter release];
     
+    [OFPreference addObserver:self selector:@selector(handleEditInheritedChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnEditInheritedKey]];
 }
 
 - (void)dealloc{
+    [OFPreference removeObserver:self forPreference:nil];
     [typesArray release];
     [super dealloc];
 }
@@ -69,6 +71,10 @@
 	[deleteTypeButton setEnabled:duplicate];
     [warnOnEditInheritedCheckButton setState:[defaults boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
     [autoSortCheckButton setState:[defaults boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
+}
+
+- (void)handleEditInheritedChanged:(NSNotification *)notification {
+    [warnOnEditInheritedCheckButton setState:[defaults boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
 }
 
 - (IBAction)changeAutoSort:(id)sender{

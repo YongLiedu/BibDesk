@@ -39,6 +39,13 @@
 
 @implementation BibPref_General
 
+- (void)awakeFromNib{
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnDeleteKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRemovalFromGroupKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRenameGroupKey]];
+    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnCiteKeyChangeKey]];
+}
+
 - (void)updateUI{
     [startupBehaviorRadio selectCellWithTag:[[defaults objectForKey:BDSKStartupBehaviorKey] intValue]];
     if([[defaults objectForKey:BDSKStartupBehaviorKey] intValue] != 3)
@@ -131,8 +138,13 @@
 }
 
 - (void)dealloc{
+    [OFPreference removeObserver:self forPreference:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
+}
+
+- (void)handleWarningPrefChanged:(NSNotification *)notification {
+    [self updateUI];
 }
 
 @end

@@ -63,5 +63,6 @@
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender;
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)handleWarningPrefChanged:(NSNotification *)notification;
 
 @end

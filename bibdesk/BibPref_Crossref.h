@@ -52,6 +52,7 @@
 }
 
 - (void)updateUI;
+- (void)handleEditInheritedChanged:(NSNotification *)notification;
 - (IBAction)changeAutoSort:(id)sender;
 - (IBAction)changeWarnOnEditInherited:(id)sender;
 - (IBAction)changeDuplicateBooktitle:(id)sender;
