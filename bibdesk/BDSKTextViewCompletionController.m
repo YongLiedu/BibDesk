@@ -290,10 +290,7 @@ static int BDSKCompletionMinHeight = 20;
     NSTableColumn *column = [[NSTableColumn alloc] initWithIdentifier:@"tc"];
     [column setMaxWidth:BDSKCompletionMaxWidth];
     [column setWidth:BDSKCompletionMaxWidth];
-    if([column respondsToSelector:@selector(setResizingMask:)])
-        [column setResizingMask:NSTableColumnAutoresizingMask];
-    else 
-        [column setResizable:YES];
+    [column setResizingMask:NSTableColumnAutoresizingMask];
     [column setEditable:NO];
     [tableView addTableColumn:column];
     [column release];
