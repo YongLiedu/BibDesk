@@ -106,36 +106,15 @@ enum {
 */
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 
-/*!
-    @method     stringWithCString:usingEncoding:
-    @abstract   Returns an autoreleased string allocated and initialized with the contents of the input characters (assumes a NULL terminated string).
-    @discussion Used to create Unicode string instances from C strings, based on the given string encoding.
-    @param      byteString (description)
-    @param      encoding (description)
-    @result     (description)
-*/
-+ (NSString *)stringWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding;
-
     /*!
     @method     unicodeNameOfCharacter:
-     @abstract   Returns the unicode name of a character via CFStringTransform on 10.4, or else returns the character as a string;
+     @abstract   Returns the unicode name of a character via CFStringTransform.
      @discussion (comprehensive description)
      @param      ch (description)
      @result     (description)
      */
 + (NSString *)unicodeNameOfCharacter:(unichar)ch;
     
-    /*!
-    @method     initWithCString:usingEncoding:
-    @abstract   Initializes the receiver with the input string of (NULL terminated) bytes.
-    @discussion Used to create Unicode string instances from C strings, based on the given string encoding.
-    @param      byteString (description)
-    @param      encoding (description)
-    @result     (description)
-*/
-
-- (NSString *)initWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding;
-
 /*!
     @method     initWithContentsOfFile:encoding:guessEncoding:
     @abstract   Tries to load a file with the specified encoding; if guessEncoding is set to YES, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.

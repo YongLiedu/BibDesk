@@ -572,8 +572,12 @@ static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *fileP
 }
 
 static inline NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding){
-    NSString *s = [[NSString alloc] initWithCString:cString usingEncoding:parserEncoding];
-    return checkStringForEncoding(s, line, filePath, parserEncoding) ? s : nil;
+    NSString *nsString = [[NSString alloc] initWithCString:cString encoding:parserEncoding];
+    if (checkStringForEncoding(nsString, line, filePath, parserEncoding) == NO) {
+        [nsString release];
+        nsString = nil;
+    }
+    return nsString;
 }
 
 static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){

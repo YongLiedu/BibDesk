@@ -104,10 +104,6 @@ static int MAX_RATING = 5;
 	return boolValue ? yesString : noString;
 }
 
-+ (NSString *)stringWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding{
-    return byteString == NULL ? nil : [(NSString *)CFStringCreateWithCString(CFAllocatorGetDefault(), byteString, CFStringConvertNSStringEncodingToEncoding(encoding)) autorelease];
-}
-
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 {
     return [[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try];
@@ -134,19 +130,11 @@ static int MAX_RATING = 5;
     CFStringAppendCharacters(charString, &ch, 1);
     
     // ignore failures for now
-    Boolean status;
-    
-    // This is a 10.4+ method; we'll just return the unichar as a string object in earlier versions.
-    if(CFStringTransform != NULL)
-        status = CFStringTransform(charString, NULL, kCFStringTransformToUnicodeName, FALSE);
+    CFStringTransform(charString, NULL, kCFStringTransformToUnicodeName, FALSE);
     
     return [(id)charString autorelease];
 } 
  
-- (NSString *)initWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding{
-    return byteString == NULL ? nil : (NSString *)CFStringCreateWithCString(CFAllocatorGetDefault(), byteString, CFStringConvertNSStringEncodingToEncoding(encoding));
-}
-
 static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 {
     unsigned len = [data length];
