@@ -309,12 +309,12 @@ typedef struct WLDragMapEntryStruct
     }
     
     if(NO == success && error != nil)
-        *error = [NSError errorWithDomain:@"NSCocoaErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"") forKey:NSLocalizedDescriptionKey]];
+        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"") forKey:NSLocalizedDescriptionKey]];
     
     if(YES == success){
         success = (noErr == FSDeleteObject(&fileRef));
         if(NO == success && error != nil)
-            *error = [NSError errorWithDomain:@"NSCocoaErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"") forKey:NSLocalizedDescriptionKey]];
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"") forKey:NSLocalizedDescriptionKey]];
     }
     
     return success;
