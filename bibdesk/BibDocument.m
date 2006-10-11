@@ -3838,6 +3838,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [printableView autorelease];
 }
 
+- (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
+    NSPrintInfo *info = [self printInfo];
+    [[info dictionary] addEntriesFromDictionary:printSettings];
+    return [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
+}
+
 - (void)printShowingPrintPanel:(BOOL)showPanels {
     // Obtain a custom view that will be printed
     NSView *printView = [self printableView];
@@ -3980,10 +3986,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [self _tableViewSingleSelectionIndexes:tview];
 }
 
-- (void)setFileName:(NSString *)fileName{ 
+- (void)setFileURL:(NSURL *)absoluteURL{ 
     // make sure that changes in the displayName are observed, as NSDocument doesn't use a KVC compliant method for setting it
     [self willChangeValueForKey:@"displayName"];
-    [super setFileName:fileName];
+    [super setFileURL:absoluteURL];
     [self didChangeValueForKey:@"displayName"];
 }
 
