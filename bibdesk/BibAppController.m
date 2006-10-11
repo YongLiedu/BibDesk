@@ -51,7 +51,6 @@
 #import "BDSKFormatParser.h"
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
-#import <ILCrashReporter/ILCrashReporter.h>
 #import "NSMutableArray+ThreadSafety.h"
 #import "NSMutableDictionary+ThreadSafety.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -112,10 +111,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     // make sure we use Spotlight's plugins on 10.4 and later
     SKLoadDefaultExtractorPlugIns();
 
-#ifdef USECRASHREPORTER
-    [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
-#endif
-        
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
         	

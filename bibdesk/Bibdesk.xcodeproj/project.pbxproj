@@ -75,8 +75,6 @@
 				F9ABEE42086E578700741FC5 /* PBXTargetDependency */,
 				F9D3E273088D9D9200E70D49 /* PBXTargetDependency */,
 				F911CBFD089737C000ABDAC6 /* PBXTargetDependency */,
-				F91B8025092BFEE100976F6F /* PBXTargetDependency */,
-				F9A66E4E092FAFA200AF31D5 /* PBXTargetDependency */,
 				CE67F055092DEEB200410758 /* PBXTargetDependency */,
 				F9A66E4C092FAF9400AF31D5 /* PBXTargetDependency */,
 				F9A66E52092FAFB400AF31D5 /* PBXTargetDependency */,
@@ -496,8 +494,6 @@
 		F91B5CE0076579FE0011ED22 /* rssTemplate.txt in Resources */ = {isa = PBXBuildFile; fileRef = F91B5CDF076579FE0011ED22 /* rssTemplate.txt */; };
 		F91B5CE507657A200011ED22 /* template.txt in Resources */ = {isa = PBXBuildFile; fileRef = F91B5CE407657A200011ED22 /* template.txt */; };
 		F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F91B7F27092BEB5A00976F6F /* AddressBook.framework */; };
-		F91B8027092BFF6100976F6F /* ILCrashReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F91B8026092BFF6100976F6F /* ILCrashReporter.framework */; };
-		F91B81DC092C0AED00976F6F /* ILCrashReporter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F91B8026092BFF6100976F6F /* ILCrashReporter.framework */; };
 		F91F286A09A6684900419960 /* PDFMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = F91F284709A661A700419960 /* PDFMetadata.m */; };
 		F920DAFF075C2B69000C5FCA /* BibAppController+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFA075C2B69000C5FCA /* BibAppController+Scripting.h */; };
 		F920DB00075C2B69000C5FCA /* BibAuthor+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFB075C2B69000C5FCA /* BibAuthor+Scripting.h */; };
@@ -599,6 +595,9 @@
 		F9A6772E07D2D57F00782ACD /* MultiplePageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6772C07D2D57F00782ACD /* MultiplePageView.m */; };
 		F9ABEC9F086E11B500741FC5 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
+		F9B07D14082B1B9000345747 /* BibDeskSuite.scriptSuite in Resources */ = {isa = PBXBuildFile; fileRef = F9022D100758066000C3F701 /* BibDeskSuite.scriptSuite */; };
+		F9B07D15082B1B9100345747 /* BibDeskSuite.scriptTerminology in Resources */ = {isa = PBXBuildFile; fileRef = F9022D110758066000C3F701 /* BibDeskSuite.scriptTerminology */; };
+		F9C4C42D097619AE00DF25F3 /* BibDeskScripting.r in Rez */ = {isa = PBXBuildFile; fileRef = F920DB25075C2D8F000C5FCA /* BibDeskScripting.r */; };
 		F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */; };
 		F9CEFCBB0A90090B00A0E54E /* BDSKOrphanedFileServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */; };
 		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
@@ -684,27 +683,6 @@
 			remoteGlobalIDString = F935665E0912D56F002B6957;
 			remoteInfo = AGRegex;
 		};
-		F91B7FC3092BFBD900976F6F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F91B7FBD092BFBD900976F6F /* ILCrashReporter.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
-			remoteInfo = ILCrashReporter;
-		};
-		F91B7FC5092BFBD900976F6F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F91B7FBD092BFBD900976F6F /* ILCrashReporter.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6AF6C41806B18B4800C4D0C9;
-			remoteInfo = CrashReporter;
-		};
-		F91B8024092BFEE100976F6F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F91B7FBD092BFBD900976F6F /* ILCrashReporter.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = ILCrashReporter;
-		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
@@ -725,13 +703,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 4A33D40608A0191B003A3FA5;
 			remoteInfo = OmniBase;
-		};
-		F9A66E4D092FAFA200AF31D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F91B7FBD092BFBD900976F6F /* ILCrashReporter.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 6AF6C41706B18B4800C4D0C9;
-			remoteInfo = CrashReporter;
 		};
 		F9A66E4F092FAFAC00AF31D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -901,7 +872,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				F91B81DC092C0AED00976F6F /* ILCrashReporter.framework in CopyFiles */,
 				F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */,
 				F9022FB107580A9600C3F701 /* AGRegex.framework in CopyFiles */,
 				F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */,
@@ -1011,7 +981,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
@@ -1251,6 +1221,8 @@
 		F9022CE40758050E00C3F701 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/BibTeXKeys.strings; sourceTree = SOURCE_ROOT; };
 		F9022CE60758050E00C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/Credits.rtf; sourceTree = SOURCE_ROOT; };
 		F9022CE80758050E00C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/Previewer.nib; sourceTree = SOURCE_ROOT; };
+		F9022D100758066000C3F701 /* BibDeskSuite.scriptSuite */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = BibDeskSuite.scriptSuite; sourceTree = "<group>"; };
+		F9022D110758066000C3F701 /* BibDeskSuite.scriptTerminology */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = BibDeskSuite.scriptTerminology; sourceTree = "<group>"; };
 		F9022D150758066000C3F701 /* CharacterConversion.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = CharacterConversion.plist; sourceTree = "<group>"; };
 		F9022D180758066000C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/ReadMe.rtf; sourceTree = "<group>"; };
 		F9022D1B0758066000C3F701 /* TypeInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = TypeInfo.plist; sourceTree = "<group>"; };
@@ -1321,8 +1293,6 @@
 		F91B5CDF076579FE0011ED22 /* rssTemplate.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = rssTemplate.txt; sourceTree = SOURCE_ROOT; };
 		F91B5CE407657A200011ED22 /* template.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = template.txt; sourceTree = SOURCE_ROOT; };
 		F91B7F27092BEB5A00976F6F /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = /System/Library/Frameworks/AddressBook.framework; sourceTree = "<absolute>"; };
-		F91B7FBD092BFBD900976F6F /* ILCrashReporter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ILCrashReporter.xcodeproj; path = ../bibdesk_vendorsrc/infinite_loop/ILCrashReporter/ILCrashReporter.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F91B8026092BFF6100976F6F /* ILCrashReporter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ILCrashReporter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F91F284609A661A700419960 /* PDFMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFMetadata.h; sourceTree = "<group>"; };
 		F91F284709A661A700419960 /* PDFMetadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDFMetadata.m; sourceTree = "<group>"; };
 		F920DAFA075C2B69000C5FCA /* BibAppController+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "BibAppController+Scripting.h"; path = "Scripting/BibAppController+Scripting.h"; sourceTree = "<group>"; };
@@ -1330,6 +1300,7 @@
 		F920DAFC075C2B69000C5FCA /* BibDeskSearchForCommand.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BibDeskSearchForCommand.h; path = Scripting/BibDeskSearchForCommand.h; sourceTree = "<group>"; };
 		F920DAFD075C2B69000C5FCA /* BibDocument+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "BibDocument+Scripting.h"; path = "Scripting/BibDocument+Scripting.h"; sourceTree = "<group>"; };
 		F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "BibItem+Scripting.h"; path = "Scripting/BibItem+Scripting.h"; sourceTree = "<group>"; };
+		F920DB25075C2D8F000C5FCA /* BibDeskScripting.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; name = BibDeskScripting.r; path = ../BibDeskScripting.r; sourceTree = "<group>"; };
 		F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDate_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDate_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileContentSearchController.h; sourceTree = "<group>"; };
@@ -1517,7 +1488,6 @@
 				3D9EC25307C66B1E00DE459D /* WebKit.framework in Frameworks */,
 				F9ABEC9F086E11B500741FC5 /* BTParse.framework in Frameworks */,
 				F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */,
-				F91B8027092BFF6100976F6F /* ILCrashReporter.framework in Frameworks */,
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
 				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 			);
@@ -1692,6 +1662,8 @@
 				CE2941040A7F8F2900A46D05 /* ReadMe.rtf */,
 				F9022D9E075807DC00C3F701 /* pdftotext */,
 				F9022D6E0758073E00C3F701 /* latex2rtf */,
+				F9022D100758066000C3F701 /* BibDeskSuite.scriptSuite */,
+				F9022D110758066000C3F701 /* BibDeskSuite.scriptTerminology */,
 				F9022D150758066000C3F701 /* CharacterConversion.plist */,
 				F9022D1B0758066000C3F701 /* TypeInfo.plist */,
 				CE2944000A7F939A00A46D05 /* PreferenceSearchTerms.plist */,
@@ -1712,7 +1684,6 @@
 			children = (
 				F92ECB6B09DEF86500A244D0 /* Security.framework */,
 				F9DF3BC109B7605E00342ADE /* SystemConfiguration.framework */,
-				F91B8026092BFF6100976F6F /* ILCrashReporter.framework */,
 				F91B7F27092BEB5A00976F6F /* AddressBook.framework */,
 				F9706DB909102DA800526FC8 /* QuartzCore.framework */,
 				F9B9E17E089479FC00C21B17 /* Quartz.framework */,
@@ -2054,6 +2025,7 @@
 			isa = PBXGroup;
 			children = (
 				F9022FBF07580B9400C3F701 /* BibDesk.sdef */,
+				F920DB25075C2D8F000C5FCA /* BibDeskScripting.r */,
 				CE9DBEDE093CF2640008648B /* BibDeskBibliographyCommand.m */,
 				CEAC51550A97730800B8DF43 /* BibDeskExportUsingTemplateCommand.m */,
 				F9022C62075802E300C3F701 /* BibDeskOpenCommand.m */,
@@ -2264,15 +2236,6 @@
 			name = Headers;
 			sourceTree = "<group>";
 		};
-		F91B7FBE092BFBD900976F6F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F91B7FC4092BFBD900976F6F /* ILCrashReporter.framework */,
-				F91B7FC6092BFBD900976F6F /* CrashReporter.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F95CC10F087F54BF002C5694 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2305,7 +2268,6 @@
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
-				F91B7FBD092BFBD900976F6F /* ILCrashReporter.xcodeproj */,
 				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
 				F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */,
 				F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */,
@@ -2628,6 +2590,7 @@
 			buildPhases = (
 				F9E0B071083E450C000109C6 /* ShellScript */,
 				F98F1C3B075839F7007DC618 /* Headers */,
+				F9022E88075809ED00C3F701 /* ShellScript */,
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
@@ -2676,10 +2639,6 @@
 					ProjectRef = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
 				},
 				{
-					ProductGroup = F91B7FBE092BFBD900976F6F /* Products */;
-					ProjectRef = F91B7FBD092BFBD900976F6F /* ILCrashReporter.xcodeproj */;
-				},
-				{
 					ProductGroup = F9AA030D092FA2E20094A059 /* Products */;
 					ProjectRef = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
 				},
@@ -2726,20 +2685,6 @@
 			fileType = wrapper.application;
 			path = RegexTest.app;
 			remoteRef = F911CB4808972F7300ABDAC6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F91B7FC4092BFBD900976F6F /* ILCrashReporter.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ILCrashReporter.framework;
-			remoteRef = F91B7FC3092BFBD900976F6F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F91B7FC6092BFBD900976F6F /* CrashReporter.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = CrashReporter.app;
-			remoteRef = F91B7FC5092BFBD900976F6F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F95CC113087F54BF002C5694 /* BibImporter.mdimporter */ = {
@@ -2939,6 +2884,8 @@
 				3DFF35610816B55B0052F37C /* forward_small.tiff in Resources */,
 				3DFF35630816B5780052F37C /* reload_small.tiff in Resources */,
 				CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */,
+				F9B07D14082B1B9000345747 /* BibDeskSuite.scriptSuite in Resources */,
+				F9B07D15082B1B9100345747 /* BibDeskSuite.scriptTerminology in Resources */,
 				3D8A5520082D1F86008E818C /* BibDesk Help in Resources */,
 				3DA82939083ECE9300321864 /* Localizable.strings in Resources */,
 				F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */,
@@ -2998,6 +2945,7 @@
 			isa = PBXRezBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9C4C42D097619AE00DF25F3 /* BibDeskScripting.r in Rez */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3042,6 +2990,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help;\ntexi2html=./texi2html\n\nINPUT='BibDesk Help/bibdesk.texi'\nDEST='BibDesk Help'\n\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\n\t${texi2html} \"${LOC_DIR}/${INPUT}\" --init-file=applehelp.init --prefix=\"BibDesk Help\" --output=\"${LOC_DIR}/${DEST}\" --split=node && \\\n\tperl -pi -e 's#<!--AppleMeta-->#<meta name=\\\"AppleTitle\\\" content=\\\"BibDesk Help\\\"><meta name=\\\"AppleIcon\\\" content=\\\"BibDesk%20Help/gfx/BibDeskIcon.png\\\"><meta name=\\\"robots\\\" content=\\\"anchors\\\">#' \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help.html && \\\n\tpython postprocess-nontitle.py \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help_*.html;\\\ndone;\n";
+		};
+		F9022E88075809ED00C3F701 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				Scripting/BibDesk.sdef,
+			);
+			outputPaths = (
+				"${SRCROOT}/BibDeskSuite.scriptSuite",
+				"${SRCROOT}/BibDeskSuite.scriptTerminology",
+				"${SRCROOT}/BibDeskScripting.r",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/bin/sdp -f ast Scripting/BibDesk.sdef\nexit 0";
 		};
 		F91E54660853576600208CDF /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3367,11 +3332,6 @@
 			name = AGRegex;
 			targetProxy = F911CBFC089737C000ABDAC6 /* PBXContainerItemProxy */;
 		};
-		F91B8025092BFEE100976F6F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = ILCrashReporter;
-			targetProxy = F91B8024092BFEE100976F6F /* PBXContainerItemProxy */;
-		};
 		F98870D807580EA1001D4D49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
@@ -3381,11 +3341,6 @@
 			isa = PBXTargetDependency;
 			name = OmniBase;
 			targetProxy = F9A66E4B092FAF9400AF31D5 /* PBXContainerItemProxy */;
-		};
-		F9A66E4E092FAFA200AF31D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = CrashReporter;
-			targetProxy = F9A66E4D092FAFA200AF31D5 /* PBXContainerItemProxy */;
 		};
 		F9A66E50092FAFAC00AF31D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3837,7 +3792,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 485;
+				CURRENT_PROJECT_VERSION = 484;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_DEBUGGING_SYMBOLS = default;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3883,7 +3838,7 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 485;
+				CURRENT_PROJECT_VERSION = 484;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -3934,7 +3889,7 @@
 		F993F1BF08553A61007A7657 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 485;
+				CURRENT_PROJECT_VERSION = 484;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -3965,7 +3920,7 @@
 		F993F1C008553A61007A7657 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 485;
+				CURRENT_PROJECT_VERSION = 484;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -4735,7 +4690,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = ppc;
-				CURRENT_PROJECT_VERSION = 485;
+				CURRENT_PROJECT_VERSION = 484;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
