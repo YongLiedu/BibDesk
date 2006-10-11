@@ -271,6 +271,8 @@
 		CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */; };
 		CE6FB32209DFFCB5005E3E14 /* BDSKSharingBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */; };
 		CE6FB32309DFFCB5005E3E14 /* BDSKSharingBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */; };
+		CE7595FF0ADDB0E0009C1329 /* BDSKContainerView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */; };
+		CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */; };
 		CE77A7FD0923BEBA0019D901 /* NSTableView_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */; };
 		CE77A7FE0923BEBA0019D901 /* NSTableView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */; };
 		CE7E1BB50A0B8EE7009D04C3 /* GroupAction.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */; };
@@ -981,7 +983,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
@@ -1064,6 +1066,8 @@
 		CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAToolbarItem_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingBrowser.h; sourceTree = "<group>"; };
 		CE6FB32109DFFCB5005E3E14 /* BDSKSharingBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSharingBrowser.m; sourceTree = "<group>"; };
+		CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKContainerView.h; sourceTree = "<group>"; };
+		CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKContainerView.m; sourceTree = "<group>"; };
 		CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableView_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAction.tiff; path = Images/GroupAction.tiff; sourceTree = "<group>"; };
@@ -1722,6 +1726,7 @@
 				2730077707CF20B500F2E485 /* BDSKBorderlessKeyWindow.m */,
 				CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */,
 				CE34E9780A03C16B00222942 /* BDSKConditionsView.m */,
+				CE7595FE0ADDB0E0009C1329 /* BDSKContainerView.m */,
 				CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */,
 				F9022C410758027800C3F701 /* BDSKMainTableView.m */,
 				F9022C430758027800C3F701 /* BDSKDragWindow.m */,
@@ -2066,6 +2071,7 @@
 				CE38FB82091D946900BCB69D /* BDSKCondition.h */,
 				CE38FB84091D946A00BCB69D /* BDSKConditionController.h */,
 				CE34E9770A03C16B00222942 /* BDSKConditionsView.h */,
+				CE7595FD0ADDB0E0009C1329 /* BDSKContainerView.h */,
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
@@ -2539,6 +2545,7 @@
 				F9937E260AD8269E001D1DFB /* CIImage_BDSKExtensions.h in Headers */,
 				F9937E270AD8269F001D1DFB /* BDSKSpotlightView.h in Headers */,
 				CE95AF170ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.h in Headers */,
+				CE7595FF0ADDB0E0009C1329 /* BDSKContainerView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3316,6 +3323,7 @@
 				F9937E2B0AD826AE001D1DFB /* NSBezierPath_CoreImageExtensions.m in Sources */,
 				F9937E2C0AD826AF001D1DFB /* NSFileManager_ExtendedAttributes.m in Sources */,
 				CE95AF180ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m in Sources */,
+				CE7596000ADDB0E1009C1329 /* BDSKContainerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
