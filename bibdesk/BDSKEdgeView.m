@@ -47,9 +47,6 @@
        NSColor *color = [NSColor gridColor];
 	   edgeColors = [[NSMutableArray alloc] initWithObjects:color, color, color, color, nil];
 	   edges = BDSKNoEdgeMask; // we start with no edge, so we can use this in IB without getting weird offsets
-	   contentView = [[NSView alloc] initWithFrame:[self contentRect]];
-	   [super addSubview:contentView];
-	   [contentView release];
     }
     return self;
 }
@@ -58,13 +55,6 @@
 	if (self = [super initWithCoder:decoder]) {
 		edgeColors = [[decoder decodeObjectForKey:@"edgeColors"] retain];
 		edges = [decoder decodeIntForKey:@"edges"];
-		if ([[super subviews] count]) { // not sure if this works OK, but we're not using it now as IB calls initWithFrame
-			[self setContentView:[[super subviews] objectAtIndex:0]];
-		} else {
-			contentView = [[NSView alloc] initWithFrame:[self contentRect]];
-			[super addSubview:contentView];
-			[contentView release];
-		}
 	}
 	return self;
 }
@@ -138,20 +128,6 @@
 	}
 }
 
-- (id)contentView {
-	return contentView;
-}
-
-- (void)setContentView:(NSView *)aView {
-	if (aView != contentView) {
-		[contentView removeFromSuperview];
-		[super addSubview:aView]; // replaceSubview:with: does not work, as it calls [self addSubview:]
-		contentView = aView;
-		[contentView setFrame:[self contentRect]];
-		[self setNeedsDisplay:YES];
-	}
-}
-
 - (NSRect)contentRect {
 	NSRect rect = [self bounds];
 	NSRect edgeRect;
@@ -198,44 +174,6 @@
 		frame = NSIntersectionRect(frame, contentRect);
 		[view setFrame:frame];
 	}
-}
-
-// NSView overrides to update the contentView and add subviews to that view
-
-- (void)setFrame:(NSRect)frameRect {
-	[super setFrame:frameRect];
-	[contentView setFrame:[self contentRect]];
-}
-
-- (void)setFrameSize:(NSSize)newSize {
-	[super setFrameSize:newSize];
-	[contentView setFrame:[self contentRect]];
-}
-
-- (void)resizeWithOldSuperviewSize:(NSSize)oldSize {
-	[super resizeWithOldSuperviewSize:oldSize];
-	[contentView setFrame:[self contentRect]];
-}
-
-- (void)addSubview:(NSView *)aView {
-	NSRect frame = [aView frame];
-	frame = [contentView convertRect:frame fromView:self];
-	[aView setFrame:frame];
-	[contentView addSubview:aView];
-}
-
-- (void)addSubview:(NSView *)aView positioned:(NSWindowOrderingMode)place relativeTo:(NSView *)otherView {
-	NSRect frame = [aView frame];
-	frame = [contentView convertRect:frame fromView:self];
-	[aView setFrame:frame];
-	[contentView addSubview:aView positioned:place relativeTo:otherView];
-}
-
-- (void)replaceSubview:(NSView *)aView with:(NSView *)newView {
-	NSRect frame = [aView frame];
-	frame = [contentView convertRect:frame fromView:self];
-	[aView setFrame:frame];
-	[contentView replaceSubview:aView with:newView];
 }
 
 @end

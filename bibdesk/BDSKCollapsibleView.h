@@ -37,20 +37,18 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKContainerView.h"
 #import "BDSKEdgeView.h"
 
 
-@interface BDSKCollapsibleView : NSView {
+@interface BDSKCollapsibleView : BDSKContainerView {
 	NSSize minSize;
 	int collapseEdges;
-	id contentView;
 }
 
 - (NSSize)minSize;
 - (void)setMinSize:(NSSize)size;
 - (int)collapseEdges;
 - (void)setCollapseEdges:(int)mask;
-- (id)contentView;
-- (NSRect)contentRect;
 
 @end

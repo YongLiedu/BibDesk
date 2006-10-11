@@ -37,6 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKContainerView.h"
 
 
 enum {
@@ -48,10 +49,9 @@ enum {
 	BDSKEveryEdgeMask = BDSKMinXEdgeMask | BDSKMinYEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask,
 };
 
-@interface BDSKEdgeView : NSView {
+@interface BDSKEdgeView : BDSKContainerView {
 	int edges;
 	NSMutableArray *edgeColors;
-	id contentView;
 }
 
 /*!
@@ -109,28 +109,6 @@ enum {
 	@param edge The edge for which you want set the color.
 */
 - (void)setColor:(NSColor *)aColor forEdge:(NSRectEdge)edge;
-
-/*!
-	@method contentView
-	@abstract Returns the contentView of the edgeView. 
-	@discussion (discussion)
-*/
-- (id)contentView;
-
-/*!
-	@method setContentView
-	@abstract Sets the contentView to aView, resizing it if necessary.
-	@discussion (discussion)
-	@param aView The view to set as contentView.
-*/
-- (void)setContentView:(NSView *)aView;
-
-/*!
-	@method contentRect
-	@abstract Returns the rect for the content.
-	@discussion (discussion)
-*/
-- (NSRect)contentRect;
 
 /*!
 	@method adjustSubviews
