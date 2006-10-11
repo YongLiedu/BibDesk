@@ -379,7 +379,7 @@ NSString *BDSKComputerName() {
     
     NSString *errorDescription = NSLocalizedString(@"Unable to Share This Document", @"");
     NSString *recoverySuggestion = NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @"");
-    NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:errorDescription, NSLocalizedDescriptionKey, errorMessage, @"NSLocalizedFailureReason", recoverySuggestion, @"NSLocalizedRecoverySuggestionErrorKey", nil]];
+    NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:errorDescription, NSLocalizedDescriptionKey, errorMessage, NSLocalizedFailureReasonErrorKey, recoverySuggestion, NSLocalizedRecoverySuggestionErrorKey, nil]];
 
     [self disableSharing];
     

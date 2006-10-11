@@ -42,11 +42,15 @@
 
 - (NSURL *)fileURLByResolvingAliases;
 - (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
+- (NSURL *)URLByDeletingLastPathComponent;
+- (NSURL *)URLByDeletingPathExtension;
+
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
 + (NSCharacterSet *)illegalURLCharacterSet;
 - (NSString *)lastPathComponent;
 - (NSString *)precomposedPath;
+- (NSString *)pathExtension;
 
 @end
 

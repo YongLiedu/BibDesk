@@ -107,6 +107,7 @@
 #import "NSMenu_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
+#import "NSURL_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -801,7 +802,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         if(selectedTemplate){
             NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
             NSURL *accessoryURL = nil;
-            NSURL *destDirURL = [NSURL fileURLWithPath:[[absoluteURL path] stringByDeletingLastPathComponent]];
+            NSURL *destDirURL = [absoluteURL URLByDeletingLastPathComponent];
             while(accessoryURL = [accessoryFileEnum nextObject]){
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
@@ -2628,7 +2629,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			tc = [[[NSTableColumn alloc] initWithIdentifier:colName] autorelease];
             [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
 			[tc setEditable:NO];
-			[[tc dataCell] setDrawsBackground:NO]; // this is necessary for the alternating row background before Tiger
+
             if([typeManager isURLField:colName]){
                 [tc setDataCell:imageCell];
             }else if([typeManager isRatingField:colName]){

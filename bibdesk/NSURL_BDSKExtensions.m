@@ -158,7 +158,17 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     
     return [(id)newURL autorelease];
 }
-    
+
+- (NSURL *)URLByDeletingLastPathComponent;
+{
+    return [(id)CFURLCreateCopyDeletingLastPathComponent(CFGetAllocator((CFURLRef)self), (CFURLRef)self) autorelease];
+}
+
+- (NSURL *)URLByDeletingPathExtension;
+{
+    return [(id)CFURLCreateCopyDeletingPathExtension(CFGetAllocator((CFURLRef)self), (CFURLRef)self) autorelease];
+}
+
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 {
     return [self URLWithStringByNormalizingPercentEscapes:string baseURL:nil];
@@ -212,6 +222,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
 - (NSString *)precomposedPath;
 {
     return [[self path] precomposedStringWithCanonicalMapping];
+}
+
+- (NSString *)pathExtension;
+{
+    return [(id)CFURLCopyPathExtension((CFURLRef)self) autorelease];
 }
 
 @end

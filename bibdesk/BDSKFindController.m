@@ -406,7 +406,7 @@ enum {
             if(error != nil){
                 NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"");
                 NSString *reason = NSLocalizedString(@"The regular expression you entered is not valid.", @"");
-                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
                 *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
             }
 			return NO;
@@ -416,7 +416,7 @@ enum {
 		if ([self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
             if(error != nil){
                 NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"");
-                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
                 *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
             }
 			return NO;
@@ -431,7 +431,7 @@ enum {
 		[self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"");
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		return NO;
@@ -445,7 +445,7 @@ enum {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"");
             NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"The entry \"%@\" is not a valid regular expression.", @""), [self findString]];
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		[findComboBox selectText:self];
@@ -472,7 +472,7 @@ enum {
 	    [self stringIsValidAsComplexString:[self findString] errorMessage:&reason] == NO) {
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"");
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		[findComboBox selectText:self];
@@ -487,7 +487,7 @@ enum {
 	   [self stringIsValidAsComplexString:[self replaceString] errorMessage:&reason] == NO){
         if(error != nil){
             NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"");
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		[replaceComboBox selectText:self];
