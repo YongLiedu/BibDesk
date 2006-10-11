@@ -67,22 +67,6 @@ enum {
     BDSKTemplateDragCopyType
 };
 
-// these should correspond to the tags of export menu items
-enum {
-	BDSKBibTeXExportFileType = 0, 
-	BDSKRISExportFileType = 1, 
-	BDSKLTBExportFileType = 2, 
-	BDSKMODSExportFileType = 3, 
-	BDSKEndNoteExportFileType = 4, 
-	BDSKAtomExportFileType = 5, 
-	BDSKRSSExportFileType = 6,
-	BDSKHTMLExportFileType = 7,
-	BDSKRTFExportFileType = 8,
-	BDSKRTFDExportFileType = 9,
-	BDSKDocExportFileType = 10,
-	BDSKTemplateExportFileType = 11
-};
-
 // our main document types
 extern NSString *BDSKBibTeXDocumentType;
 extern NSString *BDSKRISDocumentType;
