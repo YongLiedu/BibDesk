@@ -59,6 +59,7 @@
     @result     (description)
 */
 - (NSString *)UTIForURL:(NSURL *)fileURL;
+- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
 
 /*!
     @method     UTIForPathExtension:

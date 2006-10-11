@@ -156,22 +156,31 @@
     return (err == noErr);
 }
 
-- (NSString *)UTIForURL:(NSURL *)fileURL;
+- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
 {
     NSParameterAssert([fileURL isFileURL]);
     
     fileURL = [fileURL fileURLByResolvingAliases];
     FSRef fileRef;
-    CFURLGetFSRef((CFURLRef)fileURL, &fileRef);
-    CFTypeRef theUTI = NULL;
-    OSStatus err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
+    OSStatus err;
     
-    if(err == noErr && theUTI != NULL){
-        NSAssert((CFGetTypeID(theUTI) == CFStringGetTypeID()), @"Unexpected CF type returned from LSCopyItemAttribute");
-        return [(NSString *)theUTI autorelease];
-    }else{
-        return nil;
-    }
+    if (FALSE == CFURLGetFSRef((CFURLRef)fileURL, &fileRef))
+        err = coreFoundationUnknownErr;
+    
+    // kLSItemContentType returns a CFStringRef, according to the header
+    CFTypeRef theUTI = NULL;
+    if (noErr == err)
+        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
+    
+    if (noErr != err && NULL != error)
+        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObject:fileURL forKey:NSURLErrorKey]];
+    
+    return [(NSString *)theUTI autorelease];
+}
+
+- (NSString *)UTIForURL:(NSURL *)fileURL;
+{
+    return [self UTIForURL:fileURL error:NULL];
 }
 
 - (NSString *)UTIForPathExtension:(NSString *)extension;
