@@ -136,18 +136,20 @@ static id sharedInstance = nil;
 
 - (IBAction)checkForUpdates:(id)sender;
 {    
-    // @@ could reset the BDSKUpdateCheckLastDateKey
+    // reset date of last check and reschedule the timer if it's hourly
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUpdateCheckIntervalKey] == BDSKCheckForUpdatesHourly) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[NSDate date] description] forKey:BDSKUpdateCheckLastDateKey];
+        [self scheduleUpdateCheckIfNeeded];
+    }
 
     // check for network availability and display a warning if it's down
     NSError *error = nil;
-    if([self checkForNetworkAvailability:&error] == NO){
+    if([self checkForNetworkAvailability:&error] == NO || [self downloadPropertyListFromServer:&error] == NO) {
         
         // display a warning based on the error and bail out now
         [self displayAlertForUpdateCheckFailure:error];
         return;
     }
-    
-    [self downloadPropertyListFromServer:&error];
     
     OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber];
     
@@ -379,12 +381,7 @@ static int numberOfConcurrentChecks = 0;
     numberOfConcurrentChecks++;
     
     // don't bother displaying network availability warnings for an automatic check
-    if([self checkForNetworkAvailability:NULL] == NO){
-        numberOfConcurrentChecks--;
-        [pool release];
-        return;
-    } else if (numberOfConcurrentChecks > 1) {
-        NSLog(@"Already running an update check; bailing out.");
+    if([self checkForNetworkAvailability:NULL] == NO || numberOfConcurrentChecks > 1){
         numberOfConcurrentChecks--;
         [pool release];
         return;
