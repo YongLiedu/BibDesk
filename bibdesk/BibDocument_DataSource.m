@@ -1211,11 +1211,11 @@
 - (BOOL)tableView:(NSTableView *)tv shouldTrackTableColumn:(NSTableColumn *)tableColumn row:(int)row;
 {
     // this can happen when we revert
-    if (row == -1 || row >= [[self publications] count])
+    if (row == -1 || row >= [self numberOfRowsInTableView:tv])
         return NO;
     
     NSString *tcID = [tableColumn identifier];
-    return [[BibTypeManager sharedManager] isURLField:tcID] && [[[self publications] objectAtIndex:row] URLForField:tcID];
+    return [[BibTypeManager sharedManager] isURLField:tcID] && [[shownPublications objectAtIndex:row] URLForField:tcID];
 }
 
 - (void)tableView:(NSTableView *)tv mouseEnteredTableColumn:(NSTableColumn *)tableColumn row:(int)row;
@@ -1223,9 +1223,8 @@
     if (row == -1 || row >= [[self publications] count])
         return;
     
-    NSString *tcID = [tableColumn identifier];
-    BibItem *pub = [[self publications] objectAtIndex:row];
-    NSURL *url = [pub URLForField:tcID];
+    BibItem *pub = [shownPublications objectAtIndex:row];
+    NSURL *url = [pub URLForField:[tableColumn identifier]];
     if (url)
         [self setStatus:[url isFileURL] ? [[url path] stringByAbbreviatingWithTildeInPath] : [url absoluteString]];
 }
