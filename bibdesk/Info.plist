@@ -772,8 +772,10 @@
 					<true/>
 					<key>BibEditor window autosave name</key>
 					<string></string>
-					<key>Check for updates when starting</key>
-					<true/>
+					<key>BDSKUpdateCheckIntervalKey</key>
+                    <integer>1</integer>
+                    <key>BDSKUpdateCheckLastDateKey</key>
+                    <string></string>
 					<key>Check spelling continuously while editing</key>
 					<false/>
 					<key>Column Widths by Name</key>

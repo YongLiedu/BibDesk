@@ -59,7 +59,7 @@
     
     [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
     
-    [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdatesKey] == YES) ? NSOnState : NSOffState];
+    [checkForUpdatesButton selectItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]];
 
     [warnOnDeleteButton setState:([defaults boolForKey:BDSKWarnOnDeleteKey] == YES) ? NSOnState : NSOffState];
 
@@ -72,7 +72,7 @@
 }
 
 - (IBAction)toggleAutoCheckForUpdates:(id)sender{
-    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKAutoCheckForUpdatesKey];
+    [defaults setInteger:[[sender selectedItem] tag] forKey:BDSKUpdateCheckIntervalKey];
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender{

@@ -114,8 +114,6 @@
 - (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXString:(NSString *)fullString;
 - (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index;
 
-- (void)checkForUpdatesInBackground;
-- (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
 - (IBAction)visitWebSite:(id)sender;
 - (IBAction)checkForUpdates:(id)sender;
 

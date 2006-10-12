@@ -43,7 +43,7 @@
     int prevStartupBehaviorTag;
 	
 	IBOutlet NSButton* editOnPasteButton;
-    IBOutlet NSButton *checkForUpdatesButton;
+    IBOutlet NSPopUpButton *checkForUpdatesButton;
     IBOutlet NSButton *warnOnDeleteButton;
     IBOutlet NSButton *warnOnRemovalFromGroupButton;
     IBOutlet NSButton *warnOnRenameGroupButton;

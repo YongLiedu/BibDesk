@@ -15,7 +15,7 @@
             CLASS = "BibPref_General"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                checkForUpdatesButton = NSButton; 
+                checkForUpdatesButton = NSPopUpButton; 
                 defaultBibFileTextField = NSTextField; 
                 editOnPasteButton = NSButton; 
                 startupBehaviorRadio = NSMatrix; 
