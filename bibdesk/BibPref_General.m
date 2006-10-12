@@ -35,7 +35,7 @@
  */
 
 #import "BibPref_General.h"
-
+#import "BDSKUpdateChecker.h"
 
 @implementation BibPref_General
 
@@ -71,8 +71,18 @@
     
 }
 
-- (IBAction)toggleAutoCheckForUpdates:(id)sender{
-    [defaults setInteger:[[sender selectedItem] tag] forKey:BDSKUpdateCheckIntervalKey];
+// tags correspond to BDSKUpdateCheckInterval enum
+- (IBAction)changeUpdateInterval:(id)sender{
+    BDSKUpdateCheckInterval interval = [[sender selectedItem] tag];
+    [defaults setInteger:interval forKey:BDSKUpdateCheckIntervalKey];
+    
+    // an annoying dialog to be seen by annoying users...
+    if (BDSKCheckForUpdatesNever == interval || BDSKCheckForUpdatesMonthly == interval) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Are you sure this is wise?", @"") 
+                                         defaultButton:nil alternateButton:nil otherButton:nil 
+                             informativeTextWithFormat:NSLocalizedString(@"Some BibDesk users complain of too-frequent updates.  However, updates generally fix bugs that affect the integrity of your data.  If you value your data, a daily or weekly interval is a better choice.", @"")];
+        [alert beginSheetModalForWindow:[controlBox window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    }
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender{

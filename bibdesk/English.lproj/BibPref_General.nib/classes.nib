@@ -4,13 +4,13 @@
             ACTIONS = {
                 changeEditOnPaste = id; 
                 changeStartupBehavior = id; 
+                changeUpdateInterval = id; 
                 changeWarnOnDelete = id; 
                 changeWarnOnGenerateCiteKeys = id; 
                 changeWarnOnRemovalFromGroup = id; 
                 changeWarnOnRenameGroup = id; 
                 chooseAutoOpenFile = id; 
                 setAutoOpenFilePath = id; 
-                toggleAutoCheckForUpdates = id; 
             }; 
             CLASS = "BibPref_General"; 
             LANGUAGE = ObjC; 

@@ -54,8 +54,8 @@
 
 - (IBAction)setAutoOpenFilePath:(id)sender;
 - (IBAction)changeStartupBehavior:(id)sender;
-- (IBAction) chooseAutoOpenFile:(id) sender;
-- (IBAction)toggleAutoCheckForUpdates:(id)sender;
+- (IBAction)chooseAutoOpenFile:(id) sender;
+- (IBAction)changeUpdateInterval:(id)sender;
 - (IBAction)changeEditOnPaste:(id)sender;
 - (IBAction)changeWarnOnDelete:(id)sender;
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender;
