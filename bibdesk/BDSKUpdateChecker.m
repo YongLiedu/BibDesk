@@ -39,6 +39,20 @@
 #import "BDSKUpdateChecker.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 
+@interface BDSKUpdateChecker (Private)
+
+- (OFVersionNumber *)latestReleasedVersionNumber:(NSError **)error;
+- (void)displayAlertForUpdateCheckFailure:(NSError *)error;
+- (CFGregorianUnits)updateCheckGregorianUnits;
+- (NSTimeInterval)updateCheckTimeInterval;
+- (NSDate *)nextUpdateCheckDate;
+- (BOOL)checkForNetworkAvailability:(NSError **)error;
+- (void)checkForUpdatesInBackground:(NSTimer *)timer;
+- (void)checkForUpdatesInBackground;
+- (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
+
+@end
+
 static id sharedInstance = nil;
 
 @implementation BDSKUpdateChecker
@@ -60,6 +74,69 @@ static id sharedInstance = nil;
 {
     return [super init];
 }
+
+- (void)scheduleUpdateCheckIfNeeded;
+{
+    if ([self updateCheckTimeInterval]) {
+        
+        NSDate *nextCheckDate = [self nextUpdateCheckDate];
+        
+        // if the date is past, check immediately
+        if ([nextCheckDate timeIntervalSinceNow] <= 0) {
+            [self checkForUpdatesInBackground:nil];
+            
+        } else {
+            
+            // timer will be invalidated after it fires
+            NSTimer *timer = [[NSTimer alloc] initWithFireDate:nextCheckDate 
+                                                      interval:[self updateCheckTimeInterval] 
+                                                        target:self 
+                                                      selector:@selector(checkForUpdatesInBackground:) 
+                                                      userInfo:nil repeats:NO];
+            
+            [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+            [timer release];
+        }
+    }
+}
+
+- (IBAction)checkForUpdates:(id)sender;
+{    
+    // check for network availability and display a warning if it's down
+    NSError *error = nil;
+    if([self checkForNetworkAvailability:&error] == NO){
+        
+        // display a warning based on the error and bail out now
+        [self displayAlertForUpdateCheckFailure:error];
+        return;
+    }
+    
+    OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber:&error];
+    
+    if (nil != remoteVersion) {
+        NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+        OFVersionNumber *localVersion = [[[OFVersionNumber alloc] initWithVersionString:currVersionNumber] autorelease];
+        
+        if([remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
+            [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString]];
+        } else {
+            // tell user software is up to date
+            NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
+                            NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
+                            nil, nil, nil);                
+        }
+    } else {
+        
+        // likely an error page or other download failure
+        [self displayAlertForUpdateCheckFailure:error];
+    }
+    
+}
+
+@end
+
+@implementation BDSKUpdateChecker (Private)
+
 
 - (OFVersionNumber *)latestReleasedVersionNumber:(NSError **)error;
 {
@@ -161,33 +238,6 @@ static id sharedInstance = nil;
     return [(id)CFDateCreate(CFAllocatorGetDefault(), nextCheckTime) autorelease];
 }
 
-
-- (void)scheduleUpdateCheckIfNeeded;
-{
-    if ([self updateCheckTimeInterval]) {
-        
-        NSDate *nextCheckDate = [self nextUpdateCheckDate];
-        
-        // if the date is past, check immediately
-        if ([nextCheckDate timeIntervalSinceNow] <= 0) {
-            [self checkForUpdatesInBackground:nil];
-            
-        } else {
-            
-            // timer will be invalidated after it fires
-            NSTimer *timer = [[NSTimer alloc] initWithFireDate:nextCheckDate 
-                                                      interval:[self updateCheckTimeInterval] 
-                                                        target:self 
-                                                      selector:@selector(checkForUpdatesInBackground:) 
-                                                      userInfo:nil repeats:NO];
-            
-            [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-            [timer release];
-        }
-    }
-}
-
-
 - (void)checkForUpdatesInBackground:(NSTimer *)timer;
 {
     [NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
@@ -195,7 +245,8 @@ static id sharedInstance = nil;
     [self scheduleUpdateCheckIfNeeded];
 }
 
-- (BOOL)checkForNetworkAvailability:(NSError **)error{
+- (BOOL)checkForNetworkAvailability:(NSError **)error;
+{
     
     BOOL result = NO;
     SCNetworkConnectionFlags flags;
@@ -226,6 +277,7 @@ static int numberOfConcurrentChecks = 0;
     
     // don't bother displaying network availability warnings for an automatic check
     if([self checkForNetworkAvailability:NULL] == NO){
+        numberOfConcurrentChecks--;
         [pool release];
         return;
     } else if (numberOfConcurrentChecks > 1) {
@@ -260,39 +312,6 @@ static int numberOfConcurrentChecks = 0;
                              NSLocalizedString(@"Download", @""), NSLocalizedString(@"Ignore",@"Ignore"), nil, latestVersionNumber, nil);
     if (button == NSOKButton) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
-    }
-    
-}
-
-- (IBAction)checkForUpdates:(id)sender;
-{    
-    // check for network availability and display a warning if it's down
-    NSError *error = nil;
-    if([self checkForNetworkAvailability:&error] == NO){
-        
-        // display a warning based on the error and bail out now
-        [self displayAlertForUpdateCheckFailure:error];
-        return;
-    }
-    
-    OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber:&error];
-    
-    if (nil != remoteVersion) {
-        NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-        OFVersionNumber *localVersion = [[[OFVersionNumber alloc] initWithVersionString:currVersionNumber] autorelease];
-        
-        if([remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
-            [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString]];
-        } else {
-            // tell user software is up to date
-            NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
-                            NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
-                            nil, nil, nil);                
-        }
-    } else {
-        
-        // likely an error page or other download failure
-        [self displayAlertForUpdateCheckFailure:error];
     }
     
 }

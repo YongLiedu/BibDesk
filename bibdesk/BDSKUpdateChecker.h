@@ -57,14 +57,4 @@ typedef enum {
 - (void)scheduleUpdateCheckIfNeeded;
 - (IBAction)checkForUpdates:(id)sender;
 
-- (OFVersionNumber *)latestReleasedVersionNumber:(NSError **)error;
-- (void)displayAlertForUpdateCheckFailure:(NSError *)error;
-- (CFGregorianUnits)updateCheckGregorianUnits;
-- (NSTimeInterval)updateCheckTimeInterval;
-- (NSDate *)nextUpdateCheckDate;
-- (void)checkForUpdatesInBackground:(NSTimer *)timer;
-- (void)checkForUpdatesInBackground;
-- (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
-
-
 @end
