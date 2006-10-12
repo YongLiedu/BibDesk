@@ -43,6 +43,10 @@
 IBOutlet NSTextView *textView;
 }
 + (id)sharedReadMeController;
+- (NSTextView *)textView;
+- (void)displayAttributedString:(NSAttributedString *)attrString;
+- (void)setWindowTitle:(NSString *)aTitle;
+
 @end
 
 @interface BDSKRelNotesController : BDSKReadMeController {}

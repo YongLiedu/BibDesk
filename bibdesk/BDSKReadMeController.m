@@ -60,6 +60,16 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
                                withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ReadMe" ofType:@"rtf"]]];
 }
 
+- (NSTextView *)textView { return textView; }
+
+- (void)displayAttributedString:(NSAttributedString *)attrString {
+    [[textView textStorage] setAttributedString:attrString];
+}
+
+- (void)setWindowTitle:(NSString *)aTitle {
+    [[self window] setTitle:aTitle];
+}
+
 @end
 
 @implementation BDSKRelNotesController
