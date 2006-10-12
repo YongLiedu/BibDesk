@@ -47,9 +47,13 @@ typedef enum {
     BDSKCheckForUpdatesMonthly =  3
 } BDSKUpdateCheckInterval;
 
+@class BDSKReadMeController;
 
 @interface BDSKUpdateChecker : NSObject {
-
+    NSLock *plistLock;
+    NSDictionary *propertyListFromServer;
+    BDSKReadMeController *releaseNotesWindowController;
+    NSTimer *updateTimer;
 }
 
 // API
