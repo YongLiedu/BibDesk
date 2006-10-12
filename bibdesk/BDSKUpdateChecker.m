@@ -136,11 +136,9 @@ static id sharedInstance = nil;
 
 - (IBAction)checkForUpdates:(id)sender;
 {    
-    // reset date of last check and reschedule the timer if it's hourly
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUpdateCheckIntervalKey] == BDSKCheckForUpdatesHourly) {
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[NSDate date] description] forKey:BDSKUpdateCheckLastDateKey];
-        [self scheduleUpdateCheckIfNeeded];
-    }
+    // reset date of last check and reschedule the timer
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[NSDate date] description] forKey:BDSKUpdateCheckLastDateKey];
+    [self scheduleUpdateCheckIfNeeded];
 
     // check for network availability and display a warning if it's down
     NSError *error = nil;
