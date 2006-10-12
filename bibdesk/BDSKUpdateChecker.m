@@ -87,6 +87,8 @@ static id sharedInstance = nil;
 
 - (void)dealloc
 {
+    [OFPreference removeObserver:self forPreference:nil];
+    
     // these objects are only accessed from the main thread
     [releaseNotesWindowController release];
     [self setUpdateTimer:nil];
