@@ -42,6 +42,7 @@
 
 @interface BDSKUpdateChecker (Private)
 
+- (NSURL *)propertyListURL;
 - (void)handleUpdateIntervalChanged:(NSNotification *)note;
 - (void)setUpdateTimer:(NSTimer *)aTimer;
 - (OFVersionNumber *)localVersionNumber;
@@ -184,6 +185,11 @@ static id sharedInstance = nil;
     }
 }
 
+- (NSURL *)propertyListURL;
+{
+    return [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"];
+}
+
 // we assume this is only called /after/ a successful plist download; if not, it returns nil
 - (NSURL *)releaseNotesURL;
 {
@@ -213,11 +219,11 @@ static id sharedInstance = nil;
     NSError *downloadError = nil;
     
     // make sure we ignore the cache policy; use default timeout of 60 seconds
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[self propertyListURL] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
     NSURLResponse *response;
     
     // load it synchronously; either the user requested this on the main thread, or this is the update thread
-    NSData *theData = nil; //[NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&downloadError];
+    NSData *theData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&downloadError];
     NSDictionary *versionDictionary = nil;
     BOOL success;
     
