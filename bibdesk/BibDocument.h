@@ -322,6 +322,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (IBAction)emailPubCmd:(id)sender;
 
+- (IBAction)sendToLyX:(id)sender;
+
     /*!
     @method editPubCmd
     @abstract an action to edit a publication has happened. 

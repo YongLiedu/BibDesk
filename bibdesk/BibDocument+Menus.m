@@ -45,6 +45,7 @@
 #import "BibItem.h"
 #import "BibTypeManager.h"
 #import "BDSKTemplate.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 @implementation BibDocument (Menus)
 
@@ -318,6 +319,26 @@
 		return YES;
 	}
 }	
+
+- (BOOL)validateSendToLyXMenuItem:(NSMenuItem*) menuItem {
+    if ([self numberOfSelectedPubs] == 0)
+        return NO;
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *appSupportPath = [fileManager applicationSupportDirectory:kUserDomain];
+    NSString *lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX-1.4"] stringByAppendingPathComponent:@".lyxpipe.in"];
+    
+    if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
+        lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX"] stringByAppendingPathComponent:@".lyxpipe.in"];
+        if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
+            lyxPipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
+            if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
+               return NO;
+            }
+        }
+    }
+    return YES;
+}
 
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
@@ -815,6 +836,9 @@
 	}
 	else if(act == @selector(emailPubCmd:)) {
 		return ([self numberOfSelectedPubs] != 0);
+	}
+	else if(act == @selector(sendToLyX:)) {
+		return [self validateSendToLyXMenuItem:menuItem];
 	}
 	else if(act == @selector(openLinkedFile:)) {
 		return [self validateOpenLinkedFileMenuItem:menuItem];

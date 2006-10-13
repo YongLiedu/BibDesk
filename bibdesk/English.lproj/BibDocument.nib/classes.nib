@@ -109,6 +109,7 @@
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
                 selectPossibleDuplicates = id; 
+                sendToLyX = id; 
                 showMacrosWindow = id; 
                 sortForCrossrefs = id; 
                 sortGroupsByCount = id; 

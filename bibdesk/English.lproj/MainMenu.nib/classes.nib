@@ -137,6 +137,7 @@
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
                 selectPossibleDuplicates = id; 
+                sendToLyX = id; 
                 showDocumentInfoWindow = id; 
                 showFindPanel = id; 
                 showMacrosWindow = id; 

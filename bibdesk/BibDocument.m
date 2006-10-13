@@ -108,6 +108,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSData_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "BDSKShellTask.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1591,6 +1592,44 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 body:body
          attachments:files];
 
+}
+
+- (IBAction)sendToLyX:(id)sender {
+    if ([self numberOfSelectedPubs] == 0)
+        return;
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *appSupportPath = [fileManager applicationSupportDirectory:kUserDomain];
+    NSString *lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX-1.4"] stringByAppendingPathComponent:@".lyxpipe.in"];
+    
+    if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
+        lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX"] stringByAppendingPathComponent:@".lyxpipe.in"];
+        if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
+            lyxPipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
+            if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Unable to Find LyX Pipe")
+                                                 defaultButton:nil
+                                               alternateButton:nil
+                                                   otherButton:nil
+                                    informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"")];
+                [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+                return;
+            }
+        }
+    }
+    
+    NSEnumerator *itemEnum = [[self selectedPublications] objectEnumerator];
+    BibItem *item;
+    NSMutableString *cites = [NSMutableString string];
+    
+    while (item = [itemEnum nextObject]) {
+        if ([cites length] > 0) [cites appendString:@","];
+        [cites appendString:[item citeKey]];
+    }
+    
+    NSString *lyxCmd = [NSString stringWithFormat:@"echo LYXCMD:BibDesk:citation-insert:%@ > \"%@\"", cites, lyxPipePath];
+    
+    [[BDSKShellTask shellTask] runShellCommand:lyxCmd withInputString:nil];
 }
 
 - (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
