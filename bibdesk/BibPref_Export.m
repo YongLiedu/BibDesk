@@ -115,7 +115,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [prefListRadio selectCellWithTag:templatePrefList];
     [outlineView reloadData];
     [self synchronizePrefs];
-    [addButton setEnabled:(BOOL)[self canAddItem]];
+    [deleteButton setEnabled:[self canDeleteSelectedItem]];
+    [addButton setEnabled:[self canAddItem]];
 }
 
 - (void)setItemNodes:(NSArray *)array;
@@ -321,6 +322,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 - (BOOL)canDeleteSelectedItem
 {
     BDSKTreeNode *selItem = [outlineView selectedItem];
+    if (selItem == nil)
+        return NO;
     return ((templatePrefList == BDSKExportTemplateList && [selItem isLeaf] == NO) || 
             ([selItem isLeaf]  && [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO));
 }
