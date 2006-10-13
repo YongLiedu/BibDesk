@@ -42,6 +42,7 @@
     IBOutlet NSMatrix *startupBehaviorRadio;
     int prevStartupBehaviorTag;
 	
+    IBOutlet NSPopUpButton *emailTemplatePopup;
 	IBOutlet NSButton* editOnPasteButton;
     IBOutlet NSPopUpButton *checkForUpdatesButton;
     IBOutlet NSButton *warnOnDeleteButton;
@@ -54,6 +55,7 @@
 
 - (IBAction)setAutoOpenFilePath:(id)sender;
 - (IBAction)changeStartupBehavior:(id)sender;
+- (IBAction)changeEmailTemplate:(id)sender;
 - (IBAction)chooseAutoOpenFile:(id) sender;
 - (IBAction)changeUpdateInterval:(id)sender;
 - (IBAction)changeEditOnPaste:(id)sender;

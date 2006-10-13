@@ -1534,36 +1534,45 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (IBAction)emailPubCmd:(id)sender{
-    NSArray *selectedPubs = [self selectedPublications];
-    NSEnumerator *e = [selectedPubs objectEnumerator];
+    NSMutableArray *items = [[self selectedPublications] mutableCopy];
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
     BibItem *pub = nil;
     
     NSFileManager *dfm = [NSFileManager defaultManager];
     NSString *pubPath = nil;
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
-    NSMutableArray *crossrefs = [NSMutableArray array];
+    
+    NSString *templateName = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:@"BDSKEmailTemplateKey"];
+    BDSKTemplate *template = nil;
+    
+    if ([NSString isEmptyString:templateName] == NO)
+        template = [BDSKTemplate templateForStyle:templateName];
     
     while (pub = [e nextObject]) {
         pubPath = [pub localUrlPath];
-        
         if([dfm fileExistsAtPath:pubPath])
             [files addObject:pubPath];
         
-        // use the detexified version without internal fields, since TeXification introduces things that 
-        // AppleScript can't deal with (OAInternetConfig may end up using AS)
-        [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
-        [body appendString:@"\n\n"];
-        
         pub = [pub crossrefParent];
-        if (pub != nil && [selectedPubs containsObject:pub] == NO && [crossrefs containsObject:pub] == NO)
-            [crossrefs addObject:pub];
+        if (pub != nil && [items containsObject:pub] == NO) {
+            [items addObject:pub];
+            pubPath = [pub localUrlPath];
+            if([dfm fileExistsAtPath:pubPath])
+                [files addObject:pubPath];
+        }
     }
     
-    e = [crossrefs objectEnumerator];
-    while (pub = [e nextObject]) {
-        [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
-        [body appendString:@"\n\n"];
+    if (template != nil && ([template templateFormat] & BDSKTextTemplateFormat)) {
+        [body setString:[BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items]];
+    } else {
+        e = [items objectEnumerator];
+        while (pub = [e nextObject]) {
+            // use the detexified version without internal fields, since TeXification introduces things that 
+            // AppleScript can't deal with (OAInternetConfig may end up using AS)
+            [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
+            [body appendString:@"\n\n"];
+        }
     }
     
     // ampersands are common in publication names

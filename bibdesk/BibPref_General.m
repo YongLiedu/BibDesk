@@ -36,6 +36,7 @@
 
 #import "BibPref_General.h"
 #import "BDSKUpdateChecker.h"
+#import "BDSKTemplate.h"
 
 @implementation BibPref_General
 
@@ -69,6 +70,20 @@
     
     [warnOnGenerateCiteKeysButton setState:([defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] == YES) ? NSOnState : NSOffState];
     
+}
+
+- (void)willBecomeCurrentPreferenceClient{
+    NSString *currentStyle = [defaults stringForKey:BDSKEmailTemplateKey];
+    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat]];
+    [emailTemplatePopup removeAllItems];
+    [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Default BibTeX Format")];
+    [emailTemplatePopup addItemsWithTitles:styles];
+    if ([styles containsObject:currentStyle]) {
+        [emailTemplatePopup selectItemWithTitle:currentStyle];
+    } else {
+        [emailTemplatePopup selectItemAtIndex:0];
+        [defaults setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
+    }
 }
 
 // tags correspond to BDSKUpdateCheckInterval enum
@@ -122,6 +137,14 @@
     [defaults setObject:path forKey:@"NSOpen"]; // -- what did this do?
     [defaults setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
     [self updateUI];
+}
+
+- (IBAction)changeEmailTemplate:(id)sender{
+    int index = [sender indexOfSelectedItem];
+    NSString *style = index == 0 ? @"" : [sender titleOfSelectedItem];
+    if ([style isEqualToString:[defaults stringForKey:BDSKEmailTemplateKey]] == NO) {
+        [defaults setObject:style forKey:BDSKEmailTemplateKey];
+    }
 }
 
 - (IBAction)changeEditOnPaste:(id)sender{

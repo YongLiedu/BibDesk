@@ -3,6 +3,7 @@
         {
             ACTIONS = {
                 changeEditOnPaste = id; 
+                changeEmailTemplate = id; 
                 changeStartupBehavior = id; 
                 changeUpdateInterval = id; 
                 changeWarnOnDelete = id; 
@@ -18,6 +19,7 @@
                 checkForUpdatesButton = NSPopUpButton; 
                 defaultBibFileTextField = NSTextField; 
                 editOnPasteButton = NSButton; 
+                emailTemplatePopup = NSPopUpButton; 
                 startupBehaviorRadio = NSMatrix; 
                 warnOnDeleteButton = NSButton; 
                 warnOnGenerateCiteKeysButton = NSButton; 

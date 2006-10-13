@@ -76,6 +76,7 @@ extern NSString *BDSKTemplateDefaultItemString;
 + (NSArray *)allStyleNames;
 + (NSArray *)allFileTypes;
 + (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
++ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)format;
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 
 // export templates

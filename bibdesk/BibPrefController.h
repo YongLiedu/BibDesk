@@ -67,6 +67,7 @@ extern NSString *BDSKDefaultBibFilePathKey;
 extern NSString *BDSKStartupBehaviorKey;
 extern NSString *BDSKLastOpenFileNamesKey;
 extern NSString *BDSKAutoCheckForUpdatesKey;
+extern NSString *BDSKEmailTemplateKey;
 extern NSString *BDSKDragCopyKey;
 extern NSString *BDSKUsesTeXKey;
 extern NSString *BDSKEditOnPasteKey;

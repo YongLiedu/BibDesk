@@ -749,6 +749,8 @@
 					<string>Keywords</string>
 					<key>BDSKDefaultGroupFieldSeparatorKey</key>
 					<string>; </string>
+					<key>BDSKEmailTemplateKey</key>
+					<string></string>
 					<key>BDSKGroupFieldsKey</key>
 					<array>
 						<string>Keywords</string>

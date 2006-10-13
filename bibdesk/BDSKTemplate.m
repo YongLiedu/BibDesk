@@ -227,6 +227,22 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return names;
 }
 
++ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)format;
+{
+    NSMutableArray *names = [NSMutableArray array];
+    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
+    id aNode;
+    NSString *name;
+    while(aNode = [nodeE nextObject]){
+        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
+            name = [aNode valueForKey:BDSKTemplateNameString];
+            if(name != nil && [aNode templateFormat] & format)
+                [names addObject:name];
+        }
+    }
+    return names;
+}
+
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 {
     NSArray *names = [self  allStyleNamesForFileType:fileType];
