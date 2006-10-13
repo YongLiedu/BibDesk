@@ -1220,7 +1220,7 @@
 
 - (void)tableView:(NSTableView *)tv mouseEnteredTableColumn:(NSTableColumn *)tableColumn row:(int)row;
 {
-    if (row == -1 || row >= [[self publications] count])
+    if (row == -1 || row >= [self numberOfRowsInTableView:tv])
         return;
     
     BibItem *pub = [shownPublications objectAtIndex:row];
