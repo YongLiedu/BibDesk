@@ -599,7 +599,6 @@
 		F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F9B07D14082B1B9000345747 /* BibDeskSuite.scriptSuite in Resources */ = {isa = PBXBuildFile; fileRef = F9022D100758066000C3F701 /* BibDeskSuite.scriptSuite */; };
 		F9B07D15082B1B9100345747 /* BibDeskSuite.scriptTerminology in Resources */ = {isa = PBXBuildFile; fileRef = F9022D110758066000C3F701 /* BibDeskSuite.scriptTerminology */; };
-		F9C4C42D097619AE00DF25F3 /* BibDeskScripting.r in Rez */ = {isa = PBXBuildFile; fileRef = F920DB25075C2D8F000C5FCA /* BibDeskScripting.r */; };
 		F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */; };
 		F9CEFCBB0A90090B00A0E54E /* BDSKOrphanedFileServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */; };
 		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
@@ -985,7 +984,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
@@ -1306,7 +1305,6 @@
 		F920DAFC075C2B69000C5FCA /* BibDeskSearchForCommand.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BibDeskSearchForCommand.h; path = Scripting/BibDeskSearchForCommand.h; sourceTree = "<group>"; };
 		F920DAFD075C2B69000C5FCA /* BibDocument+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "BibDocument+Scripting.h"; path = "Scripting/BibDocument+Scripting.h"; sourceTree = "<group>"; };
 		F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "BibItem+Scripting.h"; path = "Scripting/BibItem+Scripting.h"; sourceTree = "<group>"; };
-		F920DB25075C2D8F000C5FCA /* BibDeskScripting.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; name = BibDeskScripting.r; path = ../BibDeskScripting.r; sourceTree = "<group>"; };
 		F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDate_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDate_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileContentSearchController.h; sourceTree = "<group>"; };
@@ -2035,7 +2033,6 @@
 			isa = PBXGroup;
 			children = (
 				F9022FBF07580B9400C3F701 /* BibDesk.sdef */,
-				F920DB25075C2D8F000C5FCA /* BibDeskScripting.r */,
 				CE9DBEDE093CF2640008648B /* BibDeskBibliographyCommand.m */,
 				CEAC51550A97730800B8DF43 /* BibDeskExportUsingTemplateCommand.m */,
 				F9022C62075802E300C3F701 /* BibDeskOpenCommand.m */,
@@ -2959,7 +2956,6 @@
 			isa = PBXRezBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9C4C42D097619AE00DF25F3 /* BibDeskScripting.r in Rez */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
