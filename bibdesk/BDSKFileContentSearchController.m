@@ -301,16 +301,36 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     return results;
 }
 
+- (void)setMaxValue:(NSNumber *)value
+{
+    if (maxValue != value) {
+        [maxValue release];
+        maxValue = [value copy];
+    }
+}
+
+- (void)setMinValue:(NSNumber *)value
+{
+    if (minValue != value) {
+        [minValue release];
+        minValue = [value copy];
+    }
+}
+
+// convenience setters that call the KVC-compliant setters
+
 - (void)setMaxValueWithDouble:(double)doubleValue
 {
-    [maxValue autorelease];
-    maxValue = [[NSNumber alloc] initWithDouble:doubleValue];
+    NSNumber *value = [[NSNumber alloc] initWithDouble:doubleValue];
+    [self setMaxValue:value];
+    [value release];
 }
 
 - (void)setMinValueWithDouble:(double)doubleValue
 {
-    [minValue autorelease];
-    minValue = [[NSNumber alloc] initWithDouble:doubleValue];
+    NSNumber *value = [[NSNumber alloc] initWithDouble:doubleValue];
+    [self setMinValue:value];
+    [value release];
 }
 
 - (NSNumber *)maxValue
