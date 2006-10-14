@@ -247,6 +247,7 @@
     // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
     // or move aside the original file
     NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
+    NSURL *tmpFileURL = [NSURL fileURLWithPath:tmpFilePath];
     NSData *data = [fileString dataUsingEncoding:encoding];
     NSError *error;
     
@@ -258,18 +259,17 @@
     
     // make a fresh document, and don't display it until we can set its name.
     BibDocument *doc = [self openUntitledDocumentAndDisplay:NO error:outError];    
-    [doc setFileName:tmpFilePath]; // required for error handling; mark it dirty, so it's obviously modified
-    [doc setFileType:BDSKBibTeXDocumentType];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    BOOL success = [doc readFromURL:[NSURL fileURLWithPath:tmpFilePath] ofType:BDSKBibTeXDocumentType encoding:encoding error:outError];
+    [doc setFileURL:tmpFileURL]; // required for error handling
+    BOOL success = [doc readFromURL:tmpFileURL ofType:BDSKBibTeXDocumentType encoding:encoding error:outError];
     
     if (success == NO) {
         [self removeDocument:doc];
         doc = nil;
     } else {
-        [doc setFileName:nil];
+        [doc setFileURL:nil];
         // set date-added for imports
-        NSCalendarDate *importDate = [NSCalendarDate date];
-        [[doc publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+        NSString *importDate = [[NSCalendarDate date] description];
+        [[doc publications] makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:importDate];
         [[doc undoManager] removeAllActions];
         [doc makeWindowControllers];
         [doc showWindows];
