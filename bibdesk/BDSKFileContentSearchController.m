@@ -97,7 +97,6 @@
 
 - (void)awakeFromNib
 {
-    [objectController setContent:self];
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
     
@@ -288,8 +287,6 @@
         [searchIndex cancel];
         [searchIndex release];
         searchIndex = nil;
-
-        [objectController setContent:nil];
 	}
 }
 

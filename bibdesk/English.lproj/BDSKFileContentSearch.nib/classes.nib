@@ -13,7 +13,6 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 indexProgressBar = NSProgressIndicator; 
-                objectController = NSObjectController; 
                 resultsArrayController = NSArrayController; 
                 stopButton = NSButton; 
                 tableView = NSTableView; 

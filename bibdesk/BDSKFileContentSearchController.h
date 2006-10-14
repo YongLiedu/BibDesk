@@ -80,7 +80,6 @@
     BDSKSearchIndex *searchIndex;
     NSString *searchKey;
         
-    IBOutlet NSObjectController *objectController;
     IBOutlet NSArrayController *resultsArrayController;
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *stopButton;
