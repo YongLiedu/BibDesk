@@ -64,7 +64,7 @@
 
 - (void)dealloc
 {
-	NSLog(@"dealloc filterController");
+	//NSLog(@"dealloc filterController");
     [filter release];
     filter  = nil;
     [conditionControllers release];
