@@ -149,8 +149,8 @@
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
-	[conditionControllers removeObject:aConditionController]; 
     [conditionsView removeView:[aConditionController view]];
+	[conditionControllers removeObject:aConditionController]; 
 	if ([conditionControllers count] == 1) {
         [[conditionControllers objectAtIndex:0] setCanRemove:NO];
         [self updateUI];
