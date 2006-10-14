@@ -41,6 +41,7 @@
 #import <OmniAppKit/OAToolbarItem.h>
 #import "OAToolbarItem_BDSKExtensions.h"
 #import "BDSKImagePopUpButton.h"
+#import "BibDocument_Actions.h"
 
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
 #define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)

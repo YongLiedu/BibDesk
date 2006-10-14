@@ -46,6 +46,7 @@
 #import "BibTypeManager.h"
 #import "BDSKTemplate.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BibDocument_Actions.h"
 
 @implementation BibDocument (Menus)
 
