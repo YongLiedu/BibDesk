@@ -43,7 +43,7 @@
 
 @interface BDSKSearchResult (BDSKSearch)
 
-- (id)initWithIndex:(SKIndexRef)skIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
+- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
 
 @end
 
@@ -202,7 +202,7 @@
             // these scores are arbitrarily scaled, so we'll keep track of the search kit's max/min values
             maxValue = MAX(score, maxValue);
             
-            searchResult = [[BDSKSearchResult alloc] initWithIndex:skIndex documentRef:skDocument score:score];            
+            searchResult = [[BDSKSearchResult alloc] initWithIndex:searchIndex documentRef:skDocument score:score];            
             [searchResults addObject:searchResult];            
             [searchResult release];
             
@@ -308,35 +308,30 @@
 
 @implementation BDSKSearchResult (BDSKSearch)
 
-- (id)initWithIndex:(SKIndexRef)skIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
+- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
 {
 
-    NSParameterAssert(NULL != skIndex);
+    NSParameterAssert(NULL != index);
     NSParameterAssert(NULL != skDocument);
     
     NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
     NSString *pathKey = [theURL path];
         
     if ((self = [self initWithKey:pathKey])){
+        
         // the table column is bound to the dictionary with an empty key path; the OATextIconCell is smart enough to recognize that it has a dictionary object value and ask for its keys
                 
         [self setValue:theURL forKey:@"url"];
         [self setValue:[NSImage imageForURL:theURL] forKey:OATextWithIconCellImageKey];
         
-        CFDictionaryRef properties;
-        NSString *title;
-        
-        // get our custom properties so we can display the item's title in the table, if possible
-        properties = SKIndexCopyDocumentProperties(skIndex, skDocument);
-        if(properties == NULL || CFDictionaryGetValueIfPresent(properties, CFSTR("title"), (const void **)&title) == FALSE)
+        NSString *title = [anIndex titleForURL:theURL];
+        if (nil == title)
             title = pathKey;
-        
+                
 #warning fixme attributed title?
         [self setValue:title forKey:OATextWithIconCellStringKey];
         [self setValue:title forKey:@"title"];
-        
-        if(properties) CFRelease(properties);
-        
+                
         NSNumber *theScore = [[NSNumber alloc] initWithFloat:score];
         [self setValue:theScore forKey:@"score"];
         [theScore release];

@@ -89,7 +89,6 @@ void *setupThreading(void *anObject);
         flags.shouldKeepRunning = 1;
         
         // repeated flushes will cause performance to suck, so don't inform the delegate of every added file
-        // @@ performance is mainly a problem for getting a properties dictionary from the index repeatedly
         flags.updateGranularity = 20;
         
         // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
@@ -99,6 +98,9 @@ void *setupThreading(void *anObject);
         
         int err = pthread_create(&notificationThread, &attr, &setupThreading, [[self retain] autorelease]);
         pthread_attr_destroy(&attr);
+        
+        // maintain a dictionary mapping URL -> -[BibItem title], since SKIndex properties are slow
+        titles = [[NSMutableDictionary alloc] initWithCapacity:128];
 
         if(err){
             [self release];
@@ -114,6 +116,7 @@ void *setupThreading(void *anObject);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [notificationPort release];
     [notificationQueue release];
+    [titles release];
     [queueLock release];
     if(index) CFRelease(index);
     [super dealloc];
@@ -153,6 +156,15 @@ void *setupThreading(void *anObject);
     OSAtomicCompareAndSwap32Barrier(flags.updateGranularity, count, (int32_t *)&flags.updateGranularity);
 }
 
+- (NSString *)titleForURL:(NSURL *)theURL
+{
+    NSString *theTitle = nil;
+    @synchronized(titles) {
+        theTitle = [[titles objectForKey:theURL] retain];
+    }
+    return [theTitle autorelease];
+}
+
 @end
 
 @implementation BDSKSearchIndex (Private)
@@ -182,7 +194,6 @@ void *setupThreading(void *anObject);
     volatile Boolean success;
     
     NSEnumerator *urlEnumerator = [[anItem valueForKey:@"urls"] objectEnumerator];
-    CFDictionaryRef properties;
         
     BOOL swap;
     swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
@@ -196,15 +207,15 @@ void *setupThreading(void *anObject);
         OBPOSTCONDITION(skDocument);
         if(skDocument == NULL) continue;
         
-        // most documents on file will have a title, and the @"title" key is guaranteed to be non-nil
-        properties = (CFDictionaryRef)[[NSDictionary alloc] initWithObjectsAndKeys:[anItem valueForKey:@"title"], @"title", nil];
-        OBASSERT(properties);
+        // SKIndexSetProperties is more generally useful, but is really slow when creating the index
+        // SKIndexRenameDocument changes the URL, so it's not useful
+        @synchronized(titles) {
+            [titles setObject:[anItem valueForKey:@"title"] forKey:url];
+        }
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
-        SKIndexSetDocumentProperties(index, skDocument, properties);
         OBPOSTCONDITION(success);
         
-        CFRelease(properties);
         CFRelease(skDocument);
         
         if (updateCount-- == 0) {
@@ -347,6 +358,10 @@ void *setupThreading(void *anObject)
 		for(idx = 0; idx < maxIdx; idx++){
 			
 			url = [urls objectAtIndex:idx];
+            
+            @synchronized(titles) {
+                [titles removeObjectForKey:url];
+            }
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);
 			OBPOSTCONDITION(skDocument);

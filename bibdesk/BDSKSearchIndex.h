@@ -55,6 +55,7 @@ typedef struct _BDSKSearchIndexFlags
 @interface BDSKSearchIndex : NSObject {
     SKIndexRef index;
     id document;
+    NSMutableDictionary *titles;
     
     id delegate;
     NSArray *initialObjectsToIndex;
@@ -75,6 +76,7 @@ typedef struct _BDSKSearchIndexFlags
 - (BOOL)isIndexing;
 - (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
 - (void)setUpdateGranularity:(unsigned int)count;
+- (NSString *)titleForURL:(NSURL *)theURL;
 
 @end
 
