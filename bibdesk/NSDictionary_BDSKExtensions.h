@@ -42,3 +42,6 @@
 @interface NSMutableDictionary (BDSKExtensions)
 - (id)initForCaseInsensitiveKeys;
 @end
+
+@interface NSDictionary (BDSKExtensions)
+@end
