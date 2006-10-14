@@ -112,6 +112,7 @@
     [self setSearchString:aString];
     [self setOptions:opts];
     [self updateSearchResults];
+    [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
 }
 
 - (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
@@ -119,6 +120,7 @@
     if ([index isEqual:searchIndex]) {
         [self cancel];
         [self updateSearchResults];
+        [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
     }
 }
 
@@ -211,14 +213,7 @@
         
         [self normalizeScoresWithMaximumValue:maxValue];
         
-    }
-    
-    // send didFinishWithResults: if the search index is done indexing, since we won't get new results from it
-    if ([searchIndex isIndexing])
-        [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
-    else
-        [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];    
-    
+    }    
 }
 
 // we need to normalize each batch of results returned from SKSearchFindMatches separately

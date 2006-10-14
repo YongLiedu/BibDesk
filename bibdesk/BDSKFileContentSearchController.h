@@ -83,7 +83,6 @@
     IBOutlet NSObjectController *objectController;
     IBOutlet NSArrayController *resultsArrayController;
     IBOutlet NSTableView *tableView;
-    IBOutlet NSProgressIndicator *spinner;
     IBOutlet NSButton *stopButton;
     IBOutlet NSProgressIndicator *indexProgressBar;
     

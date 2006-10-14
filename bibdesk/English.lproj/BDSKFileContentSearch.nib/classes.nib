@@ -15,7 +15,6 @@
                 indexProgressBar = NSProgressIndicator; 
                 objectController = NSObjectController; 
                 resultsArrayController = NSArrayController; 
-                spinner = NSProgressIndicator; 
                 stopButton = NSButton; 
                 tableView = NSTableView; 
                 topBarView = BDSKEdgeView; 

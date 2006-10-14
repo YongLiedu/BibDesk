@@ -106,9 +106,6 @@
     [cell setLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle]; // the default one makes the tableview unusably slow
     [cell setEnabled:NO]; // this is required to make it non-editable
     
-    [spinner setUsesThreadedAnimation:NO];
-    [spinner setDisplayedWhenStopped:NO];
-    
     // set up the image/text cell combination
     BDSKTextWithIconCell *textCell = [[BDSKFileContentTextWithIconCell alloc] init];
     [textCell setControlSize:[cell controlSize]];
@@ -249,32 +246,27 @@
 - (void)search:(BDSKSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
 {
     if ([search isEqual:aSearch]) {
-        [spinner stopAnimation:self];
         [stopButton setEnabled:NO];
         [self setResults:anArray];
         [indexProgressBar setDoubleValue:[searchIndex progressValue]];
+        [indexProgressBar setHidden:YES];
     }
 }
 
 - (void)cancelCurrentSearch:(id)sender
 {
     [search cancel];
-    [spinner stopAnimation:nil];
 }    
 
 - (void)rebuildResultsWithNewSearch:(NSString *)searchString
 {            
     if([NSString isEmptyString:searchString]){
-        [spinner stopAnimation:self];
         // iTunes/Mail swap out their search view when clearing the searchfield. don't clear the array, though, since we may need the array controller's selected objects
         [self restoreDocumentState:self];
     } else {
     
         // empty array; this takes care of updating the table for us
-        [self setResults:[NSArray array]];
-
-        [spinner startAnimation:self];
-        
+        [self setResults:[NSArray array]];        
         [search searchForString:searchString withOptions:kSKSearchOptionDefault];
     }
 }
