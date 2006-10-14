@@ -89,7 +89,8 @@ void *setupThreading(void *anObject);
         flags.shouldKeepRunning = 1;
         
         // repeated flushes will cause performance to suck, so don't inform the delegate of every added file
-        flags.updateGranularity = 50;
+        // @@ performance is mainly a problem for getting a properties dictionary from the index repeatedly
+        flags.updateGranularity = 20;
         
         // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
         pthread_attr_t attr;
