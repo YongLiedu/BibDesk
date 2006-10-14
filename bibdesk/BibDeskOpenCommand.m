@@ -37,6 +37,7 @@
  */
 
 #import "BibDeskOpenCommand.h"
+#import "BibDocument_Actions.h"
 #import "BibItem+Scripting.h"
 #import "BibAuthor.h"
 

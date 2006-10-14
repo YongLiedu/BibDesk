@@ -36,6 +36,7 @@
  */
 
 #import "BibDocument_Groups.h"
+#import "BibDocument_Actions.h"
 #import "BDSKGroupCell.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKFilterController.h"

@@ -39,6 +39,7 @@
 #import "BibPersonController.h"
 #import "BibTypeManager.h"
 #import "BibDocument.h"
+#import "BibDocument_Actions.h"
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BibTeXParser.h"

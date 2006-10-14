@@ -43,6 +43,7 @@
 #import "BDSKErrorEditor.h"
 #import "BibPrefController.h"
 #import "BibDocument.h"
+#import "BibDocument_Actions.h"
 #import "BibItem.h"
 #import "BibEditor.h"
 #import "NSWindowController_BDSKExtensions.h"

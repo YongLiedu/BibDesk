@@ -34,9 +34,10 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDocument.h"
-#import "BibItem.h"
 #import "BibDocument_DataSource.h"
+#import "BibDocument.h"
+#import "BibDocument_Actions.h"
+#import "BibItem.h"
 #import "BibAuthor.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKGroupCell.h"

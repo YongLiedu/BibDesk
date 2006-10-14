@@ -38,6 +38,7 @@
 #import <OmniFoundation/CFArray-OFExtensions.h>
 #import "BibPrefController.h"
 #import "BibDocument.h"
+#import "BibDocument_Actions.h"
 #import "BDSKTypeSelectHelper.h"
 #import "NSTableView_BDSKExtensions.h"
 

@@ -48,6 +48,7 @@
 #import "BDSKFileContentSearchController.h"
 #import "BDSKScriptMenu.h"
 #import "BibDocument_Search.h"
+#import "BibDocument_Actions.h"
 #import "BDSKFormatParser.h"
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"

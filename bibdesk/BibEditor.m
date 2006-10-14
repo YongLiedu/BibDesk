@@ -38,6 +38,7 @@
 #import "BibEditor.h"
 #import "BibEditor_Toolbar.h"
 #import "BibDocument.h"
+#import "BibDocument_Actions.h"
 #import "BDAlias.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKComplexString.h"

@@ -42,6 +42,7 @@
 #import "BDSKPathColorTransformer.h"
 #import <OmniAppKit/NSTableView-OAExtensions.h>
 #import "BibDocument.h"
+#import "BibDocument_Actions.h"
 #import "BibAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 
