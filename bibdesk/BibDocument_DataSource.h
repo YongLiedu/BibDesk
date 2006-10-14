@@ -45,6 +45,16 @@
 - (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
 - (NSString *)promiseDragColumnIdentifier;
 
+- (void)setPromisedItems:(NSArray *)items types:(NSArray *)types dragCopyType:(int)dragCopyType forPasteboard:(NSPasteboard *)pboard;
+- (NSArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard;
+- (NSArray *)promisedItemsForPasteboard:(NSPasteboard *)pboard;
+- (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard;
+- (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
+- (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard;
+- (void)providePromisedTypesForPasteboard:(NSPasteboard *)pboard;
+- (void)providePromisedTypes;
+- (void)pasteboardChangedOwner:(NSPasteboard *)pboard;
+
 @end
 
 @interface NSPasteboard (JCRDragWellExtensions)
