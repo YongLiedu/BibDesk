@@ -12,7 +12,7 @@
             CLASS = BDSKFileContentSearchController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                currentDocument = id; 
+                document = id; 
                 objectController = NSObjectController; 
                 resultsArrayController = NSArrayController; 
                 spinner = NSProgressIndicator; 

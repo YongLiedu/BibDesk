@@ -1,10 +1,10 @@
 //
-//  BDSKSearchIndex.h
+//  BDSKSearch.h
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 10/11/05.
+//  Created by Adam Maxwell on 10/13/06.
 /*
- This software is Copyright (c) 2005,2006
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,43 +38,34 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchIndex;
-@protocol BDSKSearchIndexDelegate <NSObject>
-- (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
-- (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)index;
+@class BDSKSearchIndex, BDSKSearch, BDSKSearchPrivateIvars;
+@protocol BDSKSearchIndexDelegate;
+
+@protocol BDSKSearchDelegate <NSObject>
+- (void)search:(BDSKSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
+- (void)search:(BDSKSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
 @end
 
-// I think a union guarantees correct alignment; is that true for a struct as well?
-typedef struct _BDSKSearchIndexFlags
+@interface BDSKSearch : NSObject <BDSKSearchIndexDelegate>
 {
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
-    volatile int32_t isIndexing __attribute__ ((aligned (4)));  
-    volatile int32_t updateGranularity __attribute__ ((aligned (4)));
-} BDSKSearchIndexFlags;
-
-@interface BDSKSearchIndex : NSObject {
-    SKIndexRef index;
-    id document;
+    @private
+    SKSearchRef search;
+    BDSKSearchIndex *searchIndex;
+    NSMutableSet *searchResults;
     
+    NSString *searchString;
+    SKSearchOptions options;
+   
+    BDSKSearchPrivateIvars *data;
     id delegate;
-    NSArray *initialObjectsToIndex;
-    
-    NSMutableArray *notificationQueue;
-    NSMachPort *notificationPort;
-    pthread_t notificationThread;
-    BDSKSearchIndexFlags flags;
-        
-    NSLock *queueLock;
 }
 
-- (id)initWithDocument:(id)aDocument;
+- (id)initWithIndex:(BDSKSearchIndex *)anIndex delegate:(id <BDSKSearchDelegate>)aDelegate;
+- (void)searchForString:(NSString *)aString withOptions:(SKSearchOptions)opts;
 
-// Warning:  it is /not/ safe to write to this SKIndexRef directly; use it only for reading.
-- (SKIndexRef)index;
+- (void)setDelegate:(id <BDSKSearchDelegate>)aDelegate;
+- (id)delegate;
 - (void)cancel;
-- (BOOL)isIndexing;
-- (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
-- (void)setUpdateGranularity:(unsigned int)count;
 
 @end
 

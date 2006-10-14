@@ -70,16 +70,15 @@
 - (void)restoreDocumentStateByRemovingSearchView:(NSView *)view;
 @end
 
-@interface BDSKFileContentSearchController : NSWindowController
+@protocol BDSKSearchDelegate;
+@class BDSKSearch;
+
+@interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate>
 {
     NSMutableArray *results;
-    SKSearchRef currentSearch;
-    NSNumber *maxValue;
-    NSNumber *minValue;
-    BDSKSearchIndex *currentSearchIndex;
-    NSString *currentSearchKey;
-    
-    id currentDocument;
+    BDSKSearch *search;
+    BDSKSearchIndex *searchIndex;
+    NSString *searchKey;
         
     IBOutlet NSObjectController *objectController;
     IBOutlet NSArrayController *resultsArrayController;
@@ -87,11 +86,7 @@
     IBOutlet NSProgressIndicator *spinner;
     IBOutlet NSButton *stopButton;
     IBOutlet BDSKStatusBar *statusBar;
-    
-    volatile BOOL searchCanceled;
-    CFMutableDictionaryRef indexDictionary;
-    NSLock *dictionaryLock;
-    
+        
     IBOutlet BDSKEdgeView *topBarView;
 	NSView *searchContentView;
 }
@@ -104,15 +99,11 @@
 - (NSArray *)titlesOfSelectedItems;
 
 - (void)rebuildResultsWithNewSearch:(NSString *)searchString;
-- (void)rebuildResultsWithCurrentString:(NSString *)searchString;
-- (void)updateSearchIfNeeded;
 - (void)setResults:(NSArray *)newResults;
 
 - (void)saveSortDescriptors;
 - (void)cancelCurrentSearch:(id)sender;
 - (void)restoreDocumentState:(id)sender;
-- (void)setMaxValueWithDouble:(double)doubleValue;
-- (void)setMinValueWithDouble:(double)doubleValue;
 
 - (IBAction)search:(id)sender;
 - (void)tableAction:(id)sender;
