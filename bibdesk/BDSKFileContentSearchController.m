@@ -88,7 +88,6 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[statusBar unbind:@"stringValue"];
     [searchContentView release];
     [results release];
     [search release];
@@ -132,14 +131,16 @@
     [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
     [topBarView setEdgeColor:[NSColor windowFrameColor]];
     [topBarView adjustSubviews];
-    [statusBar toggleBelowView:[tableView enclosingScrollView] offset:0.0];
-    statusBar = nil;
-    
+
     // we might remove this, so keep a retained reference
     searchContentView = [[[self window] contentView] retain];
 
     // @@ workaround: the font from prefs seems to be overridden by the nib; maybe bindings issue?
     [tableView changeFont:nil];
+    
+    [indexProgressBar setMaxValue:100.0];
+    [indexProgressBar setMinValue:0.0];
+    [indexProgressBar setDoubleValue:[searchIndex progressValue]];
 }    
 
 - (NSString *)windowNibName
@@ -241,6 +242,7 @@
 {
     if ([search isEqual:aSearch]) {
         [self setResults:anArray];
+        [indexProgressBar setDoubleValue:[searchIndex progressValue]];
     }
 }
 
@@ -250,6 +252,7 @@
         [spinner stopAnimation:self];
         [stopButton setEnabled:NO];
         [self setResults:anArray];
+        [indexProgressBar setDoubleValue:[searchIndex progressValue]];
     }
 }
 

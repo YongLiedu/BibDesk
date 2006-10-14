@@ -85,8 +85,8 @@
     IBOutlet NSTableView *tableView;
     IBOutlet NSProgressIndicator *spinner;
     IBOutlet NSButton *stopButton;
-    IBOutlet BDSKStatusBar *statusBar;
-        
+    IBOutlet NSProgressIndicator *indexProgressBar;
+    
     IBOutlet BDSKEdgeView *topBarView;
 	NSView *searchContentView;
 }

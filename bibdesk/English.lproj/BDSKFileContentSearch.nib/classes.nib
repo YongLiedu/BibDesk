@@ -12,11 +12,10 @@
             CLASS = BDSKFileContentSearchController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                document = id; 
+                indexProgressBar = NSProgressIndicator; 
                 objectController = NSObjectController; 
                 resultsArrayController = NSArrayController; 
                 spinner = NSProgressIndicator; 
-                statusBar = BDSKStatusBar; 
                 stopButton = NSButton; 
                 tableView = NSTableView; 
                 topBarView = BDSKEdgeView; 

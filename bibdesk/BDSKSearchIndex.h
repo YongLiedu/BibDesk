@@ -64,6 +64,7 @@ typedef struct _BDSKSearchIndexFlags
     NSMachPort *notificationPort;
     pthread_t notificationThread;
     BDSKSearchIndexFlags flags;
+    double progressValue;
         
     NSLock *queueLock;
 }
@@ -77,6 +78,7 @@ typedef struct _BDSKSearchIndexFlags
 - (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
 - (void)setUpdateGranularity:(unsigned int)count;
 - (NSString *)titleForURL:(NSURL *)theURL;
+- (double)progressValue;
 
 @end
 

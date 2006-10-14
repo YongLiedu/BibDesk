@@ -101,6 +101,8 @@ void *setupThreading(void *anObject);
         
         // maintain a dictionary mapping URL -> -[BibItem title], since SKIndex properties are slow
         titles = [[NSMutableDictionary alloc] initWithCapacity:128];
+        
+        progressValue = 0.0;
 
         if(err){
             [self release];
@@ -165,6 +167,15 @@ void *setupThreading(void *anObject);
     return [theTitle autorelease];
 }
 
+- (double)progressValue
+{
+    double theValue;
+    @synchronized(self) {
+        theValue = progressValue;
+    }
+    return theValue;
+}
+
 @end
 
 @implementation BDSKSearchIndex (Private)
@@ -176,9 +187,16 @@ void *setupThreading(void *anObject);
     OBPRECONDITION(initialObjectsToIndex);
     NSEnumerator *enumerator = [initialObjectsToIndex objectEnumerator];
     id anObject = nil;
+    double totalObjectCount = [initialObjectsToIndex count];
+    double numberIndexed = 0;
         
-    while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1)
+    while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1) {
         [self indexFilesForItem:anObject];
+        numberIndexed++;
+        @synchronized(self) {
+            progressValue = (numberIndexed / totalObjectCount) * 100;
+        }
+    }
      
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
