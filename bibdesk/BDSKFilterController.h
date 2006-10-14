@@ -48,7 +48,6 @@
 	IBOutlet BDSKConditionsView *conditionsView;
 	IBOutlet NSTextField *messageStartTextField;
 	IBOutlet NSTextField *messageEndTextField;
-	IBOutlet NSObjectController *ownerController;
 	NSMutableArray *conditionControllers;
 	BDSKFilter *filter;
 	BDSKConjunction conjunction;

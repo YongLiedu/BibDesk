@@ -9,7 +9,6 @@
                 conjunctionPopUp = NSPopUpButton; 
                 messageEndTextField = NSTextField; 
                 messageStartTextField = NSTextField; 
-                ownerController = NSObjectController; 
             }; 
             SUPERCLASS = BDSKSheetController; 
         }, 

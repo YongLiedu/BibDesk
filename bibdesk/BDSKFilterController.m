@@ -64,7 +64,7 @@
 
 - (void)dealloc
 {
-	//NSLog(@"dealloc filterController");
+	NSLog(@"dealloc filterController");
     [filter release];
     filter  = nil;
     [conditionControllers release];
@@ -90,7 +90,6 @@
         [conditionsView addView:[controller view]];
 	}
 	
-	[ownerController setContent:self]; // fix for binding-to-nib-owner bug
 	[self updateUI];
 }
 
@@ -180,10 +179,6 @@
 
 - (void)setConjunction:(BDSKConjunction)newConjunction {
 	conjunction = newConjunction;
-}
-
-- (void)windowWillClose:(NSNotification *)aNotification {
-	[ownerController setContent:nil]; // fix for binding-to-nib-owner bug
 }
 
 @end
