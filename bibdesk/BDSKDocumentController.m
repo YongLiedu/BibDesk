@@ -223,7 +223,6 @@
         }
 
         [doc setFileURL:fileURL]; // this effectively makes it not an untitled document anymore.
-        [doc setFileType:type];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
         success = [doc readFromURL:fileURL ofType:type encoding:encoding error:&error];
         if (success == NO) {
             [self removeDocument:doc];
@@ -234,10 +233,6 @@
     
     [doc makeWindowControllers];
     [doc showWindows];
-    
-    // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
-    if([doc respondsToSelector:@selector(updateAllSmartGroups)])
-        [doc performSelector:@selector(updateAllSmartGroups)];
     
     return doc;
 }
@@ -275,9 +270,6 @@
         [doc showWindows];
         // mark as dirty, since we've changed the content
         [doc updateChangeCount:NSChangeDone];
-        // @@ If the document is created as untitled and then loaded, the smart groups don't get updated at load; if you use Open Recent or the Finder, they are updated correctly (those call through to openDocumentWithContentsOfURL:display:error:, which may do something different with updating).
-        if([doc respondsToSelector:@selector(updateAllSmartGroups)])
-           [doc performSelector:@selector(updateAllSmartGroups)];
     }
     
     return doc;
