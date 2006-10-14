@@ -37,12 +37,11 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import "BibEditor.h"
 #import "BibDocument_DataSource.h"
+#import "BibDocument_Actions.h"
 #import "BibDocumentView_Toolbar.h"
 #import "BibAppController.h"
 #import "BibPrefController.h"
-#import "BibPersonController.h"
 
 #import "BDSKUndoManager.h"
 #import "MultiplePageView.h"
@@ -70,7 +69,7 @@
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
 #import "BDSKJSTORParser.h"
-#import "BibFiler.h"
+#import "BDSKWebOfScienceParser.h"
 
 #import "ApplicationServices/ApplicationServices.h"
 #import "BDSKImagePopUpButton.h"
@@ -80,7 +79,6 @@
 
 #import "BDSKMacroResolver.h"
 #import "MacroWindowController.h"
-#import "BDSKTextImportController.h"
 #import "BDSKErrorObjectController.h"
 #import "BDSKGroupTableView.h"
 #import "BDSKFileContentSearchController.h"
@@ -90,7 +88,6 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
-#import "BDSKWebOfScienceParser.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSFileManager_ExtendedAttributes.h"
@@ -524,6 +521,30 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	return YES;
 }
 
+- (void)windowWillClose:(NSNotification *)notification{
+
+    if([notification object] != documentWindow) // this is critical; 
+        return;
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
+    isDocumentClosed = YES;
+    [customCiteDrawer close];
+    [self saveSortOrder];
+    
+    // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
+       [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
+       [tableView selectedRow] != -1 )
+        [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
+	
+	[self providePromisedTypes];
+	
+    // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+}
+
 #pragma mark Publications acessors
 
 - (void)setPublications:(NSArray *)newPubs undoable:(BOOL)undo{
@@ -699,6 +720,22 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [self addWindowController:infoWC];
     }
     [infoWC beginSheetModalForWindow:documentWindow];
+}
+
+#pragma mark Macro stuff
+
+- (BDSKMacroResolver *)macroResolver{
+    return macroResolver;
+}
+
+- (IBAction)showMacrosWindow:(id)sender{
+    if (!macroWC) {
+        macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
+    }
+    if ([[self windowControllers] containsObject:macroWC] == NO) {
+        [self addWindowController:macroWC];
+    }
+    [macroWC showWindow:self];
 }
 
 #pragma mark -
@@ -1425,488 +1462,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 #pragma mark -
-#pragma mark Publication actions
-
-- (IBAction)newPub:(id)sender{
-    if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask) {
-        [self createNewPubUsingCrossrefAction:sender];
-    } else {
-        [self createNewBlankPubAndEdit:YES];
-    }
-}
-
-- (void)removePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if ([alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRemovalFromGroupKey];
-    if (returnCode == NSAlertDefaultReturn)
-        [self removePublications:[self selectedPublications] fromGroups:[self selectedGroups]];
-}
-
-// this method is called for the main table; it's a wrapper for delete or remove from group
-- (IBAction)removeSelectedPubs:(id)sender{
-	NSArray *selectedGroups = [self selectedGroups];
-	
-	if([selectedGroups containsObject:allPublicationsGroup]){
-		[self deleteSelectedPubs:sender];
-	}else{
-		BOOL canRemove = NO;
-        if ([self hasStaticGroupsSelected])
-            canRemove = YES;
-        else if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
-            canRemove = [self hasCategoryGroupsSelected];
-		if(canRemove == NO){
-			NSBeep();
-			return;
-		}
-        // the items may not belong to the groups that you're trying to remove them from, but we'll warn as if they were
-        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
-            NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
-                                                 defaultButton:NSLocalizedString(@"Yes", @"Yes")
-                                               alternateButton:nil
-                                                   otherButton:NSLocalizedString(@"No", @"No")
-                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @""), [tableView numberOfSelectedRows], ([tableView numberOfSelectedRows] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item",@"")), groupName];
-            [alert setHasCheckButton:YES];
-            [alert setCheckValue:NO];
-            [alert beginSheetModalForWindow:documentWindow
-                              modalDelegate:self 
-                             didEndSelector:@selector(removePubsAlertDidEnd:returnCode:contextInfo:) 
-                                contextInfo:NULL];
-            return;
-        } else {
-            [self removePublications:[self selectedPublications] fromGroups:selectedGroups];
-        }
-	}
-}
-
-- (void)deletePubsAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (alert != nil && [alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnDeleteKey];
-    if (returnCode == NSAlertOtherReturn)
-        return;
-    
-    // deletion changes the scroll position
-    NSPoint scrollLocation = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-    unsigned lastIndex = [[tableView selectedRowIndexes] lastIndex];
-	[self removePublications:[self selectedPublications]];
-    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
-    
-    // should select the publication following the last deleted publication (if any)
-	if(lastIndex >= [tableView numberOfRows])
-        lastIndex = [tableView numberOfRows] - 1;
-    if(lastIndex != -1)
-        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:lastIndex] byExtendingSelection:NO];
-    
-	int numSelectedPubs = [self numberOfSelectedPubs];
-	NSString * pubSingularPlural;
-	if (numSelectedPubs == 1) {
-		pubSingularPlural = NSLocalizedString(@"publication", @"publication");
-	} else {
-		pubSingularPlural = NSLocalizedString(@"publications", @"publications");
-	}
-	
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Deleted %i %@",@"Deleted %i %@ [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural] immediate:NO];
-	
-	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Delete Publication(s)"),pubSingularPlural]];
-}
-
-- (IBAction)deleteSelectedPubs:(id)sender{
-	int numSelectedPubs = [self numberOfSelectedPubs];
-    if (numSelectedPubs == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
-        return;
-    }
-	
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
-											 defaultButton:NSLocalizedString(@"OK", @"OK")
-										   alternateButton:nil
-											   otherButton:NSLocalizedString(@"Cancel", @"Cancel")
-								 informativeTextWithFormat:NSLocalizedString(@"You are about to delete %i items. Do you want to proceed?", @""), numSelectedPubs];
-		[alert setHasCheckButton:YES];
-		[alert setCheckValue:NO];
-        [alert beginSheetModalForWindow:documentWindow
-                          modalDelegate:self 
-                         didEndSelector:@selector(deletePubsAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
-	} else {
-        [self deletePubsAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
-    }
-}
-
-- (IBAction)emailPubCmd:(id)sender{
-    NSMutableArray *items = [[self selectedPublications] mutableCopy];
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-    BibItem *pub = nil;
-    
-    NSFileManager *dfm = [NSFileManager defaultManager];
-    NSString *pubPath = nil;
-    NSMutableString *body = [NSMutableString string];
-    NSMutableArray *files = [NSMutableArray array];
-    
-    NSString *templateName = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:@"BDSKEmailTemplateKey"];
-    BDSKTemplate *template = nil;
-    
-    if ([NSString isEmptyString:templateName] == NO)
-        template = [BDSKTemplate templateForStyle:templateName];
-    
-    while (pub = [e nextObject]) {
-        pubPath = [pub localUrlPath];
-        if([dfm fileExistsAtPath:pubPath])
-            [files addObject:pubPath];
-        
-        pub = [pub crossrefParent];
-        if (pub != nil && [items containsObject:pub] == NO) {
-            [items addObject:pub];
-            pubPath = [pub localUrlPath];
-            if([dfm fileExistsAtPath:pubPath])
-                [files addObject:pubPath];
-        }
-    }
-    
-    if (template != nil && ([template templateFormat] & BDSKTextTemplateFormat)) {
-        [body setString:[BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items]];
-    } else {
-        e = [items objectEnumerator];
-        while (pub = [e nextObject]) {
-            // use the detexified version without internal fields, since TeXification introduces things that 
-            // AppleScript can't deal with (OAInternetConfig may end up using AS)
-            [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
-            [body appendString:@"\n\n"];
-        }
-    }
-    
-    // ampersands are common in publication names
-    [body replaceOccurrencesOfString:@"&" withString:@"\\&" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
-    // escape backslashes
-    [body replaceOccurrencesOfString:@"\\" withString:@"\\\\" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
-    // escape double quotes
-    [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
-
-    // OAInternetConfig will use the default mail helper (at least it works with Mail.app and Entourage)
-    OAInternetConfig *ic = [OAInternetConfig internetConfig];
-    [ic launchMailTo:nil
-          carbonCopy:nil
-     blindCarbonCopy:nil
-             subject:@"BibDesk references"
-                body:body
-         attachments:files];
-
-}
-
-- (IBAction)sendToLyX:(id)sender {
-    if ([self numberOfSelectedPubs] == 0)
-        return;
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *appSupportPath = [fileManager applicationSupportDirectory:kUserDomain];
-    NSString *lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX-1.4"] stringByAppendingPathComponent:@".lyxpipe.in"];
-    
-    if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-        lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX"] stringByAppendingPathComponent:@".lyxpipe.in"];
-        if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-            lyxPipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
-            if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Unable to Find LyX Pipe")
-                                                 defaultButton:nil
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                    informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"")];
-                [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-                return;
-            }
-        }
-    }
-    
-    NSEnumerator *itemEnum = [[self selectedPublications] objectEnumerator];
-    BibItem *item;
-    NSMutableString *cites = [NSMutableString string];
-    
-    while (item = [itemEnum nextObject]) {
-        if ([cites length] > 0) [cites appendString:@","];
-        [cites appendString:[item citeKey]];
-    }
-    
-    NSString *lyxCmd = [NSString stringWithFormat:@"echo LYXCMD:BibDesk:citation-insert:%@ > \"%@\"", cites, lyxPipePath];
-    
-    [[BDSKShellTask shellTask] runShellCommand:lyxCmd withInputString:nil];
-}
-
-- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSAlertDefaultReturn)
-        return;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-    BibItem *pub;
-    while (pub = [e nextObject]) {
-        if ([pub document] == self)
-            [self editPub:pub];
-    }
-}
-
-- (IBAction)editPubCmd:(id)sender{
-    NSString *colID = nil;
-
-    if([tableView clickedColumn] != -1){
-		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
-    }
-    if([[BibTypeManager sharedManager] isLocalFileField:colID]){
-		[self openLinkedFileForField:colID];
-    }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
-		[self openRemoteURLForField:colID];
-    }else if([self hasSharedGroupsSelected] == NO){
-		int n = [self numberOfSelectedPubs];
-		if (n > 6) {
-            // Do we really want a gazillion of editor windows?
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
-                                             defaultButton:NSLocalizedString(@"No", @"No")
-                                          alternateButton:NSLocalizedString(@"Yes", @"Yes")
-                                              otherButton:nil
-                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
-			[alert beginSheetModalForWindow:documentWindow
-                              modalDelegate:self
-                             didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
-                                contextInfo:NULL];
-		} else {
-            [self editPubAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
-        }
-	} else {
-        // currently don't allow editing shared pubs; [self selectedPublications] only returns objects from shownPublications
-        NSBeginAlertSheet(NSLocalizedString(@"Can't Edit Shared Publications", @""), nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, NSLocalizedString(@"You need to drag or copy shared publications to your own document before attempting to edit them", @""));
-    }
-}
-
-- (BibEditor *)editPub:(BibItem *)pub{
-    BibEditor *e = nil;
-	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-	NSWindowController *wc;
-	
-	while(wc = [wcEnum nextObject]){
-		if([wc isKindOfClass:[BibEditor class]] && [(BibEditor*)wc publication] == pub){
-			e = (BibEditor*)wc;
-			break;
-		}
-	}
-    if(e == nil){
-        e = [[BibEditor alloc] initWithPublication:pub];
-        [self addWindowController:e];
-        [e release];
-    }
-    [e show];
-    return e;
-}
-
-- (void)showPerson:(BibAuthor *)person{
-    OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
-    BibPersonController *pc = [person personController];
-    
-    if(pc == nil){
-        pc = [[BibPersonController alloc] initWithPerson:person];
-        [self addWindowController:pc];
-        [pc release];
-    }
-    [pc show];
-}
-
-- (IBAction)selectAllPublications:(id)sender {
-	[tableView selectAll:sender];
-}
-
-- (IBAction)deselectAllPublications:(id)sender {
-	[tableView deselectAll:sender];
-}
-
-- (IBAction)openLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    [self openLinkedFileForField:field];
-}
-
-- (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    NSString *field = (NSString *)contextInfo;
-    if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-        BibItem *pub;
-        NSURL *fileURL;
-        
-        NSString *searchString;
-        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-        if([quickSearchKey isEqualToString:BDSKKeywordsString] || [quickSearchKey isEqualToString:BDSKAllFieldsString])
-            searchString = [searchField stringValue];
-        else
-            searchString = @"";
-        
-        // the user said to go ahead
-        while (pub = [e nextObject]) {
-            fileURL = [pub URLForField:field];
-            if(fileURL == nil) continue;
-            [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
-        }
-    }
-    [field release];
-}
-
-- (void)openLinkedFileForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
-    
-    if (n > 6) {
-		// Do we really want a gazillion of files open?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)")
-                                         defaultButton:NSLocalizedString(@"No", @"No")
-                                       alternateButton:NSLocalizedString(@"Open", @"Open")
-                                           otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n]];
-        [alert beginSheetModalForWindow:documentWindow
-                          modalDelegate:self
-                         didEndSelector:@selector(openLinkedFileAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
-	} else {
-        [self openLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
-    }
-}
-
-- (IBAction)revealLinkedFile:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    [self revealLinkedFileForField:field];
-}
-
-- (void)revealLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    NSString *field = (NSString *)contextInfo;
-    if (returnCode == NSAlertAlternateReturn) {
-        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-        BibItem *pub;
-        
-        while (pub = [e nextObject]) {
-            [[NSWorkspace sharedWorkspace]  selectFile:[pub localFilePathForField:field] inFileViewerRootedAtPath:nil];
-        }
-    }
-    [field release];
-}
-
-- (void)revealLinkedFileForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
-    
-    if (n > 6) {
-		// Do we really want a gazillion of Finder windows?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reveal Linked Files", @"Reveal Linked Files (multiple reveal warning)")
-                                         defaultButton:NSLocalizedString(@"No", @"No")
-                                       alternateButton:NSLocalizedString(@"Reveal", @"multiple reveal warning Reveal button")
-                                           otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"mulitple reveal linked files question"), n]];
-        [alert beginSheetModalForWindow:documentWindow
-                          modalDelegate:self
-                         didEndSelector:@selector(revealLinkedFileAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
-	} else {
-        [self revealLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
-    }
-}
-
-- (IBAction)openRemoteURL:(id)sender{
-	NSString *field = [sender representedObject];
-    if (field == nil)
-		field = BDSKUrlString;
-    [self openRemoteURLForField:field];
-}
-
-- (void)openRemoteURLAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	NSString *field = (NSString *)contextInfo;
-    if(returnCode == NSAlertAlternateReturn){
-        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-        BibItem *pub;
-        
-		while (pub = [e nextObject]) {
-			[[NSWorkspace sharedWorkspace] openURL:[pub remoteURLForField:field]];
-		}
-	}
-    [field release];
-}
-
-- (void)openRemoteURLForField:(NSString *)field{
-	int n = [self numberOfSelectedPubs];
-    
-    if (n > 6) {
-		// Do we really want a gazillion of browser windows?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)")
-                                         defaultButton:NSLocalizedString(@"No", @"No")
-                                      alternateButton:NSLocalizedString(@"Open", @"Open")
-                                          otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n]];
-        [alert beginSheetModalForWindow:documentWindow
-                          modalDelegate:self
-                         didEndSelector:@selector(openRemoteURLAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
-	} else {
-        [self openRemoteURLAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
-    }
-}
-
-- (void)editAction:(id)sender {
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
-		[self editPubCmd:sender];
-	} else if (firstResponder == groupTableView) {
-		[self editGroupAction:sender];
-	}
-}
-
-- (IBAction)alternateDelete:(id)sender {
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
-		[self deleteSelectedPubs:sender];
-	} else if (firstResponder == groupTableView) {
-		[self removeSelectedGroups:sender];
-	}
-}
-
-// -delete: and -insertNewline: are defined indirectly in NSTableView-OAExtensions using our dataSource method
-
-#pragma mark Pasteboard || copy
-
-// -cut: and copy: are defined indirectly in NSTableView-OAExtensions using our dataSource method
-// note: cut: calls delete:
-
-- (IBAction)alternateCut:(id)sender {
-	if ([documentWindow firstResponder] == tableView) {
-		[tableView copy:sender];
-		[self alternateDelete:sender];
-	}
-}
-
-- (IBAction)copyAsAction:(id)sender{
-	int copyType = [sender tag];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-	NSString *citeString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey];
-	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
-}
-
-- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString{
-	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-	BOOL prependTilde = [sud boolForKey:BDSKCitePrependTildeKey];
-	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, [sud stringForKey:BDSKCiteStartBracketKey]]; 
-	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
-    NSMutableString *s = [NSMutableString stringWithString:startCite];
-	
-    BOOL sep = [sud boolForKey:BDSKSeparateCiteKey];
-	NSString *separator = (sep)? [NSString stringWithFormat:@"%@%@", endCite, startCite] : @",";
-    BibItem *pub;
-	BOOL first = YES;
-    
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
-    NSEnumerator *e = [items objectEnumerator];
-    while(pub = [e nextObject]){
-		if(first) first = NO;
-		else [s appendString:separator];
-        [s appendString:[pub citeKey]];
-    }
-	[s appendString:endCite];
-	
-	return s;
-}
+#pragma mark String representations
 
 - (NSString *)bibTeXStringForPublications:(NSArray *)items{
 	return [self bibTeXStringDroppingInternal:NO forPublications:items];
@@ -2031,61 +1587,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return s;
 }
 
-#pragma mark Pasteboard || paste
-
-// ----------------------------------------------------------------------------------------
-// paste: get text, parse it as bibtex, add the entry to publications and (optionally) edit it.
-// ----------------------------------------------------------------------------------------
-
-// -paste: is defined indirectly in NSTableView-OAExtensions using our dataSource method
-
-// Don't use the default action in NSTableView-OAExtensions here, as it uses another pasteboard and some more overhead
-- (IBAction)duplicate:(id)sender{
-	if ([documentWindow firstResponder] != tableView ||
-		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
-		NSBeep();
-		return;
-	}
-	
-    NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
-    
-    [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
-    [self highlightBibs:newPubs];
-    [newPubs release];
-	
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
-        [self editPubCmd:nil]; // this will aske the user when there are many pubs
-    }
-}
-
-- (void)createNewBlankPub{
-    [self createNewBlankPubAndEdit:NO];
-}
-
-- (void)createNewBlankPubAndEdit:(BOOL)yn{
-    BibItem *newBI = [[[BibItem alloc] init] autorelease];
-    
-    // add the publication; addToGroup:handleInherited: depends on the pub having a document
-    [self addPublication:newBI];
-
-	NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
-	BDSKGroup *group;
-    int op;
-	while (group = [groupEnum nextObject]) {
-		if ([group isCategory]){
-			op = [newBI addToGroup:group handleInherited:BDSKOperationSet];
-            NSAssert1(BDSKOperationSet == op, @"Unable to add to group %@", group);
-        }
-    }
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
-    [self highlightBib:newBI];
-    if(yn == YES)
-    {
-        [self editPub:newBI];
-    }
-}
+#pragma - 
+#pragma mark New publications from pasteboard
 
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)outError{
 	// these are the types we support, the order here is important!
@@ -2532,6 +2035,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [self sortPubsByColumn:nil];
     [tableView setHighlightedTableColumn:tc];
 }
+
+- (void)saveSortOrder{ 
+    // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    [pw setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+    [pw setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
+    [pw setBool:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
+}  
 
 #pragma mark -
 #pragma mark Table Column Setup
@@ -3174,51 +2686,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[statusBar performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
 }
 
-#pragma mark View Actions
-
-- (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:mainBox offset:1.0];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
-}
-
-- (IBAction)changeMainTableFont:(id)sender{
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKMainTableViewFontNameKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainTableViewFontSizeKey];
-	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
-    [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
-    
-    id firstResponder = [documentWindow firstResponder];
-    if (firstResponder != tableView)
-        [documentWindow makeFirstResponder:tableView];
-}
-
-- (IBAction)changeGroupTableFont:(id)sender{
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKGroupTableViewFontNameKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKGroupTableViewFontSizeKey];
-	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
-    [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
-    
-    id firstResponder = [documentWindow firstResponder];
-    if (firstResponder != groupTableView)
-        [documentWindow makeFirstResponder:groupTableView];
-}
-
-- (IBAction)changePreviewDisplay:(id)sender{
-    int tag = [sender tag];
-    if(tag != [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:tag forKey:BDSKPreviewDisplayKey];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-    }
-}
-
-- (IBAction)refreshSharing:(id)sender{
-    [[BDSKSharingServer defaultServer] restartSharingIfNeeded];
-}
-
-- (IBAction)refreshSharedBrowsing:(id)sender{
-    [[BDSKSharingBrowser sharedBrowser] restartSharedBrowsingIfNeeded];
-}
-
 #pragma mark TeXTask delegate
 
 - (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)aTexTask{
@@ -3232,36 +2699,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	[self updateUI];
 }
 
-#pragma mark Custom cite drawer stuff
-
-- (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
-    [customCiteDrawer toggle:sender];
-	if(showingCustomCiteDrawer){
-		showingCustomCiteDrawer = NO;
-	}else{
-		showingCustomCiteDrawer = YES;
-	}
-}
-
-- (IBAction)addCustomCiteString:(id)sender{
-    int row = [customStringArray count];
-	[customStringArray addObject:@"citeCommand"];
-    [ccTableView reloadData];
-	[ccTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[ccTableView editColumn:0 row:row withEvent:nil select:YES];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
-}
-
-- (IBAction)removeCustomCiteString:(id)sender{
-    if([ccTableView numberOfSelectedRows] == 0)
-		return;
-	
-	if ([ccTableView editedRow] != -1)
-		[documentWindow makeFirstResponder:ccTableView];
-	[customStringArray removeObjectAtIndex:[ccTableView selectedRow]];
-	[ccTableView reloadData];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
-}
+#pragma mark Selection
 
 - (int)numberOfSelectedPubs{
     return [tableView numberOfSelectedRows];
@@ -3275,335 +2713,43 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
 }
 
-#pragma mark Main window stuff
+#pragma mark -
+#pragma mark Printing support
 
-- (void)saveSortOrder{ 
-    // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    [pw setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
-    [pw setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
-    [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-    [pw setBool:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
-}  
+- (NSView *)printableView{
+    BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
+    [printableView setAttributedString:[previewField textStorage]];    
+    return [printableView autorelease];
+}
 
-- (void)windowWillClose:(NSNotification *)notification{
+- (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
+    NSPrintInfo *info = [self printInfo];
+    [[info dictionary] addEntriesFromDictionary:printSettings];
+    return [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
+}
 
-    if([notification object] != documentWindow) // this is critical; 
-        return;
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-    isDocumentClosed = YES;
-    [customCiteDrawer close];
-    [self saveSortOrder];
-    
-    // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
-       [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-       [tableView selectedRow] != -1 )
-        [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
+- (void)printShowingPrintPanel:(BOOL)showPanels {
+    // Obtain a custom view that will be printed
+    NSView *printView = [self printableView];
 	
-	[self providePromisedTypes];
+    // Construct the print operation and setup Print panel
+    NSPrintOperation *op = [NSPrintOperation printOperationWithView:printView
+                                                          printInfo:[self printInfo]];
+    [op setShowPanels:showPanels];
+    [op setCanSpawnSeparateThread:YES];
+    if (showPanels) {
+        // Add accessory view, if needed
+    }
 	
-    // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-
+    // Run operation, which shows the Print panel if showPanels was YES
+    [op runOperationModalForWindow:[self windowForSheet] delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
-- (void)pageDownInPreview:(id)sender{
-    NSPoint p = [previewField scrollPositionAsPercentage];
-    
-    float pageheight = NSHeight([[[previewField enclosingScrollView] documentView] bounds]);
-    float viewheight = NSHeight([[previewField enclosingScrollView] documentVisibleRect]);
-    
-    if(p.y > 0.99 || viewheight >= pageheight){ // select next row if the last scroll put us at the end
-        int i = [[tableView selectedRowIndexes] lastIndex];
-		if (i == NSNotFound)
-			i = 0;
-		else if (i < [tableView numberOfRows])
-			i++;
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [tableView scrollRowToVisible:i];
-        return; // adjust page next time
-    }
-    [previewField pageDown:sender];
-}
+#pragma -
+#pragma mark Cite Key and Crossref lookup
 
-- (void)pageUpInPreview:(id)sender{
-    NSPoint p = [previewField scrollPositionAsPercentage];
-    
-    if(p.y < 0.01){ // select previous row if we're already at the top
-        int i = [[tableView selectedRowIndexes] firstIndex];
-		if (i == NSNotFound)
-			i = 0;
-		else if (i > 0)
-			i--;
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [tableView scrollRowToVisible:i];
-        return; // adjust page next time
-    }
-    [previewField pageUp:sender];
-}
-
-- (void)splitViewDoubleClick:(OASplitView *)sender{
-	NSView *firstView = [[sender subviews] objectAtIndex:0];
-	NSView *secondView = [[sender subviews] objectAtIndex:1];
-	NSRect firstFrame = [firstView frame];
-	NSRect secondFrame = [secondView frame];
-	
-	if (sender == splitView) {
-		// first = table, second = preview
-		if(NSHeight([secondView frame]) != 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-			lastPreviewHeight = NSHeight(secondFrame); // cache this
-			firstFrame.size.height += lastPreviewHeight;
-			secondFrame.size.height = 0;
-		} else {
-			if(lastPreviewHeight == 0)
-				lastPreviewHeight = NSHeight([sender frame]) / 3; // a reasonable value for uncollapsing the first time
-			secondFrame.size.height = lastPreviewHeight;
-			firstFrame.size.height = NSHeight([sender frame]) - lastPreviewHeight - [sender dividerThickness];
-		}
-	} else {
-		// first = group, second = table+preview
-		if(NSWidth([firstView frame]) != 0){
-			lastGroupViewWidth = NSWidth(firstFrame); // cache this
-			secondFrame.size.width += lastGroupViewWidth;
-			firstFrame.size.width = 0;
-		} else {
-			if(lastGroupViewWidth == 0)
-				lastGroupViewWidth = 120; // a reasonable value for uncollapsing the first time
-			firstFrame.size.width = lastGroupViewWidth;
-			secondFrame.size.width = NSWidth([sender frame]) - lastGroupViewWidth - [sender dividerThickness];
-		}
-	}
-	
-	[firstView setFrame:firstFrame];
-	[secondView setFrame:secondFrame];
-    [sender adjustSubviews];
-}
-
-
-#pragma mark Macro stuff
-
-- (BDSKMacroResolver *)macroResolver{
-    return macroResolver;
-}
-
-- (IBAction)showMacrosWindow:(id)sender{
-    if (!macroWC) {
-        macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
-    }
-    if ([[self windowControllers] containsObject:macroWC] == NO) {
-        [self addWindowController:macroWC];
-    }
-    [macroWC showWindow:self];
-}
-
-#pragma mark
-#pragma mark Cite Keys and Crossref support
-
-- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
-    NSArray *items = [[self itemsForCiteKeys] arrayForKey:aCiteKey];
-    
-	if ([items count] > 1)
-		return YES;
-	if ([items count] == 1 && [items objectAtIndex:0] != anItem)	
-		return YES;
-	return NO;
-}
-
-- (void)generateCiteKeysForSelectedPublications{
-    
-    unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
-    NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
-    BibItem *aPub;
-    NSMutableArray *arrayOfPubs = [NSMutableArray arrayWithCapacity:numberOfSelectedPubs];
-    NSMutableArray *arrayOfOldValues = [NSMutableArray arrayWithCapacity:numberOfSelectedPubs];
-    NSMutableArray *arrayOfNewValues = [NSMutableArray arrayWithCapacity:numberOfSelectedPubs];
-    BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillGenerateCiteKeyScriptHookName];
-    
-    // first we make sure all edits are committed
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-    
-    // put these pubs into an array, since the indices can change after we set the cite key, due to sorting or searching
-    while (aPub = [selEnum nextObject]) {
-        [arrayOfPubs addObject:aPub];
-        if(scriptHook){
-            [arrayOfOldValues addObject:[aPub citeKey]];
-            [arrayOfNewValues addObject:[aPub suggestedCiteKey]];
-        }
-    }
-    
-    if (scriptHook) {
-        [scriptHook setField:BDSKCiteKeyString];
-        [scriptHook setOldValues:arrayOfOldValues];
-        [scriptHook setNewValues:arrayOfNewValues];
-        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
-    }
-    
-    scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidGenerateCiteKeyScriptHookName];
-    [arrayOfOldValues removeAllObjects];
-    [arrayOfNewValues removeAllObjects];
-    selEnum = [arrayOfPubs objectEnumerator];
-    
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    while(aPub = [selEnum nextObject]){
-        NSString *newKey = [aPub suggestedCiteKey];
-        NSString *crossref = [aPub valueOfField:BDSKCrossrefString inherit:NO];
-        if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key",@"Could not generate cite key") 
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @""), [aPub citeKey]];
-            [alert beginSheetModalForWindow:documentWindow
-                              modalDelegate:nil
-                             didEndSelector:NULL
-                                contextInfo:NULL];
-            continue;
-        }
-        [aPub setCiteKey:newKey];
-        
-        if(scriptHook){
-            [arrayOfOldValues addObject:[aPub citeKey]];
-            [arrayOfNewValues addObject:newKey];
-        }
-        
-        [pool release];
-        pool = [[NSAutoreleasePool alloc] init];
-    }
-    
-    // should be safe to release here since arrays were created outside the scope of this local pool
-    [pool release];
-    
-    if (scriptHook) {
-        [scriptHook setField:BDSKCiteKeyString];
-        [scriptHook setOldValues:arrayOfOldValues];
-        [scriptHook setNewValues:arrayOfNewValues];
-        [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
-    }
-    
-    [[self undoManager] setActionName:(numberOfSelectedPubs > 1 ? NSLocalizedString(@"Generate Cite Keys",@"") : NSLocalizedString(@"Generate Cite Key",@""))];
-}    
-
-- (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if([alert checkValue] == YES)
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnCiteKeyChangeKey];
-    
-    if(returnCode == NSAlertDefaultReturn)
-        [self generateCiteKeysForSelectedPublications];
-}
-
-- (IBAction)generateCiteKey:(id)sender
-{
-    unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
-	if (numberOfSelectedPubs == 0 ||
-        [self hasSharedGroupsSelected] == YES) return;
-    
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
-        NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"") : NSLocalizedString(@"Really Generate Cite Key?", @"");
-        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @""), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"");
-        BDSKAlert *alert = [BDSKAlert alertWithMessageText:alertTitle
-                                             defaultButton:NSLocalizedString(@"Generate", @"")
-                                           alternateButton:NSLocalizedString(@"Cancel", @"") 
-                                               otherButton:nil
-                                 informativeTextWithFormat:message];
-        [alert setHasCheckButton:YES];
-        [alert setCheckValue:NO];
-        [alert beginSheetModalForWindow:documentWindow 
-                          modalDelegate:self 
-                         didEndSelector:@selector(generateCiteKeyAlertDidEnd:returnCode:contextInfo:) 
-                            contextInfo:NULL];
-    } else {
-        [self generateCiteKeysForSelectedPublications];
-    }
-}
-
-// select duplicates, then allow user to delete/copy/whatever
-- (IBAction)selectPossibleDuplicates:(id)sender{
-    
-	[self setFilterField:@""]; // make sure we can see everything
-    
-    [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
-    
-    CFIndex index = [tableView numberOfRows] - 1;
-    id object1 = nil, object2 = nil;
-    
-    OBASSERT(lastSelectedColumnForSort);
-    
-    NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
-    CFIndex countOfItems = 0;
-    
-    // Compare objects in the currently sorted table column using the isEqual: method to test adjacent cells in order to check for duplicates based on a specific sort key.  BibTool does this, but its effectiveness is obviously limited by the key used <http://lml.ls.fi.upm.es/manuales/bibtool/m_2_11_1.html>.
-    while(index--){
-        object1 = object2;
-        object2 = [self tableView:tableView objectValueForTableColumn:lastSelectedColumnForSort row:index];
-        if([object1 isEqual:object2]){
-            [rowsToSelect addIndexesInRange:NSMakeRange(index, 2)];
-            countOfItems++;
-        }
-    }
-    
-    if(countOfItems){
-        [tableView selectRowIndexes:rowsToSelect byExtendingSelection:NO];
-        [tableView scrollRowToCenter:[rowsToSelect firstIndex]];  // make sure at least one item is visible
-    }else
-        NSBeep();
-    
-	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
-    // update status line after the updateUI notification, or else it gets overwritten
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural] immediate:NO];
-}
-
-// select duplicates, then allow user to delete/copy/whatever
-- (IBAction)selectDuplicates:(id)sender{
-    
-	[self setFilterField:@""]; // make sure we can see everything
-    
-    [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
-    NSZone *zone = [self zone];
-    
-    NSMutableArray *pubsToRemove = [[self publications] mutableCopy];
-    CFIndex countOfItems = [pubsToRemove count];
-    BibItem **pubs = (BibItem **)NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
-    [pubsToRemove getObjects:pubs];
-    
-    // Tests equality based on standard fields (high probability that these will be duplicates)
-    NSSet *uniquePubs = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEqualityCallBacks);
-    [pubsToRemove removeIdenticalObjectsFromArray:[uniquePubs allObjects]]; // remove all unique ones based on pointer equality
-    [uniquePubs release];
-    
-    // original buffer should be large enough, since we've only removed items from pubsToRemove
-    countOfItems = [pubsToRemove count];
-    [pubsToRemove getObjects:pubs];
-    NSSet *removeSet = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEqualityCallBacks);
-    
-    NSZoneFree(zone, pubs);
-    
-    [pubsToRemove removeAllObjects];
-    [pubsToRemove addObjectsFromArray:publications];
-    CFIndex idx = [pubsToRemove count];
-    
-    while(idx--){
-        if([removeSet containsObject:[pubsToRemove objectAtIndex:idx]] == NO)
-            [pubsToRemove removeObjectAtIndex:idx];
-    }
-    
-    [removeSet release];
-	[self highlightBibs:pubsToRemove];
-    [pubsToRemove release];
-
-    if(countOfItems)
-        [tableView scrollRowToCenter:[tableView selectedRow]];  // make sure at least one item is visible
-    else
-        NSBeep();
-    
-	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
-    // update status line after the updateUI notification, or else it gets overwritten
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural] immediate:NO];
+- (OFMultiValueDictionary *)itemsForCiteKeys{
+	return itemsForCiteKeys;
 }
 
 - (void)rebuildItemsForCiteKeys{
@@ -3630,10 +2776,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[itemsForCiteKeys removeObject:pub forKey:[pub citeKey]];
 }
 
-- (OFMultiValueDictionary *)itemsForCiteKeys{
-	return itemsForCiteKeys;
-}
-
 - (BibItem *)publicationForCiteKey:(NSString *)key{
 	if ([NSString isEmptyString:key]) 
 		return nil;
@@ -3651,6 +2793,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if ([NSString isEmptyString:key] == NO) 
 		items = [[self itemsForCiteKeys] arrayForKey:key];
     return (items == nil) ? [NSArray array] : items;
+}
+
+- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
+    NSArray *items = [[self itemsForCiteKeys] arrayForKey:aCiteKey];
+    
+	if ([items count] > 1)
+		return YES;
+	if ([items count] == 1 && [items objectAtIndex:0] != anItem)	
+		return YES;
+	return NO;
 }
 
 - (BOOL)citeKeyIsCrossreffed:(NSString *)key{
@@ -3696,263 +2848,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	}
 }
 
-- (void)performSortForCrossrefs{
-    NSArray *copyOfPubs = [publications copy];
-	NSEnumerator *pubEnum = [copyOfPubs objectEnumerator];
-	BibItem *pub = nil;
-	BibItem *parent;
-	NSString *key;
-	NSMutableSet *prevKeys = [NSMutableSet set];
-	BOOL moved = NO;
-	NSArray *selectedPubs = [self selectedPublications];
-    
-    [copyOfPubs release];
-	
-	// We only move parents that come before a child.
-	while (pub = [pubEnum nextObject]){
-		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
-		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
-            [prevKeys removeObject:key];
-			parent = [self publicationForCiteKey:key];
-			[publications removeObjectIdenticalTo:parent];
-			[publications addObject:parent];
-			moved = YES;
-		}
-		[prevKeys addObject:[[pub citeKey] lowercaseString]];
-	}
-	
-	if (moved) {
-		[self sortPubsByColumn:nil];
-		[self highlightBibs:selectedPubs];
-		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"")];
-	}
-}
-
-- (IBAction)sortForCrossrefs:(id)sender{
-	NSUndoManager *undoManager = [self undoManager];
-	[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
-	[undoManager setActionName:NSLocalizedString(@"Sort Publications",@"")];
-	
-	[self performSortForCrossrefs];
-}
-
-- (void)selectCrossrefParentForItem:(BibItem *)item{
-    NSString *crossref = [item valueOfField:BDSKCrossrefString inherit:NO];
-    [tableView deselectAll:nil];
-    BibItem *parent = [self publicationForCiteKey:crossref];
-    if(crossref && parent){
-        [self highlightBib:parent];
-        [tableView scrollRowToCenter:[tableView selectedRow]];
-    } else
-        NSBeep(); // if no parent found
-}
-
-- (IBAction)selectCrossrefParentAction:(id)sender{
-    BibItem *selectedBI = [[self selectedPublications] lastObject];
-    [self selectCrossrefParentForItem:selectedBI];
-}
-
-- (void)createNewPubUsingCrossrefForItem:(BibItem *)item{
-    BibItem *newBI = [[BibItem alloc] init];
-	NSString *parentType = [item pubType];
-    
-	[newBI setField:BDSKCrossrefString toValue:[item citeKey]];
-	if ([parentType isEqualToString:BDSKProceedingsString]) {
-		[newBI setPubType:BDSKInproceedingsString];
-	} else if ([parentType isEqualToString:BDSKBookString] || 
-			   [parentType isEqualToString:BDSKBookletString] || 
-			   [parentType isEqualToString:BDSKTechreportString] || 
-			   [parentType isEqualToString:BDSKManualString]) {
-		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
-			[newBI setPubType:BDSKIncollectionString];
-	}
-    [self addPublication:newBI];
-    [newBI release];
-    [self editPub:newBI];
-}
-
-- (IBAction)createNewPubUsingCrossrefAction:(id)sender{
-    BibItem *selectedBI = [[self selectedPublications] lastObject];
-    [self createNewPubUsingCrossrefForItem:selectedBI];
-}
-
-- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
-	
-	NSSet *parentTypes = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
-	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
-	BibItem *aPub;
-	
-    // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-	
-	while (aPub = [selEnum nextObject]) {
-		if([parentTypes containsObject:[aPub pubType]])
-			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
-	}
-	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles",@"") : NSLocalizedString(@"Duplicate Title",@""))];
-}
-
-- (IBAction)duplicateTitleToBooktitle:(id)sender{
-	if ([self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) return;
-	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
-                                     defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
-                                   alternateButton:NSLocalizedString(@"Overwrite", @"Overwrite")
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @"")];
-	[alert beginSheetModalForWindow:documentWindow
-                      modalDelegate:self
-                     didEndSelector:@selector(dublicateTitleToBooktitleAlertDidEnd:returnCode:contextInfo:) 
-                        contextInfo:NULL];
-}
-
-#pragma mark
-#pragma mark Printing support
-
-- (NSView *)printableView{
-    BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
-    [printableView setAttributedString:[previewField textStorage]];    
-    return [printableView autorelease];
-}
-
-- (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
-    NSPrintInfo *info = [self printInfo];
-    [[info dictionary] addEntriesFromDictionary:printSettings];
-    return [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
-}
-
-- (void)printShowingPrintPanel:(BOOL)showPanels {
-    // Obtain a custom view that will be printed
-    NSView *printView = [self printableView];
-	
-    // Construct the print operation and setup Print panel
-    NSPrintOperation *op = [NSPrintOperation printOperationWithView:printView
-                                                          printInfo:[self printInfo]];
-    [op setShowPanels:showPanels];
-    [op setCanSpawnSeparateThread:YES];
-    if (showPanels) {
-        // Add accessory view, if needed
-    }
-	
-    // Run operation, which shows the Print panel if showPanels was YES
-    [op runOperationModalForWindow:[self windowForSheet] delegate:nil didRunSelector:NULL contextInfo:NULL];
-}
-
-#pragma mark 
-#pragma mark AutoFile stuff
-
-- (void)consolidateAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    BOOL check = (returnCode == NSAlertDefaultReturn);
-    if (returnCode == NSAlertAlternateReturn)
-        return;
-
-    // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-
-    [[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files",@"")];
-}
-
-- (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([self hasSharedGroupsSelected] == YES) {
-        NSBeep();
-        return;
-    }
-    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files",@"")
-                                         defaultButton:NSLocalizedString(@"Move Complete Only",@"Move Complete Only")
-                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
-                                           otherButton:NSLocalizedString(@"Move All",@"Move All")
-                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@"")];
-    // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BibFiler 
-    // as that will use a sheet as well, see bug # 1526145
-	[alert beginSheetModalForWindow:documentWindow
-                      modalDelegate:self
-                     didEndSelector:NULL
-                 didDismissSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:)
-                        contextInfo:NULL];
-    
-}
-
-#pragma mark blog stuff
-
-
-- (IBAction)postItemToWeblog:(id)sender{
-
-	[NSException raise:BDSKUnimplementedException
-				format:@"postItemToWeblog is unimplemented."];
-	
-	NSString *appPath = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"Blapp"]; // pref
-	NSLog(@"%@",appPath);
-#if 0	
-	AppleEvent *theAE;
-	OSERR err = AECreateAppleEvent (NNWEditDataItemAppleEventClass,
-									NNWEditDataItemAppleEventID,
-									'MMcC', // Blapp
-									kAutoGenerateReturnID,
-									kAnyTransactionID,
-									&theAE);
-
-
-	
-	
-	OSErr AESend (
-				  const AppleEvent * theAppleEvent,
-				  AppleEvent * reply,
-				  AESendMode sendMode,
-				  AESendPriority sendPriority,
-				  SInt32 timeOutInTicks,
-				  AEIdleUPP idleProc,
-				  AEFilterUPP filterProc
-				  );
-#endif
-}
-
-#pragma mark Text import sheet support
-
-- (IBAction)importFromPasteboardAction:(id)sender{
-    
-    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSString *type = [pasteboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKReferenceMinerStringPboardType, BDSKBibItemPboardType, NSStringPboardType, nil]];
-    
-    if(type != nil){
-        NSError *error = nil;
-        BOOL isKnownFormat = YES;
-		if([type isEqualToString:NSStringPboardType]){
-			// sniff the string to see if we should add it directly
-			NSString *pboardString = [pasteboard stringForType:type];
-			isKnownFormat = ([pboardString contentStringType] != BDSKUnknownStringType);
-		}
-		
-        if(isKnownFormat && [self addPublicationsFromPasteboard:pasteboard error:&error] && error == nil)
-            return; // it worked, so we're done here
-    }
-    
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
-
-    [tic beginSheetForPasteboardModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-	[tic release];
-}
-
-- (IBAction)importFromFileAction:(id)sender{
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
-
-    [tic beginSheetForFileModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-	[tic release];
-}
-
-- (IBAction)importFromWebAction:(id)sender{
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
-
-    [tic beginSheetForWebModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-	[tic release];
-}
+#pragma mark Protocols forwarding
 
 // Declaring protocol conformance in the category headers shuts the compiler up, but causes a hang in -[NSObject conformsToProtocol:], which sucks.  Therefore, we use wrapper methods here to call the real (category) implementations.
 - (void)restoreDocumentStateByRemovingSearchView:(NSView *)view{ 
@@ -3966,6 +2862,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
     return [self _tableViewSingleSelectionIndexes:tview];
 }
+
+#pragma mark DisplayName KVO
 
 - (void)setFileURL:(NSURL *)absoluteURL{ 
     // make sure that changes in the displayName are observed, as NSDocument doesn't use a KVC compliant method for setting it

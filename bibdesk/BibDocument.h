@@ -259,46 +259,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 // Responses to UI actions
 
 /*!
-@method newPub:
-    @abstract creates a new publication (BibItem)
- @discussion This is the action method for the 'new' button. It calls [self createNewBlankPubAndEdit:YES] 
-    @param sender The sending object (not used, we assume it's the 'new' button.)
-*/
-- (IBAction)newPub:(id)sender; // new pub button pressed.
-
-/*!
-    @method deleteSelectedPubs:
-    @abstract Deletes the selected publications from the document
-    @discussion Action of the Delete button. It removes the selected items of the tableview from the publications array. It assumes that there is at least one selected item -- the worst that could happen should be that the change count is wrong if it's called otherwise.
- @param sender The sending object - not used.
-    
-*/
-- (IBAction)deleteSelectedPubs:(id)sender;
-/*!
-    @method removeSelectedPubs:
-    @abstract Removes the selected publications from the selected groups
-    @discussion It removes the selected items of the tableview from the groups selected in the group tableview, or deletes them if the first group is selected. It assumes that there is at least one selected item -- the worst that could happen should be that the change count is wrong if it's called otherwise.
- @param sender The sending object - not used.
-    
-*/
-- (IBAction)removeSelectedPubs:(id)sender;
-
-- (IBAction)selectPossibleDuplicates:(id)sender;
-- (IBAction)selectDuplicates:(id)sender;
-
-- (IBAction)sortForCrossrefs:(id)sender;
-
-- (void)performSortForCrossrefs;
-
-- (void)selectCrossrefParentForItem:(BibItem *)item;
-- (IBAction)selectCrossrefParentAction:(id)sender;
-
-- (void)createNewPubUsingCrossrefForItem:(BibItem *)item;
-- (IBAction)createNewPubUsingCrossrefAction:(id)sender;
-
-- (IBAction)duplicateTitleToBooktitle:(id)sender;
-
-/*!
     @method updatePreviews
     @abstract updates views because pub selection changed
     @discussion proxy for outline/tableview-selectiondidchange. - not the best name for this method, since it does more than update previews...
@@ -315,124 +275,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 */
 - (void)displayPreviewForItems:(NSArray *)itemIndexes;
-
-/*!
-@method emailPubCmd
- 
-*/
-- (IBAction)emailPubCmd:(id)sender;
-
-- (IBAction)sendToLyX:(id)sender;
-
-    /*!
-    @method editPubCmd
-    @abstract an action to edit a publication has happened. 
-    @discussion This is the tableview's doubleaction and the action of the edit pub button. It calls editPub with the tableview's selected publication.
-    @param sender Not Used!
-*/
-- (IBAction)editPubCmd:(id)sender;
-
-/*!
-    @method editPub
- @abstract Opens the edit window
- @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
- @param pub The BibItem that should be edited.
-*/
-- (BibEditor *)editPub:(BibItem *)pub;
-
-/*!
-    @method showPerson:
-    @abstract Opens the personcontroller window
-    @discussion Creates a personcontroller if one doesn't exist, and tells it to show itself. 
-    @param person The BibAuthor that should be displayed.
-*/
-- (void)showPerson:(BibAuthor *)person;
-
-/*!
-    @method selectAllPublications:
-    @abstract Selects all publications
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)selectAllPublications:(id)sender;
-
-/*!
-    @method deselectAllPublications:
-    @abstract Deselects all publications
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)deselectAllPublications:(id)sender;
-
-/*!
-    @method openLinkedFile:
-    @abstract Opens the linked file of the selected publication with the default application
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)openLinkedFile:(id)sender;
-
-- (void)openLinkedFileForField:(NSString *)field;
-
-/*!
-    @method revealLinkedFile:
-    @abstract Reveals the linked file of the selected publication in the Finder
-    @discussion 
-    @param sender The sender. Not used.
-*/
-- (IBAction)revealLinkedFile:(id)sender;
-
-- (void)revealLinkedFileForField:(NSString *)field;
-
-/*!
-    @method openRemoteURL:
-    @abstract Opens the remote URL of the selected publication in the default browser
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)openRemoteURL:(id)sender;
-
-- (void)openRemoteURLForField:(NSString *)field;
-
-/*!
-    @method editAction:
-    @abstract General edit action. Edits the selected publications or the selected smart group, depending on the selected tableView. 
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (void)editAction:(id)sender;
-
-/*!
-    @method alternateDelete:
-    @abstract General alternate delete action. Deletes the selected publications or the selected smart groups, depending on the selected tableView. 
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (void)alternateDelete:(id)sender;
-
-/*!
-    @method alternateCut:
-    @abstract Cuts using alternateDelete: action.
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)alternateCut:(id)sender;
-
-/*!
-    @method copyAsAction:
-    @abstract copy items in a particular format, depending on the tag of the sender
-    @discussion puts the format for the currently selected publications onto the general pasteboard.
-    @param sender The sender.
-*/
-- (IBAction)copyAsAction:(id)sender;
-
-/*!
-	@method citeStringForPublications:citeString:
-	@abstract  method for generating cite string
-	@discussion generates appropriate cite command from the given items 
-*/
-
-- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString;
 
 /*!
 	@method bibTeXStringForPublications
@@ -544,9 +386,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
      */
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem;
 
-- (IBAction)generateCiteKey:(id)sender;
-- (void)generateCiteKeysForSelectedPublications;
-
 /* Paste related methods */
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)error;
 - (NSArray *)newPublicationsFromArchivedData:(NSData *)data;
@@ -556,28 +395,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSArray *)newPublicationForURL:(NSURL *)url error:(NSError **)error;
 
 // Private methods
-/*!
-    @method createNewBlankPub
-    @abstract Action method for the new pub button.
- @discussion calls [createNewBlankPubAndEdit:YES]
-    
-*/
-- (void)createNewBlankPub;
-
-/*!
-    @method createNewBlankPubAndEdit
-    @abstract Supports creating new publications
-    @discussion adds a new publication and may edit it.
-    @param yn A boolean -- whether or not to tell the new pub to open an editor window.
-*/
-- (void)createNewBlankPubAndEdit:(BOOL)yn;
-
-/*!
-    @method handleTableSelectionChangedNotification:
-    @abstract listens for notification of changes in the selection of the main table.
-    @discussion \253discussion\273
-    
-*/
 
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
 
@@ -690,63 +507,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)highlightBibs:(NSArray *)bibArray;
 
-- (IBAction)toggleStatusBar:(id)sender;
-
 - (void)setStatus:(NSString *)status;
 - (void)setStatus:(NSString *)status immediate:(BOOL)now;
 
-- (IBAction)changeMainTableFont:(id)sender;
-- (IBAction)changeGroupTableFont:(id)sender;
-
-- (IBAction)changePreviewDisplay:(id)sender;
-
-- (IBAction)refreshSharing:(id)sender;
-- (IBAction)refreshSharedBrowsing:(id)sender;
-
-- (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
-
-- (IBAction)addCustomCiteString:(id)sender;
-- (IBAction)removeCustomCiteString:(id)sender;
-
-/*!
-    @method     pageDownInPreview:
-    @abstract   Page down in the lower pane of the splitview using spacebar.
-    @discussion Currently sent by the tableview, which gets keyDown: events.
-    @param      sender (description)
-*/
-- (void)pageDownInPreview:(id)sender;
-
-/*!
-    @method     pageUpInPreview:
-    @abstract   Page up in the lower pane of the splitview using spacebar.
-    @discussion Currently sent by the tableview, which gets keyDown: events.
-    @param      sender (description)
-*/
-- (void)pageUpInPreview:(id)sender;
-/*!
-    @method splitViewDoubleClick:
-    @abstract A delegate method of the OASplitView. Handles doubleClicking.
-    @discussion \253discussion\273
-    
-*/
-- (void)splitViewDoubleClick:(OASplitView *)sender;
-
-/*!
-    @method     consolidateLinkedFiles:
-    @abstract   invokes autofile. see BibFiler.h,m for info
-    
-*/
-
-- (IBAction)consolidateLinkedFiles:(id)sender;
-
-- (IBAction)postItemToWeblog:(id)sender;
-
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
-
-- (IBAction)importFromPasteboardAction:(id)sender;
-- (IBAction)importFromFileAction:(id)sender;
-- (IBAction)importFromWebAction:(id)sender;
 
 /*!
     @method     saveSortOrder
