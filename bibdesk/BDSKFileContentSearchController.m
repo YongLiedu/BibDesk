@@ -71,6 +71,7 @@
     results = [[NSMutableArray alloc] initWithCapacity:10];
     
     searchKey = [[NSString alloc] initWithString:@""];
+    canceledSearch = NO;
         
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDocumentCloseNotification:) name:BDSKDocumentWindowWillCloseNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
@@ -237,7 +238,10 @@
 - (void)search:(BDSKSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
 {
     if ([search isEqual:aSearch]) {
-        [self setResults:anArray];
+        
+        // don't reset the array
+        if (NO == canceledSearch)
+            [self setResults:anArray];
         [indexProgressBar setDoubleValue:[searchIndex progressValue]];
     }
 }
@@ -246,15 +250,24 @@
 {
     if ([search isEqual:aSearch]) {
         [stopButton setEnabled:NO];
-        [self setResults:anArray];
+        
+        // don't reset the array if we canceled updates
+        if (NO == canceledSearch)
+            [self setResults:anArray];
         [indexProgressBar setDoubleValue:[searchIndex progressValue]];
-        [indexProgressBar setHidden:YES];
+        
+        // hides progress bar and text
+        [progressView setHidden:YES];
     }
 }
 
 - (void)cancelCurrentSearch:(id)sender
 {
     [search cancel];
+    [stopButton setEnabled:NO];
+    
+    // this will cancel updates to the tableview
+    canceledSearch = YES;
 }    
 
 - (void)rebuildResultsWithNewSearch:(NSString *)searchString
@@ -266,6 +279,9 @@
     
         // empty array; this takes care of updating the table for us
         [self setResults:[NSArray array]];        
+        [stopButton setEnabled:YES];
+        // set before starting the search, or we can end up updating with it == YES
+        canceledSearch = NO;
         [search searchForString:searchString withOptions:kSKSearchOptionDefault];
     }
 }

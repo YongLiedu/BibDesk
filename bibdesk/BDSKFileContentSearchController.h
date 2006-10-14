@@ -83,7 +83,9 @@
     IBOutlet NSArrayController *resultsArrayController;
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *stopButton;
+    IBOutlet NSView *progressView;
     IBOutlet NSProgressIndicator *indexProgressBar;
+    BOOL canceledSearch;
     
     IBOutlet BDSKEdgeView *topBarView;
 	NSView *searchContentView;

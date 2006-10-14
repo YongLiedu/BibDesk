@@ -105,6 +105,7 @@
 - (void)cancel;
 {
     [self setSearch:NULL];
+    [searchResults removeAllObjects];
 }
 
 - (void)searchForString:(NSString *)aString withOptions:(SKSearchOptions)opts;
@@ -118,8 +119,13 @@
 - (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
 {
     if ([index isEqual:searchIndex]) {
-        [self cancel];
-        [self updateSearchResults];
+        
+        // if there's a search in progress, we'll cancel it and re-update
+        // if not, we'll notify the delegate with an empty array, since the index is still working
+        if (NULL != search) {
+            [self cancel];
+            [self updateSearchResults];
+        }
         [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
     }
 }
