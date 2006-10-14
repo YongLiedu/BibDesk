@@ -1587,7 +1587,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return s;
 }
 
-#pragma - 
+#pragma mark -
 #pragma mark New publications from pasteboard
 
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)outError{
@@ -1837,6 +1837,109 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [newBI setField:BDSKUrlString toValue:[url absoluteString]];
     
 	return [NSArray arrayWithObject:newBI];
+}
+
+#pragma mark -
+#pragma mark Cite Key and Crossref lookup
+
+- (OFMultiValueDictionary *)itemsForCiteKeys{
+	return itemsForCiteKeys;
+}
+
+- (void)rebuildItemsForCiteKeys{
+	[itemsForCiteKeys release];
+    itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+	NSArray *pubs = [publications copy];
+	[self addToItemsForCiteKeys:pubs];
+	[pubs release];
+}
+
+- (void)addToItemsForCiteKeys:(NSArray *)pubs{
+	BibItem *pub;
+	NSEnumerator *e = [pubs objectEnumerator];
+	
+	while(pub = [e nextObject])
+		[itemsForCiteKeys addObject:pub forKey:[pub citeKey]];
+}
+
+- (void)removeFromItemsForCiteKeys:(NSArray *)pubs{
+	BibItem *pub;
+	NSEnumerator *e = [pubs objectEnumerator];
+	
+	while(pub = [e nextObject])
+		[itemsForCiteKeys removeObject:pub forKey:[pub citeKey]];
+}
+
+- (BibItem *)publicationForCiteKey:(NSString *)key{
+	if ([NSString isEmptyString:key]) 
+		return nil;
+    
+	NSArray *items = [[self itemsForCiteKeys] arrayForKey:key];
+	
+	if ([items count] == 0)
+		return nil;
+    // may have duplicate items for the same key, so just return the first one
+    return [items objectAtIndex:0];
+}
+
+- (NSArray *)allPublicationsForCiteKey:(NSString *)key{
+	NSArray *items = nil;
+    if ([NSString isEmptyString:key] == NO) 
+		items = [[self itemsForCiteKeys] arrayForKey:key];
+    return (items == nil) ? [NSArray array] : items;
+}
+
+- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
+    NSArray *items = [[self itemsForCiteKeys] arrayForKey:aCiteKey];
+    
+	if ([items count] > 1)
+		return YES;
+	if ([items count] == 1 && [items objectAtIndex:0] != anItem)	
+		return YES;
+	return NO;
+}
+
+- (BOOL)citeKeyIsCrossreffed:(NSString *)key{
+	if ([NSString isEmptyString:key]) 
+		return NO;
+    
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	
+	while (pub = [pubEnum nextObject]) {
+		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
+			return YES;
+        }
+	}
+	return NO;
+}
+
+- (void)changeCrossrefKey:(NSString *)oldKey toKey:(NSString *)newKey{
+	if ([NSString isEmptyString:oldKey]) 
+		return;
+    
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	
+	while (pub = [pubEnum nextObject]) {
+		if ([oldKey caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
+			[pub setField:BDSKCrossrefString toValue:newKey];
+        }
+	}
+}
+
+- (void)invalidateGroupsForCrossreffedCiteKey:(NSString *)key{
+	if ([NSString isEmptyString:key]) 
+		return;
+    
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	
+	while (pub = [pubEnum nextObject]) {
+		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
+			[pub invalidateGroupNames];
+        }
+	}
 }
 
 #pragma mark -
@@ -2626,6 +2729,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [statusStr release];
 }
 
+#pragma mark -
+#pragma mark Selection
+
+- (int)numberOfSelectedPubs{
+    return [tableView numberOfSelectedRows];
+}
+
+- (NSArray *)selectedPublications{
+
+    if(nil == tableView || [tableView selectedRow] == -1)
+        return nil;
+    
+    return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
+}
+
 - (BOOL)highlightItemForPartialItem:(NSDictionary *)partialItem{
     
     // make sure we can see the publication, if it's still here
@@ -2675,6 +2793,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     }
 }
 
+#pragma mark -
+#pragma mark Status bar
+
 - (void)setStatus:(NSString *)status {
 	[self setStatus:status immediate:YES];
 }
@@ -2686,6 +2807,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[statusBar performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
 }
 
+#pragma mark -
 #pragma mark TeXTask delegate
 
 - (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)aTexTask{
@@ -2697,20 +2819,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (void)texTask:(BDSKTeXTask *)aTexTask finishedWithResult:(BOOL)success{
 	[statusBar stopAnimation:nil];
 	[self updateUI];
-}
-
-#pragma mark Selection
-
-- (int)numberOfSelectedPubs{
-    return [tableView numberOfSelectedRows];
-}
-
-- (NSArray *)selectedPublications{
-
-    if(nil == tableView || [tableView selectedRow] == -1)
-        return nil;
-    
-    return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
 }
 
 #pragma mark -
@@ -2745,109 +2853,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [op runOperationModalForWindow:[self windowForSheet] delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
-#pragma -
-#pragma mark Cite Key and Crossref lookup
-
-- (OFMultiValueDictionary *)itemsForCiteKeys{
-	return itemsForCiteKeys;
-}
-
-- (void)rebuildItemsForCiteKeys{
-	[itemsForCiteKeys release];
-    itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
-	NSArray *pubs = [publications copy];
-	[self addToItemsForCiteKeys:pubs];
-	[pubs release];
-}
-
-- (void)addToItemsForCiteKeys:(NSArray *)pubs{
-	BibItem *pub;
-	NSEnumerator *e = [pubs objectEnumerator];
-	
-	while(pub = [e nextObject])
-		[itemsForCiteKeys addObject:pub forKey:[pub citeKey]];
-}
-
-- (void)removeFromItemsForCiteKeys:(NSArray *)pubs{
-	BibItem *pub;
-	NSEnumerator *e = [pubs objectEnumerator];
-	
-	while(pub = [e nextObject])
-		[itemsForCiteKeys removeObject:pub forKey:[pub citeKey]];
-}
-
-- (BibItem *)publicationForCiteKey:(NSString *)key{
-	if ([NSString isEmptyString:key]) 
-		return nil;
-    
-	NSArray *items = [[self itemsForCiteKeys] arrayForKey:key];
-	
-	if ([items count] == 0)
-		return nil;
-    // may have duplicate items for the same key, so just return the first one
-    return [items objectAtIndex:0];
-}
-
-- (NSArray *)allPublicationsForCiteKey:(NSString *)key{
-	NSArray *items = nil;
-    if ([NSString isEmptyString:key] == NO) 
-		items = [[self itemsForCiteKeys] arrayForKey:key];
-    return (items == nil) ? [NSArray array] : items;
-}
-
-- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
-    NSArray *items = [[self itemsForCiteKeys] arrayForKey:aCiteKey];
-    
-	if ([items count] > 1)
-		return YES;
-	if ([items count] == 1 && [items objectAtIndex:0] != anItem)	
-		return YES;
-	return NO;
-}
-
-- (BOOL)citeKeyIsCrossreffed:(NSString *)key{
-	if ([NSString isEmptyString:key]) 
-		return NO;
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	
-	while (pub = [pubEnum nextObject]) {
-		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
-			return YES;
-        }
-	}
-	return NO;
-}
-
-- (void)changeCrossrefKey:(NSString *)oldKey toKey:(NSString *)newKey{
-	if ([NSString isEmptyString:oldKey]) 
-		return;
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	
-	while (pub = [pubEnum nextObject]) {
-		if ([oldKey caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
-			[pub setField:BDSKCrossrefString toValue:newKey];
-        }
-	}
-}
-
-- (void)invalidateGroupsForCrossreffedCiteKey:(NSString *)key{
-	if ([NSString isEmptyString:key]) 
-		return;
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	
-	while (pub = [pubEnum nextObject]) {
-		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
-			[pub invalidateGroupNames];
-        }
-	}
-}
-
+#pragma mark -
 #pragma mark Protocols forwarding
 
 // Declaring protocol conformance in the category headers shuts the compiler up, but causes a hang in -[NSObject conformsToProtocol:], which sucks.  Therefore, we use wrapper methods here to call the real (category) implementations.
