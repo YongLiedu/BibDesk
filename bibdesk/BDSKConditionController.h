@@ -42,7 +42,7 @@
 @class BDSKFilterController;
 
 
-@interface BDSKConditionController : NSObject {
+@interface BDSKConditionController : NSWindowController {
 	IBOutlet NSComboBox *keyComboBox;
 	IBOutlet NSPopUpButton *comparisonPopUp;
     IBOutlet NSPopUpButton *dateComparisonPopUp;
@@ -58,7 +58,6 @@
 	IBOutlet NSView *view;
 	IBOutlet NSButton *addButton;
 	IBOutlet NSButton *removeButton;
-	IBOutlet NSObjectController *ownerController;
 	BDSKFilterController *filterController;
 	BDSKCondition *condition;
 	NSMutableArray *keys;

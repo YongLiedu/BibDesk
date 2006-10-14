@@ -109,7 +109,7 @@
 
 - (IBAction)dismiss:(id)sender {
     if ([sender tag] == NSOKButton) {
-        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:1];
+        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
         NSEnumerator *cEnum = [conditionControllers objectEnumerator];
         BDSKConditionController *controller = nil;
         
@@ -125,7 +125,6 @@
         [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Edit smart group")];
 	}
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:NSWindowWillCloseNotification object:[self window]];
     [super dismiss:sender];
 }
 

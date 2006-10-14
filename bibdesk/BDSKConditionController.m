@@ -62,11 +62,6 @@
         BibTypeManager *typeMan = [BibTypeManager sharedManager];
         keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, BDSKPubTypeString, nil]
                                       excluding:nil] mutableCopy];
-		
-		BOOL success = [NSBundle loadNibNamed:@"BDSKCondition" owner:self];
-		if (!success) {
-			NSLog(@"Could not load BDSKCondition nib.");
-		}
     }
     return self;
 }
@@ -74,7 +69,8 @@
 - (void)dealloc
 {
 	//NSLog(@"dealloc conditionController");
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+    [condition removeObserver:self forKeyPath:@"key"];
+    [condition removeObserver:self forKeyPath:@"dateComparison"];
     filterController = nil;
 	[condition release];
     condition = nil;
@@ -82,7 +78,6 @@
     keys  = nil;
     [view release];
     view  = nil;
-	[ownerController release];
     [[dateComparisonPopUp superview] release];
     [[comparisonPopUp superview] release];
     [[valueTextField superview] release];
@@ -95,8 +90,13 @@
     [super dealloc];
 }
 
+- (NSString *)windowNibName {
+    return @"BDSKCondition";
+}
+
 - (void)awakeFromNib {
     // we add/remove these controls, so we need to retain them
+    [view retain];
     [[dateComparisonPopUp superview] retain];
     [[comparisonPopUp superview] retain];
     [[valueTextField superview] retain];
@@ -112,30 +112,18 @@
         [formatter setGeneratesCalendarDates:YES];
     [dateTextField setFormatter:formatter];
     [toDateTextField setFormatter:formatter];
-
-	[ownerController setContent:self]; // fix for binding-to-nib-owner bug
 	
 	[keyComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
     
     [self layoutComparisonControls];
     [self layoutValueControls];
 	
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(windowWillClose:)
-												 name:NSWindowWillCloseNotification
-											   object:[filterController window]];
-    
     [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
     [condition addObserver:self forKeyPath:@"dateComparison" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
 }
 
-- (void)windowWillClose:(NSNotification *)notification {
-	[ownerController setContent:nil]; // fix for binding-to-nib-owner bug
-    [condition removeObserver:self forKeyPath:@"key"];
-    [condition removeObserver:self forKeyPath:@"dateComparison"];
-}
-
 - (NSView *)view {
+    [self window]; // this makes sure the nib is loaded
 	return view;
 }
 
@@ -145,7 +133,6 @@
 
 - (IBAction)removeThisCondition:(id)sender {
 	if (![self canRemove]) return;
-	[ownerController setContent:nil]; // fix for binding-to-nib-owner bug
     [condition removeObserver:self forKeyPath:@"key"];
     [condition removeObserver:self forKeyPath:@"dateComparison"];
 	[filterController removeConditionController:self];
