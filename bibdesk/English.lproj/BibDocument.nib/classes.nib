@@ -19,11 +19,6 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = OAGradientTableView; 
         }, 
-        {
-            CLASS = BDSKGroupTextFieldCell; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSTextFieldCell; 
-        }, 
         {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {CLASS = BDSKMainTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {

@@ -70,10 +70,6 @@
 
 ///////////
 
-@interface BDSKGroupTextFieldCell  : NSTextFieldCell {
-}
-@end
-
 @interface NSObject (BDSKGroupTableViewDelegate)
 - (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;
 @end

@@ -355,15 +355,3 @@
 }
 
 @end
-
-@implementation BDSKGroupTextFieldCell 
-
-- (NSColor *)textColor;
-{
-    if (_cFlags.highlighted)
-        return [NSColor textBackgroundColor];
-    else
-        return [super textColor];
-}
-
-@end
