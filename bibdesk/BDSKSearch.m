@@ -301,6 +301,8 @@
 
 // convenient init method for search result; could give it members for some variables (title, score)
 
+#import "NSAttributedString_BDSKExtensions.h"
+
 @implementation BDSKSearchResult (BDSKSearch)
 
 - (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
@@ -323,8 +325,9 @@
         if (nil == title)
             title = pathKey;
                 
-#warning fixme attributed title?
-        [self setValue:title forKey:OATextWithIconCellStringKey];
+        NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithTeXString:title attributes:nil collapseWhitespace:NO];
+        [self setValue:attributedTitle forKey:OATextWithIconCellStringKey]; 
+        [attributedTitle release];
         [self setValue:title forKey:@"title"];
                 
         NSNumber *theScore = [[NSNumber alloc] initWithFloat:score];
