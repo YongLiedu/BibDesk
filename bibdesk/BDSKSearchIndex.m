@@ -255,7 +255,6 @@ void *setupThreading(void *anObject)
     }
         
     // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns
-    volatile int32_t keepGoing;
     
     @try{
         
