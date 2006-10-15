@@ -37,7 +37,6 @@
  */
 
 #import "BDSKUpdateChecker.h"
-#import <SystemConfiguration/SystemConfiguration.h>
 #import "BDSKReadMeController.h"
 
 @interface BDSKUpdateChecker (Private)
@@ -50,7 +49,6 @@
 - (NSString *)keyForCurrentMajorVersion;
 - (BOOL)downloadPropertyListFromServer:(NSError **)error;
 - (OFVersionNumber *)latestReleasedVersionNumber;
-- (void)displayAlertForUpdateCheckFailure:(NSError *)error;
 - (CFGregorianUnits)updateCheckGregorianUnits;
 - (NSTimeInterval)updateCheckTimeInterval;
 - (NSDate *)nextUpdateCheckDate;
@@ -145,7 +143,7 @@ static id sharedInstance = nil;
     if([self checkForNetworkAvailability:&error] == NO || [self downloadPropertyListFromServer:&error] == NO) {
         
         // display a warning based on the error and bail out now
-        [self displayAlertForUpdateCheckFailure:error];
+        [NSApp presentError:error];
         return;
     }
     
@@ -164,7 +162,7 @@ static id sharedInstance = nil;
     } else {
         
         // likely an error page or other download failure
-        [self displayAlertForUpdateCheckFailure:error];
+        [NSApp presentError:error];
     }
     
 }
@@ -235,19 +233,23 @@ static id sharedInstance = nil;
                                                              mutabilityOption:NSPropertyListImmutable
                                                                        format:NULL
                                                              errorDescription:&err];
-        if(nil == versionDictionary || nil != err){
+        if(nil == versionDictionary){
             // add the parsing error as underlying error, if the retrieval actually succeeded
-            OFError(&downloadError, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create property list from update check download", @""), NSUnderlyingErrorKey, err, nil);
+            OFError(&downloadError, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to read the version number from the server", @""), NSLocalizedRecoverySuggestionErrorKey, (err ? err : NSLocalizedString(@"Unknown failure reading downloaded data", @"")), nil);
             [err release];
+            if (error) *error = downloadError;
             
             // see if we have a web server error page and log it to the console; NSUnderlyingErrorKey has \n literals when logged
             NSAttributedString *attrString = [[NSAttributedString alloc] initWithHTML:theData documentAttributes:NULL];
             if ([NSString isEmptyString:[attrString string]] == NO)
                 NSLog(@"retrieved HTML data instead of property list: \n\"%@\"", [attrString string]);
             [attrString release];
-        }        
-        success = YES;
-    } else {
+        } else {
+            success = YES;
+        }
+    }
+        
+    if (nil == versionDictionary) {
         if(error) *error = downloadError;
         success = NO;
     }    
@@ -268,25 +270,6 @@ static id sharedInstance = nil;
     [plistLock unlock];
     return thisBranchDictionary ? [[[OFVersionNumber alloc] initWithVersionString:[thisBranchDictionary valueForKey:@"LatestVersion"]] autorelease] : nil;
 }
-
-- (void)displayAlertForUpdateCheckFailure:(NSError *)error;
-{
-    // the error generally has too much information to display in an alert, but it's likely the most useful part for debugging; hence we'll give the user a chance to see it
-    NSAlert *alert = [NSAlert alertWithMessageText:[error localizedDescription]
-                                     defaultButton:NSLocalizedString(@"Ignore", @"")
-                                   alternateButton:NSLocalizedString(@"Open Console", @"")
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"You may safely ignore this warning, or open the console log to view additional information about the failure.  If this problem continues, please file a bug report or e-mail bibdesk-develop@lists.sourceforge.net with details.", @"")];
-    
-    // alertWithMessageText:... uses constants from NSPanel.h, alertWithError: uses constants from NSAlert.h
-    int rv = [alert runModal];
-    if (rv == NSAlertAlternateReturn) {
-        BOOL didLaunch = [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:@"com.apple.console" options:0 additionalEventParamDescriptor:nil launchIdentifier:NULL];
-        if (NO == didLaunch)
-            NSBeep();
-    }
-    NSLog(@"%@", [error description]);
-}    
 
 // returns the update check granularity
 - (CFGregorianUnits)updateCheckGregorianUnits;
@@ -341,29 +324,56 @@ static id sharedInstance = nil;
     [self scheduleUpdateCheckIfNeeded];
 }
 
-- (BOOL)checkForNetworkAvailability:(NSError **)error;
+- (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(unsigned int)recoveryOptionIndex;
 {
+    // we only receive this for a single error at present, so don't bother checking domain/code; we're trying to diagnose a network problem that prevented reaching -propertyListURL
+    BOOL didRecover = NO;
     
-    BOOL result = NO;
-    SCNetworkConnectionFlags flags;
-    const char *hostName = "bibdesk.sourceforge.net";
-    
-    if( SCNetworkCheckReachabilityByName(hostName, &flags) ){
-        result = !(flags & kSCNetworkFlagsConnectionRequired) && (flags & kSCNetworkFlagsReachable);
+    if (0 == recoveryOptionIndex) {
+        // ignore
+        didRecover = NO;
+        
+    } else if (1 == recoveryOptionIndex) {
+        // diagnose
+        CFURLRef theURL = (CFURLRef)[self propertyListURL];
+        CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
+        CFNetDiagnosticStatus status = CFNetDiagnosticDiagnoseProblemInteractively(diagnostic);
+        CFRelease(diagnostic);
+        didRecover = (status == kCFNetDiagnosticNoErr);
+        
+    } else if (2 == recoveryOptionIndex) {
+        // open console
+        didRecover = [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:@"com.apple.console" options:0 additionalEventParamDescriptor:nil launchIdentifier:NULL];
     }
     
-    if(result == NO){
-        if(error)
-            OFError(error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Network Unavailable", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"BibDesk is unable to establish a network connection, possibly because your network is down or a firewall is blocking the connection.", @""), nil);
-        else
-            NSLog(@"Unable to contact %s, possibly because your network is down or a firewall is prevening the connection.", hostName);
-    }
-    
-    return result;
+    return didRecover;
 }
 
-// sanity check so we don't spawn dozens of threads
-static int numberOfConcurrentChecks = 0;
+- (BOOL)checkForNetworkAvailability:(NSError **)error;
+{
+    CFURLRef theURL = (CFURLRef)[self propertyListURL];
+    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
+    
+    NSString *details;
+    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
+    CFRelease(diagnostic);
+    [details autorelease];
+    
+    BOOL success;
+    
+    if (kCFNetDiagnosticConnectionUp == status) {
+        success = YES;
+    } else {
+        if (nil == details) details = NSLocalizedString(@"Unknown network error", @"");
+        
+        // This ridiculous dictionary contains all the information needed for NSErrorRecoveryAttempting.  Note that buttons in the alert will be ordered right-to-left {0, 1, 2} and correspond to objects in the NSLocalizedRecoveryOptionsErrorKey array.
+        if (error) *error = [NSError errorWithDomain:@"BDSKNetworkError" code:0 
+                                 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:details, NSLocalizedDescriptionKey, self, NSRecoveryAttempterErrorKey, NSLocalizedString(@"Would you like to ignore this problem or attempt to diagnose it?  You may also open the Console log to check for errors.", @""), NSLocalizedRecoverySuggestionErrorKey, [NSArray arrayWithObjects:NSLocalizedString(@"Ignore", @""), NSLocalizedString(@"Diagnose", @""), NSLocalizedString(@"Open Console", @""), nil], NSLocalizedRecoveryOptionsErrorKey, nil]];
+        success = NO;
+    }
+    
+    return success;
+}
 
 - (OFVersionNumber *)localVersionNumber;
 {
@@ -374,6 +384,9 @@ static int numberOfConcurrentChecks = 0;
 
 - (void)checkForUpdatesInBackground;
 {
+    // sanity check so we don't spawn dozens of threads
+    static int numberOfConcurrentChecks = 0;
+
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     numberOfConcurrentChecks++;
