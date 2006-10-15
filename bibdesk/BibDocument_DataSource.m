@@ -1100,20 +1100,9 @@
 - (void)providePromisedTypes {
 	NSEnumerator *nameEnum = [[promisedPboardTypes allKeys] objectEnumerator];
 	NSString *name;
-	
-	while (name = [nameEnum nextObject]) {
-		NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
-		NSArray *types = [[self promisedTypesForPasteboard:pboard] copy]; // we need to copy as types can be removed
-		NSEnumerator *typeEnum = nil;
-		NSString *type;
-		
-		if (types == nil) return;
-		typeEnum = [types objectEnumerator];
-		[types release];
-		
-		while (type = [typeEnum nextObject]) 
-			[self pasteboard:pboard provideDataForType:type];
-	}
+    
+	while (name = [nameEnum nextObject])
+        [self providePromisedTypesForPasteboard:[NSPasteboard pasteboardWithName:name]];
 }
 
 // NSPasteboard delegate method for the owner
