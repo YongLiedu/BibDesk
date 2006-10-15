@@ -404,8 +404,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 // Private methods
 
-- (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
-
 /*!
     @method updateUI
     @abstract Updates user interface elements
@@ -420,6 +418,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 */
 - (void)setupTableColumns;
+
+- (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
+
+- (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
 
 /*!
     @method     sortPubsByColumn:
@@ -450,14 +452,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 */
 - (IBAction)columnsMenuAddTableColumn:(id)sender;
-
-/*!
-    @method handleTableColumnChangedNotification
-    @abstract incorporates changes from other windows.
-    @discussion 
-    
-*/
-- (void)handleTableColumnChangedNotification:(NSNotification *)notification;
 
 /*!
     @method     handlePreviewDisplayChangedNotification:

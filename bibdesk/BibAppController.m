@@ -237,13 +237,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         [BDSKScriptMenu addScriptsToMainMenu];
     }
 
-	[self updateColumnsMenu];
-
-	// register to observe when the columns change, to update the columns menu
-	[[NSNotificationCenter defaultCenter] addObserver:self
-			selector:@selector(handleTableColumnsChangedNotification:)
-			name:BDSKTableColumnChangedNotification
-			object:nil];
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite{
@@ -460,33 +453,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	return groupSortMenuItem;
 }
 
-- (void)updateColumnsMenu{
-	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
-    NSEnumerator *shownColNamesE = [prefsShownColNamesArray reverseObjectEnumerator];
-	NSString *colName;
-    NSMenu *columnsMenu = [columnsMenuItem submenu];
-	NSMenuItem *item = nil;
-	
-	
-	// remove the add-items, and remember the extra ones, corrsponding to removed columns
-	while(![[columnsMenu itemAtIndex:0] isSeparatorItem]){
-		[columnsMenu removeItemAtIndex:0];
-	}
-	
-	// next add all the shown columns in the order they are shown
-	while(colName = [shownColNamesE nextObject]){
-        item = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:colName 
-                                           action:@selector(columnsMenuSelectTableColumn:)
-                                    keyEquivalent:@""] autorelease];
-		[item setState:NSOnState];
-		[columnsMenu insertItem:item atIndex:0];
-	}
-}
-	
-- (void)handleTableColumnsChangedNotification:(NSNotification *)notification {
-	[self updateColumnsMenu];
-}
-
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
@@ -537,20 +503,36 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 - (BOOL)menuHasKeyEquivalent:(NSMenu *)menu forEvent:(NSEvent *)event target:(id *)target action:(SEL *)action { return NO; }
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
-    // this should be a Copy As > Template menu
-    NSArray *styles = [BDSKTemplate allStyleNames];
-    int i = [menu numberOfItems];
-    while (i--) {
-        if ([[menu itemAtIndex:i] tag] < BDSKTemplateDragCopyType)
-            break;
-        [menu removeItemAtIndex:i];
-    }
     
-    NSMenuItem *item;
-    int count = [styles count];
-    for (i = 0; i < count; i++) {
-        item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
-        [item setTag:BDSKTemplateDragCopyType + i];
+    if ([menu isEqual:[columnsMenuItem submenu]]) {
+                
+        // remove the added items (if any); the document will then fill it appropriately
+        while(![[menu itemAtIndex:0] isSeparatorItem]){
+            [menu removeItemAtIndex:0];
+        }
+        
+        id document = [[NSDocumentController sharedDocumentController] currentDocument];
+
+        if ([document respondsToSelector:@selector(columnsMenuNeedsUpdate:)])
+            [document performSelector:@selector(columnsMenuNeedsUpdate:) withObject:menu];
+        
+    } else {
+    
+        // this should be a Copy As > Template menu
+        NSArray *styles = [BDSKTemplate allStyleNames];
+        int i = [menu numberOfItems];
+        while (i--) {
+            if ([[menu itemAtIndex:i] tag] < BDSKTemplateDragCopyType)
+                break;
+            [menu removeItemAtIndex:i];
+        }
+        
+        NSMenuItem *item;
+        int count = [styles count];
+        for (i = 0; i < count; i++) {
+            item = [menu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+            [item setTag:BDSKTemplateDragCopyType + i];
+        }
     }
 }
 

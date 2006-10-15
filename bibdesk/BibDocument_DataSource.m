@@ -62,6 +62,7 @@
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKTypeSelectHelper.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSTableView_BDSKExtensions.h"
 
 @implementation BibDocument (DataSource)
 
@@ -323,43 +324,34 @@
     }
 }
 
-- (void)tableViewColumnDidResize:(NSNotification *)notification{
-	if([notification object] != tableView) return;
-    
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    NSMutableDictionary *columns = [[[pw objectForKey:BDSKColumnWidthsKey] mutableCopy] autorelease];
+- (NSDictionary *)currentTableColumnWidthsAndIdentifiers {
     NSEnumerator *tcE = [[tableView tableColumns] objectEnumerator];
     NSTableColumn *tc = nil;
-
-    if (!columns) columns = [NSMutableDictionary dictionaryWithCapacity:5];
-
-    while(tc = (NSTableColumn *) [tcE nextObject]){
+    NSMutableDictionary *columns = [NSMutableDictionary dictionaryWithCapacity:5];
+    
+    while(tc = [tcE nextObject]){
         [columns setObject:[NSNumber numberWithFloat:[tc width]]
                     forKey:[tc identifier]];
     }
-    ////NSLog(@"tableViewColumnDidResize - setting %@ forKey: %@ ", columns, BDSKColumnWidthsKey);
-    [pw setObject:columns forKey:BDSKColumnWidthsKey];
-	// WARNING: don't notify changes to other docs, as this is very buggy. 
+    return columns;
+}    
+
+- (void)tableViewColumnDidResize:(NSNotification *)notification{
+	if([notification object] != tableView) return;
+      
+    // current setting will override those already in the prefs; we may not be displaying all the columns in prefs right now, but we want to preserve their widths
+    NSMutableDictionary *columns = [NSMutableDictionary dictionary];
+    [columns addEntriesFromDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
+    [columns addEntriesFromDictionary:[self currentTableColumnWidthsAndIdentifiers]];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:columns forKey:BDSKColumnWidthsKey];
 }
 
 
 - (void)tableViewColumnDidMove:(NSNotification *)notification{
 	if([notification object] != tableView) return;
     
-	NSMutableArray *columnsInOrder = [NSMutableArray arrayWithCapacity:5];
-
-    NSEnumerator *tcE = [[tableView tableColumns] objectEnumerator];
-    NSTableColumn *tc = nil;
-
-    while(tc = (NSTableColumn *) [tcE nextObject]){
-        [columnsInOrder addObject:[tc identifier]];
-    }
-
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:columnsInOrder
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[tableView tableColumnIdentifiers]
                                                       forKey:BDSKShownColsNamesKey];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
-                                                        object:self];
-
 }
 
 - (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{

@@ -74,10 +74,6 @@
 /* Accessor methods for the groupSortMenuItem */
 - (NSMenuItem*) groupSortMenuItem;
 	
-- (void)updateColumnsMenu;
-
-- (void)handleTableColumnsChangedNotification:(NSNotification *)notification;
-
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (NSArray *)requiredFieldsForLocalUrl;

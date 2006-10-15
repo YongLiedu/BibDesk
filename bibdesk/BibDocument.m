@@ -196,12 +196,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 													 name:BDSKGroupTableSelectionChangedNotification
 												   object:self];
 
-		// register for tablecolumn changes notifications:
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleTableColumnChangedNotification:)
-													 name:BDSKTableColumnChangedNotification
-												   object:nil];
-        
 		//  register to observe for item change notifications here.
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleBibItemChangedNotification:)
@@ -461,7 +455,22 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:nextWindowLocation];
     
     [documentWindow makeFirstResponder:tableView];	
+    
+#warning move to an earlier funnel point?
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
+        NSArray *xattrs = [[NSFileManager defaultManager] extendedAttributeNamesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
+        if (xattrs) {
+            NSEnumerator *xattrE = [xattrs objectEnumerator];
+            NSString *xattrName;
+            while (xattrName = [xattrE nextObject]) {
+                [[NSFileManager defaultManager] removeExtendedAttribute:xattrName atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+            }
+        }
+    }
+    
     [tableView removeAllTableColumns];
+    
+#warning is this always late enough for xattrs?
 	[self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self sortPubsByDefaultColumn];
 }
@@ -2150,9 +2159,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)sortPubsByDefaultColumn{
-    OFPreferenceWrapper *defaults = [OFPreferenceWrapper sharedPreferenceWrapper];
+
+    NSDictionary *windowSetup = [self mainWindowSetupDictionaryFromExtendedAttributes];        
     
-    NSString *colName = [defaults objectForKey:BDSKDefaultSortedTableColumnKey];
+    NSString *colName = nil == windowSetup ? [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey] : [windowSetup objectForKey:BDSKDefaultSortedTableColumnKey];
     if([NSString isEmptyString:colName])
         return;
     
@@ -2161,7 +2171,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return;
     
     lastSelectedColumnForSort = [tc retain];
-    sortDescending = [defaults boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    sortDescending = nil == windowSetup ? [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey] : [windowSetup boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     [self sortPubsByColumn:nil];
     [tableView setHighlightedTableColumn:tc];
 }
@@ -2173,6 +2183,37 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [pw setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
     [pw setBool:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
+    
+    NSString *path = [[self fileURL] path];
+    if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
+        /*
+        NSFileManager *fm = [NSFileManager defaultManager];
+        [fm setExtendedAttributeNamed:BDSKDefaultSortedTableColumnKey toPropertyListValue:[lastSelectedColumnForSort identifier] atPath:path options:nil error:NULL];
+        [fm setExtendedAttributeNamed:BDSKDefaultSortedTableColumnIsDescendingKey toPropertyListValue:[NSNumber numberWithBool:sortDescending] atPath:path options:nil error:NULL];
+        [fm setExtendedAttributeNamed:BDSKColumnWidthsKey toPropertyListValue:[self currentTableColumnWidthsAndIdentifiers] atPath:path options:nil error:NULL];
+        [fm setExtendedAttributeNamed:BDSKShownColsNamesKey toPropertyListValue:[tableView tableColumnIdentifiers] atPath:path options:nil error:NULL];
+        [fm setExtendedAttributeNamed:BDSKSortGroupsKey toPropertyListValue:sortGroupsKey atPath:path options:nil error:NULL];
+        [fm setExtendedAttributeNamed:BDSKSortGroupsDescendingKey toPropertyListValue:[NSNumber numberWithBool:sortGroupsDescending] atPath:path options:nil error:NULL];
+         */
+
+        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        [dictionary setBoolValue:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+        [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
+        [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
+        [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
+        [dictionary setBoolValue:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
+        
+        NSError *error;
+
+        if ([[NSFileManager defaultManager] setExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" 
+                                                  toPropertyListValue:dictionary
+                                                               atPath:path options:nil error:&error] == NO) {
+            NSLog(@"%@: %@", self, error);
+        }
+
+         
+    }
 }  
 
 #pragma mark -
@@ -2227,19 +2268,43 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return [headerTitleCache objectForKey:field];
 }
 
+- (NSArray *)defaultTableColumnIdentifiers {
+    NSArray *array = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKShownColsNamesKey];
+    if (nil == array)
+        array = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey];
+    return array;
+}
+
+// returns nil if no attributes set
+- (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
+    return [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+}
+
+- (NSDictionary *)defaultTableColumnWidthsAndIdentifiers {
+    NSDictionary *dict = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey];
+    if (nil == dict)
+        dict = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
+    return dict;
+}
+
 //note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
 - (void)setupTableColumns{
-	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
-    NSEnumerator *shownColNamesE = [prefsShownColNamesArray objectEnumerator];
+    [self setupTableColumnsWithIdentifiers:[self defaultTableColumnIdentifiers]];
+}
+
+- (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers {
+    
+    NSEnumerator *shownColNamesE = [identifiers objectEnumerator];
     NSTableColumn *tc;
     NSString *colName;
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
     
-    NSDictionary *tcWidthsByIdentifier = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
+    // get width settings from this doc's xattrs or from prefs
+    NSDictionary *tcWidthsByIdentifier = [self defaultTableColumnWidthsAndIdentifiers];
     NSNumber *tcWidth = nil;
     NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
 	
-    NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[prefsShownColNamesArray count]];
+    NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[identifiers count]];
 	
 	while(colName = [shownColNamesE nextObject]){
 		tc = [tableView tableColumnWithIdentifier:colName];
@@ -2310,25 +2375,40 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return [[[NSApp delegate] columnsMenuItem] submenu];
 }
 
+- (void)columnsMenuNeedsUpdate:(NSMenu *)columnsMenu {
+    
+    NSArray *shownColumns = [tableView tableColumnIdentifiers];
+    NSEnumerator *shownColNamesE = [shownColumns reverseObjectEnumerator];
+	NSString *colName;
+	NSMenuItem *item = nil;
+	
+	// next add all the shown columns in the order they are shown
+	while(colName = [shownColNamesE nextObject]){
+        item = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:colName 
+                                                                     action:@selector(columnsMenuSelectTableColumn:)
+                                                              keyEquivalent:@""] autorelease];
+		[item setState:NSOnState];
+		[columnsMenu insertItem:item atIndex:0];
+	}    
+}
+
 - (IBAction)columnsMenuSelectTableColumn:(id)sender{
-    NSMutableArray *prefsShownColNamesMutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy];
+    
+    NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[tableView tableColumnIdentifiers]];
 
     if ([sender state] == NSOnState) {
-        [prefsShownColNamesMutableArray removeObject:[sender title]];
+        [shownColumns removeObject:[sender title]];
         [sender setState:NSOffState];
     }else{
-        if(![prefsShownColNamesMutableArray containsObject:[sender title]]){
-            [prefsShownColNamesMutableArray addObject:[sender title]];
+        if(![shownColumns containsObject:[sender title]]){
+            [shownColumns addObject:[sender title]];
         }
         [sender setState:NSOnState];
     }
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:shownColumns
                                                       forKey:BDSKShownColsNamesKey];
-    [prefsShownColNamesMutableArray release];
-    [self setupTableColumns];
+    [self setupTableColumnsWithIdentifiers:shownColumns];
     [self updateUI];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
-														object:self];
 }
     
 - (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -2337,23 +2417,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(newColumnName == nil || returnCode == NSCancelButton)
         return;
     
-    NSMutableArray *prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
+    NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[tableView tableColumnIdentifiers]];
 
     // Check if an object already exists in the tableview, bail without notification if it does
     // This means we can't have a column more than once.
-    if ([prefsShownColNamesMutableArray containsObject:newColumnName])
+    if ([shownColumns containsObject:newColumnName])
         return;
 
     // Store the new column in the preferences
-    [prefsShownColNamesMutableArray addObject:newColumnName];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
+    [shownColumns addObject:newColumnName];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:shownColumns
                                                       forKey:BDSKShownColsNamesKey];
     
     // Actually redraw the view now with the new column.
-    [self setupTableColumns];
+    [self setupTableColumnsWithIdentifiers:shownColumns];
     [self updateUI];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
-                                                        object:self];
 }
 
 - (IBAction)columnsMenuAddTableColumn:(id)sender{
@@ -2437,15 +2515,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 #pragma mark -
 #pragma mark Notification handlers
-
-- (void)handleTableColumnChangedNotification:(NSNotification *)notification{
-    // don't pay attention to notifications I send (infinite loop might result)
-    if([notification object] == self)
-        return;
-	
-    [self setupTableColumns];
-	[self updateUI];
-}
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
     // note: this is only supposed to handle the pretty-printed preview, /not/ the TeX preview

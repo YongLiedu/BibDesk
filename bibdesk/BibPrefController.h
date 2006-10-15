@@ -253,7 +253,6 @@ extern NSString *BDSKMiscString;
 extern NSString *BDSKFinalizeChangesNotification;
 extern NSString *BDSKDocumentWindowWillCloseNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
-extern NSString *BDSKTableColumnChangedNotification;
 extern NSString *BDSKTableSelectionChangedNotification;
 extern NSString *BDSKGroupTableSelectionChangedNotification;
 extern NSString *BDSKGroupFieldChangedNotification;

@@ -274,7 +274,6 @@ NSString *BDSKMiscString = @"misc";
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";
 NSString *BDSKDocumentWindowWillCloseNotification = @"Document Window Will Close Notification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
-NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
 NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotification";
 NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChangedNotification";
 NSString *BDSKGroupFieldChangedNotification = @"GroupFieldChangedNotification";

@@ -44,6 +44,7 @@
 - (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
 - (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
 - (NSString *)promiseDragColumnIdentifier;
+- (NSDictionary *)currentTableColumnWidthsAndIdentifiers;
 
 - (void)setPromisedItems:(NSArray *)items types:(NSArray *)types dragCopyType:(int)dragCopyType forPasteboard:(NSPasteboard *)pboard;
 - (NSArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard;
