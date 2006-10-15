@@ -2186,16 +2186,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSString *path = [[self fileURL] path];
     if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
-        /*
-        NSFileManager *fm = [NSFileManager defaultManager];
-        [fm setExtendedAttributeNamed:BDSKDefaultSortedTableColumnKey toPropertyListValue:[lastSelectedColumnForSort identifier] atPath:path options:nil error:NULL];
-        [fm setExtendedAttributeNamed:BDSKDefaultSortedTableColumnIsDescendingKey toPropertyListValue:[NSNumber numberWithBool:sortDescending] atPath:path options:nil error:NULL];
-        [fm setExtendedAttributeNamed:BDSKColumnWidthsKey toPropertyListValue:[self currentTableColumnWidthsAndIdentifiers] atPath:path options:nil error:NULL];
-        [fm setExtendedAttributeNamed:BDSKShownColsNamesKey toPropertyListValue:[tableView tableColumnIdentifiers] atPath:path options:nil error:NULL];
-        [fm setExtendedAttributeNamed:BDSKSortGroupsKey toPropertyListValue:sortGroupsKey atPath:path options:nil error:NULL];
-        [fm setExtendedAttributeNamed:BDSKSortGroupsDescendingKey toPropertyListValue:[NSNumber numberWithBool:sortGroupsDescending] atPath:path options:nil error:NULL];
-         */
 
+        // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
         [dictionary setBoolValue:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
