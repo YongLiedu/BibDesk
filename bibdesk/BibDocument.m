@@ -2277,7 +2277,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 // returns nil if no attributes set
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
-    return [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+    return [self fileURL] ? [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" atPath:[[self fileURL] path] traverseLink:YES error:NULL] : nil;
 }
 
 - (NSDictionary *)defaultTableColumnWidthsAndIdentifiers {
