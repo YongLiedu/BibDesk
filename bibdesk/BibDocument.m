@@ -442,18 +442,29 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [self setupToolbar];
     
-    // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
-    [[aController window] setFrameUsingName:@"Main Window Frame Autosave"];
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    NSRect frameRect = [xattrDefaults rectForKey:@"BDSKDocumentWindowFrame" defaultValue:NSZeroRect];
+    
     // we should only cascade windows if we have multiple documents open; bug #1299305
     // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
     static NSPoint nextWindowLocation = {0.0, 0.0};
-    [aController setShouldCascadeWindows:NO];
-    if ([[aController window] setFrameAutosaveName:@"Main Window Frame Autosave"]) {
-        NSRect windowFrame = [[aController window] frame];
-        nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
-    }
-    nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:nextWindowLocation];
     
+    if (nil != xattrDefaults && NSEqualRects(frameRect, NSZeroRect) == NO) {
+        [[aController window] setFrame:frameRect display:YES];
+        [aController setShouldCascadeWindows:NO];
+        nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:NSMakePoint(NSMinX(frameRect), NSMaxY(frameRect))];
+    } else {
+        // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
+        [[aController window] setFrameUsingName:@"Main Window Frame Autosave"];
+
+        [aController setShouldCascadeWindows:NO];
+        if ([[aController window] setFrameAutosaveName:@"Main Window Frame Autosave"]) {
+            NSRect windowFrame = [[aController window] frame];
+            nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
+        }
+        nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:nextWindowLocation];
+    }
+            
     [documentWindow makeFirstResponder:tableView];	
     
 #warning move to an earlier funnel point?
@@ -540,6 +551,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     isDocumentClosed = YES;
     [customCiteDrawer close];
     [self saveSortOrder];
+    [self saveWindowSetupInExtendedAttributes];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
@@ -552,6 +564,37 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
+}
+
+// returns nil if no attributes set
+- (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
+    return [self fileURL] ? [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" atPath:[[self fileURL] path] traverseLink:YES error:NULL] : nil;
+}
+
+- (void)saveWindowSetupInExtendedAttributes {
+    
+    NSString *path = [[self fileURL] path];
+    if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
+        
+        // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
+        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        [dictionary setBoolValue:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+        [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
+        [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
+        [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
+        [dictionary setBoolValue:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
+        [dictionary setRectValue:[documentWindow frame] forKey:@"BDSKDocumentWindowFrame"];
+        
+        NSError *error;
+        
+        if ([[NSFileManager defaultManager] setExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" 
+                                                  toPropertyListValue:dictionary
+                                                               atPath:path options:nil error:&error] == NO) {
+            NSLog(@"%@: %@", self, error);
+        }
+        
+    } 
 }
 
 #pragma mark Publications acessors
@@ -2182,30 +2225,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [pw setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
     [pw setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-    [pw setBool:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
-    
-    NSString *path = [[self fileURL] path];
-    if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
-
-        // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
-        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-        [dictionary setBoolValue:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
-        [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
-        [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
-        [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
-        [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-        [dictionary setBoolValue:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
-        
-        NSError *error;
-
-        if ([[NSFileManager defaultManager] setExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" 
-                                                  toPropertyListValue:dictionary
-                                                               atPath:path options:nil error:&error] == NO) {
-            NSLog(@"%@: %@", self, error);
-        }
-
-         
-    }
+    [pw setBool:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
 }  
 
 #pragma mark -
@@ -2265,11 +2285,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (nil == array)
         array = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey];
     return array;
-}
-
-// returns nil if no attributes set
-- (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
-    return [self fileURL] ? [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" atPath:[[self fileURL] path] traverseLink:YES error:NULL] : nil;
 }
 
 - (NSDictionary *)defaultTableColumnWidthsAndIdentifiers {

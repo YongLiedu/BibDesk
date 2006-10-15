@@ -219,6 +219,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)dealloc;
 
+- (void)saveWindowSetupInExtendedAttributes;
+- (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
+
 /*!
     @method     publicationsForAuthor:
     @abstract   Returns publications that an author is connected to
@@ -420,8 +423,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)setupTableColumns;
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
-
-- (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
 
 /*!
     @method     sortPubsByColumn:
