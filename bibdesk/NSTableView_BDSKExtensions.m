@@ -277,6 +277,8 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     [self scrollRectToVisible:rowRect];
 }
 
+- (NSArray *)tableColumnIdentifiers { return [[self tableColumns] valueForKey:@"identifier"]; }
+
 @end
 
 #pragma mark -

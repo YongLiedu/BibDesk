@@ -53,6 +53,7 @@
 
 - (void)removeAllTableColumns;
 - (void)scrollRowToCenter:(unsigned int)row;
+- (NSArray *)tableColumnIdentifiers;
 
 @end
 
