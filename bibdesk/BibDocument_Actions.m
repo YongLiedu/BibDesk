@@ -73,11 +73,57 @@
 #pragma mark -
 #pragma mark Publication actions
 
+- (void)addNewPubAndEdit:(BibItem *)newBI{
+    // add the publication; addToGroup:handleInherited: depends on the pub having a document
+    [self addPublication:newBI];
+
+	NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
+	BDSKGroup *group;
+    int op;
+	while (group = [groupEnum nextObject]) {
+		if ([group isCategory]){
+			op = [newBI addToGroup:group handleInherited:BDSKOperationSet];
+            NSAssert1(BDSKOperationSet == op, @"Unable to add to group %@", group);
+        }
+    }
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+    [self highlightBib:newBI];
+    [self editPub:newBI];
+}
+
+- (void)createNewPub{
+    BibItem *newBI = [[[BibItem alloc] init] autorelease];
+    [self addNewPubAndEdit:newBI];
+}
+
+- (void)createNewPubUsingCrossrefForItem:(BibItem *)item{
+    BibItem *newBI = [[BibItem alloc] init];
+	NSString *parentType = [item pubType];
+    
+	[newBI setField:BDSKCrossrefString toValue:[item citeKey]];
+	if ([parentType isEqualToString:BDSKProceedingsString]) {
+		[newBI setPubType:BDSKInproceedingsString];
+	} else if ([parentType isEqualToString:BDSKBookString] || 
+			   [parentType isEqualToString:BDSKBookletString] || 
+			   [parentType isEqualToString:BDSKTechreportString] || 
+			   [parentType isEqualToString:BDSKManualString]) {
+		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
+			[newBI setPubType:BDSKIncollectionString];
+	}
+    [self addNewPubAndEdit:newBI];
+}
+
+- (IBAction)createNewPubUsingCrossrefAction:(id)sender{
+    BibItem *selectedBI = [[self selectedPublications] lastObject];
+    [self createNewPubUsingCrossrefForItem:selectedBI];
+}
+
 - (IBAction)newPub:(id)sender{
     if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask) {
         [self createNewPubUsingCrossrefAction:sender];
     } else {
-        [self createNewBlankPubAndEdit:YES];
+        [self createNewPub];
     }
 }
 
@@ -180,6 +226,137 @@
     }
 }
 
+- (IBAction)alternateDelete:(id)sender {
+	id firstResponder = [documentWindow firstResponder];
+	if (firstResponder == tableView) {
+		[self deleteSelectedPubs:sender];
+	} else if (firstResponder == groupTableView) {
+		[self removeSelectedGroups:sender];
+	}
+}
+
+// -delete:, -insertNewline:, -cut:, -copy: and -paste: are defined indirectly in NSTableView-OAExtensions using our dataSource method
+// Note: cut: calls delete:
+
+- (IBAction)alternateCut:(id)sender {
+	if ([documentWindow firstResponder] == tableView) {
+		[tableView copy:sender];
+		[self alternateDelete:sender];
+	}
+}
+
+- (IBAction)copyAsAction:(id)sender{
+	int copyType = [sender tag];
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+	NSString *citeString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey];
+	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
+}
+
+// Don't use the default action in NSTableView-OAExtensions here, as it uses another pasteboard and some more overhead
+- (IBAction)duplicate:(id)sender{
+	if ([documentWindow firstResponder] != tableView ||
+		[self numberOfSelectedPubs] == 0 ||
+        [self hasSharedGroupsSelected] == YES) {
+		NSBeep();
+		return;
+	}
+	
+    NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
+    
+    [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
+    [self highlightBibs:newPubs];
+    [newPubs release];
+	
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+        [self editPubCmd:nil]; // this will aske the user when there are many pubs
+    }
+}
+
+- (BibEditor *)editPub:(BibItem *)pub{
+    BibEditor *e = nil;
+	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+	NSWindowController *wc;
+	
+	while(wc = [wcEnum nextObject]){
+		if([wc isKindOfClass:[BibEditor class]] && [(BibEditor*)wc publication] == pub){
+			e = (BibEditor*)wc;
+			break;
+		}
+	}
+    if(e == nil){
+        e = [[BibEditor alloc] initWithPublication:pub];
+        [self addWindowController:e];
+        [e release];
+    }
+    [e show];
+    return e;
+}
+
+- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertDefaultReturn)
+        return;
+    
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+    BibItem *pub;
+    while (pub = [e nextObject]) {
+        if ([pub document] == self)
+            [self editPub:pub];
+    }
+}
+
+- (IBAction)editPubCmd:(id)sender{
+    NSString *colID = nil;
+
+    if([tableView clickedColumn] != -1){
+		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
+    }
+    if([[BibTypeManager sharedManager] isLocalFileField:colID]){
+		[self openLinkedFileForField:colID];
+    }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
+		[self openRemoteURLForField:colID];
+    }else if([self hasSharedGroupsSelected] == NO){
+		int n = [self numberOfSelectedPubs];
+		if (n > 6) {
+            // Do we really want a gazillion of editor windows?
+			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
+                                             defaultButton:NSLocalizedString(@"No", @"No")
+                                          alternateButton:NSLocalizedString(@"Yes", @"Yes")
+                                              otherButton:nil
+                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
+			[alert beginSheetModalForWindow:documentWindow
+                              modalDelegate:self
+                             didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
+                                contextInfo:NULL];
+		} else {
+            [self editPubAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
+        }
+	} else {
+        // currently don't allow editing shared pubs; [self selectedPublications] only returns objects from shownPublications
+        NSBeginAlertSheet(NSLocalizedString(@"Can't Edit Shared Publications", @""), nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, NSLocalizedString(@"You need to drag or copy shared publications to your own document before attempting to edit them", @""));
+    }
+}
+
+- (void)editAction:(id)sender {
+	id firstResponder = [documentWindow firstResponder];
+	if (firstResponder == tableView) {
+		[self editPubCmd:sender];
+	} else if (firstResponder == groupTableView) {
+		[self editGroupAction:sender];
+	}
+}
+
+- (void)showPerson:(BibAuthor *)person{
+    OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
+    BibPersonController *pc = [person personController];
+    
+    if(pc == nil){
+        pc = [[BibPersonController alloc] initWithPerson:person];
+        [self addWindowController:pc];
+        [pc release];
+    }
+    [pc show];
+}
+
 - (IBAction)emailPubCmd:(id)sender{
     NSMutableArray *items = [[self selectedPublications] mutableCopy];
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
@@ -277,90 +454,38 @@
     
     [[BDSKShellTask shellTask] runShellCommand:lyxCmd withInputString:nil];
 }
+- (IBAction)postItemToWeblog:(id)sender{
 
-- (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSAlertDefaultReturn)
-        return;
-    
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-    BibItem *pub;
-    while (pub = [e nextObject]) {
-        if ([pub document] == self)
-            [self editPub:pub];
-    }
-}
-
-- (IBAction)editPubCmd:(id)sender{
-    NSString *colID = nil;
-
-    if([tableView clickedColumn] != -1){
-		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
-    }
-    if([[BibTypeManager sharedManager] isLocalFileField:colID]){
-		[self openLinkedFileForField:colID];
-    }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
-		[self openRemoteURLForField:colID];
-    }else if([self hasSharedGroupsSelected] == NO){
-		int n = [self numberOfSelectedPubs];
-		if (n > 6) {
-            // Do we really want a gazillion of editor windows?
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
-                                             defaultButton:NSLocalizedString(@"No", @"No")
-                                          alternateButton:NSLocalizedString(@"Yes", @"Yes")
-                                              otherButton:nil
-                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
-			[alert beginSheetModalForWindow:documentWindow
-                              modalDelegate:self
-                             didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
-                                contextInfo:NULL];
-		} else {
-            [self editPubAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
-        }
-	} else {
-        // currently don't allow editing shared pubs; [self selectedPublications] only returns objects from shownPublications
-        NSBeginAlertSheet(NSLocalizedString(@"Can't Edit Shared Publications", @""), nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, NSLocalizedString(@"You need to drag or copy shared publications to your own document before attempting to edit them", @""));
-    }
-}
-
-- (BibEditor *)editPub:(BibItem *)pub{
-    BibEditor *e = nil;
-	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-	NSWindowController *wc;
+	[NSException raise:BDSKUnimplementedException
+				format:@"postItemToWeblog is unimplemented."];
 	
-	while(wc = [wcEnum nextObject]){
-		if([wc isKindOfClass:[BibEditor class]] && [(BibEditor*)wc publication] == pub){
-			e = (BibEditor*)wc;
-			break;
-		}
-	}
-    if(e == nil){
-        e = [[BibEditor alloc] initWithPublication:pub];
-        [self addWindowController:e];
-        [e release];
-    }
-    [e show];
-    return e;
+	NSString *appPath = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"Blapp"]; // pref
+	NSLog(@"%@",appPath);
+#if 0	
+	AppleEvent *theAE;
+	OSERR err = AECreateAppleEvent (NNWEditDataItemAppleEventClass,
+									NNWEditDataItemAppleEventID,
+									'MMcC', // Blapp
+									kAutoGenerateReturnID,
+									kAnyTransactionID,
+									&theAE);
+
+
+	
+	
+	OSErr AESend (
+				  const AppleEvent * theAppleEvent,
+				  AppleEvent * reply,
+				  AESendMode sendMode,
+				  AESendPriority sendPriority,
+				  SInt32 timeOutInTicks,
+				  AEIdleUPP idleProc,
+				  AEFilterUPP filterProc
+				  );
+#endif
 }
 
-- (void)showPerson:(BibAuthor *)person{
-    OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
-    BibPersonController *pc = [person personController];
-    
-    if(pc == nil){
-        pc = [[BibPersonController alloc] initWithPerson:person];
-        [self addWindowController:pc];
-        [pc release];
-    }
-    [pc show];
-}
-
-- (IBAction)selectAllPublications:(id)sender {
-	[tableView selectAll:sender];
-}
-
-- (IBAction)deselectAllPublications:(id)sender {
-	[tableView deselectAll:sender];
-}
+#pragma mark | URL actions
 
 - (IBAction)openLinkedFile:(id)sender{
 	NSString *field = [sender representedObject];
@@ -490,127 +615,15 @@
     }
 }
 
-- (void)editAction:(id)sender {
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
-		[self editPubCmd:sender];
-	} else if (firstResponder == groupTableView) {
-		[self editGroupAction:sender];
-	}
-}
-
-- (IBAction)alternateDelete:(id)sender {
-	id firstResponder = [documentWindow firstResponder];
-	if (firstResponder == tableView) {
-		[self deleteSelectedPubs:sender];
-	} else if (firstResponder == groupTableView) {
-		[self removeSelectedGroups:sender];
-	}
-}
-
-// -delete: and -insertNewline: are defined indirectly in NSTableView-OAExtensions using our dataSource method
-
-#pragma mark Pasteboard || copy
-
-// -cut: and copy: are defined indirectly in NSTableView-OAExtensions using our dataSource method
-// note: cut: calls delete:
-
-- (IBAction)alternateCut:(id)sender {
-	if ([documentWindow firstResponder] == tableView) {
-		[tableView copy:sender];
-		[self alternateDelete:sender];
-	}
-}
-
-- (IBAction)copyAsAction:(id)sender{
-	int copyType = [sender tag];
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-	NSString *citeString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey];
-	[self writePublications:[self selectedPublications] forDragCopyType:copyType citeString:citeString toPasteboard:pboard];
-}
-
-- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString{
-	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-	BOOL prependTilde = [sud boolForKey:BDSKCitePrependTildeKey];
-	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, [sud stringForKey:BDSKCiteStartBracketKey]]; 
-	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
-    NSMutableString *s = [NSMutableString stringWithString:startCite];
-	
-    BOOL sep = [sud boolForKey:BDSKSeparateCiteKey];
-	NSString *separator = (sep)? [NSString stringWithFormat:@"%@%@", endCite, startCite] : @",";
-    BibItem *pub;
-	BOOL first = YES;
-    
-    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-    
-    NSEnumerator *e = [items objectEnumerator];
-    while(pub = [e nextObject]){
-		if(first) first = NO;
-		else [s appendString:separator];
-        [s appendString:[pub citeKey]];
-    }
-	[s appendString:endCite];
-	
-	return s;
-}
-
-#pragma mark Pasteboard || paste
-
-// ----------------------------------------------------------------------------------------
-// paste: get text, parse it as bibtex, add the entry to publications and (optionally) edit it.
-// ----------------------------------------------------------------------------------------
-
-// -paste: is defined indirectly in NSTableView-OAExtensions using our dataSource method
-
-// Don't use the default action in NSTableView-OAExtensions here, as it uses another pasteboard and some more overhead
-- (IBAction)duplicate:(id)sender{
-	if ([documentWindow firstResponder] != tableView ||
-		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
-		NSBeep();
-		return;
-	}
-	
-    NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
-    
-    [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
-    [self highlightBibs:newPubs];
-    [newPubs release];
-	
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
-        [self editPubCmd:nil]; // this will aske the user when there are many pubs
-    }
-}
-
-- (void)createNewBlankPub{
-    [self createNewBlankPubAndEdit:NO];
-}
-
-- (void)createNewBlankPubAndEdit:(BOOL)yn{
-    BibItem *newBI = [[[BibItem alloc] init] autorelease];
-    
-    // add the publication; addToGroup:handleInherited: depends on the pub having a document
-    [self addPublication:newBI];
-
-	NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
-	BDSKGroup *group;
-    int op;
-	while (group = [groupEnum nextObject]) {
-		if ([group isCategory]){
-			op = [newBI addToGroup:group handleInherited:BDSKOperationSet];
-            NSAssert1(BDSKOperationSet == op, @"Unable to add to group %@", group);
-        }
-    }
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
-    [self highlightBib:newBI];
-    if(yn == YES)
-    {
-        [self editPub:newBI];
-    }
-}
-
 #pragma mark View Actions
+
+- (IBAction)selectAllPublications:(id)sender {
+	[tableView selectAll:sender];
+}
+
+- (IBAction)deselectAllPublications:(id)sender {
+	[tableView deselectAll:sender];
+}
 
 - (IBAction)toggleStatusBar:(id)sender{
 	[statusBar toggleBelowView:mainBox offset:1.0];
@@ -719,16 +732,6 @@
     [sender adjustSubviews];
 }
 
-#pragma mark Sharing Actions
-
-- (IBAction)refreshSharing:(id)sender{
-    [[BDSKSharingServer defaultServer] restartSharingIfNeeded];
-}
-
-- (IBAction)refreshSharedBrowsing:(id)sender{
-    [[BDSKSharingBrowser sharedBrowser] restartSharedBrowsingIfNeeded];
-}
-
 #pragma mark Custom cite drawer stuff
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
@@ -758,6 +761,16 @@
 	[customStringArray removeObjectAtIndex:[ccTableView selectedRow]];
 	[ccTableView reloadData];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+}
+
+#pragma mark Sharing Actions
+
+- (IBAction)refreshSharing:(id)sender{
+    [[BDSKSharingServer defaultServer] restartSharingIfNeeded];
+}
+
+- (IBAction)refreshSharedBrowsing:(id)sender{
+    [[BDSKSharingBrowser sharedBrowser] restartSharedBrowsingIfNeeded];
 }
 
 #pragma mark Text import sheet support
@@ -800,7 +813,6 @@
 	[tic release];
 }
 
-#pragma mark 
 #pragma mark AutoFile stuff
 
 - (void)consolidateAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -838,41 +850,6 @@
     
 }
 
-#pragma mark blog stuff
-
-
-- (IBAction)postItemToWeblog:(id)sender{
-
-	[NSException raise:BDSKUnimplementedException
-				format:@"postItemToWeblog is unimplemented."];
-	
-	NSString *appPath = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"Blapp"]; // pref
-	NSLog(@"%@",appPath);
-#if 0	
-	AppleEvent *theAE;
-	OSERR err = AECreateAppleEvent (NNWEditDataItemAppleEventClass,
-									NNWEditDataItemAppleEventID,
-									'MMcC', // Blapp
-									kAutoGenerateReturnID,
-									kAnyTransactionID,
-									&theAE);
-
-
-	
-	
-	OSErr AESend (
-				  const AppleEvent * theAppleEvent,
-				  AppleEvent * reply,
-				  AESendMode sendMode,
-				  AESendPriority sendPriority,
-				  SInt32 timeOutInTicks,
-				  AEIdleUPP idleProc,
-				  AEFilterUPP filterProc
-				  );
-#endif
-}
-
-#pragma mark
 #pragma mark Cite Keys and Crossref support
 
 - (void)generateCiteKeysForSelectedPublications{
@@ -985,6 +962,98 @@
     }
 }
 
+- (void)performSortForCrossrefs{
+    NSArray *copyOfPubs = [publications copy];
+	NSEnumerator *pubEnum = [copyOfPubs objectEnumerator];
+	BibItem *pub = nil;
+	BibItem *parent;
+	NSString *key;
+	NSMutableSet *prevKeys = [NSMutableSet set];
+	BOOL moved = NO;
+	NSArray *selectedPubs = [self selectedPublications];
+    
+    [copyOfPubs release];
+	
+	// We only move parents that come before a child.
+	while (pub = [pubEnum nextObject]){
+		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
+		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
+            [prevKeys removeObject:key];
+			parent = [self publicationForCiteKey:key];
+			[publications removeObjectIdenticalTo:parent];
+			[publications addObject:parent];
+			moved = YES;
+		}
+		[prevKeys addObject:[[pub citeKey] lowercaseString]];
+	}
+	
+	if (moved) {
+		[self sortPubsByColumn:nil];
+		[self highlightBibs:selectedPubs];
+		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"")];
+	}
+}
+
+- (IBAction)sortForCrossrefs:(id)sender{
+	NSUndoManager *undoManager = [self undoManager];
+	[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
+	[undoManager setActionName:NSLocalizedString(@"Sort Publications",@"")];
+	
+	[self performSortForCrossrefs];
+}
+
+- (void)selectCrossrefParentForItem:(BibItem *)item{
+    NSString *crossref = [item valueOfField:BDSKCrossrefString inherit:NO];
+    [tableView deselectAll:nil];
+    BibItem *parent = [self publicationForCiteKey:crossref];
+    if(crossref && parent){
+        [self highlightBib:parent];
+        [tableView scrollRowToCenter:[tableView selectedRow]];
+    } else
+        NSBeep(); // if no parent found
+}
+
+- (IBAction)selectCrossrefParentAction:(id)sender{
+    BibItem *selectedBI = [[self selectedPublications] lastObject];
+    [self selectCrossrefParentForItem:selectedBI];
+}
+
+- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
+	
+	NSSet *parentTypes = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
+	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
+	BibItem *aPub;
+	
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
+	
+	while (aPub = [selEnum nextObject]) {
+		if([parentTypes containsObject:[aPub pubType]])
+			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
+	}
+	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles",@"") : NSLocalizedString(@"Duplicate Title",@""))];
+}
+
+- (IBAction)duplicateTitleToBooktitle:(id)sender{
+	if ([self numberOfSelectedPubs] == 0 ||
+        [self hasSharedGroupsSelected] == YES) return;
+	
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
+                                     defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
+                                   alternateButton:NSLocalizedString(@"Overwrite", @"Overwrite")
+                                       otherButton:nil
+                         informativeTextWithFormat:NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @"")];
+	[alert beginSheetModalForWindow:documentWindow
+                      modalDelegate:self
+                     didEndSelector:@selector(dublicateTitleToBooktitleAlertDidEnd:returnCode:contextInfo:) 
+                        contextInfo:NULL];
+}
+
+#pragma mark Duplicate searching
+
 // select duplicates, then allow user to delete/copy/whatever
 - (IBAction)selectPossibleDuplicates:(id)sender{
     
@@ -1067,120 +1136,6 @@
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
     // update status line after the updateUI notification, or else it gets overwritten
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural] immediate:NO];
-}
-
-- (void)performSortForCrossrefs{
-    NSArray *copyOfPubs = [publications copy];
-	NSEnumerator *pubEnum = [copyOfPubs objectEnumerator];
-	BibItem *pub = nil;
-	BibItem *parent;
-	NSString *key;
-	NSMutableSet *prevKeys = [NSMutableSet set];
-	BOOL moved = NO;
-	NSArray *selectedPubs = [self selectedPublications];
-    
-    [copyOfPubs release];
-	
-	// We only move parents that come before a child.
-	while (pub = [pubEnum nextObject]){
-		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
-		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
-            [prevKeys removeObject:key];
-			parent = [self publicationForCiteKey:key];
-			[publications removeObjectIdenticalTo:parent];
-			[publications addObject:parent];
-			moved = YES;
-		}
-		[prevKeys addObject:[[pub citeKey] lowercaseString]];
-	}
-	
-	if (moved) {
-		[self sortPubsByColumn:nil];
-		[self highlightBibs:selectedPubs];
-		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"")];
-	}
-}
-
-- (IBAction)sortForCrossrefs:(id)sender{
-	NSUndoManager *undoManager = [self undoManager];
-	[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
-	[undoManager setActionName:NSLocalizedString(@"Sort Publications",@"")];
-	
-	[self performSortForCrossrefs];
-}
-
-- (void)selectCrossrefParentForItem:(BibItem *)item{
-    NSString *crossref = [item valueOfField:BDSKCrossrefString inherit:NO];
-    [tableView deselectAll:nil];
-    BibItem *parent = [self publicationForCiteKey:crossref];
-    if(crossref && parent){
-        [self highlightBib:parent];
-        [tableView scrollRowToCenter:[tableView selectedRow]];
-    } else
-        NSBeep(); // if no parent found
-}
-
-- (IBAction)selectCrossrefParentAction:(id)sender{
-    BibItem *selectedBI = [[self selectedPublications] lastObject];
-    [self selectCrossrefParentForItem:selectedBI];
-}
-
-- (void)createNewPubUsingCrossrefForItem:(BibItem *)item{
-    BibItem *newBI = [[BibItem alloc] init];
-	NSString *parentType = [item pubType];
-    
-	[newBI setField:BDSKCrossrefString toValue:[item citeKey]];
-	if ([parentType isEqualToString:BDSKProceedingsString]) {
-		[newBI setPubType:BDSKInproceedingsString];
-	} else if ([parentType isEqualToString:BDSKBookString] || 
-			   [parentType isEqualToString:BDSKBookletString] || 
-			   [parentType isEqualToString:BDSKTechreportString] || 
-			   [parentType isEqualToString:BDSKManualString]) {
-		if (![[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] isEqualToString:BDSKInbookString]) 
-			[newBI setPubType:BDSKIncollectionString];
-	}
-    [self addPublication:newBI];
-    [newBI release];
-    [self editPub:newBI];
-}
-
-- (IBAction)createNewPubUsingCrossrefAction:(id)sender{
-    BibItem *selectedBI = [[self selectedPublications] lastObject];
-    [self createNewPubUsingCrossrefForItem:selectedBI];
-}
-
-- (void)dublicateTitleToBooktitleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	BOOL overwrite = (returnCode == NSAlertAlternateReturn);
-	
-	NSSet *parentTypes = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
-	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
-	BibItem *aPub;
-	
-    // first we make sure all edits are committed
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
-	
-	while (aPub = [selEnum nextObject]) {
-		if([parentTypes containsObject:[aPub pubType]])
-			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
-	}
-	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles",@"") : NSLocalizedString(@"Duplicate Title",@""))];
-}
-
-- (IBAction)duplicateTitleToBooktitle:(id)sender{
-	if ([self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) return;
-	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
-                                     defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
-                                   alternateButton:NSLocalizedString(@"Overwrite", @"Overwrite")
-                                       otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @"")];
-	[alert beginSheetModalForWindow:documentWindow
-                      modalDelegate:self
-                     didEndSelector:@selector(dublicateTitleToBooktitleAlertDidEnd:returnCode:contextInfo:) 
-                        contextInfo:NULL];
 }
 
 @end

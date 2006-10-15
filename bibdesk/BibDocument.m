@@ -1414,6 +1414,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return error == nil;
 }
 
+#pragma mark -
+
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding{
     documentStringEncoding = encoding;
 }
@@ -1583,6 +1585,31 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[s appendString:[pub RISStringValue]];
 		[s appendString:@"\n"];
     }
+	
+	return s;
+}
+
+- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString{
+	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+	BOOL prependTilde = [sud boolForKey:BDSKCitePrependTildeKey];
+	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, [sud stringForKey:BDSKCiteStartBracketKey]]; 
+	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
+    NSMutableString *s = [NSMutableString stringWithString:startCite];
+	
+    BOOL sep = [sud boolForKey:BDSKSeparateCiteKey];
+	NSString *separator = (sep)? [NSString stringWithFormat:@"%@%@", endCite, startCite] : @",";
+    BibItem *pub;
+	BOOL first = YES;
+    
+    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
+    
+    NSEnumerator *e = [items objectEnumerator];
+    while(pub = [e nextObject]){
+		if(first) first = NO;
+		else [s appendString:separator];
+        [s appendString:[pub citeKey]];
+    }
+	[s appendString:endCite];
 	
 	return s;
 }

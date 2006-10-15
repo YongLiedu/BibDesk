@@ -305,6 +305,14 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSString *)RISStringForPublications:(NSArray *)items;
 
 /*!
+	@method citeStringForPublications:citeString:
+	@abstract  method for generating cite string
+	@discussion generates appropriate cite command from the given items 
+*/
+
+- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString;
+
+/*!
     @method setPublications
     @abstract Sets the publications array
     @discussion Simply replaces the publications array

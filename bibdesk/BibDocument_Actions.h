@@ -42,6 +42,13 @@
 
 @interface BibDocument (Actions)
 
+#pragma mark Publication Actions
+
+- (void)addNewPubAndEdit:(BibItem *)item;
+- (void)createNewPub;
+- (void)createNewPubUsingCrossrefForItem:(BibItem *)item;
+- (IBAction)createNewPubUsingCrossrefAction:(id)sender;
+
 /*!
 @method newPub:
     @abstract creates a new publication (BibItem)
@@ -68,14 +75,32 @@
 - (IBAction)removeSelectedPubs:(id)sender;
 
 /*!
-@method emailPubCmd
- 
+    @method alternateDelete:
+    @abstract General alternate delete action. Deletes the selected publications or the selected smart groups, depending on the selected tableView. 
+    @discussion - 
+    @param sender The sender. Not used.
 */
-- (IBAction)emailPubCmd:(id)sender;
+- (void)alternateDelete:(id)sender;
 
-- (IBAction)sendToLyX:(id)sender;
+/*!
+    @method alternateCut:
+    @abstract Cuts using alternateDelete: action.
+    @discussion - 
+    @param sender The sender. Not used.
+*/
+- (IBAction)alternateCut:(id)sender;
 
-    /*!
+/*!
+    @method copyAsAction:
+    @abstract copy items in a particular format, depending on the tag of the sender
+    @discussion puts the format for the currently selected publications onto the general pasteboard.
+    @param sender The sender.
+*/
+- (IBAction)copyAsAction:(id)sender;
+
+- (IBAction)duplicate:(id)sender;
+
+/*!
     @method editPubCmd
     @abstract an action to edit a publication has happened. 
     @discussion This is the tableview's doubleaction and the action of the edit pub button. It calls editPub with the tableview's selected publication.
@@ -97,23 +122,22 @@
     @discussion Creates a personcontroller if one doesn't exist, and tells it to show itself. 
     @param person The BibAuthor that should be displayed.
 */
+
+/*!
+    @method editAction:
+    @abstract General edit action. Edits the selected publications or the selected smart group, depending on the selected tableView. 
+    @discussion - 
+    @param sender The sender. Not used.
+*/
+- (void)editAction:(id)sender;
+
 - (void)showPerson:(BibAuthor *)person;
 
-/*!
-    @method selectAllPublications:
-    @abstract Selects all publications
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)selectAllPublications:(id)sender;
+- (IBAction)emailPubCmd:(id)sender;
+- (IBAction)sendToLyX:(id)sender;
+- (IBAction)postItemToWeblog:(id)sender;
 
-/*!
-    @method deselectAllPublications:
-    @abstract Deselects all publications
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)deselectAllPublications:(id)sender;
+#pragma mark | URL actions
 
 /*!
     @method openLinkedFile:
@@ -145,67 +169,23 @@
 
 - (void)openRemoteURLForField:(NSString *)field;
 
+#pragma mark View Actions
+
 /*!
-    @method editAction:
-    @abstract General edit action. Edits the selected publications or the selected smart group, depending on the selected tableView. 
+    @method selectAllPublications:
+    @abstract Selects all publications
     @discussion - 
     @param sender The sender. Not used.
 */
-- (void)editAction:(id)sender;
+- (IBAction)selectAllPublications:(id)sender;
 
 /*!
-    @method alternateDelete:
-    @abstract General alternate delete action. Deletes the selected publications or the selected smart groups, depending on the selected tableView. 
+    @method deselectAllPublications:
+    @abstract Deselects all publications
     @discussion - 
     @param sender The sender. Not used.
 */
-- (void)alternateDelete:(id)sender;
-
-/*!
-    @method alternateCut:
-    @abstract Cuts using alternateDelete: action.
-    @discussion - 
-    @param sender The sender. Not used.
-*/
-- (IBAction)alternateCut:(id)sender;
-
-/*!
-    @method copyAsAction:
-    @abstract copy items in a particular format, depending on the tag of the sender
-    @discussion puts the format for the currently selected publications onto the general pasteboard.
-    @param sender The sender.
-*/
-- (IBAction)copyAsAction:(id)sender;
-
-/*!
-	@method citeStringForPublications:citeString:
-	@abstract  method for generating cite string
-	@discussion generates appropriate cite command from the given items 
-*/
-
-- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString;
-/*!
-    @method createNewBlankPub
-    @abstract Action method for the new pub button.
- @discussion calls [createNewBlankPubAndEdit:YES]
-    
-*/
-- (void)createNewBlankPub;
-
-/*!
-    @method createNewBlankPubAndEdit
-    @abstract Supports creating new publications
-    @discussion adds a new publication and may edit it.
-    @param yn A boolean -- whether or not to tell the new pub to open an editor window.
-*/
-- (void)createNewBlankPubAndEdit:(BOOL)yn;
-
-/*!
-    @method handleTableSelectionChangedNotification:
-    @abstract listens for notification of changes in the selection of the main table.
-    @discussion \253discussion\273
-    
-*/
+- (IBAction)deselectAllPublications:(id)sender;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
@@ -213,14 +193,6 @@
 - (IBAction)changeGroupTableFont:(id)sender;
 
 - (IBAction)changePreviewDisplay:(id)sender;
-
-- (IBAction)refreshSharing:(id)sender;
-- (IBAction)refreshSharedBrowsing:(id)sender;
-
-- (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
-
-- (IBAction)addCustomCiteString:(id)sender;
-- (IBAction)removeCustomCiteString:(id)sender;
 
 /*!
     @method     pageDownInPreview:
@@ -251,16 +223,32 @@
     
 */
 
-- (IBAction)consolidateLinkedFiles:(id)sender;
+#pragma mark Custom cite drawer stuff
 
-- (IBAction)postItemToWeblog:(id)sender;
+- (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
+
+- (IBAction)addCustomCiteString:(id)sender;
+- (IBAction)removeCustomCiteString:(id)sender;
+
+#pragma mark Sharing Actions
+
+- (IBAction)refreshSharing:(id)sender;
+- (IBAction)refreshSharedBrowsing:(id)sender;
+
+#pragma mark Text import sheet support
 
 - (IBAction)importFromPasteboardAction:(id)sender;
 - (IBAction)importFromFileAction:(id)sender;
 - (IBAction)importFromWebAction:(id)sender;
 
-- (IBAction)selectPossibleDuplicates:(id)sender;
-- (IBAction)selectDuplicates:(id)sender;
+#pragma mark AutoFile stuff
+
+- (IBAction)consolidateLinkedFiles:(id)sender;
+
+#pragma mark Cite Keys and Crossref support
+
+- (void)generateCiteKeysForSelectedPublications;
+- (IBAction)generateCiteKey:(id)sender;
 
 - (IBAction)sortForCrossrefs:(id)sender;
 
@@ -269,12 +257,11 @@
 - (void)selectCrossrefParentForItem:(BibItem *)item;
 - (IBAction)selectCrossrefParentAction:(id)sender;
 
-- (void)createNewPubUsingCrossrefForItem:(BibItem *)item;
-- (IBAction)createNewPubUsingCrossrefAction:(id)sender;
-
 - (IBAction)duplicateTitleToBooktitle:(id)sender;
 
-- (IBAction)generateCiteKey:(id)sender;
-- (void)generateCiteKeysForSelectedPublications;
+#pragma mark Duplicate searching
+
+- (IBAction)selectPossibleDuplicates:(id)sender;
+- (IBAction)selectDuplicates:(id)sender;
 
 @end
