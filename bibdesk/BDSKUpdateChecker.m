@@ -207,6 +207,7 @@ static id sharedInstance = nil;
     return [NSURL URLWithString:URLString];
 }
 
+// string of the form BibDesk1.3 for BibDesk 1.3.x; update check info is keyed to a specific branch of development
 - (NSString *)keyForCurrentMajorVersion;
 {
     OFVersionNumber *localVersion = [self localVersionNumber];
