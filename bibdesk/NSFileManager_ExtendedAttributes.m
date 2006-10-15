@@ -188,6 +188,27 @@ static NSString *xattrError(int err, const char *path);
     return [attribute autorelease];
 }
 
+- (id)propertyListFromExtendedAttributeNamed:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)traverse error:(NSError **)outError;
+{
+    NSError *error;
+    NSData *data = [self extendedAttributeNamed:attr atPath:path traverseLink:traverse error:&error];
+    id plist = nil;
+    if (nil == data) {
+        if (outError) *outError = [NSError errorWithDomain:@"BDSKErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, error, NSUnderlyingErrorKey, nil]];
+    } else {
+        NSString *errorString;
+        plist = [NSPropertyListSerialization propertyListFromData:data 
+                                                 mutabilityOption:NSPropertyListImmutable 
+                                                           format:NULL 
+                                                 errorDescription:&errorString];
+        if (nil == plist) {
+            if (outError) *outError = [NSError errorWithDomain:@"BDSKErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errorString, NSLocalizedDescriptionKey, nil]];
+            [errorString release];
+        }
+    }
+    return plist;
+}
+
 - (BOOL)addExtendedAttributeNamed:(NSString *)attr withStringValue:(NSString *)value atPath:(NSString *)path error:(NSError **)error;
 {
     return [self setExtendedAttributeNamed:attr toValue:[value dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:error];
@@ -246,6 +267,23 @@ static NSString *xattrError(int err, const char *path);
         return YES;
 }
 
+- (BOOL)setExtendedAttributeNamed:(NSString *)attr toPropertyListValue:(id)plist atPath:(NSString *)path options:(NSDictionary *)options error:(NSError **)error;
+{
+    NSString *errorString;
+    NSData *data = [NSPropertyListSerialization dataFromPropertyList:plist 
+                                                              format:NSPropertyListBinaryFormat_v1_0 
+                                                    errorDescription:&errorString];
+    BOOL success;
+    if (nil == data) {
+        if (error) *error = [NSError errorWithDomain:@"BDSKErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errorString, NSLocalizedDescriptionKey, nil]];
+        [errorString release];
+        success = NO;
+    } else {
+        success = [self setExtendedAttributeNamed:attr toValue:data atPath:path options:options error:error];
+    }
+    return success;
+}
+
 - (BOOL)removeExtendedAttribute:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 {
     NSParameterAssert(path != nil);
@@ -274,59 +312,59 @@ static NSString *xattrError(int err, const char *path);
 // guaranteed to return non-nil
 static NSString *xattrError(int err, const char *myPath)
 {
-    char *errMsg = NULL;
+    NSString *errMsg = nil;
     switch (err)
     {
         case ENOTSUP:
-            errMsg = "file system does not support extended attributes or they are disabled.";
+            errMsg = NSLocalizedString(@"File system does not support extended attributes or they are disabled.", @"");
             break;
         case ERANGE:
-            errMsg = "buffer too small for attribute names.";
+            errMsg = NSLocalizedString(@"Buffer too small for attribute names.", @"");
             break;
         case EPERM:
-            errMsg = "this file system object does not support extended attributes";
+            errMsg = NSLocalizedString(@"This file system object does not support extended attributes.", @"");
             break;
         case ENOTDIR:
-            errMsg = "a component of the path is not a directory";
+            errMsg = NSLocalizedString(@"A component of the path is not a directory.", @"");
             break;
         case ENAMETOOLONG:
-            errMsg = "name too long";
+            errMsg = NSLocalizedString(@"File name too long.", @"");
             break;
         case EACCES:
-            errMsg = "search permission denied for this path";
+            errMsg = NSLocalizedString(@"Search permission denied for this path.", @"");
             break;
         case ELOOP:
-            errMsg = "too many symlinks encountered resolving path";
+            errMsg = NSLocalizedString(@"Too many symlinks encountered resolving path.", @"");
             break;
         case EIO:
-            errMsg = "I/O error occurred";
+            errMsg = NSLocalizedString(@"I/O error occurred.", @"");
             break;
         case EINVAL:
-            errMsg = "options not recognized";
+            errMsg = NSLocalizedString(@"Options not recognized.", @"");
             break;
         case EEXIST:
-            errMsg = "options contained XATTR_CREATE but the named attribute exists";
+            errMsg = NSLocalizedString(@"Options contained XATTR_CREATE but the named attribute exists.", @"");
             break;
         case ENOATTR:
-            errMsg = "options contained XATTR_REPLACE but the named attributed does not exist";
+            errMsg = NSLocalizedString(@"The named attribute does not exist.", @"");
             break;
         case EROFS:
-            errMsg = "read-only file system.  Unable to change attributes";
+            errMsg = NSLocalizedString(@"Read-only file system.  Unable to change attributes.", @"");
             break;
         case EFAULT:
-            errMsg = "path or name points to an invalid address";
+            errMsg = NSLocalizedString(@"Path or name points to an invalid address.", @"");
             break;
         case E2BIG:
-            errMsg = "the data size of the extended attributed is too large";
+            errMsg = NSLocalizedString(@"The data size of the extended attribute is too large.", @"");
             break;
         case ENOSPC:
-            errMsg = "no space left on file system";
+            errMsg = NSLocalizedString(@"No space left on file system.", @"");
             break;
         default:
-            errMsg = "unknown error occurred";
+            errMsg = NSLocalizedString(@"Unknown error occurred.", @"");
             break;
     }
-    return [NSString stringWithCString:errMsg encoding:NSASCIIStringEncoding];
+    return errMsg;
 }
     
 

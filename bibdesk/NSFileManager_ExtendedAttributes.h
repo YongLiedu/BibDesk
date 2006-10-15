@@ -84,6 +84,18 @@
 - (NSArray *)allExtendedAttributesAtPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 
 /*!
+    @method     propertyListFromExtendedAttributeNamed:atPath:traverseLink:error:
+    @abstract   Returns a property list using NSPropertyListSerialization.
+    @discussion (comprehensive description)
+    @param      attr (description)
+    @param      path (description)
+    @param      traverse (description)
+    @param      outError (description)
+    @result     (description)
+*/
+- (id)propertyListFromExtendedAttributeNamed:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)traverse error:(NSError **)outError;
+
+/*!
     @method     setExtendedAttributeNamed:toValue:atPath:options:error:
     @abstract   Sets the value of attribute named <tt>attr</tt> to <tt>value</tt>, which is an NSData object.
     @discussion Calls <tt>setxattr(2)</tt> to set the attributes for the file.
@@ -123,6 +135,20 @@
     @result     (description)
 */
 - (BOOL)addExtendedAttributeNamed:(NSString *)attr withStringValue:(NSString *)value atPath:(NSString *)path error:(NSError **)error;
+
+/*!
+    @method     setExtendedAttributeNamed:toPropertyListValue:atPath:options:error:
+    @abstract   Sets the extended attribute named <tt>attr</tt> to the specified property list.  The plist is converted to NSData using NSPropertyListSerialization.
+    @discussion (comprehensive description)
+    @param      attr (description)
+    @param      plist (description)
+    @param      path (description)
+    @param      options (description)
+    @param      error (description)
+    @result     (description)
+*/
+- (BOOL)setExtendedAttributeNamed:(NSString *)attr toPropertyListValue:(id)plist atPath:(NSString *)path options:(NSDictionary *)options error:(NSError **)error;
+
 
 /*!
     @method     replaceExtendedAttributeNamed:withValue:atPath:error:
