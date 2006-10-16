@@ -55,8 +55,8 @@
 	BOOL prependTilde = [defaults boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
-    [defaultDragCopyPopup selectItemAtIndex:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:0] intValue]];
-    [alternateDragCopyPopup selectItemAtIndex:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:1] intValue]];
+    [defaultDragCopyPopup selectItemWithTag:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:0] intValue]];
+    [alternateDragCopyPopup selectItemWithTag:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:1] intValue]];
     [separateCiteCheckButton setState:[defaults boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
     [prependTildeCheckButton setState:[defaults boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
@@ -76,14 +76,16 @@
 
 - (IBAction)changeDefaultDragCopyFormat:(id)sender{
     NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
-    [dragCopyTypes replaceObjectAtIndex:0 withObject:[NSNumber numberWithInt:[sender indexOfSelectedItem]]];
+    NSNumber *number = [NSNumber numberWithInt:[[sender selectedItem] tag]];
+    [dragCopyTypes replaceObjectAtIndex:0 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
 }
 
 - (IBAction)changeAlternateDragCopyFormat:(id)sender{
     NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
-    [dragCopyTypes replaceObjectAtIndex:1 withObject:[NSNumber numberWithInt:[sender indexOfSelectedItem]]];
+    NSNumber *number = [NSNumber numberWithInt:[[sender selectedItem] tag]];
+    [dragCopyTypes replaceObjectAtIndex:1 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
 }

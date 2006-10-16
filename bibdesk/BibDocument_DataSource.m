@@ -64,6 +64,8 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
 
+#define MAX_DRAG_IMAGE_WIDTH 700.0
+
 @implementation BibDocument (DataSource)
 
 #pragma mark TableView data source
@@ -702,6 +704,7 @@
 	NSArray *promisedDraggedItems = [self promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
 	int dragCopyType = -1;
 	int count = 0;
+    BOOL inside = NO;
 	
     if ([dragType isEqualToString:NSFilenamesPboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilenamesPboardType];
@@ -735,11 +738,13 @@
 		// we draw only the first item and indicate other items using ellipsis
 		switch (dragCopyType) {
 			case BDSKBibTeXDragCopyType:
+			case BDSKMinimalBibTeXDragCopyType:
 				[s appendString:[firstItem bibTeXStringDroppingInternal:YES]];
 				if (count > 1) {
 					[s appendString:@"\n"];
 					[s appendString:[NSString horizontalEllipsisString]];
 				}
+                inside = YES;
 				break;
 			case BDSKCiteDragCopyType:
 				sep = [sud boolForKey:BDSKSeparateCiteKey];
@@ -775,6 +780,22 @@
 				[s appendString:@"}"];
 				if (count > 1) 
 					[s appendString:[NSString horizontalEllipsisString]];
+				break;
+			case BDSKLTBDragCopyType:
+				[s appendString:@"\\bib{"];
+				[s appendString:[firstItem citeKey]];
+				[s appendString:@"}{"];
+				[s appendString:[firstItem pubType]];
+				[s appendString:@"}"];
+				if (count > 1) 
+					[s appendString:[NSString horizontalEllipsisString]];
+				break;
+			case BDSKRISDragCopyType:
+                [s appendString:[firstItem RISStringValue]];
+				if (count > 1) 
+					[s appendString:[NSString horizontalEllipsisString]];
+                inside = YES;
+				break;
 		}
 		
 		NSAttributedString *attrString = [[[NSAttributedString alloc] initWithString:s] autorelease];
@@ -787,6 +808,8 @@
             NSLog(@"string size was zero");
             size = NSMakeSize(30.0,20.0); // work around bug in NSAttributedString
         }
+        if (size.width > MAX_DRAG_IMAGE_WIDTH)
+            size.width = MAX_DRAG_IMAGE_WIDTH;
         
 		size.width += 2 * point.x;
 		size.height += 2 * point.y;
@@ -811,7 +834,7 @@
         [image unlockFocus];
 	}
 	
-    return [image dragImageWithCount:count inside:dragCopyType == BDSKBibTeXDragCopyType];
+    return [image dragImageWithCount:count inside:inside];
 }
 
 #pragma mark TableView dragging destination
