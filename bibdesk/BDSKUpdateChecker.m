@@ -38,6 +38,7 @@
 
 #import "BDSKUpdateChecker.h"
 #import "BDSKReadMeController.h"
+#import "NSError_BDSKExtensions.h"
 
 @interface BDSKUpdateChecker (Private)
 
@@ -235,10 +236,13 @@ static id sharedInstance = nil;
                                                                        format:NULL
                                                              errorDescription:&err];
         if(nil == versionDictionary){
-            // add the parsing error as underlying error, if the retrieval actually succeeded
-            OFError(&downloadError, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to read the version number from the server", @""), NSLocalizedRecoverySuggestionErrorKey, (err ? err : NSLocalizedString(@"Unknown failure reading downloaded data", @"")), nil);
+            if (error) {
+                *error = [NSError mutableLocalErrorWithCode:kBDSKPropertyListDeserializationFailed localizedDescription:NSLocalizedString(@"Unable to read the version number from the server", @"")];
+                [*error setValue:err forKey:NSLocalizedRecoverySuggestionErrorKey];
+                // add the parsing error as underlying error, if the retrieval actually succeeded
+                [*error embedError:downloadError];
+            }
             [err release];
-            if (error) *error = downloadError;
             
             // see if we have a web server error page and log it to the console; NSUnderlyingErrorKey has \n literals when logged
             NSAttributedString *attrString = [[NSAttributedString alloc] initWithHTML:theData documentAttributes:NULL];
@@ -248,9 +252,7 @@ static id sharedInstance = nil;
         } else {
             success = YES;
         }
-    }
-        
-    if (nil == versionDictionary) {
+    } else {
         if(error) *error = downloadError;
         success = NO;
     }    
@@ -327,24 +329,28 @@ static id sharedInstance = nil;
 
 - (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(unsigned int)recoveryOptionIndex;
 {
-    // we only receive this for a single error at present, so don't bother checking domain/code; we're trying to diagnose a network problem that prevented reaching -propertyListURL
     BOOL didRecover = NO;
     
-    if (0 == recoveryOptionIndex) {
-        // ignore
+    // we only receive this for a single error at present
+    if ([error isLocalError] && [error code] == kBDSKNetworkConnectionFailed) {
+        if (0 == recoveryOptionIndex) {
+            // ignore
+            didRecover = NO;
+            
+        } else if (1 == recoveryOptionIndex) {
+            // diagnose
+            CFURLRef theURL = (CFURLRef)[self propertyListURL];
+            CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
+            CFNetDiagnosticStatus status = CFNetDiagnosticDiagnoseProblemInteractively(diagnostic);
+            CFRelease(diagnostic);
+            didRecover = (status == kCFNetDiagnosticNoErr);
+            
+        } else if (2 == recoveryOptionIndex) {
+            // open console
+            didRecover = [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:@"com.apple.console" options:0 additionalEventParamDescriptor:nil launchIdentifier:NULL];
+        }
+    } else {
         didRecover = NO;
-        
-    } else if (1 == recoveryOptionIndex) {
-        // diagnose
-        CFURLRef theURL = (CFURLRef)[self propertyListURL];
-        CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
-        CFNetDiagnosticStatus status = CFNetDiagnosticDiagnoseProblemInteractively(diagnostic);
-        CFRelease(diagnostic);
-        didRecover = (status == kCFNetDiagnosticNoErr);
-        
-    } else if (2 == recoveryOptionIndex) {
-        // open console
-        didRecover = [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:@"com.apple.console" options:0 additionalEventParamDescriptor:nil launchIdentifier:NULL];
     }
     
     return didRecover;
@@ -367,9 +373,14 @@ static id sharedInstance = nil;
     } else {
         if (nil == details) details = NSLocalizedString(@"Unknown network error", @"");
         
-        // This ridiculous dictionary contains all the information needed for NSErrorRecoveryAttempting.  Note that buttons in the alert will be ordered right-to-left {0, 1, 2} and correspond to objects in the NSLocalizedRecoveryOptionsErrorKey array.
-        if (error) *error = [NSError errorWithDomain:@"BDSKNetworkError" code:0 
-                                 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:details, NSLocalizedDescriptionKey, self, NSRecoveryAttempterErrorKey, NSLocalizedString(@"Would you like to ignore this problem or attempt to diagnose it?  You may also open the Console log to check for errors.", @""), NSLocalizedRecoverySuggestionErrorKey, [NSArray arrayWithObjects:NSLocalizedString(@"Ignore", @""), NSLocalizedString(@"Diagnose", @""), NSLocalizedString(@"Open Console", @""), nil], NSLocalizedRecoveryOptionsErrorKey, nil]];
+        // This error contains all the information needed for NSErrorRecoveryAttempting.  
+        // Note that buttons in the alert will be ordered right-to-left {0, 1, 2} and correspond to objects in the NSLocalizedRecoveryOptionsErrorKey array.
+        if (error) {
+            *error = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:details];
+            [*error setValue:self forKey:NSRecoveryAttempterErrorKey];
+            [*error setValue:NSLocalizedString(@"Would you like to ignore this problem or attempt to diagnose it?  You may also open the Console log to check for errors.", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            [*error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Ignore", @""), NSLocalizedString(@"Diagnose", @""), NSLocalizedString(@"Open Console", @""), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
+        }
         success = NO;
     }
     

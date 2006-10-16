@@ -106,6 +106,7 @@
 #import "NSData_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKShellTask.h"
+#import "NSError_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -438,6 +439,18 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 {
     [super windowControllerDidLoadNib:aController];
     
+    // hidden default to remove xattrs; this presently occurs before we use them, but it may need to be earlier at some point
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
+        NSArray *xattrs = [[NSFileManager defaultManager] extendedAttributeNamesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
+        if (xattrs) {
+            NSEnumerator *xattrE = [xattrs objectEnumerator];
+            NSString *xattrName;
+            while (xattrName = [xattrE nextObject]) {
+                [[NSFileManager defaultManager] removeExtendedAttribute:xattrName atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+            }
+        }
+    }    
+    
     [aController setShouldCloseDocument:YES];
     
     [self setupToolbar];
@@ -466,22 +479,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
             
     [documentWindow makeFirstResponder:tableView];	
-    
-#warning move to an earlier funnel point?
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
-        NSArray *xattrs = [[NSFileManager defaultManager] extendedAttributeNamesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
-        if (xattrs) {
-            NSEnumerator *xattrE = [xattrs objectEnumerator];
-            NSString *xattrName;
-            while (xattrName = [xattrE nextObject]) {
-                [[NSFileManager defaultManager] removeExtendedAttribute:xattrName atPath:[[self fileURL] path] traverseLink:YES error:NULL];
-            }
-        }
-    }
-    
+        
     [tableView removeAllTableColumns];
     
-#warning is this always late enough for xattrs?
 	[self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self sortPubsByDefaultColumn];
 }
@@ -948,22 +948,23 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
     success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:YES updateFilenames:NO];
     
-    if (NO == success) {
+    // see if this is our error or Apple's
+    if (NO == success && [nsError isLocalError]) {
         
         // get offending BibItem if possible
-        BibItem *theItem = [[nsError userInfo] valueForKey:@"item"];
+        BibItem *theItem = [nsError valueForKey:BDSKUnderlyingItemErrorKey];
         if (theItem)
             [self highlightBib:theItem];
         
-        NSString *errTitle = NSAutosaveOperation == currentSaveOperationType ? NSLocalizedString(@"Unable to Autosave File", @"") : NSLocalizedString(@"Unable to Save File", @"");
+        NSString *errTitle = NSAutosaveOperation == currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"") : NSLocalizedString(@"Unable to save file", @"");
         
         // @@ do this in fileWrapperOfType:forPublications:error:?  should just use error localizedDescription
-        NSString *errMsg = [[nsError userInfo] valueForKey:NSLocalizedRecoverySuggestionErrorKey];
+        NSString *errMsg = [nsError valueForKey:NSLocalizedRecoverySuggestionErrorKey];
         if (nil == errMsg)
             errMsg = NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"");
         
-        OFError(&nsError, "BDSKSaveError", NSLocalizedDescriptionKey, errTitle, NSLocalizedRecoverySuggestionErrorKey, errMsg, nil);
-        
+        nsError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:errTitle underlyingError:nsError];
+        [nsError setValue:errMsg forKey:NSLocalizedRecoverySuggestionErrorKey];        
     }
     // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
     else if (currentSaveOperationType != NSAutosaveOperation)
@@ -1000,7 +1001,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([selectedTemplate templateFormat] & BDSKRTFDTemplateFormat){
         fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
         if(fileWrapper == nil){
-            // @@ report error?
+            if (outError) 
+                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"")];
         }
     }else{
         NSError *error = nil;
@@ -1056,32 +1058,35 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         }
     }
     
+    // grab the underlying error; if we recognize it, pass it up as a kBDSKDocumentSaveError
     if(nil == data && outError){
         // see if this was an encoding failure; if so, we can suggest how to fix it
         // NSLocalizedRecoverySuggestion is appropriate for display as error message in alert
-        if([[error userInfo] valueForKey:NSStringEncodingErrorKey]){
+        if(kBDSKDocumentEncodingSaveError == [error code]){
             // encoding conversion failure (string to data)
-            NSStringEncoding usedEncoding = [[[error userInfo] valueForKey:NSStringEncodingErrorKey] intValue];
+            NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] intValue];
             NSString *usedName = [NSString localizedNameOfStringEncoding:usedEncoding];
             NSString *UTF8Name = [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding];
-            NSString *suggestion;
+            
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"") underlyingError:error];
             
             // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
             if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
-                suggestion = [NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @""), usedName, UTF8Name];
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @""), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
             } else if (NSUTF8StringEncoding != usedEncoding){
                 // could suggest disabling TeX conversion, but the error might be from something out of the range of what we try to convert, so combining TeXify && UTF-8 would work
-                suggestion = [NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should save using an encoding such as %@.", @""), usedName, UTF8Name];
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should save using an encoding such as %@.", @""), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
             } else {
                 // if UTF-8 fails, you're hosed...
-                suggestion = [NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Please report this error to BibDesk's developers.", @""), UTF8Name];
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Please report this error to BibDesk's developers.", @""), UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
             }
-            
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), NSLocalizedRecoverySuggestionErrorKey, suggestion, nil);
-            
-        } else if([[error userInfo] valueForKey:@"item"]) {
+                        
+        } else if(kBDSKDocumentTeXifySaveError == [error code]) {
+            NSError *underlyingError = [[error copy] autorelease];
             // TeXification error; this has a specific item
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Save Document", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:@"%@  %@", [error localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")], @"item", [[error userInfo] valueForKey:@"item"], nil);
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"") underlyingError:underlyingError];
+            [error setValue:[underlyingError valueForKey:BDSKUnderlyingItemErrorKey] forKey:BDSKUnderlyingItemErrorKey];
+            [error setValue:[NSString stringWithFormat:@"%@  %@", [error localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         *outError = error;
     }
@@ -1222,17 +1227,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // We used to throw the exception back up, but that caused major grief with the NSErrors.  Since we had multiple call levels adding a local NSError, when we jumped to the handler in writeToURL:ofType:error:, it had an uninitialized error (since dataOfType:error: never returned).  This would occasionally cause a crash when saving or autosaving, since NSDocumentController would apparently try to use the error.  It's much safer just to catch and discard the exception here, then propagate the NSError back up and return nil.
         
         if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKEncodingConversionException]){
+            // encoding conversion failed
             NSLog(@"Unable to save file with encoding %@", encodingName);
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName]];
+            [error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+            
         } else if([exception isKindOfClass:[NSException class]] && [[exception name] isEqual:BDSKTeXifyException]){
-            if ([[exception userInfo] valueForKey:@"item"])
-                OFError(&error, "BDSKTeXifyError", NSLocalizedDescriptionKey, [exception reason], @"item", [[exception userInfo] valueForKey:@"item"], nil);
-            else
-                OFError(&error, "BDSKTeXifyError", NSLocalizedDescriptionKey, [exception reason], nil);
+            // TeXification failed
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentTeXifySaveError localizedDescription:[exception reason]];
+            [error setValue:[[exception userInfo] valueForKey:@"item"] forKey:BDSKUnderlyingItemErrorKey];
+            
         } else {
             // some unknown exception
             NSLog(@"Exception %@ in %@", exception, NSStringFromSelector(_cmd));
-            OFError(&error, "BDSKSaveError", NSLocalizedDescriptionKey, [exception description], nil);
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:[exception description]];
         }
         outputData = nil;
     }
