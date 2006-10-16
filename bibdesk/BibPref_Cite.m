@@ -55,6 +55,8 @@
 	BOOL prependTilde = [defaults boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
+    [defaultDragCopyPopup selectItemAtIndex:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:0] intValue]];
+    [alternateDragCopyPopup selectItemAtIndex:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:1] intValue]];
     [separateCiteCheckButton setState:[defaults boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
     [prependTildeCheckButton setState:[defaults boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
@@ -70,6 +72,20 @@
 		[citeBehaviorLine setFrame:frame];
 	}
 	[controlBox setNeedsDisplay:YES];
+}
+
+- (IBAction)changeDefaultDragCopyFormat:(id)sender{
+    NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
+    [dragCopyTypes replaceObjectAtIndex:0 withObject:[NSNumber numberWithInt:[sender indexOfSelectedItem]]];
+    [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
+    [dragCopyTypes release];
+}
+
+- (IBAction)changeAlternateDragCopyFormat:(id)sender{
+    NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
+    [dragCopyTypes replaceObjectAtIndex:1 withObject:[NSNumber numberWithInt:[sender indexOfSelectedItem]]];
+    [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
+    [dragCopyTypes release];
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
@@ -105,35 +121,6 @@
     if(error != nil)
         NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
     return NO;
-}
-
-#pragma mark TableView datasource
-
-- (int)numberOfRowsInTableView:(NSTableView *)tv{
-    return 4;
-}
-
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSString *colID = [tableColumn identifier];
-    if ([colID isEqualToString:@"modifier"]) {
-        switch(row){
-            case 0: return NSLocalizedString(@"None", @"");
-            case 1: return [NSString commandKeyIndicatorString];
-            case 2: return [NSString alternateKeyIndicatorString];
-            case 3: return [NSString stringWithFormat:@"%@%@", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString]];
-        } 
-    } else {
-        NSArray *dragCopyTypes = [defaults arrayForKey:BDSKDragCopyTypesKey];
-        return [dragCopyTypes objectAtIndex:row];
-    }
-    return nil;
-}
-
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
-    [dragCopyTypes replaceObjectAtIndex:row withObject:object];
-    [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
-    [dragCopyTypes release];
 }
 
 @end

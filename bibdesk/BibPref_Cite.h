@@ -39,6 +39,9 @@
 
 @interface BibPref_Cite : OAPreferenceClient
 {
+    IBOutlet NSPopUpButton* defaultDragCopyPopup;
+    IBOutlet NSPopUpButton* alternateDragCopyPopup;
+    
     IBOutlet NSTextField* citeBehaviorLine; /*! for feedback */
     IBOutlet NSTextField* citeStringField; /*! for user input */
     IBOutlet NSButton* separateCiteCheckButton;
@@ -46,6 +49,8 @@
 	IBOutlet NSMatrix* citeBracketRadio;
 }
 
+- (IBAction)changeDefaultDragCopyFormat:(id)sender;
+- (IBAction)changeAlternateDragCopyFormat:(id)sender;
 - (IBAction)changeSeparateCite:(id)sender;
 - (IBAction)changePrependTilde:(id)sender;
 - (IBAction)citeStringFieldChanged:(id)sender;

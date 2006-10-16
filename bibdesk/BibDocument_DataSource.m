@@ -394,18 +394,11 @@
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-    int modifierFlags = [[NSApp currentEvent] modifierFlags];
-    int index = 0;
-	int dragCopyType;
+    int index = (GetCurrentKeyModifiers() & optionKey) ? 1 : 0;
+	int dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
     BOOL yn = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
-    
-    if(modifierFlags & NSCommandKeyMask)
-        index |= 1;
-    if(modifierFlags & NSAlternateKeyMask)
-        index |= 2;
-    dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
     
 	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
@@ -729,16 +722,11 @@
     
 	} else {
 		OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-        int modifierFlags = [[NSApp currentEvent] modifierFlags];
-        int index = 0;
+        int index = (GetCurrentKeyModifiers() & optionKey) ? 1 : 0;
 		NSMutableString *s = [NSMutableString string];
 		BibItem *firstItem = [promisedDraggedItems objectAtIndex:0];
 		BOOL sep;
         
-        if(modifierFlags & NSCommandKeyMask)
-            index |= 1;
-        if(modifierFlags & NSAlternateKeyMask)
-            index |= 2;
         dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
 		
 		// don't depend on this being non-zero; this method gets called for drags where promisedDraggedItems is nil
