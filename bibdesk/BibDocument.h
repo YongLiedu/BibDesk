@@ -446,6 +446,15 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion \253discussion\273
     
 */
+
+/*!
+    @method     columnsMenuNeedsUpdate:
+    @abstract   Sent to the front document by the menu's delegate when the delegate receives menuNeedsUpdate:.
+    @discussion (comprehensive description)
+    @param      columnsMenu (description)
+*/
+- (void)columnsMenuNeedsUpdate:(NSMenu *)columnsMenu;
+
 - (IBAction)columnsMenuAddTableColumn:(id)sender;
 
 /*!
@@ -459,6 +468,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)handleNameDisplayChangedNotification:(NSNotification *)notification;
 - (void)handleFlagsChangedNotification:(NSNotification *)notification;
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
+- (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
 
 // notifications observed on behalf of owned BibItems for efficiency
 - (void)handleTypeInfoDidChangeNotification:(NSNotification *)notification;
