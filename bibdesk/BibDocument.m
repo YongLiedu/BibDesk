@@ -482,7 +482,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     [tableView removeAllTableColumns];
     
-	[self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
+	[self setupDefaultTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self sortPubsByDefaultColumn];
 }
 
@@ -551,7 +551,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     isDocumentClosed = YES;
     [customCiteDrawer close];
     [self saveSortOrder];
-    [self saveWindowSetupInExtendedAttributes];
+    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL]];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
@@ -571,9 +571,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return [self fileURL] ? [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" atPath:[[self fileURL] path] traverseLink:YES error:NULL] : nil;
 }
 
-- (void)saveWindowSetupInExtendedAttributes {
+- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL {
     
-    NSString *path = [[self fileURL] path];
+    NSString *path = [anURL path];
     if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
         
         // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
@@ -897,6 +897,11 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
                 [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
             }
         }
+        
+        // save our window setup if we export to BibTeX or RIS
+        if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
+            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL];
+        
     }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
         [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
                                                      forPublications:publications
@@ -920,6 +925,9 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [pubsInfo release];
         [[NSApp delegate] rebuildMetadataCache:infoDict];
         [infoDict release];
+        
+        // save window setup to extended attributes, so it is set also if we use saveAs
+        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL];
     }
     
     return YES;
@@ -2302,11 +2310,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return dict;
 }
 
-//note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
-- (void)setupTableColumns{
+- (void)setupDefaultTableColumns{
     [self setupTableColumnsWithIdentifiers:[self defaultTableColumnIdentifiers]];
 }
 
+//note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers {
     
     NSEnumerator *shownColNamesE = [identifiers objectEnumerator];

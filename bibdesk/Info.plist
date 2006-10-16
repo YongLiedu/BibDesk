@@ -764,6 +764,10 @@
 					<false/>
 					<key>BDSKShouldWritePDFMetadata</key>
 					<false/>
+					<key>BDSKUpdateCheckIntervalKey</key>
+					<integer>1</integer>
+					<key>BDSKUpdateCheckLastDateKey</key>
+					<string></string>
 					<key>BDSKWarnOnCiteKeyChangeKey</key>
 					<true/>
 					<key>BDSKWarnOnDelete</key>
@@ -774,10 +778,6 @@
 					<true/>
 					<key>BibEditor window autosave name</key>
 					<string></string>
-					<key>BDSKUpdateCheckIntervalKey</key>
-                    <integer>1</integer>
-                    <key>BDSKUpdateCheckLastDateKey</key>
-                    <string></string>
 					<key>Check spelling continuously while editing</key>
 					<false/>
 					<key>Column Widths by Name</key>

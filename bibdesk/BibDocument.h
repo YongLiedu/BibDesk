@@ -219,7 +219,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)dealloc;
 
-- (void)saveWindowSetupInExtendedAttributes;
+- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL;
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
 
 /*!
@@ -414,13 +414,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)updateUI;
 
-/*!
-    @method setupTableColumns
-    @abstract \253Abstract\273
-    @discussion \253discussion\273
-    
-*/
-- (void)setupTableColumns;
+- (void)setupDefaultTableColumns;
 
 - (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
 
