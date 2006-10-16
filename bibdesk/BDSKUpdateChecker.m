@@ -249,6 +249,7 @@ static id sharedInstance = nil;
             if ([NSString isEmptyString:[attrString string]] == NO)
                 NSLog(@"retrieved HTML data instead of property list: \n\"%@\"", [attrString string]);
             [attrString release];
+            success = NO;
         } else {
             success = YES;
         }
