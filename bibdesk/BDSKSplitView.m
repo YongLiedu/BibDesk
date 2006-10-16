@@ -140,3 +140,107 @@
 }
 
 @end
+
+
+
+@interface NSSplitView (BDSKExtensions)
+
+- (float)horizontalFraction;
+- (void)setHorizontalFraction:(float)newFract;
+
+- (float)verticalFraction;
+- (void)setVerticalFraction:(float)newFract;
+
+@end
+
+@implementation NSSplitView (BDSKExtensions)
+
+// Omni assumes that splitviews have a horizontal divider, but we want fraction to be correct for vertical dividers as well.  I think our category should always override Omni's category implementation of -fraction and -setFraction:, but I'm not sure if that's guaranteed.
+
+#warning ensure that our category overrides
+- (float)fraction;
+{
+    return [self isVertical] ? [self verticalFraction] : [self horizontalFraction];
+}
+
+- (void)setFraction:(float)newFract;
+{
+    if ([self isVertical])
+        [self setVerticalFraction:newFract];
+    else
+        [self setHorizontalFraction:newFract];
+}
+
+- (float)horizontalFraction;
+{
+    NSRect                      topFrame, bottomFrame;
+    
+    if ([[self subviews] count] < 2)
+        return 0.0;
+    
+    topFrame = [[[self subviews] objectAtIndex:0] frame];
+    bottomFrame = [[[self subviews] objectAtIndex:1] frame];
+    return bottomFrame.size.height
+        / (bottomFrame.size.height + topFrame.size.height);
+}
+
+- (void)setHorizontalFraction:(float)newFract;
+{
+    NSRect                      topFrame, bottomFrame;
+    NSView                       *topSubView;
+    NSView                       *bottomSubView;
+    float                       totalHeight;
+    
+    if ([[self subviews] count] < 2)
+        return;
+    
+    topSubView = [[self subviews] objectAtIndex:0];
+    bottomSubView = [[self subviews] objectAtIndex:1];
+    topFrame = [topSubView frame];
+    bottomFrame = [bottomSubView frame];
+    totalHeight = bottomFrame.size.height + topFrame.size.height;
+    bottomFrame.size.height = newFract * totalHeight;
+    topFrame.size.height = totalHeight - bottomFrame.size.height;
+    [topSubView setFrame:topFrame];
+    [bottomSubView setFrame:bottomFrame];
+    [self adjustSubviews];
+    [self setNeedsDisplay: YES];
+}
+
+- (float)verticalFraction;
+{
+    NSRect                      leftFrame, rightFrame;
+    
+    if ([[self subviews] count] < 2)
+        return 0.0;
+    
+    leftFrame = [[[self subviews] objectAtIndex:0] frame];
+    rightFrame = [[[self subviews] objectAtIndex:1] frame];
+    return NSWidth(rightFrame)
+        / (NSWidth(rightFrame) + NSWidth(leftFrame));
+}
+
+- (void)setVerticalFraction:(float)newFract;
+{
+    NSRect                      leftFrame, rightFrame;
+    NSView                       *leftSubView;
+    NSView                       *rightSubView;
+    float                       totalHeight;
+    
+    if ([[self subviews] count] < 2)
+        return;
+    
+    leftSubView = [[self subviews] objectAtIndex:0];
+    rightSubView = [[self subviews] objectAtIndex:1];
+    leftFrame = [leftSubView frame];
+    rightFrame = [rightSubView frame];
+    totalHeight = NSWidth(rightFrame) + NSHeight(leftFrame);
+    rightFrame.size.width = newFract * totalHeight;
+    leftFrame.size.width = totalHeight - NSWidth(rightFrame);
+    [leftSubView setFrame:leftFrame];
+    [rightSubView setFrame:rightFrame];
+    [self adjustSubviews];
+    [self setNeedsDisplay: YES];
+}
+
+@end
