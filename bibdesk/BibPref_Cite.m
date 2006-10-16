@@ -55,7 +55,6 @@
 	BOOL prependTilde = [defaults boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
-    [dragCopyRadio selectCellWithTag:[defaults integerForKey:BDSKDragCopyKey]];
     [separateCiteCheckButton setState:[defaults boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
     [prependTildeCheckButton setState:[defaults boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
@@ -71,10 +70,6 @@
 		[citeBehaviorLine setFrame:frame];
 	}
 	[controlBox setNeedsDisplay:YES];
-}
-
-- (IBAction)changeCopyBehavior:(id)sender{
-    [defaults setInteger:[[sender selectedCell] tag] forKey:BDSKDragCopyKey];
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
@@ -112,7 +107,38 @@
     return NO;
 }
 
+#pragma mark TableView datasource
+
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
+    return 4;
+}
+
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    NSString *colID = [tableColumn identifier];
+    if ([colID isEqualToString:@"modifier"]) {
+        switch(row){
+            case 0: return NSLocalizedString(@"None", @"");
+            case 1: return [NSString commandKeyIndicatorString];
+            case 2: return [NSString alternateKeyIndicatorString];
+            case 3: return [NSString stringWithFormat:@"%@%@", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString]];
+        } 
+    } else {
+        NSArray *dragCopyTypes = [defaults arrayForKey:BDSKDragCopyTypesKey];
+        return [dragCopyTypes objectAtIndex:row];
+    }
+    return nil;
+}
+
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
+    [dragCopyTypes replaceObjectAtIndex:row withObject:object];
+    [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
+    [dragCopyTypes release];
+}
+
 @end
+
+#pragma mark -
 
 @implementation BDSKDragCopyCiteKeyFormatter
 

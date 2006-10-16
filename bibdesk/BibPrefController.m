@@ -95,7 +95,7 @@ NSString *BDSKBibTeXBinPathKey = @"BibTeX Binary Path";
 NSString *BDSKBTStyleKey = @"BibTeX Style";
 NSString *BDSKUsesTeXKey = @"Uses TeX";
 
-NSString *BDSKDragCopyKey = @"Drag and Copy";
+NSString *BDSKDragCopyTypesKey = @"BDSKDragCopyTypesKey";
 NSString *BDSKEditOnPasteKey = @"Edit on Paste";
 NSString *BDSKSeparateCiteKey = @"Separate Cite";
 NSString *BDSKCitePrependTildeKey = @"Cite Prepend Tilde";

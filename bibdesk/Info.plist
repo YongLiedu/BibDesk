@@ -412,6 +412,13 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKDragCopyTypesKey</key>
+					<array>
+                        <integer>1</integer>
+                        <integer>0</integer>
+                        <integer>2</integer>
+                        <integer>3</integer>
+                    </array>
 					<key>Citation End Bracket</key>
 					<string>}</string>
 					<key>Citation Start Bracket</key>
@@ -428,8 +435,6 @@
 						<string>citeyear</string>
 						<string>citeauthor</string>
 					</array>
-					<key>Drag and Copy</key>
-					<integer>1</integer>
 					<key>Edit on Paste</key>
 					<false/>
 					<key>Separate Cite</key>

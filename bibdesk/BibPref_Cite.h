@@ -39,7 +39,6 @@
 
 @interface BibPref_Cite : OAPreferenceClient
 {
-    IBOutlet NSMatrix *dragCopyRadio;
     IBOutlet NSTextField* citeBehaviorLine; /*! for feedback */
     IBOutlet NSTextField* citeStringField; /*! for user input */
     IBOutlet NSButton* separateCiteCheckButton;
@@ -47,7 +46,6 @@
 	IBOutlet NSMatrix* citeBracketRadio;
 }
 
-- (IBAction)changeCopyBehavior:(id)sender;
 - (IBAction)changeSeparateCite:(id)sender;
 - (IBAction)changePrependTilde:(id)sender;
 - (IBAction)citeStringFieldChanged:(id)sender;
