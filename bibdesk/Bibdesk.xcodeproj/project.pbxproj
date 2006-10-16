@@ -645,6 +645,8 @@
 		F9EF21D908B1575E00AAC9A9 /* ScrollArrowRight_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9EF21C908B1575D00AAC9A9 /* ScrollArrowRight_Pressed.tiff */; };
 		F9EF21DA08B1575F00AAC9A9 /* ScrollArrowRight.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */; };
 		F9F0C95009A95725004BBE5E /* PDFMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = F91F284609A661A700419960 /* PDFMetadata.h */; };
+		F9F5E20D0AE307C0007EBB31 /* NSError_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */; };
+		F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */; };
 		F9F78CD407D5320D004B68AF /* BDSKStringEncodingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
 		F9FD63DC0A61B87800F9871B /* NSMenu_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */; };
@@ -986,7 +988,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
@@ -1450,6 +1452,8 @@
 		F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ScrollArrowRight.tiff; path = Images/ScrollArrowRight.tiff; sourceTree = "<group>"; };
 		F9F0856808247BC800812F2A /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDesk Help/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = ../bibdeskinputmanager/BibDeskInputManager.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSError_BDSKExtensions.h; sourceTree = "<group>"; };
+		F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSError_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringEncodingManager.h; sourceTree = "<group>"; };
 		F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStringEncodingManager.m; sourceTree = "<group>"; };
 		F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSMenu_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1796,6 +1800,7 @@
 				F96F11950AAF4FD100815D06 /* NSData_BDSKExtensions.m */,
 				F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */,
 				CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */,
+				F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */,
 				F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */,
 				F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */,
 				CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */,
@@ -2226,6 +2231,7 @@
 				F96F11940AAF4FD100815D06 /* NSData_BDSKExtensions.h */,
 				F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */,
 				CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */,
+				F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */,
 				F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */,
 				F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */,
 				CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */,
@@ -2558,6 +2564,7 @@
 				F9EA8FCA0ADE01F9005EFBE4 /* BDSKUpdateChecker.h in Headers */,
 				F9A2245C0AE02C8E0046CA3D /* BDSKSearch.h in Headers */,
 				CE5C29CD0AE14FEC00C3E6B5 /* BibDocument_Actions.h in Headers */,
+				F9F5E20D0AE307C0007EBB31 /* NSError_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3318,6 +3325,7 @@
 				F9EA8FCB0ADE01F9005EFBE4 /* BDSKUpdateChecker.m in Sources */,
 				F9A2245D0AE02C8E0046CA3D /* BDSKSearch.m in Sources */,
 				CE5C29CE0AE14FEC00C3E6B5 /* BibDocument_Actions.m in Sources */,
+				F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
