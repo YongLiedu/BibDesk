@@ -44,6 +44,16 @@
 #define END_JOIN_WIDTH 3.0f
 #define END_JOIN_HEIGHT 20.0f
 
+@interface BDSKSplitView (Private)
+
+- (float)horizontalFraction;
+- (void)setHorizontalFraction:(float)newFract;
+
+- (float)verticalFraction;
+- (void)setVerticalFraction:(float)newFract;
+
+@end
+
 @implementation BDSKSplitView
 
 + (CIColor *)startColor{
@@ -139,25 +149,8 @@
     drawEnd = flag;
 }
 
-@end
-
-
-
-@interface NSSplitView (BDSKExtensions)
-
-- (float)horizontalFraction;
-- (void)setHorizontalFraction:(float)newFract;
-
-- (float)verticalFraction;
-- (void)setVerticalFraction:(float)newFract;
-
-@end
-
-@implementation NSSplitView (BDSKExtensions)
-
-// Omni assumes that splitviews have a horizontal divider, but we want fraction to be correct for vertical dividers as well.  I think our category should always override Omni's category implementation of -fraction and -setFraction:, but I'm not sure if that's guaranteed.
-
-#warning ensure that our category overrides
+// Omni assumes that splitviews have a horizontal divider, but we want fraction to be correct for vertical dividers as well.  
+// Overriding in an NSSplitView category gives a conflict with the implementation NSSplitView-OAExtensions, with unpredictable result
 - (float)fraction;
 {
     return [self isVertical] ? [self verticalFraction] : [self horizontalFraction];
@@ -171,25 +164,29 @@
         [self setHorizontalFraction:newFract];
 }
 
+@end
+
+
+@implementation BDSKSplitView (Private)
+
 - (float)horizontalFraction;
 {
-    NSRect                      topFrame, bottomFrame;
+    NSRect topFrame, bottomFrame;
     
     if ([[self subviews] count] < 2)
         return 0.0;
     
     topFrame = [[[self subviews] objectAtIndex:0] frame];
     bottomFrame = [[[self subviews] objectAtIndex:1] frame];
-    return bottomFrame.size.height
-        / (bottomFrame.size.height + topFrame.size.height);
+    return NSHeight(bottomFrame) / (NSHeight(bottomFrame) + NSHeight(topFrame));
 }
 
 - (void)setHorizontalFraction:(float)newFract;
 {
-    NSRect                      topFrame, bottomFrame;
-    NSView                       *topSubView;
-    NSView                       *bottomSubView;
-    float                       totalHeight;
+    NSRect topFrame, bottomFrame;
+    NSView *topSubView;
+    NSView *bottomSubView;
+    float totalHeight;
     
     if ([[self subviews] count] < 2)
         return;
@@ -198,9 +195,9 @@
     bottomSubView = [[self subviews] objectAtIndex:1];
     topFrame = [topSubView frame];
     bottomFrame = [bottomSubView frame];
-    totalHeight = bottomFrame.size.height + topFrame.size.height;
+    totalHeight = NSHeight(bottomFrame) + NSHeight(topFrame);
     bottomFrame.size.height = newFract * totalHeight;
-    topFrame.size.height = totalHeight - bottomFrame.size.height;
+    topFrame.size.height = totalHeight - NSHeight(bottomFrame);
     [topSubView setFrame:topFrame];
     [bottomSubView setFrame:bottomFrame];
     [self adjustSubviews];
@@ -209,23 +206,22 @@
 
 - (float)verticalFraction;
 {
-    NSRect                      leftFrame, rightFrame;
+    NSRect leftFrame, rightFrame;
     
     if ([[self subviews] count] < 2)
         return 0.0;
     
     leftFrame = [[[self subviews] objectAtIndex:0] frame];
     rightFrame = [[[self subviews] objectAtIndex:1] frame];
-    return NSWidth(rightFrame)
-        / (NSWidth(rightFrame) + NSWidth(leftFrame));
+    return NSWidth(rightFrame) / (NSWidth(rightFrame) + NSWidth(leftFrame));
 }
 
 - (void)setVerticalFraction:(float)newFract;
 {
-    NSRect                      leftFrame, rightFrame;
-    NSView                       *leftSubView;
-    NSView                       *rightSubView;
-    float                       totalHeight;
+    NSRect leftFrame, rightFrame;
+    NSView *leftSubView;
+    NSView *rightSubView;
+    float totalWidth;
     
     if ([[self subviews] count] < 2)
         return;
@@ -234,9 +230,9 @@
     rightSubView = [[self subviews] objectAtIndex:1];
     leftFrame = [leftSubView frame];
     rightFrame = [rightSubView frame];
-    totalHeight = NSWidth(rightFrame) + NSHeight(leftFrame);
-    rightFrame.size.width = newFract * totalHeight;
-    leftFrame.size.width = totalHeight - NSWidth(rightFrame);
+    totalWidth = NSWidth(rightFrame) + NSWidth(leftFrame);
+    rightFrame.size.width = newFract * totalWidth;
+    leftFrame.size.width = totalWidth - NSWidth(rightFrame);
     [leftSubView setFrame:leftFrame];
     [rightSubView setFrame:rightFrame];
     [self adjustSubviews];
