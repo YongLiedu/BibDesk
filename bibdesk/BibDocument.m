@@ -120,6 +120,11 @@ NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x5745
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
+// private keys used for storing window information in xattrs
+static NSString *BDSKMainWindowExtendedAttributeKey = @"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes";
+static NSString *BDSKGroupSplitViewFractionKey = @"BDSKGroupSplitViewFractionKey";
+static NSString *BDSKMainTableSplitViewFractionKey = @"BDSKMainTableSplitViewFractionKey";
+static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
@@ -318,10 +323,24 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [groupSplitView setDrawEnd:YES];
     [splitView setDrawEnd:YES];
-
+    
+    // set autosave names first
 	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
     [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
     
+    // set previous splitview frames
+    // @@ can setting window frame in windowControllerDidLoadNib: cause problems here?
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    if (nil != xattrDefaults) {
+        float fraction;
+        fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
+        if (fraction > 0)
+            [groupSplitView setFraction:fraction];
+        fraction = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
+        if (fraction > 0)
+            [splitView setFraction:fraction];
+    }
+
 	[statusBar retain]; // we need to retain, as we might remove it from the window
 	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowStatusBarKey]) {
 		[self toggleStatusBar:nil];
@@ -456,7 +475,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self setupToolbar];
     
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    NSRect frameRect = [xattrDefaults rectForKey:@"BDSKDocumentWindowFrame" defaultValue:NSZeroRect];
+    NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
     
     // we should only cascade windows if we have multiple documents open; bug #1299305
     // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
@@ -568,7 +587,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 // returns nil if no attributes set
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
-    return [self fileURL] ? [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" atPath:[[self fileURL] path] traverseLink:YES error:NULL] : nil;
+    return [self fileURL] ? [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL] : nil;
 }
 
 - (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL {
@@ -584,11 +603,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
         [dictionary setBoolValue:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
-        [dictionary setRectValue:[documentWindow frame] forKey:@"BDSKDocumentWindowFrame"];
-        
+        [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
+        [dictionary setFloatValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
+        [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
+
         NSError *error;
         
-        if ([[NSFileManager defaultManager] setExtendedAttributeNamed:@"net.sourceforge.bibdesk.BDSKDocumentWindowAttributes" 
+        if ([[NSFileManager defaultManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
                                                   toPropertyListValue:dictionary
                                                                atPath:path options:nil error:&error] == NO) {
             NSLog(@"%@: %@", self, error);
