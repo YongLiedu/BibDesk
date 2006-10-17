@@ -51,6 +51,30 @@ NSString *BDSKTemplateAccessoryString = @"Accessory File";
 NSString *BDSKTemplateMainPageString = @"Main Page";
 NSString *BDSKTemplateDefaultItemString = @"Default Item";
 
+static inline NSString *itemTemplateSubstring(NSString *templateString){
+    int start, end, length = [templateString length];
+    NSRange range = [templateString rangeOfString:@"<$publications>"];
+    start = NSMaxRange(range);
+    if (start != NSNotFound) {
+        range = [templateString rangeOfTrailingEmptyLineInRange:NSMakeRange(start, length - start)];
+        if (range.location != NSNotFound)
+            start = NSMaxRange(range);
+        range = [templateString rangeOfString:@"</$publications>" options:0 range:NSMakeRange(start, length - start)];
+        end = range.location;
+        if (end != NSNotFound) {
+            range = [templateString rangeOfString:@"<?$publications>" options:0 range:NSMakeRange(start, end - start)];
+            if (range.location != NSNotFound)
+                end = range.location;
+            range = [templateString rangeOfLeadingEmptyLineInRange:NSMakeRange(start, end - start)];
+            if (range.location != NSNotFound)
+                end = range.location;
+        } else
+            return nil;
+    } else
+        return nil;
+    return [templateString substringWithRange:NSMakeRange(start, end - start)];
+}
+
 @implementation BDSKTemplate
 
 #pragma mark Class methods
@@ -338,7 +362,13 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     // return default template string if no type or no type-specific template
     if(nil == theURL)
         theURL = [self defaultItemTemplateURL];
-    return [NSString stringWithContentsOfURL:theURL];
+    if(nil != theURL)
+        return [NSString stringWithContentsOfURL:theURL];
+    if([type isEqualToString:BDSKTemplateMainPageString] == NO)
+        return nil;
+    // get the item template from the main page template
+    theURL = [self mainPageTemplateURL];
+    return itemTemplateSubstring([NSString stringWithContentsOfURL:theURL]);
 }
 
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
