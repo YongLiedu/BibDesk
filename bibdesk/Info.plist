@@ -552,8 +552,6 @@
 						<string>Local-Url</string>
 						<string>Url</string>
 					</array>
-					<key>Field to use as Description in RSS</key>
-					<string>Rss-Description</string>
 					<key>Local File Fields</key>
 					<array>
 						<string>Local-Url</string>
