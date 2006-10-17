@@ -83,7 +83,9 @@
 	while (group = [groupEnum nextObject]) {
 		if ([group isCategory]){
 			op = [newBI addToGroup:group handleInherited:BDSKOperationSet];
-            NSAssert1(BDSKOperationSet == op, @"Unable to add to group %@", group);
+            NSAssert1(BDSKOperationSet == op || BDSKOperationAppend == op, @"Unable to add to group %@", group);
+        } else if ([group isStatic]) {
+            [(BDSKStaticGroup *)group addPublication:newBI];
         }
     }
 	
