@@ -78,7 +78,9 @@
     [emailTemplatePopup removeAllItems];
     [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Default BibTeX Format")];
     [emailTemplatePopup addItemsWithTitles:styles];
-    if ([styles containsObject:currentStyle]) {
+    if ([NSString isEmptyString:currentStyle]) {
+        [emailTemplatePopup selectItemAtIndex:0];
+    } else if ([styles containsObject:currentStyle]) {
         [emailTemplatePopup selectItemWithTitle:currentStyle];
     } else {
         [emailTemplatePopup selectItemAtIndex:0];
