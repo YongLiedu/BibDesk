@@ -141,6 +141,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	IBOutlet NSMenu * URLMenu;
 	IBOutlet NSMenu * groupMenu;
 	IBOutlet NSMenu * actionMenu;
+	IBOutlet NSMenu * columnsMenu;
 	IBOutlet BDSKImagePopUpButton * actionMenuButton;
 	IBOutlet BDSKImagePopUpButton * groupActionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
@@ -429,16 +430,21 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion \253discussion\273
     
 */
+- (IBAction)columnsMenuAddTableColumn:(id)sender;
 
 /*!
-    @method     columnsMenuNeedsUpdate:
-    @abstract   Sent to the front document by the menu's delegate when the delegate receives menuNeedsUpdate:.
+    @method     columnsMenu
+    @abstract   Returnes the columns menu
     @discussion (comprehensive description)
-    @param      columnsMenu (description)
 */
-- (void)columnsMenuNeedsUpdate:(NSMenu *)columnsMenu;
+- (NSMenu *)columnsMenu;
 
-- (IBAction)columnsMenuAddTableColumn:(id)sender;
+/*!
+    @method     updateColumnsMenu
+    @abstract   Updates the columns menu
+    @discussion (comprehensive description)
+*/
+- (void)updateColumnsMenu;
 
 /*!
     @method     handlePreviewDisplayChangedNotification:

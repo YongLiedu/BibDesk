@@ -122,6 +122,7 @@
                 actionMenuFirstItem = NSMenuItem; 
                 addCustomCiteStringButton = NSButton; 
                 ccTableView = BDSKCustomCiteTableView; 
+                columnsMenu = NSMenu; 
                 ctxCopyBibTex = NSMenuItem; 
                 ctxCopyPDF = NSMenuItem; 
                 ctxCopyTex = NSMenuItem; 
@@ -154,7 +155,7 @@
             SUPERCLASS = NSDocument; 
         }, 
         {
-            ACTIONS = {"" = id; clearQuickSearch = id; selectCrossrefParentAction = id; }; 
+            ACTIONS = {clearQuickSearch = id; selectCrossrefParentAction = id; }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 

@@ -57,8 +57,9 @@
 	NSArray *requiredFieldsForCiteKey;
 	NSArray *requiredFieldsForLocalUrl;
     
-	IBOutlet NSMenuItem * columnsMenuItem;
-	IBOutlet NSMenuItem * groupSortMenuItem;
+	IBOutlet NSMenu *columnsMenu;
+	IBOutlet NSMenu *groupSortMenu;
+	IBOutlet NSMenu *copyAsTemplateMenu;
 
     NSLock *metadataCacheLock;
     volatile BOOL canWriteMetadata;
@@ -69,10 +70,7 @@
 - (NSString *)temporaryBaseDirectoryCreating:(BOOL)create;
 - (NSString *)temporaryFilePath:(NSString *)fileName createDirectory:(BOOL)create;
 
-/* Accessor methods for the columnsMenuItem */
-- (NSMenuItem*) columnsMenuItem;
-/* Accessor methods for the groupSortMenuItem */
-- (NSMenuItem*) groupSortMenuItem;
+- (NSMenu *)groupSortMenu;
 	
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;

@@ -509,8 +509,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 	[[cornerViewButton cell] setUsesItemFromMenu:NO];
 	[[cornerViewButton cell] setRefreshesMenu:NO];
     
-	[cornerViewButton setMenu:[[[NSApp delegate] columnsMenuItem] submenu]];
-    
 	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerCell setAction:@selector(changeGroupFieldAction:)];
 	[headerCell setTarget:self];
@@ -2408,6 +2406,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     }
     [tableView setHighlightedTableColumn: lastSelectedColumnForSort]; 
     [tableView tableViewFontChanged:nil];
+    
+    [self updateColumnsMenu];
 }
 
 - (NSMenu *)tableView:(NSTableView *)tv menuForTableHeaderColumn:(NSTableColumn *)tc{
@@ -2415,24 +2415,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		return nil;
 	// for now, just returns the same all the time.
 	// Could customize menu for details of selected item.
-	return [[[NSApp delegate] columnsMenuItem] submenu];
-}
-
-- (void)columnsMenuNeedsUpdate:(NSMenu *)columnsMenu {
-    
-    NSArray *shownColumns = [tableView tableColumnIdentifiers];
-    NSEnumerator *shownColNamesE = [shownColumns reverseObjectEnumerator];
-	NSString *colName;
-	NSMenuItem *item = nil;
-	
-	// next add all the shown columns in the order they are shown
-	while(colName = [shownColNamesE nextObject]){
-        item = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:colName 
-                                                                     action:@selector(columnsMenuSelectTableColumn:)
-                                                              keyEquivalent:@""] autorelease];
-		[item setState:NSOnState];
-		[columnsMenu insertItem:item atIndex:0];
-	}    
+	return columnsMenu;
 }
 
 - (IBAction)columnsMenuSelectTableColumn:(id)sender{
@@ -2554,6 +2537,30 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		return nil;
 	
 	return myMenu;
+}
+
+- (NSMenu *)columnsMenu{
+    return columnsMenu;
+}
+
+- (void)updateColumnsMenu{
+    
+    NSArray *shownColumns = [tableView tableColumnIdentifiers];
+    NSEnumerator *shownColNamesE = [shownColumns reverseObjectEnumerator];
+	NSString *colName;
+	NSMenuItem *item = nil;
+	
+    while([[columnsMenu itemAtIndex:0] isSeparatorItem] == NO)
+        [columnsMenu removeItemAtIndex:0];
+    
+	// next add all the shown columns in the order they are shown
+	while(colName = [shownColNamesE nextObject]){
+        item = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:colName 
+                                                                     action:@selector(columnsMenuSelectTableColumn:)
+                                                              keyEquivalent:@""] autorelease];
+		[item setState:NSOnState];
+		[columnsMenu insertItem:item atIndex:0];
+	}    
 }
 
 #pragma mark -

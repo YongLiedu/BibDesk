@@ -24,7 +24,7 @@
             }; 
             CLASS = BibAppController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {columnsMenuItem = NSMenuItem; groupSortMenuItem = NSMenuItem; }; 
+            OUTLETS = {columnsMenu = NSMenu; copyAsTemplateMenu = NSMenu; groupSortMenu = NSMenu; }; 
             SUPERCLASS = NSObject; 
         }, 
         {

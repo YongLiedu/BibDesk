@@ -773,7 +773,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)tableColumn onPopUp:(BOOL)flag{
 	if ([[tableColumn identifier] isEqualToString:@"group"] && flag == NO) {
-		return [[[NSApp delegate] groupSortMenuItem] submenu];
+		return [[NSApp delegate] groupSortMenu];
 	}
 	return nil;
 }

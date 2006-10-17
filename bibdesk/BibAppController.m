@@ -445,12 +445,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 #pragma mark Menu stuff
 
-- (NSMenuItem*) columnsMenuItem {
-	return columnsMenuItem;
-}
-
-- (NSMenuItem*) groupSortMenuItem {
-	return groupSortMenuItem;
+- (NSMenu *)groupSortMenu {
+	return groupSortMenu;
 }
 
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
@@ -504,21 +500,17 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 - (void)menuNeedsUpdate:(NSMenu *)menu {
     
-    if ([menu isEqual:[columnsMenuItem submenu]]) {
+    if ([menu isEqual:columnsMenu]) {
                 
-        // remove the added items (if any); the document will then fill it appropriately
-        while(![[menu itemAtIndex:0] isSeparatorItem]){
+        // remove all items; then fill it with the items from the current document
+        while([menu numberOfItems])
             [menu removeItemAtIndex:0];
-        }
         
-        id document = [[NSDocumentController sharedDocumentController] currentDocument];
-
-        if ([document respondsToSelector:@selector(columnsMenuNeedsUpdate:)])
-            [document performSelector:@selector(columnsMenuNeedsUpdate:) withObject:menu];
+        BibDocument *document = (BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument];
+        [menu addItemsFromMenu:[document columnsMenu]];
         
-    } else {
+    } else if ([menu isEqual:copyAsTemplateMenu]) {
     
-        // this should be a Copy As > Template menu
         NSArray *styles = [BDSKTemplate allStyleNames];
         int i = [menu numberOfItems];
         while (i--) {
