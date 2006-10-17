@@ -148,7 +148,6 @@ NSString *BDSKTriStateFieldsKey = @"Three state fields";
 NSString *BDSKOutputTemplateFileKey = @"Output Template File";
 
 NSString *BDSKCustomCiteStringsKey = @"Custom CiteStrings";
-NSString *BDSKRSSDescriptionFieldKey = @"Field to use as Description in RSS";
 NSString *BDSKExportTemplateStyleKey = @"BDSKExportTemplateStyleKey";
 
 NSString *BDSKPubTypeStringKey = @"Current Publication Type String";

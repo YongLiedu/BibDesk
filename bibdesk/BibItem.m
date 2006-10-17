@@ -1988,32 +1988,22 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *templateStyle = [BDSKTemplate defaultStyleNameForFileType:@"rss"];
     if (templateStyle) {
         BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
-        if ([template defaultItemTemplateURL]) {
-            [self setItemIndex:1];
-            return [self stringValueUsingTemplate:template];
-        }
+        NSString *string = [self stringValueUsingTemplate:template];
+        if (string)
+            return string;
     }
     
     // no item template found, so do some custom  stuff
     
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
 
-    NSString *descField = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKRSSDescriptionFieldKey];
-	NSString *description;
-
-    [s appendString:@"<item>\n"];
-    [s appendString:@"<title>\n"];
+    [s appendString:@"<item>\n<title>"];
 	[s appendString:[[self title] xmlString]];
-    [s appendString:@"</title>\n"];
-    [s appendString:@"<description>\n"];
-    if(description = [self valueOfField:descField]){
-        [s appendString:[description xmlString]];
-    }
-    [s appendString:@"</description>\n"];
-    [s appendString:@"<link>"];
+    [s appendString:@"</title>\n<description>"];
+    [s appendString:[[self valueOfField:BDSKRssDescriptionString] xmlString]];
+    [s appendString:@"</description>\n<link>"];
     [s appendString:[self valueOfField:BDSKUrlString]];
-    [s appendString:@"</link>\n"];
-    [s appendString:@"</item>\n"];
+    [s appendString:@"</link>\n</item>\n"];
     return s;
 }
 

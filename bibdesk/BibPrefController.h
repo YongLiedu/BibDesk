@@ -130,7 +130,6 @@ extern NSString *BDSKTypesForDuplicateBooktitleKey;
 extern NSString *BDSKWarnOnEditInheritedKey;
 extern NSString *BDSKAutoSortForCrossrefsKey;
 
-extern NSString *BDSKRSSDescriptionFieldKey;
 extern NSString *BDSKExportTemplateStyleKey;
 
 extern NSString *BDSKColumnWidthsKey;

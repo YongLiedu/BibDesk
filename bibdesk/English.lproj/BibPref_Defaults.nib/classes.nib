@@ -8,7 +8,6 @@
         {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             ACTIONS = {
-                RSSDescriptionFieldChanged = id; 
                 addDefaultField = id; 
                 addGlobalMacroFile = id; 
                 closeMacroFileWindow = id; 
@@ -21,8 +20,6 @@
             CLASS = "BibPref_Defaults"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                RSSDescriptionFieldMatrix = NSMatrix; 
-                RSSDescriptionFieldTextField = NSTextField; 
                 addDefaultFieldButton = NSButton; 
                 defaultFieldsTableView = NSTableView; 
                 delSelectedDefaultFieldButton = NSButton; 

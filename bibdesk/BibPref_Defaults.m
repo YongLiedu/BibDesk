@@ -133,23 +133,9 @@ enum {
 - (void)awakeFromNib{
     [super awakeFromNib];
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
-    [RSSDescriptionFieldTextField setFormatter:fieldNameFormatter];
     [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
     [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
-}
-
-- (void)updateButtons{
-	int row = [defaultFieldsTableView selectedRow];
-	if(row == -1){
-		[delSelectedDefaultFieldButton setEnabled:NO];
-		return;
-	}
-	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString] || [field isEqualToString:BDSKRatingString])
-		[delSelectedDefaultFieldButton setEnabled:NO];
-	else
-		[delSelectedDefaultFieldButton setEnabled:YES];
 }
 
 - (void)updatePrefs{
@@ -209,7 +195,7 @@ enum {
     [triStateFields release];
     
 	[defaultFieldsTableView reloadData];
-	[self updateButtons];
+	[self updateUI];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKCustomFieldsChangedNotification
 														object:self
@@ -217,16 +203,16 @@ enum {
 }
 
 - (void)updateUI{	
-	[self updateButtons];
-	
-    if ([[defaults objectForKey:BDSKRSSDescriptionFieldKey] isEqualToString:BDSKRssDescriptionString]) {
-        [RSSDescriptionFieldMatrix selectCellWithTag:0];
-        [RSSDescriptionFieldTextField setEnabled:NO];
-    }else{
-		[RSSDescriptionFieldTextField setStringValue:[defaults objectForKey:BDSKRSSDescriptionFieldKey]];
-        [RSSDescriptionFieldMatrix selectCellWithTag:1];
-        [RSSDescriptionFieldTextField setEnabled:YES];
-    }
+	int row = [defaultFieldsTableView selectedRow];
+	if(row == -1){
+		[delSelectedDefaultFieldButton setEnabled:NO];
+		return;
+	}
+	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
+	if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString] || [field isEqualToString:BDSKRatingString])
+		[delSelectedDefaultFieldButton setEnabled:NO];
+	else
+		[delSelectedDefaultFieldButton setEnabled:YES];
 }
 
 - (void)dealloc{
@@ -415,31 +401,6 @@ enum {
 - (IBAction)showTypeInfoEditor:(id)sender{
 	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self controlBox] window]];
 }
-
-- (IBAction)RSSDescriptionFieldChanged:(id)sender{
-    int selTag = [[sender selectedCell] tag];
-    switch(selTag){
-        case 0:
-            // use Rss-Description
-            [defaults setObject:BDSKRssDescriptionString
-                         forKey:BDSKRSSDescriptionFieldKey];
-			break;
-        case 1:
-            [defaults setObject:[[RSSDescriptionFieldTextField stringValue] capitalizedString]
-                         forKey:BDSKRSSDescriptionFieldKey];
-            break;
-    }
-    [self updateUI];
-}
-
-- (void)controlTextDidChange:(NSNotification *)aNotification{
-	if ([aNotification object] == RSSDescriptionFieldTextField) {
-		[defaults setObject:[[RSSDescriptionFieldTextField stringValue] capitalizedString]
-					 forKey:BDSKRSSDescriptionFieldKey];
-		[self updateUI];
-	}
-}
-
 
 #pragma mark BST macro methods
 
