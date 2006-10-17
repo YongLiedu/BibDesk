@@ -316,6 +316,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 {
     // since this private method is only called by PDFView, so super must implement it if it's called
     [super adjustScrollbars:obj];
+    [[self scrollView] setHasHorizontalScroller:YES];
     [self layoutScrollView];
 }
 
