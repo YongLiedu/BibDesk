@@ -2025,6 +2025,10 @@ automatically at startup.
 open the edit window for an item you have pasted or dragged in. 
 See @ref{Getting More Help} for information on the Error panel.
 
+@prefitem{Emailing Bibliography Information} This preference lets you choose the format that is 
+used to generate an emailed representation. You can either choose the default format, which is 
+a cleaned BibTeX string, or a custom text template.
+
 @prefitem{Warnings} These options allow you to activate or deactivate warnings before 
 deleting items, removing items from a group, renaming groups, or generating cite keys. 
 These warnings can also be deactivated from the warning dialog. 
@@ -2073,15 +2077,8 @@ to other applcations from BibDesk.
 
 @image{gfx/citationPrefs}
 
-@prefitem{Copying and Dragging} This controls what gets dropped (or copied) on a drag (or copy).
-
-@itemize
-@item BibTeX entry means the whole entry like: @code{@@misc@{key, author="" , @dots{} @}}.
-@item TeX Citation means: @code{\cite@{cite-key@}}
-@item PDF Description means the contents of the PDF Preview pane as a page of PDF.
-@item RTF Description means the contents of the RTF Preview pane.
-@item LaTeX Description means a LaTeX representation of the items.
-@end itemize
+@prefitem{Copying and Dragging} This controls what gets dropped (or copied) on a drag (or copy). 
+The alternate default format is used when the Option key is held down during the drag (or copy). 
 
 @prefitem{Cite Command Style} This lets you define the default cite command style that is used when dragging TeX cite commands from the publication table.
 
@@ -2363,9 +2360,7 @@ their original content by clicking this button. Be careful though, as you can no
 @cindex default fields
 
 The Defaults pane lets you add new default BibTeX fields, that will be added to all entries. 
-You can also control which field 
-will be used for the description of RSS feeds, and edit BibDesk's global macro definitions
-for all files.
+You can also edit BibDesk's global macro definitions for all files.
 
 @image{gfx/defaultsPrefs}
 
@@ -2379,10 +2374,6 @@ you if you have read the cited paper. Choose @samp{Rating} if it should hold a r
 Select the check box in the last column if you would like to add the field by default to 
 every entry when a file is opened or a new publication is made. Select this to avoid adding 
 them every time by hand. This setting is not relevant for boolean and rating fields.
-
-@prefitem{Field to Use for RSS Description} This field will be used as the text that
-shows up as the headline of each item in the RSS feed. By default it is the Rss-description field, 
-but you can also supply here your own custom field. 
 
 @prefitem{Custom BibTeX Types and Fields} Clicking the button allows you to add new types and add new fields 
 to existing fields. 
