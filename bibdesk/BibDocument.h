@@ -202,23 +202,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
  */
 - (id)init;
 
-
-/*!
-    @method     awakeFromNib
-    @abstract   Called when the document's nib is finished loading. Don't call this directly.
-    @discussion Put things here that need to be done once, as soon as the window is loaded but before it is shown.
-*/
-- (void)awakeFromNib;
-
-/*!
-    @method     dealloc
-    @abstract   Releases memory reserved by the BibDocument. 
- @discussion Don't call this. 
- It will be called automatically at the end of the object's lifetime.
-
-*/
-- (void)dealloc;
-
 - (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL;
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
 

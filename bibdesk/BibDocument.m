@@ -175,100 +175,112 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
         
         isDocumentClosed = NO;
+        
+		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
+		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
+        
+        // need to set this for new documents
+        [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
+
+		sortDescending = NO;
+		sortGroupsDescending = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSortGroupsDescendingKey];
+		sortGroupsKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSortGroupsKey] retain];
 		
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handlePreviewDisplayChangedNotification:)
-													 name:BDSKPreviewDisplayChangedNotification
-												   object:nil];
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        
+		[nc addObserver:self
+               selector:@selector(handlePreviewDisplayChangedNotification:)
+	               name:BDSKPreviewDisplayChangedNotification
+                 object:nil];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleGroupFieldChangedNotification:)
-													 name:BDSKGroupFieldChangedNotification
-												   object:self];
+		[nc addObserver:self
+               selector:@selector(handleGroupFieldChangedNotification:)
+	               name:BDSKGroupFieldChangedNotification
+                 object:self];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleGroupAddRemoveNotification:)
-													 name:BDSKGroupAddRemoveNotification
-												   object:nil];
+		[nc addObserver:self
+               selector:@selector(handleGroupAddRemoveNotification:)
+	               name:BDSKGroupAddRemoveNotification
+                 object:nil];
 
 		// register for selection changes notifications:
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleTableSelectionChangedNotification:)
-													 name:BDSKTableSelectionChangedNotification
-												   object:self];
+		[nc addObserver:self
+               selector:@selector(handleTableSelectionChangedNotification:)
+	               name:BDSKTableSelectionChangedNotification
+                 object:self];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleGroupTableSelectionChangedNotification:)
-													 name:BDSKGroupTableSelectionChangedNotification
-												   object:self];
+		[nc addObserver:self
+               selector:@selector(handleGroupTableSelectionChangedNotification:)
+	               name:BDSKGroupTableSelectionChangedNotification
+                 object:self];
 
 		//  register to observe for item change notifications here.
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleBibItemChangedNotification:)
-													 name:BDSKBibItemChangedNotification
-												   object:nil];
+		[nc addObserver:self
+               selector:@selector(handleBibItemChangedNotification:)
+	               name:BDSKBibItemChangedNotification
+                 object:nil];
 
 		// register to observe for add/delete items.
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleBibItemAddDelNotification:)
-													 name:BDSKDocSetPublicationsNotification
-												   object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocSetPublicationsNotification
+                 object:self];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleBibItemAddDelNotification:)
-													 name:BDSKDocAddItemNotification
-												   object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocAddItemNotification
+                 object:self];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleBibItemAddDelNotification:)
-													 name:BDSKDocDelItemNotification
-                                                   object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocDelItemNotification
+                 object:self];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleMacroChangedNotification:)
-                                                     name:BDSKMacroDefinitionChangedNotification
-                                                   object:nil];
+        [nc addObserver:self
+               selector:@selector(handleMacroChangedNotification:)
+                   name:BDSKMacroDefinitionChangedNotification
+                 object:nil];
 
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleFilterChangedNotification:)
-                                                     name:BDSKFilterChangedNotification
-                                                   object:nil];
+        [nc addObserver:self
+               selector:@selector(handleFilterChangedNotification:)
+                   name:BDSKFilterChangedNotification
+                 object:nil];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleStaticGroupChangedNotification:)
-                                                     name:BDSKStaticGroupChangedNotification
-                                                   object:nil];
+        [nc addObserver:self
+               selector:@selector(handleStaticGroupChangedNotification:)
+                   name:BDSKStaticGroupChangedNotification
+                 object:nil];
         
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleSharedGroupUpdatedNotification:)
-													 name:BDSKSharedGroupUpdatedNotification
-												   object:nil];
+		[nc addObserver:self
+               selector:@selector(handleSharedGroupUpdatedNotification:)
+	               name:BDSKSharedGroupUpdatedNotification
+                 object:nil];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSharedGroupsChangedNotification:)
-                                                     name:BDSKSharedGroupsChangedNotification
-                                                   object:nil];
+        [nc addObserver:self
+               selector:@selector(handleSharedGroupsChangedNotification:)
+                   name:BDSKSharedGroupsChangedNotification
+                 object:nil];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleFlagsChangedNotification:)
-                                                     name:OAFlagsChangedNotification
-                                                   object:nil];
+        [nc addObserver:self
+               selector:@selector(handleFlagsChangedNotification:)
+                   name:OAFlagsChangedNotification
+                 object:nil];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleApplicationWillTerminateNotification:)
-                                                     name:NSApplicationWillTerminateNotification
-                                                   object:nil];
+        [nc addObserver:self
+               selector:@selector(handleApplicationWillTerminateNotification:)
+                   name:NSApplicationWillTerminateNotification
+                 object:nil];
         
         // observe these on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleTypeInfoDidChangeNotification:)
-                                                     name:BDSKBibTypeInfoChangedNotification
-                                                   object:[BibTypeManager sharedManager]];
+        [nc addObserver:self
+               selector:@selector(handleTypeInfoDidChangeNotification:)
+                   name:BDSKBibTypeInfoChangedNotification
+                 object:[BibTypeManager sharedManager]];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleCustomFieldsDidChangeNotification:)
-                                                     name:BDSKCustomFieldsChangedNotification
-                                                   object:nil];
+        [nc addObserver:self
+               selector:@selector(handleCustomFieldsDidChangeNotification:)
+                   name:BDSKCustomFieldsChangedNotification
+                 object:nil];
         
         [OFPreference addObserver:self
                          selector:@selector(handleIgnoredSortTermsChangedNotification:)
@@ -286,30 +298,114 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
                          selector:@selector(handleNameDisplayChangedNotification:)
                     forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayLastNameFirstKey]];
         
-		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
-		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
-        
-        // need to set this for new documents
-        [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
-
-		sortDescending = NO;
-		sortGroupsDescending = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSortGroupsDescendingKey];
-		sortGroupsKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSortGroupsKey] retain];
-        
     }
     return self;
 }
 
-- (void)awakeFromNib{
-    NSSize drawerSize;
-	
-	[self setupSearchField];
-   
-    [tableView setDoubleAction:@selector(editPubCmd:)];
-    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
-    [tableView registerForDraggedTypes:dragTypes];
-    [groupTableView registerForDraggedTypes:dragTypes];
+- (void)dealloc{
+#if DEBUG
+    NSLog(@"bibdoc dealloc");
+#endif
+    [fileSearchController release];
+    if ([self undoManager]) {
+        [[self undoManager] removeAllActionsWithTarget:self];
+    }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [OFPreference removeObserver:self forPreference:nil];
+    [macroResolver release];
+    [itemsForCiteKeys release];
+    // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
+    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [publications release];
+    [shownPublications release];
+    [groupedPublications release];
+    [categoryGroups release];
+    [smartGroups release];
+    [staticGroups release];
+    [allPublicationsGroup release];
+    [lastImportGroup release];
+    [frontMatter release];
+    [documentInfo release];
+    [quickSearchKey release];
+    [customStringArray release];
+    [toolbarItems release];
+	[statusBar release];
+	[texTask release];
+    [macroWC release];
+    [infoWC release];
+    [promiseDragColumnIdentifier release];
+    [lastSelectedColumnForSort release];
+    [sortGroupsKey release];
+	[promisedPboardTypes release];
+    [sharedGroups release];
+    [sharedGroupSpinners release];
+    [super dealloc];
+}
+
+- (NSString *)windowNibName{
+        return @"BibDocument";
+}
+
+- (void)showWindows{
+    [super showWindows];
     
+    // Get the search string keyword if available (Spotlight passes this)
+    NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
+    NSString *searchString = [[event descriptorForKeyword:keyAESearchText] stringValue];
+    
+    if([event eventID] == kAEOpenDocuments && searchString != nil){
+        // We want to handle open events for our Spotlight cache files differently; rather than setting the search field, we can jump to them immediately since they have richer context.  This code gets the path of the document being opened in order to check the file extension.
+        NSString *hfsPath = [[[event descriptorForKeyword:keyAEResult] coerceToDescriptorType:typeFileURL] stringValue];
+        
+        // hfsPath will be nil for under some conditions, which seems strange; possibly because I wasn't checking eventID == 'odoc'?
+        if(hfsPath == nil) NSLog(@"No path available from event %@ (descriptor %@)", event, [event descriptorForKeyword:keyAEResult]);
+        NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
+        
+        OBPOSTCONDITION(fileURL != nil);
+        if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
+            [self selectGroup:allPublicationsGroup];
+            [self setSelectedSearchFieldKey:BDSKAllFieldsString];
+            [self setFilterField:searchString];
+        }
+    }
+}
+
+- (void)windowControllerDidLoadNib:(NSWindowController *) aController
+{
+    [super windowControllerDidLoadNib:aController];
+    
+    // this is the controller for the main window
+    [aController setShouldCloseDocument:YES];
+    
+    // hidden default to remove xattrs; this presently occurs before we use them, but it may need to be earlier at some point
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
+        NSArray *xattrs = [[NSFileManager defaultManager] extendedAttributeNamesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
+        if (xattrs) {
+            NSEnumerator *xattrE = [xattrs objectEnumerator];
+            NSString *xattrName;
+            while (xattrName = [xattrE nextObject]) {
+                [[NSFileManager defaultManager] removeExtendedAttribute:xattrName atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+            }
+        }
+    }
+    
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    
+    [self setupToolbar];
+	[self setupSearchField];
+    
+    // First remove the toolbar if we should, as it affects proper resizing of the window and splitViews
+	[statusBar retain]; // we need to retain, as we might remove it from the window
+	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowStatusBarKey]) {
+		[self toggleStatusBar:nil];
+	} else {
+		// make sure they are ordered correctly, mainly for the focus ring
+		[statusBar removeFromSuperview];
+		[[mainBox superview] addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
+	}
+	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
+    
+    // This must also be done before we resize the window and the splitViews
     [groupCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
     [groupCollapsibleView setMinSize:NSMakeSize(56.0, 20.0)];
     [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
@@ -321,6 +417,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
     
+    // SplitViews setup
     [groupSplitView setDrawEnd:YES];
     [splitView setDrawEnd:YES];
     
@@ -330,7 +427,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     
     // set previous splitview frames
     // @@ can setting window frame in windowControllerDidLoadNib: cause problems here?
-    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     if (nil != xattrDefaults) {
         float fraction;
         fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
@@ -340,24 +436,49 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         if (fraction > 0)
             [splitView setFraction:fraction];
     }
+    
+    NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
+    
+    // we should only cascade windows if we have multiple documents open; bug #1299305
+    // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
+    static NSPoint nextWindowLocation = {0.0, 0.0};
+    
+    if (nil != xattrDefaults && NSEqualRects(frameRect, NSZeroRect) == NO) {
+        [[aController window] setFrame:frameRect display:YES];
+        [aController setShouldCascadeWindows:NO];
+        nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:NSMakePoint(NSMinX(frameRect), NSMaxY(frameRect))];
+    } else {
+        // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
+        [[aController window] setFrameUsingName:@"Main Window Frame Autosave"];
 
-	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowStatusBarKey]) {
-		[self toggleStatusBar:nil];
-	} else {
-		// make sure they are ordered correctly, mainly for the focus ring
-		[statusBar removeFromSuperview];
-		[[mainBox superview] addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
-	}
-	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
+        [aController setShouldCascadeWindows:NO];
+        if ([[aController window] setFrameAutosaveName:@"Main Window Frame Autosave"]) {
+            NSRect windowFrame = [[aController window] frame];
+            nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
+        }
+        nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:nextWindowLocation];
+    }
+            
+    [documentWindow setAutorecalculatesKeyViewLoop:YES];
+    [documentWindow makeFirstResponder:tableView];	
+    
+    // TableView setup
+    [tableView removeAllTableColumns];
+    
+	[self setupDefaultTableColumns]; // calling it here mostly just makes sure that the menu is set up.
+    [self sortPubsByDefaultColumn];
+    
+    [tableView setDoubleAction:@selector(editPubCmd:)];
+    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
+    [tableView registerForDraggedTypes:dragTypes];
+    [groupTableView registerForDraggedTypes:dragTypes];
 
     // workaround for IB flakiness...
-    drawerSize = [customCiteDrawer contentSize];
+    NSSize drawerSize = [customCiteDrawer contentSize];
     [customCiteDrawer setContentSize:NSMakeSize(100,drawerSize.height)];
-
 	showingCustomCiteDrawer = NO;
 	
-	// unfortunately we cannot set this in IB
+	// ImagePopUpButtons setup
 	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
@@ -402,13 +523,11 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     else
         [headerCell selectItemAtIndex:0];
     
+    // Accessor view setup
     [saveTextEncodingPopupButton removeAllItems];
     [saveTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
-        
-    [documentWindow setAutorecalculatesKeyViewLoop:YES];
     
-    // array of BDSKSharedGroup objects and zeroconf support; 10.4 only for now
-    // doesn't do anything when already enabled
+    // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
     sharedGroups = nil;
     sharedGroupSpinners = nil;
@@ -423,126 +542,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
     [self updateGroupsPreservingSelection:NO];
     [self updateAllSmartGroups];
-
-}
-
-- (NSString *)windowNibName{
-        return @"BibDocument";
-}
-
-- (void)showWindows{
-    [super showWindows];
-    
-    // Get the search string keyword if available (Spotlight passes this)
-    NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
-    NSString *searchString = [[event descriptorForKeyword:keyAESearchText] stringValue];
-    
-    if([event eventID] == kAEOpenDocuments && searchString != nil){
-        // We want to handle open events for our Spotlight cache files differently; rather than setting the search field, we can jump to them immediately since they have richer context.  This code gets the path of the document being opened in order to check the file extension.
-        NSString *hfsPath = [[[event descriptorForKeyword:keyAEResult] coerceToDescriptorType:typeFileURL] stringValue];
-        
-        // hfsPath will be nil for under some conditions, which seems strange; possibly because I wasn't checking eventID == 'odoc'?
-        if(hfsPath == nil) NSLog(@"No path available from event %@ (descriptor %@)", event, [event descriptorForKeyword:keyAEResult]);
-        NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
-        
-        OBPOSTCONDITION(fileURL != nil);
-        if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
-            [self selectGroup:allPublicationsGroup];
-            [self setSelectedSearchFieldKey:BDSKAllFieldsString];
-            [self setFilterField:searchString];
-        }
-    }
-}
-
-- (void)windowControllerDidLoadNib:(NSWindowController *) aController
-{
-    [super windowControllerDidLoadNib:aController];
-    
-    // hidden default to remove xattrs; this presently occurs before we use them, but it may need to be earlier at some point
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
-        NSArray *xattrs = [[NSFileManager defaultManager] extendedAttributeNamesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
-        if (xattrs) {
-            NSEnumerator *xattrE = [xattrs objectEnumerator];
-            NSString *xattrName;
-            while (xattrName = [xattrE nextObject]) {
-                [[NSFileManager defaultManager] removeExtendedAttribute:xattrName atPath:[[self fileURL] path] traverseLink:YES error:NULL];
-            }
-        }
-    }    
-    
-    [aController setShouldCloseDocument:YES];
-    
-    [self setupToolbar];
-    
-    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
-    
-    // we should only cascade windows if we have multiple documents open; bug #1299305
-    // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
-    static NSPoint nextWindowLocation = {0.0, 0.0};
-    
-    if (nil != xattrDefaults && NSEqualRects(frameRect, NSZeroRect) == NO) {
-        [[aController window] setFrame:frameRect display:YES];
-        [aController setShouldCascadeWindows:NO];
-        nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:NSMakePoint(NSMinX(frameRect), NSMaxY(frameRect))];
-    } else {
-        // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
-        [[aController window] setFrameUsingName:@"Main Window Frame Autosave"];
-
-        [aController setShouldCascadeWindows:NO];
-        if ([[aController window] setFrameAutosaveName:@"Main Window Frame Autosave"]) {
-            NSRect windowFrame = [[aController window] frame];
-            nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
-        }
-        nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:nextWindowLocation];
-    }
-            
-    [documentWindow makeFirstResponder:tableView];	
-        
-    [tableView removeAllTableColumns];
-    
-	[self setupDefaultTableColumns]; // calling it here mostly just makes sure that the menu is set up.
-    [self sortPubsByDefaultColumn];
-}
-
-- (void)dealloc{
-#if DEBUG
-    NSLog(@"bibdoc dealloc");
-#endif
-    [fileSearchController release];
-    if ([self undoManager]) {
-        [[self undoManager] removeAllActionsWithTarget:self];
-    }
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [OFPreference removeObserver:self forPreference:nil];
-    [macroResolver release];
-    [itemsForCiteKeys release];
-    // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
-    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-    [publications release];
-    [shownPublications release];
-    [groupedPublications release];
-    [categoryGroups release];
-    [smartGroups release];
-    [staticGroups release];
-    [allPublicationsGroup release];
-    [lastImportGroup release];
-    [frontMatter release];
-    [documentInfo release];
-    [quickSearchKey release];
-    [customStringArray release];
-    [toolbarItems release];
-	[statusBar release];
-	[texTask release];
-    [macroWC release];
-    [infoWC release];
-    [promiseDragColumnIdentifier release];
-    [lastSelectedColumnForSort release];
-    [sortGroupsKey release];
-	[promisedPboardTypes release];
-    [sharedGroups release];
-    [sharedGroupSpinners release];
-    [super dealloc];
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
