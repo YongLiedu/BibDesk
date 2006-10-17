@@ -417,26 +417,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
     
-    // SplitViews setup
-    [groupSplitView setDrawEnd:YES];
-    [splitView setDrawEnd:YES];
-    
-    // set autosave names first
-	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
-    [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
-    
-    // set previous splitview frames
-    // @@ can setting window frame in windowControllerDidLoadNib: cause problems here?
-    if (nil != xattrDefaults) {
-        float fraction;
-        fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
-        if (fraction > 0)
-            [groupSplitView setFraction:fraction];
-        fraction = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
-        if (fraction > 0)
-            [splitView setFraction:fraction];
-    }
-    
     NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
     
     // we should only cascade windows if we have multiple documents open; bug #1299305
@@ -462,20 +442,40 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [documentWindow setAutorecalculatesKeyViewLoop:YES];
     [documentWindow makeFirstResponder:tableView];	
     
+    // SplitViews setup
+    [groupSplitView setDrawEnd:YES];
+    [splitView setDrawEnd:YES];
+    
+    // set autosave names first
+	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
+    [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
+    
+    // set previous splitview frames
+    if (nil != xattrDefaults) {
+        float fraction;
+        fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
+        if (fraction > 0)
+            [groupSplitView setFraction:fraction];
+        fraction = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
+        if (fraction > 0)
+            [splitView setFraction:fraction];
+    }
+    
     // TableView setup
     [tableView removeAllTableColumns];
     
-	[self setupDefaultTableColumns]; // calling it here mostly just makes sure that the menu is set up.
+	[self setupDefaultTableColumns];
     [self sortPubsByDefaultColumn];
     
-    [tableView setDoubleAction:@selector(editPubCmd:)];
+    [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
 
+    // Cite Drawer setup
     // workaround for IB flakiness...
     NSSize drawerSize = [customCiteDrawer contentSize];
-    [customCiteDrawer setContentSize:NSMakeSize(100,drawerSize.height)];
+    [customCiteDrawer setContentSize:NSMakeSize(100.0, drawerSize.height)];
 	showingCustomCiteDrawer = NO;
 	
 	// ImagePopUpButtons setup

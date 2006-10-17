@@ -103,25 +103,18 @@
 /*!
     @method editPubCmd
     @abstract an action to edit a publication has happened. 
-    @discussion This is the tableview's doubleaction and the action of the edit pub button. It calls editPub with the tableview's selected publication.
+    @discussion -
     @param sender Not Used!
 */
 - (IBAction)editPubCmd:(id)sender;
 
 /*!
     @method editPub
- @abstract Opens the edit window
- @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
- @param pub The BibItem that should be edited.
+    @abstract Opens the edit window
+    @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
+    @param pub The BibItem that should be edited.
 */
 - (BibEditor *)editPub:(BibItem *)pub;
-
-/*!
-    @method showPerson:
-    @abstract Opens the personcontroller window
-    @discussion Creates a personcontroller if one doesn't exist, and tells it to show itself. 
-    @param person The BibAuthor that should be displayed.
-*/
 
 /*!
     @method editAction:
@@ -131,6 +124,20 @@
 */
 - (void)editAction:(id)sender;
 
+/*!
+    @method editPubOrOpenURLAction:
+    @abstract 
+    @discussion This is the tableview's doubleaction and the action of the edit pub button. It calls editPub with the tableview's selected publication.
+    @param sender The sender. Not used.
+*/
+- (void)editPubOrOpenURLAction:(id)sender;
+
+/*!
+    @method showPerson:
+    @abstract Opens the personcontroller window
+    @discussion Creates a personcontroller if one doesn't exist, and tells it to show itself. 
+    @param person The BibAuthor that should be displayed.
+*/
 - (void)showPerson:(BibAuthor *)person;
 
 - (IBAction)emailPubCmd:(id)sender;

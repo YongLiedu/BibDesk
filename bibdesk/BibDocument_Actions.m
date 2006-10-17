@@ -305,16 +305,7 @@
 }
 
 - (IBAction)editPubCmd:(id)sender{
-    NSString *colID = nil;
-
-    if([tableView clickedColumn] != -1){
-		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
-    }
-    if([[BibTypeManager sharedManager] isLocalFileField:colID]){
-		[self openLinkedFileForField:colID];
-    }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
-		[self openRemoteURLForField:colID];
-    }else if([self hasSharedGroupsSelected] == NO){
+    if([self hasSharedGroupsSelected] == NO){
 		int n = [self numberOfSelectedPubs];
 		if (n > 6) {
             // Do we really want a gazillion of editor windows?
@@ -343,6 +334,18 @@
 	} else if (firstResponder == groupTableView) {
 		[self editGroupAction:sender];
 	}
+}
+
+- (IBAction)editPubOrOpenURLAction:(id)sender{
+    int column = [tableView clickedColumn];
+    NSString *colID = column != -1 ? [[[tableView tableColumns] objectAtIndex:column] identifier] : nil;
+    
+    if([[BibTypeManager sharedManager] isLocalFileField:colID])
+		[self openLinkedFileForField:colID];
+    else if([[BibTypeManager sharedManager] isRemoteURLField:colID])
+		[self openRemoteURLForField:colID];
+    else
+        [self editPubCmd:sender];
 }
 
 - (void)showPerson:(BibAuthor *)person{
