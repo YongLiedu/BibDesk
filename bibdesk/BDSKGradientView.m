@@ -71,13 +71,13 @@
 - (void)setLowerColor:(NSColor *)color
 {
     [endColor autorelease];
-    endColor = [[CIColor colorWithNSColor:color] retain];
+    endColor = [[CIColor alloc] initWithColor:color];
 }
 
 - (void)setUpperColor:(NSColor *)color
 {
     [startColor autorelease];
-    startColor = [[CIColor colorWithNSColor:color] retain];
+    startColor = [[CIColor alloc] initWithColor:color];
 }    
 
 - (CIColor *)lowerColor { return endColor; }

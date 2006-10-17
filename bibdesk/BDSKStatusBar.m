@@ -51,14 +51,14 @@
 + (CIColor *)lowerColor{
     static CIColor *lowerColor = nil;
     if (lowerColor == nil)
-        lowerColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]] retain];
+        lowerColor = [[CIColor alloc] initWithColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     return lowerColor;
 }
 
 + (CIColor *)upperColor{
     static CIColor *upperColor = nil;
     if (upperColor == nil)
-        upperColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]] retain];
+        upperColor = [[CIColor alloc] initWithColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     return upperColor;
 }
 
