@@ -1627,6 +1627,7 @@ The groupedPublications array is a subset of the publications array, developed b
         @try {
             url = [NSURL URLWithString:[groupDict objectForKey:@"URL"]];
             group = [[BDSKURLGroup alloc] initWithURL:url];
+            [group setName:[groupDict objectForKey:@"group name"]];
             [group setUndoManager:[self undoManager]];
             [array addObject:group];
         }
