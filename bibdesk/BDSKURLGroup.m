@@ -145,6 +145,8 @@
 {
     isRetrieving = NO;
     failedDownload = YES;
+    // redraw 
+    [self setPublications:nil];
 }
 
 #pragma mark Accessors
@@ -159,7 +161,7 @@
         // get the publications asynchronously if remote, synchronously if local
         [self startDownload]; 
     }
-    // this will be nil the first time
+    // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
     return publications;
 }
 
