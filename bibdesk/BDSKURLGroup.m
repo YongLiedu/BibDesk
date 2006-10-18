@@ -68,23 +68,6 @@
     [super dealloc];
 }
 
-// NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
-
-- (id)copyWithZone:(NSZone *)zone { return [self retain]; }
-
-    // NSCoding protocol
-
-- (void)encodeWithCoder:(NSCoder *)aCoder;
-{
-    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
-}
-
-- (id)initWithCoder:(NSCoder *)aDecoder;
-{
-    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
-    return nil;
-}
-
 // Logging
 
 - (NSString *)description;

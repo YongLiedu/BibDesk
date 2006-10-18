@@ -83,28 +83,21 @@ static unsigned currentUniqueID = 0;
     return self;
 }
 
-// NSCoding protocol
+// NSCoding protocol, should never be used
 
 - (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super init]) {
-        uniqueID = ++currentUniqueID;
-		name = [[decoder decodeObjectForKey:@"name"] retain];
-		count = [decoder decodeIntForKey:@"count"];
-	}
-	return self;
+    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
+    return nil;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-	[coder encodeObject:name forKey:@"name"];
-	[coder encodeInt:count forKey:@"count"];
+    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
 }
 
-// NSCopying protocol
+// NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
 
 - (id)copyWithZone:(NSZone *)aZone {
-	BDSKGroup *copy = [[[self class] allocWithZone:aZone] initWithName:name count:count];
-    copy->uniqueID = uniqueID;
-	return copy;
+	return [self retain];
 }
 
 - (void)dealloc {
@@ -271,28 +264,6 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 	[[super init] release];
     id aName = ([[[BibTypeManager sharedManager] personFieldsSet] containsObject:aKey]) ? [BibAuthor emptyAuthor] : @"";
     return [[BDSKEmptyGroup allocWithZone:zone] initWithName:aName key:aKey count:aCount];
-}
-
-// NSCoding protocol
-
-- (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
-		key = [[decoder decodeObjectForKey:@"key"] retain];
-	}
-	return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder {
-	[super encodeWithCoder:coder];
-	[coder encodeObject:key forKey:@"key"];
-}
-
-// NSCopying protocol
-
-- (id)copyWithZone:(NSZone *)aZone {
-	BDSKCategoryGroup *copy = [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
-    copy->uniqueID = uniqueID;
-	return copy;
 }
 
 - (void)dealloc {
@@ -559,29 +530,6 @@ static NSString *BDSKLastImportLocalizedString = nil;
 		aName = NSLocalizedString(@"Smart Group", @"Smart group");
 	self = [self initWithName:aName count:0 filter:aFilter];
 	return self;
-}
-
-// NSCoding protocol
-
-- (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
-		filter = [[decoder decodeObjectForKey:@"filter"] retain];
-		undoManager = nil;
-	}
-	return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder {
-	[super encodeWithCoder:coder];
-	[coder encodeObject:filter forKey:@"filter"];
-}
-
-// NSCopying protocol
-
-- (id)copyWithZone:(NSZone *)aZone {
-	BDSKSmartGroup *copy = [[[self class] allocWithZone:aZone] initWithName:name count:count filter:filter];
-    copy->uniqueID = uniqueID;
-	return copy;
 }
 
 - (void)dealloc {
