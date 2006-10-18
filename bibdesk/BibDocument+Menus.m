@@ -55,7 +55,8 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
 		// no selection or selection includes shared groups
 		return NO;
 	}
@@ -70,7 +71,8 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
 		// no selection
 		return NO;
 	}
@@ -210,7 +212,8 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES)
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES)
 		return NO;
 	return YES;
 }
@@ -248,7 +251,8 @@
 	int n = [self numberOfSelectedPubs];
 	
 	if (n == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
 		// no selection
 		if (![[menuItem menu] supermenu]) {
 			s = NSLocalizedString(@"Delete", @"Delete");
@@ -451,7 +455,8 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
 		// no selection
 		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
 		[menuItem setTitle:s];
@@ -474,7 +479,8 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
 		// no selection
 		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
 		[menuItem setTitle:s];
@@ -498,7 +504,8 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
 		// no selection
 		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked Files", @"Consolidate Linked Files..."),0x2026];
 		[menuItem setTitle:s];
@@ -574,11 +581,11 @@
 }
 
 - (BOOL)validateSortForCrossrefsMenuItem:(NSMenuItem *)menuItem{
-    return ([self hasSharedGroupsSelected] == NO);
+    return ([self hasSharedGroupsSelected] == NO && [self hasURLGroupsSelected] == NO);
 }
 
 - (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO){
+    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO && [self hasURLGroupsSelected] == NO){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         if(![NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
             return YES;
@@ -587,7 +594,7 @@
 }
 
 - (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO){
+    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO && [self hasURLGroupsSelected] == NO){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         
         // only valid if the selected pub (parent-to-be) doesn't have a crossref field
@@ -733,12 +740,12 @@
 }
 
 - (BOOL) validateSelectDuplicatesMenuItem:(NSMenuItem *)menuItem{
-    return ([self hasSharedGroupsSelected] == NO);
+    return ([self hasSharedGroupsSelected] == NO && [self hasURLGroupsSelected] == NO);
 }
 
 - (BOOL) validateSelectPossibleDuplicatesMenuItem:(NSMenuItem *)menuItem{
     [menuItem setTitle:[NSLocalizedString(@"Select Duplicates by ", @"for selecting duplicate publications; requires a single trailing space") stringByAppendingString:[lastSelectedColumnForSort identifier]]];
-    return ([self hasSharedGroupsSelected] == NO);
+    return ([self hasSharedGroupsSelected] == NO && [self hasURLGroupsSelected] == NO);
 }
 
 - (BOOL)validateFindPanelActionMenuItem:(NSMenuItem *)menuItem {
@@ -753,7 +760,7 @@
 
 - (BOOL)validateEditNewGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
     NSString *s;
-    if ([self hasSharedGroupsSelected])
+    if ([self hasSharedGroupsSelected] || [self hasURLGroupsSelected])
         s = NSLocalizedString(@"New Group With Merged Selection", @"New group with merged selection");
     else
         s = NSLocalizedString(@"New Group With Selection", @"New group with selection");
@@ -778,11 +785,11 @@
 }
 
 - (BOOL)validateMergeInSharedGroupMenuItem:(NSMenuItem *)menuItem {
-    return ([self hasSharedGroupsSelected]);
+    return ([self hasSharedGroupsSelected] || [self hasURLGroupsSelected]);
 }
 
 - (BOOL)validateMergeInSharedPublicationsMenuItem:(NSMenuItem *)menuItem {
-    return ([self hasSharedGroupsSelected] && [self numberOfSelectedPubs] > 0);
+    return (([self hasSharedGroupsSelected] || [self hasURLGroupsSelected]) && [self numberOfSelectedPubs] > 0);
 }
 
 - (BOOL)validateRefreshSharingMenuItem:(NSMenuItem *)menuItem {

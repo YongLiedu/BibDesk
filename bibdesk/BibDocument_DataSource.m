@@ -290,7 +290,7 @@
         }
     } else if (tv == groupTableView) {
         BDSKGroup *group = [self objectInGroupsAtIndex:row];
-        if ([group isShared] == NO) return;
+        if ([group isShared] == NO && [group isURL] == NO) return;
         
         NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
         
@@ -426,8 +426,8 @@
 		}else if([rowIndexes count] == 1){
             // a single row, not necessarily the selected one
             BDSKGroup *group = [self objectInGroupsAtIndex:[rowIndexes firstIndex]];
-            if ([group isShared]) {
-                pubs = [(BDSKSharedGroup *)group publications];
+            if ([group isShared] || [group isURL]) {
+                pubs = [(id)group publications];
 			} else {
                 NSArray *allPubs = [publications copy];
                 NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[allPubs count]];

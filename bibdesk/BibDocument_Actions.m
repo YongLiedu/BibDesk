@@ -207,7 +207,8 @@
 - (IBAction)deleteSelectedPubs:(id)sender{
 	int numSelectedPubs = [self numberOfSelectedPubs];
     if (numSelectedPubs == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
         return;
     }
 	
@@ -258,7 +259,8 @@
 - (IBAction)duplicate:(id)sender{
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
 		NSBeep();
 		return;
 	}
@@ -830,7 +832,8 @@
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([self hasSharedGroupsSelected] == YES) {
+    if ([self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) {
         NSBeep();
         return;
     }
@@ -940,7 +943,8 @@
 {
     unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
 	if (numberOfSelectedPubs == 0 ||
-        [self hasSharedGroupsSelected] == YES) return;
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) return;
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
         NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"") : NSLocalizedString(@"Really Generate Cite Key?", @"");
@@ -1038,7 +1042,8 @@
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
 	if ([self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsSelected] == YES) return;
+        [self hasSharedGroupsSelected] == YES ||
+        [self hasURLGroupsSelected] == YES) return;
 	
 	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
                                      defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
