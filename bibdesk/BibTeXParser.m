@@ -740,6 +740,9 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     const char *staticGroupStr = "BibDesk Static Groups";
     size_t staticGroupStrLength = strlen(staticGroupStr);
     Boolean isStaticGroup = FALSE;
+    const char *urlGroupStr = "BibDesk URL Groups";
+    size_t urlGroupStrLength = strlen(staticGroupStr);
+    Boolean isURLGroup = FALSE;
     Boolean firstValue = TRUE;
     
     while(field = bt_next_value(entry, field, NULL, &text)){
@@ -750,10 +753,12 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                     isSmartGroup = TRUE;
                 else if(strlen(text) >= staticGroupStrLength && strncmp(text, staticGroupStr, staticGroupStrLength) == 0)
                     isStaticGroup = TRUE;
+                else if(strlen(text) >= staticGroupStrLength && strncmp(text, urlGroupStr, urlGroupStrLength) == 0)
+                    isURLGroup = TRUE;
             }
             
             // encoding will be UTF-8 for the plist, so make sure we use it for each line
-            tmpStr = copyCheckedString(text, field->line, filePath, ((isSmartGroup || isStaticGroup)? NSUTF8StringEncoding : encoding));
+            tmpStr = copyCheckedString(text, field->line, filePath, ((isSmartGroup || isStaticGroup || isURLGroup)? NSUTF8StringEncoding : encoding));
             
             if(tmpStr) 
                 [commentStr appendString:tmpStr];
@@ -762,7 +767,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             [tmpStr release];
         }
     }
-    if(isSmartGroup == TRUE || isStaticGroup == TRUE){
+    if(isSmartGroup == TRUE || isStaticGroup == TRUE || isURLGroup == TRUE){
         if(document){
             NSRange range = [commentStr rangeOfString:@"{"];
             if(range.location != NSNotFound){
@@ -772,8 +777,10 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                     [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
                     if (isSmartGroup == TRUE)
                         [document setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                    else
+                    else if (isStaticGroup == TRUE)
                         [document setStaticGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                    else
+                        [document setURLGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                 }
             }
         }
