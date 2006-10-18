@@ -151,12 +151,6 @@ NSString *BDSKUnderlyingItemErrorKey = @"BDSKUnderlyingItemError";
     [NSException raise:NSInternalInconsistencyException format:@"Mutating method sent to immutable NSError instance"];
 }
 
-- (int)code;
-{
-    [NSException raise:NSInternalInconsistencyException format:@"Mutating method sent to immutable NSError instance"];
-    return 0;
-}
-
 - (id)valueForUndefinedKey:(NSString *)aKey
 {
     return [[self userInfo] valueForKey:aKey];
