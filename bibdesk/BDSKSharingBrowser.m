@@ -161,6 +161,15 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
         unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:5];
         
+#if 0
+        id group = [[NSClassFromString(@"BDSKURLGroup") alloc] initWithURL:[NSURL URLWithString:@"http://cm.bell-labs.com/cm/cs/bib/ehg.bib"]];
+        [sharedGroups addObject:group];
+        [group release];
+        group = [[NSClassFromString(@"BDSKURLGroup") alloc] initWithURL:[NSURL fileURLWithPath:[@"~/Desktop/navier.bib" stringByStandardizingPath]]];
+        [sharedGroups addObject:group];
+        [group release];
+#endif
+        
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
     }
 }
