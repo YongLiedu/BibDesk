@@ -159,6 +159,10 @@ static unsigned currentUniqueID = 0;
 	return NO;
 }
 
+- (BOOL)isURL {
+	return NO;
+}
+
 - (BOOL)isScratch {
 	return NO;
 }

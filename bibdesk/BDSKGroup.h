@@ -128,6 +128,13 @@
 - (BOOL)isShared;
 
 /*!
+	@method isURL
+	@abstract Boolean, returns whether the receiver is a URL group. 
+	@discussion -
+*/
+- (BOOL)isURL;
+
+/*!
 	@method isScratch
 	@abstract Boolean, returns whether the receiver is a scratch group. 
 	@discussion -

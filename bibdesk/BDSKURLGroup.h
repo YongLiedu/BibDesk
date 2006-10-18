@@ -51,6 +51,7 @@
 - (NSImage *)icon;
 
 - (id)initWithURL:(NSURL *)aURL;
+- (NSURL *)URL;
 - (NSArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;

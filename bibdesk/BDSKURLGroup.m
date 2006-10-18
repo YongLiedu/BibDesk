@@ -146,6 +146,11 @@
 
 #pragma mark Accessors
 
+- (NSURL *)URL;
+{
+    return URL;
+}
+
 - (NSArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil){
@@ -183,7 +188,7 @@
     return [BDSKSharedGroup icon];
 }
 
-- (BOOL)isShared { return YES; }
+- (BOOL)isURL { return YES; }
 
 - (BOOL)hasEditableName { return NO; }
 
