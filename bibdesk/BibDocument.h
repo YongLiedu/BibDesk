@@ -181,8 +181,12 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
     
+    IBOutlet NSWindow *addURLGroupSheet;
+    IBOutlet NSTextField *addURLField;
+    
     BOOL dragFromSharedGroups;
     NSMutableArray *sharedGroups;
+    NSMutableArray *urlGroups;
     NSMutableDictionary *sharedGroupSpinners;
     
     id fileSearchController;

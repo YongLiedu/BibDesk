@@ -52,6 +52,7 @@
 #import "BibTypeManager.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharedGroup.h"
+#import "BDSKURLGroup.h"
 #import "NSArray_BDSKExtensions.h"
 
 @implementation BibDocument (Groups)
@@ -59,7 +60,7 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 1 : 0) + 1 /* add 1 for all publications group */ ;
+    return [smartGroups count] + [sharedGroups count] + [urlGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 1 : 0) + 1 /* add 1 for all publications group */ ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
@@ -78,6 +79,11 @@
     count = [sharedGroups count];
     if (index < count)
         return [sharedGroups objectAtIndex:index];
+    index -= count;
+    
+    count = [urlGroups count];
+    if (index < count)
+        return [urlGroups objectAtIndex:index];
     index -= count;
     
 	count = [smartGroups count];
@@ -124,8 +130,12 @@
     return NSMakeRange((lastImportGroup == nil) ? 1 : 2, [sharedGroups count]);
 }
 
+- (NSRange)rangeOfURLGroups{
+    return NSMakeRange(NSMaxRange([self rangeOfSharedGroups]), [urlGroups count]);
+}
+
 - (NSRange)rangeOfSmartGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfSharedGroups]), [smartGroups count]);
+    return NSMakeRange(NSMaxRange([self rangeOfURLGroups]), [smartGroups count]);
 }
 
 - (NSRange)rangeOfStaticGroups{
@@ -148,6 +158,13 @@
     unsigned int maxCount = MIN([indexes count], smartRange.length);
     unsigned int buffer[maxCount];
     return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&smartRange];
+}
+
+- (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange urlRange = [self rangeOfURLGroups];
+    unsigned int maxCount = MIN([indexes count], urlRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&urlRange];
 }
 
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -189,6 +206,15 @@
 
 - (BOOL)hasSharedGroupsSelected{
     return [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
+- (BOOL)hasURLGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange urlRange = [self rangeOfURLGroups];
+    return [indexes intersectsIndexesInRange:urlRange];
+}
+
+- (BOOL)hasURLGroupsSelected{
+    return [self hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -305,6 +331,44 @@
     }
 }
 
+- (void)addURLGroup:(BDSKURLGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] removeURLGroup:group];
+	
+    if (sharedGroupSpinners == nil)
+        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+    
+	[urlGroups addObject:group];
+    
+    SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
+    [urlGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
+    
+    [groupTableView reloadData];
+}
+
+- (void)removeURLGroup:(BDSKURLGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
+	
+    NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
+    [spinner removeFromSuperview];
+    [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+    
+	[urlGroups removeObjectIdenticalTo:group];
+    [groupTableView reloadData];
+}
+
+// assumes you only have a single URL group with this name; that assumption is not enforced elsewhere
+- (void)removeURLGroupNamed:(id)name {
+    NSEnumerator *e = [urlGroups objectEnumerator];
+    BDSKURLGroup *group = nil;
+    
+    while(group = [e nextObject]){
+        if([[group name] isEqual:name]){
+            [self removeURLGroup:group];
+            break;
+        }
+    }
+}
+
 /* 
 The groupedPublications array is a subset of the publications array, developed by searching the publications array; shownPublications is now a subset of the groupedPublications array, and searches in the searchfield will search only within groupedPublications (which may include all publications).
 */
@@ -414,6 +478,22 @@ The groupedPublications array is a subset of the publications array, developed b
     
 	// reset ourself as delegate
     [groupTableView setDelegate:self];
+}
+
+- (void)handleURLGroupUpdatedNotification:(NSNotification *)notification{
+    BDSKGroup *group = [notification object];
+    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
+    
+    if ([urlGroups containsObject:group] == NO)
+        return; /// must be from another document
+    
+    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
+        [self sortGroupsByKey:sortGroupsKey];
+    }else{
+        [groupTableView reloadData];
+        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
+            [self displaySelectedGroups];
+    }
 }
 
 #pragma mark UI updating
@@ -570,7 +650,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // optimize for single selections
     if ([selectedGroups count] == 1 && [selectedGroups containsObject:allPublicationsGroup]) {
         array = publications;
-    } else if ([selectedGroups count] == 1 && ([self hasSharedGroupsSelected] || [self hasStaticGroupsSelected])) {
+    } else if ([selectedGroups count] == 1 && ([self hasSharedGroupsSelected] || [self hasURLGroupsSelected] || [self hasStaticGroupsSelected])) {
         unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
         BDSKGroup *group = [self objectInGroupsAtIndex:rowIndex];
         array = [(id)group publications];
@@ -613,7 +693,8 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
    
     if([tableView numberOfSelectedRows] == 0 || 
-       [self hasSharedGroupsSelected] == YES)
+       [self hasSharedGroupsSelected] == YES || 
+       [self hasURLGroupsSelected] == YES)
         return [NSIndexSet indexSet];
     
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
@@ -723,6 +804,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:[self rangeOfSharedGroups]];
+    [indexes addIndexesInRange:[self rangeOfURLGroups]];
     [indexes addIndex:0];
     return indexes;
 }
@@ -932,7 +1014,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	[filterController release];
 }
 
-- (IBAction)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (void)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
         unsigned int insertIndex = NSMaxRange([self rangeOfSmartGroups]);
@@ -961,6 +1043,49 @@ The groupedPublications array is a subset of the publications array, developed b
     // updating of the tables is done when finishing the edit of the name
 }
 
+- (IBAction)addURLGroupAction:(id)sender {
+    [addURLField setStringValue:@""];
+    [NSApp beginSheet:addURLGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(addURLGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+}
+
+- (void)addURLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+	if(returnCode == NSOKButton){
+        if ([sheet makeFirstResponder:nil] == NO)
+            [sheet endEditingFor:nil];
+        NSURL *url = [NSURL URLWithString:[addURLField stringValue]];
+		BDSKURLGroup *group = [[BDSKURLGroup alloc] initWithURL:url];
+		[self addURLGroup:group];
+		[group release];
+	}
+	
+}
+
+- (IBAction)dismissAddURLGroupSheet:(id)sender {
+    [addURLGroupSheet orderOut:sender];
+    [NSApp endSheet:addURLGroupSheet returnCode:[sender tag]];
+}
+
+- (void)chooseURLPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSOKButton) {
+        NSURL *url = [[oPanel URLs] firstObject];
+        [addURLField setStringValue:[url absoluteString]];
+    }
+}
+
+- (IBAction)chooseURLForGroupAction:(id)sender {
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setResolvesAliases:NO];
+    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    
+    [oPanel beginSheetForDirectory:nil 
+                              file:nil 
+                    modalForWindow:addURLGroupSheet
+                     modalDelegate:self 
+                    didEndSelector:@selector(chooseURLPanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:nil];
+}
+
 - (IBAction)addGroupButtonAction:(id)sender {
     if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask)
         [self addSmartGroupAction:sender];
@@ -981,6 +1106,9 @@ The groupedPublications array is a subset of the publications array, developed b
 			count++;
 		} else if ([group isStatic] == YES && group != lastImportGroup) {
 			[self removeStaticGroup:(BDSKStaticGroup *)group];
+			count++;
+		} else if ([group isURL] == YES) {
+			[self removeURLGroup:(BDSKURLGroup *)group];
 			count++;
         }
 		rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
@@ -1062,7 +1190,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     // first merge in shared groups
-    if ([self hasSharedGroupsSelected] == YES)
+    if ([self hasSharedGroupsSelected] || [self hasURLGroupsSelected])
         pubs = [self mergeInPublications:pubs];
     
     group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
@@ -1083,7 +1211,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)mergeInSharedGroup:(id)sender{
-    if ([self hasSharedGroupsSelected] == NO) {
+    if ([self hasSharedGroupsSelected] == NO || [self hasURLGroupsSelected] == NO) {
         NSBeep();
         return;
     }
@@ -1092,7 +1220,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)mergeInSharedPublications:(id)sender{
-    if ([self hasSharedGroupsSelected] == NO || [self numberOfSelectedPubs] == 0) {
+    if ([self hasSharedGroupsSelected] == NO || [self hasURLGroupsSelected] == NO || [self numberOfSelectedPubs] == 0) {
         NSBeep();
         return;
     }
@@ -1147,7 +1275,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && [group isShared] == NO && group != allPublicationsGroup && group != lastImportGroup);
+	OBASSERT([group isSmart] == NO && [group isShared] == NO && [group isURL] == NO && group != allPublicationsGroup && group != lastImportGroup);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1200,7 +1328,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
-		if([group isSmart] == YES || [group isShared] == YES || group == allPublicationsGroup || group == lastImportGroup)
+		if([group isSmart] == YES || [group isShared] == YES || [group isURL] == YES || group == allPublicationsGroup || group == lastImportGroup)
 			continue;
 		
 		if (groupName == nil)
@@ -1354,6 +1482,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [categoryGroups sortUsingDescriptors:sortDescriptors];
     [smartGroups sortUsingDescriptors:sortDescriptors];
     [sharedGroups sortUsingDescriptors:sortDescriptors];
+    [urlGroups sortUsingDescriptors:sortDescriptors];
     [[self staticGroups] sortUsingDescriptors:sortDescriptors];
 	
     if (emptyGroup != nil) {
@@ -1454,6 +1583,48 @@ The groupedPublications array is a subset of the publications array, developed b
     tmpStaticGroups = [plist retain];
 }
 
+- (void)setURLGroupsFromSerializedData:(NSData *)data {
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	id plist = [NSPropertyListSerialization propertyListFromData:data
+												mutabilityOption:NSPropertyListImmutable
+														  format:&format 
+												errorDescription:&error];
+	
+	if (error) {
+		NSLog(@"Error deserializing: %@", error);
+        [error release];
+		return;
+	}
+	if ([plist isKindOfClass:[NSArray class]] == NO) {
+		NSLog(@"Serialized URL groups was no array.");
+		return;
+	}
+	
+    NSEnumerator *groupEnum = [plist objectEnumerator];
+    NSDictionary *groupDict;
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
+    BDSKURLGroup *group = nil;
+    NSURL *url = nil;
+    
+    while (groupDict = [groupEnum nextObject]) {
+        @try {
+            url = [NSURL URLWithString:[groupDict objectForKey:@"URL"]];
+            group = [[BDSKURLGroup alloc] initWithURL:url];
+            [array addObject:group];
+        }
+        @catch(id exception) {
+            NSLog(@"Ignoring exception \"%@\" while parsing URL groups data.", exception);
+        }
+        @finally {
+            [group release];
+            group = nil;
+        }
+    }
+	
+	[urlGroups setArray:array];
+}
+
 - (NSData *)serializedSmartGroupsData {
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[smartGroups count]];
     NSDictionary *groupDict;
@@ -1491,6 +1662,33 @@ The groupedPublications array is a subset of the publications array, developed b
 	while (group = [groupEnum nextObject]) {
 		keys = [[[group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@","];
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
+		[array addObject:groupDict];
+		[groupDict release];
+	}
+	
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
+															  format:format 
+													errorDescription:&error];
+    	
+	if (error) {
+		NSLog(@"Error serializing: %@", error);
+        [error release];
+		return nil;
+	}
+	return data;
+}
+
+- (NSData *)serializedURLGroupsData {
+	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
+	NSString *keys;
+    NSDictionary *groupDict;
+	NSEnumerator *groupEnum = [urlGroups objectEnumerator];
+	BDSKURLGroup *group;
+	
+	while (group = [groupEnum nextObject]) {
+        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", [[group URL] absoluteString], @"URL", nil];
 		[array addObject:groupDict];
 		[groupDict release];
 	}

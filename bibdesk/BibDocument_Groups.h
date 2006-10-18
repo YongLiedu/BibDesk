@@ -38,9 +38,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKSmartGroup;
-@class BDSKStaticGroup;
-@class BDSKFilterController;
+@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKFilterController;
 
 @interface BibDocument (Groups)
 
@@ -50,10 +48,12 @@
 - (NSRange)rangeOfCategoryGroups;
 - (NSRange)rangeOfSmartGroups;
 - (NSRange)rangeOfSharedGroups;
+- (NSRange)rangeOfURLGroups;
 - (NSRange)rangeOfStaticGroups;
 - (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasCategoryGroupsSelected;
@@ -61,6 +61,8 @@
 - (BOOL)hasSmartGroupsSelected;
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsSelected;
+- (BOOL)hasURLGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasURLGroupsSelected;
 - (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasStaticGroupsSelected;
 
@@ -70,6 +72,9 @@
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroupNamed:(id)name;
+- (void)addURLGroup:(BDSKURLGroup *)group;
+- (void)removeURLGroup:(BDSKURLGroup *)group;
+- (void)removeURLGroupNamed:(id)name;
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
 
@@ -103,6 +108,9 @@
 - (IBAction)sortGroupsByCount:(id)sender;
 - (IBAction)addSmartGroupAction:(id)sender;
 - (IBAction)addStaticGroupAction:(id)sender;
+- (IBAction)addURLGroupAction:(id)sender;
+- (IBAction)dismissAddURLGroupSheet:(id)sender;
+- (IBAction)chooseURLForGroupAction:(id)sender;
 - (IBAction)addGroupButtonAction:(id)sender;
 - (IBAction)removeSelectedGroups:(id)sender;
 - (IBAction)editGroupAction:(id)sender;
@@ -111,6 +119,7 @@
 - (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (void)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)addURLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)mergeInSharedGroup:(id)sender;
 - (IBAction)mergeInSharedPublications:(id)sender;
@@ -118,8 +127,10 @@
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)setStaticGroupsFromSerializedData:(NSData *)data;
+- (void)setURLGroupsFromSerializedData:(NSData *)data;
 - (NSData *)serializedSmartGroupsData;
 - (NSData *)serializedStaticGroupsData;
+- (NSData *)serializedURLGroupsData;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;

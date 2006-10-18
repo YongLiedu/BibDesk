@@ -140,6 +140,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
         categoryGroups = [[NSMutableArray alloc] initWithCapacity:1];
         smartGroups = [[NSMutableArray alloc] initWithCapacity:1];
+        urlGroups = [[NSMutableArray alloc] initWithCapacity:1];
         staticGroups = nil;
         tmpStaticGroups = nil;
 		allPublicationsGroup = [[BDSKGroup alloc] initWithAllPublications];
@@ -1242,6 +1243,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if([smartGroups count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" useEncoding:encoding];
             [outputData appendData:[self serializedSmartGroupsData]];
+            [outputData appendDataFromString:@"}}" useEncoding:encoding];
+        }
+        if([urlGroups count] > 0){
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" useEncoding:encoding];
+            [outputData appendData:[self serializedURLGroupsData]];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         [outputData appendDataFromString:@"\n" useEncoding:encoding];
@@ -2865,6 +2871,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if ([self hasSharedGroupsSelected] == YES) {
         // we can only one shared group selected at a time
         [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"in shared group"), [[[self selectedGroups] lastObject] stringValue]];
+	} else if ([self hasURLGroupsSelected] == YES) {
+        // we can only one URL group selected at a time
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in URL group", @"in URL group"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if (groupPubsCount != totalPubsCount) {
 		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
 			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"group", @"group"), [[[self selectedGroups] lastObject] stringValue]] :
