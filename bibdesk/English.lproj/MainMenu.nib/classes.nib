@@ -94,6 +94,7 @@
             ACTIONS = {
                 addSmartGroupAction = id; 
                 addStaticGroupAction = id; 
+                addURLGroupAction = id; 
                 alternateCut = id; 
                 alternateDelete = id; 
                 changePreviewDisplay = id; 
