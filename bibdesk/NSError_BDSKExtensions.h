@@ -50,6 +50,7 @@ enum {
     kBDSKDocumentTeXifySaveError = 3,             /* TeXification failed during saving       */
     kBDSKPropertyListDeserializationFailed = 4,   /* NSPropertyListSerialization failed      */
     kBDSKNetworkConnectionFailed = 5,             /* Unable to connect to a network          */
+    kBDSKFileNotFound = 6,                        /* File not found (should have URL/path)   */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;
