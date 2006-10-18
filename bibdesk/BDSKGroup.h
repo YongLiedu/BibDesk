@@ -41,7 +41,7 @@
 @class BDSKFilter;
 @class BibItem;
 
-@interface BDSKGroup : NSObject <NSCopying, NSCoding> {
+@interface BDSKGroup : NSObject <NSCopying> {
 	id name;
 	int count;
     unsigned uniqueID;
