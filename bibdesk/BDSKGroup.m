@@ -58,6 +58,8 @@
 
 @implementation BDSKGroup
 
+static unsigned currentUniqueID = 0;
+
 // super's designated initializer
 - (id)init {
 	self = [self initWithName:NSLocalizedString(@"Group", @"Group") count:0];
@@ -74,6 +76,7 @@
 // designated initializer
 - (id)initWithName:(id)aName count:(int)aCount {
     if (self = [super init]) {
+        uniqueID = ++currentUniqueID;
         name = [aName copy];
         count = aCount;
     }
@@ -84,6 +87,7 @@
 
 - (id)initWithCoder:(NSCoder *)decoder {
 	if (self = [super init]) {
+        uniqueID = ++currentUniqueID;
 		name = [[decoder decodeObjectForKey:@"name"] retain];
 		count = [decoder decodeIntForKey:@"count"];
 	}
@@ -98,7 +102,8 @@
 // NSCopying protocol
 
 - (id)copyWithZone:(NSZone *)aZone {
-	id copy = [[[self class] allocWithZone:aZone] initWithName:name count:count];
+	BDSKGroup *copy = [[[self class] allocWithZone:aZone] initWithName:name count:count];
+    copy->uniqueID = uniqueID;
 	return copy;
 }
 
@@ -121,6 +126,10 @@
 }
 
 // accessors
+
+- (NSNumber *)uniqueID {
+    return [NSNumber numberWithUnsignedInt:uniqueID];
+}
 
 - (id)name {
     return [[name retain] autorelease];
@@ -281,7 +290,8 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 // NSCopying protocol
 
 - (id)copyWithZone:(NSZone *)aZone {
-	id copy = [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
+	BDSKCategoryGroup *copy = [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
+    copy->uniqueID = uniqueID;
 	return copy;
 }
 
@@ -569,7 +579,8 @@ static NSString *BDSKLastImportLocalizedString = nil;
 // NSCopying protocol
 
 - (id)copyWithZone:(NSZone *)aZone {
-	id copy = [[[self class] allocWithZone:aZone] initWithName:name count:count filter:filter];
+	BDSKSmartGroup *copy = [[[self class] allocWithZone:aZone] initWithName:name count:count filter:filter];
+    copy->uniqueID = uniqueID;
 	return copy;
 }
 
