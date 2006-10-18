@@ -65,19 +65,20 @@
 - (void)drawRect:(NSRect)aRect
 {
     // fill entire view, not just the (possibly clipped) aRect
-    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartCIColor:[self upperColor] endCIColor:[self lowerColor]];
+    [[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
 }
 
+// -[CIColor initWithColor:] fails (returns nil) with +[NSColor gridColor] rdar://problem/4789043
 - (void)setLowerColor:(NSColor *)color
 {
     [endColor autorelease];
-    endColor = [[CIColor alloc] initWithColor:color];
+    endColor = [[CIColor colorWithNSColor:color] retain];
 }
 
 - (void)setUpperColor:(NSColor *)color
 {
     [startColor autorelease];
-    startColor = [[CIColor alloc] initWithColor:color];
+    startColor = [[CIColor colorWithNSColor:color] retain];
 }    
 
 - (CIColor *)lowerColor { return endColor; }

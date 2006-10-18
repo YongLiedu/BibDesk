@@ -80,19 +80,19 @@
 - (void)drawBlendedJoinEndAtLeftInRect:(NSRect)rect {
     // this blends us smoothly with the a vertical divider on our left
     Class svClass = [self class];
-    [[NSBezierPath bezierPathWithRect:rect] fillPathWithCIColor:[svClass startColor]
+    [[NSBezierPath bezierPathWithRect:rect] fillPathWithColor:[svClass startColor]
                                                  blendedAtRight:NO
-                                  ofVerticalGradientFromCIColor:[svClass startColor]
-                                                      toCIColor:[svClass endColor]];
+                                  ofVerticalGradientFromColor:[svClass startColor]
+                                                      toColor:[svClass endColor]];
 }
 
 - (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
     // this blends us smoothly with the status bar
-    [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromCIColor:[[self class] startColor]
-                                                                            toCIColor:[[self class] endColor]
+    [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
+                                                                            toColor:[[self class] endColor]
                                                                          blendedAtTop:NO
-                                                        ofVerticalGradientFromCIColor:[BDSKStatusBar lowerColor]
-                                                                            toCIColor:[BDSKStatusBar upperColor]];
+                                                        ofVerticalGradientFromColor:[BDSKStatusBar lowerColor]
+                                                                            toColor:[BDSKStatusBar upperColor]];
 }
 
 - (void)drawRect:(NSRect)rect {
@@ -114,7 +114,7 @@
 			divRect.size.width = [self dividerThickness];
 		}
 		if (NSIntersectsRect(rect, divRect)) {
-			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartCIColor:[[self class] startColor] endCIColor:[[self class] endColor]];
+			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
             if (drawEnd) {
                 NSRect endRect, ignored;
                 if ([self isVertical]) {

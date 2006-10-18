@@ -48,15 +48,7 @@
 // Modified after http://www.cocoadev.com/index.pl?GradientFill
 //
 
-- (void)fillPathVertically:(BOOL)isVertical withStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
-{
-    OB_WARN_OBSOLETE_METHOD;
-    CIColor *startColor = [CIColor colorWithNSColor:inStartColor];
-    CIColor *endColor = [CIColor colorWithNSColor:inEndColor];
-    [self fillPathVertically:isVertical withStartCIColor:startColor endCIColor:endColor];
-}
-
-- (void)fillPathVertically:(BOOL)isVertical withStartCIColor:(CIColor *)startColor endCIColor:(CIColor *)endColor;
+- (void)fillPathVertically:(BOOL)isVertical withStartColor:(CIColor *)startColor endColor:(CIColor *)endColor;
 {
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
@@ -80,31 +72,12 @@
     [nsContext restoreGraphicsState];
 }
 
-- (void)fillPathVerticallyWithStartCIColor:(CIColor *)inStartColor endCIColor:(CIColor *)inEndColor;
+- (void)fillPathVerticallyWithStartColor:(CIColor *)inStartColor endColor:(CIColor *)inEndColor;
 {
-    [self fillPathVertically:YES withStartCIColor:inStartColor endCIColor:inEndColor];
+    [self fillPathVertically:YES withStartColor:inStartColor endColor:inEndColor];
 }
 
-- (void)fillPathVerticallyWithStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
-{
-    OB_WARN_OBSOLETE_METHOD;
-	[self fillPathVertically:YES withStartColor:inStartColor endColor:inEndColor];
-}
-
-- (void)fillPathHorizontallyWithStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
-{
-	[self fillPathVertically:NO withStartColor:inStartColor endColor:inEndColor];
-}
-
-- (void)fillPathWithHorizontalGradientFromColor:(NSColor *)inFgStartColor toColor:(NSColor *)inFgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
-    CIColor *fgStartColor = [CIColor colorWithNSColor:inFgStartColor];
-    CIColor *fgEndColor = [CIColor colorWithNSColor:inFgEndColor];
-    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
-    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
-    [self fillPathWithHorizontalGradientFromCIColor:fgStartColor toCIColor:fgEndColor blendedAtTop:top ofVerticalGradientFromCIColor:bgStartColor toCIColor:bgEndColor];
-}
-
-- (void)fillPathWithHorizontalGradientFromCIColor:(CIColor *)fgStartColor toCIColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromCIColor:(CIColor *)bgStartColor toCIColor:(CIColor *)bgEndColor;
+- (void)fillPathWithHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
@@ -121,16 +94,7 @@
     [nsContext restoreGraphicsState];
 }
 
-- (void)fillPathWithVerticalGradientFromColor:(NSColor *)inFgStartColor toColor:(NSColor *)inFgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
-    OB_WARN_OBSOLETE_METHOD;
-    CIColor *fgStartColor = [CIColor colorWithNSColor:inFgStartColor];
-    CIColor *fgEndColor = [CIColor colorWithNSColor:inFgEndColor];
-    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
-    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
-    [self fillPathWithVerticalGradientFromCIColor:fgStartColor toCIColor:fgEndColor blendedAtRight:right ofHorizontalGradientFromCIColor:bgStartColor toCIColor:bgEndColor];
-}
-
-- (void)fillPathWithVerticalGradientFromCIColor:(CIColor *)fgStartColor toCIColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromCIColor:(CIColor *)bgStartColor toCIColor:(CIColor *)bgEndColor;
+- (void)fillPathWithVerticalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
@@ -147,40 +111,12 @@
     [nsContext restoreGraphicsState];
 }
 
-- (void)fillPathWithColor:(NSColor *)inFgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
-    OB_WARN_OBSOLETE_METHOD;
-    CIColor *fgColor = [CIColor colorWithNSColor:inFgColor];
-    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
-    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
-    [self fillPathWithCIColor:fgColor blendedAtRight:right ofVerticalGradientFromCIColor:bgStartColor toCIColor:bgEndColor];
-}
-
-- (void)fillPathWithCIColor:(CIColor *)fgColor blendedAtRight:(BOOL)right ofVerticalGradientFromCIColor:(CIColor *)bgStartColor toCIColor:(CIColor *)bgEndColor;
+- (void)fillPathWithColor:(CIColor *)fgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
     NSRect bounds = [self bounds];
     CGRect aRect = *(CGRect*)&bounds;
     
     CIImage *image = [CIImage imageInRect:aRect withColor:fgColor blendedAtRight:right ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
-    
-    NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
-    [nsContext saveGraphicsState];
-    
-	[self addClip];
-	
-    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
-    
-    [nsContext restoreGraphicsState];
-}
-
-- (void)fillPathWithColor:(NSColor *)inFgColor blendedAtTop:(BOOL)top ofHorizontalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
-    CIColor *fgColor = [CIColor colorWithNSColor:inFgColor];
-    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
-    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
-    
-    NSRect bounds = [self bounds];
-    CGRect aRect = *(CGRect*)&bounds;
-    
-    CIImage *image = [CIImage imageInRect:aRect withColor:fgColor blendedAtTop:top ofHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];

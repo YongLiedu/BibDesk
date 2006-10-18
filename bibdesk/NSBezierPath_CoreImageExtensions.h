@@ -41,22 +41,13 @@
 
 @interface NSBezierPath (BDSKGradientExtensions)
 
-- (void)fillPathVertically:(BOOL)isVertical withStartCIColor:(CIColor *)startColor endCIColor:(CIColor *)endColor;
-- (void)fillPathVerticallyWithStartCIColor:(CIColor *)inStartColor endCIColor:(CIColor *)inEndColor;
+- (void)fillPathVertically:(BOOL)isVertical withStartColor:(CIColor *)startColor endColor:(CIColor *)endColor;
+- (void)fillPathVerticallyWithStartColor:(CIColor *)inStartColor endColor:(CIColor *)inEndColor;
 
-- (void)fillPathVertically:(BOOL)isVertical withStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
-- (void)fillPathVerticallyWithStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
-- (void)fillPathHorizontallyWithStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
+- (void)fillPathWithHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 
-- (void)fillPathWithHorizontalGradientFromColor:(NSColor *)inFgStartColor toColor:(NSColor *)inFgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor;
-- (void)fillPathWithVerticalGradientFromColor:(NSColor *)inFgStartColor toColor:(NSColor *)inFgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor;
+- (void)fillPathWithVerticalGradientFromColor:(CIColor *)inFgStartColor toColor:(CIColor *)inFgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(CIColor *)inBgStartColor toColor:(CIColor *)inBgEndColor;
+- (void)fillPathWithColor:(CIColor *)inFgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(CIColor *)inBgStartColor toColor:(CIColor *)inBgEndColor;
 
-- (void)fillPathWithHorizontalGradientFromCIColor:(CIColor *)fgStartColor toCIColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromCIColor:(CIColor *)bgStartColor toCIColor:(CIColor *)bgEndColor;
-
-- (void)fillPathWithVerticalGradientFromCIColor:(CIColor *)inFgStartColor toCIColor:(CIColor *)inFgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromCIColor:(CIColor *)inBgStartColor toCIColor:(CIColor *)inBgEndColor;
-- (void)fillPathWithCIColor:(CIColor *)inFgColor blendedAtRight:(BOOL)right ofVerticalGradientFromCIColor:(CIColor *)inBgStartColor toCIColor:(CIColor *)inBgEndColor;
-
-- (void)fillPathWithColor:(NSColor *)inFgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor;
-- (void)fillPathWithColor:(NSColor *)inFgColor blendedAtTop:(BOOL)top ofHorizontalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor;
 
 @end
