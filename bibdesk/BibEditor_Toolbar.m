@@ -287,6 +287,11 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     // Optional method   self message is sent to us since we are the target of some toolbar item actions
     // (for example:  of the save items action)
     BOOL enable = YES;
+    NSString *identifier = [toolbarItem itemIdentifier];
+    
+    if ([identifier isEqualToString:BibEditorToolbarDeleteItemIdentifier] || 
+        [identifier isEqualToString:BibEditorToolbarAddWithCrossrefItemIdentifier]) 
+        enable = isEditable;
 
     return enable;
 }
