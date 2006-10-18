@@ -46,14 +46,25 @@
     NSString *filePath;
     BOOL isRetrieving;
     BOOL failedDownload;
+    NSURLDownload *URLDownload;
+	NSUndoManager *undoManager;
 }
 
 - (NSImage *)icon;
 
 - (id)initWithURL:(NSURL *)aURL;
+
+- (void)setName:(NSString *)newName;
+
 - (NSURL *)URL;
+- (void)setURL:(NSURL *)newURL;
+
 - (NSArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
+
 - (BOOL)isRetrieving;
+
+- (NSUndoManager *)undoManager;
+- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 @end

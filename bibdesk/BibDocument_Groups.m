@@ -342,6 +342,7 @@
     SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
     [urlGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
     
+	[group setUndoManager:[self undoManager]];
     [groupTableView reloadData];
 }
 
@@ -352,6 +353,7 @@
     [spinner removeFromSuperview];
     [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
     
+	[group setUndoManager:nil];
 	[urlGroups removeObjectIdenticalTo:group];
     [groupTableView reloadData];
 }
@@ -1122,6 +1124,17 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 }
 
+- (void)changeURLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+	if(returnCode == NSOKButton){
+        if ([sheet makeFirstResponder:nil] == NO)
+            [sheet endEditingFor:nil];
+        NSURL *url = [NSURL URLWithString:[addURLField stringValue]];
+		BDSKURLGroup *group = (BDSKURLGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
+		[group setURL:url];
+	}
+	
+}
+
 - (IBAction)editGroupAction:(id)sender {
 	if ([groupTableView numberOfSelectedRows] != 1) {
 		NSBeep();
@@ -1148,6 +1161,9 @@ The groupedPublications array is a subset of the publications array, developed b
         // this must be a person field
         OBASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
+	} else if ([group isURL]) {
+        [addURLField setStringValue:[[(BDSKURLGroup *)group URL] absoluteString]];
+        [NSApp beginSheet:addURLGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(changeURLGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 	}
 }
 
@@ -1611,6 +1627,7 @@ The groupedPublications array is a subset of the publications array, developed b
         @try {
             url = [NSURL URLWithString:[groupDict objectForKey:@"URL"]];
             group = [[BDSKURLGroup alloc] initWithURL:url];
+            [group setUndoManager:[self undoManager]];
             [array addObject:group];
         }
         @catch(id exception) {

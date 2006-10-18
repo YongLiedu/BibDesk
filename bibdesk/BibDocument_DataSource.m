@@ -57,6 +57,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "BibEditor.h"
 #import "BDSKSharedGroup.h"
+#import "BDSKURLGroup.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
@@ -233,6 +234,10 @@
 		}else if([group isStatic] == YES){
 			[(BDSKStaticGroup *)group setName:object];
 			[[self undoManager] setActionName:NSLocalizedString(@"Rename Static Group",@"Rename static group")];
+			[self sortGroupsByKey:sortGroupsKey];
+		}else if([group isURL] == YES){
+			[(BDSKURLGroup *)group setName:object];
+			[[self undoManager] setActionName:NSLocalizedString(@"Rename URL Group",@"Rename URL group")];
 			[self sortGroupsByKey:sortGroupsKey];
 		}else{
 			NSArray *pubs = [groupedPublications copy];

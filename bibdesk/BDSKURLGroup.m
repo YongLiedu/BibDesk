@@ -57,6 +57,7 @@
         URL = [aURL copy];
         isRetrieving = NO;
         failedDownload = NO;
+        URLDownload = nil;
     }
     
     return self;
@@ -64,6 +65,7 @@
 
 - (void)dealloc;
 {
+    [URLDownload cancel];
     [URL release];
     [filePath release];
     [publications release];
@@ -98,8 +100,11 @@
     } else {
         NSURLRequest *request = [NSURLRequest requestWithURL:URL];
         // we use a WebDownload since it's supposed to add authentication dialog capability
-        WebDownload *download = [[[WebDownload alloc] initWithRequest:request delegate:self] autorelease];
-        [download setDestination:[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] allowOverwrite:NO];
+        if ([self isRetrieving])
+            [URLDownload cancel];
+        [URLDownload release];
+        URLDownload = [[WebDownload alloc] initWithRequest:request delegate:self];
+        [URLDownload setDestination:[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] allowOverwrite:NO];
         isRetrieving = YES;
     }
 }
@@ -115,6 +120,11 @@
     isRetrieving = NO;
     failedDownload = NO;
     NSError *error = nil;
+    
+    if (URLDownload) {
+        [URLDownload release];
+        URLDownload = nil;
+    }
 
     // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
     NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:NSASCIIStringEncoding guessEncoding:YES];
@@ -140,6 +150,12 @@
 {
     isRetrieving = NO;
     failedDownload = YES;
+    
+    if (URLDownload) {
+        [URLDownload release];
+        URLDownload = nil;
+    }
+    
     // redraw 
     [self setPublications:nil];
     [NSApp presentError:error];
@@ -147,9 +163,43 @@
 
 #pragma mark Accessors
 
+- (void)setName:(NSString *)newName;
+{
+    if (newName != name) {
+		[(BDSKURLGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
+        [name release];
+        name = [newName retain];
+    }
+}
+
 - (NSURL *)URL;
 {
     return URL;
+}
+
+- (void)setURL:(NSURL *)newURL;
+{
+    if (URL != newURL) {
+		[[[self undoManager] prepareWithInvocationTarget:self] setURL:URL];
+        
+        if ([name isEqualToString:[URL lastPathComponent]])
+            [self setName:[newURL lastPathComponent]];
+        
+        [URL release];
+        URL = [newURL retain];
+        
+        if ([self isRetrieving])
+            [URLDownload cancel];
+        
+        [publications release];
+        publications = nil;
+        
+        count = 0;
+        
+        // use this to notify the tableview to start the progress indicators
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
+    }
 }
 
 - (NSArray *)publications;
@@ -183,6 +233,17 @@
 
 - (BOOL)failedDownload { return failedDownload; }
 
+- (NSUndoManager *)undoManager {
+    return undoManager;
+}
+
+- (void)setUndoManager:(NSUndoManager *)newUndoManager {
+    if (undoManager != newUndoManager) {
+        [undoManager release];
+        undoManager = [newUndoManager retain];
+    }
+}
+
 // BDSKGroup overrides
 
 - (NSImage *)icon {
@@ -192,7 +253,7 @@
 
 - (BOOL)isURL { return YES; }
 
-- (BOOL)hasEditableName { return NO; }
+- (BOOL)isEditable { return YES; }
 
 - (BOOL)containsItem:(BibItem *)item {
     // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the the URL download is busy; containsItem is called very frequently
