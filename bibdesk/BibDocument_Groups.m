@@ -1243,6 +1243,10 @@ The groupedPublications array is a subset of the publications array, developed b
     [self mergeInPublications:[self selectedPublications]];
 }
 
+- (IBAction)refreshURLGroups:(id)sender{
+    [urlGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+}
+
 #pragma mark Add or remove items
 
 - (NSArray *)mergeInPublications:(NSArray *)items{

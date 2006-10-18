@@ -94,6 +94,7 @@
                 quickSearchRemoveField = id; 
                 refreshSharedBrowsing = id; 
                 refreshSharing = id; 
+                refreshURLGroups = id; 
                 removeCustomCiteString = id; 
                 removeGroupFieldAction = id; 
                 removeSelectedGroups = id; 

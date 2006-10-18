@@ -802,6 +802,10 @@
     return ([pw boolForKey:BDSKShouldLookForSharedFilesKey]);
 }
 
+- (BOOL)validateRefreshURLGroupsMenuItem:(NSMenuItem *)menuItem {
+    return [urlGroups count] > 0;
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 

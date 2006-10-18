@@ -124,6 +124,7 @@
 - (IBAction)mergeInSharedGroup:(id)sender;
 - (IBAction)mergeInSharedPublications:(id)sender;
 - (NSArray *)mergeInPublications:(NSArray *)items;
+- (IBAction)refreshURLGroups:(id)sender;
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)setStaticGroupsFromSerializedData:(NSData *)data;
