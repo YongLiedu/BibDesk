@@ -249,7 +249,7 @@
 
 - (NSImage *)icon {
     // @@ should get its own icon
-    return [NSImage smallImageNamed:@"sharedFolderIcon"];
+    return [NSImage smallImageNamed:@"urlFolderIcon"];
 }
 
 - (BOOL)isURL { return YES; }
