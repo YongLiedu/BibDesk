@@ -123,7 +123,7 @@ static int numberOfOpenEditors = 0;
         numberOfOpenEditors++;
         
         publication = [aBib retain];
-        isEditable = NO;//([publication document] != nil);
+        isEditable = ([publication document] != nil);
                                         // has to be before we call [self window] because that calls windowDidLoad:.
         pdfSnoopViewLoaded = NO;
         webSnoopViewLoaded = NO;
