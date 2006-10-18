@@ -301,31 +301,25 @@
     NSEnumerator *e = [[self selectedPublications] objectEnumerator];
     BibItem *pub;
     while (pub = [e nextObject]) {
-        if ([pub document] == self)
-            [self editPub:pub];
+        [self editPub:pub];
     }
 }
 
 - (IBAction)editPubCmd:(id)sender{
-    if([self hasSharedGroupsSelected] == NO){
-		int n = [self numberOfSelectedPubs];
-		if (n > 6) {
-            // Do we really want a gazillion of editor windows?
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
-                                             defaultButton:NSLocalizedString(@"No", @"No")
-                                          alternateButton:NSLocalizedString(@"Yes", @"Yes")
-                                              otherButton:nil
-                                informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
-			[alert beginSheetModalForWindow:documentWindow
-                              modalDelegate:self
-                             didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
-                                contextInfo:NULL];
-		} else {
-            [self editPubAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
-        }
-	} else {
-        // currently don't allow editing shared pubs; [self selectedPublications] only returns objects from shownPublications
-        NSBeginAlertSheet(NSLocalizedString(@"Can't Edit Shared Publications", @""), nil, nil, nil, documentWindow, nil, NULL, NULL, NULL, NSLocalizedString(@"You need to drag or copy shared publications to your own document before attempting to edit them", @""));
+    int n = [self numberOfSelectedPubs];
+    if (n > 6) {
+        // Do we really want a gazillion of editor windows?
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
+                                         defaultButton:NSLocalizedString(@"No", @"No")
+                                      alternateButton:NSLocalizedString(@"Yes", @"Yes")
+                                          otherButton:nil
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
+        [alert beginSheetModalForWindow:documentWindow
+                          modalDelegate:self
+                         didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+    } else {
+        [self editPubAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:NULL];
     }
 }
 
