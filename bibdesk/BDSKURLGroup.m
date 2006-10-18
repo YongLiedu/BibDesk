@@ -97,12 +97,16 @@
 - (void)startDownload;
 {
     if ([URL isFileURL]) {
-        [self download:nil didCreateDestination:[URL path]];
-        [self downloadDidFinish:nil];
+        if([[NSFileManager defaultManager] fileExistsAtPath:[URL path]]){
+            [self download:nil didCreateDestination:[URL path]];
+            [self downloadDidFinish:nil];
+        } else {
+            [self download:nil didFailWithError:nil];
+        }
     } else {
         NSURLRequest *request = [NSURLRequest requestWithURL:URL];
         WebDownload *download = [[[WebDownload alloc] initWithRequest:request delegate:self] autorelease];
-        [download setDestination:[[NSApp delegate] temporaryFilePath:nil createDirectory:YES] allowOverwrite:NO];
+        [download setDestination:[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] allowOverwrite:NO];
         isRetrieving = YES;
     }
 }
@@ -117,19 +121,21 @@
 {
     isRetrieving = NO;
     failedDownload = NO;
-    NSError *error;
+    NSError *error = nil;
     NSStringEncoding encoding;
     NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:NSASCIIStringEncoding guessEncoding:YES];
     NSArray *pubs = nil;
     if (nil == contentString) {
         failedDownload = YES;
-        [NSApp presentError:error];
     } else {
         int type = [contentString contentStringType];
         if (type == BDSKBibTeXStringType) {
             pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] error:&error document:nil];
         } else {
             pubs = [BDSKParserForStringType(type) itemsFromString:contentString error:&error frontMatter:nil filePath:filePath];
+        }
+        if (pubs == nil || error) {
+            failedDownload = YES;
         }
     }
     [self setPublications:pubs];
@@ -174,7 +180,7 @@
 
 - (BOOL)failedDownload { return failedDownload; }
 
-    // BDSKGroup overrides
+// BDSKGroup overrides
 
 - (NSImage *)icon {
     return [BDSKSharedGroup icon];
@@ -185,7 +191,7 @@
 - (BOOL)hasEditableName { return NO; }
 
 - (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user canceled a password; containsItem is called very frequently
+    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the the URL download is busy; containsItem is called very frequently
     NSArray *pubs = [publications retain];
     BOOL rv = [pubs containsObject:item];
     [pubs release];
