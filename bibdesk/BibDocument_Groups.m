@@ -386,7 +386,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [sharedGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
     }
     
-    // rebuild the dictionary of spinners
+    // reset the dictionary of spinners
     if (sharedGroupSpinners == nil) {
         sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
     } else {
@@ -394,19 +394,6 @@ The groupedPublications array is a subset of the publications array, developed b
         [sharedGroupSpinners removeAllObjects];
     }
     
-    NSEnumerator *groupEnum = [array objectEnumerator];
-    BDSKSharedGroup *group;
-    
-    while(group = [groupEnum nextObject]){
-        NSProgressIndicator *spinner = [[NSProgressIndicator alloc] init];
-        [spinner setControlSize:NSSmallControlSize];
-        [spinner setStyle:NSProgressIndicatorSpinningStyle];
-        [spinner setDisplayedWhenStopped:NO];
-        [spinner sizeToFit];
-        [sharedGroupSpinners setObject:spinner forKey:[group name]];
-        [spinner release];
-    }
-	
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	

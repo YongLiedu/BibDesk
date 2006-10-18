@@ -292,9 +292,19 @@
         BDSKGroup *group = [self objectInGroupsAtIndex:row];
         if ([group isShared] == NO) return;
         
-        NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group name]];
+        NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
         
-        if ([(BDSKSharedGroup *)group isRetrieving]) {
+        if ([group isRetrieving]) {
+            if (spinner == nil) {
+                spinner = [[NSProgressIndicator alloc] init];
+                [spinner setControlSize:NSSmallControlSize];
+                [spinner setStyle:NSProgressIndicatorSpinningStyle];
+                [spinner setDisplayedWhenStopped:NO];
+                [spinner sizeToFit];
+                [sharedGroupSpinners setObject:spinner forKey:[group uniqueID]];
+                [spinner release];
+            }
+            
             int column = [[tv tableColumns] indexOfObject:aTableColumn];
             NSRect ignored, rect = [tv frameOfCellAtColumn:column row:row];
             NSSize size = [spinner frame].size;
@@ -306,9 +316,10 @@
             if([[tv subviews] containsObject:spinner] == NO)
                 [tv addSubview:spinner];
             [spinner startAnimation:nil];
-        } else {
+        } else if (spinner != nil) {
             [spinner stopAnimation:nil];
             [spinner removeFromSuperview];
+            [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
         }
     }
 }
