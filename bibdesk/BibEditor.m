@@ -123,6 +123,7 @@ static int numberOfOpenEditors = 0;
         numberOfOpenEditors++;
         
         publication = [aBib retain];
+        isEditable = NO;//([publication document] != nil);
                                         // has to be before we call [self window] because that calls windowDidLoad:.
         pdfSnoopViewLoaded = NO;
         webSnoopViewLoaded = NO;
@@ -155,11 +156,16 @@ static int numberOfOpenEditors = 0;
     
 	// The rest is called when we load the window
 	
+    [[bibFields prototype] setEditable:isEditable];
+    [bibTypeButton setEnabled:isEditable];
+    [addFieldButton setEnabled:isEditable];
+    
     // Setup the default cells for the extraBibFields matrix
 	booleanButtonCell = [[NSButtonCell alloc] initTextCell:@""];
 	[booleanButtonCell setButtonType:NSSwitchButton];
 	[booleanButtonCell setTarget:self];
 	[booleanButtonCell setAction:@selector(changeFlag:)];
+    [booleanButtonCell setEnabled:isEditable];
 	
 	triStateButtonCell = [booleanButtonCell copy];
 	[triStateButtonCell setAllowsMixedState:YES];
@@ -168,6 +174,7 @@ static int numberOfOpenEditors = 0;
 	[ratingButtonCell setImagePosition:NSImageLeft];
 	[ratingButtonCell setTarget:self];
 	[ratingButtonCell setAction:@selector(changeRating:)];
+    [ratingButtonCell setEnabled:isEditable];
 	
 	NSCell *cell = [[NSCell alloc] initTextCell:@""];
 	[extraBibFields setPrototype:cell];
@@ -219,13 +226,15 @@ static int numberOfOpenEditors = 0;
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     
     [self setupForm];
-    [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+    if (isEditable)
+        [bibFields registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
     // Setup the citekey textfield
     BDSKCiteKeyFormatter *citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
     [citeKeyField setFormatter:citeKeyFormatter];
     [citeKeyFormatter release];
 	[citeKeyField setStringValue:[publication citeKey]];
+    [citeKeyField setEditable:isEditable];
 	
     // Setup the type popup
     [self setupTypePopUp];
@@ -234,12 +243,16 @@ static int numberOfOpenEditors = 0;
     // The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
     [self setupButtons];
 
-	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
+	if (isEditable)
+        [authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
     
     // Setup the textviews
     [notesView setString:[publication valueOfField:BDSKAnnoteString inherit:NO]];
+    [notesView setEditable:isEditable];
     [abstractView setString:[publication valueOfField:BDSKAbstractString inherit:NO]];
+    [abstractView setEditable:isEditable];
     [rssDescriptionView setString:[publication valueOfField:BDSKRssDescriptionString inherit:NO]];
+    [rssDescriptionView setEditable:isEditable];
 	currentEditedView = nil;
     
     // Set up identifiers for the tab view items, since we receive delegate messages from it
@@ -262,7 +275,8 @@ static int numberOfOpenEditors = 0;
     [bibFields setDelegate:self];
     
     [[self window] setDelegate:self];
-    [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
+    if (isEditable)
+        [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
 	
     [self setCiteKeyDuplicateWarning:![publication isValidCiteKey:[publication citeKey]]];
     
@@ -879,23 +893,23 @@ static int numberOfOpenEditors = 0;
 	else if (theAction == @selector(generateCiteKey:)) {
 		// need to set the title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
-		return YES;
+		return isEditable;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
 		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
 		NSString *lurl = [publication localUrlPath];
-		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+		return (isEditable && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
 	else if (theAction == @selector(duplicateTitleToBooktitle:)) {
 		// need to set the title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle")];
-		return (![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
+		return (isEditable && ![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
 	}
 	else if (theAction == @selector(selectCrossrefParentAction:)) {
         return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == NO);
 	}
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
-        return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
+        return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
 	}
 	else if (theAction == @selector(openLinkedFile:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
@@ -922,7 +936,7 @@ static int numberOfOpenEditors = 0;
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Move Linked File", @"Move Linked File")];
-		return (lurl == nil ? NO : YES);
+		return (isEditable && lurl != nil);
 	}
 	else if (theAction == @selector(toggleSnoopDrawer:)) {
 		int requiredContent = [menuItem tag];
@@ -956,12 +970,14 @@ static int numberOfOpenEditors = 0;
 		return ([publication remoteURLForField:field] != nil);
 	}
 	else if (theAction == @selector(saveFileAsLocalUrl:)) {
-		return ![[[remoteSnoopWebView mainFrame] dataSource] isLoading];
+		return (isEditable && [[[remoteSnoopWebView mainFrame] dataSource] isLoading] == NO);
 	}
 	else if (theAction == @selector(downloadLinkedFileAsLocalUrl:)) {
 		return NO;
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
+        if (isEditable == NO)
+            return NO;
         id cell = [bibFields selectedCell];
 		return (cell != nil && [bibFields currentEditor] != nil &&
 				![macroTextFieldWC isEditing] && ![[cell title] isEqualToString:BDSKCrossrefString]);
@@ -974,6 +990,15 @@ static int numberOfOpenEditors = 0;
 		}
 		return YES;
     }
+    else if (theAction == @selector(raiseAddField:) || 
+             theAction == @selector(raiseDelField:) || 
+             theAction == @selector(raiseChangeFieldName:) || 
+             theAction == @selector(chooseLocalURL:) || 
+             theAction == @selector(setLocalURLPathFromMenuItem:) || 
+             theAction == @selector(setRemoteURLFromMenuItem:)) {
+        return isEditable;
+    }
+
 	return YES;
 }
 
@@ -3248,7 +3273,8 @@ static int numberOfOpenEditors = 0;
 	[[viewLocalButton cell] setUsesItemFromMenu:NO];
 	[viewLocalButton setRefreshesMenu:YES];
 	[viewLocalButton setDelegate:self];
-    [viewLocalButton registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]];
+    if (isEditable)
+        [viewLocalButton registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, nil]];
     
 	[viewLocalButton setMenu:[self menuForImagePopUpButton:viewLocalButton]];
     
@@ -3260,7 +3286,8 @@ static int numberOfOpenEditors = 0;
 	[[viewRemoteButton cell] setUsesItemFromMenu:NO];
 	[viewRemoteButton setRefreshesMenu:YES];
 	[viewRemoteButton setDelegate:self];
-    [viewRemoteButton registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
+    if (isEditable)
+        [viewRemoteButton registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, BDSKWeblocFilePboardType, nil]];
     
 	[viewRemoteButton setMenu:[self menuForImagePopUpButton:viewRemoteButton]];
     
