@@ -43,6 +43,7 @@
 #import "BibAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKParserProtocol.h"
+#import "NSError_BDSKExtensions.h"
 
 @implementation BDSKURLGroup
 
@@ -72,7 +73,7 @@
 
 - (NSString *)description;
 {
-    return [NSString stringWithFormat:@"<%@ %p>: {\n\tis downloading: %@\n\tname: %@\n }", [self class], self, (isRetrieving ? @"yes" : @"no"), name];
+    return [NSString stringWithFormat:@"<%@ %p>: {\n\tis downloading: %@\n\tname: %@\n\tURL: %@\n }", [self class], self, (isRetrieving ? @"yes" : @"no"), name, URL];
 }
 
 #pragma mark Downloading
@@ -80,14 +81,22 @@
 - (void)startDownload;
 {
     if ([URL isFileURL]) {
-        if([[NSFileManager defaultManager] fileExistsAtPath:[URL path]]){
+        BOOL isDir;
+        if([[NSFileManager defaultManager] fileExistsAtPath:[URL path] isDirectory:&isDir] && NO == isDir){
             [self download:nil didCreateDestination:[URL path]];
             [self downloadDidFinish:nil];
         } else {
-            [self download:nil didFailWithError:nil];
+            NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
+            if (isDir)
+                [error setValue:NSLocalizedString(@"URL points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
+            else
+                [error setValue:NSLocalizedString(@"The URL points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
+            [error setValue:[URL path] forKey:NSFilePathErrorKey];
+            [self download:nil didFailWithError:error];
         }
     } else {
         NSURLRequest *request = [NSURLRequest requestWithURL:URL];
+        // we use a WebDownload since it's supposed to add authentication dialog capability
         WebDownload *download = [[[WebDownload alloc] initWithRequest:request delegate:self] autorelease];
         [download setDestination:[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] allowOverwrite:NO];
         isRetrieving = YES;
@@ -105,7 +114,8 @@
     isRetrieving = NO;
     failedDownload = NO;
     NSError *error = nil;
-    NSStringEncoding encoding;
+
+    // tried using -[NSString stringWithContentsOfFile:usedEncoding:error:] but it fails too often
     NSString *contentString = [NSString stringWithContentsOfFile:filePath encoding:NSASCIIStringEncoding guessEncoding:YES];
     NSArray *pubs = nil;
     if (nil == contentString) {
@@ -119,6 +129,7 @@
         }
         if (pubs == nil || error) {
             failedDownload = YES;
+            [NSApp presentError:error];
         }
     }
     [self setPublications:pubs];
@@ -130,6 +141,7 @@
     failedDownload = YES;
     // redraw 
     [self setPublications:nil];
+    [NSApp presentError:error];
 }
 
 #pragma mark Accessors
