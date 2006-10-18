@@ -741,7 +741,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     size_t staticGroupStrLength = strlen(staticGroupStr);
     Boolean isStaticGroup = FALSE;
     const char *urlGroupStr = "BibDesk URL Groups";
-    size_t urlGroupStrLength = strlen(staticGroupStr);
+    size_t urlGroupStrLength = strlen(urlGroupStr);
     Boolean isURLGroup = FALSE;
     Boolean firstValue = TRUE;
     
@@ -753,7 +753,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                     isSmartGroup = TRUE;
                 else if(strlen(text) >= staticGroupStrLength && strncmp(text, staticGroupStr, staticGroupStrLength) == 0)
                     isStaticGroup = TRUE;
-                else if(strlen(text) >= staticGroupStrLength && strncmp(text, urlGroupStr, urlGroupStrLength) == 0)
+                else if(strlen(text) >= urlGroupStrLength && strncmp(text, urlGroupStr, urlGroupStrLength) == 0)
                     isURLGroup = TRUE;
             }
             
