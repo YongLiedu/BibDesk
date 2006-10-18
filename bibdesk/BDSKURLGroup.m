@@ -84,9 +84,10 @@
 - (void)startDownload;
 {
     if ([URL isFileURL]) {
+        NSString *path = [[URL fileURLByResolvingAliases] path];
         BOOL isDir;
-        if([[NSFileManager defaultManager] fileExistsAtPath:[URL path] isDirectory:&isDir] && NO == isDir){
-            [self download:nil didCreateDestination:[URL path]];
+        if([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && NO == isDir){
+            [self download:nil didCreateDestination:path];
             [self downloadDidFinish:nil];
         } else {
             NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
@@ -135,7 +136,7 @@
         int type = [contentString contentStringType];
         if (type == BDSKBibTeXStringType) {
             pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] error:&error document:nil];
-        } else {
+        } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKParserForStringType(type) itemsFromString:contentString error:&error frontMatter:nil filePath:filePath];
         }
         if (pubs == nil || error) {
