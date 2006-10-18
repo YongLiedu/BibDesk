@@ -44,6 +44,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKParserProtocol.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSImage+Toolbox.h"
 
 @implementation BDSKURLGroup
 
@@ -156,7 +157,7 @@
     if([self isRetrieving] == NO && publications == nil){
         // use this to notify the tableview to start the progress indicators
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
         
         // get the publications asynchronously if remote, synchronously if local
         [self startDownload]; 
@@ -175,7 +176,7 @@
     [self setCount:[publications count]];
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
 - (BOOL)isRetrieving { return isRetrieving; }
@@ -185,7 +186,8 @@
 // BDSKGroup overrides
 
 - (NSImage *)icon {
-    return [BDSKSharedGroup icon];
+    // @@ should get its own icon
+    return [NSImage smallImageNamed:@"sharedFolderIcon"];
 }
 
 - (BOOL)isURL { return YES; }
