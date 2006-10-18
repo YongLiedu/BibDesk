@@ -785,11 +785,29 @@
 }
 
 - (BOOL)validateMergeInSharedGroupMenuItem:(NSMenuItem *)menuItem {
-    return ([self hasSharedGroupsSelected] || [self hasURLGroupsSelected]);
+    if ([self hasSharedGroupsSelected]) {
+        [menuItem setTitle:[NSLocalizedString(@"Merge In Shared Group", @"Merge In Shared Group") stringByAppendingEllipsis]];
+        return YES;
+    } else if ([self hasURLGroupsSelected]) {
+        [menuItem setTitle:[NSLocalizedString(@"Merge In External File Group", @"Merge In External File Group") stringByAppendingEllipsis]];
+        return YES;
+    } else {
+        [menuItem setTitle:[NSLocalizedString(@"Merge In Shared Group", @"Merge In Shared Group") stringByAppendingEllipsis]];
+        return NO;
+    }
 }
 
 - (BOOL)validateMergeInSharedPublicationsMenuItem:(NSMenuItem *)menuItem {
-    return (([self hasSharedGroupsSelected] || [self hasURLGroupsSelected]) && [self numberOfSelectedPubs] > 0);
+    if ([self hasSharedGroupsSelected]) {
+        [menuItem setTitle:[NSLocalizedString(@"Merge In Shared Publications", @"Merge In Shared Publications") stringByAppendingEllipsis]];
+        return [self numberOfSelectedPubs] > 0;
+    } else if ([self hasURLGroupsSelected]) {
+        [menuItem setTitle:[NSLocalizedString(@"Merge In External Publications", @"Merge In External Publications") stringByAppendingEllipsis]];
+        return [self numberOfSelectedPubs] > 0;
+    } else {
+        [menuItem setTitle:[NSLocalizedString(@"Merge In External Publications", @"Merge In External Publications") stringByAppendingEllipsis]];
+        return NO;
+    }
 }
 
 - (BOOL)validateRefreshSharingMenuItem:(NSMenuItem *)menuItem {
