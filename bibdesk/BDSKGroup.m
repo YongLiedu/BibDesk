@@ -163,8 +163,12 @@ static unsigned currentUniqueID = 0;
 	return NO;
 }
 
-- (BOOL)isScratch {
+- (BOOL)isScript {
 	return NO;
+}
+
+- (BOOL)isExternal {
+    return [self isShared] || [self isURL] || [self isScript];
 }
 
 - (BOOL)isValidDropTarget {

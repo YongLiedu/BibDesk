@@ -135,11 +135,18 @@
 - (BOOL)isURL;
 
 /*!
-	@method isScratch
-	@abstract Boolean, returns whether the receiver is a scratch group. 
+	@method isScript
+	@abstract Boolean, returns whether the receiver is a script group. 
 	@discussion -
 */
-- (BOOL)isScratch;
+- (BOOL)isScript;
+
+/*!
+	@method isExternal
+	@abstract Boolean, returns whether the receiver is an external source group (shared, URL or script). 
+	@discussion -
+*/
+- (BOOL)isExternal;
 
 /*!
 	@method stringValue
