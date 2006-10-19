@@ -1330,6 +1330,7 @@ The groupedPublications array is a subset of the publications array, developed b
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub addToGroup:group handleInherited:handleInherited];
+                count++;
 			}
 		}
     }
@@ -1387,6 +1388,7 @@ The groupedPublications array is a subset of the publications array, developed b
 				handleInherited = rv;
 				if(handleInherited != BDSKOperationIgnore){
 					[pub removeFromGroup:group handleInherited:handleInherited];
+                    tmpCount++;
 				}
 			}
 		}
@@ -1434,6 +1436,7 @@ The groupedPublications array is a subset of the publications array, developed b
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
 				[pub replaceGroup:group withGroupNamed:newGroupName handleInherited:handleInherited];
+                count++;
 			}
 		}
 	}
