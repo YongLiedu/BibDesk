@@ -1707,7 +1707,6 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSData *)serializedURLGroupsData {
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
-	NSString *keys;
     NSDictionary *groupDict;
 	NSEnumerator *groupEnum = [urlGroups objectEnumerator];
 	BDSKURLGroup *group;

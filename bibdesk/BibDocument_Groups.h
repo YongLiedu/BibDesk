@@ -103,6 +103,7 @@
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
+- (void)handleURLGroupUpdatedNotification:(NSNotification *)notification;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
