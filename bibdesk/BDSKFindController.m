@@ -626,7 +626,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
-	}else if([theDocument hasSharedGroupsSelected] || [theDocument hasURLGroupsSelected]){
+	}else if([theDocument hasExternalGroupsSelected]){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items",@"")];
         return;
@@ -653,7 +653,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
-	}else if(replace && ([theDocument hasSharedGroupsSelected] || [theDocument hasURLGroupsSelected])){
+	}else if(replace && ([theDocument hasExternalGroupsSelected])){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items",@"")];
         return;
@@ -715,7 +715,7 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
-	}else if([theDocument hasSharedGroupsSelected] || [theDocument hasURLGroupsSelected]){
+	}else if([theDocument hasExternalGroupsSelected]){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items",@"")];
         return;

@@ -38,7 +38,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKFilterController;
+@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKFilterController;
 
 @interface BibDocument (Groups)
 
@@ -49,11 +49,13 @@
 - (NSRange)rangeOfSmartGroups;
 - (NSRange)rangeOfSharedGroups;
 - (NSRange)rangeOfURLGroups;
+- (NSRange)rangeOfScriptGroups;
 - (NSRange)rangeOfStaticGroups;
 - (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasCategoryGroupsSelected;
@@ -63,8 +65,11 @@
 - (BOOL)hasSharedGroupsSelected;
 - (BOOL)hasURLGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasURLGroupsSelected;
+- (BOOL)hasScriptGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasScriptGroupsSelected;
 - (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasStaticGroupsSelected;
+- (BOOL)hasExternalGroupsSelected;
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
@@ -75,6 +80,10 @@
 - (void)addURLGroup:(BDSKURLGroup *)group;
 - (void)removeURLGroup:(BDSKURLGroup *)group;
 - (void)removeURLGroupNamed:(id)name;
+- (void)addScriptGroup:(BDSKScriptGroup *)group;
+- (void)removeScriptGroup:(BDSKScriptGroup *)group;
+- (void)removeScriptGroupNamed:(id)name;
+
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
 
@@ -112,6 +121,9 @@
 - (IBAction)addURLGroupAction:(id)sender;
 - (IBAction)dismissAddURLGroupSheet:(id)sender;
 - (IBAction)chooseURLForGroupAction:(id)sender;
+- (IBAction)addScriptGroupAction:(id)sender;
+- (IBAction)dismissAddScriptGroupSheet:(id)sender;
+- (IBAction)chooseScriptForGroupAction:(id)sender;
 - (IBAction)addGroupButtonAction:(id)sender;
 - (IBAction)removeSelectedGroups:(id)sender;
 - (IBAction)editGroupAction:(id)sender;
@@ -121,6 +133,7 @@
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (void)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 - (void)addURLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)addScriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)mergeInSharedGroup:(id)sender;
 - (IBAction)mergeInSharedPublications:(id)sender;
@@ -130,9 +143,11 @@
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)setStaticGroupsFromSerializedData:(NSData *)data;
 - (void)setURLGroupsFromSerializedData:(NSData *)data;
+- (void)setScriptGroupsFromSerializedData:(NSData *)data;
 - (NSData *)serializedSmartGroupsData;
 - (NSData *)serializedStaticGroupsData;
 - (NSData *)serializedURLGroupsData;
+- (NSData *)serializedScriptGroupsData;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;

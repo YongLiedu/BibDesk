@@ -34,6 +34,7 @@
                 addCustomCiteString = id; 
                 addGroupButtonAction = id; 
                 addGroupFieldAction = id; 
+                addScriptGroupAction = id; 
                 addSmartGroupAction = id; 
                 addStaticGroupAction = id; 
                 addURLGroupAction = id; 
@@ -44,6 +45,7 @@
                 changeIntersectGroupsAction = id; 
                 changeMainTableFont = id; 
                 changePreviewDisplay = id; 
+                chooseScriptForGroupAction = id; 
                 chooseURLForGroupAction = id; 
                 clearQuickSearch = id; 
                 columnsMenuAddTableColumn = id; 
@@ -55,10 +57,12 @@
                 cut = id; 
                 deleteSelectedPubs = id; 
                 deselectAllPublications = id; 
+                dismissAddScriptGroupSheet = id; 
                 dismissAddURLGroupSheet = id; 
                 duplicateTitleToBooktitle = id; 
                 editAction = id; 
                 editGroupAction = id; 
+                editNewGroupWithSelection = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
                 exportAsAction = id; 
@@ -83,6 +87,7 @@
                 importFromWebAction = id; 
                 makeSearchFieldKey = id; 
                 mergeInSharedGroup = id; 
+                mergeInSharedPublications = id; 
                 newPub = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 
@@ -105,6 +110,7 @@
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
                 selectAllPublications = id; 
+                selectAllPublicationsGroup = id; 
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
                 selectPossibleDuplicates = id; 
@@ -126,6 +132,7 @@
                 actionMenuButton = BDSKImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
                 addCustomCiteStringButton = NSButton; 
+                addScriptGroupSheet = NSWindow; 
                 addURLField = NSTextField; 
                 addURLGroupSheet = NSWindow; 
                 ccTableView = NSTableView; 
@@ -154,6 +161,9 @@
                 removeCustomCiteStringButton = NSButton; 
                 saveAccessoryView = NSView; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
+                scriptArgumentsField = NSTextField; 
+                scriptPathField = NSTextField; 
+                scriptTypePopup = NSPopUpButton; 
                 searchField = NSSearchField; 
                 splitView = BDSKSplitView; 
                 statusBar = BDSKStatusBar; 

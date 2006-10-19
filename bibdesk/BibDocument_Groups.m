@@ -53,6 +53,7 @@
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKURLGroup.h"
+#import "BDSKScriptGroup.h"
 #import "NSArray_BDSKExtensions.h"
 
 @implementation BibDocument (Groups)
@@ -60,7 +61,7 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [sharedGroups count] + [urlGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 1 : 0) + 1 /* add 1 for all publications group */ ;
+    return [smartGroups count] + [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 1 : 0) + 1 /* add 1 for all publications group */ ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
@@ -84,6 +85,11 @@
     count = [urlGroups count];
     if (index < count)
         return [urlGroups objectAtIndex:index];
+    index -= count;
+    
+    count = [scriptGroups count];
+    if (index < count)
+        return [scriptGroups objectAtIndex:index];
     index -= count;
     
 	count = [smartGroups count];
@@ -134,8 +140,12 @@
     return NSMakeRange(NSMaxRange([self rangeOfSharedGroups]), [urlGroups count]);
 }
 
+- (NSRange)rangeOfScriptGroups{
+    return NSMakeRange(NSMaxRange([self rangeOfURLGroups]), [scriptGroups count]);
+}
+
 - (NSRange)rangeOfSmartGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfURLGroups]), [smartGroups count]);
+    return NSMakeRange(NSMaxRange([self rangeOfScriptGroups]), [smartGroups count]);
 }
 
 - (NSRange)rangeOfStaticGroups{
@@ -160,6 +170,13 @@
     return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&smartRange];
 }
 
+- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange sharedRange = [self rangeOfSharedGroups];
+    unsigned int maxCount = MIN([indexes count], sharedRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&sharedRange];
+}
+
 - (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange urlRange = [self rangeOfURLGroups];
     unsigned int maxCount = MIN([indexes count], urlRange.length);
@@ -167,11 +184,11 @@
     return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&urlRange];
 }
 
-- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange sharedRange = [self rangeOfSharedGroups];
-    unsigned int maxCount = MIN([indexes count], sharedRange.length);
+- (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange scriptRange = [self rangeOfScriptGroups];
+    unsigned int maxCount = MIN([indexes count], scriptRange.length);
     unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&sharedRange];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&scriptRange];
 }
 
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -217,6 +234,15 @@
     return [self hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
+- (BOOL)hasScriptGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange scriptRange = [self rangeOfScriptGroups];
+    return [indexes intersectsIndexesInRange:scriptRange];
+}
+
+- (BOOL)hasScriptGroupsSelected{
+    return [self hasScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
 - (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange staticRange = [self rangeOfStaticGroups];
     return [indexes intersectsIndexesInRange:staticRange];
@@ -224,6 +250,10 @@
 
 - (BOOL)hasStaticGroupsSelected{
     return [self hasStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
+- (BOOL)hasExternalGroupsSelected{
+    return [self hasSharedGroupsSelected] || [self hasURLGroupsSelected] || [self hasScriptGroupsSelected];
 }
 
 #pragma mark Accessors
@@ -366,6 +396,46 @@
     while(group = [e nextObject]){
         if([[group name] isEqual:name]){
             [self removeURLGroup:group];
+            break;
+        }
+    }
+}
+
+- (void)addScriptGroup:(BDSKScriptGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] removeScriptGroup:group];
+	
+    if (sharedGroupSpinners == nil)
+        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+    
+	[scriptGroups addObject:group];
+    
+    SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
+    [scriptGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
+    
+	[group setUndoManager:[self undoManager]];
+    [groupTableView reloadData];
+}
+
+- (void)removeScriptGroup:(BDSKScriptGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
+	
+    NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
+    [spinner removeFromSuperview];
+    [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+    
+	[group setUndoManager:nil];
+	[scriptGroups removeObjectIdenticalTo:group];
+    [groupTableView reloadData];
+}
+
+// assumes you only have a single URL group with this name; that assumption is not enforced elsewhere
+- (void)removeScriptGroupNamed:(id)name {
+    NSEnumerator *e = [scriptGroups objectEnumerator];
+    BDSKScriptGroup *group = nil;
+    
+    while(group = [e nextObject]){
+        if([[group name] isEqual:name]){
+            [self removeScriptGroup:group];
             break;
         }
     }
@@ -652,7 +722,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // optimize for single selections
     if ([selectedGroups count] == 1 && [selectedGroups containsObject:allPublicationsGroup]) {
         array = publications;
-    } else if ([selectedGroups count] == 1 && ([self hasSharedGroupsSelected] || [self hasURLGroupsSelected] || [self hasStaticGroupsSelected])) {
+    } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected])) {
         unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
         BDSKGroup *group = [self objectInGroupsAtIndex:rowIndex];
         array = [(id)group publications];
@@ -695,8 +765,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
    
     if([tableView numberOfSelectedRows] == 0 || 
-       [self hasSharedGroupsSelected] == YES || 
-       [self hasURLGroupsSelected] == YES)
+       [self hasExternalGroupsSelected] == YES)
         return [NSIndexSet indexSet];
     
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
@@ -1058,6 +1127,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		BDSKURLGroup *group = [[BDSKURLGroup alloc] initWithURL:url];
 		[self addURLGroup:group];
 		[group release];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group",@"Add external file group")];
 	}
 	
 }
@@ -1085,6 +1155,59 @@ The groupedPublications array is a subset of the publications array, developed b
                     modalForWindow:addURLGroupSheet
                      modalDelegate:self 
                     didEndSelector:@selector(chooseURLPanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:nil];
+}
+
+- (IBAction)addScriptGroupAction:(id)sender {
+    [scriptPathField setStringValue:@""];
+    [NSApp beginSheet:addScriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(addScriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+}
+
+- (void)addScriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+	if(returnCode == NSOKButton){
+        if ([sheet makeFirstResponder:nil] == NO)
+            [sheet endEditingFor:nil];
+        NSString *path = [scriptPathField stringValue];
+        int type = [scriptTypePopup indexOfSelectedItem];
+        NSString *argString = [scriptArgumentsField stringValue];
+        NSArray *arguments = [NSString isEmptyString:argString] ? [NSArray array] : [argString componentsSeparatedByString:@" "];
+		BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithName:NSLocalizedString(@"Script Group", @"Script group") scriptPath:path scriptArguments:arguments scriptType:type];
+        unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
+		[self addScriptGroup:group];
+		[group release];
+        
+		[groupTableView reloadData];
+		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add Script Group",@"Add script group")];
+		// updating of the tables is done when finishing the edit of the name
+	}
+	
+}
+
+- (IBAction)dismissAddScriptGroupSheet:(id)sender {
+    [addScriptGroupSheet orderOut:sender];
+    [NSApp endSheet:addScriptGroupSheet returnCode:[sender tag]];
+}
+
+- (void)chooseScriptPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSOKButton) {
+        NSURL *url = [[oPanel URLs] firstObject];
+        [scriptPathField setStringValue:[url path]];
+    }
+}
+
+- (IBAction)chooseScriptForGroupAction:(id)sender {
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setResolvesAliases:NO];
+    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    
+    [oPanel beginSheetForDirectory:nil 
+                              file:nil 
+                    modalForWindow:addScriptGroupSheet
+                     modalDelegate:self 
+                    didEndSelector:@selector(chooseScriptPanelDidEnd:returnCode:contextInfo:) 
                        contextInfo:nil];
 }
 
@@ -1131,6 +1254,24 @@ The groupedPublications array is a subset of the publications array, developed b
         NSURL *url = [NSURL URLWithString:[addURLField stringValue]];
 		BDSKURLGroup *group = (BDSKURLGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
 		[group setURL:url];
+		[[self undoManager] setActionName:NSLocalizedString(@"Edit External File Group",@"Edit external file group")];
+	}
+	
+}
+
+- (void)changeScriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+	if(returnCode == NSOKButton){
+        if ([sheet makeFirstResponder:nil] == NO)
+            [sheet endEditingFor:nil];
+        NSString *path = [scriptPathField stringValue];
+        int type = [scriptTypePopup indexOfSelectedItem];
+        NSString *argString = [scriptArgumentsField stringValue];
+        NSArray *arguments = [NSString isEmptyString:argString] ? [NSArray array] : [argString componentsSeparatedByString:@" "];
+		BDSKScriptGroup *group = (BDSKScriptGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
+		[group setScriptPath:path];
+		[group setScriptArguments:arguments];
+		[group setScriptType:type];
+		[[self undoManager] setActionName:NSLocalizedString(@"Edit Script Group",@"Edit script group")];
 	}
 	
 }
@@ -1164,6 +1305,11 @@ The groupedPublications array is a subset of the publications array, developed b
 	} else if ([group isURL]) {
         [addURLField setStringValue:[[(BDSKURLGroup *)group URL] absoluteString]];
         [NSApp beginSheet:addURLGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(changeURLGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	} else if ([group isScript]) {
+        [scriptPathField setStringValue:[(BDSKScriptGroup *)group scriptPath]];
+        [scriptTypePopup selectItemAtIndex:[(BDSKScriptGroup *)group scriptType]];
+        [scriptArgumentsField setStringValue:[[(BDSKScriptGroup *)group scriptArguments] componentsJoinedByString:@" "]];
+        [NSApp beginSheet:addScriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(changeScriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 	}
 }
 
@@ -1206,7 +1352,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     // first merge in shared groups
-    if ([self hasSharedGroupsSelected] || [self hasURLGroupsSelected])
+    if ([self hasExternalGroupsSelected])
         pubs = [self mergeInPublications:pubs];
     
     group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
@@ -1227,7 +1373,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)mergeInSharedGroup:(id)sender{
-    if ([self hasSharedGroupsSelected] == NO || [self hasURLGroupsSelected] == NO) {
+    if ([self hasExternalGroupsSelected] == NO) {
         NSBeep();
         return;
     }
@@ -1236,7 +1382,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)mergeInSharedPublications:(id)sender{
-    if ([self hasSharedGroupsSelected] == NO || [self hasURLGroupsSelected] == NO || [self numberOfSelectedPubs] == 0) {
+    if ([self hasExternalGroupsSelected] == NO || [self numberOfSelectedPubs] == 0) {
         NSBeep();
         return;
     }
@@ -1295,7 +1441,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && [group isShared] == NO && [group isURL] == NO && group != allPublicationsGroup && group != lastImportGroup);
+	OBASSERT([group isSmart] == NO && [group isExternal] == NO && group != allPublicationsGroup && group != lastImportGroup);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1349,7 +1495,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
-		if([group isSmart] == YES || [group isShared] == YES || [group isURL] == YES || group == allPublicationsGroup || group == lastImportGroup)
+		if([group isSmart] == YES || [group isExternal] == YES || group == allPublicationsGroup || group == lastImportGroup)
 			continue;
 		
 		if (groupName == nil)
@@ -1650,6 +1796,56 @@ The groupedPublications array is a subset of the publications array, developed b
 	[urlGroups setArray:array];
 }
 
+- (void)setScriptGroupsFromSerializedData:(NSData *)data {
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	id plist = [NSPropertyListSerialization propertyListFromData:data
+												mutabilityOption:NSPropertyListImmutable
+														  format:&format 
+												errorDescription:&error];
+	
+	if (error) {
+		NSLog(@"Error deserializing: %@", error);
+        [error release];
+		return;
+	}
+	if ([plist isKindOfClass:[NSArray class]] == NO) {
+		NSLog(@"Serialized URL groups was no array.");
+		return;
+	}
+	
+    NSEnumerator *groupEnum = [plist objectEnumerator];
+    NSDictionary *groupDict;
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
+    BDSKScriptGroup *group = nil;
+    NSString *name = nil;
+    NSString *path = nil;
+    NSArray *arguments = nil;
+    int type;
+    
+    while (groupDict = [groupEnum nextObject]) {
+        @try {
+            name = [groupDict objectForKey:@"group name"];
+            path = [groupDict objectForKey:@"script path"];
+            arguments = [groupDict objectForKey:@"script arguments"];
+            type = [[groupDict objectForKey:@"script type"] intValue];
+            group = [[BDSKScriptGroup alloc] initWithName:name scriptPath:path scriptArguments:arguments scriptType:type];
+            [group setName:[groupDict objectForKey:@"group name"]];
+            [group setUndoManager:[self undoManager]];
+            [array addObject:group];
+        }
+        @catch(id exception) {
+            NSLog(@"Ignoring exception \"%@\" while parsing URL groups data.", exception);
+        }
+        @finally {
+            [group release];
+            group = nil;
+        }
+    }
+	
+	[scriptGroups setArray:array];
+}
+
 - (NSData *)serializedSmartGroupsData {
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[smartGroups count]];
     NSDictionary *groupDict;
@@ -1713,6 +1909,32 @@ The groupedPublications array is a subset of the publications array, developed b
 	
 	while (group = [groupEnum nextObject]) {
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", [[group URL] absoluteString], @"URL", nil];
+		[array addObject:groupDict];
+		[groupDict release];
+	}
+	
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
+															  format:format 
+													errorDescription:&error];
+    	
+	if (error) {
+		NSLog(@"Error serializing: %@", error);
+        [error release];
+		return nil;
+	}
+	return data;
+}
+
+- (NSData *)serializedScriptGroupsData {
+	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
+    NSDictionary *groupDict;
+	NSEnumerator *groupEnum = [scriptGroups objectEnumerator];
+	BDSKScriptGroup *group;
+	
+	while (group = [groupEnum nextObject]) {
+        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", [group scriptPath], @"script path", [group scriptArguments], @"script arguments", [NSNumber numberWithInt:[group scriptType]], @"script type", nil];
 		[array addObject:groupDict];
 		[groupDict release];
 	}

@@ -295,7 +295,7 @@
         }
     } else if (tv == groupTableView) {
         BDSKGroup *group = [self objectInGroupsAtIndex:row];
-        if ([group isShared] == NO && [group isURL] == NO) return;
+        if ([group isExternal] == NO) return;
         
         NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
         
@@ -431,7 +431,7 @@
 		}else if([rowIndexes count] == 1){
             // a single row, not necessarily the selected one
             BDSKGroup *group = [self objectInGroupsAtIndex:[rowIndexes firstIndex]];
-            if ([group isShared] || [group isURL]) {
+            if ([group isExternal]) {
                 pubs = [(id)group publications];
 			} else {
                 NSArray *allPubs = [publications copy];

@@ -141,6 +141,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         categoryGroups = [[NSMutableArray alloc] initWithCapacity:1];
         smartGroups = [[NSMutableArray alloc] initWithCapacity:1];
         urlGroups = [[NSMutableArray alloc] initWithCapacity:1];
+        scriptGroups = [[NSMutableArray alloc] initWithCapacity:1];
         staticGroups = nil;
         tmpStaticGroups = nil;
 		allPublicationsGroup = [[BDSKGroup alloc] initWithAllPublications];
@@ -1245,6 +1246,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if([urlGroups count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" useEncoding:encoding];
             [outputData appendData:[self serializedURLGroupsData]];
+            [outputData appendDataFromString:@"}}" useEncoding:encoding];
+        }
+        if([scriptGroups count] > 0){
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" useEncoding:encoding];
+            [outputData appendData:[self serializedScriptGroupsData]];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         [outputData appendDataFromString:@"\n" useEncoding:encoding];
@@ -2870,7 +2876,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"in shared group"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if ([self hasURLGroupsSelected] == YES) {
         // we can only one URL group selected at a time
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in URL group", @"in URL group"), [[[self selectedGroups] lastObject] stringValue]];
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"in URL group"), [[[self selectedGroups] lastObject] stringValue]];
+	} else if ([self hasScriptGroupsSelected] == YES) {
+        // we can only one URL group selected at a time
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"in URL group"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if (groupPubsCount != totalPubsCount) {
 		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
 			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"group", @"group"), [[[self selectedGroups] lastObject] stringValue]] :

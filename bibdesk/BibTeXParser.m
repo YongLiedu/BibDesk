@@ -747,6 +747,9 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     const char *urlGroupStr = "BibDesk URL Groups";
     size_t urlGroupStrLength = strlen(urlGroupStr);
     Boolean isURLGroup = FALSE;
+    const char *scriptGroupStr = "BibDesk Script Groups";
+    size_t scriptGroupStrLength = strlen(scriptGroupStr);
+    Boolean isScriptGroup = FALSE;
     Boolean firstValue = TRUE;
     
     while(field = bt_next_value(entry, field, NULL, &text)){
@@ -759,6 +762,8 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                     isStaticGroup = TRUE;
                 else if(strlen(text) >= urlGroupStrLength && strncmp(text, urlGroupStr, urlGroupStrLength) == 0)
                     isURLGroup = TRUE;
+                else if(strlen(text) >= scriptGroupStrLength && strncmp(text, scriptGroupStr, scriptGroupStrLength) == 0)
+                    isScriptGroup = TRUE;
             }
             
             // encoding will be UTF-8 for the plist, so make sure we use it for each line
@@ -771,7 +776,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             [tmpStr release];
         }
     }
-    if(isSmartGroup == TRUE || isStaticGroup == TRUE || isURLGroup == TRUE){
+    if(isSmartGroup == TRUE || isStaticGroup == TRUE || isURLGroup == TRUE || isScriptGroup == TRUE){
         if(document){
             NSRange range = [commentStr rangeOfString:@"{"];
             if(range.location != NSNotFound){
@@ -783,8 +788,10 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                         [document setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                     else if (isStaticGroup == TRUE)
                         [document setStaticGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                    else
+                    else if (isURLGroup == TRUE)
                         [document setURLGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                    else
+                        [document setScriptGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                 }
             }
         }

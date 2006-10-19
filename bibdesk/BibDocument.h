@@ -184,9 +184,15 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSWindow *addURLGroupSheet;
     IBOutlet NSTextField *addURLField;
     
+    IBOutlet NSWindow *addScriptGroupSheet;
+    IBOutlet NSTextField *scriptPathField;
+    IBOutlet NSTextField *scriptArgumentsField;
+    IBOutlet NSPopUpButton *scriptTypePopup;
+    
     BOOL dragFromSharedGroups;
     NSMutableArray *sharedGroups;
     NSMutableArray *urlGroups;
+    NSMutableArray *scriptGroups;
     NSMutableDictionary *sharedGroupSpinners;
     
     id fileSearchController;
