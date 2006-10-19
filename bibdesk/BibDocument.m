@@ -383,18 +383,9 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     
     // hidden default to remove xattrs; this presently occurs before we use them, but it may need to be earlier at some point
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
-        NSArray *xattrs = [[NSFileManager defaultManager] extendedAttributeNamesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
-        if (xattrs) {
-            NSEnumerator *xattrE = [xattrs objectEnumerator];
-            NSString *xattrName;
-            while (xattrName = [xattrE nextObject]) {
-                [[NSFileManager defaultManager] removeExtendedAttribute:xattrName atPath:[[self fileURL] path] traverseLink:YES error:NULL];
-            }
-        }
+        [[NSFileManager defaultManager] removeAllExtendedAttributesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
     }
-    
-    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    
+        
     [self setupToolbar];
 	[self setupSearchField];
     
@@ -421,6 +412,9 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
     
+    // get document-specific attributes (returns nil if there are none)
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+
     NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
     
     // we should only cascade windows if we have multiple documents open; bug #1299305

@@ -187,4 +187,15 @@
 */
 - (BOOL)removeExtendedAttribute:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 
+/*!
+    @method     removeAllExtendedAttributesAtPath:traverseLink:error:
+    @abstract   Removes all extended attributes at the specified path.
+    @discussion (comprehensive description)
+    @param      path (description)
+    @param      follow (description)
+    @param      error (description)
+    @result     (description)
+*/
+- (BOOL)removeAllExtendedAttributesAtPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
+
 @end

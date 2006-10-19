@@ -309,6 +309,23 @@ static NSString *xattrError(int err, const char *path);
     
 }
 
+- (BOOL)removeAllExtendedAttributesAtPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
+{
+    NSArray *allAttributes = [self extendedAttributeNamesAtPath:path traverseLink:follow error:error];
+    if  (nil == allAttributes)
+        return NO;
+    
+    NSEnumerator *e = [allAttributes objectEnumerator];
+    NSString *attrName;
+    while (attrName = [e nextObject]) {
+        
+        // return NO as soon as any single removal fails
+        if ([self removeExtendedAttribute:attrName atPath:path traverseLink:follow error:error] == NO)
+            return NO;
+    }
+    return YES;
+}
+
 // guaranteed to return non-nil
 static NSString *xattrError(int err, const char *myPath)
 {
