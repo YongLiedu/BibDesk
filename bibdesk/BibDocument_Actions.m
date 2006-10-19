@@ -77,19 +77,48 @@
     // add the publication; addToGroup:handleInherited: depends on the pub having a document
     [self addPublication:newBI];
 
-	NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	
+    NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
-    int op;
-	while (group = [groupEnum nextObject]) {
+	BOOL isSingleValued = [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]];
+    int count = 0;
+    // we don't overwrite inherited single valued fields, they already have the field set through inheritance
+    int op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
+    
+    while (group = [groupEnum nextObject]) {
 		if ([group isCategory]){
-			op = [newBI addToGroup:group handleInherited:BDSKOperationSet];
-            NSAssert1(BDSKOperationSet == op || BDSKOperationAppend == op, @"Unable to add to group %@", group);
+            if (isSingleValued && count > 0)
+                continue;
+			op = [newBI addToGroup:group handleInherited:handleInherited];
+            if(op == BDSKOperationSet || op == BDSKOperationAppend){
+                count++;
+            }else if(op == BDSKOperationAsk){
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
+                                                     defaultButton:NSLocalizedString(@"Don't Change", @"Don't change")
+                                                   alternateButton:nil // "Set" would end up choosing an arbitrary one
+                                                       otherButton:NSLocalizedString(@"Append", @"Append")
+                                         informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
+                handleInherited = [alert runSheetModalForWindow:documentWindow];
+                if(handleInherited != BDSKOperationIgnore){
+                    [newBI addToGroup:group handleInherited:handleInherited];
+                    count++;
+                }
+            }
         } else if ([group isStatic]) {
             [(BDSKStaticGroup *)group addPublication:newBI];
         }
     }
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	if (isSingleValued && [self numberOfCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 1) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"alert title")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The new item can only be added to one of the selected \"%@\" groups", @""), [self currentGroupField]];
+        [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    }
+    
     [self highlightBib:newBI];
     [self editPub:newBI];
 }
