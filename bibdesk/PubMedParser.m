@@ -308,6 +308,7 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict)
     
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
     BibItem *newBI = nil;
+    NSString *type = BDSKArticleString;
     
     // fix up the page numbers if necessary
     mergePageNumbers(pubDict);
@@ -316,18 +317,18 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict)
 	// choose the authors from the IP or IS tag as available
     chooseNumber(pubDict);
 	
-    newBI = [[BibItem alloc] initWithType:BDSKArticleString
-								 fileType:BDSKBibtexString
-								pubFields:pubDict
-                                    isNew:YES];
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]] != nil){ // "standard" RIS, if such a thing exists
-        [newBI setPubType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]]];
+        type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]];
     } else if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]] != nil){ // Medline RIS
-		[newBI setPubType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]]];
+		type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]];
     }
-    // set the citekey, since RIS/Medline types don't have a citekey field
-    [newBI setCiteKeyString:[newBI suggestedCiteKey]];
+    
+    newBI = [[BibItem alloc] initWithType:type
+								 fileType:BDSKBibtexString
+								  citeKey:nil
+								pubFields:pubDict
+                                    isNew:YES];
     
     return newBI;
 }

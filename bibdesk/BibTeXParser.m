@@ -209,14 +209,15 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                             [aDocument setDocumentInfoWithoutUndo:dictionary];
                     }else{
                         
+                        tmpStr = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
+                        if (nil == tmpStr) @throw BibTeXParserInternalException;
+                        
                         newBI = [[BibItem alloc] initWithType:entryType
                                                      fileType:BDSKBibtexString
+                                                      citeKey:tmpStr
                                                     pubFields:dictionary
                                                         isNew:isPasteOrDrag];
 
-                        tmpStr = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
-                        if (nil == tmpStr) @throw BibTeXParserInternalException;
-                        [newBI setCiteKeyString:tmpStr];
                         [tmpStr release];
                         
                         [returnArray addObject:newBI];

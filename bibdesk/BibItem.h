@@ -84,16 +84,17 @@ enum {
 - (id)init;
 
 /*!
-     @method initWithType:fileType:pubFields:createdDate:
+     @method initWithType:fileType:citeKey:pubFields:createdDate:
      @abstract Initializes an alloc'd BibItem to a type and allows to set the authors. This is the designated intializer.
      @discussion This lets you set the type and the Authors array at initialization time. Call it with an empty array for authArray if you don't want to do that -<em>Don't use nil</em> The authors array is kept up but isn't used much right now. This will change. The createdDate should be nil when the BibItem is not newly added, such as in a parser. 
      @param fileType A string representing which kind of file this item was read from.
+     @param key The cite key. Pass nil to generate the cite key.
      @param type A string representing the type of entry this item is - used to make the BibItem have the right entries in its dictionary.
      @param fieldsDict The dictionary of fields to initialize the item with.
      @param isNew Boolean determines if the item is new for the BibTeX document. Determines if the date-added should be set. Should be YES unless when reading the BibTeX source file.
      @result The receiver, initialized to type and containing authors authArray.
 */
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
 
 /*!
     @method makeType

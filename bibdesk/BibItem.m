@@ -181,6 +181,7 @@ static CFDictionaryRef selectorTable = NULL;
 {
 	self = [self initWithType:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] 
                      fileType:BDSKBibtexString 
+                      citeKey:BDSKDefaultCiteKey 
                     pubFields:nil 
                         isNew:YES];
 	if (self) {
@@ -191,7 +192,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 // this is the designated initializer.
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
     if (self = [super init]){
 		if(fieldsDict){
 			pubFields = [fieldsDict mutableCopy];
@@ -209,7 +210,6 @@ static CFDictionaryRef selectorTable = NULL;
         document = nil;
         [self setFileType:inFileType];
         [self setPubTypeWithoutUndo:type];
-        [self setCiteKeyString: BDSKDefaultCiteKey];
         [self setDate: nil];
         [self setDateAdded: nil];
         [self setDateModified: nil];
@@ -222,6 +222,8 @@ static CFDictionaryRef selectorTable = NULL;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
         [self updateMetadataForKey:nil];
         
+        [self setCiteKeyString: key == nil ? [self suggestedCiteKey] : key];
+        
         // used for determining if we need to re-save Spotlight metadata
         // set to YES initially so the first save after opening a file always writes the metadata, since we don't know beforehand if it's been written
         spotlightMetadataChanged = YES;
@@ -233,8 +235,7 @@ static CFDictionaryRef selectorTable = NULL;
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
     // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
-    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType pubFields:pubFields isNew:YES];
-    [theCopy setCiteKeyString: citeKey];
+    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields isNew:YES];
     [theCopy setDate: pubDate];
 	
     return theCopy;
