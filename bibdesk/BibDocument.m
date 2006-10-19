@@ -320,8 +320,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [OFPreference removeObserver:self forPreference:nil];
     [macroResolver release];
     [itemsForCiteKeys release];
-    // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
-    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [publications release];
     [shownPublications release];
     [groupedPublications release];
