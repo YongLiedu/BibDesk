@@ -169,7 +169,7 @@
     if (newName != name) {
 		[(BDSKURLGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
         [name release];
-        name = [newName retain];
+        name = [newName copy];
     }
 }
 
@@ -187,19 +187,13 @@
             [self setName:[newURL lastPathComponent]];
         
         [URL release];
-        URL = [newURL retain];
+        URL = [newURL copy];
         
         if ([self isRetrieving])
             [URLDownload cancel];
         
-        [publications release];
-        publications = nil;
-        
-        count = 0;
-        
-        // use this to notify the tableview to start the progress indicators
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
+        // get rid of any current pubs and notify the tableview to start progress indicators
+        [self setPublications:nil];
     }
 }
 
@@ -221,7 +215,7 @@
 {
     if(newPublications != publications){
         [publications release];
-        publications = [newPublications retain];
+        publications = [newPublications copy];
     }
     
     [self setCount:[publications count]];
@@ -257,11 +251,8 @@
 - (BOOL)isEditable { return YES; }
 
 - (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the the URL download is busy; containsItem is called very frequently
-    NSArray *pubs = [publications retain];
-    BOOL rv = [pubs containsObject:item];
-    [pubs release];
-    return rv;
+    // calling [self publications] will repeatedly reschedule a retrieval, which may be undesirable if it failed
+    return [publications containsObject:item];
 }
 
 - (BOOL)isValidDropTarget { return NO; }
