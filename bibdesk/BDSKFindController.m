@@ -43,6 +43,7 @@
 #import "BDSKComplexString.h"
 #import "BibDocument+Scripting.h"
 #import "BibDocument_Search.h"
+#import "BibDocument_Groups.h"
 #import "BDSKFieldNameFormatter.h"
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
@@ -625,6 +626,10 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
+	}else if([theDocument hasSharedGroupsSelected] || [theDocument hasURLGroupsSelected]){
+        NSBeep();
+		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items",@"")];
+        return;
 	}
     
     BibItem *selItem = [[[theDocument selectedPublications] objectEnumerator] nextObject];
@@ -648,7 +653,12 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
-	}
+	}else if(replace && ([theDocument hasSharedGroupsSelected] || [theDocument hasURLGroupsSelected])){
+        NSBeep();
+		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items",@"")];
+        return;
+    }
+    
     [self clearFrontDocumentQuickSearch];
 	
 	[self finalizeEdits];
@@ -704,6 +714,10 @@ enum {
     if(!theDocument){
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
+        return;
+	}else if([theDocument hasSharedGroupsSelected] || [theDocument hasURLGroupsSelected]){
+        NSBeep();
+		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items",@"")];
         return;
 	}
 	
