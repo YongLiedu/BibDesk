@@ -896,7 +896,7 @@
         }
             
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == ccTableView || [info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[self objectInGroupsAtIndex:row]  isValidDropTarget] == NO || row == 0 || (type == nil && [info draggingSource] != tableView)) 
+        if([info draggingSource] == ccTableView || [info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[self objectInGroupsAtIndex:row]  isValidDropTarget] == NO || (type == nil && [info draggingSource] != tableView) || (row == 0 && [info draggingSource] == tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
