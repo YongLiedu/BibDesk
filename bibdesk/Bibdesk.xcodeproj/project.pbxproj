@@ -185,6 +185,8 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		CE11A2B40AE662EB008C47AC /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */; };
 		CE11A6350AE6BB77008C47AC /* urlFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */; };
+		CE11AC0A0AE7E0DC008C47AC /* BDSKScriptGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */; };
+		CE11AC0B0AE7E0DC008C47AC /* BDSKScriptGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */; };
 		CE15C0D70AA5B9A3002C555F /* BDSKErrorManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */; };
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
 		CE1A7F40090BEC3800ACC864 /* BDSKHeaderPopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */; };
@@ -993,6 +995,8 @@
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
+		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
+		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
@@ -1870,6 +1874,7 @@
 				CE3448000A11302F0026A92A /* BDSKPreviewItem.m */,
 				CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */,
 				CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */,
+				CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */,
 				F925332208FC9FB80045D563 /* BDSKSearchIndex.m */,
 				F92EF32109E6242100A244D0 /* BDSKSharedGroup.m */,
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
@@ -2145,6 +2150,7 @@
 				CE392ED208D034E4001CEAC8 /* BDSKRatingButtonCell.h */,
 				CE95A5790A88883300334DFA /* BDSKReadMeController.h */,
 				CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */,
+				CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */,
 				CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */,
 				CED65DCA0907A338003EED90 /* BDSKScriptHook+Scripting.h */,
 				CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */,
@@ -2575,6 +2581,7 @@
 				CE5C29CD0AE14FEC00C3E6B5 /* BibDocument_Actions.h in Headers */,
 				F9F5E20D0AE307C0007EBB31 /* NSError_BDSKExtensions.h in Headers */,
 				F9F5ECD10AE5E7C8007EBB31 /* BDSKURLGroup.h in Headers */,
+				CE11AC0A0AE7E0DC008C47AC /* BDSKScriptGroup.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3338,6 +3345,7 @@
 				F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */,
 				F9F5ECD20AE5E7C8007EBB31 /* BDSKURLGroup.m in Sources */,
 				CE11A2B40AE662EB008C47AC /* BDSKTextViewCompletionController.m in Sources */,
+				CE11AC0B0AE7E0DC008C47AC /* BDSKScriptGroup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
