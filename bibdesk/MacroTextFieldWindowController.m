@@ -257,7 +257,7 @@
 }
 
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification {
-	[backgroundView setShowFocusRing:YES];
+	[backgroundView setShowFocusRing:[[self currentCell] isEditable]];
 }
 
 - (void)cellWindowDidResignKey:(NSNotification *)notification {
