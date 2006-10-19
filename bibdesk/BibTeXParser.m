@@ -196,6 +196,9 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                             complexString = copyStringFromBTField(field, filePath, macroResolver, parserEncoding);
                         }
                         
+                        if (nil == complexString)
+                            @throw BibTeXParserInternalException;
+                        
                         // add the expanded values to the autocomplete dictionary
                         [[NSApp delegate] addString:complexString forCompletionEntry:sFieldName];
                         
