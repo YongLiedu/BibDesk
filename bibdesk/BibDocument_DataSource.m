@@ -227,19 +227,12 @@
 		// we need to check for this because for some reason setObjectValue:... is called when the row is selected in this tableView
 		if([NSString isEmptyString:object] || [[group stringValue] isEqualToString:object])
 			return;
-		if([group isSmart] == YES){
-			[(BDSKSmartGroup *)group setName:object];
-			[[self undoManager] setActionName:NSLocalizedString(@"Rename Smart Group",@"Rename smart group")];
-			[self sortGroupsByKey:sortGroupsKey];
-		}else if([group isStatic] == YES){
-			[(BDSKStaticGroup *)group setName:object];
-			[[self undoManager] setActionName:NSLocalizedString(@"Rename Static Group",@"Rename static group")];
-			[self sortGroupsByKey:sortGroupsKey];
-		}else if([group isURL] == YES){
-			[(BDSKURLGroup *)group setName:object];
-			[[self undoManager] setActionName:NSLocalizedString(@"Rename URL Group",@"Rename URL group")];
-			[self sortGroupsByKey:sortGroupsKey];
-		}else{
+		if([group hasEditableName]){
+			[group performSelector:@selector(setName:) withObject:object];
+			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group",@"Rename group")];
+			if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
+                [self sortGroupsByKey:sortGroupsKey];
+		}else if([group isCategory]){
 			NSArray *pubs = [groupedPublications copy];
 			[self movePublications:pubs fromGroup:group toGroupNamed:object];
 			[pubs release];
