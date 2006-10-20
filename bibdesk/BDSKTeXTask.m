@@ -615,7 +615,7 @@
     
     OFSimpleLock(&currentTaskLock);
     currentTask = task;
-    OFSimpleUnlock(&currentTaskLock);
+    // we keep the lock, as the task is now the currentTask
     
     volatile BOOL success = YES;
     
@@ -629,7 +629,10 @@
     NS_ENDHANDLER
     
     NSDate *hardLimit = [[NSDate alloc] initWithTimeIntervalSinceNow:10];
-    while ([task isRunning]){
+    BOOL isRunning = [task isRunning];
+    OFSimpleUnlock(&currentTaskLock);
+    
+    while (isRunning){
         NSDate *limit = [[NSDate alloc] initWithTimeIntervalSinceNow:1]; // runs about 2x per second
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
                                  beforeDate:limit];
@@ -637,10 +640,15 @@
         if([(NSDate *)[NSDate date] compare:hardLimit] == NSOrderedDescending){
             // no single task should take this long, so we'll bail out
             // this appears to happen occasionally if you're changing selection continuously
+            OFSimpleLock(&currentTaskLock);
             [task terminate];
+            OFSimpleUnlock(&currentTaskLock);
             success = NO;
             break;
         }
+        OFSimpleLock(&currentTaskLock);
+        isRunning = [task isRunning];
+        OFSimpleUnlock(&currentTaskLock);
     }
     [hardLimit release];
     
