@@ -51,6 +51,7 @@ enum {
     kBDSKPropertyListDeserializationFailed = 4,   /* NSPropertyListSerialization failed      */
     kBDSKNetworkConnectionFailed = 5,             /* Unable to connect to a network          */
     kBDSKFileNotFound = 6,                        /* File not found (should have URL/path)   */
+    kBDSKAppleScriptError = 7,                    /* AppleScript failed                      */
 };
 
 extern NSString *BDSKUnderlyingItemErrorKey;

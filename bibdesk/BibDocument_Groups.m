@@ -568,6 +568,22 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
+- (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification{
+    BDSKGroup *group = [notification object];
+    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
+    
+    if ([scriptGroups containsObject:group] == NO)
+        return; /// must be from another document
+    
+    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
+        [self sortGroupsByKey:sortGroupsKey];
+    }else{
+        [groupTableView reloadData];
+        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
+            [self displaySelectedGroups];
+    }
+}
+
 #pragma mark UI updating
 
 // this method uses counted sets to compute the number of publications per group; each group object is just a name

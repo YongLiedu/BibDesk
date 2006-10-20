@@ -269,6 +269,11 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
                  object:nil];
         
         [nc addObserver:self
+               selector:@selector(handleScriptGroupUpdatedNotification:)
+                   name:BDSKScriptGroupUpdatedNotification
+                 object:nil];
+        
+        [nc addObserver:self
                selector:@selector(handleFlagsChangedNotification:)
                    name:OAFlagsChangedNotification
                  object:nil];

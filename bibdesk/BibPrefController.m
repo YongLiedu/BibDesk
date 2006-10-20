@@ -294,6 +294,7 @@ NSString *BDSKSharedGroupsChangedNotification = @"BDSKSharedGroupsChangedNotific
 NSString *BDSKSharedGroupUpdatedNotification = @"BDSKSharedGroupUpdatedNotification";
 NSString *BDSKSharingNameChangedNotification = @"BDSKSharingNameChangedNotification";
 NSString *BDSKURLGroupUpdatedNotification = @"BDSKURLGroupUpdatedNotification";
+NSString *BDSKScriptGroupUpdatedNotification = @"BDSKScriptGroupUpdatedNotification";
 NSString *BDSKClientConnectionsChangedNotification = @"BDSKClientConnectionsChangedNotification";
 NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedNotification";
 NSString *BDSKDocumentControllerAddDocumentNotification = @"BDSKDocumentControllerAddDocumentNotification";
