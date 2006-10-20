@@ -1080,7 +1080,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)addURLGroupAction:(id)sender {
-    [addURLField setStringValue:@""];
+    [addURLField setStringValue:@"http://"];
     [NSApp beginSheet:addURLGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(addURLGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
@@ -1124,7 +1124,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)addScriptGroupAction:(id)sender {
-    [scriptPathField setStringValue:@"http://"];
+    [scriptPathField setStringValue:@""];
     [NSApp beginSheet:addScriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(addScriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
