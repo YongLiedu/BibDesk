@@ -446,6 +446,8 @@
         [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFinishWithResult:) forObject:self withObject:outputString];
     }
     
+    [outputString release];
+    
     OFSimpleUnlock(&processingLock);
 	[pool release];
 }
