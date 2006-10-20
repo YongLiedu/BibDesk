@@ -49,6 +49,7 @@
 #import "NSImage+Toolbox.h"
 #import "BibAppController.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 #import <OmniFoundation/OFMessageQueue.h>
@@ -76,15 +77,29 @@
         messageQueue = [[OFMessageQueue alloc] init];
         [messageQueue startBackgroundProcessors:1];
         [messageQueue setSchedulesBasedOnPriority:NO];
+        
+        workingDirPath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:YES] retain];
+        
+        OFSimpleLockInit(&processingLock);
+        OFSimpleLockInit(&currentTaskLock);
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
     return self;
 }
 
 - (void)dealloc;
 {
+    [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self terminate];
+    OFSimpleLockFree(&processingLock);
+    OFSimpleLockFree(&currentTaskLock);
     [scriptPath release];
     [scriptArguments release];
     [publications release];
+    [workingDirPath release];
+    [stdoutData release];
     [super dealloc];
 }
 
@@ -95,39 +110,41 @@
 
 #pragma mark Running the script
 
-// this runs in the background thread
-// we pass arguments because our ivars might change on the main thread
-// @@ is this safe now?
-- (void)runScriptAtPath:(NSString *)path ofType:(NSNumber *)type withArguments:(NSArray *)args;
+- (void)startRunningScript;
 {
-    NSString *outputString = nil;
-    NSError *error = nil;
+    BOOL isDir = NO;
     
-    if ([type intValue] == BDSKShellScriptType) {
-        NSString *currentDirPath = [[NSApp delegate] temporaryFilePath:nil createDirectory:YES];
-        outputString = [[BDSKShellTask shellTask] executeBinary:path 
-                                                    inDirectory:currentDirPath
-                                                  withArguments:args
-                                                    environment:nil
-                                                    inputString:nil];
-    } else if ([type intValue] == BDSKAppleScriptType) {
+    if([[NSFileManager defaultManager] fileExistsAtPath:scriptPath isDirectory:&isDir] == NO || isDir){
+        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
+        if (isDir)
+            [error setValue:NSLocalizedString(@"Script path points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
+        else
+            [error setValue:NSLocalizedString(@"The script path points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
+        [error setValue:scriptPath forKey:NSFilePathErrorKey];
+        [self scriptDidFailWithError:error];
+    } else if (scriptType == BDSKShellScriptType) {
+        [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forObject:self withObject:scriptPath withObject:scriptArguments];
+        isRetrieving = YES;
+    } else if (scriptType == BDSKAppleScriptType) {
+        // NSAppleScript can only run  on the main thread
+        NSString *outputString = nil;
+        NSError *error = nil;
         NSDictionary *errorInfo = nil;
-        NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:&errorInfo];
+        NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptPath] error:&errorInfo];
         if (errorInfo) {
             error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to Create AppleScript for ", @"")];
             [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
         } else {
-            
             @try{
-                if ([args count])
-                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:args];
+                if ([scriptArguments count])
+                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:scriptArguments];
                 else 
                     outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME];
             }
             @catch (id exception){
                 // if there are no arguments we try to run the whole script
-                if ([args count] == 0) {
-                    NSDictionary *errorInfo = nil;
+                if ([scriptArguments count] == 0) {
+                    errorInfo = nil;
                     outputString = [[script executeAndReturnError:&errorInfo] objCObjectValue];
                     if (errorInfo) {
                         error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"")];
@@ -142,34 +159,14 @@
                 [script release];
             }
         }
-    }
-    
-    NSArray *pubs = nil;
-    
-    if (nil == outputString || error) {
-        if (error == nil)
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
-        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFailWithError:) forObject:self withObject:error];
-    } else {
-        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFinishWithResult:) forObject:self withObject:outputString];
-    }
-}
-
-- (void)startRunningScript;
-{
-    BOOL isDir = NO;
-    
-    if([[NSFileManager defaultManager] fileExistsAtPath:scriptPath isDirectory:&isDir] && NO == isDir){
-        [messageQueue queueSelector:@selector(runScriptAtPath:ofType:withArguments:) forObject:self withObject:scriptPath withObject:[NSNumber numberWithInt:scriptType] withObject:scriptArguments];
-        isRetrieving = YES;
-    } else {
-        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
-        if (isDir)
-            [error setValue:NSLocalizedString(@"Script path points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
-        else
-            [error setValue:NSLocalizedString(@"The script path points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
-        [error setValue:scriptPath forKey:NSFilePathErrorKey];
-        [self scriptDidFailWithError:error];
+        NSArray *pubs = nil;
+        if (nil == outputString || error) {
+            if (error == nil)
+                error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
+            [self scriptDidFailWithError:error];
+        } else {
+            [self scriptDidFinishWithResult:outputString];
+        }
     }
 }
 
@@ -328,5 +325,135 @@
 - (BOOL)isEditable { return YES; }
 
 - (BOOL)isValidDropTarget { return NO; }
+
+#pragma mark Shell task thread
+
+- (void)terminate{
+    
+    NSDate *referenceDate = [NSDate date];
+    
+    while ([self isProcessing] && currentTask){
+        // if the task is still running after 2 seconds, kill it; we can't sleep here, because the main thread (usually this one) may be updating the UI for a task
+        if([referenceDate timeIntervalSinceNow] > -2 && OFSimpleLockTry(&currentTaskLock)){
+            [currentTask terminate];
+            currentTask = nil;
+            OFSimpleUnlock(&currentTaskLock);
+            break;
+        } else if([referenceDate timeIntervalSinceNow] > -2.1){ // just in case this ever happens
+            NSLog(@"%@ failed to lock for task %@", self, currentTask);
+            [currentTask terminate];
+            break;
+        }
+    }    
+}
+
+- (BOOL)isProcessing{
+	// just see if we can get the lock, otherwise we are processing
+    if(OFSimpleLockTry(&processingLock)){
+		OFSimpleUnlock(&processingLock);
+		return NO;
+	}
+	return YES;
+}
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification{
+    [self terminate];
+    [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
+}
+
+// this runs in the background thread
+// we pass arguments because our ivars might change on the main thread
+// @@ is this safe now?
+- (void)runShellScriptAtPath:(NSString *)path withArguments:(NSArray *)args;
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    volatile BOOL rv = YES;
+
+    OFSimpleLock(&processingLock);
+    
+    NSArray *pubs = nil;
+    NSString *outputString = nil;
+    NSTask *task;
+    NSPipe *outputPipe = [NSPipe pipe];
+    NSFileHandle *outputFileHandle = [outputPipe fileHandleForReading];
+    BOOL isRunning;
+
+    task = [[NSTask allocWithZone:[self zone]] init];    
+    [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+    [task setLaunchPath:path];
+    [task setCurrentDirectoryPath:workingDirPath];
+    [task setStandardOutput:outputPipe];
+    if ([args count])
+        [task setArguments:args];
+    
+    // ignore SIGPIPE, as it causes a crash (seems to happen if the binaries don't exist and you try writing to the pipe)
+    signal(SIGPIPE, SIG_IGN);
+    
+    OFSimpleLock(&currentTaskLock);
+    currentTask = task;
+    // we keep the lock, as the task is now the currentTask
+    [task launch];
+    isRunning = [task isRunning];
+    OFSimpleUnlock(&currentTaskLock);
+    
+    NS_DURING
+    if (isRunning) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+        [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
+        
+        // Now loop the runloop in the special mode until we've processed the notification.
+        stdoutData = nil;
+        while (stdoutData == nil && isRunning) {
+            // Run the run loop, briefly, until we get the notification...
+            [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+            OFSimpleLock(&currentTaskLock);
+            isRunning = [task isRunning];
+            OFSimpleUnlock(&currentTaskLock);
+        }
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+
+        OFSimpleLock(&currentTaskLock);
+        [task waitUntilExit];
+        OFSimpleUnlock(&currentTaskLock);        
+
+        outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
+        if(outputString == nil)
+            outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSASCIIStringEncoding];
+        
+        [stdoutData release];
+        stdoutData = nil;
+    } else {
+        NSLog(@"Failed to launch task or task exited without accepting input.  Termination status was %d", [task terminationStatus]);
+    }
+    NS_HANDLER
+        // if the pipe failed, we catch an exception here and ignore it
+        NSLog(@"exception %@ encountered while trying to launch task %@", [localException name], path);
+    NS_ENDHANDLER
+    
+    // reset signal handling to default behavior
+    signal(SIGPIPE, SIG_DFL);
+    
+    OFSimpleLock(&currentTaskLock);
+    currentTask = nil;
+    OFSimpleUnlock(&currentTaskLock);        
+    
+    [task release];
+    
+    if (nil == outputString) {
+        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
+        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFailWithError:) forObject:self withObject:error];
+    } else {
+        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFinishWithResult:) forObject:self withObject:outputString];
+    }
+    
+    OFSimpleUnlock(&processingLock);
+	[pool release];
+}
+
+- (void)stdoutNowAvailable:(NSNotification *)notification {
+    // This is the notification method that executeBinary:inDirectory:withArguments:environment:inputString: registers to get called when all the data has been read. It just grabs the data and stuffs it in an ivar.  The setting of this ivar signals the main method that the output is complete and available.
+    NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+    stdoutData = (outputData ? [outputData retain] : [[NSData allocWithZone:[self zone]] init]);
+}
 
 @end

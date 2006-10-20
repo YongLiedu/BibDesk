@@ -38,6 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
+#import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 
 @class OFMessageQueue;
 
@@ -55,6 +56,11 @@ enum {
     BOOL isRetrieving;
     BOOL failedDownload;
     OFMessageQueue *messageQueue;
+    NSTask *currentTask;
+    NSString *workingDirPath;
+    NSData *stdoutData;
+    OFSimpleLockType processingLock;    
+    OFSimpleLockType currentTaskLock;
 }
 
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
@@ -80,6 +86,9 @@ enum {
 - (void)startRunningScript;
 - (void)scriptDidFinishWithResult:(NSString *)outputString;
 - (void)scriptDidFailWithError:(NSError *)error;
-- (void)runScriptAtPath:(NSString *)path ofType:(NSNumber *)type withArguments:(NSArray *)args;
+- (void)runShellScriptAtPath:(NSString *)path withArguments:(NSArray *)args;
+- (void)terminate;
+- (BOOL)isProcessing;
+- (void)stdoutNowAvailable:(NSNotification *)notification;
 
 @end
