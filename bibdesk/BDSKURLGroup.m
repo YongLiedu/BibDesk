@@ -200,12 +200,12 @@
 - (NSArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil){
+        // get the publications asynchronously if remote, synchronously if local
+        [self startDownload]; 
+        
         // use this to notify the tableview to start the progress indicators
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
-        
-        // get the publications asynchronously if remote, synchronously if local
-        [self startDownload]; 
     }
     // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
     return publications;
