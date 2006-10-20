@@ -187,6 +187,7 @@
 		CE11A6350AE6BB77008C47AC /* urlFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */; };
 		CE11AC0A0AE7E0DC008C47AC /* BDSKScriptGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */; };
 		CE11AC0B0AE7E0DC008C47AC /* BDSKScriptGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */; };
+		CE11B0060AE8FD53008C47AC /* scriptFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE11B0050AE8FD53008C47AC /* scriptFolderIcon.tiff */; };
 		CE15C0D70AA5B9A3002C555F /* BDSKErrorManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */; };
 		CE15C0D80AA5B9A3002C555F /* BDSKErrorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */; };
 		CE1A7F40090BEC3800ACC864 /* BDSKHeaderPopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */; };
@@ -997,6 +998,7 @@
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
+		CE11B0050AE8FD53008C47AC /* scriptFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = scriptFolderIcon.tiff; sourceTree = "<group>"; };
 		CE15C0D50AA5B9A3002C555F /* BDSKErrorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKErrorManager.h; sourceTree = "<group>"; };
 		CE15C0D60AA5B9A3002C555F /* BDSKErrorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKErrorManager.m; sourceTree = "<group>"; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
@@ -2031,6 +2033,7 @@
 				F9022DB80758088000C3F701 /* risDocIcon.icns */,
 				F9022DB90758088000C3F701 /* rss.tiff */,
 				F91B5CDF076579FE0011ED22 /* rssTemplate.txt */,
+				CE11B0050AE8FD53008C47AC /* scriptFolderIcon.tiff */,
 				F93840890906DD1F00FC37F2 /* scripthook.tiff */,
 				F9EF21C708B1575D00AAC9A9 /* ScrollArrowLeft_Pressed.tiff */,
 				F9EF21C808B1575D00AAC9A9 /* ScrollArrowLeft.tiff */,
@@ -2976,6 +2979,7 @@
 				CE22E1D50A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib in Resources */,
 				CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */,
 				CE11A6350AE6BB77008C47AC /* urlFolderIcon.tiff in Resources */,
+				CE11B0060AE8FD53008C47AC /* scriptFolderIcon.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
