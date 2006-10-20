@@ -41,6 +41,10 @@
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BibTeXParser.h"
+#import "PubMedParser.h"
+#import "BDSKJSTORParser.h"
+#import "BDSKWebOfScienceParser.h"
+#import "BDSKParserProtocol.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "BibAppController.h"
@@ -169,7 +173,13 @@
     NSArray *pubs = nil;
     int type = [outputString contentStringType];
     if (type == BDSKBibTeXStringType) {
+        outputString = [outputString stringWithPhoneyCiteKeys:@"FixMe"];
+        type = BDSKBibTeXStringType;
+    }
+    if (type == BDSKBibTeXStringType) {
         pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] error:&error document:nil];
+    } else if (type != BDSKUnknownStringType){
+        pubs = [BDSKParserForStringType(type) itemsFromString:outputString error:&error];
     } else {
         error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return BibTeX", @"")];
     }
