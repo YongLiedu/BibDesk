@@ -68,4 +68,6 @@
 - (NSUndoManager *)undoManager;
 - (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
+- (void)terminate;
+
 @end

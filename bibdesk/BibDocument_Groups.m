@@ -1371,10 +1371,12 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)refreshURLGroups:(id)sender{
+    [urlGroups makeObjectsPerformSelector:@selector(terminate) withObject:nil];
     [urlGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
 }
 
 - (IBAction)refreshScriptGroups:(id)sender{
+    [scriptGroups makeObjectsPerformSelector:@selector(terminate) withObject:nil];
     [scriptGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
 }
 

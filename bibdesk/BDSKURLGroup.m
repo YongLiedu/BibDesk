@@ -76,11 +76,16 @@
 
 - (void)dealloc;
 {
-    [URLDownload cancel];
+    [self terminate];
     [URL release];
     [filePath release];
     [publications release];
     [super dealloc];
+}
+
+- (void)terminate;
+{
+    [URLDownload cancel];
 }
 
 // Logging
