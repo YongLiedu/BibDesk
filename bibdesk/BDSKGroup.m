@@ -226,7 +226,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 + (void)initialize{
     OBINITIALIZE;
-    BDSKAllPublicationsLocalizedString = [NSLocalizedString(@"All Publications", @"group name for all pubs") copy];
+    BDSKAllPublicationsLocalizedString = [NSLocalizedString(@"Library", @"group name for all pubs") copy];
 }
 
 - (id)init {

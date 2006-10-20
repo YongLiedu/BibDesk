@@ -481,7 +481,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
-	// select the current groups, if still around. Otherwise select All Publications
+	// select the current groups, if still around. Otherwise select Library
 	if([selectedGroups count] != 0){
 		unsigned int row = [self countOfGroups];
 		while(row--){
@@ -609,7 +609,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
-	// select the current group, if still around. Otherwise select All Publications
+	// select the current group, if still around. Otherwise select Library
 	if(preserve && [selectedGroups count] != 0){
 		unsigned int row = [self countOfGroups];
 		while(row--){
@@ -1651,7 +1651,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
-	// select the current groups. Otherwise select All Publications
+	// select the current groups. Otherwise select Library
 	if([selectedGroups count] != 0){
 		unsigned int groupsCount = [self countOfGroups];
 		unsigned int row = -1;

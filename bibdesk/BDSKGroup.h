@@ -58,7 +58,7 @@
 
 /*!
 	@method initWithAllPublications
-	@abstract Initializes and returns a new All Publications group. 
+	@abstract Initializes and returns a new Library group. 
 	@discussion -
 */
 - (id)initWithAllPublications;
