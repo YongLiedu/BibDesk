@@ -97,6 +97,7 @@
                 postItemToWeblog = id; 
                 quickSearchAddField = id; 
                 quickSearchRemoveField = id; 
+                refreshScriptGroups = id; 
                 refreshSharedBrowsing = id; 
                 refreshSharing = id; 
                 refreshURLGroups = id; 

@@ -92,6 +92,7 @@
         }, 
         {
             ACTIONS = {
+                addScriptGroupAction = id; 
                 addSmartGroupAction = id; 
                 addStaticGroupAction = id; 
                 addURLGroupAction = id; 
