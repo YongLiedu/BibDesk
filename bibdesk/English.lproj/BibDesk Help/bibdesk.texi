@@ -1099,7 +1099,7 @@ item for editing.
 
 References can be deleted by selecting the reference and choosing
 @menutitle{Delete} from the @menutitle{Edit} menu or pressing the @buttontitle{Delete}
-key. When a group other than the "All Publications" group is selected, 
+key. When a group other than the "Library" group is selected, 
 the selected items will be removed from any currently selected smart group, 
 they will not be deleted from the database. You can force them to be deleted from the 
 database by holding the @buttontitle{Option} key down while choosing @menutitle{Delete}. 
@@ -1114,7 +1114,7 @@ pressing the @buttontitle{Delete} button will remove any selected smart groups.
 
 The @menutitle{Cut} menu item, with keyboard shortcut @cmd{X}, copies the selected publications before deleting them. 
 As for the @menutitle{Delete} menu item, this will remove items from selected smart groups 
-when the "All Publications" group is not selected, while holding down the @buttontitle{Option} key 
+when the "Library" group is not selected, while holding down the @buttontitle{Option} key 
 will always delete the items from the database. 
 
 @c --------------------------------------------------------------------------------------
