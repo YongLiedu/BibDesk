@@ -39,6 +39,8 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
+@class OFMessageQueue;
+
 enum {
     BDSKShellScriptType,
     BDSKAppleScriptType
@@ -50,7 +52,9 @@ enum {
     NSArray *scriptArguments;
     int scriptType;
 	NSUndoManager *undoManager;
+    BOOL isRetrieving;
     BOOL failedDownload;
+    OFMessageQueue *messageQueue;
 }
 
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
@@ -71,5 +75,10 @@ enum {
 
 - (NSUndoManager *)undoManager;
 - (void)setUndoManager:(NSUndoManager *)newUndoManager;
+
+- (void)startRunningScript;
+- (void)scriptDidFinishWithResult:(NSString *)outputString;
+- (void)scriptDidFailWithError:(NSError *)error;
+- (void)runScriptAtPath:(NSString *)path ofType:(NSNumber *)type withArguments:(NSArray *)args;
 
 @end

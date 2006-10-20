@@ -47,6 +47,7 @@
 #import "NSError_BDSKExtensions.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
+#import <OmniFoundation/OFMessageQueue.h>
 
 @implementation BDSKScriptGroup
 
@@ -58,6 +59,10 @@
         scriptArguments = [arguments retain];
         scriptType = type;
         failedDownload = NO;
+        
+        messageQueue = [[OFMessageQueue alloc] init];
+        [messageQueue startBackgroundProcessors:1];
+        [messageQueue setSchedulesBasedOnPriority:NO];
     }
     return self;
 }
@@ -75,62 +80,55 @@
     return [NSString stringWithFormat:@"<%@ %p>: {\n\t\tname: %@\n\tscript path: %@\n }", [self class], self, name, scriptPath];
 }
 
-#pragma mark Loading
+#pragma mark Running the script
 
-- (void)loadUsingScript;
+// this runs in the background thread
+// we pass arguments because our ivars might change on the main thread
+// @@ is this safe now?
+- (void)runScriptAtPath:(NSString *)path ofType:(NSNumber *)type withArguments:(NSArray *)args;
 {
     NSString *outputString = nil;
-    failedDownload = NO;
     NSError *error = nil;
-    BOOL isDir;
     
-    if([[NSFileManager defaultManager] fileExistsAtPath:scriptPath isDirectory:&isDir] && NO == isDir){
-        if (scriptType == BDSKShellScriptType) {
-                NSString *currentDirPath = [[NSApp delegate] temporaryFilePath:nil createDirectory:YES];
-                outputString = [[BDSKShellTask shellTask] executeBinary:scriptPath 
-                                                            inDirectory:currentDirPath
-                                                          withArguments:scriptArguments
-                                                            environment:nil
-                                                            inputString:nil];
-        } else if (scriptType == BDSKAppleScriptType) {
-            NSDictionary *errorInfo = nil;
-            NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptPath] error:&errorInfo];
-            if (errorInfo) {
-                error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to Create AppleScript for ", @"")];
-                [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
-                failedDownload = YES;
-            } else {
-                
-                @try{
-                    if ([scriptArguments count])
-                        outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:scriptArguments];
-                    else 
-                        outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME];
-                }
-                @catch (id exception){
-                    // if there are no arguments we try to run the whole script
-                    if ([scriptArguments count] == 0) {
-                        NSDictionary *errorInfo = nil;
-                        outputString = [[script executeAndReturnError:&errorInfo] objCObjectValue];
-                    } else {
+    if ([type intValue] == BDSKShellScriptType) {
+        NSString *currentDirPath = [[NSApp delegate] temporaryFilePath:nil createDirectory:YES];
+        outputString = [[BDSKShellTask shellTask] executeBinary:path 
+                                                    inDirectory:currentDirPath
+                                                  withArguments:args
+                                                    environment:nil
+                                                    inputString:nil];
+    } else if ([type intValue] == BDSKAppleScriptType) {
+        NSDictionary *errorInfo = nil;
+        NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:&errorInfo];
+        if (errorInfo) {
+            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to Create AppleScript for ", @"")];
+            [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        } else {
+            
+            @try{
+                if ([args count])
+                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:args];
+                else 
+                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME];
+            }
+            @catch (id exception){
+                // if there are no arguments we try to run the whole script
+                if ([args count] == 0) {
+                    NSDictionary *errorInfo = nil;
+                    outputString = [[script executeAndReturnError:&errorInfo] objCObjectValue];
+                    if (errorInfo) {
                         error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"")];
-                        [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
-                        failedDownload = YES;
+                        [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
                     }
-                }
-                @finally{
-                    [script release];
+                } else {
+                    error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"")];
+                    [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
                 }
             }
+            @finally{
+                [script release];
+            }
         }
-    } else {
-        error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
-        if (isDir)
-            [error setValue:NSLocalizedString(@"Script path points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
-        else
-            [error setValue:NSLocalizedString(@"The script path points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
-        [error setValue:scriptPath forKey:NSFilePathErrorKey];
-        failedDownload = YES;
     }
     
     NSArray *pubs = nil;
@@ -138,21 +136,58 @@
     if (nil == outputString || error) {
         if (error == nil)
             error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
+        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFailWithError:) forObject:self withObject:error];
+    } else {
+        [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFinishWithResult:) forObject:self withObject:outputString];
+    }
+}
+
+- (void)startRunningScript;
+{
+    BOOL isDir = NO;
+    
+    if([[NSFileManager defaultManager] fileExistsAtPath:scriptPath isDirectory:&isDir] && NO == isDir){
+        [messageQueue queueSelector:@selector(runScriptAtPath:ofType:withArguments:) forObject:self withObject:scriptPath withObject:[NSNumber numberWithInt:scriptType] withObject:scriptArguments];
+        isRetrieving = YES;
+    } else {
+        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
+        if (isDir)
+            [error setValue:NSLocalizedString(@"Script path points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
+        else
+            [error setValue:NSLocalizedString(@"The script path points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
+        [error setValue:scriptPath forKey:NSFilePathErrorKey];
+        [self scriptDidFailWithError:error];
+    }
+}
+
+- (void)scriptDidFinishWithResult:(NSString *)outputString;
+{
+    isRetrieving = NO;
+    failedDownload = NO;
+    NSError *error = nil;
+
+    NSArray *pubs = nil;
+    int type = [outputString contentStringType];
+    if (type == BDSKBibTeXStringType) {
+        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] error:&error document:nil];
+    } else {
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return BibTeX", @"")];
+    }
+    if (pubs == nil || error) {
         failedDownload = YES;
         [NSApp presentError:error];
-    } else {
-        int type = [outputString contentStringType];
-        if (type == BDSKBibTeXStringType) {
-            pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] error:&error document:nil];
-        } else {
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return BibTeX", @"")];
-        }
-        if (pubs == nil || error) {
-            failedDownload = YES;
-            [NSApp presentError:error];
-        }
     }
     [self setPublications:pubs];
+}
+
+- (void)scriptDidFailWithError:(NSError *)error;
+{
+    isRetrieving = NO;
+    failedDownload = YES;
+    
+    // redraw 
+    [self setPublications:nil];
+    [NSApp presentError:error];
 }
 
 #pragma mark Accessors
@@ -168,13 +203,13 @@
 
 - (NSArray *)publications;
 {
-    if(publications == nil){
+    if([self isRetrieving] == NO && publications == nil){
+        // get the publications asynchronously
+        [self startRunningScript]; 
+        
         // use this to notify the tableview to start the progress indicators
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKScriptGroupUpdatedNotification object:self userInfo:userInfo];
-        
-        // get the publications asynchronously if remote, synchronously if local
-        [self loadUsingScript]; 
     }
     // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
     return publications;
@@ -192,8 +227,6 @@
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKScriptGroupUpdatedNotification object:self userInfo:userInfo];
 }
-
-- (BOOL)failedDownload { return failedDownload; }
 
 - (NSString *)scriptPath;
 {
@@ -260,10 +293,6 @@
     return [NSImage smallImageNamed:@"urlFolderIcon"];
 }
 
-- (BOOL)isScript { return YES; }
-
-- (BOOL)isEditable { return YES; }
-
 - (BOOL)containsItem:(BibItem *)item {
     // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the the URL download is busy; containsItem is called very frequently
     NSArray *pubs = [publications retain];
@@ -271,6 +300,14 @@
     [pubs release];
     return rv;
 }
+
+- (BOOL)isRetrieving { return isRetrieving; }
+
+- (BOOL)failedDownload { return failedDownload; }
+
+- (BOOL)isScript { return YES; }
+
+- (BOOL)isEditable { return YES; }
 
 - (BOOL)isValidDropTarget { return NO; }
 
