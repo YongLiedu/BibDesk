@@ -52,6 +52,7 @@
 
 - (NSImage *)icon;
 
+- (id)initWithName:(NSString *)aName URL:(NSURL *)aURL;
 - (id)initWithURL:(NSURL *)aURL;
 
 - (void)setName:(NSString *)newName;

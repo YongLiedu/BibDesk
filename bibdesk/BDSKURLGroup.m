@@ -53,8 +53,16 @@
 
 - (id)initWithURL:(NSURL *)aURL;
 {
+    self = [self initWithName:nil URL:aURL];
+    return self;
+}
+
+- (id)initWithName:(NSString *)aName URL:(NSURL *)aURL;
+{
     NSParameterAssert(aURL != nil);
-    if(self = [super initWithName:[aURL lastPathComponent] count:0]){
+    if (aName == nil)
+        aName = [aURL lastPathComponent];
+    if(self = [super initWithName:aName count:0]){
         
         publications = nil;
         URL = [aURL copy];

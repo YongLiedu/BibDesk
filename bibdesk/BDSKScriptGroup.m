@@ -55,8 +55,17 @@
 
 @implementation BDSKScriptGroup
 
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
+{
+    self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:type];
+    return self;
+}
+
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
 {
+    NSParameterAssert(path != nil);
+    if (aName == nil)
+        aName = [[path lastPathComponent] stringByDeletingPathExtension];
     if(self = [super initWithName:aName count:0]){
         publications = nil;
         scriptPath = [path retain];

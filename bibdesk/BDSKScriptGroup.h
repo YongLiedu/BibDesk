@@ -57,6 +57,7 @@ enum {
     OFMessageQueue *messageQueue;
 }
 
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
 
 - (void)setName:(NSString *)newName;
