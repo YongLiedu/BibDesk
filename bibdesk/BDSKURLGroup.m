@@ -253,7 +253,6 @@
 // BDSKGroup overrides
 
 - (NSImage *)icon {
-    // @@ should get its own icon
     return [NSImage smallImageNamed:@"urlFolderIcon"];
 }
 
