@@ -286,23 +286,25 @@ textRect.origin.y += floorf(vOffset); \
     
     [label drawInRect:textRect];
     
-    if (failedDownload) {
-        NSImage *cautionImage = [NSImage cautionIconImage];
-        NSSize cautionImageSize = [cautionImage size];
-        NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
-        if(controlViewIsFlipped)
-            [[NSImage cautionIconImage] drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-        else
-            [[NSImage cautionIconImage] drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-    } else if (countSize.width > 0 && isRetrieving == NO) {
-        [NSGraphicsContext saveGraphicsState];
-		[bgColor setFill];
-		[NSBezierPath fillHorizontalOvalAroundRect:NSIntegralRect(countRect)];
-        [NSGraphicsContext restoreGraphicsState];
+    if (isRetrieving == NO) {
+        if (failedDownload) {
+            NSImage *cautionImage = [NSImage cautionIconImage];
+            NSSize cautionImageSize = [cautionImage size];
+            NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
+            if(controlViewIsFlipped)
+                [[NSImage cautionIconImage] drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+            else
+                [[NSImage cautionIconImage] drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+        } else if (countSize.width > 0) {
+            [NSGraphicsContext saveGraphicsState];
+            [bgColor setFill];
+            [NSBezierPath fillHorizontalOvalAroundRect:NSIntegralRect(countRect)];
+            [NSGraphicsContext restoreGraphicsState];
 
-		[countString drawInRect:countRect];
+            [countString drawInRect:countRect];
+        }
     }
-    	
+    
     // Draw the image
     imageRect = BDSKCenterRect(imageRect, imageSize, controlViewIsFlipped);
 	if (controlViewIsFlipped)
