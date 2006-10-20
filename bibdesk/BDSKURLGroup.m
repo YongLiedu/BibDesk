@@ -39,6 +39,9 @@
 #import "BDSKURLGroup.h"
 #import <WebKit/WebKit.h>
 #import "BibTeXParser.h"
+#import "PubMedParser.h"
+#import "BDSKJSTORParser.h"
+#import "BDSKWebOfScienceParser.h"
 #import "BDSKSharedGroup.h"
 #import "BibAppController.h"
 #import "NSURL_BDSKExtensions.h"
