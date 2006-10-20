@@ -1088,7 +1088,15 @@ The groupedPublications array is a subset of the publications array, developed b
 	if(returnCode == NSOKButton){
         if ([sheet makeFirstResponder:nil] == NO)
             [sheet endEditingFor:nil];
-        NSURL *url = [NSURL URLWithString:[addURLField stringValue]];
+        NSString *urlString = [addURLField stringValue];
+        NSURL *url = nil;
+        if ([urlString rangeOfString:@"//:"].location == NSNotFound) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
+                url = [NSURL fileURLWithPath:urlString];
+            else
+                url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
+        } else
+            url = [NSURL URLWithString:urlString];
 		BDSKURLGroup *group = [[BDSKURLGroup alloc] initWithURL:url];
 		[self addURLGroup:group];
 		[group release];
@@ -1216,7 +1224,15 @@ The groupedPublications array is a subset of the publications array, developed b
 	if(returnCode == NSOKButton){
         if ([sheet makeFirstResponder:nil] == NO)
             [sheet endEditingFor:nil];
-        NSURL *url = [NSURL URLWithString:[addURLField stringValue]];
+        NSString *urlString = [addURLField stringValue];
+        NSURL *url = nil;
+        if ([urlString rangeOfString:@"//:"].location == NSNotFound) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
+                url = [NSURL fileURLWithPath:urlString];
+            else
+                url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
+        } else
+            url = [NSURL URLWithString:urlString];
 		BDSKURLGroup *group = (BDSKURLGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
 		[group setURL:url];
 		[[self undoManager] setActionName:NSLocalizedString(@"Edit External File Group",@"Edit external file group")];
