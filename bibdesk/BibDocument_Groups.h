@@ -45,44 +45,40 @@
 - (unsigned int)countOfGroups;
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index;
 
-- (NSRange)rangeOfCategoryGroups;
-- (NSRange)rangeOfSmartGroups;
 - (NSRange)rangeOfSharedGroups;
 - (NSRange)rangeOfURLGroups;
 - (NSRange)rangeOfScriptGroups;
+- (NSRange)rangeOfSmartGroups;
 - (NSRange)rangeOfStaticGroups;
-- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
-- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (NSRange)rangeOfCategoryGroups;
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
-- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
-- (BOOL)hasCategoryGroupsSelected;
-- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes;
-- (BOOL)hasSmartGroupsSelected;
+- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsSelected;
 - (BOOL)hasURLGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasURLGroupsSelected;
 - (BOOL)hasScriptGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasScriptGroupsSelected;
+- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSmartGroupsSelected;
 - (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasStaticGroupsSelected;
+- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasCategoryGroupsSelected;
 - (BOOL)hasExternalGroupsSelected;
 
-- (void)addSmartGroup:(BDSKSmartGroup *)group;
-- (void)removeSmartGroup:(BDSKSmartGroup *)group;
-- (void)removeSmartGroupNamed:(id)name;
-- (void)addStaticGroup:(BDSKStaticGroup *)group;
-- (void)removeStaticGroup:(BDSKStaticGroup *)group;
-- (void)removeStaticGroupNamed:(id)name;
 - (void)addURLGroup:(BDSKURLGroup *)group;
 - (void)removeURLGroup:(BDSKURLGroup *)group;
-- (void)removeURLGroupNamed:(id)name;
 - (void)addScriptGroup:(BDSKScriptGroup *)group;
 - (void)removeScriptGroup:(BDSKScriptGroup *)group;
-- (void)removeScriptGroupNamed:(id)name;
+- (void)addSmartGroup:(BDSKSmartGroup *)group;
+- (void)removeSmartGroup:(BDSKSmartGroup *)group;
+- (void)addStaticGroup:(BDSKStaticGroup *)group;
+- (void)removeStaticGroup:(BDSKStaticGroup *)group;
 
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
@@ -140,6 +136,7 @@
 - (IBAction)mergeInSharedPublications:(id)sender;
 - (NSArray *)mergeInPublications:(NSArray *)items;
 - (IBAction)refreshURLGroups:(id)sender;
+- (IBAction)refreshScriptGroups:(id)sender;
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)setStaticGroupsFromSerializedData:(NSData *)data;

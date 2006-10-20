@@ -156,20 +156,6 @@
     return NSMakeRange(NSMaxRange([self rangeOfStaticGroups]), [categoryGroups count]);
 }
 
-- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange categoryRange = [self rangeOfCategoryGroups];
-    unsigned int maxCount = MIN([indexes count], categoryRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&categoryRange];
-}
-
-- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange smartRange = [self rangeOfSmartGroups];
-    unsigned int maxCount = MIN([indexes count], smartRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&smartRange];
-}
-
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange sharedRange = [self rangeOfSharedGroups];
     unsigned int maxCount = MIN([indexes count], sharedRange.length);
@@ -191,6 +177,13 @@
     return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&scriptRange];
 }
 
+- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange smartRange = [self rangeOfSmartGroups];
+    unsigned int maxCount = MIN([indexes count], smartRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&smartRange];
+}
+
 - (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange staticRange = [self rangeOfStaticGroups];
     unsigned int maxCount = MIN([indexes count], staticRange.length);
@@ -198,22 +191,11 @@
     return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&staticRange];
 }
 
-- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
+- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange categoryRange = [self rangeOfCategoryGroups];
-    return [indexes intersectsIndexesInRange:categoryRange];
-}
-
-- (BOOL)hasCategoryGroupsSelected{
-    return [self hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange smartRange = [self rangeOfSmartGroups];
-    return [indexes intersectsIndexesInRange:smartRange];
-}
-
-- (BOOL)hasSmartGroupsSelected{
-    return [self hasSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    unsigned int maxCount = MIN([indexes count], categoryRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&categoryRange];
 }
 
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -243,6 +225,15 @@
     return [self hasScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
+- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange smartRange = [self rangeOfSmartGroups];
+    return [indexes intersectsIndexesInRange:smartRange];
+}
+
+- (BOOL)hasSmartGroupsSelected{
+    return [self hasSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
 - (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes{
     NSRange staticRange = [self rangeOfStaticGroups];
     return [indexes intersectsIndexesInRange:staticRange];
@@ -250,6 +241,15 @@
 
 - (BOOL)hasStaticGroupsSelected{
     return [self hasStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+}
+
+- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange categoryRange = [self rangeOfCategoryGroups];
+    return [indexes intersectsIndexesInRange:categoryRange];
+}
+
+- (BOOL)hasCategoryGroupsSelected{
+    return [self hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasExternalGroupsSelected{
@@ -298,69 +298,6 @@
     return staticGroups;
 }
 
-- (void)addSmartGroup:(BDSKSmartGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
-    
-    // update the count
-	NSArray *array = [publications copy];
-	[group filterItems:array];
-    [array release];
-	
-	[smartGroups addObject:group];
-	[group setUndoManager:[self undoManager]];
-    [groupTableView reloadData];
-}
-
-- (void)removeSmartGroup:(BDSKSmartGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
-	
-	[group setUndoManager:nil];
-	[smartGroups removeObjectIdenticalTo:group];
-    [groupTableView reloadData];
-}
-
-// assumes you only have a single smart group with this name; that assumption is not enforced elsewhere
-- (void)removeSmartGroupNamed:(id)name {
-    NSEnumerator *e = [smartGroups objectEnumerator];
-    BDSKSmartGroup *sGroup = nil;
-    
-    while(sGroup = [e nextObject]){
-        if([[sGroup name] isEqual:name]){
-            [self removeSmartGroup:sGroup];
-            break;
-        }
-    }
-}
-
-- (void)addStaticGroup:(BDSKStaticGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
-	
-	[group setUndoManager:[self undoManager]];
-	[[self staticGroups] addObject:group];
-    [groupTableView reloadData];
-}
-
-- (void)removeStaticGroup:(BDSKStaticGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
-	
-	[group setUndoManager:nil];
-	[[self staticGroups] removeObjectIdenticalTo:group];
-    [groupTableView reloadData];
-}
-
-// assumes you only have a single static group with this name; that assumption is not enforced elsewhere
-- (void)removeStaticGroupNamed:(id)name {
-    NSEnumerator *e = [[self staticGroups] objectEnumerator];
-    BDSKStaticGroup *sGroup = nil;
-    
-    while(sGroup = [e nextObject]){
-        if([[sGroup name] isEqual:name]){
-            [self removeStaticGroup:sGroup];
-            break;
-        }
-    }
-}
-
 - (void)addURLGroup:(BDSKURLGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeURLGroup:group];
 	
@@ -386,19 +323,6 @@
 	[group setUndoManager:nil];
 	[urlGroups removeObjectIdenticalTo:group];
     [groupTableView reloadData];
-}
-
-// assumes you only have a single URL group with this name; that assumption is not enforced elsewhere
-- (void)removeURLGroupNamed:(id)name {
-    NSEnumerator *e = [urlGroups objectEnumerator];
-    BDSKURLGroup *group = nil;
-    
-    while(group = [e nextObject]){
-        if([[group name] isEqual:name]){
-            [self removeURLGroup:group];
-            break;
-        }
-    }
 }
 
 - (void)addScriptGroup:(BDSKScriptGroup *)group {
@@ -428,17 +352,41 @@
     [groupTableView reloadData];
 }
 
-// assumes you only have a single URL group with this name; that assumption is not enforced elsewhere
-- (void)removeScriptGroupNamed:(id)name {
-    NSEnumerator *e = [scriptGroups objectEnumerator];
-    BDSKScriptGroup *group = nil;
+- (void)addSmartGroup:(BDSKSmartGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
     
-    while(group = [e nextObject]){
-        if([[group name] isEqual:name]){
-            [self removeScriptGroup:group];
-            break;
-        }
-    }
+    // update the count
+	NSArray *array = [publications copy];
+	[group filterItems:array];
+    [array release];
+	
+	[smartGroups addObject:group];
+	[group setUndoManager:[self undoManager]];
+    [groupTableView reloadData];
+}
+
+- (void)removeSmartGroup:(BDSKSmartGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
+	
+	[group setUndoManager:nil];
+	[smartGroups removeObjectIdenticalTo:group];
+    [groupTableView reloadData];
+}
+
+- (void)addStaticGroup:(BDSKStaticGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
+	
+	[group setUndoManager:[self undoManager]];
+	[[self staticGroups] addObject:group];
+    [groupTableView reloadData];
+}
+
+- (void)removeStaticGroup:(BDSKStaticGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
+	
+	[group setUndoManager:nil];
+	[[self staticGroups] removeObjectIdenticalTo:group];
+    [groupTableView reloadData];
 }
 
 /* 
@@ -1176,7 +1124,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)addScriptGroupAction:(id)sender {
-    [scriptPathField setStringValue:@""];
+    [scriptPathField setStringValue:@"http://"];
     [NSApp beginSheet:addScriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(addScriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
@@ -1188,7 +1136,7 @@ The groupedPublications array is a subset of the publications array, developed b
         int type = [scriptTypePopup indexOfSelectedItem];
         NSString *argString = [scriptArgumentsField stringValue];
         NSArray *arguments = [NSString isEmptyString:argString] ? [NSArray array] : [argString componentsSeparatedByString:@" "];
-		BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithName:NSLocalizedString(@"Script Group", @"Script group") scriptPath:path scriptArguments:arguments scriptType:type];
+		BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
         unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
 		[self addScriptGroup:group];
 		[group release];
@@ -1408,6 +1356,10 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)refreshURLGroups:(id)sender{
     [urlGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+}
+
+- (IBAction)refreshScriptGroups:(id)sender{
+    [scriptGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
 }
 
 #pragma mark Add or remove items
@@ -1791,13 +1743,14 @@ The groupedPublications array is a subset of the publications array, developed b
     NSDictionary *groupDict;
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
     BDSKURLGroup *group = nil;
+    NSString *name = nil;
     NSURL *url = nil;
     
     while (groupDict = [groupEnum nextObject]) {
         @try {
+            name = [groupDict objectForKey:@"group name"];
             url = [NSURL URLWithString:[groupDict objectForKey:@"URL"]];
-            group = [[BDSKURLGroup alloc] initWithURL:url];
-            [group setName:[groupDict objectForKey:@"group name"]];
+            group = [[BDSKURLGroup alloc] initWithName:name URL:url];
             [group setUndoManager:[self undoManager]];
             [array addObject:group];
         }
