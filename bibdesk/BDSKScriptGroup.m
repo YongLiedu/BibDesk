@@ -255,7 +255,7 @@
 - (void)setScriptPath:(NSString *)newPath;
 {
     if (newPath != scriptPath) {
-		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptPath:newPath];
+		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptPath:scriptPath];
         [scriptPath release];
         scriptPath = [newPath retain];
         
@@ -271,7 +271,7 @@
 - (void)setScriptArguments:(NSArray *)newArguments;
 {
     if (newArguments != scriptArguments) {
-		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptArguments:newArguments];
+		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptArguments:scriptArguments];
         [scriptArguments release];
         scriptArguments = [newArguments retain];
         
@@ -287,7 +287,7 @@
 - (void)setScriptType:(int)newType;
 {
     if (newType != scriptType) {
-		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptType:newType];
+		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptType:scriptType];
         scriptType = newType;
         
         [self setPublications:nil];
