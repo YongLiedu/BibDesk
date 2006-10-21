@@ -61,7 +61,7 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 1 : 0) + 1 /* add 1 for all publications group */ ;
+    return [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [smartGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 2 : 1) /* add 1 for all publications group */ ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
@@ -1212,6 +1212,9 @@ The groupedPublications array is a subset of the publications array, developed b
 		} else if ([group isURL] == YES) {
 			[self removeURLGroup:(BDSKURLGroup *)group];
 			count++;
+		} else if ([group isScript] == YES) {
+			[self removeScriptGroup:(BDSKScriptGroup *)group];
+			count++;
         }
 		rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
 	}
@@ -1643,11 +1646,12 @@ The groupedPublications array is a subset of the publications array, developed b
         }
     }
     
-    [categoryGroups sortUsingDescriptors:sortDescriptors];
-    [smartGroups sortUsingDescriptors:sortDescriptors];
     [sharedGroups sortUsingDescriptors:sortDescriptors];
     [urlGroups sortUsingDescriptors:sortDescriptors];
+    [scriptGroups sortUsingDescriptors:sortDescriptors];
+    [smartGroups sortUsingDescriptors:sortDescriptors];
     [[self staticGroups] sortUsingDescriptors:sortDescriptors];
+    [categoryGroups sortUsingDescriptors:sortDescriptors];
 	
     if (emptyGroup != nil) {
         [categoryGroups insertObject:emptyGroup atIndex:0];
