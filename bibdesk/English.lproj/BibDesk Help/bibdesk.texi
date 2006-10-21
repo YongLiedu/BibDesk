@@ -62,6 +62,15 @@ Option-Cmd-\key\
 @end ifnothtml
 @end macro
 
+@macro ctrcmd {key}
+@html
+&#8963;&#8984;\key\
+@end html
+@ifnothtml
+Control-Cmd-\key\
+@end ifnothtml
+@end macro
+
 @c Some macros for typesetting menu and button titles.
 
 @macro menutitle {text}
@@ -1367,8 +1376,10 @@ Field Groups and Smart Groups are the easiest way to keep a large file separated
 categories without managing many small files scattered around your hard drive.
 
 @menu
-* Field Groups::  Grouping references based on a particular field.
-* Smart Groups::  Grouping references based on specific criteria.
+* Field Groups::     Grouping references based on a particular field.
+* Smart Groups::     Grouping references based on specific criteria.
+* Static Groups::    Grouping arbitrary sets of references.
+* External Groups::  Importing groups of items from an external source.
 @end menu
 
 @node Field Groups
@@ -1450,29 +1461,41 @@ consistent across versions of BibDesk.  Some BibTeX editors may not preserve the
 field, unfortunately (early versions of BibDesk didn't preserve it, either).
 
 Text-based fields are compared case-insensitively, for the criteria specified.  The BibDesk @samp{Date-Modified}
-and @samp{Date-Created} fields are handled specially, and only @samp{comes before} and @samp{comes after} are
-allowable comparisons.  Date comparisons are updated several times per day, so the relative comparison should
+and @samp{Date-Created} fields are handled specially.  You can enter date ranges in various convenient ways.  
+Date comparisons are automatically updated several times per day, so the relative comparison should
 always be true.
 
-@subheading Notes
+@node Static Groups
+@subsection Static Groups
 
-To enter a date, you should use a fixed date in your system's short date format (see the
-International pane of System Preferences), or a relative date such as ``ten days ago.''
-The following are examples of supported expressions:
+@cindex static group
+@kindex Control-Cmd-G
 
-@itemize
-@item @samp{an hour ago}
-@item @samp{a week ago}
-@item @samp{15 days ago}
-@item @samp{one day ago}
-@item @samp{a fortnight ago}
-@item @samp{last Tuesday at dinner}
-@end itemize
+BibDesk supports static groups that contain an arbitrary set of items.  To add a static group, 
+use the command @menutitle{New Static Group} (@ctrcmd{G}) from the @menutitle{File} menu.  
+To add publications to the group, just drag the items and drop them on the group. 
 
-Digits 1--10 are recognized as words @samp{one}@dots{}@samp{ten}, but you need to use numerals for anything higher 
-(e.g. @samp{twenty days ago} will not work, but @samp{20 days ago} will work).  You can also use 
-@samp{one week from tomorrow} and so forth, but that's not likely to be much use with @samp{Date-Modified} 
-and @samp{Date-Created}.
+@node External Groups
+@subsection External Groups
+
+@cindex external group
+
+BibDesk can automatically fetch publications from external sources.  There are three types of external groups.  
+
+Shared Groups contain items that others share on your local network.  
+They are fetched using Bonjour.  This is similar to sharing of music files in iTunes.  
+You can turn on sharing in the @ref{Sharing Preferences,Sharing Preferences}.  
+
+External File Groups get their items from a remote URL on the internet or from a local file on your computer. 
+
+Script Groups generate their items using a script, either a shell script or an AppleScript.  
+For example, the script can download content from a remote location and parse the content to get the items.  
+The script should return valid BibTeX. 
+
+Items in external groups are not included in the Library and can not be edited.  
+You can add external items to your Library by dragging them to the Library group.  
+You can also use the @menutitle{Merge In External Publications} menu item in the 
+@menutitle{File} menu. This wil only add items that are not yet in your Library. 
 
 @c --------------------------------------------------------------------------------------
 
