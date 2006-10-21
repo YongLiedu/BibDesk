@@ -66,7 +66,6 @@ static NSString *BDSKLastImportLocalizedString = nil;
 - (id)initWithName:(id)aName publications:(NSArray *)array {
     if (self = [super initWithName:aName count:[array count]]) {
         publications = [array mutableCopy];
-		undoManager = nil;
     }
     return self;
 }
@@ -79,7 +78,6 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (void)dealloc {
 	[[self undoManager] removeAllActionsWithTarget:self];
-    [undoManager release];
     [publications release];
     [super dealloc];
 }
@@ -89,14 +87,6 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 - (BOOL)isStatic { return YES; }
-
-- (void)setName:(id)newName {
-    if (name != newName) {
-		[(BDSKStaticGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
-        [name release];
-        name = [newName retain];
-    }
-}
 
 - (NSArray *)publications {
     return publications;
@@ -153,17 +143,6 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (BOOL)containsItem:(BibItem *)item {
 	return [publications containsObject:item];
-}
-
-- (NSUndoManager *)undoManager {
-    return undoManager;
-}
-
-- (void)setUndoManager:(NSUndoManager *)newUndoManager {
-    if (undoManager != newUndoManager) {
-        [undoManager release];
-        undoManager = [newUndoManager retain];
-    }
 }
 
 @end

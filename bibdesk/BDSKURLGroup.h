@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
-@interface BDSKURLGroup : BDSKGroup
+@interface BDSKURLGroup : BDSKMutableGroup
 {
     NSArray *publications;
     NSURL *URL;
@@ -47,15 +47,12 @@
     BOOL isRetrieving;
     BOOL failedDownload;
     NSURLDownload *URLDownload;
-	NSUndoManager *undoManager;
 }
 
 - (NSImage *)icon;
 
 - (id)initWithName:(NSString *)aName URL:(NSURL *)aURL;
 - (id)initWithURL:(NSURL *)aURL;
-
-- (void)setName:(NSString *)newName;
 
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
@@ -64,9 +61,6 @@
 - (void)setPublications:(NSArray *)newPublications;
 
 - (BOOL)isRetrieving;
-
-- (NSUndoManager *)undoManager;
-- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 - (void)terminate;
 

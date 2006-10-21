@@ -47,12 +47,11 @@ enum {
     BDSKAppleScriptType
 };
 
-@interface BDSKScriptGroup : BDSKGroup {
+@interface BDSKScriptGroup : BDSKMutableGroup {
     NSArray *publications;
     NSString *scriptPath;
     NSArray *scriptArguments;
     int scriptType;
-	NSUndoManager *undoManager;
     BOOL isRetrieving;
     BOOL failedDownload;
     OFMessageQueue *messageQueue;
@@ -66,8 +65,6 @@ enum {
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
 
-- (void)setName:(NSString *)newName;
-
 - (NSArray *)publications;
 - (void)setPublications:(NSArray *)newPubs;
 
@@ -79,9 +76,6 @@ enum {
 
 - (int)scriptType;
 - (void)setScriptType:(int)newType;
-
-- (NSUndoManager *)undoManager;
-- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 - (void)startRunningScript;
 - (void)scriptDidFinishWithResult:(NSString *)outputString;

@@ -149,6 +149,14 @@ static unsigned currentUniqueID = 0;
 
 - (BOOL)isValidDropTarget { return YES; }
 
+- (BOOL)hasEditableName { return NO; }
+
+- (BOOL)isEditable { return NO; }
+
+- (BOOL)failedDownload { return NO; }
+
+- (BOOL)isRetrieving { return NO; }
+
 // custom accessors
 
 - (NSString *)stringValue {
@@ -169,26 +177,7 @@ static unsigned currentUniqueID = 0;
 	return [[self numberValue] compare:[otherGroup numberValue]];
 }
 
-- (BOOL)containsItem:(BibItem *)item {
-    return YES;
-}
-
-- (BOOL)hasEditableName {
-    return YES;
-}
-
-- (BOOL)isEditable {
-    return NO;
-}
-
-- (BOOL)failedDownload {
-    return NO;
-}
-
-
-- (BOOL)isRetrieving {
-    return NO;
-}
+- (BOOL)containsItem:(BibItem *)item { return YES; }
 
 @end
 
@@ -216,12 +205,49 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     
 	return image;
 }
-
-- (BOOL)hasEditableName {
-    return NO;
-}
  
 @end
+
+#pragma mark -
+
+@implementation BDSKMutableGroup
+
+- (id)initWithName:(id)aName count:(int)aCount {
+    if (self = [super initWithName:aName count:aCount]) {
+        undoManager = nil;
+    }
+    return self;
+}
+
+- (void)dealloc {
+	[[self undoManager] removeAllActionsWithTarget:self];
+    [undoManager release];
+    [super dealloc];
+}
+
+- (void)setName:(id)newName {
+    if (name != newName) {
+		[(BDSKMutableGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
+        [name release];
+        name = [newName retain];
+    }
+}
+
+- (NSUndoManager *)undoManager {
+    return undoManager;
+}
+
+- (void)setUndoManager:(NSUndoManager *)newUndoManager {
+    if (undoManager != newUndoManager) {
+        [undoManager release];
+        undoManager = [newUndoManager retain];
+    }
+}
+
+- (BOOL)hasEditableName { return YES; }
+
+@end
+
 
 #pragma mark NSString category for KVC
 

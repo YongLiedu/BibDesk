@@ -183,15 +183,6 @@
 
 #pragma mark Accessors
 
-- (void)setName:(NSString *)newName;
-{
-    if (newName != name) {
-		[(BDSKURLGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
-        [name release];
-        name = [newName copy];
-    }
-}
-
 - (NSURL *)URL;
 {
     return URL;
@@ -246,17 +237,6 @@
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (BOOL)failedDownload { return failedDownload; }
-
-- (NSUndoManager *)undoManager {
-    return undoManager;
-}
-
-- (void)setUndoManager:(NSUndoManager *)newUndoManager {
-    if (undoManager != newUndoManager) {
-        [undoManager release];
-        undoManager = [newUndoManager retain];
-    }
-}
 
 // BDSKGroup overrides
 

@@ -226,7 +226,7 @@
 		if([NSString isEmptyString:object] || [[group stringValue] isEqualToString:object])
 			return;
 		if([group hasEditableName]){
-			[group performSelector:@selector(setName:) withObject:object];
+			[(BDSKMutableGroup *)group setName:object];
 			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group",@"Rename group")];
 			if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
                 [self sortGroupsByKey:sortGroupsKey];

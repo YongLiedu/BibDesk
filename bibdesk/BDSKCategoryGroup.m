@@ -93,8 +93,6 @@
 
 // accessors
 
-- (BOOL)isCategory { return YES; }
-
 - (NSString *)key {
     return [[key retain] autorelease];
 }
@@ -102,6 +100,10 @@
 - (NSImage *)icon {
 	return [NSImage smallImageNamed:@"genericFolderIcon"];
 }
+
+- (BOOL)isCategory { return YES; }
+
+- (BOOL)hasEditableName { return YES; }
 
 - (BOOL)isEditable {
     return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key];

@@ -148,6 +148,38 @@
 - (BOOL)isExternal;
 
 /*!
+    @method     hasEditableName
+    @abstract   Returns NO by default.  Editable subclasses should override this to allow changing the name of a group.
+*/
+- (BOOL)hasEditableName;
+
+/*!
+    @method     isEditable
+    @abstract   Returns NO by default.  Editable subclasses should override this to allow editing of its properties.
+*/
+- (BOOL)isEditable;
+
+/*!
+    @method     failedDownload
+    @abstract   Method for remote groups.  Returns NO by default.
+*/
+- (BOOL)failedDownload;
+
+/*!
+    @method     isRetrieving
+    @abstract   Method for remote groups.  Returns NO by default.
+*/
+- (BOOL)isRetrieving;
+
+/*!
+    @method     isValidDropTarget
+    @abstract   Some subclasses (e.g. BDSKSharedGroup) are never valid drop targets, while others are generally valid.  Returns YES by default.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isValidDropTarget;
+
+/*!
 	@method stringValue
 	@abstract Returns string value of the name.
 	@discussion -
@@ -185,36 +217,34 @@
 */
 - (BOOL)containsItem:(BibItem *)item;
 
-/*!
-    @method     hasEditableName
-    @abstract   Returns YES by default.  Non-editable subclasses should override this to prevent changing the name of a group.
-*/
-- (BOOL)hasEditableName;
+@end
+
+
+@interface BDSKMutableGroup : BDSKGroup {
+	NSUndoManager *undoManager;
+}
 
 /*!
-    @method     isEditable
-    @abstract   Returns NO by default.  Editable subclasses should override this to allow editing of its properties.
+	@method setName:
+	@abstract Sets the name for the group.
+	@discussion -
+	@param newName The new name to set.
 */
-- (BOOL)isEditable;
+- (void)setName:(id)newName;
 
 /*!
-    @method     failedDownload
-    @abstract   Method for remote groups.  Returns NO by default.
+	@method undoManager
+	@abstract Returns the undo manager of the group.
+	@discussion -
 */
-- (BOOL)failedDownload;
+- (NSUndoManager *)undoManager;
 
 /*!
-    @method     isRetrieving
-    @abstract   Method for remote groups.  Returns NO by default.
+	@method setUndoManager:
+	@abstract Sets the undo manager for the group.
+	@discussion -
+	@param newUndoManager The new undo manager to set.
 */
-- (BOOL)isRetrieving;
-
-/*!
-    @method     isValidDropTarget
-    @abstract   Some subclasses (e.g. BDSKSharedGroup) are never valid drop targets, while others are generally valid.  Returns YES by default.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (BOOL)isValidDropTarget;
+- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 @end

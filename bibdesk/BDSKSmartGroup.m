@@ -56,7 +56,6 @@
 - (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter {
     if (self = [super initWithName:aName count:aCount]) {
         filter = [aFilter copy];
-		undoManager = nil;
 		[filter setUndoManager:nil];
     }
     return self;
@@ -73,8 +72,6 @@
 }
 
 - (void)dealloc {
-	[[self undoManager] removeAllActionsWithTarget:self];
-    [undoManager release];
     [filter release];
     [super dealloc];
 }
@@ -103,14 +100,6 @@
 
 // accessors
 
-- (void)setName:(id)newName {
-    if (name != newName) {
-		[(BDSKSmartGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
-        [name release];
-        name = [newName retain];
-    }
-}
-
 - (BDSKFilter *)filter {
     return [[filter retain] autorelease];
 }
@@ -120,18 +109,6 @@
 		[[[self undoManager] prepareWithInvocationTarget:self] setFilter:filter];
         [filter release];
         filter = [newFilter copy];
-		[filter setUndoManager:undoManager];
-    }
-}
-
-- (NSUndoManager *)undoManager {
-    return undoManager;
-}
-
-- (void)setUndoManager:(NSUndoManager *)newUndoManager {
-    if (undoManager != newUndoManager) {
-        [undoManager release];
-        undoManager = [newUndoManager retain];
 		[filter setUndoManager:undoManager];
     }
 }

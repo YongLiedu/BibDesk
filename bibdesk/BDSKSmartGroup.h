@@ -41,9 +41,8 @@
 
 @class BDSKFilter;
 
-@interface BDSKSmartGroup : BDSKGroup {
+@interface BDSKSmartGroup : BDSKMutableGroup {
 	BDSKFilter *filter;
-	NSUndoManager *undoManager;
 }
 
 /*!
@@ -65,14 +64,6 @@
 - (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter;
 
 /*!
-	@method setName:
-	@abstract Sets the name for the group.
-	@discussion -
-	@param newName The new name to set.
-*/
-- (void)setName:(id)newName;
-
-/*!
 	@method filter
 	@abstract Returns the filter of the group.
 	@discussion -
@@ -86,21 +77,6 @@
 	@param newFilter The new filter to set.
 */
 - (void)setFilter:(BDSKFilter *)newFilter;
-
-/*!
-	@method undoManager
-	@abstract Returns the undo manager of the group.
-	@discussion -
-*/
-- (NSUndoManager *)undoManager;
-
-/*!
-	@method setUndoManager:
-	@abstract Sets the undo manager for the group.
-	@discussion -
-	@param newUndoManager The new undo manager to set.
-*/
-- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 /*!
 	@method filterItems:

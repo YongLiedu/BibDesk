@@ -41,9 +41,8 @@
 
 @class BibItem;
 
-@interface BDSKStaticGroup : BDSKGroup {
+@interface BDSKStaticGroup : BDSKMutableGroup {
 	NSMutableArray *publications;
-	NSUndoManager *undoManager;
 }
 
 /*!
@@ -62,14 +61,6 @@
 	@param array The publications for the static group.
 */
 - (id)initWithLastImport:(NSArray *)array;
-
-/*!
-	@method setName:
-	@abstract Sets the name for the group.
-	@discussion -
-	@param newName The new name to set.
-*/
-- (void)setName:(id)newName;
 
 /*!
 	@method publications
@@ -117,20 +108,5 @@
 	@param items The publications to remove.
 */
 - (void)removePublicationsInArray:(NSArray *)items;
-
-/*!
-	@method undoManager
-	@abstract Returns the undo manager of the group.
-	@discussion -
-*/
-- (NSUndoManager *)undoManager;
-
-/*!
-	@method setUndoManager:
-	@abstract Sets the undo manager for the group.
-	@discussion -
-	@param newUndoManager The new undo manager to set.
-*/
-- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 @end

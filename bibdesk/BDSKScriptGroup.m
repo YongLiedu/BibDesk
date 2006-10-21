@@ -207,15 +207,6 @@
 
 #pragma mark Accessors
 
-- (void)setName:(NSString *)newName;
-{
-    if (newName != name) {
-		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
-        [name release];
-        name = [newName retain];
-    }
-}
-
 - (NSArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil){
@@ -290,17 +281,6 @@
         scriptType = newType;
         
         [self setPublications:nil];
-    }
-}
-
-- (NSUndoManager *)undoManager {
-    return undoManager;
-}
-
-- (void)setUndoManager:(NSUndoManager *)newUndoManager {
-    if (undoManager != newUndoManager) {
-        [undoManager release];
-        undoManager = [newUndoManager retain];
     }
 }
 
