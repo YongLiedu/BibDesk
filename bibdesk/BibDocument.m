@@ -2536,13 +2536,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	
 	// kick out every item we won't need:
 	int i = [myMenu numberOfItems];
+    BOOL wasSeparator = YES;
 	
 	while (--i >= 0) {
 		theItem = (NSMenuItem*)[myMenu itemAtIndex:i];
-		if (![self validateMenuItem:theItem] ||
-			((i == [myMenu numberOfItems] - 1 || i == 0) && [theItem isSeparatorItem])) {
+		if ([self validateMenuItem:theItem] == NO || ((wasSeparator || i == 0) && [theItem isSeparatorItem]))
 			[myMenu removeItem:theItem];
-		}
+        else
+            wasSeparator = [theItem isSeparatorItem];
 	}
 	while([myMenu numberOfItems] > 0 && [(NSMenuItem*)[myMenu itemAtIndex:0] isSeparatorItem])	
 		[myMenu removeItemAtIndex:0];
