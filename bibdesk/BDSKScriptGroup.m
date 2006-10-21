@@ -233,6 +233,9 @@
 
 - (void)setPublications:(NSArray *)newPublications;
 {
+    if ([self isRetrieving])
+        [self terminate];
+    
     if(newPublications != publications){
         [publications release];
         publications = [newPublications retain];

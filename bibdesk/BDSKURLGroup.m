@@ -86,6 +86,9 @@
 - (void)terminate;
 {
     [URLDownload cancel];
+    [URLDownload release];
+    URLDownload = nil;
+    isRetrieving = NO;
 }
 
 // Logging
@@ -205,9 +208,6 @@
         [URL release];
         URL = [newURL copy];
         
-        if ([self isRetrieving])
-            [URLDownload cancel];
-        
         // get rid of any current pubs and notify the tableview to start progress indicators
         [self setPublications:nil];
     }
@@ -229,6 +229,9 @@
 
 - (void)setPublications:(NSArray *)newPublications;
 {
+    if ([self isRetrieving])
+        [self terminate];
+    
     if(newPublications != publications){
         [publications release];
         publications = [newPublications copy];
