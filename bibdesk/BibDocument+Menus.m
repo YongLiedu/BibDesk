@@ -777,7 +777,7 @@
     return YES;
 }
 
-- (BOOL)validateMergeInSharedGroupMenuItem:(NSMenuItem *)menuItem {
+- (BOOL)validateMergeInExternalGroupMenuItem:(NSMenuItem *)menuItem {
     if ([self hasSharedGroupsSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Merge In Shared Group")];
         return YES;
@@ -793,7 +793,7 @@
     }
 }
 
-- (BOOL)validateMergeInSharedPublicationsMenuItem:(NSMenuItem *)menuItem {
+- (BOOL)validateMergeInExternalPublicationsMenuItem:(NSMenuItem *)menuItem {
     if ([self hasSharedGroupsSelected]) {
         [menuItem setTitle:NSLocalizedString(@"Merge In Shared Publications", @"Merge In Shared Publications")];
         return [self numberOfSelectedPubs] > 0;
@@ -967,11 +967,11 @@
     else if (act == @selector(changeIntersectGroupsAction:)){
         return [self validateChangeIntersectGroupsMenuItem:menuItem];
     }
-    else if (act == @selector(mergeInSharedGroup:)){
-        return [self validateMergeInSharedGroupMenuItem:menuItem];
+    else if (act == @selector(mergeInExternalGroup:)){
+        return [self validateMergeInExternalGroupMenuItem:menuItem];
     }
-    else if (act == @selector(mergeInSharedPublications:)){
-        return [self validateMergeInSharedPublicationsMenuItem:menuItem];
+    else if (act == @selector(mergeInExternalPublications:)){
+        return [self validateMergeInExternalPublicationsMenuItem:menuItem];
     }
     else if (act == @selector(refreshSharing:)){
         return [self validateRefreshSharingMenuItem:menuItem];

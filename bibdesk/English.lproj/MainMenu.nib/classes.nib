@@ -123,13 +123,14 @@
                 makeNewExternalSource = id; 
                 makeNewNotepad = id; 
                 makeSearchFieldKey = id; 
-                mergeInSharedPublications = id; 
+                mergeInExternalPublications = id; 
                 newBDSKLibrary = id; 
                 newPub = id; 
                 openDocumentUsingFilter = id; 
                 openDocumentUsingPhonyCiteKeys = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 
+                refreshAllExternalGroups = id; 
                 removeSelectedPubs = id; 
                 revealLinkedFile = id; 
                 saveAsBDSKDocument = id; 

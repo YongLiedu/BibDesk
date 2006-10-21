@@ -86,8 +86,8 @@
                 importFromPasteboardAction = id; 
                 importFromWebAction = id; 
                 makeSearchFieldKey = id; 
-                mergeInSharedGroup = id; 
-                mergeInSharedPublications = id; 
+                mergeInExternalGroup = id; 
+                mergeInExternalPublications = id; 
                 newPub = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 

@@ -252,8 +252,12 @@
     return [self hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
+- (BOOL)hasExternalGroupsAtIndexes:(NSIndexSet *)indexes{
+    return [self hasSharedGroupsAtIndexes:indexes] || [self hasURLGroupsAtIndexes:indexes] || [self hasScriptGroupsAtIndexes:indexes];
+}
+
 - (BOOL)hasExternalGroupsSelected{
-    return [self hasSharedGroupsSelected] || [self hasURLGroupsSelected] || [self hasScriptGroupsSelected];
+    return [self hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 #pragma mark Accessors
@@ -1353,7 +1357,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
-- (IBAction)mergeInSharedGroup:(id)sender{
+- (IBAction)mergeInExternalGroup:(id)sender{
     if ([self hasExternalGroupsSelected] == NO) {
         NSBeep();
         return;
@@ -1362,7 +1366,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [self mergeInPublications:[self publicationsInCurrentGroups]];
 }
 
-- (IBAction)mergeInSharedPublications:(id)sender{
+- (IBAction)mergeInExternalPublications:(id)sender{
     if ([self hasExternalGroupsSelected] == NO || [self numberOfSelectedPubs] == 0) {
         NSBeep();
         return;
@@ -1376,6 +1380,12 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)refreshScriptGroups:(id)sender{
     [scriptGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+}
+
+- (IBAction)refreshAllExternalGroups:(id)sender{
+    [self refreshSharedBrowsing:sender];
+    [self refreshURLGroups:sender];
+    [self refreshScriptGroups:sender];
 }
 
 #pragma mark Add or remove items

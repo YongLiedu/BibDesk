@@ -69,6 +69,7 @@
 - (BOOL)hasStaticGroupsSelected;
 - (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasCategoryGroupsSelected;
+- (BOOL)hasExternalGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasExternalGroupsSelected;
 
 - (void)addURLGroup:(BDSKURLGroup *)group;
@@ -113,6 +114,7 @@
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
+
 - (IBAction)addSmartGroupAction:(id)sender;
 - (IBAction)addStaticGroupAction:(id)sender;
 - (IBAction)addURLGroupAction:(id)sender;
@@ -132,11 +134,12 @@
 - (void)addURLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 - (void)addScriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
-- (IBAction)mergeInSharedGroup:(id)sender;
-- (IBAction)mergeInSharedPublications:(id)sender;
+- (IBAction)mergeInExternalGroup:(id)sender;
+- (IBAction)mergeInExternalPublications:(id)sender;
 - (NSArray *)mergeInPublications:(NSArray *)items;
 - (IBAction)refreshURLGroups:(id)sender;
 - (IBAction)refreshScriptGroups:(id)sender;
+- (IBAction)refreshAllExternalGroups:(id)sender;
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)setStaticGroupsFromSerializedData:(NSData *)data;

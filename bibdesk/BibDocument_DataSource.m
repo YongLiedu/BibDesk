@@ -439,7 +439,7 @@
                 }
                 pubs = pubsInGroup;
             }
-            dragFromSharedGroups = [self hasSharedGroupsAtIndexes:rowIndexes] || [self hasURLGroupsAtIndexes:rowIndexes];
+            dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
 		}
 		if([pubs count] == 0){
             NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @""),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
@@ -465,12 +465,12 @@
         pubs = [self selectedPublications];
         dragCopyType = 1; // only type that makes sense here
         
-        dragFromSharedGroups = [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] || [self hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+        dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
     }else{
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
-        dragFromSharedGroups = [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] || [self hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+        dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
