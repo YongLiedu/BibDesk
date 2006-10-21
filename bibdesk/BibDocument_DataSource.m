@@ -466,9 +466,9 @@
         dragCopyType = 1; // only type that makes sense here
         
         dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
-    }else{
+    }else if(tv == tableView){
 		// drag from the main table
-		pubs = [shownPublications objectsAtIndexes:rowIndexes];
+		pubs = [shownPublications objectsAtIndexes:[groupTableView selectedRowIndexes]];
         
         dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
 
