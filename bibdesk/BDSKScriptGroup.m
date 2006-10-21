@@ -338,13 +338,15 @@
     while ([self isProcessing] && currentTask){
         // if the task is still running after 2 seconds, kill it; we can't sleep here, because the main thread (usually this one) may be updating the UI for a task
         if([referenceDate timeIntervalSinceNow] > -2 && OFSimpleLockTry(&currentTaskLock)){
-            [currentTask terminate];
+            if([currentTask isRunning])
+                [currentTask terminate];
             currentTask = nil;
             OFSimpleUnlock(&currentTaskLock);
             break;
         } else if([referenceDate timeIntervalSinceNow] > -2.1){ // just in case this ever happens
             NSLog(@"%@ failed to lock for task %@", self, currentTask);
             [currentTask terminate];
+            currentTask = nil;
             break;
         }
     }    
@@ -376,6 +378,7 @@
     
     NSArray *pubs = nil;
     NSString *outputString = nil;
+    NSError *error = nil;
     NSTask *task;
     NSPipe *outputPipe = [NSPipe pipe];
     NSFileHandle *outputFileHandle = [outputPipe fileHandleForReading];
@@ -395,43 +398,52 @@
     OFSimpleLock(&currentTaskLock);
     currentTask = task;
     // we keep the lock, as the task is now the currentTask
-    [task launch];
+    
+    @try{ [task launch]; }
+    @catch(id exception){
+        if([task isRunning])
+            [task terminate];
+    }
+    
     isRunning = [task isRunning];
     OFSimpleUnlock(&currentTaskLock);
     
-    NS_DURING
-    if (isRunning) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
-        [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
-        
-        // Now loop the runloop in the special mode until we've processed the notification.
-        stdoutData = nil;
-        while (stdoutData == nil && isRunning) {
-            // Run the run loop, briefly, until we get the notification...
-            [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+    @try{
+        if (isRunning) {
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+            [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
+            
+            // Now loop the runloop in the special mode until we've processed the notification.
+            stdoutData = nil;
+            while (stdoutData == nil && isRunning) {
+                // Run the run loop, briefly, until we get the notification...
+                [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+                OFSimpleLock(&currentTaskLock);
+                isRunning = [task isRunning];
+                OFSimpleUnlock(&currentTaskLock);
+            }
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+
             OFSimpleLock(&currentTaskLock);
-            isRunning = [task isRunning];
-            OFSimpleUnlock(&currentTaskLock);
+            [task waitUntilExit];
+            OFSimpleUnlock(&currentTaskLock);        
+
+            outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
+            if(outputString == nil)
+                outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSASCIIStringEncoding];
+            
+            [stdoutData release];
+            stdoutData = nil;
+        } else {
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"")];
+            [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Failed to launch shell script %@", @""), path] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
-
-        OFSimpleLock(&currentTaskLock);
-        [task waitUntilExit];
-        OFSimpleUnlock(&currentTaskLock);        
-
-        outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
-        if(outputString == nil)
-            outputString = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSASCIIStringEncoding];
-        
-        [stdoutData release];
-        stdoutData = nil;
-    } else {
-        NSLog(@"Failed to launch task or task exited without accepting input.  Termination status was %d", [task terminationStatus]);
     }
-    NS_HANDLER
+    @catch(id exception){
         // if the pipe failed, we catch an exception here and ignore it
-        NSLog(@"exception %@ encountered while trying to launch task %@", [localException name], path);
-    NS_ENDHANDLER
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"")];
+        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Exception %@ encountered while trying to run shell script %@", @""), [exception name], path] forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
     
     // reset signal handling to default behavior
     signal(SIGPIPE, SIG_DFL);
@@ -442,8 +454,9 @@
     
     [task release];
     
-    if (nil == outputString) {
-        NSError *error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
+    if (error || nil == outputString) {
+        if(error == nil)
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
         [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFailWithError:) forObject:self withObject:error];
     } else {
         [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFinishWithResult:) forObject:self withObject:outputString];
