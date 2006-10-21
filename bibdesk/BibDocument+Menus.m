@@ -624,8 +624,10 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    int n = [self numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-    n += [self numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    int n = [self numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
+            [self numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
+            [self numberOfURLGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
+            [self numberOfScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 	
 	NSString *s = @"";
 	
