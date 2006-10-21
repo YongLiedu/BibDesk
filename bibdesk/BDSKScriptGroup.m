@@ -159,7 +159,6 @@
                 [script release];
             }
         }
-        NSArray *pubs = nil;
         if (nil == outputString || error) {
             if (error == nil)
                 error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
@@ -374,11 +373,9 @@
 - (void)runShellScriptAtPath:(NSString *)path withArguments:(NSArray *)args;
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    volatile BOOL rv = YES;
 
     OFSimpleLock(&processingLock);
     
-    NSArray *pubs = nil;
     NSString *outputString = nil;
     NSError *error = nil;
     NSTask *task;
