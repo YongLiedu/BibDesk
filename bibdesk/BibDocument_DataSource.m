@@ -56,8 +56,6 @@
 #import "NSFileManager_ExtendedAttributes.h"
 #import "NSSet_BDSKExtensions.h"
 #import "BibEditor.h"
-#import "BDSKSharedGroup.h"
-#import "BDSKURLGroup.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"

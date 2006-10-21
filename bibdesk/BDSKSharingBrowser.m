@@ -39,7 +39,7 @@
 #import "BDSKSharingBrowser.h"
 #import "BibPrefController.h"
 #import "BibDocument_Groups.h"
-#import "BDSKGroup.h"
+#import "BDSKSharedGroup.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKSharingServer.h"
 #import "BDSKSharedGroup.h"

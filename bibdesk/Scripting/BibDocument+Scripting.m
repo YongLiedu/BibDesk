@@ -39,8 +39,6 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BDSKTeXTask.h"
-#import "BDSKGroup.h"
-#import "BDSKSharedGroup.h"
 
 /* ssp
 Category on BibDocument to implement a few additional functions needed for scripting
@@ -129,7 +127,7 @@ Getting and setting the selection of the table
     BibItem *pub;
     
     while (pub = [pubE nextObject]) 
-        if ([pub document] != nil) [selection addObject:pub];
+        if ([pub document] != self) [selection addObject:pub];
     return selection;
 }
 

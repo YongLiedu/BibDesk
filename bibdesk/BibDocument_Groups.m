@@ -44,6 +44,12 @@
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "BibDocument_Search.h"
 #import "BDSKGroup.h"
+#import "BDSKSharedGroup.h"
+#import "BDSKURLGroup.h"
+#import "BDSKScriptGroup.h"
+#import "BDSKSmartGroup.h"
+#import "BDSKStaticGroup.h"
+#import "BDSKCategoryGroup.h"
 #import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKCountedSet.h"
@@ -51,9 +57,6 @@
 #import "BibAppController.h"
 #import "BibTypeManager.h"
 #import "BDSKSharingBrowser.h"
-#import "BDSKSharedGroup.h"
-#import "BDSKURLGroup.h"
-#import "BDSKScriptGroup.h"
 #import "NSArray_BDSKExtensions.h"
 
 @implementation BibDocument (Groups)

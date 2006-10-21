@@ -46,6 +46,7 @@
 #import "BibEditor.h"
 #import "BibPersonController.h"
 #import "BDSKGroup.h"
+#import "BDSKStaticGroup.h"
 
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"

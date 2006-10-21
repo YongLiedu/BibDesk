@@ -37,7 +37,6 @@
  */
 
 #import "BDSKSharingServer.h"
-#import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKPasswordController.h"

@@ -325,6 +325,8 @@
 
 - (BOOL)isScript { return YES; }
 
+- (BOOL)isExternal { return YES; }
+
 - (BOOL)isEditable { return YES; }
 
 - (BOOL)isValidDropTarget { return NO; }

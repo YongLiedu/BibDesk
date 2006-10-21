@@ -38,6 +38,7 @@
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKCountedSet.h"
 #import "BDSKGroup.h"
+#import "BDSKCategoryGroup.h"
 #import "BibEditor.h"
 #import "BibTypeManager.h"
 #import "BibAuthor.h"

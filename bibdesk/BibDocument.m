@@ -42,6 +42,8 @@
 #import "BibDocumentView_Toolbar.h"
 #import "BibAppController.h"
 #import "BibPrefController.h"
+#import "BDSKGroup.h"
+#import "BDSKStaticGroup.h"
 
 #import "BDSKUndoManager.h"
 #import "MultiplePageView.h"
@@ -55,7 +57,6 @@
 #import "BDSKScriptHookManager.h"
 #import "BDSKCountedSet.h"
 #import "BDSKFilterController.h"
-#import "BDSKGroup.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
 #import "BDSKTableSortDescriptor.h"
