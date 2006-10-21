@@ -779,29 +779,29 @@
 
 - (BOOL)validateMergeInSharedGroupMenuItem:(NSMenuItem *)menuItem {
     if ([self hasSharedGroupsSelected]) {
-        [menuItem setTitle:[NSLocalizedString(@"Merge In Shared Group", @"Merge In Shared Group") stringByAppendingEllipsis]];
+        [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Merge In Shared Group")];
         return YES;
     } else if ([self hasURLGroupsSelected]) {
-        [menuItem setTitle:[NSLocalizedString(@"Merge In External File Group", @"Merge In External File Group") stringByAppendingEllipsis]];
+        [menuItem setTitle:NSLocalizedString(@"Merge In External File Group", @"Merge In External File Group")];
         return YES;
     } else if ([self hasScriptGroupsSelected]) {
-        [menuItem setTitle:[NSLocalizedString(@"Merge In Script Group", @"Merge In External File Group") stringByAppendingEllipsis]];
+        [menuItem setTitle:NSLocalizedString(@"Merge In Script Group", @"Merge In External File Group")];
         return YES;
     } else {
-        [menuItem setTitle:[NSLocalizedString(@"Merge In Shared Group", @"Merge In Shared Group") stringByAppendingEllipsis]];
+        [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Merge In Shared Group")];
         return NO;
     }
 }
 
 - (BOOL)validateMergeInSharedPublicationsMenuItem:(NSMenuItem *)menuItem {
     if ([self hasSharedGroupsSelected]) {
-        [menuItem setTitle:[NSLocalizedString(@"Merge In Shared Publications", @"Merge In Shared Publications") stringByAppendingEllipsis]];
+        [menuItem setTitle:NSLocalizedString(@"Merge In Shared Publications", @"Merge In Shared Publications")];
         return [self numberOfSelectedPubs] > 0;
     } else if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected]) {
-        [menuItem setTitle:[NSLocalizedString(@"Merge In External Publications", @"Merge In External Publications") stringByAppendingEllipsis]];
+        [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Merge In External Publications")];
         return [self numberOfSelectedPubs] > 0;
     } else {
-        [menuItem setTitle:[NSLocalizedString(@"Merge In External Publications", @"Merge In External Publications") stringByAppendingEllipsis]];
+        [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Merge In External Publications")];
         return NO;
     }
 }
