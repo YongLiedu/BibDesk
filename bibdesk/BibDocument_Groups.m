@@ -1090,7 +1090,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [sheet endEditingFor:nil];
         NSString *urlString = [addURLField stringValue];
         NSURL *url = nil;
-        if ([urlString rangeOfString:@"//:"].location == NSNotFound) {
+        if ([urlString rangeOfString:@"://"].location == NSNotFound) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
                 url = [NSURL fileURLWithPath:urlString];
             else
@@ -1226,7 +1226,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [sheet endEditingFor:nil];
         NSString *urlString = [addURLField stringValue];
         NSURL *url = nil;
-        if ([urlString rangeOfString:@"//:"].location == NSNotFound) {
+        if ([urlString rangeOfString:@"://"].location == NSNotFound) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
                 url = [NSURL fileURLWithPath:urlString];
             else
@@ -1371,12 +1371,10 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)refreshURLGroups:(id)sender{
-    [urlGroups makeObjectsPerformSelector:@selector(terminate) withObject:nil];
     [urlGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
 }
 
 - (IBAction)refreshScriptGroups:(id)sender{
-    [scriptGroups makeObjectsPerformSelector:@selector(terminate) withObject:nil];
     [scriptGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
 }
 
