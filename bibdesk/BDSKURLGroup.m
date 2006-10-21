@@ -266,6 +266,8 @@
 
 - (BOOL)isURL { return YES; }
 
+- (BOOL)isExternal { return YES; }
+
 - (BOOL)isEditable { return YES; }
 
 - (BOOL)containsItem:(BibItem *)item {

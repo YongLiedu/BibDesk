@@ -227,6 +227,8 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isShared { return YES; }
 
+- (BOOL)isExternal { return YES; }
+
 - (BOOL)hasEditableName { return NO; }
 
 - (BOOL)containsItem:(BibItem *)item {
