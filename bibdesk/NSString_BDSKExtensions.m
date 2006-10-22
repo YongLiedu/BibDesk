@@ -489,7 +489,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 - (NSString *)stringByEscapingGroupPlistEntities{
 	NSMutableString *escapedValue = [self mutableCopy];
 	// escape braces as they can give problems with btparse
-	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"];
+	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"]; // this should come first
 	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
 	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
 	[escapedValue replaceAllOccurrencesOfString:@"<" withString:@"%3C"];
@@ -500,11 +500,11 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 - (NSString *)stringByUnescapingGroupPlistEntities{
 	NSMutableString *escapedValue = [self mutableCopy];
 	// escape braces as they can give problems with btparse, and angles as they can give problems with the plist xml
-	[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"];
 	[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
 	[escapedValue replaceAllOccurrencesOfString:@"%7D" withString:@"}"];
 	[escapedValue replaceAllOccurrencesOfString:@"%3C" withString:@"<"];
 	[escapedValue replaceAllOccurrencesOfString:@"%3E" withString:@">"];
+	[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"]; // this should come last
 	return [escapedValue autorelease];
 }
 
