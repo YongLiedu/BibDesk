@@ -273,18 +273,20 @@
         NSDictionary *groupDict;
         BDSKStaticGroup *group = nil;
         NSMutableArray *pubArray = nil;
+        NSString *name;
         NSArray *keys;
         NSEnumerator *keyEnum;
         NSString *key;
         
         while (groupDict = [groupEnum nextObject]) {
             @try {
+                name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
                 keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
                 keyEnum = [keys objectEnumerator];
                 pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
                 while (key = [keyEnum nextObject]) 
                     [pubArray addObjectsFromArray:[self allPublicationsForCiteKey:key]];
-                group = [[BDSKStaticGroup alloc] initWithName:[groupDict objectForKey:@"group name"] publications:pubArray];
+                group = [[BDSKStaticGroup alloc] initWithName:name publications:pubArray];
                 [group setUndoManager:[self undoManager]];
                 [staticGroups addObject:group];
             }
@@ -1772,16 +1774,16 @@ The groupedPublications array is a subset of the publications array, developed b
 		return;
 	}
 	
+    NSString *name = nil;
+    NSURL *url = nil;
     NSEnumerator *groupEnum = [plist objectEnumerator];
     NSDictionary *groupDict;
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
     BDSKURLGroup *group = nil;
-    NSString *name = nil;
-    NSURL *url = nil;
     
     while (groupDict = [groupEnum nextObject]) {
         @try {
-            name = [groupDict objectForKey:@"group name"];
+            name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
             url = [NSURL URLWithString:[groupDict objectForKey:@"URL"]];
             group = [[BDSKURLGroup alloc] initWithName:name URL:url];
             [group setUndoManager:[self undoManager]];
@@ -1817,20 +1819,20 @@ The groupedPublications array is a subset of the publications array, developed b
 		return;
 	}
 	
-    NSEnumerator *groupEnum = [plist objectEnumerator];
-    NSDictionary *groupDict;
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
-    BDSKScriptGroup *group = nil;
     NSString *name = nil;
     NSString *path = nil;
     NSArray *arguments = nil;
     int type;
+    NSEnumerator *groupEnum = [plist objectEnumerator];
+    NSDictionary *groupDict;
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
+    BDSKScriptGroup *group = nil;
     
     while (groupDict = [groupEnum nextObject]) {
         @try {
-            name = [groupDict objectForKey:@"group name"];
-            path = [groupDict objectForKey:@"script path"];
-            arguments = [groupDict objectForKey:@"script arguments"];
+            name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
+            path = [[groupDict objectForKey:@"script path"] stringByUnescapingGroupPlistEntities];
+            arguments = [[groupDict objectForKey:@"script arguments"] arrayByPerformingSelector:@selector(stringByUnescapingGroupPlistEntities)];
             type = [[groupDict objectForKey:@"script type"] intValue];
             group = [[BDSKScriptGroup alloc] initWithName:name scriptPath:path scriptArguments:arguments scriptType:type];
             [group setName:[groupDict objectForKey:@"group name"]];
@@ -1851,13 +1853,15 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSData *)serializedSmartGroupsData {
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[smartGroups count]];
-    NSDictionary *groupDict;
+    NSString *name;
+    NSMutableDictionary *groupDict;
 	NSEnumerator *groupEnum = [smartGroups objectEnumerator];
 	BDSKSmartGroup *group;
 	
 	while (group = [groupEnum nextObject]) {
+        name = [[group stringValue] stringByEscapingGroupPlistEntities];
 		groupDict = [[[group filter] dictionaryValue] mutableCopy];
-		[(NSMutableDictionary *)groupDict setObject:[group stringValue] forKey:@"group name"];
+		[groupDict setObject:name forKey:@"group name"];
 		[array addObject:groupDict];
 		[groupDict release];
 	}
@@ -1879,13 +1883,15 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSData *)serializedStaticGroupsData {
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[[self staticGroups] count]];
 	NSString *keys;
+    NSString *name;
     NSDictionary *groupDict;
 	NSEnumerator *groupEnum = [[self staticGroups] objectEnumerator];
 	BDSKStaticGroup *group;
 	
 	while (group = [groupEnum nextObject]) {
+        name = [[group stringValue] stringByEscapingGroupPlistEntities];
 		keys = [[[group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@","];
-        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
+        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", keys, @"keys", nil];
 		[array addObject:groupDict];
 		[groupDict release];
 	}
@@ -1906,12 +1912,16 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSData *)serializedURLGroupsData {
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
+    NSString *name;
+    NSString *url;
     NSDictionary *groupDict;
 	NSEnumerator *groupEnum = [urlGroups objectEnumerator];
 	BDSKURLGroup *group;
 	
 	while (group = [groupEnum nextObject]) {
-        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", [[group URL] absoluteString], @"URL", nil];
+        name = [[group stringValue] stringByEscapingGroupPlistEntities];
+        url = [[group URL] absoluteString];
+        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", url, @"URL", nil];
 		[array addObject:groupDict];
 		[groupDict release];
 	}
@@ -1932,12 +1942,20 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSData *)serializedScriptGroupsData {
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
+    NSString *name;
+    NSString *path;
+    NSArray *args;
+    NSNumber *type;
     NSDictionary *groupDict;
 	NSEnumerator *groupEnum = [scriptGroups objectEnumerator];
 	BDSKScriptGroup *group;
 	
 	while (group = [groupEnum nextObject]) {
-        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", [group scriptPath], @"script path", [group scriptArguments], @"script arguments", [NSNumber numberWithInt:[group scriptType]], @"script type", nil];
+        name = [[group stringValue] stringByEscapingGroupPlistEntities];
+        name = [[group scriptPath] stringByEscapingGroupPlistEntities];
+        args = [[group scriptArguments] arrayByPerformingSelector:@selector(stringByEscapingGroupPlistEntities)];
+        type = [NSNumber numberWithInt:[group scriptType]];
+        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", path, @"script path", args, @"script arguments", type, @"script type", nil];
 		[array addObject:groupDict];
 		[groupDict release];
 	}

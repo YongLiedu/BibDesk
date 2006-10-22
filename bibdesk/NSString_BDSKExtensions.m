@@ -486,6 +486,28 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return [fixedString autorelease];
 }
 
+- (NSString *)stringByEscapingGroupPlistEntities{
+	NSMutableString *escapedValue = [self mutableCopy];
+	// escape braces as they can give problems with btparse
+	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"];
+	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
+	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
+	[escapedValue replaceAllOccurrencesOfString:@"<" withString:@"%3C"];
+	[escapedValue replaceAllOccurrencesOfString:@">" withString:@"%3E"];
+	return [escapedValue autorelease];
+}
+
+- (NSString *)stringByUnescapingGroupPlistEntities{
+	NSMutableString *escapedValue = [self mutableCopy];
+	// escape braces as they can give problems with btparse, and angles as they can give problems with the plist xml
+	[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"];
+	[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
+	[escapedValue replaceAllOccurrencesOfString:@"%7D" withString:@"}"];
+	[escapedValue replaceAllOccurrencesOfString:@"%3C" withString:@"<"];
+	[escapedValue replaceAllOccurrencesOfString:@"%3E" withString:@">"];
+	return [escapedValue autorelease];
+}
+
 #pragma mark Comparisons
 
 - (NSComparisonResult)localizedCaseInsensitiveNumericCompare:(NSString *)aStr{

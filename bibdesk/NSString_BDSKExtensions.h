@@ -253,6 +253,9 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSString *)stringByAddingRISEndTagsToPubMedString;
 
+- (NSString *)stringByEscapingGroupPlistEntities;
+- (NSString *)stringByUnescapingGroupPlistEntities;
+
 #pragma mark Comparisons
 
 /*!

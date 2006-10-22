@@ -89,7 +89,7 @@
 - (id)initWithDictionary:(NSDictionary *)dictionary {
 	if (self = [self init]) {
         NSString *aKey = [dictionary objectForKey:@"key"];
-		NSMutableString *escapedValue = [[dictionary objectForKey:@"value"] mutableCopy];
+		NSString *aValue = [[dictionary objectForKey:@"value"] stringByUnescapingGroupPlistEntities];
 		NSNumber *comparisonNumber = [dictionary objectForKey:@"comparison"];
 		
 		if (aKey != nil) 
@@ -99,14 +99,8 @@
         if (comparisonNumber != nil) 
 			[self setComparison:[comparisonNumber intValue]];
         
-		if (escapedValue != nil) {
-			// we escape braces as they can give problems with btparse
-			[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
-			[escapedValue replaceAllOccurrencesOfString:@"%7D" withString:@"}"];
-			[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"];
-			[self setValue:escapedValue];
-			[escapedValue release];
-        }
+		if (aValue != nil)
+			[self setValue:aValue];
         
         static BOOL didWarn = NO;
 		
@@ -165,13 +159,8 @@
 
 - (NSDictionary *)dictionaryValue {
 	NSNumber *comparisonNumber = [NSNumber numberWithInt:[self comparison]];
-	NSMutableString *escapedValue = [[self value] mutableCopy];
-	// escape braces as they can give problems with btparse
-	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"];
-	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
-	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
+	NSString *escapedValue = [[self value] stringByEscapingGroupPlistEntities];
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:key, @"key", escapedValue, @"value", comparisonNumber, @"comparison", [[self class] dictionaryVersion], @"version", nil];
-	[escapedValue release];
 	return [dict autorelease];
 }
 
