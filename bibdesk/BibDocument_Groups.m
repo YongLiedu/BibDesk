@@ -1952,7 +1952,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	
 	while (group = [groupEnum nextObject]) {
         name = [[group stringValue] stringByEscapingGroupPlistEntities];
-        name = [[group scriptPath] stringByEscapingGroupPlistEntities];
+        path = [[group scriptPath] stringByEscapingGroupPlistEntities];
         args = [[group scriptArguments] arrayByPerformingSelector:@selector(stringByEscapingGroupPlistEntities)];
         type = [NSNumber numberWithInt:[group scriptType]];
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", path, @"script path", args, @"script arguments", type, @"script type", nil];
