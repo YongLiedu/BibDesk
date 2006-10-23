@@ -88,6 +88,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	
     [filePapersAutomaticallyCheckButton setState:[defaults boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
     [useRelativePathCheckButton setState:[defaults boolForKey:BDSKAutoFileUsesRelativePathKey] ? NSOnState : NSOffState];
+    [warnOnMoveFolderCheckButton setState:[defaults boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
 
     if ([NSString isEmptyString:papersFolder]) {
 		[papersFolderLocationTextField setStringValue:USE_DOCUMENT_FOLDER];
@@ -187,6 +188,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{
 	[defaults setBool:([filePapersAutomaticallyCheckButton state] == NSOnState)
 			   forKey:BDSKFilePapersAutomaticallyKey];
+}
+
+- (IBAction)toggleWarnOnMoveFolderAction:(id)sender{
+	[defaults setBool:([warnOnMoveFolderCheckButton state] == NSOnState)
+			   forKey:BDSKWarnOnMoveFolderKey];
 }
 
 // presently just used to display the warning if the path for autofile was invalid

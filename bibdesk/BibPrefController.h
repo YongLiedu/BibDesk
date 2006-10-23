@@ -155,6 +155,7 @@ extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLocalUrlFormatPresetKey;
 extern NSString *BDSKLocalUrlLowercaseKey;
 extern NSString *BDSKLocalUrlCleanOptionKey;
+extern NSString *BDSKWarnOnMoveFolderKey;
 
 extern NSString *BDSKLastVersionLaunchedKey;
 extern NSString *BDSKSnoopDrawerSavedSizeKey;

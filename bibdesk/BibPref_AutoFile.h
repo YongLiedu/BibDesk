@@ -49,6 +49,7 @@
 	IBOutlet NSButton* clearPapersFolderLocationButton;
 	IBOutlet NSButton* useRelativePathCheckButton;
 	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
+	IBOutlet NSButton* warnOnMoveFolderCheckButton;
     IBOutlet NSTextField *formatField;
     IBOutlet NSTextField *formatSheetField;
     IBOutlet NSPopUpButton *formatPresetPopUp;
@@ -70,6 +71,7 @@
 - (IBAction)clearPapersFolderLocationAction:(id)sender;
 - (IBAction)toggleUseRelativePathAction:(id)sender;
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender;
+- (IBAction)toggleWarnOnMoveFolderAction:(id)sender;
 - (IBAction)localUrlFormatChanged:(id)sender;
 - (IBAction)changeLocalUrlLowercase:(id)sender;
 - (IBAction)setFormatCleanOption:(id)sender;

@@ -168,6 +168,7 @@ NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
 NSString *BDSKLocalUrlLowercaseKey = @"Local-Url Generate Lowercase";
 NSString *BDSKLocalUrlCleanOptionKey = @"Local-Url Clean Braces or TeX";
+NSString *BDSKWarnOnMoveFolderKey = @"BDSKWarnOnMoveFolderKey";
 
 NSString *BDSKDuplicateBooktitleKey = @"Duplicate Booktitle for Crossref";
 NSString *BDSKForceDuplicateBooktitleKey = @"Overwrite Booktitle when Duplicating for Crossref";

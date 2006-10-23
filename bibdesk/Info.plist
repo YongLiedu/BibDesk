@@ -376,6 +376,8 @@
 				<dict>
 					<key>AutoFile uses relative path</key>
 					<false/>
+					<key>BDSKWarnOnMoveFolderKey</key>
+					<true/>
 					<key>File papers into the papers folder automatically</key>
 					<false/>
 					<key>Local-Url Clean Braces or TeX</key>

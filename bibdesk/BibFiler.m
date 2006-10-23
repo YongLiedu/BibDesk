@@ -45,6 +45,7 @@
 #import "BibDocument_Actions.h"
 #import "BibAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BDSKAlert.h"
 
 static BibFiler *sharedFiler = nil;
 
@@ -570,40 +571,59 @@ static BibFiler *sharedFiler = nil;
                 statusFlag = BDSKCannotCreateParentErrorMask;
             NS_ENDHANDLER
             if(statusFlag == BDSKNoError){
-                // unfortunately NSFileManager cannot reliably move symlinks...
-                if([fileType isEqualToString:NSFileTypeSymbolicLink]){
-                    NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
-                    if(![pathContent hasPrefix:@"/"]){// it links to a relative path
-                        pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
-                    }
-                    if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
-                        status = NSLocalizedString(@"Unable to move symbolic link.", @"");
-                        statusFlag = BDSKCannotMoveFileErrorMask;
-                    }else{
-                        if(![self removeFileAtPath:resolvedPath handler:self]){
-                            if (force == NO){
-                                status = NSLocalizedString(@"Unable to remove original.", @"");
+                if([fileType isEqualToString:NSFileTypeDirectory] && force == NO && 
+                   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnMoveFolderKey]){
+                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"")
+                                                         defaultButton:NSLocalizedString(@"Move", @"")
+                                                       alternateButton:NSLocalizedString(@"Don't Move", @"") 
+                                                           otherButton:nil
+                                             informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @""), path, newPath];
+                    [alert setHasCheckButton:YES];
+                    [alert setCheckValue:NO];
+                    ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
+                    if([alert checkValue] == YES)
+                        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
+                }
+                if(ignoreMove){
+                    status = NSLocalizedString(@"Shouldn't move folder.", @"");
+                    fix = NSLocalizedString(@"Move anyway.", @"");
+                    statusFlag = BDSKCannotMoveFileErrorMask;
+                }else{
+                    // unfortunately NSFileManager cannot reliably move symlinks...
+                    if([fileType isEqualToString:NSFileTypeSymbolicLink]){
+                        NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
+                        if(![pathContent hasPrefix:@"/"]){// it links to a relative path
+                            pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
+                        }
+                        if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
+                            status = NSLocalizedString(@"Unable to move symbolic link.", @"");
+                            statusFlag = BDSKCannotMoveFileErrorMask;
+                        }else{
+                            if(![self removeFileAtPath:resolvedPath handler:self]){
+                                if (force == NO){
+                                    status = NSLocalizedString(@"Unable to remove original.", @"");
+                                    fix = NSLocalizedString(@"Copy original file.", @"");
+                                    statusFlag = BDSKCannotRemoveFileErrorMask;
+                                    //cleanup: remove new file
+                                    [self removeFileAtPath:resolvedNewPath handler:nil];
+                                }
+                            }
+                        }
+                    }else if(![self movePath:resolvedPath toPath:resolvedNewPath handler:self]){
+                        if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
+                            if(force == NO){
+                                status = NSLocalizedString(@"Unable to remove original file.", @"");
                                 fix = NSLocalizedString(@"Copy original file.", @"");
                                 statusFlag = BDSKCannotRemoveFileErrorMask;
-                                //cleanup: remove new file
-                                [self removeFileAtPath:resolvedNewPath handler:nil];
+                                // cleanup: move back
+                                if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
+                                    [self removeFileAtPath:resolvedNewPath handler:nil];
+                                }
                             }
+                        }else{ // other error while moving file
+                            status = NSLocalizedString(@"Unable to move file.", @"");
+                            statusFlag = BDSKCannotMoveFileErrorMask;
                         }
-                    }
-                }else if(![self movePath:resolvedPath toPath:resolvedNewPath handler:self]){
-                    if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
-                        if(force == NO){
-                            status = NSLocalizedString(@"Unable to remove original file.", @"");
-                            fix = NSLocalizedString(@"Copy original file.", @"");
-                            statusFlag = BDSKCannotRemoveFileErrorMask;
-                            // cleanup: move back
-                            if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
-                                [self removeFileAtPath:resolvedNewPath handler:nil];
-                            }
-                        }
-                    }else{ // other error while moving file
-                        status = NSLocalizedString(@"Unable to move file.", @"");
-                        statusFlag = BDSKCannotMoveFileErrorMask;
                     }
                 }
             }
