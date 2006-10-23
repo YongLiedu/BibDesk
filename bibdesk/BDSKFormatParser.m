@@ -44,6 +44,7 @@
 #import "BibTypeManager.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
+#import "NSScanner_BDSKExtensions.h"
 
 @implementation BDSKFormatParser
 
@@ -87,10 +88,8 @@
 		}
 		// does nothing at the end; allows but ignores % at end
 		[scanner scanString:@"%" intoString:NULL];
-		if (![scanner isAtEnd]) {
-			// found %, so now there should be a specifier char
-			specifier = [format characterAtIndex:[scanner scanLocation]];
-			[scanner setScanLocation:[scanner scanLocation]+1];
+        // found %, so now there should be a specifier char
+		if ([scanner scanCharacter:&specifier]) {
 			switch (specifier) {
 				case 'a':
 				case 'p':
@@ -830,12 +829,10 @@
 		}
 		
 		// found %, so now there should be a specifier char
-		if ([scanner isAtEnd]) {
+		if (![scanner scanCharacter:&specifier]) {
 			errorMsg = NSLocalizedString(@"Empty specifier % at end of format.", @"");
 			break;
 		}
-		specifier = [*formatString characterAtIndex:[scanner scanLocation]];
-		[scanner setScanLocation:[scanner scanLocation]+1];
 		
 		// see if it is a valid specifier
 		if (![validSpecifierChars characterIsMember:specifier]) {
