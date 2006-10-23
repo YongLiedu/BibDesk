@@ -109,9 +109,8 @@
 								[scanner scanString:@"]" intoString:NULL];
 							}
 						}
-						if (![scanner isAtEnd]) {
+						if ([scanner peekCharacter:&nextChar]) {
 							// look for #names
-							nextChar = [format characterAtIndex:[scanner scanLocation]];
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (int)(nextChar - '0');
@@ -170,9 +169,8 @@
 								}
 							}
 						}
-						if (![scanner isAtEnd]) {
+						if ([scanner peekCharacter:&nextChar]) {
 							// look for #names
-							nextChar = [format characterAtIndex:[scanner scanLocation]];
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (int)(nextChar - '0');

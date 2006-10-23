@@ -550,7 +550,8 @@
     
     while ([scanner isAtEnd] == NO) {
         [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
-        ch = [self characterAtIndex:[scanner scanLocation]];
+        if ([scanner peekCharacter:&ch] == NO)
+            break;
         if (ch == '"') {
             [scanner setScanLocation:[scanner scanLocation] + 1];
             NSMutableString *tmpString = [NSMutableString string];
@@ -610,9 +611,8 @@
                     }
                     tmpValue = [[tmpString appleScriptArgumentsArray] objectAtIndex:0];
                     [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
-                    if ([scanner isAtEnd])
+                    if ([scanner peekCharacter:&ch] == NO)
                         [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
-                    ch = [self characterAtIndex:[scanner scanLocation]];
                     if (ch != '}' && ch != ',')
                         [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
                 } else if (ch == '{') {
@@ -685,11 +685,10 @@
                 [arguments addObject:[s stringByRemovingSurroundingWhitespace]];
         }
         [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
-        if ([scanner isAtEnd])
+        if ([scanner scanCharacter:&ch] == NO)
             break;
-        if ([self characterAtIndex:[scanner scanLocation]] != ',')
+        if (ch != ',')
             [NSException raise:NSInternalInconsistencyException format:@"Missing ,"];
-        [scanner setScanLocation:[scanner scanLocation] + 1];
     }
     return arguments;
 }
