@@ -591,7 +591,7 @@
             NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
             BOOL isDict = NO;
             id tmpValue = nil;
-            NSString *tmpKey;
+            NSString *tmpKey = nil;
             while ([scanner isAtEnd] == NO) {
                 [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
                 if ([scanner scanCharacter:&ch] == NO)
