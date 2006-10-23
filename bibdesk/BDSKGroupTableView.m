@@ -275,6 +275,19 @@
 	[self scrollRowToVisible:0];
 }
 
+- (NSColor *)backgroundColor {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKUseBackgroundColorForGroupTableKey"]) {
+        static NSColor *backgroundColor = nil;
+        if (nil == backgroundColor) {
+            // from Mail.app on 10.4; should be based on control tint?
+            float red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
+            backgroundColor = [[NSColor colorWithDeviceRed:red green:green blue:blue alpha:1.0] retain];
+        }
+        return backgroundColor;
+    }
+    return [super backgroundColor];
+}
+
 @end
 
 @implementation BDSKGroupTableHeaderView 
