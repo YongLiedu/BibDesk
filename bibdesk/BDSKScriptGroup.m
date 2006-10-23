@@ -483,12 +483,13 @@
 - (NSArray *)shellScriptArgumentsArray {
     static NSCharacterSet *specialChars;
     static NSCharacterSet *quoteChars;
-    static NSCharacterSet *spaceChars;
     
     if (specialChars == nil) {
-        specialChars = [[NSCharacterSet characterSetWithCharactersInString:@"\\\"'` \t"] retain];
+        NSMutableCharacterSet *tmpSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy];
+        [tmpSet addCharactersInString:@"\\\"'`"];
+        specialChars = [tmpSet copy];
+        [tmpSet release];
         quoteChars = [[NSCharacterSet characterSetWithCharactersInString:@"\"'`"] retain];
-        spaceChars = [[NSCharacterSet characterSetWithCharactersInString:@" \t"] retain];
     }
     
     NSScanner *scanner = [NSScanner scannerWithString:self];
@@ -504,14 +505,17 @@
             [currArg appendString:s];
         if ([scanner scanCharacter:&ch] == NO)
             break;
-        if ([spaceChars characterIsMember:ch]) {
-            [scanner scanCharactersFromSet:spaceChars intoString:NULL];
+        if ([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:ch]) {
+            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
             [arguments addObject:currArg];
             currArg = [scanner isAtEnd] ? nil : [NSMutableString string];
         } else if (ch == '\\') {
             if ([scanner scanCharacter:&ch] == NO)
                 [NSException raise:NSInternalInconsistencyException format:@"Missing character"];
-            [currArg appendFormat:@"%C", ch];
+            if ([currArg length] == 0 && [[NSCharacterSet newlineCharacterSet] characterIsMember:ch])
+                [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+            else 
+                [currArg appendFormat:@"%C", ch];
         } else if ([quoteChars characterIsMember:ch]) {
             if ([scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(ch, 1)] intoString:&s])
                 [currArg appendString:s];
