@@ -142,7 +142,7 @@
             isRetrieving = YES;
         }
     } else if (scriptType == BDSKAppleScriptType) {
-        // NSAppleScript can only run  on the main thread
+        // NSAppleScript can only run on the main thread
         NSString *outputString = nil;
         NSError *error = nil;
         NSDictionary *errorInfo = nil;
@@ -154,12 +154,6 @@
             @try{
                 if (argsArray == nil)
                     argsArray = [[scriptArguments appleScriptArgumentsArray] retain];
-            }
-            @catch (id exception) {
-                error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Parsing Arguments", @"")];
-                [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
-            }
-            @try{
                 if ([argsArray count])
                     outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:argsArray];
                 else 
@@ -179,11 +173,9 @@
                     [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
                 }
             }
-            @finally{
-                [script release];
-            }
+            [script release];
         }
-        if (nil == outputString || error) {
+        if (error || nil == outputString || NO == [outputString isKindOfClass:[NSString class]]) {
             if (error == nil)
                 error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
             [self scriptDidFailWithError:error];
@@ -290,7 +282,7 @@
         scriptArguments = [newArguments retain];
         
         [argsArray release];
-        argsArray == nil;
+        argsArray = nil;
         
         [self setPublications:nil];
     }
@@ -308,7 +300,7 @@
         scriptType = newType;
         
         [argsArray release];
-        argsArray == nil;
+        argsArray = nil;
         
         [self setPublications:nil];
     }
