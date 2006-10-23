@@ -466,9 +466,9 @@
         dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
     }else if(tv == tableView){
 		// drag from the main table
-		pubs = [shownPublications objectsAtIndexes:[groupTableView selectedRowIndexes]];
+		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
-        dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
+        dragFromSharedGroups = [self hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
