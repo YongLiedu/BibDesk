@@ -50,19 +50,20 @@
 #import "BibAppController.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSScanner_BDSKExtensions.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 #import <OmniFoundation/OFMessageQueue.h>
 
 @implementation BDSKScriptGroup
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 {
     self = [self initWithName:nil scriptPath:path scriptArguments:arguments scriptType:type];
     return self;
 }
 
-- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
+- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 {
     NSParameterAssert(path != nil);
     if (aName == nil)
@@ -71,6 +72,7 @@
         publications = nil;
         scriptPath = [path retain];
         scriptArguments = [arguments retain];
+        argsArray = nil;
         scriptType = type;
         failedDownload = NO;
         
@@ -97,6 +99,7 @@
     OFSimpleLockFree(&currentTaskLock);
     [scriptPath release];
     [scriptArguments release];
+    [argsArray release];
     [publications release];
     [workingDirPath release];
     [stdoutData release];
@@ -123,8 +126,21 @@
         [error setValue:scriptPath forKey:NSFilePathErrorKey];
         [self scriptDidFailWithError:error];
     } else if (scriptType == BDSKShellScriptType) {
-        [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forObject:self withObject:scriptPath withObject:scriptArguments];
-        isRetrieving = YES;
+        NSError *error = nil;
+        @try{
+            if (argsArray == nil)
+                argsArray = [[scriptArguments shellScriptArgumentsArray] retain];
+        }
+        @catch (id exception) {
+            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Parsing Arguments", @"")];
+            [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
+        if (error) {
+            [self scriptDidFailWithError:error];
+        } else {
+            [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forObject:self withObject:scriptPath withObject:argsArray];
+            isRetrieving = YES;
+        }
     } else if (scriptType == BDSKAppleScriptType) {
         // NSAppleScript can only run  on the main thread
         NSString *outputString = nil;
@@ -136,14 +152,22 @@
             [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
         } else {
             @try{
-                if ([scriptArguments count])
-                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:scriptArguments];
+                if (argsArray == nil)
+                    argsArray = [[scriptArguments appleScriptArgumentsArray] retain];
+            }
+            @catch (id exception) {
+                error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Parsing Arguments", @"")];
+                [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            }
+            @try{
+                if ([argsArray count])
+                    outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME withParametersFromArray:argsArray];
                 else 
                     outputString = [script executeHandler:APPLESCRIPT_HANDLER_NAME];
             }
             @catch (id exception){
                 // if there are no arguments we try to run the whole script
-                if ([scriptArguments count] == 0) {
+                if ([argsArray count] == 0) {
                     errorInfo = nil;
                     outputString = [[script executeAndReturnError:&errorInfo] objCObjectValue];
                     if (errorInfo) {
@@ -253,17 +277,20 @@
     }
 }
 
-- (NSArray *)scriptArguments;
+- (NSString *)scriptArguments;
 {
     return scriptArguments;
 }
 
-- (void)setScriptArguments:(NSArray *)newArguments;
+- (void)setScriptArguments:(NSString *)newArguments;
 {
     if (newArguments != scriptArguments) {
 		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptArguments:scriptArguments];
         [scriptArguments release];
         scriptArguments = [newArguments retain];
+        
+        [argsArray release];
+        argsArray == nil;
         
         [self setPublications:nil];
     }
@@ -279,6 +306,9 @@
     if (newType != scriptType) {
 		[(BDSKScriptGroup *)[[self undoManager] prepareWithInvocationTarget:self] setScriptType:scriptType];
         scriptType = newType;
+        
+        [argsArray release];
+        argsArray == nil;
         
         [self setPublications:nil];
     }
@@ -451,6 +481,221 @@
     // This is the notification method that executeBinary:inDirectory:withArguments:environment:inputString: registers to get called when all the data has been read. It just grabs the data and stuffs it in an ivar.  The setting of this ivar signals the main method that the output is complete and available.
     NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
     stdoutData = (outputData ? [outputData retain] : [[NSData allocWithZone:[self zone]] init]);
+}
+
+@end
+
+
+@implementation NSString (BDSKScriptGroupExtensions)
+
+- (NSArray *)shellScriptArgumentsArray {
+    static NSCharacterSet *specialChars;
+    static NSCharacterSet *quoteChars;
+    static NSCharacterSet *spaceChars;
+    
+    if (specialChars == nil) {
+        specialChars = [[NSCharacterSet characterSetWithCharactersInString:@"\\\"'` \t"] retain];
+        quoteChars = [[NSCharacterSet characterSetWithCharactersInString:@"\"'`"] retain];
+        spaceChars = [[NSCharacterSet characterSetWithCharactersInString:@" \t"] retain];
+    }
+    
+    NSScanner *scanner = [NSScanner scannerWithString:self];
+    NSString *s = nil;
+    unichar ch;
+    NSMutableString *currArg = [scanner isAtEnd] ? nil : [NSMutableString string];
+    NSMutableArray *arguments = [NSMutableArray array];
+    
+    [scanner setCharactersToBeSkipped:nil];
+    
+    while ([scanner isAtEnd] == NO) {
+        if ([scanner scanUpToCharactersFromSet:specialChars intoString:&s])
+            [currArg appendString:s];
+        if ([scanner scanCharacter:&ch] == NO)
+            break;
+        if ([spaceChars characterIsMember:ch]) {
+            [scanner scanCharactersFromSet:spaceChars intoString:NULL];
+            [arguments addObject:currArg];
+            currArg = [scanner isAtEnd] ? nil : [NSMutableString string];
+        } else if (ch == '\\') {
+            if ([scanner scanCharacter:&ch] == NO)
+                [NSException raise:NSInternalInconsistencyException format:@"Missing character"];
+            [currArg appendFormat:@"%C", ch];
+        } else if ([quoteChars characterIsMember:ch]) {
+            if ([scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(ch, 1)] intoString:&s])
+                [currArg appendString:s];
+            if ([scanner scanCharacter:NULL] == NO)
+                [NSException raise:NSInternalInconsistencyException format:@"Unmatched %C", ch];
+        }
+    }
+    if (currArg)
+        [arguments addObject:currArg];
+    return arguments;
+}
+
+- (NSArray *)appleScriptArgumentsArray {
+    static NSCharacterSet *numberChars = nil;
+    static NSCharacterSet *specialStringChars = nil;
+    static NSCharacterSet *listSeparatorChars = nil;
+    static NSCharacterSet *specialListChars = nil;
+    
+    if (numberChars == nil) {
+        numberChars = [[NSCharacterSet characterSetWithCharactersInString:@"-.0123456789"] retain];
+        specialStringChars = [[NSCharacterSet characterSetWithCharactersInString:@"\\\""] retain];
+        listSeparatorChars = [[NSCharacterSet characterSetWithCharactersInString:@"},:"] retain];
+        specialListChars = [[NSCharacterSet characterSetWithCharactersInString:@"{}\""] retain];
+    }
+    
+    NSScanner *scanner = [NSScanner scannerWithString:self];
+    NSString *s = nil;
+    unichar ch;
+    NSMutableArray *arguments = [NSMutableArray array];
+    
+    [scanner setCharactersToBeSkipped:nil];
+    
+    while ([scanner isAtEnd] == NO) {
+        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+        ch = [self characterAtIndex:[scanner scanLocation]];
+        if (ch == '"') {
+            [scanner setScanLocation:[scanner scanLocation] + 1];
+            NSMutableString *tmpString = [NSMutableString string];
+            while ([scanner isAtEnd] == NO) {
+                if ([scanner scanUpToCharactersFromSet:specialStringChars intoString:&s])
+                    [tmpString appendString:s];
+                if ([scanner scanCharacter:&ch] == NO)
+                    [NSException raise:NSInternalInconsistencyException format:@"Missing \""];
+                if (ch == '"') {
+                    [tmpString removeSurroundingWhitespace];
+                    [arguments addObject:tmpString];
+                    break;
+                } else if (ch == '\\') {
+                    if ([scanner scanCharacter:&ch] == NO)
+                        [NSException raise:NSInternalInconsistencyException format:@"Missing character"];
+                    if (ch == 'n')
+                        [tmpString appendString:@"\n"];
+                    else if (ch == 'r')
+                        [tmpString appendString:@"\r"];
+                    else if (ch == 't')
+                        [tmpString appendString:@"\t"];
+                    else if (ch == '"')
+                        [tmpString appendString:@"\""];
+                    else if (ch == '\\')
+                        [tmpString appendString:@"\\"];
+                    else // or should we raise an execption?
+                        [tmpString appendFormat:@"%C", ch];
+                }
+            }
+        } else if ([numberChars characterIsMember:ch]) {
+            float tmpNumber = 0;
+            if ([scanner scanFloat:&tmpNumber])
+                [arguments addObject:[NSNumber numberWithFloat:tmpNumber]];
+        } else if (ch == '{') {
+            [scanner setScanLocation:[scanner scanLocation] + 1];
+            NSMutableArray *tmpArray = [NSMutableArray array];
+            NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
+            BOOL isDict = NO;
+            id tmpValue = nil;
+            NSString *tmpKey;
+            while ([scanner isAtEnd] == NO) {
+                [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+                if ([scanner scanCharacter:&ch] == NO)
+                    [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
+                tmpValue = nil;
+                if (ch == '"') {
+                    NSMutableString *tmpString = [NSMutableString stringWithString:@"\""];
+                    while ([scanner isAtEnd] == NO) {
+                        if ([scanner scanUpToString:@"\"" intoString:&s])
+                            [tmpString appendString:s];
+                        if ([scanner isAtEnd])
+                            [NSException raise:NSInternalInconsistencyException format:@"Missing \""];
+                        [scanner setScanLocation:[scanner scanLocation] + 1];
+                        [tmpString appendString:@"\""];
+                        if ([self characterAtIndex:[scanner scanLocation] - 2] != '\\')
+                            break;
+                    }
+                    tmpValue = [[tmpString appleScriptArgumentsArray] objectAtIndex:0];
+                    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+                    if ([scanner isAtEnd])
+                        [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
+                    ch = [self characterAtIndex:[scanner scanLocation]];
+                    if (ch != '}' && ch != ',')
+                        [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
+                } else if (ch == '{') {
+                    NSMutableString *tmpString = [NSMutableString stringWithString:@"{"];
+                    int nesting = 1;
+                    while ([scanner isAtEnd] == NO) {
+                        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+                        if ([scanner scanUpToCharactersFromSet:specialListChars intoString:&s])
+                            [tmpString appendString:s];
+                        if ([scanner scanCharacter:&ch] == NO)
+                            [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
+                        [tmpString appendFormat:@"%C", ch];
+                        if (ch == '"') {
+                            while ([scanner isAtEnd] == NO) {
+                                if ([scanner scanUpToString:@"\"" intoString:&s])
+                                    [tmpString appendString:s];
+                                if ([scanner scanString:@"\"" intoString:NULL] == NO)
+                                    [NSException raise:NSInternalInconsistencyException format:@"Missing \""];
+                                [tmpString appendString:@"\""];
+                                if ([self characterAtIndex:[scanner scanLocation] - 2] != '\\')
+                                    break;
+                            }
+                        } else if (ch == '{') {
+                            nesting++;
+                        } else {
+                            nesting--;
+                            if(nesting == 0){
+                                break;
+                            }
+                        }
+                    }
+                    tmpValue = [[tmpString appleScriptArgumentsArray] objectAtIndex:0];
+                } else {
+                    [scanner setScanLocation:[scanner scanLocation] - 1];
+                    if ([scanner scanUpToCharactersFromSet:listSeparatorChars intoString:&s])
+                        tmpValue = [[s appleScriptArgumentsArray] objectAtIndex:0];
+                }
+                if ([scanner scanCharacter:&ch] == NO)
+                    [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
+                if (ch == '}') {
+                    if (isDict) {
+                        if (tmpValue)
+                            [tmpDict setObject:tmpValue forKey:tmpKey];
+                        [arguments addObject:tmpDict];
+                    } else {
+                        if (tmpValue)
+                            [tmpArray addObject:tmpValue];
+                        [arguments addObject:tmpArray];
+                    }
+                    break;
+                } else if (ch == ',') {
+                    if (isDict)
+                        [tmpDict setObject:tmpValue forKey:tmpKey];
+                    else
+                        [tmpArray addObject:tmpValue];
+                } else if (ch == ':') {
+                    isDict = YES;
+                    tmpKey = tmpValue;
+                    tmpValue = nil;
+                } else
+                    [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
+            }
+        } else if ([scanner scanString:@"true" intoString:NULL] || [scanner scanString:@"yes" intoString:NULL]) {
+            [arguments addObject:[NSNumber numberWithBool:YES]];
+        } else if ([scanner scanString:@"false" intoString:NULL] || [scanner scanString:@"no" intoString:NULL]) {
+            [arguments addObject:[NSNumber numberWithBool:NO]];
+        } else { // or should we raise an exception?
+            NSString *s = nil;
+            if ([scanner scanUpToString:@"," intoString:&s])
+                [arguments addObject:[s stringByRemovingSurroundingWhitespace]];
+        }
+        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+        if ([scanner isAtEnd])
+            break;
+        if ([self characterAtIndex:[scanner scanLocation]] != ',')
+            [NSException raise:NSInternalInconsistencyException format:@"Missing ,"];
+        [scanner setScanLocation:[scanner scanLocation] + 1];
+    }
+    return arguments;
 }
 
 @end

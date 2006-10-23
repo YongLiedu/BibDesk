@@ -1151,8 +1151,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [sheet endEditingFor:nil];
         NSString *path = [scriptPathField stringValue];
         int type = [scriptTypePopup indexOfSelectedItem];
-        NSString *argString = [scriptArgumentsField stringValue];
-        NSArray *arguments = [NSString isEmptyString:argString] ? [NSArray array] : [argString componentsSeparatedByString:@" "];
+        NSString *arguments = [scriptArgumentsField stringValue];
 		BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
         unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
 		[self addScriptGroup:group];
@@ -1258,8 +1257,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [sheet endEditingFor:nil];
         NSString *path = [scriptPathField stringValue];
         int type = [scriptTypePopup indexOfSelectedItem];
-        NSString *argString = [scriptArgumentsField stringValue];
-        NSArray *arguments = [NSString isEmptyString:argString] ? [NSArray array] : [argString componentsSeparatedByString:@" "];
+        NSString *arguments = [scriptArgumentsField stringValue];
 		BDSKScriptGroup *group = (BDSKScriptGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
 		[group setScriptPath:path];
 		[group setScriptArguments:arguments];
@@ -1301,7 +1299,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	} else if ([group isScript]) {
         [scriptPathField setStringValue:[(BDSKScriptGroup *)group scriptPath]];
         [scriptTypePopup selectItemAtIndex:[(BDSKScriptGroup *)group scriptType]];
-        [scriptArgumentsField setStringValue:[[(BDSKScriptGroup *)group scriptArguments] componentsJoinedByString:@" "]];
+        [scriptArgumentsField setStringValue:[(BDSKScriptGroup *)group scriptArguments]];
         [NSApp beginSheet:addScriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(changeScriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 	}
 }
@@ -1821,7 +1819,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     NSString *name = nil;
     NSString *path = nil;
-    NSArray *arguments = nil;
+    NSString *arguments = nil;
     int type;
     NSEnumerator *groupEnum = [plist objectEnumerator];
     NSDictionary *groupDict;
@@ -1832,7 +1830,10 @@ The groupedPublications array is a subset of the publications array, developed b
         @try {
             name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
             path = [[groupDict objectForKey:@"script path"] stringByUnescapingGroupPlistEntities];
-            arguments = [[groupDict objectForKey:@"script arguments"] arrayByPerformingSelector:@selector(stringByUnescapingGroupPlistEntities)];
+            arguments = [groupDict objectForKey:@"script arguments"];
+            if ([arguments isKindOfClass:[NSArray class]]) // legacy
+                arguments = [(NSArray *)arguments componentsJoinedByString:@" "];
+            arguments = [arguments stringByUnescapingGroupPlistEntities];
             type = [[groupDict objectForKey:@"script type"] intValue];
             group = [[BDSKScriptGroup alloc] initWithName:name scriptPath:path scriptArguments:arguments scriptType:type];
             [group setName:[groupDict objectForKey:@"group name"]];
@@ -1944,7 +1945,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
     NSString *name;
     NSString *path;
-    NSArray *args;
+    NSString *args;
     NSNumber *type;
     NSDictionary *groupDict;
 	NSEnumerator *groupEnum = [scriptGroups objectEnumerator];
@@ -1953,7 +1954,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	while (group = [groupEnum nextObject]) {
         name = [[group stringValue] stringByEscapingGroupPlistEntities];
         path = [[group scriptPath] stringByEscapingGroupPlistEntities];
-        args = [[group scriptArguments] arrayByPerformingSelector:@selector(stringByEscapingGroupPlistEntities)];
+        args = [[group scriptArguments] stringByEscapingGroupPlistEntities];
         type = [NSNumber numberWithInt:[group scriptType]];
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", path, @"script path", args, @"script arguments", type, @"script type", nil];
 		[array addObject:groupDict];

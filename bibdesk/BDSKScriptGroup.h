@@ -50,7 +50,8 @@ enum {
 @interface BDSKScriptGroup : BDSKMutableGroup {
     NSArray *publications;
     NSString *scriptPath;
-    NSArray *scriptArguments;
+    NSString *scriptArguments;
+    NSArray *argsArray;
     int scriptType;
     BOOL isRetrieving;
     BOOL failedDownload;
@@ -62,8 +63,8 @@ enum {
     OFSimpleLockType currentTaskLock;
 }
 
-- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
-- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSArray *)arguments scriptType:(int)type;
+- (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
+- (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 
 - (NSArray *)publications;
 - (void)setPublications:(NSArray *)newPubs;
@@ -71,8 +72,8 @@ enum {
 - (NSString *)scriptPath;
 - (void)setScriptPath:(NSString *)newPath;
 
-- (NSArray *)scriptArguments;
-- (void)setScriptArguments:(NSArray *)newArguments;
+- (NSString *)scriptArguments;
+- (void)setScriptArguments:(NSString *)newArguments;
 
 - (int)scriptType;
 - (void)setScriptType:(int)newType;
@@ -85,4 +86,10 @@ enum {
 - (BOOL)isProcessing;
 - (void)stdoutNowAvailable:(NSNotification *)notification;
 
+@end
+
+
+@interface NSString (BDSKScriptGroupExtensions)
+- (NSArray *)shellScriptArgumentsArray;
+- (NSArray *)appleScriptArgumentsArray;
 @end
