@@ -1105,7 +1105,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 							  error:(NSString **)error{	
 	
 	// add to the frontmost bibliography
-	BibDocument * doc = [[NSApp orderedDocuments] firstObject];
+	BibDocument * doc = [[NSDocumentController sharedDocumentController] currentDocument];
     if (!doc) {
 		// if there are no open documents, give an error. 
 		// Or rather create a new document and add the entry there? Would anybody want that?

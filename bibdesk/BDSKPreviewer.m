@@ -159,7 +159,7 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification {
-    id document = [[NSApp orderedDocuments] firstObject];
+    id document = [[NSDocumentController sharedDocumentController] currentDocument];
     if(document && [document respondsToSelector:@selector(updatePreviews:)])
         [document updatePreviews:nil];
 }
