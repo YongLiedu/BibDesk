@@ -867,16 +867,18 @@ static int numberOfOpenEditors = 0;
     int i = [menu numberOfItems];
     BibAuthor *person;
     NSMenuItem *item;
+    SEL selector = isEditable ? @selector(showPersonDetailCmd:) : NULL;
     while (i-- > 1)
         [menu removeItemAtIndex:i];
     if (count == 0)
         return;
     for (i = 0; i < count; i++) {
         person = [thePeople objectAtIndex:i];
-        item = [menu addItemWithTitle:[person normalizedName] action:@selector(showPersonDetailCmd:) keyEquivalent:@""];
+        item = [menu addItemWithTitle:[person normalizedName] action:selector keyEquivalent:@""];
         [item setTag:i];
     }
-    item = [menu addItemWithTitle:NSLocalizedString(@"Show All", @"Show all") action:@selector(showPersonDetailCmd:) keyEquivalent:@""];
+    if (isEditable)
+        item = [menu addItemWithTitle:NSLocalizedString(@"Show All", @"Show all") action:selector keyEquivalent:@""];
     [item setTag:count];
 }
 
