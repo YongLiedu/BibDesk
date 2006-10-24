@@ -90,6 +90,8 @@ static id sharedSearch = nil;
                 success = NO;
             
             CFRelease(mdQuery);
+        } else {
+            success = NO;
         }
     }
     
@@ -102,6 +104,9 @@ static id sharedSearch = nil;
     NSMutableArray *results = nil;
     
     if(mdQuery != NULL){
+        
+        // supposed to disable updates before iterating results
+        MDQueryDisableUpdates(mdQuery);
         CFIndex idx = MDQueryGetResultCount(mdQuery);
         results = [NSMutableArray arrayWithCapacity:idx];
 
@@ -116,6 +121,7 @@ static id sharedSearch = nil;
                 CFRelease(value);
             }
         }
+        MDQueryEnableUpdates(mdQuery);
     }
     
     return results;
