@@ -323,6 +323,8 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     if ([self undoManager]) {
         [[self undoManager] removeAllActionsWithTarget:self];
     }
+    // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
+    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
     [macroResolver release];
