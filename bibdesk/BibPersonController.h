@@ -54,7 +54,6 @@
     IBOutlet NSTableView *pubsTableView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet OASplitView *splitView;
-    IBOutlet NSObjectController *ownerController;
 }
 
 #pragma mark initialization

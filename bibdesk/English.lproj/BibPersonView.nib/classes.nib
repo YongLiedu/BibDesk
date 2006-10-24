@@ -15,7 +15,6 @@
                 collapsibleView = BDSKCollapsibleView; 
                 imageView = BDSKDragImageView; 
                 nameTextField = NSTextField; 
-                ownerController = NSObjectController; 
                 pubsTableView = NSTableView; 
                 splitView = OASplitView; 
             }; 

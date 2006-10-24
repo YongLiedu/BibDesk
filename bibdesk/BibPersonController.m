@@ -87,8 +87,6 @@
         [super awakeFromNib];
 	}
 	
-	// bind-to-owner bug workaround
-	[ownerController setContent:self];
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
 	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
@@ -160,11 +158,6 @@
 - (void)handleBibItemChanged:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
     [self setPublications:[(BibDocument *)[self document] publicationsForAuthor:person]];
-}
-
-- (void)windowWillClose:(NSNotification *)notification{
-	// bind-to-owner bug workaround
-	[ownerController setContent:nil];
 }
 
 - (void)openSelectedPub:(id)sender{
