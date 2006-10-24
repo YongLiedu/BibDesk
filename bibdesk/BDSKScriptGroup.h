@@ -93,3 +93,7 @@ enum {
 - (NSArray *)shellScriptArgumentsArray;
 - (NSArray *)appleScriptArgumentsArray;
 @end
+
+@interface NSScanner (BDSKScriptGroupExtensions)
+- (BOOL)scanAppleScriptValueUpToCharactersInSet:stopSet intoObject:(id *)object;
+@end

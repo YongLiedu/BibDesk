@@ -536,189 +536,147 @@
 }
 
 // parses a comma separated list of AppleScript type arguments
-// arguments can be:
-// "-quoted strings (with escapes),  explicit numbers, lists of the form {item,...}, records of the form {key:value,...}, unquoted strings (no escapes)
 - (NSArray *)appleScriptArgumentsArray {
-    static NSCharacterSet *numberChars = nil;
-    static NSCharacterSet *specialStringChars = nil;
-    static NSCharacterSet *listSeparatorChars = nil;
-    static NSCharacterSet *specialListChars = nil;
+    static NSCharacterSet *commaChars = nil;
+    if (commaChars == nil)
+        commaChars = [[NSCharacterSet characterSetWithCharactersInString:@","] retain];
     
-    if (numberChars == nil) {
-        numberChars = [[NSCharacterSet characterSetWithCharactersInString:@"-.0123456789"] retain];
-        specialStringChars = [[NSCharacterSet characterSetWithCharactersInString:@"\\\""] retain];
-        listSeparatorChars = [[NSCharacterSet characterSetWithCharactersInString:@"},:"] retain];
-        specialListChars = [[NSCharacterSet characterSetWithCharactersInString:@"{}\""] retain];
-    }
-    
-    NSScanner *scanner = [NSScanner scannerWithString:self];
-    NSString *s = nil;
-    unichar ch = 0;
     NSMutableArray *arguments = [NSMutableArray array];
+    NSScanner *scanner = [NSScanner scannerWithString:self];
+    unichar ch = 0;
+    id object;
     
     [scanner setCharactersToBeSkipped:nil];
     
     while ([scanner isAtEnd] == NO) {
-        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
-        if ([scanner peekCharacter:&ch] == NO)
-            break;
-        if (ch == '"') {
-            // quoted string, look for escaped characters or closing double-quote
-            [scanner setScanLocation:[scanner scanLocation] + 1];
-            NSMutableString *tmpString = [NSMutableString string];
-            while ([scanner isAtEnd] == NO) {
-                if ([scanner scanUpToCharactersFromSet:specialStringChars intoString:&s])
-                    [tmpString appendString:s];
-                if ([scanner scanCharacter:&ch] == NO)
-                    [NSException raise:NSInternalInconsistencyException format:@"Missing \""];
-                if (ch == '"') {
-                    [tmpString removeSurroundingWhitespace];
-                    [arguments addObject:tmpString];
-                    break;
-                } else if (ch == '\\') {
-                    if ([scanner scanCharacter:&ch] == NO)
-                        [NSException raise:NSInternalInconsistencyException format:@"Missing character"];
-                    if (ch == 'n')
-                        [tmpString appendString:@"\n"];
-                    else if (ch == 'r')
-                        [tmpString appendString:@"\r"];
-                    else if (ch == 't')
-                        [tmpString appendString:@"\t"];
-                    else if (ch == '"')
-                        [tmpString appendString:@"\""];
-                    else if (ch == '\\')
-                        [tmpString appendString:@"\\"];
-                    else // or should we raise an exception?
-                        [tmpString appendFormat:@"%C", ch];
-                }
-            }
-        } else if ([numberChars characterIsMember:ch]) {
-            // explicit number, should we check for integers?
-            float tmpNumber = 0;
-            if ([scanner scanFloat:&tmpNumber])
-                [arguments addObject:[NSNumber numberWithFloat:tmpNumber]];
-        } else if (ch == '{') {
-            // list or record, comma-separated items, possibly with keys
-            // look for item and then a separator or closing brace
-            [scanner setScanLocation:[scanner scanLocation] + 1];
-            NSMutableArray *tmpArray = [NSMutableArray array];
-            NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-            BOOL isDict = NO;
-            id tmpValue = nil;
-            NSString *tmpKey = nil;
-            while ([scanner isAtEnd] == NO) {
-                // look for a key or value
-                [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
-                if ([scanner scanCharacter:&ch] == NO)
-                    [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
-                tmpValue = nil;
-                if (ch == '"') {
-                    // quoted string item, look for the closing (unescaped) double-quote
-                    NSMutableString *tmpString = [NSMutableString stringWithString:@"\""];
-                    while ([scanner isAtEnd] == NO) {
-                        if ([scanner scanUpToString:@"\"" intoString:&s])
-                            [tmpString appendString:s];
-                        if ([scanner isAtEnd])
-                            [NSException raise:NSInternalInconsistencyException format:@"Missing \""];
-                        [scanner setScanLocation:[scanner scanLocation] + 1];
-                        [tmpString appendString:@"\""];
-                        if ([self characterAtIndex:[scanner scanLocation] - 2] != '\\')
-                            break;
-                    }
-                    // parse the string to replace escapes
-                    tmpValue = [[tmpString appleScriptArgumentsArray] objectAtIndex:0];
-                    // after a quoted string we should have a closing brace or a comma for the next item
-                    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
-                    if ([scanner peekCharacter:&ch] == NO)
-                        [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
-                    if (ch != '}' && ch != ',')
-                        [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
-                } else if (ch == '{') {
-                    // nested list or record item. Find all balanced braces that are not inside a quoted string until the matching closing brace
-                    NSMutableString *tmpString = [NSMutableString stringWithString:@"{"];
-                    int nesting = 1;
-                    while ([scanner isAtEnd] == NO) {
-                        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
-                        if ([scanner scanUpToCharactersFromSet:specialListChars intoString:&s])
-                            [tmpString appendString:s];
-                        if ([scanner scanCharacter:&ch] == NO)
-                            [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
-                        [tmpString appendFormat:@"%C", ch];
-                        if (ch == '"') {
-                            // quoted string, ignore braces until the matching unescaped closing double-quote
-                            while ([scanner isAtEnd] == NO) {
-                                if ([scanner scanUpToString:@"\"" intoString:&s])
-                                    [tmpString appendString:s];
-                                if ([scanner scanString:@"\"" intoString:NULL] == NO)
-                                    [NSException raise:NSInternalInconsistencyException format:@"Missing \""];
-                                [tmpString appendString:@"\""];
-                                if ([self characterAtIndex:[scanner scanLocation] - 2] != '\\')
-                                    break;
-                            }
-                        } else if (ch == '{') {
-                            nesting++;
-                        } else { // ch == '}'
-                            nesting--;
-                            if(nesting == 0) // this is the matching closing brace of the nested list or record
-                                break;
-                        }
-                    }
-                    // parse the list or record we found to get its object value
-                    tmpValue = [[tmpString appleScriptArgumentsArray] objectAtIndex:0];
-                } else {
-                    // a number, key, or unquoted string item, parse up to comma, colon or closing brace
-                    [scanner setScanLocation:[scanner scanLocation] - 1];
-                    if ([scanner scanUpToCharactersFromSet:listSeparatorChars intoString:&s])
-                        tmpValue = [[s appleScriptArgumentsArray] objectAtIndex:0];
-                }
-                if ([scanner scanCharacter:&ch] == NO)
-                    [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
-                if (ch == '}') {
-                    // matching closing brace of the list or record argument, we can add the array or dictionary
-                    if (isDict) {
-                        if (tmpValue)
-                            [tmpDict setObject:tmpValue forKey:tmpKey];
-                        [arguments addObject:tmpDict];
-                    } else {
-                        if (tmpValue)
-                            [tmpArray addObject:tmpValue];
-                        [arguments addObject:tmpArray];
-                    }
-                    break;
-                } else if (ch == ',') {
-                    // item separator, add it to the array or dictionary
-                    if (isDict)
-                        [tmpDict setObject:tmpValue forKey:tmpKey];
-                    else
-                        [tmpArray addObject:tmpValue];
-                } else if (ch == ':') {
-                    // we just founnd a key, so we have a record
-                    isDict = YES;
-                    tmpKey = tmpValue;
-                    tmpValue = nil;
-                } else
-                    [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
-            }
-        } else if ([scanner scanString:@"true" intoString:NULL] || [scanner scanString:@"yes" intoString:NULL]) {
-            // boolean
-            [arguments addObject:[NSNumber numberWithBool:YES]];
-        } else if ([scanner scanString:@"false" intoString:NULL] || [scanner scanString:@"no" intoString:NULL]) {
-            // boolean
-            [arguments addObject:[NSNumber numberWithBool:NO]];
-        } else { // or should we raise an exception?
-            // unquoted string, just scan up to the next comma separating the arguments
-            NSString *s = nil;
-            if ([scanner scanUpToString:@"," intoString:&s])
-                [arguments addObject:[s stringByRemovingSurroundingWhitespace]];
-        }
-        // we should now be at the end of an argument, so if we're not at the end we should have a comma separator
-        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+        if ([scanner scanAppleScriptValueUpToCharactersInSet:commaChars intoObject:&object])
+            [arguments addObject:object];
         if ([scanner scanCharacter:&ch] == NO)
             break;
         if (ch != ',')
             [NSException raise:NSInternalInconsistencyException format:@"Missing ,"];
     }
     return arguments;
+}
+
+@end
+
+
+@implementation NSScanner (BDSKScriptGroupExtensions)
+
+// parses an AppleScript type value, including surrounding whitespace. A value can be:
+// "-quoted string (with escapes),  explicit number, list of the form {item,...}, record of the form {key:value,...}, boolean constant, unquoted string (no escapes)
+- (BOOL)scanAppleScriptValueUpToCharactersInSet:stopSet intoObject:(id *)object {
+    static NSCharacterSet *numberChars = nil;
+    static NSCharacterSet *specialStringChars = nil;
+    static NSCharacterSet *listSeparatorChars = nil;
+    
+    if (numberChars == nil) {
+        numberChars = [[NSCharacterSet characterSetWithCharactersInString:@"-.0123456789"] retain];
+        specialStringChars = [[NSCharacterSet characterSetWithCharactersInString:@"\\\""] retain];
+        listSeparatorChars = [[NSCharacterSet characterSetWithCharactersInString:@"},:"] retain];
+    }
+    
+    unichar ch = 0;
+    id tmpObject = nil;
+    
+    [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+    
+    if ([self peekCharacter:&ch] == NO)
+        return NO;
+    if (ch == '"') {
+        // quoted string, look for escaped characters or closing double-quote
+        [self setScanLocation:[self scanLocation] + 1];
+        NSMutableString *tmpString = [NSMutableString string];
+        NSString *s = nil;
+        while ([self isAtEnd] == NO) {
+            if ([self scanUpToCharactersFromSet:specialStringChars intoString:&s])
+                [tmpString appendString:s];
+            if ([self scanCharacter:&ch] == NO)
+                [NSException raise:NSInternalInconsistencyException format:@"Missing \""];
+            if (ch == '\\') {
+                if ([self scanCharacter:&ch] == NO)
+                    [NSException raise:NSInternalInconsistencyException format:@"Missing character"];
+                if (ch == 'n')
+                    [tmpString appendString:@"\n"];
+                else if (ch == 'r')
+                    [tmpString appendString:@"\r"];
+                else if (ch == 't')
+                    [tmpString appendString:@"\t"];
+                else if (ch == '"')
+                    [tmpString appendString:@"\""];
+                else if (ch == '\\')
+                    [tmpString appendString:@"\\"];
+                else // or should we raise an exception?
+                    [tmpString appendFormat:@"%C", ch];
+            } else if (ch == '"') {
+                [tmpString removeSurroundingWhitespace];
+                tmpObject = tmpString;
+                break;
+            }
+        }
+    } else if ([numberChars characterIsMember:ch]) {
+        // explicit number, should we check for integers?
+        float tmpFloat = 0;
+        if ([self scanFloat:&tmpFloat])
+            tmpObject = [NSNumber numberWithFloat:tmpFloat];
+    } else if (ch == '{') {
+        // list or record, comma-separated items, possibly with keys
+        // look for item and then a separator or closing brace
+        [self setScanLocation:[self scanLocation] + 1];
+        NSMutableArray *tmpArray = [NSMutableArray array];
+        NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
+        BOOL isDict = NO;
+        id tmpValue = nil;
+        NSString *tmpKey = nil;
+        while ([self isAtEnd] == NO) {
+            // look for a key or value
+            [self scanAppleScriptValueUpToCharactersInSet:listSeparatorChars intoObject:&tmpValue];
+            if ([self scanCharacter:&ch] == NO)
+                [NSException raise:NSInternalInconsistencyException format:@"Missing }"];
+            if (ch == ':') {
+                // we just found a key, so we have a record
+                isDict = YES;
+                tmpKey = tmpValue;
+                tmpValue = nil;
+            } else if (ch == ',') {
+                // item separator, add it to the array or dictionary
+                if (isDict)
+                    [tmpDict setObject:tmpValue forKey:tmpKey];
+                else
+                    [tmpArray addObject:tmpValue];
+                tmpValue = nil;
+                tmpKey = nil;
+            } else if (ch == '}') {
+                // matching closing brace of the list or record argument, we can add the array or dictionary
+                if (isDict) {
+                    if (tmpValue)
+                        [tmpDict setObject:tmpValue forKey:tmpKey];
+                    tmpObject = tmpDict;
+                } else {
+                    if (tmpValue)
+                        [tmpArray addObject:tmpValue];
+                    tmpObject = tmpArray;
+                }
+                break;
+            }
+        }
+    } else if ([self scanString:@"true" intoString:NULL] || [self scanString:@"yes" intoString:NULL]) {
+        // boolean
+        tmpObject = [NSNumber numberWithBool:YES];
+    } else if ([self scanString:@"false" intoString:NULL] || [self scanString:@"no" intoString:NULL]) {
+        // boolean
+        tmpObject = [NSNumber numberWithBool:NO];
+    } else { // or should we raise an exception?
+        // unquoted string, just scan up to the next character in the stopset
+        NSString *s = nil;
+        if ([self scanUpToCharactersFromSet:stopSet intoString:&s])
+            tmpObject = [s stringByRemovingSurroundingWhitespace];
+    }
+    [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+    if (object != NULL)
+        *object = tmpObject;
+    return nil != tmpObject;
 }
 
 @end
