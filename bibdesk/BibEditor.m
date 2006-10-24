@@ -866,7 +866,7 @@ static int numberOfOpenEditors = 0;
     int count = [thePeople count];
     int i = [menu numberOfItems];
     BibAuthor *person;
-    NSMenuItem *item;
+    NSMenuItem *item = nil;
     SEL selector = isEditable ? @selector(showPersonDetailCmd:) : NULL;
     while (i-- > 1)
         [menu removeItemAtIndex:i];
