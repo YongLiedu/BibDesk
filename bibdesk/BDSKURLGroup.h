@@ -39,9 +39,12 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
-@interface BDSKURLGroup : BDSKMutableGroup
+@class BDSKPublicationsArray;
+@protocol BDSKItemOwner;
+
+@interface BDSKURLGroup : BDSKMutableGroup <BDSKItemOwner>
 {
-    NSArray *publications;
+    BDSKPublicationsArray *publications;
     NSURL *URL;
     NSString *filePath;
     BOOL isRetrieving;
@@ -57,7 +60,7 @@
 - (NSURL *)URL;
 - (void)setURL:(NSURL *)newURL;
 
-- (NSArray *)publications;
+- (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 
 - (BOOL)isRetrieving;

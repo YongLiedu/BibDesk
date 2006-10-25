@@ -40,15 +40,16 @@
 #import "BDSKGroup.h"
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 
-@class OFMessageQueue;
+@class OFMessageQueue, BDSKPublicationsArray;
+@protocol BDSKItemOwner;
 
 enum {
     BDSKShellScriptType,
     BDSKAppleScriptType
 };
 
-@interface BDSKScriptGroup : BDSKMutableGroup {
-    NSArray *publications;
+@interface BDSKScriptGroup : BDSKMutableGroup <BDSKItemOwner> {
+    BDSKPublicationsArray *publications;
     NSString *scriptPath;
     NSString *scriptArguments;
     NSArray *argsArray;
@@ -66,7 +67,7 @@ enum {
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 - (id)initWithName:(NSString *)aName scriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;
 
-- (NSArray *)publications;
+- (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPubs;
 
 - (NSString *)scriptPath;

@@ -48,6 +48,7 @@
 #import "BDSKParserProtocol.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
+#import "BDSKPublicationsArray.h"
 
 @implementation BDSKURLGroup
 
@@ -204,7 +205,7 @@
     }
 }
 
-- (NSArray *)publications;
+- (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil){
         // get the publications asynchronously if remote, synchronously if local
@@ -224,8 +225,10 @@
         [self terminate];
     
     if(newPublications != publications){
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
-        publications = [newPublications copy];
+        publications = [[BDSKPublicationsArray alloc] initWithArray:newPublications];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
     }
     
     [self setCount:[publications count]];

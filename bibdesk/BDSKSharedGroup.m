@@ -42,6 +42,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import <BDSKAsynchronousDOServer.h>
+#import "BDSKPublicationsArray.h"
 
 typedef struct _BDSKSharedGroupFlags {
     volatile int32_t isRetrieving __attribute__ ((aligned (4)));
@@ -180,7 +181,7 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark Accessors
 
-- (NSArray *)publications;
+- (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && ([self needsUpdate] == YES || publications == nil)){
         // let the server get the publications asynchronously
@@ -197,8 +198,10 @@ static NSImage *unlockedIcon = nil;
 - (void)setPublications:(NSArray *)newPublications;
 {
     if(newPublications != publications){
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
-        publications = [newPublications retain];
+        publications = [[BDSKPublicationsArray alloc] initWithArray:newPublications];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
     }
     
     [self setCount:[publications count]];

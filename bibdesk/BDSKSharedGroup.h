@@ -40,11 +40,12 @@
 #import "BDSKGroup.h"
 
 
-@class BDSKSharedGroupServer;
+@class BDSKSharedGroupServer, BDSKPublicationsArray;
+@protocol BDSKItemOwner;
 
-@interface BDSKSharedGroup : BDSKGroup
+@interface BDSKSharedGroup : BDSKGroup <BDSKItemOwner>
 {
-    NSArray *publications;
+    BDSKPublicationsArray *publications;
     BDSKSharedGroupServer *server;
     BOOL needsUpdate;
 }
@@ -54,7 +55,7 @@
 + (NSImage *)unlockedIcon;
 
 - (id)initWithService:(NSNetService *)aService;
-- (NSArray *)publications;
+- (BDSKPublicationsArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;
 - (BOOL)needsUpdate;

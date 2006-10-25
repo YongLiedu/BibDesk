@@ -51,9 +51,11 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
+#import <OmniFoundation/OFMessageQueue.h>
+#import "BibItem.h"
+#import "BDSKPublicationsArray.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
-#import <OmniFoundation/OFMessageQueue.h>
 
 @implementation BDSKScriptGroup
 
@@ -223,7 +225,7 @@
 
 #pragma mark Accessors
 
-- (NSArray *)publications;
+- (BDSKPublicationsArray *)publications;
 {
     if([self isRetrieving] == NO && publications == nil){
         // get the publications asynchronously
@@ -243,8 +245,10 @@
         [self terminate];
     
     if(newPublications != publications){
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
-        publications = [newPublications retain];
+        publications = [[BDSKPublicationsArray alloc] initWithArray:newPublications];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
     }
     
     [self setCount:[publications count]];
