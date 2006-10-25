@@ -47,6 +47,7 @@
 #import "BibPersonController.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
+#import "BDSKPublicationsArray.h"
 
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
@@ -1008,7 +1009,7 @@
 		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
 		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
             [prevKeys removeObject:key];
-			parent = [self publicationForCiteKey:key];
+			parent = [publications itemForCiteKey:key];
 			[publications removeObjectIdenticalTo:parent];
 			[publications addObject:parent];
 			moved = YES;
@@ -1032,10 +1033,9 @@
 }
 
 - (void)selectCrossrefParentForItem:(BibItem *)item{
-    NSString *crossref = [item valueOfField:BDSKCrossrefString inherit:NO];
-    [tableView deselectAll:nil];
-    BibItem *parent = [self publicationForCiteKey:crossref];
-    if(crossref && parent){
+    BibItem *parent = [item crossrefParent];
+    if(parent){
+        [tableView deselectAll:nil];
         [self highlightBib:parent];
         [tableView scrollRowToCenter:[tableView selectedRow]];
     } else

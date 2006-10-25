@@ -578,7 +578,7 @@
 }
 
 - (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1 && [self hasExternalGroupsSelected] == NO){
+    if([self numberOfSelectedPubs] == 1){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         if(![NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
             return YES;

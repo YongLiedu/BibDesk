@@ -243,8 +243,7 @@ static int numberOfOpenEditors = 0;
     // The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
     [self setupButtons];
 
-	if (isEditable)
-        [authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
+    [authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
     
     // Setup the textviews
     [notesView setString:[publication valueOfField:BDSKAnnoteString inherit:NO]];
@@ -861,7 +860,7 @@ static int numberOfOpenEditors = 0;
     int i = [menu numberOfItems];
     BibAuthor *person;
     NSMenuItem *item = nil;
-    SEL selector = isEditable ? @selector(showPersonDetailCmd:) : NULL;
+    SEL selector = @selector(showPersonDetailCmd:);
     while (i-- > 1)
         [menu removeItemAtIndex:i];
     if (count == 0)
@@ -871,8 +870,7 @@ static int numberOfOpenEditors = 0;
         item = [menu addItemWithTitle:[person normalizedName] action:selector keyEquivalent:@""];
         [item setTag:i];
     }
-    if (isEditable)
-        item = [menu addItemWithTitle:NSLocalizedString(@"Show All", @"Show all") action:selector keyEquivalent:@""];
+    item = [menu addItemWithTitle:NSLocalizedString(@"Show All", @"Show all") action:selector keyEquivalent:@""];
     [item setTag:count];
 }
 
@@ -902,7 +900,7 @@ static int numberOfOpenEditors = 0;
 		return (isEditable && ![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
 	}
 	else if (theAction == @selector(selectCrossrefParentAction:)) {
-        return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == NO);
+        return ([NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == NO);
 	}
 	else if (theAction == @selector(createNewPubUsingCrossrefAction:)) {
         return (isEditable && [NSString isEmptyString:[publication valueOfField:BDSKCrossrefString inherit:NO]] == YES);
