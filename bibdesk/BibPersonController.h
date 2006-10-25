@@ -54,6 +54,7 @@
     IBOutlet NSTableView *pubsTableView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet OASplitView *splitView;
+    BOOL isEditable;
 }
 
 #pragma mark initialization
@@ -72,7 +73,6 @@
 - (void)handlePubListChanged:(NSNotification *)notification;
 - (void)handleBibItemChanged:(NSNotification *)note;
 - (void)openSelectedPub:(id)sender;
-- (IBAction)changeName:(id)sender;
 - (void)changeNameToString:(NSString *)newNameString;
 
 @end

@@ -45,6 +45,7 @@
 #import "BibTeXParser.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKDragImageView.h"
+#import "BDSKPublicationsArray.h"
 #import <AddressBook/AddressBook.h>
 
 @implementation BibPersonController
@@ -63,6 +64,8 @@
 	if(self){
         [self setPerson:aPerson];
         publications = nil;
+        
+        isEditable = ([[person publication] document] != nil);
         
         [person setPersonController:self];
 	}
@@ -101,8 +104,11 @@
 
 	[self updateUI];
     [pubsTableView setDoubleAction:@selector(openSelectedPub:)];
-    [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
-
+    
+    if (isEditable)
+        [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
+    
+    [nameTextField setEditable:isEditable];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -113,7 +119,7 @@
 
 - (NSArray *)publications{
     if (publications == nil)
-        publications = [[(BibDocument *)[self document] publicationsForAuthor:person] copy];
+        publications = [[[[[person publication] owner] publications] itemsForAuthor:person] retain];
     return publications;
 }
 
@@ -157,7 +163,7 @@
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    [self setPublications:[(BibDocument *)[self document] publicationsForAuthor:person]];
+    [self setPublications:nil];
 }
 
 - (void)openSelectedPub:(id)sender{
@@ -175,8 +181,12 @@
 	[newNameString release];
 }
 
-- (IBAction)changeName:(id)sender{
-    NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @""),  NSLocalizedString(@"Yes", @"Yes"), NSLocalizedString(@"No", @"No"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[sender stringValue] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @""));
+
+- (void)controlTextDidEndEditing:(NSNotification *)aNotification;
+{
+    id sender = [aNotification object];
+    if(sender == nameTextField && [sender isEditable]) // this shouldn't be called for uneditable cells, but it is
+        NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @""),  NSLocalizedString(@"Yes", @"Yes"), NSLocalizedString(@"No", @"No"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[sender stringValue] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @""));
 }
 
 - (void)changeNameToString:(NSString *)newNameString{
@@ -260,6 +270,9 @@
 #pragma mark Dragging delegate methods
 
 - (NSDragOperation)dragImageView:(BDSKDragImageView *)view validateDrop:(id <NSDraggingInfo>)sender {
+    if(isEditable == NO)
+        return NO;
+    
     if ([sender draggingSource] == view)
 		return NSDragOperationNone;
 	
