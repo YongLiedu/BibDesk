@@ -722,6 +722,16 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     }
 }
 
+- (void)getCopyOfMacrosOnMainThread:(NSMutableDictionary *)dstDict{
+    if([NSThread inMainThread] == NO){
+        [self performSelectorOnMainThread:_cmd withObject:dstDict waitUntilDone:YES];
+    } else {
+        NSDictionary *dict = [[NSDictionary alloc] initWithDictionary:[macroResolver macroDefinitions] copyItems:YES];
+        [dstDict addEntriesFromDictionary:dict];
+        [dict release];
+    }
+}
+
 - (NSNumber *)fileOrderOfPublication:(BibItem *)thePub{
     unsigned int order = [publications indexOfObjectIdenticalTo:thePub];
     return NSNotFound == order ? nil : [NSNumber numberWithInt:(order + 1)];
@@ -2574,8 +2584,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
-	BibDocument *changedDoc = [[aNotification object] document];
-	if(changedDoc && changedDoc != self)
+	id changedOwner = [[aNotification object] owner];
+	if(changedOwner && changedOwner != self)
 		return; // only macro changes for ourselves or the global macros
 	
     [tableView reloadData];
