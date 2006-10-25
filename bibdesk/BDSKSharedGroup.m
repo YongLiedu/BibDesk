@@ -201,7 +201,7 @@ static NSImage *unlockedIcon = nil;
     if(newPublications != publications){
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
-        publications = [[BDSKPublicationsArray alloc] initWithArray:newPublications];
+        publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
     }
     

@@ -171,7 +171,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     return NO;
 }
 
-#pragma mark BDSKMacroResolver protocol
+#pragma mark Macros management
 
 // used for autocompletion; returns global macro definitions + local (document) definitions
 - (NSDictionary *)allMacroDefinitions {
@@ -267,6 +267,16 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     [self synchronize];
 	
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Remove macro", @"type", macroKey, @"macroKey", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
+                                                        object:self
+                                                      userInfo:userInfo];    
+}
+
+- (void)removeAllMacros{
+    [macroDefinitions release];
+    macroDefinitions == nil;
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Remove macro", @"type", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
                                                         object:self
                                                       userInfo:userInfo];    

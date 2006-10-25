@@ -2039,8 +2039,8 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
-	BibDocument *changedDoc = [[notification object] document];
-	if(changedDoc && changedDoc != [self document])
+	id changedOwner = [[notification object] owner];
+	if(changedOwner && changedOwner != [publication owner])
 		return; // only macro changes for our own document or the global macros
 	
 	NSArray *cells = [bibFields cells];

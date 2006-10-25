@@ -74,11 +74,17 @@
         
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
-        if (aMacroResolver && isEditable) {
+        if (aMacroResolver) {
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(handleMacroChangedNotification:)
                                                          name:BDSKMacroDefinitionChangedNotification
                                                        object:aMacroResolver];
+            if (aMacroResolver != [BDSKMacroResolver defaultMacroResolver]) {
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(handleMacroChangedNotification:)
+                                                             name:BDSKMacroDefinitionChangedNotification
+                                                           object:[BDSKMacroResolver defaultMacroResolver]];
+            }
         }
         
         [self refreshMacros];
@@ -135,19 +141,25 @@
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif{
     NSDictionary *info = [notif userInfo];
-    NSString *type = [info objectForKey:@"type"];
-	if ([type isEqualToString:@"Add macro"]) {
-        NSString *key = [info objectForKey:@"macroKey"];
-		[macros addObject:key];
-	} else if ([type isEqualToString:@"Remove macro"]) {
-        NSString *key = [info objectForKey:@"macroKey"];
-		[macros removeObject:key];
-	} else if ([type isEqualToString:@"Change key"]) {
-        NSString *newKey = [info objectForKey:@"newKey"];
-        NSString *oldKey = [info objectForKey:@"oldKey"];
-        int indexOfOldKey = [macros indexOfObject:oldKey];
-        [macros replaceObjectAtIndex:indexOfOldKey withObject:newKey];
-	}
+    BDSKMacroResolver *sender = [notif object];
+    if (sender == macroResolver) {
+        NSString *type = [info objectForKey:@"type"];
+        if ([type isEqualToString:@"Add macro"]) {
+            NSString *key = [info objectForKey:@"macroKey"];
+            [macros addObject:key];
+        } else if ([type isEqualToString:@"Remove macro"]) {
+            NSString *key = [info objectForKey:@"macroKey"];
+            if (key)
+                [macros removeObject:key];
+            else
+                [macros removeAllObjects];
+        } else if ([type isEqualToString:@"Change key"]) {
+            NSString *newKey = [info objectForKey:@"newKey"];
+            NSString *oldKey = [info objectForKey:@"oldKey"];
+            int indexOfOldKey = [macros indexOfObject:oldKey];
+            [macros replaceObjectAtIndex:indexOfOldKey withObject:newKey];
+        }
+    }
     [tableView reloadData];
 }
 
