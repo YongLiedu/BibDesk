@@ -58,6 +58,7 @@
 #import "BibTypeManager.h"
 #import "BDSKSharingBrowser.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 
 @implementation BibDocument (Groups)
@@ -330,6 +331,16 @@
     [spinner removeFromSuperview];
     [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
     
+    BDSKMacroResolver *resolver = [group macroResolver];
+    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+    NSWindowController *wc;
+    while(wc = [wcEnum nextObject]){
+        if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver){
+            [wc hideWindow:nil];
+            break;
+        }
+    }
+    
 	[group setUndoManager:nil];
 	[urlGroups removeObjectIdenticalTo:group];
     [groupTableView reloadData];
@@ -356,6 +367,16 @@
     NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
     [spinner removeFromSuperview];
     [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+    
+    BDSKMacroResolver *resolver = [group macroResolver];
+    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+    NSWindowController *wc;
+    while(wc = [wcEnum nextObject]){
+        if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver){
+            [wc hideWindow:nil];
+            break;
+        }
+    }
     
 	[group setUndoManager:nil];
 	[scriptGroups removeObjectIdenticalTo:group];
