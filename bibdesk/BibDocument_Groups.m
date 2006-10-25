@@ -58,6 +58,7 @@
 #import "BibTypeManager.h"
 #import "BDSKSharingBrowser.h"
 #import "NSArray_BDSKExtensions.h"
+#import "BDSKPublicationsArray.h"
 
 @implementation BibDocument (Groups)
 
@@ -285,7 +286,7 @@
                 keyEnum = [keys objectEnumerator];
                 pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
                 while (key = [keyEnum nextObject]) 
-                    [pubArray addObjectsFromArray:[self allPublicationsForCiteKey:key]];
+                    [pubArray addObjectsFromArray:[publications allItemsForCiteKey:key]];
                 group = [[BDSKStaticGroup alloc] initWithName:name publications:pubArray];
                 [group setUndoManager:[self undoManager]];
                 [staticGroups addObject:group];

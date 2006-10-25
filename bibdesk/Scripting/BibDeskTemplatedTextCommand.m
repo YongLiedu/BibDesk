@@ -40,6 +40,7 @@
 #import "BibDocument.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
+#import "BDSKPublicationsArray.h"
 
 
 @implementation BibDeskTemplatedTextCommand

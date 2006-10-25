@@ -40,6 +40,7 @@
 #import "BibDocument.h"
 #import "BibDocument+Scripting.h"
 #import "BibItem.h"
+#import "BDSKPublicationsArray.h"
 
 /* 
 ssp: 2004-07-11

@@ -40,6 +40,7 @@
 #import "BibPrefController.h"
 #import "BibDocument.h"
 #import "BibTeXParser.h"
+#import "BDSKPublicationsArray.h"
 
 /* ssp
 A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.

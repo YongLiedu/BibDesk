@@ -37,6 +37,7 @@
  */
 #import "BibAuthor+Scripting.h"
 #import "BibDocument.h"
+#import "BDSKPublicationsArray.h"
 
 @implementation BibAuthor (Scripting)
 /* 
@@ -64,7 +65,7 @@ ssp 2004-07-10
 - (NSArray *)publications {
 	BibDocument * myDoc = [[self publication] document];
 	if (myDoc)
-		return [myDoc publicationsForAuthor:self];
+		return [[myDoc publications] itemsForAuthor:self];
 	return [NSArray array];
 }
 

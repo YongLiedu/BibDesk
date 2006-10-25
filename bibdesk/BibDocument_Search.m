@@ -46,6 +46,7 @@
 #import "BDSKFileContentSearchController.h"
 #import "BDSKGroupTableView.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "BDSKPublicationsArray.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
 NSString *BDSKDocumentFormatForSearchingDates = nil;

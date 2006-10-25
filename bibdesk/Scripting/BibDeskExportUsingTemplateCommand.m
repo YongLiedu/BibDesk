@@ -39,6 +39,7 @@
 #import "BibDeskExportUsingTemplateCommand.h"
 #import "BibDocument.h"
 #import "BDSKTemplate.h"
+#import "BDSKPublicationsArray.h"
 
 
 @implementation BibDeskExportUsingTemplateCommand

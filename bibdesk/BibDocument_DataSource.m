@@ -62,6 +62,7 @@
 #import "BDSKTypeSelectHelper.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "BDSKPublicationsArray.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -972,7 +973,7 @@
                                [scanner scanUpToString:@"\\bibcite{" intoString:NULL] && 
                                [scanner scanString:@"\\bibcite{" intoString:NULL]) {
                             if([scanner scanUpToString:@"}" intoString:&key]) {
-                                if (items = [itemsForCiteKeys arrayForKey:key])
+                                if (items = [publications allItemsForCiteKey:key])
                                     [selItems addObjectsFromArray:items];
                             }
                         }
