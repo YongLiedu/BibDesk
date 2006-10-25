@@ -2904,7 +2904,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [self setDateModified:nil];
     }
     
-    if([self document] != nil && ([[BibTypeManager sharedManager] isURLField:key] || [key isEqualToString:BDSKTitleString])){
+    if([self document] != nil && ([[BibTypeManager sharedManager] isURLField:key] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
                                                             object:[self document]
                                                           userInfo:[self searchIndexInfo]];
