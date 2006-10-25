@@ -46,6 +46,8 @@
 #import "NSString_BDSKExtensions.h"
 #import "BibTeXParser.h"
 #import "BDSKComplexStringFormatter.h"
+#import "BDSKGroup.h"
+#import "BibItem.h"
 #import "BDSKMacroResolver.h"
 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
@@ -68,9 +70,11 @@
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
 		macroTextFieldWC = nil;
         
+        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isKindOfClass:[BibDocument class]]);
+        
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
-        if (aMacroResolver) {
+        if (aMacroResolver && isEditable) {
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(handleMacroChangedNotification:)
                                                          name:BDSKMacroDefinitionChangedNotification
@@ -91,20 +95,35 @@
     [super dealloc];
 }
 
+- (void)updateButtons{
+    [addButton setEnabled:isEditable];
+    [removeButton setEnabled:isEditable && [tableView numberOfSelectedRows]];
+}
+
 - (void)awakeFromNib{
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
-    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
+    if(isEditable)
+        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
     tc = [tableView tableColumnWithIdentifier:@"definition"];
     [[tc dataCell] setFormatter:tableCellFormatter];
     [tableView reloadData];
+    [[tc dataCell] setEditable:isEditable];
+    [[[tableView tableColumnWithIdentifier:@"macro"] dataCell] setEditable:isEditable];
+    [self updateButtons];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     NSString *title = NSLocalizedString(@"Macros", @"title for macros window");
+    if ([[macroResolver owner] isKindOfClass:[BDSKGroup class]])
+        title = [NSString stringWithFormat:@"%@ - %@", title, [(BDSKGroup *)[macroResolver owner] stringValue]];
     if ([NSString isEmptyString:displayName] == NO)
         title = [NSString stringWithFormat:@"%@ - %@", title, displayName];
     return title;
+}
+
+- (BDSKMacroResolver *)macroResolver{
+    return macroResolver;
 }
 
 - (void)refreshMacros{
@@ -364,6 +383,10 @@
 	}
 }
 
+- (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
+    [self updateButtons];
+}
+
 #pragma mark || dragging operations
 
 // this is also called from the copy: action defined in NSTableView_OAExtensions
@@ -445,7 +468,8 @@
 }
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
-	BibDocument *document = [macroResolver document];
+    // if this is called, we shouldn't belong to a group
+	BibDocument *document = (BibDocument *)[macroResolver owner];
 	
     BOOL hadCircular = NO;
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];

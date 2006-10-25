@@ -42,13 +42,18 @@
 @interface MacroWindowController : NSWindowController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;
+    IBOutlet NSButton *addButton;
+    IBOutlet NSButton *removeButton;
     BDSKMacroResolver *macroResolver;
     NSMutableArray *macros;
 	BDSKComplexStringFormatter *tableCellFormatter;
 	MacroTableViewWindowController *macroTextFieldWC;
+    BOOL isEditable;
 }
 
 - (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
+
+- (BDSKMacroResolver *)macroResolver;
 
 - (void)refreshMacros;
 

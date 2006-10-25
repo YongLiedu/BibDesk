@@ -12,7 +12,12 @@
             }; 
             CLASS = MacroWindowController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {closeButton = NSButton; macroDataSource = id; tableView = NSTableView; }; 
+            OUTLETS = {
+                addButton = NSButton; 
+                closeButton = NSButton; 
+                removeButton = NSButton; 
+                tableView = NSTableView; 
+            }; 
             SUPERCLASS = NSWindowController; 
         }
     ); 
