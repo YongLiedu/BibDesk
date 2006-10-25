@@ -38,6 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 @class BibDocument, BibItem;
+@protocol BDSKItemOwner;
 
 @interface BibTeXParser : NSObject {
 }
@@ -47,28 +48,28 @@
     @abstract   Convenience method that returns an array of BibItems from the input NSData; used by the pasteboard.  Uses libbtparse to parse the data.
     @discussion (comprehensive description)
     @param      inData (description)
-    @param      hadProblems (description)
-    @param      aDocument (description)
+    @param      anOwner (description)
+    @param      outError (description)
     @result     (description)
 */
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError document:(BibDocument *)aDocument;
++ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKItemOwner>)anOwner error:(NSError **)outError;
 
 /*!
     @method     itemsFromData:error:frontMatter:filePath:document:
     @abstract   Parsing method that returns an array of BibItems from data, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
     @param      inData (description)
-    @param      hadProblems (description)
     @param      frontMatter (description)
     @param      filePath (description)
-    @param      aDocument (description)
+    @param      anOwner (description)
     @result     (description)
+    @param      outError (description)
 */
 + (NSMutableArray *)itemsFromData:(NSData *)inData
-                            error:(NSError **)outError
                       frontMatter:(NSMutableString *)frontMatter
                          filePath:(NSString *)filePath
-						 document:(BibDocument *)aDocument;
+						 document:(id<BDSKItemOwner>)anOwner
+                            error:(NSError **)outError;
 
 /*!
     @method     macrosFromBibTeXString:document:

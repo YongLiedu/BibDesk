@@ -84,13 +84,11 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
 }
 
 /// libbtparse methods
-+ (NSMutableArray *)itemsFromData:(NSData *)inData
-                              error:(NSError **)outError
-						   document:(BibDocument *)aDocument{
-    return [self itemsFromData:inData error:outError frontMatter:nil filePath:BDSKParserPasteDragString document:aDocument];
++ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKItemOwner>)anOwner error:(NSError **)outError{
+    return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString document:anOwner error:outError];
 }
 
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
++ (NSMutableArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKItemOwner>)anOwner error:(NSError **)outError{
     
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if ([inData length] == 0)
@@ -101,8 +99,8 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
     int ok = 1;
     
     BibItem *newBI = nil;
-    
-    BDSKMacroResolver *macroResolver = [aDocument macroResolver];
+    BibDocument *document = [anOwner isKindOfClass:[BibDocument class]] ? (BibDocument *)anOwner : nil;
+    BDSKMacroResolver *macroResolver = [anOwner macroResolver];
 
     // Strings read from file and added to Dictionary object
     char *fieldname = "\0";
@@ -124,7 +122,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
     FILE *infile = NULL;
     BOOL isPasteOrDrag = [filePath isEqualToString:BDSKParserPasteDragString];
     
-    NSStringEncoding parserEncoding = (aDocument == nil || isPasteOrDrag ? NSUTF8StringEncoding : [(BibDocument *)aDocument documentStringEncoding]);
+    NSStringEncoding parserEncoding = (document == nil || isPasteOrDrag ? NSUTF8StringEncoding : [document documentStringEncoding]);
     
     NSError *error = nil;
     
@@ -166,8 +164,8 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                             appendPreambleToFrontmatter(entry, frontMatter, filePath, parserEncoding);
                         }else if([entryType isEqualToString:@"string"]){
                             addMacroToResolver(entry, macroResolver, filePath, parserEncoding, &error);
-                        }else if([entryType isEqualToString:@"comment"]){
-                            appendCommentToFrontmatterOrAddGroups(entry, frontMatter, filePath, aDocument, parserEncoding);
+                        }else if([entryType isEqualToString:@"comment"] && document){
+                            appendCommentToFrontmatterOrAddGroups(entry, frontMatter, filePath, document, parserEncoding);
                         }
                     }
                     
@@ -209,7 +207,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                     
                     if([entryType isEqualToString:@"bibdesk_info"]){
                         if(nil != frontMatter)
-                            [aDocument setDocumentInfoWithoutUndo:dictionary];
+                            [document setDocumentInfoWithoutUndo:dictionary];
                     }else{
                         
                         tmpStr = copyCheckedString(bt_entry_key(entry), entry->line, filePath, parserEncoding);
@@ -255,7 +253,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
         [parserLock unlock];
     }
 	
-    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:aDocument pasteDragData:isPasteOrDrag ? inData : nil];
+    [[BDSKErrorObjectController sharedErrorObjectController] endObservingErrorsForDocument:document pasteDragData:isPasteOrDrag ? inData : nil];
     
     return returnArray;
 }
