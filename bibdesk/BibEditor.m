@@ -222,7 +222,7 @@ static int numberOfOpenEditors = 0;
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
 
-    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[self document] macroResolver]];
+    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     
     [self setupForm];
@@ -2234,7 +2234,7 @@ static int numberOfOpenEditors = 0;
     if (control != bibFields) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
-		return [[NSApp delegate] possibleMatches:[[[self document] macroResolver] allMacroDefinitions] 
+		return [[NSApp delegate] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];
