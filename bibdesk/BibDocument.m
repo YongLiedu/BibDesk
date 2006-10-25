@@ -44,6 +44,7 @@
 #import "BibPrefController.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
+#import "BDSKPublicationsArray.h"
 
 #import "BDSKUndoManager.h"
 #import "MultiplePageView.h"
@@ -136,7 +137,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 
 - (id)init{
     if(self = [super init]){
-        publications = [[NSMutableArray alloc] initWithCapacity:1];
+        publications = [[BDSKPublicationsArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
         categoryGroups = [[NSMutableArray alloc] initWithCapacity:1];
@@ -172,8 +173,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
         [self setUndoManager:newUndoManager];
-		
-        itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
 		
 		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
         
@@ -328,7 +327,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
     [macroResolver release];
-    [itemsForCiteKeys release];
     [publications release];
     [shownPublications release];
     [groupedPublications release];
@@ -639,7 +637,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         
 		[publications setArray:newPubs];
 		[publications makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
-        [self rebuildItemsForCiteKeys];
 		
 		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocSetPublicationsNotification
@@ -652,7 +649,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [self setPublications:newPubs undoable:YES];
 }
 
-- (NSMutableArray *) publications{
+- (BDSKPublicationsArray *) publications{
     return publications;
 }
 
@@ -664,7 +661,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 	[publications insertObjects:pubs atIndexes:indexes];        
     
 	[pubs makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
-	[self addToItemsForCiteKeys:pubs];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
@@ -699,7 +695,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 	[publications removeObjectsAtIndexes:indexes];
 	
 	[pubs makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
-	[self removeFromItemsForCiteKeys:pubs];
     [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
@@ -715,23 +710,6 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 - (void)removePublication:(BibItem *)pub{
 	NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:[publications indexOfObjectIdenticalTo:pub]];
     [self removePublicationsAtIndexes:indexes];
-}
-
-- (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor{
-    NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    BibItem *bi;
-    NSMutableArray *anAuthorPubs = [NSMutableArray array];
-    
-    while(bi = [pubEnum nextObject]){
-        [auths addObjectsFromArray:[bi pubAuthors]];
-        if([auths containsObject:anAuthor]){
-            [anAuthorPubs addObject:bi];
-        }
-        [auths removeAllObjects];
-    }
-    [auths release];
-    return anAuthorPubs;
 }
 
 - (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray{
@@ -1533,7 +1511,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *tmpKey = [(NSString *)contextInfo autorelease];
     if(returnCode == NSAlertDefaultReturn){
         NSArray *selItems = [self selectedPublications];
-        [self highlightBibs:[self allPublicationsForCiteKey:tmpKey]];
+        [self highlightBibs:[[self publications] allItemsForCiteKey:tmpKey]];
         [self generateCiteKeysForSelectedPublications];
         [self highlightBibs:selItems];
     }
@@ -1543,7 +1521,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([publications count] == 0)
         return;
     
-    NSArray *tmpKeyItems = [self allPublicationsForCiteKey:tmpKey];
+    NSArray *tmpKeyItems = [[self publications] allItemsForCiteKey:tmpKey];
     
     if([tmpKeyItems count] == 0)
         return;
@@ -1971,78 +1949,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 #pragma mark -
 #pragma mark Cite Key and Crossref lookup
-
-- (OFMultiValueDictionary *)itemsForCiteKeys{
-	return itemsForCiteKeys;
-}
-
-- (void)rebuildItemsForCiteKeys{
-	[itemsForCiteKeys release];
-    itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
-	NSArray *pubs = [publications copy];
-	[self addToItemsForCiteKeys:pubs];
-	[pubs release];
-}
-
-- (void)addToItemsForCiteKeys:(NSArray *)pubs{
-	BibItem *pub;
-	NSEnumerator *e = [pubs objectEnumerator];
-	
-	while(pub = [e nextObject])
-		[itemsForCiteKeys addObject:pub forKey:[pub citeKey]];
-}
-
-- (void)removeFromItemsForCiteKeys:(NSArray *)pubs{
-	BibItem *pub;
-	NSEnumerator *e = [pubs objectEnumerator];
-	
-	while(pub = [e nextObject])
-		[itemsForCiteKeys removeObject:pub forKey:[pub citeKey]];
-}
-
-- (BibItem *)publicationForCiteKey:(NSString *)key{
-	if ([NSString isEmptyString:key]) 
-		return nil;
-    
-	NSArray *items = [[self itemsForCiteKeys] arrayForKey:key];
-	
-	if ([items count] == 0)
-		return nil;
-    // may have duplicate items for the same key, so just return the first one
-    return [items objectAtIndex:0];
-}
-
-- (NSArray *)allPublicationsForCiteKey:(NSString *)key{
-	NSArray *items = nil;
-    if ([NSString isEmptyString:key] == NO) 
-		items = [[self itemsForCiteKeys] arrayForKey:key];
-    return (items == nil) ? [NSArray array] : items;
-}
-
-- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
-    NSArray *items = [[self itemsForCiteKeys] arrayForKey:aCiteKey];
-    
-	if ([items count] > 1)
-		return YES;
-	if ([items count] == 1 && [items objectAtIndex:0] != anItem)	
-		return YES;
-	return NO;
-}
-
-- (BOOL)citeKeyIsCrossreffed:(NSString *)key{
-	if ([NSString isEmptyString:key]) 
-		return NO;
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	
-	while (pub = [pubEnum nextObject]) {
-		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
-			return YES;
-        }
-	}
-	return NO;
-}
 
 - (void)changeCrossrefKey:(NSString *)oldKey toKey:(NSString *)newKey{
 	if ([NSString isEmptyString:oldKey]) 
@@ -2638,8 +2544,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         BibItem *pub = [notification object];
         NSString *oldKey = [userInfo objectForKey:@"oldCiteKey"];
         NSString *newKey = [pub citeKey];
-        [itemsForCiteKeys removeObjectIdenticalTo:pub forKey:oldKey];
-        [itemsForCiteKeys addObject:pub forKey:newKey];
+        [publications changeCiteKey:oldKey toCiteKey:newKey forItem:pub];
 		[self changeCrossrefKey:oldKey toKey:newKey];
     }
 

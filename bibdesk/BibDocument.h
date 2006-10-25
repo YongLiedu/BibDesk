@@ -40,9 +40,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-@protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate;
+@protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate, BDSKItemOwner;
 
-@class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate;
+@class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton;
@@ -86,7 +86,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView>
+@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKItemOwner>
 {
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
@@ -121,7 +121,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSMutableArray* customStringArray;
 	BOOL showingCustomCiteDrawer;
     
-    NSMutableArray *publications;    // holds all the publications
+    BDSKPublicationsArray *publications;    // holds all the publications
     NSMutableArray *shownPublications;    // holds the ones we want to show.
     // All display related operations should use shownPublications
     // in aspect oriented objective c i could have coded that assertion!
@@ -159,8 +159,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	
     NSMutableDictionary *documentInfo;
     BDSKDocumentInfoWindowController *infoWC;
-    
-    OFMultiValueDictionary *itemsForCiteKeys;
     
     NSString *promiseDragColumnIdentifier;
 
@@ -215,15 +213,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL;
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
-
-/*!
-    @method     publicationsForAuthor:
-    @abstract   Returns publications that an author is connected to
-    @discussion ...
-    @param      anAuthor A BibAuthor that may be connected to a pub in this document.
-    @result     An array of BibItems that the author is connected to.
-*/
-- (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor;
 
 /*!
     @method     clearChangeCount
@@ -323,7 +312,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion Returns the publications array.
     
 */
-- (NSMutableArray *)publications;
+- (BDSKPublicationsArray *)publications;
 - (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray;
 - (void)insertPublications:(NSArray *)pubs atIndexes:(NSIndexSet *)indexes;
 - (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index;
@@ -353,43 +342,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification;
 
-- (BOOL)citeKeyIsCrossreffed:(NSString *)key;
-
 - (void)changeCrossrefKey:(NSString *)oldKey toKey:(NSString *)newKey;
 
 - (void)invalidateGroupsForCrossreffedCiteKey:(NSString *)key;
-
-- (void)rebuildItemsForCiteKeys;
-- (void)addToItemsForCiteKeys:(NSArray *)pubs;
-- (void)removeFromItemsForCiteKeys:(NSArray *)pubs;
-
-/*!
-    @method     itemsForCiteKeys
-    @abstract   Returns a dictionary of publications for cite keys. It can have multiple items for a single key.
-    @discussion Keys are case insensitive. Always use this accessor, not the ivar itself, as the ivar is build in this method. 
-    @result     (description)
-*/
-- (OFMultiValueDictionary *)itemsForCiteKeys;
-
-/*!
-    @method     publicationForCiteKey:
-    @abstract   Returns a publication matching the given citekey, using a case-insensitive comparison.
-    @discussion Used for finding parent items for crossref lookups, which require case-insensitivity in cite-keys.
-                The case conversion is handled by this method, though, and the caller shouldn't be concerned with it.
-    @param      key (description)
-    @result     (description)
-*/
-- (BibItem *)publicationForCiteKey:(NSString *)key;
-
-- (NSArray *)allPublicationsForCiteKey:(NSString *)key;
-
-    /*!
-@method citeKeyIsUsed:byItemOtherThan
-     @abstract tells whether aCiteKey is in the dict.
-     @discussion ...
-
-     */
-- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem;
 
 /* Paste related methods */
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)error;
