@@ -168,7 +168,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
 		[texTask setDelegate:self];
         
-        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
@@ -784,13 +784,32 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
-    if (!macroWC) {
-        macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
+    if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected]) {
+        BDSKMacroResolver *resolver = [(id<BDSKItemOwner>)[self objectInGroupsAtIndex:[groupTableView selectedRow]] macroResolver];
+        MacroWindowController *controller = nil;
+        NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+        NSWindowController *wc;
+        while(wc = [wcEnum nextObject]){
+            if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver)
+                break;
+        }
+        if(wc){
+            controller = (MacroWindowController *)wc;
+        }else{
+            controller = [[MacroWindowController alloc] initWithMacroResolver:resolver];
+            [self addWindowController:controller];
+            [controller release];
+        }
+        [controller showWindow:self];
+    } else {
+        if (!macroWC) {
+            macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
+        }
+        if ([[self windowControllers] containsObject:macroWC] == NO) {
+            [self addWindowController:macroWC];
+        }
+        [macroWC showWindow:self];
     }
-    if ([[self windowControllers] containsObject:macroWC] == NO) {
-        [self addWindowController:macroWC];
-    }
-    [macroWC showWindow:self];
 }
 
 #pragma mark -
@@ -1458,7 +1477,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [self setDocumentStringEncoding:encoding];
 
     NSError *error = nil;
-	newPubs = [BibTeXParser itemsFromData:data error:&error frontMatter:frontMatter filePath:[absoluteURL path] document:self];
+	newPubs = [BibTeXParser itemsFromData:data frontMatter:frontMatter filePath:[absoluteURL path] document:self error:&error];
 	if(outError) *outError = error;	
     [self setPublications:newPubs undoable:NO];
 
@@ -1813,10 +1832,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if(type == BDSKBibTeXStringType){
         data = [string dataUsingEncoding:NSUTF8StringEncoding];
-        newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
+        newPubs = [BibTeXParser itemsFromData:data document:self error:&parseError];
     }else if(type == BDSKNoKeyBibTeXStringType){
         data = [[string stringWithPhoneyCiteKeys:@"FixMe"] dataUsingEncoding:NSUTF8StringEncoding];
-        newPubs = [BibTeXParser itemsFromData:data error:&parseError document:self];
+        newPubs = [BibTeXParser itemsFromData:data document:self error:&parseError];
 	}else if (type != BDSKUnknownStringType){
         newPubs = [BDSKParserForStringType(type) itemsFromString:string error:&parseError];
     }
@@ -1921,7 +1940,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             if(btData == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
             
-            if(newBI == nil && (btData == nil || (newBI = [[BibTeXParser itemsFromData:btData error:&xerror document:self] firstObject]) == nil))
+            if(newBI == nil && (btData == nil || (newBI = [[BibTeXParser itemsFromData:btData document:self error:&xerror] firstObject]) == nil))
                 newBI = [[[BibItem alloc] init] autorelease];
             
             [newBI setField:BDSKLocalUrlString toValue:[url absoluteString]];

@@ -288,7 +288,7 @@ Extra wrapping of the created and modified date methods to
 	}
 
     NSError *error = nil;
-    NSArray *newPubs = [BibTeXParser itemsFromData:data error:&error document:[self document]];
+    NSArray *newPubs = [BibTeXParser itemsFromData:data document:[self document] error:&error];
 	
 	// try to do some error handling for AppleScript
 	if(error) {
