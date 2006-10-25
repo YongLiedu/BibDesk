@@ -1116,7 +1116,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             // TeXification error; this has a specific item
             error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"") underlyingError:underlyingError];
             [error setValue:[underlyingError valueForKey:BDSKUnderlyingItemErrorKey] forKey:BDSKUnderlyingItemErrorKey];
-            [error setValue:[NSString stringWithFormat:@"%@  %@", [error localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            [error setValue:[NSString stringWithFormat:@"%@  %@", [underlyingError localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         *outError = error;
     }
