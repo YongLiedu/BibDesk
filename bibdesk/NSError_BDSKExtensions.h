@@ -72,5 +72,6 @@ extern NSString *BDSKUnderlyingItemErrorKey;
 
 // embed an underlying error; if this isn't a mutable subclass, raises an exception
 - (void)embedError:(NSError *)underlyingError;
+- (void)setCode:(int)code;
 
 @end
