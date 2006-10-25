@@ -39,12 +39,13 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
-@class BDSKPublicationsArray;
+@class BDSKPublicationsArray, BDSKMacroResolver;
 @protocol BDSKItemOwner;
 
 @interface BDSKURLGroup : BDSKMutableGroup <BDSKItemOwner>
 {
     BDSKPublicationsArray *publications;
+    BDSKMacroResolver *macroResolver;
     NSURL *URL;
     NSString *filePath;
     BOOL isRetrieving;

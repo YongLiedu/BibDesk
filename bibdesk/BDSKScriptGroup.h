@@ -40,7 +40,7 @@
 #import "BDSKGroup.h"
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 
-@class OFMessageQueue, BDSKPublicationsArray;
+@class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver;
 @protocol BDSKItemOwner;
 
 enum {
@@ -50,6 +50,7 @@ enum {
 
 @interface BDSKScriptGroup : BDSKMutableGroup <BDSKItemOwner> {
     BDSKPublicationsArray *publications;
+    BDSKMacroResolver *macroResolver;
     NSString *scriptPath;
     NSString *scriptArguments;
     NSArray *argsArray;

@@ -54,6 +54,7 @@
 #import <OmniFoundation/OFMessageQueue.h>
 #import "BibItem.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKMacroResolver.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 
@@ -72,6 +73,7 @@
         aName = [[path lastPathComponent] stringByDeletingPathExtension];
     if(self = [super initWithName:aName count:0]){
         publications = nil;
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         scriptPath = [path retain];
         scriptArguments = [arguments retain];
         argsArray = nil;
@@ -103,6 +105,7 @@
     [scriptArguments release];
     [argsArray release];
     [publications release];
+    [macroResolver release];
     [workingDirPath release];
     [stdoutData release];
     [super dealloc];
@@ -200,7 +203,7 @@
         type = BDSKBibTeXStringType;
     }
     if (type == BDSKBibTeXStringType) {
-        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] error:&error document:nil];
+        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] document:nil error:&error];
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKParserForStringType(type) itemsFromString:outputString error:&error];
     } else {
@@ -255,6 +258,11 @@
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKScriptGroupUpdatedNotification object:self userInfo:userInfo];
+}
+
+- (BDSKMacroResolver *)macroResolver;
+{
+    return macroResolver;
 }
 
 - (NSString *)scriptPath;

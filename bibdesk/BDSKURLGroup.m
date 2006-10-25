@@ -49,6 +49,7 @@
 #import "NSError_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKMacroResolver.h"
 
 @implementation BDSKURLGroup
 
@@ -66,6 +67,7 @@
     if(self = [super initWithName:aName count:0]){
         
         publications = nil;
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         URL = [aURL copy];
         isRetrieving = NO;
         failedDownload = NO;
@@ -81,6 +83,7 @@
     [URL release];
     [filePath release];
     [publications release];
+    [macroResolver release];
     [super dealloc];
 }
 
@@ -155,7 +158,8 @@
     } else {
         int type = [contentString contentStringType];
         if (type == BDSKBibTeXStringType) {
-            pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] error:&error document:nil];
+            NSMutableString *frontMatter = [NSMutableString string];
+            pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:self error:&error];
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKParserForStringType(type) itemsFromString:contentString error:&error frontMatter:nil filePath:filePath];
         }
@@ -235,6 +239,11 @@
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKURLGroupUpdatedNotification object:self userInfo:userInfo];
+}
+
+- (BDSKMacroResolver *)macroResolver;
+{
+    return macroResolver;
 }
 
 - (BOOL)isRetrieving { return isRetrieving; }

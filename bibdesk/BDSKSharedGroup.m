@@ -43,6 +43,7 @@
 #import "NSImage+Toolbox.h"
 #import <BDSKAsynchronousDOServer.h>
 #import "BDSKPublicationsArray.h"
+#import "BDSKMacroResolver.h"
 
 typedef struct _BDSKSharedGroupFlags {
     volatile int32_t isRetrieving __attribute__ ((aligned (4)));
@@ -210,6 +211,10 @@ static NSImage *unlockedIcon = nil;
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
 }
+
+
+// we cannot yet support macros for shared items
+- (BDSKMacroResolver *)macroResolver { return nil; }
 
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 
