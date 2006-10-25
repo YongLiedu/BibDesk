@@ -48,8 +48,12 @@ enum {
     BDSKIsCrossreffedCrossrefError
 };
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray;
 @protocol BDSKParseableItem;
+
+@protocol BDSKItemOwner <NSObject>
+- (BDSKPublicationsArray *)publications;
+@end
 
 /*!
 @class BibItem
@@ -70,6 +74,7 @@ enum {
     BOOL hasBeenEdited;
 	BOOL needsToBeFiled;
 	BibDocument *document;
+	id<BDSKItemOwner> owner;
     BDSKFieldCollection *templateFields;
     int currentIndex;
     BOOL spotlightMetadataChanged;
@@ -111,6 +116,9 @@ enum {
 
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
+
+- (id<BDSKItemOwner>)owner;
+- (void)setOwner:(id<BDSKItemOwner>)newOwner;
 
 - (NSUndoManager *)undoManager;
 

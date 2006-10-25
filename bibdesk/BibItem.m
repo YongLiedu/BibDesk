@@ -64,6 +64,7 @@
 #import "BDSKTemplate.h"
 #import "BDSKTemplateParser.h"
 #import "BibDocument_Search.h"
+#import "BDSKPublicationsArray.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 
@@ -209,6 +210,8 @@ static CFDictionaryRef selectorTable = NULL;
         people = nil;
         
         document = nil;
+        owner = nil;
+        
         [self setFileType:inFileType];
         [self setPubTypeWithoutUndo:type];
         [self setDate: nil];
@@ -256,6 +259,7 @@ static CFDictionaryRef selectorTable = NULL;
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             // set by the document, which we don't archive
             document = nil;
+            owner = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
@@ -491,6 +495,17 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 - (void)setDocument:(BibDocument *)newDocument {
     if (document != newDocument) {
 		document = newDocument;
+	}
+    [self setOwner:document];
+}
+
+- (id<BDSKItemOwner>)owner {
+    return owner;
+}
+
+- (void)setOwner:(id<BDSKItemOwner>)newOwner {
+    if (owner != newOwner) {
+		owner = newOwner;
 	}
 }
 
@@ -789,7 +804,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	if ([NSString isEmptyString:key])
 		return nil;
 	
-	return [document publicationForCiteKey:key];
+	return [[owner publications] itemForCiteKey:key];
 }
 
 // Container is an aspect of the BibItem that depends on the type of the item
@@ -988,7 +1003,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 - (NSString *)suggestedCiteKey
 {
     NSString *suggestion = [self citeKey];
-    if ([self hasEmptyOrDefaultCiteKey] || [document citeKeyIsUsed:suggestion byItemOtherThan:self])
+    if ([self hasEmptyOrDefaultCiteKey] || [[document publications] citeKeyIsUsed:suggestion byItemOtherThan:self])
         suggestion = nil;
     
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
@@ -1036,7 +1051,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 - (BOOL)isValidCiteKey:(NSString *)proposedCiteKey{
 	if ([NSString isEmptyString:proposedCiteKey] == YES)
         return NO;
-    return ([document citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
+    return ([[owner publications] citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
 }
 
 - (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey{
@@ -1044,9 +1059,9 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     if ([NSString isEmptyString:aCrossref] == NO) {
         if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
             errorCode = BDSKSelfCrossrefError;
-        else if ([NSString isEmptyString:[[document publicationForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
+        else if ([NSString isEmptyString:[[[document publications] itemForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
             errorCode = BDSKChainCrossrefError;
-        else if ([document citeKeyIsCrossreffed:aCiteKey])
+        else if ([[document publications] citeKeyIsCrossreffed:aCiteKey])
             errorCode = BDSKIsCrossreffedCrossrefError;
     }
     return errorCode;
