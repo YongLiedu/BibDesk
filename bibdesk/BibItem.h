@@ -48,11 +48,12 @@ enum {
     BDSKIsCrossreffedCrossrefError
 };
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver;
 @protocol BDSKParseableItem;
 
 @protocol BDSKItemOwner <NSObject>
 - (BDSKPublicationsArray *)publications;
+- (BDSKMacroResolver *)macroResolver;
 @end
 
 /*!
