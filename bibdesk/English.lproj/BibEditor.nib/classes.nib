@@ -30,7 +30,6 @@
                 changeFlag = id; 
                 changeRating = id; 
                 chooseLocalURL = id; 
-                citeKeyDidChange = id; 
                 consolidateLinkedFiles = id; 
                 createNewPubUsingCrossrefAction = id; 
                 deletePub = id; 

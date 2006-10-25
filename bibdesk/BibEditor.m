@@ -1002,41 +1002,6 @@ static int numberOfOpenEditors = 0;
     NSBeginAlertSheet(NSLocalizedString(@"Duplicate Cite Key", @""),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.",@""));
 }
 
-- (IBAction)citeKeyDidChange:(id)sender{
-    NSString *newKey = [sender stringValue];
-	NSString *oldKey = [publication citeKey];
-	
-   	if(![newKey isEqualToString:oldKey]){
-		[publication setCiteKey:newKey];
-		
-		[[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
-		
-		// autofile paper if we have enough information
-		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
-			 [publication needsToBeFiled] && [publication canSetLocalUrl] ) {
-			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
-			[publication setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
-			[self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
-		}
-
-		// still need to check duplicates ourselves:
-		if(![publication isValidCiteKey:newKey]){
-			[self setCiteKeyDuplicateWarning:YES];
-		}else{
-			[self setCiteKeyDuplicateWarning:NO];
-		}
-		
-		BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
-		if (scriptHook) {
-			[scriptHook setField:BDSKCiteKeyString];
-			[scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
-			[scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
-			[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
-		}
-		
-	}
-}
-
 - (void)setCiteKeyDuplicateWarning:(BOOL)set{
 	if(set){
 		[citeKeyWarningButton setImage:[NSImage cautionIconImage]];
@@ -1712,27 +1677,64 @@ static int numberOfOpenEditors = 0;
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
 	id control = [aNotification object];
-	if (control != bibFields)
-		return;
-	int index = [control indexOfSelectedItem];
-	if (index == -1)
-		return;
 	
-    NSCell *cell = [control cellAtIndex:index];
-    NSString *title = [cell title];
-	NSString *value = [cell stringValue];
-	NSString *prevValue = [publication valueOfField:title];
+    if (control == bibFields) {
+        
+        int index = [control indexOfSelectedItem];
+        if (index == -1)
+            return;
+        
+        NSCell *cell = [control cellAtIndex:index];
+        NSString *title = [cell title];
+        NSString *value = [cell stringValue];
+        NSString *prevValue = [publication valueOfField:title];
 
-    if ([prevValue isInherited] &&
-	    ([value isEqualAsComplexString:prevValue] || [value isEqualAsComplexString:@""]) ) {
-		// make sure we keep the original inherited string value
-		[cell setObjectValue:prevValue];
-	} else if (prevValue != nil && ![value isEqualAsComplexString:prevValue]) {
-		// if prevValue == nil, the field was removed and we're finalizing an edit for a field we should ignore
-        [self recordChangingField:title toValue:value];
+        if ([prevValue isInherited] &&
+            ([value isEqualAsComplexString:prevValue] || [value isEqualAsComplexString:@""]) ) {
+            // make sure we keep the original inherited string value
+            [cell setObjectValue:prevValue];
+        } else if (isEditable && prevValue != nil && ![value isEqualAsComplexString:prevValue] == NO) {
+            // if prevValue == nil, the field was removed and we're finalizing an edit for a field we should ignore
+            [self recordChangingField:title toValue:value];
+        }
+        // do this here, the order is important!
+        [formCellFormatter setEditAsComplexString:NO];
+        
+	} else if (control == citeKeyField) {
+
+        NSString *newKey = [control stringValue];
+        NSString *oldKey = [publication citeKey];
+        
+        if(isEditable && [newKey isEqualToString:oldKey] == NO){
+            [publication setCiteKey:newKey];
+            
+            [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+            
+            // autofile paper if we have enough information
+            if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
+                 [publication needsToBeFiled] && [publication canSetLocalUrl] ) {
+                [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
+                [publication setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+                [self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
+            }
+
+            // still need to check duplicates ourselves:
+            if(![publication isValidCiteKey:newKey]){
+                [self setCiteKeyDuplicateWarning:YES];
+            }else{
+                [self setCiteKeyDuplicateWarning:NO];
+            }
+            
+            BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKChangeFieldScriptHookName];
+            if (scriptHook) {
+                [scriptHook setField:BDSKCiteKeyString];
+                [scriptHook setOldValues:[NSArray arrayWithObject:oldKey]];
+                [scriptHook setNewValues:[NSArray arrayWithObject:newKey]];
+                [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:publication] document:[self document]];
+            }
+            
+        }
     }
-	// do this here, the order is important!
-	[formCellFormatter setEditAsComplexString:NO];
 }
 
 - (void)moveFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{

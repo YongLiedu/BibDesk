@@ -326,13 +326,6 @@
 - (IBAction)showCiteKeyWarning:(id)sender;
 
 /*!
-    @method     citeKeyDidChange:
-    @abstract   Action of the cite-key field to set a new cite-key.
-    @discussion (comprehensive description)
-*/
-- (IBAction)citeKeyDidChange:(id)sender;
-
-/*!
     @method     setCiteKeyDuplicateWarning
     @abstract   Method to (un)set a warning to the user that the cite-key is a duplicate in te document. 
     @discussion (comprehensive description)
