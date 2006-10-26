@@ -54,6 +54,7 @@
 @interface BDSKTextImportController (Private)
 
 - (void)handleFlagsChangedNotification:(NSNotification *)notification;
+- (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
 - (void)loadPasteboardData;
 - (void)showWebViewWithURLString:(NSString *)urlString;
@@ -97,6 +98,7 @@
     if(self){
         document = doc;
         item = [[BibItem alloc] init];
+        [item setOwner:self];
         fields = [[NSMutableArray alloc] init];
 		bookmarks = [[NSMutableArray alloc] init];
         showingWebView = NO;
@@ -121,6 +123,10 @@
                                                  selector:@selector(handleFlagsChangedNotification:)
                                                      name:OAFlagsChangedNotification
                                                    object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemChangedNotification:)
+                                                     name:BDSKBibItemChangedNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -141,6 +147,7 @@
 	[macroTextFieldWC release];
 	[webSelection release];
     [tableFieldEditor release];
+    [undoManager release];
     [super dealloc];
 }
 
@@ -248,6 +255,7 @@
 	[item setCiteKey:[item suggestedCiteKey]]; // only now can we generate, due to unique specifiers
     [item release];
     item = newItem;
+    [item setOwner:self];
 	
 	int numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
@@ -271,6 +279,7 @@
 - (IBAction)clearAction:(id)sender{
     [item release];
     item = [[BibItem alloc] init];
+    [item setOwner:self];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
     [itemTableView reloadData];
@@ -380,7 +389,7 @@
 - (IBAction)addField:(id)sender{
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
     NSArray *currentFields = [item allFieldNames];
-    NSArray *fieldNames = [typeMan allFieldNamesIncluding:nil excluding:currentFields];
+    NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
                                                                                               fieldsArray:fieldNames];
@@ -398,6 +407,14 @@
     [self editSelectedCellAsMacro];
 	if([itemTableView editedRow] != row)
 		[itemTableView editColumn:2 row:row withEvent:nil select:YES];
+}
+
+- (IBAction)undo:(id)sender{
+    [undoManager undo];
+}
+
+- (IBAction)redo:(id)sender{
+    [undoManager redo];
 }
 
 #pragma mark WebView contextual menu actions
@@ -478,6 +495,28 @@
 	[self addBookmarkWithURLString:URLString title:title];
 }
 
+#pragma mark UndoManager
+
+- (NSUndoManager *)undoManager {
+    if (undoManager == nil)
+        undoManager = [[NSUndoManager alloc] init];
+    return undoManager;
+}
+
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender {
+    return [self undoManager];
+}
+
+#pragma mark BDSKItemOwner protocol
+
+- (BDSKPublicationsArray *)publications {
+    return [document publications];
+}
+
+- (BDSKMacroResolver *)macroResolver {
+    return [document macroResolver];
+}
+
 @end
 
 
@@ -491,6 +530,11 @@
     } else {
         [addButton setTitle:NSLocalizedString(@"Add", @"Add")];
     }
+}
+
+- (void)handleBibItemChangedNotification:(NSNotification *)notification{
+    if ([notification object] == item)
+        [itemTableView reloadData];
 }
 
 #pragma mark Setup
@@ -881,7 +925,7 @@
 
 #pragma mark Menu validation
 
-- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
 	if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
 		return ![[[webView mainFrame] dataSource] isLoading];
 	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {
@@ -896,6 +940,16 @@
 	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
 		int row = [itemTableView selectedRow];
 		return (row != -1 && ![macroTextFieldWC isEditing] && ![[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString]);
+	} else if ([menuItem action] == @selector(undo:)) {
+        NSString *title = [undoManager undoActionName];
+        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Undo", @"Undo") : [NSString stringWithFormat:NSLocalizedString(@"Undo %@", @"Undo %@"), title];
+        [menuItem setTitle:title];
+        return [undoManager canUndo];
+	} else if ([menuItem action] == @selector(redo:)) {
+        NSString *title = [undoManager redoActionName];
+        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Redo", @"Redo") : [NSString stringWithFormat:NSLocalizedString(@"Redo %@", @"Redo %@"), title];
+        [menuItem setTitle:title];
+        return [undoManager canRedo];
 	}
 	return YES;
 }

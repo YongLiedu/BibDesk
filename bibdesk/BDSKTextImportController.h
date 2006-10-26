@@ -53,8 +53,9 @@
 @class BDSKComplexStringFormatter;
 @class BDSKCiteKeyFormatter;
 @class BDSKCrossrefFormatter;
+@protocol BDSKItemOwner;
 
-@interface BDSKTextImportController : BDSKSheetController {
+@interface BDSKTextImportController : BDSKSheetController <BDSKItemOwner> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* statusLine;
@@ -85,6 +86,8 @@
     NSMutableArray *fields;
     NSMutableArray *bookmarks;
 	NSString *webSelection;
+    
+    NSUndoManager *undoManager;
     
 	BDSKComplexStringFormatter *tableCellFormatter;
 	BDSKCrossrefFormatter *crossrefFormatter;
@@ -129,6 +132,8 @@
 - (IBAction)stopOrReloadAction:(id)sender;
 - (IBAction)addField:(id)sender;
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
+- (IBAction)undo:(id)sender;
+- (IBAction)redo:(id)sender;
 
 - (void)copyLocationAsRemoteUrl:(id)sender;
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
@@ -147,4 +152,3 @@
 @interface BDSKImportTextView : NSTextView {}
 - (IBAction)makePlainText:(id)sender;
 @end
-
