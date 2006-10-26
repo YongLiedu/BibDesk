@@ -124,7 +124,7 @@ static int numberOfOpenEditors = 0;
         numberOfOpenEditors++;
         
         publication = [aBib retain];
-        isEditable = [[publication document] isKindOfClass:[BibDocument class]];
+        isEditable = [[publication document] isDocument];
         
         // has to be before we call [self window] because that calls windowDidLoad:.
         pdfSnoopViewLoaded = NO;

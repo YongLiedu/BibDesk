@@ -276,6 +276,8 @@
 
 - (NSString *)documentInfoForKey:(NSString *)key { return nil; }
 
+- (BOOL)isDocument { return NO; }
+
 - (NSString *)scriptPath;
 {
     return scriptPath;

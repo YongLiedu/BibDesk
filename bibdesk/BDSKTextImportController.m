@@ -551,6 +551,8 @@
     return [document documentInfoForKey:key];
 }
 
+- (BOOL)isDocument { return NO; }
+
 @end
 
 

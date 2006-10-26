@@ -37,6 +37,7 @@
  */
 
 #import "MacroWindowController.h"
+#import "BDSKDocumentProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BibPrefController.h" // for notification name declarations
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
@@ -70,7 +71,7 @@
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
 		macroTextFieldWC = nil;
         
-        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver document] isKindOfClass:[BibDocument class]]);
+        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver document] isDocument]);
         
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.

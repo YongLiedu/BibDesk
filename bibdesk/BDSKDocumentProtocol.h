@@ -43,6 +43,7 @@
 // this protocol describes the methods for a stand-in for the document, documents of BibItem and BDSKMacroResolver should conform to this
 @protocol BDSKDocument <NSObject>
 
+- (BOOL)isDocument;
 - (BDSKPublicationsArray *)publications;
 - (BDSKMacroResolver *)macroResolver;
 - (NSUndoManager *)undoManager;

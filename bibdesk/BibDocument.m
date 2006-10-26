@@ -2987,4 +2987,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [super fileName];
 }
 
+- (BOOL)isDocument{
+    return YES;
+}
+
 @end

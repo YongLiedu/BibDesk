@@ -42,6 +42,7 @@
 #import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
 #import "BibPrefController.h"
+#import "BDSKDocumentProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BibItem.h"
@@ -409,7 +410,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)endObservingErrorsForPublication:(BibItem *)pub{
     id document = [pub document];
     // we can't and shouldn't manage errors from external groups
-    if ([document isKindOfClass:[BibDocument class]] == NO)
+    if ([document isDocument] == NO)
         document == nil;
     [self endObservingErrorsForDocument:document pasteDragData:nil publication:pub];
 }

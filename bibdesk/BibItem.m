@@ -2346,8 +2346,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		return NO;
 	
 	if ([self canSetLocalUrl]) {
-        OBASSERT([document isKindOfClass:[BibDocument class]]);
-        if ([document isKindOfClass:[BibDocument class]]) {
+        OBASSERT([document isDocument]);
+        if ([document isDocument]) {
             [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
                                   fromDocument:(BibDocument *)document
                                          check:NO]; 
@@ -2418,13 +2418,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)addToGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES);
+	OBASSERT([aGroup isCategory] == YES && [document isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     // don't add it twice
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
-    if([document isKindOfClass:[BibDocument class]] == NO || [[self groupsForField:field] containsObject:groupName])
+    if([[self groupsForField:field] containsObject:groupName])
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -2470,13 +2470,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES);
+	OBASSERT([aGroup isCategory] == YES && [document isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
 	NSSet *groupNames = [groups objectForKey:field];
-    if([document isKindOfClass:[BibDocument class]] == NO || [groupNames containsObject:groupName] == NO)
+    if([groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -2604,13 +2604,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES);
+	OBASSERT([aGroup isCategory] == YES && [document isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
 	NSSet *groupNames = [groups objectForKey:field];
-    if([document isKindOfClass:[BibDocument class]] == NO || [groupNames containsObject:groupName] == NO)
+    if([groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -2912,7 +2912,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [self setDateModified:nil];
     }
     
-    if([document isKindOfClass:[BibDocument class]] && ([[BibTypeManager sharedManager] isURLField:key] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
+    if([document isDocument] && ([[BibTypeManager sharedManager] isURLField:key] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)document
                                                           userInfo:[self searchIndexInfo]];

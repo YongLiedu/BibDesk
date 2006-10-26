@@ -66,7 +66,7 @@
         [self setPerson:aPerson];
         publications = nil;
         
-        isEditable = [[[person publication] document] isKindOfClass:[BibDocument class]];
+        isEditable = [[[person publication] document] isDocument];
         
         [person setPersonController:self];
 	}

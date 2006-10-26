@@ -228,6 +228,8 @@ static NSImage *unlockedIcon = nil;
 
 - (NSString *)documentInfoForKey:(NSString *)key { return nil; }
 
+- (BOOL)isDocument { return NO; }
+
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 
 - (BOOL)failedDownload { return [server failedDownload]; }

@@ -100,7 +100,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
     int ok = 1;
     
     BibItem *newBI = nil;
-    BibDocument *document = [anOwner isKindOfClass:[BibDocument class]] ? (BibDocument *)anOwner : nil;
+    BibDocument *document = [anOwner isDocument] ? (BibDocument *)anOwner : nil;
     BDSKMacroResolver *macroResolver = [anOwner macroResolver];
 
     // Strings read from file and added to Dictionary object
