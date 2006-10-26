@@ -52,8 +52,18 @@
 
 @implementation BDSKPublicationsArray
 
-#pragma mark NSMutableArray primitive methods
+#pragma mark Init, dealloc and copy overrides
 
+- (id)init;
+{
+    if (self = [super init]) {
+        publications = [[NSMutableArray alloc] init];
+        itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+    }
+    return self;
+}
+
+// this is called from initWithArray:
 - (id)initWithObjects:(id *)objects count:(unsigned)count;
 {
     if (self = [super init]) {
@@ -91,6 +101,8 @@
 {
     return [publications mutableCopyWithZone:zone];
 }
+
+#pragma mark NSMutableArray primitive methods
 
 - (unsigned)count;
 {
@@ -136,7 +148,19 @@
     [self addToItemsForCiteKeys:anObject];
 }
 
-#pragma mark Itmes for cite keys
+#pragma mark Convenience overrides
+
+- (void)getObjects:(id *)aBuffer range:(NSRange)aRange;
+{
+    [publications getObjects:aBuffer range:aRange];
+}
+
+- (NSEnumerator *)objectEnumerator;
+{
+    return [publications objectEnumerator];
+}
+
+#pragma mark Items for cite keys
 
 - (void)addToItemsForCiteKeys:(BibItem *)item;
 {
