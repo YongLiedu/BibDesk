@@ -636,7 +636,7 @@ static BibFiler *sharedFiler = nil;
             if (fix != nil)
                 [userInfo setObject:fix forKey:NSLocalizedRecoverySuggestionErrorKey];
             *error = [NSError errorWithDomain:@"BibFilerErrorDomain" code:statusFlag userInfo:userInfo];
-            NSLog(@"error \"%@\" occurred; suggested fix is \"%@\"", *error, fix);
+            //NSLog(@"error \"%@\" occurred; suggested fix is \"%@\"", *error, fix);
         }
         return NO;
     }else if([NSString isEmptyString:comment] == NO){
