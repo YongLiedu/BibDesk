@@ -41,10 +41,6 @@
 
 @class BDSKMacroResolver;
 
-@interface NSObject (NSKeyedUnarchiverComplexStringDelegate)
-- (BDSKMacroResolver *)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver;
-@end
-
 /* BDSKComplexString is a string that may be a concatenation of strings, 
     some of which are macros.
    It's a concrete subclass of NSString, which means it can be used 
@@ -62,6 +58,9 @@
   BOOL complex;
   BOOL inherited;
 }
+
++ (BDSKMacroResolver *)macroResolverForUnarchiving;
++ (void)setMacroResolverForUnarchiving:(BDSKMacroResolver *)aMacroResolver;
 
 /*!
     @method     macroResolver

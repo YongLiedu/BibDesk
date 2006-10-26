@@ -47,6 +47,8 @@ static NSCharacterSet *macroCharSet = nil;
 static NSZone *complexStringExpansionZone = NULL;
 static Class BDSKComplexStringClass = Nil;
 
+static BDSKMacroResolver *macroResolverForUnarchiving = nil;
+
 #define SAFE_ALLOCA_SIZE (8 * 8192)
 
 static inline
@@ -121,6 +123,17 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     
     BDSKComplexStringClass = self;
 
+}
+
++ (BDSKMacroResolver *)macroResolverForUnarchiving{
+    return macroResolverForUnarchiving;
+}
+
++ (void)setMacroResolverForUnarchiving:(BDSKMacroResolver *)aMacroResolver{
+    if (macroResolverForUnarchiving != aMacroResolver) {
+        [macroResolverForUnarchiving release];
+        macroResolverForUnarchiving = [aMacroResolver retain];
+    }
 }
 
 + (id)allocWithZone:(NSZone *)aZone{
@@ -204,11 +217,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
             nodes = [[coder decodeObjectForKey:@"nodes"] retain];
             complex = [coder decodeBoolForKey:@"complex"];
             inherited = [coder decodeBoolForKey:@"inherited"];
-            NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
-            if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
-                macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
-            } else
-                macroResolver = nil;
+            macroResolver = [BDSKComplexString macroResolverForUnarchiving];
         }
     } else {
         [[super init] release];
