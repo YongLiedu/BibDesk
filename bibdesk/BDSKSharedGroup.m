@@ -219,8 +219,9 @@ static NSImage *unlockedIcon = nil;
 }
 
 
-// we cannot yet support macros for shared items
 - (BDSKMacroResolver *)macroResolver { return macroResolver; }
+
+- (NSUndoManager *)undoManager { return nil; }
 
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 

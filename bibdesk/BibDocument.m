@@ -562,6 +562,11 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 	return YES;
 }
 
+// this is needed for the BDSKItemOwner protocol
+- (NSUndoManager *)undoManager {
+    return [super undoManager];
+}
+
 - (void)windowWillClose:(NSNotification *)notification{
 
     if([notification object] != documentWindow) // this is critical; 

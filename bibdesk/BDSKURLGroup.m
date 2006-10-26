@@ -249,6 +249,8 @@
     return macroResolver;
 }
 
+- (NSUndoManager *)undoManager { return nil; }
+
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (BOOL)failedDownload { return failedDownload; }

@@ -269,6 +269,8 @@
     return macroResolver;
 }
 
+- (NSUndoManager *)undoManager { return nil; }
+
 - (NSString *)scriptPath;
 {
     return scriptPath;

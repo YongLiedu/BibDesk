@@ -54,6 +54,7 @@ enum {
 @protocol BDSKItemOwner <NSObject>
 - (BDSKPublicationsArray *)publications;
 - (BDSKMacroResolver *)macroResolver;
+- (NSUndoManager *)undoManager;
 @end
 
 /*!
