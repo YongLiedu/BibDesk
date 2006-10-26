@@ -61,7 +61,7 @@
 
 	if ([receiver isKindOfClass:[BibDocument class]]) {
         document = receiver;
-    } else if ([dPO isKindOfClass:[BibDocument class]] == NO) {
+    } else if ([dPO isKindOfClass:[BibDocument class]]) {
         document = dPO;
     } else {
 		// give up
@@ -144,7 +144,7 @@
 
 	if ([receiver isKindOfClass:[BibDocument class]]) {
         document = receiver;
-    } else if ([dPO isKindOfClass:[BibDocument class]] == NO) {
+    } else if ([dPO isKindOfClass:[BibDocument class]]) {
         document = dPO;
     } else {
 		// give up
