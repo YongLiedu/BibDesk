@@ -203,7 +203,8 @@
         type = BDSKBibTeXStringType;
     }
     if (type == BDSKBibTeXStringType) {
-        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] document:nil error:&error];
+        NSMutableString *frontMatter = [NSMutableString string];
+        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:BDSKParserPasteDragString document:self error:&error];
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKParserForStringType(type) itemsFromString:outputString error:&error];
     } else {
