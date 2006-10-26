@@ -251,7 +251,7 @@
 
 - (NSUndoManager *)undoManager { return nil; }
 
-- (NSString *)fileName { return nil; }
+- (NSString *)fileName { return filePath; }
 
 - (NSString *)documentInfoForKey:(NSString *)key { return nil; }
 
