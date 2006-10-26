@@ -37,7 +37,7 @@
  */
 
 #import "BDSKApplication.h"
-
+#import "BDSKTextImportController.h"
 
 @implementation BDSKApplication
 

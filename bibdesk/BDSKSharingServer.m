@@ -457,7 +457,6 @@ NSString *BDSKComputerName() {
 
 - (NSDictionary *)copyMacrosFromOpenDocuments
 {
-    NSMutableSet *set = nil;
     NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:10];
 
     // this is only useful if everyone else uses the mutex, though...
