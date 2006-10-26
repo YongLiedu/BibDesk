@@ -50,6 +50,7 @@
 #import "BDSKFieldEditor.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKMacroResolver.h"
+#import "NSImage+Toolbox.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -88,6 +89,7 @@
 - (BOOL)editSelectedCellAsMacro;
 - (void)autoDiscoverDataFromFrame:(WebFrame *)frame;
 - (void)autoDiscoverDataFromString:(NSString *)string;
+- (void)setCiteKeyDuplicateWarning:(BOOL)set;
 
 @end
 
@@ -155,6 +157,8 @@
 
 - (void)awakeFromNib{
 	[itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
+    [citeKeyField setFormatter:[[[BDSKCiteKeyFormatter alloc] init] autorelease]];
+    [citeKeyField setStringValue:[item citeKey]];
     [statusLine setStringValue:@""];
 	[webViewBox setEdges:BDSKEveryEdgeMask];
 	[webViewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
@@ -250,9 +254,11 @@
     // make the tableview stop editing:
     [[self window] makeFirstResponder:[self window]];
     
+    if ([item hasEmptyOrDefaultCiteKey])
+        [item setCiteKey:[item suggestedCiteKey]];
+    
 	[itemsAdded addObject:item];
     [document addPublication:item];
-	[item setCiteKey:[item suggestedCiteKey]]; // only now can we generate, due to unique specifiers
     [item release];
     item = newItem;
     [item setOwner:self];
@@ -262,6 +268,8 @@
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d %@ added.", @"format string for pubs added. args: one int for number added, then one string for singular or plural of publication(s)."), numItems, pubSingularPlural]];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
+    [citeKeyField setStringValue:[item citeKey]];
+    [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
     [itemTableView reloadData];
 }
 
@@ -282,6 +290,8 @@
     [item setOwner:self];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
+    [citeKeyField setStringValue:[item citeKey]];
+    [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
     [itemTableView reloadData];
 }
 
@@ -417,6 +427,15 @@
     [undoManager redo];
 }
 
+- (IBAction)generateCiteKey:(id)sender{
+	[item setCiteKey:[item suggestedCiteKey]];
+    [[item undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
+}
+
+- (IBAction)showCiteKeyWarning:(id)sender{
+    NSBeginAlertSheet(NSLocalizedString(@"Duplicate Cite Key", @""),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.",@""));
+}
+
 #pragma mark WebView contextual menu actions
 
 - (void)copyLocationAsRemoteUrl:(id)sender{
@@ -517,6 +536,14 @@
     return [document macroResolver];
 }
 
+- (NSString *)fileName {
+    return [document fileName];
+}
+
+- (NSString *)documentInfoForKey:(NSString *)key {
+    return [document documentInfoForKey:key];
+}
+
 @end
 
 
@@ -533,8 +560,17 @@
 }
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
-    if ([notification object] == item)
+    if ([notification object] != item)
+        return;
+	
+	NSString *changeKey = [[notification userInfo] objectForKey:@"key"];
+    
+	if([changeKey isEqualToString:BDSKCiteKeyString]) {
+		[citeKeyField setStringValue:[item citeKey]];
+        [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
+    } else {
         [itemTableView reloadData];
+    }
 }
 
 #pragma mark Setup
@@ -1306,9 +1342,30 @@
 
 #pragma mark NSControl text delegate
 
+// @@ should we do some more error chacking for valid entries and cite keys, as well as showing warnings for formatter errors?
+
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification {
-	if ([aNotification object] == itemTableView)
+	if([aNotification object] == itemTableView){
 		[tableCellFormatter setEditAsComplexString:NO];
+	}else if([aNotification object] == citeKeyField){
+        [item setCiteKey:[citeKeyField stringValue]];
+        [[item undoManager] setActionName:NSLocalizedString(@"Edit Cite Key",@"")];
+        [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
+    }
+}
+
+#pragma mark Cite key duplicate warning
+
+- (void)setCiteKeyDuplicateWarning:(BOOL)set{
+	if(set){
+		[citeKeyWarningButton setImage:[NSImage cautionIconImage]];
+		[citeKeyWarningButton setToolTip:NSLocalizedString(@"This cite-key is a duplicate",@"")];
+	}else{
+		[citeKeyWarningButton setImage:nil];
+		[citeKeyWarningButton setToolTip:nil];
+	}
+	[citeKeyWarningButton setEnabled:set];
+	[citeKeyField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])];
 }
 
 #pragma mark TableView Data source

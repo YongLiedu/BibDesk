@@ -2369,11 +2369,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)documentFileName {
-    return [document fileName];
+    return [owner fileName];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key {
-    return [document documentInfoForKey:key];
+    return [owner documentInfoForKey:key];
 }
 
 #pragma mark -

@@ -251,6 +251,10 @@
 
 - (NSUndoManager *)undoManager { return nil; }
 
+- (NSString *)fileName { return nil; }
+
+- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
+
 - (BOOL)isRetrieving { return isRetrieving; }
 
 - (BOOL)failedDownload { return failedDownload; }

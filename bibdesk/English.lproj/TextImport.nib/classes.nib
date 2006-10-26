@@ -33,12 +33,16 @@
                 dismissUrlSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 editSelectedFieldAsRawBibTeX = id; 
+                generateCiteKey = id; 
                 importFromFileAction = id; 
                 importFromPasteboardAction = id; 
                 importFromWebAction = id; 
+                redo = id; 
                 saveFileAsLocalUrl = id; 
+                showCiteKeyWarning = id; 
                 showHelpAction = id; 
                 stopOrReloadAction = id; 
+                undo = id; 
             }; 
             CLASS = BDSKTextImportController; 
             LANGUAGE = ObjC; 
@@ -50,6 +54,8 @@
                 backButton = NSButton; 
                 bookmarkField = NSTextField; 
                 bookmarkPopUpButton = NSPopUpButton; 
+                citeKeyField = NSTextField; 
+                citeKeyWarningButton = NSButton; 
                 clearButton = NSButton; 
                 closeButton = NSButton; 
                 forwardButton = NSButton; 

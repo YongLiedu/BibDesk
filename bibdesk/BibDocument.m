@@ -2987,4 +2987,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 // just create this setter to avoid a run time warning
 - (void)setDisplayName:(NSString *)newName{}
 
+- (NSString *)fileName {
+    return [super fileName];
+}
+
 @end

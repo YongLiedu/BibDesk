@@ -55,6 +55,8 @@ enum {
 - (BDSKPublicationsArray *)publications;
 - (BDSKMacroResolver *)macroResolver;
 - (NSUndoManager *)undoManager;
+- (NSString *)fileName;
+- (NSString *)documentInfoForKey:(NSString *)key;
 @end
 
 /*!

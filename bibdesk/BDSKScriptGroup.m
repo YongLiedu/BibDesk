@@ -271,6 +271,10 @@
 
 - (NSUndoManager *)undoManager { return nil; }
 
+- (NSString *)fileName { return nil; }
+
+- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
+
 - (NSString *)scriptPath;
 {
     return scriptPath;

@@ -46,18 +46,13 @@
 #import "BDSKTypeSelectHelper.h"
 #import <WebKit/WebKit.h>
 
-@class BibDocument;
-@class BDSKEdgeView;
-@class WebView;
-@class WebDownload;
-@class BDSKComplexStringFormatter;
-@class BDSKCiteKeyFormatter;
-@class BDSKCrossrefFormatter;
+@class BibDocument, BDSKEdgeView, WebView, WebDownload, BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter;
 @protocol BDSKItemOwner;
 
 @interface BDSKTextImportController : BDSKSheetController <BDSKItemOwner> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
+    IBOutlet NSTextField* citeKeyField;
     IBOutlet NSTextField* statusLine;
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *addAndCloseButton;
@@ -79,6 +74,7 @@
     IBOutlet NSButton *stopOrReloadButton;
     IBOutlet NSTextField *bookmarkField;
     IBOutlet NSPanel *addBookmarkSheet;
+    IBOutlet NSButton *citeKeyWarningButton;
     
 	BibDocument* document;
     BibItem* item;
@@ -91,6 +87,7 @@
     
 	BDSKComplexStringFormatter *tableCellFormatter;
 	BDSKCrossrefFormatter *crossrefFormatter;
+	BDSKCiteKeyFormatter *citeKeyFormatter;
 	NSTextView *tableFieldEditor;
 	
 	BOOL showingWebView;
@@ -134,6 +131,8 @@
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
 - (IBAction)undo:(id)sender;
 - (IBAction)redo:(id)sender;
+- (IBAction)generateCiteKey:(id)sender;
+- (IBAction)showCiteKeyWarning:(id)sender;
 
 - (void)copyLocationAsRemoteUrl:(id)sender;
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
