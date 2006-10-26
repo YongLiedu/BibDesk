@@ -416,21 +416,19 @@
 	
     if(tv == groupTableView){
 		if([rowIndexes containsIndex:0]){
-			pubs = [[publications copy] autorelease];
+			pubs = [NSArray arrayWithArray:publications];
 		}else if([rowIndexes count] > 1){
 			// multiple dragged rows always are the selected rows
-			pubs = [[groupedPublications copy] autorelease];
+			pubs = [NSArray arrayWithArray:groupedPublications];
 		}else if([rowIndexes count] == 1){
             // a single row, not necessarily the selected one
             BDSKGroup *group = [self objectInGroupsAtIndex:[rowIndexes firstIndex]];
             if ([group isExternal]) {
-                pubs = [[[(id)group publications] copy] autorelease];
+                pubs = [NSArray arrayWithArray:[(id)group publications]];
 			} else {
-                NSArray *allPubs = [publications copy];
-                NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[allPubs count]];
-                NSEnumerator *pubEnum = [allPubs objectEnumerator];
+                NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[publications count]];
+                NSEnumerator *pubEnum = [publications objectEnumerator];
                 BibItem *pub;
-                [allPubs release];
                 
                 while (pub = [pubEnum nextObject]) {
                     if ([group containsItem:pub]) 

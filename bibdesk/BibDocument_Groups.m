@@ -388,9 +388,7 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
     
     // update the count
-	NSArray *array = [publications copy];
-	[group filterItems:array];
-    [array release];
+	[group filterItems:publications];
 	
 	[smartGroups addObject:group];
 	[group setUndoManager:[self undoManager]];
@@ -700,16 +698,14 @@ The groupedPublications array is a subset of the publications array, developed b
 
 	NSRange smartRange = [self rangeOfSmartGroups];
     unsigned int row = NSMaxRange(smartRange);
-    NSArray *array = [publications copy];
 	BOOL shouldUpdate = NO;
     
     while(NSLocationInRange(--row, smartRange)){
-		[(BDSKSmartGroup *)[self objectInGroupsAtIndex:row] filterItems:array];
+		[(BDSKSmartGroup *)[self objectInGroupsAtIndex:row] filterItems:publications];
 		if([groupTableView isRowSelected:row])
 			shouldUpdate = YES;
     }
     
-    [array release];
     [groupTableView reloadData];
     
     if(shouldUpdate == YES){
@@ -735,19 +731,17 @@ The groupedPublications array is a subset of the publications array, developed b
         array = [(id)group publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
-        array = [publications copy];
-        
-        NSEnumerator *pubEnum = [array objectEnumerator];
+        NSEnumerator *pubEnum = [publications objectEnumerator];
         BibItem *pub;
         NSEnumerator *groupEnum;
         BDSKGroup *group;
-        NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[array count]];
+        NSMutableArray *filteredArray = [NSMutableArray arrayWithCapacity:[publications count]];
         BOOL intersectGroups = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKIntersectGroupsKey];
         
         // to take union, we add the items contained in a selected group
         // to intersect, we remove the items not contained in a selected group
         if (intersectGroups)
-            [filteredArray setArray:array];
+            [filteredArray setArray:publications];
         
         while (pub = [pubEnum nextObject]) {
             groupEnum = [selectedGroups objectEnumerator];
@@ -762,7 +756,6 @@ The groupedPublications array is a subset of the publications array, developed b
             }
         }
         
-        [array release];
         array = filteredArray;
     }
 	

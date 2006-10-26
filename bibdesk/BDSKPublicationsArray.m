@@ -92,16 +92,6 @@
     [super dealloc];
 }
 
-- (id)copyWithZone:(NSZone *)zone;
-{
-    return [publications copyWithZone:zone];
-}
-
-- (id)mutableCopyWithZone:(NSZone *)zone;
-{
-    return [publications mutableCopyWithZone:zone];
-}
-
 #pragma mark NSMutableArray primitive methods
 
 - (unsigned)count;

@@ -994,7 +994,7 @@
 }
 
 - (void)performSortForCrossrefs{
-    NSArray *copyOfPubs = [publications copy];
+    NSArray *copyOfPubs = [[NSArray alloc] initWithArray:publications];
 	NSEnumerator *pubEnum = [copyOfPubs objectEnumerator];
 	BibItem *pub = nil;
 	BibItem *parent;
@@ -1128,7 +1128,7 @@
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     NSZone *zone = [self zone];
     
-    NSMutableArray *pubsToRemove = [[self publications] mutableCopy];
+    NSMutableArray *pubsToRemove = [[NSMutableArray alloc] initWithArray:publications];
     CFIndex countOfItems = [pubsToRemove count];
     BibItem **pubs = (BibItem **)NSZoneMalloc(zone, sizeof(BibItem *) * countOfItems);
     [pubsToRemove getObjects:pubs];
