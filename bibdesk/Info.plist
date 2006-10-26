@@ -226,7 +226,7 @@
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
-	<string>OAApplication</string>
+	<string>BDSKApplication</string>
 	<key>NSServices</key>
 	<array>
 		<dict>
@@ -416,9 +416,9 @@
 				<dict>
 					<key>BDSKDragCopyTypesKey</key>
 					<array>
-                        <integer>1</integer>
-                        <integer>0</integer>
-                    </array>
+						<integer>1</integer>
+						<integer>0</integer>
+					</array>
 					<key>Citation End Bracket</key>
 					<string>}</string>
 					<key>Citation Start Bracket</key>
