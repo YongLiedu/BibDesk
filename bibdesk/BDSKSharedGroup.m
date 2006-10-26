@@ -63,6 +63,7 @@ typedef struct _BDSKSharedGroupFlags {
 @protocol BDSKSharedGroupServerMainThread <BDSKAsyncDOServerMainThread>
 
 - (oneway void)unarchivePublications:(bycopy NSData *)archive;
+- (oneway void)unarchiveMacros:(bycopy NSData *)archive;
 - (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
 
@@ -157,6 +158,7 @@ static NSImage *unlockedIcon = nil;
     if(self = [super initWithName:[aService name] count:0]){
 
         publications = nil;
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         needsUpdate = YES;
         
         server = [[BDSKSharedGroupServer alloc] initWithGroup:self andService:aService];
@@ -170,6 +172,7 @@ static NSImage *unlockedIcon = nil;
     [server stopDOServer];
     [server release];
     [publications release];
+    [macroResolver release];
     [super dealloc];
 }
 
@@ -203,6 +206,9 @@ static NSImage *unlockedIcon = nil;
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        
+        if (publications == nil)
+            [macroResolver removeAllMacros];
     }
     
     [self setCount:[publications count]];
@@ -214,7 +220,7 @@ static NSImage *unlockedIcon = nil;
 
 
 // we cannot yet support macros for shared items
-- (BDSKMacroResolver *)macroResolver { return nil; }
+- (BDSKMacroResolver *)macroResolver { return macroResolver; }
 
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 
@@ -451,9 +457,30 @@ static NSImage *unlockedIcon = nil;
     
     NSAssert([NSThread inMainThread] == 1, @"publications must be set from the main thread");
     
+    [BDSKComplexString setMacroResolverForUnarchiving:[group macroResolver]];
+    
     NSArray *publications = archive ? [NSKeyedUnarchiver unarchiveObjectWithData:archive] : nil;
     [archive release];
+    
+    [BDSKComplexString setMacroResolverForUnarchiving:nil];
+    
     [group setPublications:publications];
+}
+
+- (oneway void)unarchiveMacros:(bycopy NSData *)archive;
+{
+    // retain as the autoreleasepool of our caller will be released as we're oneway
+    [archive retain];
+    
+    NSAssert([NSThread inMainThread] == 1, @"macros must be set from the main thread");
+    
+    NSDictionary *macros = archive ? [NSKeyedUnarchiver unarchiveObjectWithData:archive] : nil;
+    [archive release];
+    
+    NSEnumerator *macroEnum = [macros keyEnumerator];
+    NSString *macro;
+    while(macro = [macroEnum nextObject])
+        [[group macroResolver] setMacroDefinition:[macros objectForKey:macro] forMacro:macro];
 }
 
 - (void)retrievePublicationsInBackground{ [[self serverOnServerThread] retrievePublications]; }
@@ -468,6 +495,7 @@ static NSImage *unlockedIcon = nil;
     
     @try {
         NSData *archive = nil;
+        NSData *macroArchive = nil;
         NSData *proxyData = [[self remoteServer] archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
@@ -481,10 +509,13 @@ static NSImage *unlockedIcon = nil;
                 @throw errorStr;
             } else {
                 archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
+                macroArchive = [dictionary objectForKey:BDSKSharedArchivedMacroDataKey];
             }
         }
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
+        if(macroArchive)
+            [[self serverOnMainThread] unarchiveMacros:macroArchive];
         [[self serverOnMainThread] unarchivePublications:archive];
     }
     @catch(id exception){

@@ -60,6 +60,7 @@ NSString *BDSKTXTAuthenticateKey = @"authenticate";
 NSString *BDSKTXTVersionKey = @"txtvers";
 
 NSString *BDSKSharedArchivedDataKey = @"publications_v1";
+NSString *BDSKSharedArchivedMacroDataKey = @"macros_v1";
 
 NSString *BDSKComputerNameChangedNotification = nil;
 NSString *BDSKHostNameChangedNotification = nil;
@@ -110,6 +111,7 @@ NSString *BDSKComputerName() {
 - (unsigned int)numberOfConnections;
 - (void)notifyClientConnectionsChanged;
 - (NSArray *)copyPublicationsFromOpenDocuments;
+- (NSDictionary *)copyMacrosFromOpenDocuments;
 
 @end
 
@@ -453,14 +455,33 @@ NSString *BDSKComputerName() {
     return pubs;
 }
 
+- (NSDictionary *)copyMacrosFromOpenDocuments
+{
+    NSMutableSet *set = nil;
+    NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:10];
+
+    // this is only useful if everyone else uses the mutex, though...
+    @synchronized([NSDocumentController sharedDocumentController]){
+        NSEnumerator *docE = [[[[[NSDocumentController sharedDocumentController] documents] copy] autorelease] objectEnumerator];
+        id document = nil;
+        while(document = [docE nextObject]){
+            [document getCopyOfMacrosOnMainThread:macros];
+        }
+    }
+    return macros;
+}
+
 - (bycopy NSData *)archivedSnapshotOfPublications
 {
     NSArray *pubs = [self copyPublicationsFromOpenDocuments];
+    NSDictionary *macros = [self copyMacrosFromOpenDocuments];
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:pubs];
+    NSData *macroDataToSend = [NSKeyedArchiver archivedDataWithRootObject:macros];
     [pubs release];
+    [macros release];
     
-    if(dataToSend != nil){
-        NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, nil];
+    if(dataToSend != nil && macroDataToSend != nil){
+        NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, macroDataToSend, BDSKSharedArchivedMacroDataKey, nil];
         NSString *errorString = nil;
         dataToSend = [NSPropertyListSerialization dataFromPropertyList:dictionary format:NSPropertyListBinaryFormat_v1_0 errorDescription:&errorString];
         if(errorString != nil){

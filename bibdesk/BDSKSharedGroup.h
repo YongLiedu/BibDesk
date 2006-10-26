@@ -40,12 +40,13 @@
 #import "BDSKGroup.h"
 
 
-@class BDSKSharedGroupServer, BDSKPublicationsArray;
+@class BDSKSharedGroupServer, BDSKPublicationsArray, BDSKMacroResolver;
 @protocol BDSKItemOwner;
 
 @interface BDSKSharedGroup : BDSKGroup <BDSKItemOwner>
 {
     BDSKPublicationsArray *publications;
+    BDSKMacroResolver *macroResolver;
     BDSKSharedGroupServer *server;
     BOOL needsUpdate;
 }

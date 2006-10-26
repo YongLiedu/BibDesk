@@ -492,6 +492,17 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     NSArray *array = [[BDSKSharingBrowser sharedBrowser] sharedGroups];
     
+    id owner;
+    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+    NSWindowController *wc;
+    while(wc = [wcEnum nextObject]){
+        if([wc isKindOfClass:[MacroWindowController class]]){
+            owner = [[(MacroWindowController*)wc macroResolver] owner];
+            if ([owner isKindOfClass:[BDSKSharedGroup class]] && [array containsObject:owner] == NO)
+                [wc hideWindow:nil];
+        }
+    }
+    
     [sharedGroups release];
     sharedGroups = nil;
     if (array != nil) {

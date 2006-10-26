@@ -314,6 +314,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (BDSKPublicationsArray *)publications;
 - (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray;
+- (void)getCopyOfMacrosOnMainThread:(NSMutableDictionary *)dstDict;
 - (void)insertPublications:(NSArray *)pubs atIndexes:(NSIndexSet *)indexes;
 - (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index;
 

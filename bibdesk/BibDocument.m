@@ -794,7 +794,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
-    if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected]) {
+    if ([self hasExternalGroupsSelected]) {
         BDSKMacroResolver *resolver = [(id<BDSKItemOwner>)[self objectInGroupsAtIndex:[groupTableView selectedRow]] macroResolver];
         MacroWindowController *controller = nil;
         NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
@@ -1821,18 +1821,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (NSArray *)newPublicationsFromArchivedData:(NSData *)data{
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
     
-    // we set the delegate so we can pass it the macroresolver for any complex string it might decode
-    [unarchiver setDelegate:self];
+    [BDSKComplexString setMacroResolverForUnarchiving:macroResolver];
     
     NSArray *newPubs = [unarchiver decodeObjectForKey:@"publications"];
     [unarchiver finishDecoding];
     [unarchiver release];
     
+    [BDSKComplexString setMacroResolverForUnarchiving:nil];
+    
     return newPubs;
-}
-
-- (BDSKMacroResolver *)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver{
-    return macroResolver;
 }
 
 - (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)outError {

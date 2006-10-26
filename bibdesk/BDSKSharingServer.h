@@ -42,6 +42,7 @@ extern NSString *BDSKTXTAuthenticateKey;
 extern NSString *BDSKTXTVersionKey;
 
 extern NSString *BDSKSharedArchivedDataKey;
+extern NSString *BDSKSharedArchivedMacroDataKey;
 
 extern NSString *BDSKComputerNameChangedNotification;
 extern NSString *BDSKHostNameChangedNotification;
