@@ -274,7 +274,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 - (void)removeAllMacros{
     [macroDefinitions release];
-    macroDefinitions == nil;
+    macroDefinitions = nil;
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Remove macro", @"type", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
