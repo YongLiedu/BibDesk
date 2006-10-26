@@ -76,6 +76,12 @@
     return self;
 }
 
+- (void)dealloc{
+    [publications release];
+    [itemsForCiteKeys release];
+    [super dealloc];
+}
+
 - (id)copyWithZone:(NSZone *)zone;
 {
     return [publications copyWithZone:zone];
