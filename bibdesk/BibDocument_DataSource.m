@@ -858,7 +858,7 @@
     if(tv == (NSTableView *)ccTableView){
         return NSDragOperationNone;// can't drag into that tv.
     }else if(tv == tableView){
-		if(type == nil) 
+        if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
 		if ([info draggingSource] == groupTableView && dragFromSharedGroups && [groupTableView selectedRow] == 0) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
