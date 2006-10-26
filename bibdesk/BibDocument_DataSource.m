@@ -424,7 +424,7 @@
             // a single row, not necessarily the selected one
             BDSKGroup *group = [self objectInGroupsAtIndex:[rowIndexes firstIndex]];
             if ([group isExternal]) {
-                pubs = [(id)group publications];
+                pubs = [[[(id)group publications] copy] autorelease];
 			} else {
                 NSArray *allPubs = [publications copy];
                 NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[allPubs count]];
