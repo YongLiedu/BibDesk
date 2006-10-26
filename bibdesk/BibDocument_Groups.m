@@ -498,7 +498,7 @@ The groupedPublications array is a subset of the publications array, developed b
     while(wc = [wcEnum nextObject]){
         if([wc isKindOfClass:[MacroWindowController class]]){
             owner = [[(MacroWindowController*)wc macroResolver] owner];
-            if ([owner isKindOfClass:[BDSKSharedGroup class]] && [array containsObject:owner] == NO)
+            if ([owner isKindOfClass:[BDSKSharedGroup class]] && [array containsObjectIdenticalTo:owner] == NO)
                 [wc hideWindow:nil];
         }
     }
