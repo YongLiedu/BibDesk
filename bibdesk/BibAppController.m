@@ -549,7 +549,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	requiredFieldsForLocalUrl = [newFields retain];
 }
 
-- (NSString *)folderPathForFilingPapersFromDocument:(BibDocument *)document {
+- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKItemOwner>)document {
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	if ([NSString isEmptyString:papersFolderPath])
 		papersFolderPath = [[document fileName] stringByDeletingLastPathComponent];

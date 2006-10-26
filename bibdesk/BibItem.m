@@ -976,7 +976,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", document, @"document", oldCiteKey, @"oldCiteKey", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", oldCiteKey, @"oldCiteKey", document, @"document", nil];
 
     [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
     [oldCiteKey release];
@@ -1003,7 +1003,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 - (NSString *)suggestedCiteKey
 {
     NSString *suggestion = [self citeKey];
-    if ([self hasEmptyOrDefaultCiteKey] || [[document publications] citeKeyIsUsed:suggestion byItemOtherThan:self])
+    if ([self hasEmptyOrDefaultCiteKey] || [[owner publications] citeKeyIsUsed:suggestion byItemOtherThan:self])
         suggestion = nil;
     
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
@@ -1037,7 +1037,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
 				return NO;
 		} else if ([fieldName hasPrefix:@"Document: "]) {
-			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
+			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
 				return NO;
 		} else {
 			if ([NSString isEmptyString:[self valueOfField:fieldName]]) {
@@ -1059,9 +1059,9 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     if ([NSString isEmptyString:aCrossref] == NO) {
         if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
             errorCode = BDSKSelfCrossrefError;
-        else if ([NSString isEmptyString:[[[document publications] itemForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
+        else if ([NSString isEmptyString:[[[owner publications] itemForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
             errorCode = BDSKChainCrossrefError;
-        else if ([[document publications] citeKeyIsCrossreffed:aCiteKey])
+        else if ([[owner publications] citeKeyIsCrossreffed:aCiteKey])
             errorCode = BDSKIsCrossreffedCrossrefError;
     }
     return errorCode;
@@ -1230,7 +1230,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	[self updateMetadataForKey:key];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",document, @"document", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type", document, @"document", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -2223,11 +2223,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)localUrlPathInheriting:(BOOL)inherit{
-	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:inherit];
+	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:inherit];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field{
-	return [self localFilePathForField:field relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFilePathForField:field relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:YES];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
@@ -2235,7 +2235,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
-	return [self localFileURLForField:field relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFileURLForField:field relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:YES];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
@@ -2276,7 +2276,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (BOOL)isValidLocalUrlPath:(NSString *)proposedPath{
     if ([NSString isEmptyString:proposedPath])
         return NO;
-    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
+    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
@@ -2284,7 +2284,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSString *)suggestedLocalUrl{
 	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     
     NSString *oldPath = [self localUrlPathInheriting:NO];
     if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
@@ -2307,7 +2307,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
-		[NSString isEmptyString:[[document fileName] stringByDeletingLastPathComponent]]))
+		[NSString isEmptyString:[[owner fileName] stringByDeletingLastPathComponent]]))
 		return NO;
 	
 	NSEnumerator *fEnum = [requiredFields objectEnumerator];
@@ -2318,10 +2318,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             if([self hasEmptyOrDefaultCiteKey])
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
-			if ([NSString isEmptyString:[document fileName]])
+			if ([NSString isEmptyString:[owner fileName]])
 				return NO;
 		} else if ([fieldName hasPrefix:@"Document: "]) {
-			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
+			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
 				return NO;
 		} else if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
@@ -2353,6 +2353,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (BOOL)autoFilePaper
 {
+    OBASSERT(document != nil);
+    
     // we can't autofile if it's disabled or there is nothing to file
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [self localUrlPath] == nil)
 		return NO;
