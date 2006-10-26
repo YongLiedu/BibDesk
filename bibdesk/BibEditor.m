@@ -1693,7 +1693,7 @@ static int numberOfOpenEditors = 0;
             ([value isEqualAsComplexString:prevValue] || [value isEqualAsComplexString:@""]) ) {
             // make sure we keep the original inherited string value
             [cell setObjectValue:prevValue];
-        } else if (isEditable && prevValue != nil && ![value isEqualAsComplexString:prevValue] == NO) {
+        } else if (isEditable && prevValue != nil && [value isEqualAsComplexString:prevValue] == NO) {
             // if prevValue == nil, the field was removed and we're finalizing an edit for a field we should ignore
             [self recordChangingField:title toValue:value];
         }
