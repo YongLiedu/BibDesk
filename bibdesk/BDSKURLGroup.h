@@ -40,9 +40,9 @@
 #import "BDSKGroup.h"
 
 @class BDSKPublicationsArray, BDSKMacroResolver;
-@protocol BDSKItemOwner;
+@protocol BDSKDocument;
 
-@interface BDSKURLGroup : BDSKMutableGroup <BDSKItemOwner>
+@interface BDSKURLGroup : BDSKMutableGroup <BDSKDocument>
 {
     BDSKPublicationsArray *publications;
     BDSKMacroResolver *macroResolver;

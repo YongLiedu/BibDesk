@@ -38,18 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKSheetController.h"
-#import "BibItem.h"
-#import "BibTypeManager.h"
-#import "MacroTextFieldWindowController.h"
-#import "BDSKImagePopUpButton.h"
-#import <OmniAppKit/OATypeAheadSelectionHelper.h>
-#import "BDSKTypeSelectHelper.h"
-#import <WebKit/WebKit.h>
 
-@class BibDocument, BDSKEdgeView, WebView, WebDownload, BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter;
-@protocol BDSKItemOwner;
+@class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, MacroTableViewWindowController;
+@class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKTypeSelectHelper;
+@protocol BDSKDocument;
 
-@interface BDSKTextImportController : BDSKSheetController <BDSKItemOwner> {
+@interface BDSKTextImportController : BDSKSheetController <BDSKDocument> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;

@@ -35,6 +35,7 @@
  */
 
 #import "BibAppController.h"
+#import "BDSKDocumentProtocol.h"
 #import <Carbon/Carbon.h>
 #import "BibPrefController.h"
 #import "BibItem.h"
@@ -47,6 +48,7 @@
 #import "BDSKFindController.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKScriptMenu.h"
+#import "BibDocument.h"
 #import "BibDocument_Search.h"
 #import "BibDocument_Actions.h"
 #import "BDSKFormatParser.h"
@@ -549,7 +551,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	requiredFieldsForLocalUrl = [newFields retain];
 }
 
-- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKItemOwner>)document {
+- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKDocument>)document {
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	if ([NSString isEmptyString:papersFolderPath])
 		papersFolderPath = [[document fileName] stringByDeletingLastPathComponent];
@@ -993,6 +995,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     return;
 }
 
+// this only should return items that belong to a document, not items from external groups
+// if this is ever changed, we should also change showPubWithKey:userData:error:
 - (NSSet *)itemsMatchingSearchConstraints:(NSDictionary *)constraints{
     NSArray *docs = [[NSDocumentController sharedDocumentController] documents];
     if([docs count] == 0)
@@ -1077,8 +1081,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	BibItem *item;
 	NSEnumerator *itemE = [items objectEnumerator];
     
-    while(item = [itemE nextObject]){
-		[[item document] editPub:item];
+    while(item = [itemE nextObject]){   
+        // these should all be items belonging to a BibDocument, see remark before itemsMatchingSearchConstraints:
+		[(BibDocument *)[item document] editPub:item];
     }
 
 }

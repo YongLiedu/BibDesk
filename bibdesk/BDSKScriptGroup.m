@@ -37,6 +37,7 @@
  */
 
 #import "BDSKScriptGroup.h"
+#import "BDSKDocumentProtocol.h"
 #import "BDSKShellTask.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
@@ -73,7 +74,7 @@
         aName = [[path lastPathComponent] stringByDeletingPathExtension];
     if(self = [super initWithName:aName count:0]){
         publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
         scriptPath = [path retain];
         scriptArguments = [arguments retain];
         argsArray = nil;

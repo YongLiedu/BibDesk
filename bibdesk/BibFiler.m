@@ -471,7 +471,8 @@ static BibFiler *sharedFiler = nil;
             break;
         case 2:
             pub = [dict objectForKey:@"paper"];
-            [[pub document] editPub:pub];
+            // at this moment we have the document set
+            [document editPub:pub];
             break;
 	}
 }

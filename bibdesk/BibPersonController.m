@@ -38,6 +38,7 @@
 
 #import "BibPersonController.h"
 #import "BibTypeManager.h"
+#import "BDSKDocumentProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BibAuthor.h"
@@ -65,7 +66,7 @@
         [self setPerson:aPerson];
         publications = nil;
         
-        isEditable = ([[person publication] document] != nil);
+        isEditable = [[[person publication] document] isKindOfClass:[BibDocument class]];
         
         [person setPersonController:self];
 	}
@@ -119,7 +120,7 @@
 
 - (NSArray *)publications{
     if (publications == nil)
-        publications = [[[[[person publication] owner] publications] itemsForAuthor:person] retain];
+        publications = [[[[[person publication] document] publications] itemsForAuthor:person] retain];
     return publications;
 }
 

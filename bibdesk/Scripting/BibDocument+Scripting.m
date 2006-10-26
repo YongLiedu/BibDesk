@@ -126,6 +126,8 @@ Getting and setting the selection of the table
     NSEnumerator *pubE = [[self selectedPublications] objectEnumerator];
     BibItem *pub;
     
+    // only items belonging to the document can be accessed through AppleScript
+    // items from external groups have no scriptable container, and AppleScript accesses properties of the document
     while (pub = [pubE nextObject]) 
         if ([pub document] != self) [selection addObject:pub];
     return selection;

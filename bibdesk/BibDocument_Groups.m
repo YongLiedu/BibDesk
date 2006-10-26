@@ -36,6 +36,7 @@
  */
 
 #import "BibDocument_Groups.h"
+#import "BDSKDocumentProtocol.h"
 #import "BibDocument_Actions.h"
 #import "BDSKGroupCell.h"
 #import "NSImage+Toolbox.h"
@@ -492,13 +493,13 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     NSArray *array = [[BDSKSharingBrowser sharedBrowser] sharedGroups];
     
-    id owner;
+    id document;
     NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
     NSWindowController *wc;
     while(wc = [wcEnum nextObject]){
         if([wc isKindOfClass:[MacroWindowController class]]){
-            owner = [[(MacroWindowController*)wc macroResolver] owner];
-            if ([owner isKindOfClass:[BDSKSharedGroup class]] && [array containsObjectIdenticalTo:owner] == NO)
+            document = [[(MacroWindowController*)wc macroResolver] document];
+            if ([document isKindOfClass:[BDSKSharedGroup class]] && [array containsObjectIdenticalTo:document] == NO)
                 [wc hideWindow:nil];
         }
     }

@@ -43,8 +43,8 @@
 #import "NSDictionary_BDSKExtensions.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
+#import "BDSKDocumentProtocol.h"
 #import "BibDocument.h"
-#import "BibItem.h"
 #import <OmniFoundation/OFPreference.h>
 
 
@@ -79,33 +79,30 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (id)init{
-    self = [self initWithOwner:nil];
+    self = [self initWithDocument:nil];
     return self;
 }
 
-- (id)initWithOwner:(id<BDSKItemOwner>)anOwner{
+- (id)initWithDocument:(id<BDSKDocument>)aDocument{
     if (self = [super init]) {
         macroDefinitions = nil;
-        owner = anOwner;
+        document = aDocument;
     }
     return self;
 }
 
 - (void)dealloc {
     [macroDefinitions release];
-    owner = nil;
+    document = nil;
     [super dealloc];
 }
 
-- (id<BDSKItemOwner>)owner{
-    return owner;
+- (id<BDSKDocument>)document{
+    return document;
 }
 
 - (NSUndoManager *)undoManager{
-    if ([owner respondsToSelector:@selector(undoManager)])
-        return [(BibDocument *)owner undoManager];
-    else
-        return nil;
+    return [document undoManager];
 }
 
 - (NSString *)bibTeXString{
@@ -332,8 +329,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 @implementation BDSKGlobalMacroResolver
 
-- (id)initWithOwner:(id<BDSKItemOwner>)anOwner{
-    if (self = [super initWithOwner:nil]) {
+- (id)initWithDocument:(id<BDSKDocument>)aDocument{
+    if (self = [super initWithDocument:nil]) {
         // store system-defined macros for the months.
         // we grab their localized versions for display.
         NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]

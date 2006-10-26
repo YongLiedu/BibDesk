@@ -280,7 +280,7 @@
     if (row == -1) return;
     if (tv == tableView) {
         if ([aCell isKindOfClass:[NSButtonCell class]]) {
-            if ([[shownPublications objectAtIndex:row] document] == nil) 
+            if ([[shownPublications objectAtIndex:row] document] == self) 
                 [aCell setEnabled:NO];
             else
                 [aCell setEnabled:YES];
@@ -869,7 +869,7 @@
 			return NSDragOperationNone;
 		}
         // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
-        if(row == -1 || op == NSTableViewDropAbove || (row < [shownPublications count] && [[shownPublications objectAtIndex:row] document] == nil)){
+        if(row == -1 || op == NSTableViewDropAbove){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
 		}else if(([type isEqualToString:NSFilenamesPboardType] == NO || [[info draggingPasteboard] containsUnparseableFile] == NO) &&
                  [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
@@ -920,13 +920,13 @@
     if(tv == (NSTableView *)ccTableView){
         return NO; // can't drag into that tv.
     } else if(tv == tableView){
+        if([self hasExternalGroupsSelected])
+            return NO;
 		if(row != -1){
             BibItem *pub = [shownPublications objectAtIndex:row];
             NSURL *theURL = nil;
             
-            if([pub document] == nil){
-                return NO;
-            }else if([type isEqualToString:NSFilenamesPboardType]){
+            if([type isEqualToString:NSFilenamesPboardType]){
                 NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
                 if ([fileNames count] == 0)
                     return NO;

@@ -38,7 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 @class BibDocument, BibItem;
-@protocol BDSKItemOwner;
+@protocol BDSKDocument;
 
 @interface BibTeXParser : NSObject {
 }
@@ -52,7 +52,7 @@
     @param      outError (description)
     @result     (description)
 */
-+ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKItemOwner>)anOwner error:(NSError **)outError;
++ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKDocument>)anOwner error:(NSError **)outError;
 
 /*!
     @method     itemsFromData:error:frontMatter:filePath:document:
@@ -68,7 +68,7 @@
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                       frontMatter:(NSMutableString *)frontMatter
                          filePath:(NSString *)filePath
-						 document:(id<BDSKItemOwner>)anOwner
+						 document:(id<BDSKDocument>)anOwner
                             error:(NSError **)outError;
 
 /*!

@@ -35,6 +35,7 @@
  */
 
 #import "BibDocument.h"
+#import "BDSKDocumentProtocol.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BibDocument_DataSource.h"
@@ -168,7 +169,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
 		[texTask setDelegate:self];
         
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
@@ -562,7 +563,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 	return YES;
 }
 
-// this is needed for the BDSKItemOwner protocol
+// this is needed for the BDSKDocument protocol
 - (NSUndoManager *)undoManager {
     return [super undoManager];
 }
@@ -795,7 +796,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 
 - (IBAction)showMacrosWindow:(id)sender{
     if ([self hasExternalGroupsSelected]) {
-        BDSKMacroResolver *resolver = [(id<BDSKItemOwner>)[self objectInGroupsAtIndex:[groupTableView selectedRow]] macroResolver];
+        BDSKMacroResolver *resolver = [(id<BDSKDocument>)[self objectInGroupsAtIndex:[groupTableView selectedRow]] macroResolver];
         MacroWindowController *controller = nil;
         NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
         NSWindowController *wc;
@@ -2560,7 +2561,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	NSDictionary *userInfo = [notification userInfo];
     
     // see if it's ours
-	if([userInfo objectForKey:@"document"] != self || [userInfo objectForKey:@"document"] == nil)
+	if([userInfo objectForKey:@"document"] != self)
         return;
 
 	NSString *changedKey = [userInfo objectForKey:@"key"];

@@ -54,11 +54,12 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
  Needs a properly working -document method to work with multpiple documents.
 */
 - (NSScriptObjectSpecifier *) objectSpecifier {
-	// NSLog(@"BibItem objectSpecifier");
-	NSArray * ar = [[self document] publications];
+    // only items belonging to a BibDocument are scriptable
+    BibDocument *myDoc = (BibDocument *)[self document];
+	NSArray * ar = [myDoc publications];
 	unsigned index = [ar indexOfObjectIdenticalTo:self];
     if (index != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [[self document] objectSpecifier];
+        NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
         return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:index] autorelease];
     } else {
         return nil;

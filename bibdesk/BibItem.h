@@ -49,15 +49,7 @@ enum {
 };
 
 @class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver;
-@protocol BDSKParseableItem;
-
-@protocol BDSKItemOwner <NSObject>
-- (BDSKPublicationsArray *)publications;
-- (BDSKMacroResolver *)macroResolver;
-- (NSUndoManager *)undoManager;
-- (NSString *)fileName;
-- (NSString *)documentInfoForKey:(NSString *)key;
-@end
+@protocol BDSKParseableItem, BDSKDocument;
 
 /*!
 @class BibItem
@@ -77,8 +69,7 @@ enum {
 	NSMutableDictionary *groups;
     BOOL hasBeenEdited;
 	BOOL needsToBeFiled;
-	BibDocument *document;
-	id<BDSKItemOwner> owner;
+	id<BDSKDocument> document;
     BDSKFieldCollection *templateFields;
     int currentIndex;
     BOOL spotlightMetadataChanged;
@@ -118,11 +109,8 @@ enum {
 */
 - (void)dealloc;
 
-- (BibDocument *)document;
-- (void)setDocument:(BibDocument *)newDocument;
-
-- (id<BDSKItemOwner>)owner;
-- (void)setOwner:(id<BDSKItemOwner>)newOwner;
+- (id<BDSKDocument>)document;
+- (void)setDocument:(id<BDSKDocument>)newDocument;
 
 - (NSUndoManager *)undoManager;
 

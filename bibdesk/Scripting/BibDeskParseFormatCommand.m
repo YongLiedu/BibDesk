@@ -97,7 +97,7 @@
     BOOL isLocalFile = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field];
     NSString *papersFolderPath = nil;
     if (isLocalFile)
-        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
+        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub document]];
 	
     NSString *suggestion = nil;
     if ([field isEqualToString:BDSKCiteKeyString]) {

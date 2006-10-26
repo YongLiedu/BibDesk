@@ -37,7 +37,7 @@
  */
 
 #import "BibField.h"
-#import "BibDocument.h"
+#import "BDSKDocumentProtocol.h"
 
 /* cmh
 A wrapper object around the fields to access them in AppleScript. 

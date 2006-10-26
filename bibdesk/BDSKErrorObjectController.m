@@ -238,7 +238,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
     // fileName is nil for paste/drag and author parsing errors; check for a pub first, since that's the best way to edit
     if (pub) {
-        BibEditor *pubEditor = [[pub document] editPub:pub];
+        // if we have an error for a pub, it should be from a BibDocument. Otherwise we would have ignored it, see endObservingErrorsForDocument:...
+        BibEditor *pubEditor = [(BibDocument *)[pub document] editPub:pub];
         [pubEditor makeKeyField:BDSKAuthorString];
     } else if (nil == fileName || [[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
         [editor showWindow:self];
@@ -406,7 +407,11 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)endObservingErrorsForPublication:(BibItem *)pub{
-    [self endObservingErrorsForDocument:[pub document] pasteDragData:nil publication:pub];
+    id document = [pub document];
+    // we can't and shouldn't manage errors from external groups
+    if ([document isKindOfClass:[BibDocument class]] == NO)
+        document == nil;
+    [self endObservingErrorsForDocument:document pasteDragData:nil publication:pub];
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{

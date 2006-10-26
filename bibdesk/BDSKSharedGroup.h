@@ -41,9 +41,9 @@
 
 
 @class BDSKSharedGroupServer, BDSKPublicationsArray, BDSKMacroResolver;
-@protocol BDSKItemOwner;
+@protocol BDSKDocument;
 
-@interface BDSKSharedGroup : BDSKGroup <BDSKItemOwner>
+@interface BDSKSharedGroup : BDSKGroup <BDSKDocument>
 {
     BDSKPublicationsArray *publications;
     BDSKMacroResolver *macroResolver;

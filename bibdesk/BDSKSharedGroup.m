@@ -37,6 +37,7 @@
  */
 
 #import "BDSKSharedGroup.h"
+#import "BDSKDocumentProtocol.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
 #import "NSArray_BDSKExtensions.h"
@@ -158,7 +159,7 @@ static NSImage *unlockedIcon = nil;
     if(self = [super initWithName:[aService name] count:0]){
 
         publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
         needsUpdate = YES;
         
         server = [[BDSKSharedGroupServer alloc] initWithGroup:self andService:aService];

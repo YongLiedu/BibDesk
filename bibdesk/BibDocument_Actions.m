@@ -55,6 +55,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
 
+#import "BibTypeManager.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKAlert.h"
 #import "BibFiler.h"

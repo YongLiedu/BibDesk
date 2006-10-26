@@ -37,6 +37,7 @@
  */
 
 #import "BDSKURLGroup.h"
+#import "BDSKDocumentProtocol.h"
 #import <WebKit/WebKit.h>
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
@@ -67,7 +68,7 @@
     if(self = [super initWithName:aName count:0]){
         
         publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
         URL = [aURL copy];
         isRetrieving = NO;
         failedDownload = NO;

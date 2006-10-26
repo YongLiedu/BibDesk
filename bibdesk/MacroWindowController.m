@@ -70,7 +70,7 @@
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
 		macroTextFieldWC = nil;
         
-        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isKindOfClass:[BibDocument class]]);
+        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver document] isKindOfClass:[BibDocument class]]);
         
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
@@ -121,8 +121,8 @@
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     NSString *title = NSLocalizedString(@"Macros", @"title for macros window");
-    if ([[macroResolver owner] isKindOfClass:[BDSKGroup class]])
-        title = [NSString stringWithFormat:@"%@ - %@", title, [(BDSKGroup *)[macroResolver owner] stringValue]];
+    if ([[macroResolver document] isKindOfClass:[BDSKGroup class]])
+        title = [NSString stringWithFormat:@"%@ - %@", title, [(BDSKGroup *)[macroResolver document] stringValue]];
     if ([NSString isEmptyString:displayName] == NO)
         title = [NSString stringWithFormat:@"%@ - %@", title, displayName];
     return title;
@@ -481,7 +481,7 @@
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
     // if this is called, we shouldn't belong to a group
-	BibDocument *document = (BibDocument *)[macroResolver owner];
+	BibDocument *document = (BibDocument *)[macroResolver document];
 	
     BOOL hadCircular = NO;
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];

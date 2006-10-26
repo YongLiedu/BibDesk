@@ -37,6 +37,14 @@
  */
 
 #import "BDSKTextImportController.h"
+#import "BDSKDocumentProtocol.h"
+#import "BibItem.h"
+#import "BibTypeManager.h"
+#import "MacroTextFieldWindowController.h"
+#import "BDSKImagePopUpButton.h"
+#import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import "BDSKTypeSelectHelper.h"
+#import <WebKit/WebKit.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKCrossrefFormatter.h"
@@ -103,7 +111,7 @@
     if(self){
         document = doc;
         item = [[BibItem alloc] init];
-        [item setOwner:self];
+        [item setDocument:self];
         fields = [[NSMutableArray alloc] init];
 		bookmarks = [[NSMutableArray alloc] init];
         showingWebView = NO;
@@ -264,7 +272,7 @@
     [document addPublication:item];
     [item release];
     item = newItem;
-    [item setOwner:self];
+    [item setDocument:self];
 	
 	int numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
@@ -290,7 +298,7 @@
 - (IBAction)clearAction:(id)sender{
     [item release];
     item = [[BibItem alloc] init];
-    [item setOwner:self];
+    [item setDocument:self];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
     [citeKeyField setStringValue:[item citeKey]];
@@ -525,7 +533,7 @@
     return [self undoManager];
 }
 
-#pragma mark BDSKItemOwner protocol
+#pragma mark BDSKDocument protocol
 
 - (BDSKPublicationsArray *)publications {
     return [document publications];

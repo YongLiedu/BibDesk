@@ -40,7 +40,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate, BDSKItemOwner;
+@protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate, BDSKDocument;
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
@@ -86,7 +86,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKItemOwner>
+@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKDocument>
 {
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
