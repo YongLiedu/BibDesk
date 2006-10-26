@@ -160,6 +160,14 @@
     return [publications objectEnumerator];
 }
 
+#pragma mark Item order
+
+- (NSNumber *)orderOfItem:(BibItem *)item;
+{
+    unsigned order = [publications indexOfObjectIdenticalTo:item];
+    return NSNotFound == order ? nil : [NSNumber numberWithInt:(order + 1)];
+}
+
 #pragma mark Items for cite keys
 
 - (void)addToItemsForCiteKeys:(BibItem *)item;

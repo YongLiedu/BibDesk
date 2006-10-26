@@ -45,6 +45,8 @@
     OFMultiValueDictionary *itemsForCiteKeys;
 }
 
+- (NSNumber *)orderOfItem:(BibItem *)item;
+
 - (BibItem *)itemForCiteKey:(NSString *)key;
 - (NSArray *)allItemsForCiteKey:(NSString *)key;
 - (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(BibItem *)anItem;

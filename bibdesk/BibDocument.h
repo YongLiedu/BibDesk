@@ -324,7 +324,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)removePublicationsAtIndexes:(NSIndexSet *)indexes;
 - (void)removePublications:(NSArray *)pubs;
 - (void)removePublication:(BibItem *)pub;
-- (NSNumber *)fileOrderOfPublication:(BibItem *)thePub;
 
 - (NSDictionary *)documentInfo;
 - (void)setDocumentInfoWithoutUndo:(NSDictionary *)dict;

@@ -515,7 +515,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 
 // accessors for fileorder
 - (NSNumber *)fileOrder{
-    return [document fileOrderOfPublication:self];
+    return [[owner publications] orderOfItem:self];
 }
 
 - (NSString *)fileType { 
