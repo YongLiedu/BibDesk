@@ -203,10 +203,10 @@ static NSImage *unlockedIcon = nil;
 - (void)setPublications:(NSArray *)newPublications;
 {
     if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
         
         if (publications == nil)
             [macroResolver removeAllMacros];
