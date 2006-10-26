@@ -510,7 +510,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (NSUndoManager *)undoManager { // this may be nil
-    return [document undoManager];
+    return [owner undoManager];
 }
 
 // accessors for fileorder
@@ -1139,7 +1139,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	
 	NSDictionary *notifInfo;
 	if(oldValue != nil && value != nil)
-		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type", document, @"document", oldValue, @"oldValue", nil];
+		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type", oldValue, @"oldValue", document, @"document", nil];
 	else
 		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", document, @"document", nil];
     [oldValue release];
@@ -1197,7 +1197,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	[self updateMetadataForKey:key];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type",document, @"document", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", document, @"document", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
