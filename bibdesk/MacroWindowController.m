@@ -129,8 +129,8 @@
     return title;
 }
 
-- (NSString *)windowRepresentedFilename:(NSString *)path{
-    return [[macroResolver document] isDocument] ? path : @"";
+- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
+    return [[macroResolver document] isDocument] ? nil : @"";
 }
 
 - (BDSKMacroResolver *)macroResolver{

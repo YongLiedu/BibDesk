@@ -286,7 +286,7 @@ static int numberOfOpenEditors = 0;
     return [publication displayTitle];
 }
 
-- (NSString *)windowRepresentedFilename:(NSString *)path{
+- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
     NSString *fname = [publication localUrlPath];
     return fname ? fname : @"";
 }

@@ -61,11 +61,6 @@
     }
 }
 
-- (NSString *)windowRepresentedFilename:(NSString *)path;
-{
-    return path;
-}
-
 @end
 
 
@@ -81,8 +76,13 @@ static IMP originalSetRepresentedFilename;
 // see bug #1471488; overriding representedFilename is not sufficient; apparently the window doesn't use its accessor
 - (void)replacementSetRepresentedFilename:(NSString *)path;
 {
-    if ([self windowController])
-        path = [[self windowController] windowRepresentedFilename:path];
+    id delegate = [self delegate];
+    if (delegate && [delegate respondsToSelector:@selector(representedFilenameForWindow:)]) {
+        NSString *newPath = [delegate representedFilenameForWindow:self];
+        // if it returns nil, use the path we were passed
+        if (newPath) 
+            path = newPath;
+    }
     originalSetRepresentedFilename(self, _cmd, path);
 }
 

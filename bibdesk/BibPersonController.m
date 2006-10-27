@@ -117,8 +117,8 @@
     return [person name];
 }
 
-- (NSString *)windowRepresentedFilename:(NSString *)path{
-    return [[[person publication] document] isDocument] ? path : @"";
+- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
+    return [[[person publication] document] isDocument] ? nil : @"";
 }
 
 #pragma mark accessors
