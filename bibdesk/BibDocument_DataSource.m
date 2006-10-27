@@ -281,9 +281,9 @@
     if (tv == tableView) {
         if ([aCell isKindOfClass:[NSButtonCell class]]) {
             if ([[shownPublications objectAtIndex:row] document] == self) 
-                [aCell setEnabled:NO];
-            else
                 [aCell setEnabled:YES];
+            else
+                [aCell setEnabled:NO];
         }
     } else if (tv == groupTableView) {
         BDSKGroup *group = [self objectInGroupsAtIndex:row];
@@ -1222,6 +1222,7 @@
     [tv scrollRowToVisible:itemIndex];
 }
 
+#pragma mark HFS Promise drags
 // promise drags (currently used for webloc files)
 - (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet;
 {
