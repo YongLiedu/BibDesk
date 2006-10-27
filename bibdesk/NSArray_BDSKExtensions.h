@@ -42,6 +42,7 @@
 @interface NSArray (BDSKExtensions)
 
 - (id)firstObject;
+- (NSArray *)arrayDroppingFirstObject;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 
 @end

@@ -46,6 +46,11 @@
     return [self count] ? [self objectAtIndex:0] : nil;
 }
 
+- (NSArray *)arrayDroppingFirstObject;
+{
+    return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
+}
+
 // this may give unexpected results if you have multiple instances of an object in an array; it will return only the lowest index
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 {

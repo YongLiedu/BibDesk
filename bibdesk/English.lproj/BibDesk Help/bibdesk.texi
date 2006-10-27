@@ -3715,13 +3715,13 @@ Below are lists of collection keys that could be used in BibDesk export template
 @multitable {optionalFields} {}
 @headitem Key @tab Description
 @item requiredFields
-@tab 
+@tab Drops already used fields
 @item optionalFields
-@tab 
+@tab Drops already used fields
 @item defaultFields
-@tab 
+@tab Drops already used fields
 @item allFields
-@tab 
+@tab Drops already used fields
 @item persons.FieldName
 @tab FieldName can be Author or Editor
 @item authors
@@ -3872,6 +3872,8 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item @@unionOfArrays
 @tab 
 @item @@distinctUnionOfArrays
+@tab 
+@item @@arrayDroppingFirstObject
 @tab 
 @end multitable
 
