@@ -520,33 +520,27 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 #pragma mark -
 #pragma mark Generic person handling code
 
-- (void)rebuildPeople{
-    NSEnumerator *pEnum = [[[BibTypeManager sharedManager] personFieldsSet] objectEnumerator];
-    NSString *personStr;
-    NSMutableArray *tmpPeople;
-    NSString *personType;
+- (void)rebuildPeopleIfNeeded{
     
-    if (people == nil)
-        people = [[NSMutableDictionary alloc] initWithCapacity:2];
-    
-    while(personType = [pEnum nextObject]){
-        // get the string representation from pubFields
-        personStr = [pubFields objectForKey:personType];
+    if (people == nil) {
         
-        // don't check for an empty string, since that is valid here (we may be deleting authors)
-        if(personStr != nil){
-            // parse into an array of author objects
-            tmpPeople = [[BibTeXParser authorsFromBibtexString:personStr withPublication:self] mutableCopy];
+        NSEnumerator *pEnum = [[[BibTypeManager sharedManager] personFieldsSet] objectEnumerator];
+        NSString *personStr;
+        NSString *personType;
+        
+        people = [[NSMutableDictionary alloc] initWithCapacity:2];
+        
+        while(personType = [pEnum nextObject]){
+            // get the string representation from pubFields
+            personStr = [pubFields objectForKey:personType];
+            
+            // parse into an array of BibAuthor objects
+            NSArray *tmpPeople = [BibTeXParser authorsFromBibtexString:personStr withPublication:self];
             if([tmpPeople count])
                 [people setObject:tmpPeople forKey:personType];
-            [tmpPeople release];
         }
-    }
-}
-
-- (void)rebuildPeopleIfNeeded{
-    if (people == nil)
-        [self rebuildPeople];
+        
+    }    
 }
 
 // this returns a set so it's clear that the objects are unordered
@@ -611,7 +605,6 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	if([peopleArray count] == 0)
         return @"";
     
-    [peopleArray retain];
     unsigned idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
@@ -622,7 +615,6 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
         if(idx != count - 1)
             [names appendString:@" and "];
     }
-    [peopleArray release];
     
 	return names;
 }
@@ -709,7 +701,6 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	if([peopleArray count] == 0)
         return @"";
     
-    [peopleArray retain];
     unsigned idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
@@ -720,7 +711,6 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
         if(idx != count - 1)
             [names appendString:@" and "];
     }
-    [peopleArray release];
 
 	return names;
 }

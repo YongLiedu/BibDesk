@@ -133,7 +133,6 @@ enum {
 
 /* Methods for handling people objects (BibAuthors) which may be any people type (Author, Editor, etc.)
 */
-- (void)rebuildPeople;
 - (void)rebuildPeopleIfNeeded;
 - (NSSet *)allPeople;
 - (int)numberOfPeople;
