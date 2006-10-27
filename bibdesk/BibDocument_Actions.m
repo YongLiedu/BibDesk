@@ -84,7 +84,7 @@
 	
     NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
-	BOOL isSingleValued = [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]];
+	BOOL isSingleValued = [[self currentGroupField] isSingleValuedField];
     int count = 0;
     // we don't overwrite inherited single valued fields, they already have the field set through inheritance
     int op, handleInherited = isSingleValued ? BDSKOperationIgnore : BDSKOperationAsk;
@@ -178,7 +178,7 @@
 		BOOL canRemove = NO;
         if ([self hasStaticGroupsSelected])
             canRemove = YES;
-        else if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
+        else if ([[self currentGroupField] isSingleValuedField] == NO)
             canRemove = [self hasCategoryGroupsSelected];
 		if(canRemove == NO){
 			NSBeep();
@@ -368,9 +368,9 @@
     int column = [tableView clickedColumn];
     NSString *colID = column != -1 ? [[[tableView tableColumns] objectAtIndex:column] identifier] : nil;
     
-    if([[BibTypeManager sharedManager] isLocalFileField:colID])
+    if([colID isLocalFileField])
 		[self openLinkedFileForField:colID];
-    else if([[BibTypeManager sharedManager] isRemoteURLField:colID])
+    else if([colID isRemoteURLField])
 		[self openRemoteURLForField:colID];
     else
         [self editPubCmd:sender];

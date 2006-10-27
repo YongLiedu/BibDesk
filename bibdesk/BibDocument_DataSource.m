@@ -93,7 +93,6 @@
     static NSString *shortDateFormatString = nil;
     if(shortDateFormatString == nil)
         shortDateFormatString = [[[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString] copy];
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
     
     if(row >= 0 && tView == tableView){ // sortedRow can be -1 if you delete the last pub and sortDescending is true
         pub = [shownPublications objectAtIndex:row];
@@ -145,13 +144,13 @@
 			return [pub pubAuthorsOrEditorsForDisplay];
         } else if([tcID isEqualToString:BDSKEditorString]) {
 			return [pub peopleStringForDisplayFromField:BDSKEditorString];
-        }else if([typeManager isURLField:tcID]){
+        }else if([tcID isURLField]){
             return [pub smallImageForURLField:tcID];
-		}else if([typeManager isRatingField:tcID]){
+		}else if([tcID isRatingField]){
 			return [NSNumber numberWithInt:[pub ratingValueOfField:tcID]];
-		}else if([typeManager isBooleanField:tcID]){
+		}else if([tcID isBooleanField]){
             return [NSNumber numberWithBool:[pub boolValueOfField:tcID]];
-		}else if([typeManager isTriStateField:tcID]){
+		}else if([tcID isTriStateField]){
 			return [NSNumber numberWithInt:[pub triStateValueOfField:tcID]];
 		}else if([tcID isEqualToString:BDSKPubTypeString]){
 			return [pub pubType];
@@ -172,10 +171,9 @@
 		[customStringArray replaceObjectAtIndex:row withObject:object];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 	}else if (tv == tableView){
-        BibTypeManager *typeManager = [BibTypeManager sharedManager];
 
 		NSString *tcID = [tableColumn identifier];
-		if([typeManager isRatingField:tcID]){
+		if([tcID isRatingField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
 			int oldRating = [pub ratingValueOfField:tcID];
 			int newRating = [object intValue];
@@ -190,7 +188,7 @@
 				}
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Rating",@"Change Rating")];
 			}
-		}else if([typeManager isBooleanField:tcID]){
+		}else if([tcID isBooleanField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
             NSCellStateValue oldStatus = [pub boolValueOfField:tcID];
 			NSCellStateValue newStatus = [object intValue];
@@ -205,7 +203,7 @@
 				}
 				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box",@"Change Check Box")];
 			}
-		}else if([typeManager isTriStateField:tcID]){
+		}else if([tcID isTriStateField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
             NSCellStateValue oldStatus = [pub triStateValueOfField:tcID];
 			NSCellStateValue newStatus = [object intValue];
@@ -487,7 +485,7 @@
 				
 				dragColumnId = [[[tv tableColumns] objectAtIndex:dragColumn] identifier];
 				
-				if([[BibTypeManager sharedManager] isLocalFileField:dragColumnId]){
+				if([dragColumnId isLocalFileField]){
 
                     // if we have more than one row, we can't put file contents on the pasteboard, but most apps seem to handle file names just fine
                     unsigned row = [rowIndexes firstIndex];
@@ -514,7 +512,7 @@
 
                     return [pboard setPropertyList:filePaths forType:NSFilenamesPboardType];
                     
-				}else if([[BibTypeManager sharedManager] isRemoteURLField:dragColumnId]){
+				}else if([dragColumnId isRemoteURLField]){
 					// cache this so we know which column (field) was dragged
 					[self setPromiseDragColumnIdentifier:dragColumnId];
 					
@@ -1161,7 +1159,7 @@
         NSMutableArray *a = [NSMutableArray arrayWithCapacity:numberOfRows];
 
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
-        if([[BibTypeManager sharedManager] isURLField:field] == NO && nil != column){
+        if([field isURLField] == NO && nil != column){
             id value;
             typedef id (*dataIMP)(id, SEL, id, id, unsigned int);
             SEL selector = @selector(tableView:objectValueForTableColumn:row:);
@@ -1239,7 +1237,7 @@
     
     // this ivar stores the field name (e.g. Url, L2)
     NSString *fieldName = [self promiseDragColumnIdentifier];
-    BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalFileField:fieldName];
+    BOOL isLocalFile = [fieldName isLocalFileField];
     
     NSString *originalPath;
     NSString *fileName;
@@ -1297,7 +1295,7 @@
         return NO;
     
     NSString *tcID = [tableColumn identifier];
-    return [[BibTypeManager sharedManager] isURLField:tcID] && [[shownPublications objectAtIndex:row] URLForField:tcID];
+    return [tcID isURLField] && [[shownPublications objectAtIndex:row] URLForField:tcID];
 }
 
 - (void)tableView:(NSTableView *)tv mouseEnteredTableColumn:(NSTableColumn *)tableColumn row:(int)row;

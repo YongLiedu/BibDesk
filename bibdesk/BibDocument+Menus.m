@@ -285,7 +285,7 @@
         return [self validateDeleteSelectionMenuItem:menuItem];
     } else {
         m = [self numberOfStaticGroupsAtIndexes:selIndexes];
-        if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
+        if ([[self currentGroupField] isSingleValuedField] == NO)
             m += [self numberOfCategoryGroupsAtIndexes:selIndexes];
     }
 	

@@ -612,3 +612,16 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 @end
+
+@implementation NSString (BDSKTypeExtensions)
+
+- (BOOL)isBooleanField { return [[BibTypeManager sharedManager] isBooleanField:self]; }
+- (BOOL)isTriStateField { return [[BibTypeManager sharedManager] isTriStateField:self]; }
+- (BOOL)isRatingField { return [[BibTypeManager sharedManager] isRatingField:self]; }
+- (BOOL)isLocalFileField { return [[BibTypeManager sharedManager] isLocalFileField:self]; }
+- (BOOL)isRemoteURLField { return [[BibTypeManager sharedManager] isRemoteURLField:self]; }
+- (BOOL)isPersonField { return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:self]; }
+- (BOOL)isSingleValuedField { return [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:self]; }
+- (BOOL)isURLField { return [[BibTypeManager sharedManager] isURLField:self]; }
+
+@end

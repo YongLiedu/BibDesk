@@ -2441,7 +2441,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
         NSURL *theURL = nil;
         
-		if([[BibTypeManager sharedManager] isLocalFileField:tcId]){
+		if([tcId isLocalFileField]){
 			myMenu = [[fileMenu copyWithZone:[NSMenu menuZone]] autorelease];
 			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
 			[[myMenu itemAtIndex:1] setRepresentedObject:tcId];
@@ -2451,7 +2451,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 theItem = [myMenu insertItemWithTitle:NSLocalizedString(@"Open With", @"Open with") 
                                     andSubmenuOfApplicationsForURL:theURL atIndex:1];
             }
-		}else if([[BibTypeManager sharedManager] isRemoteURLField:tcId]){
+		}else if([tcId isRemoteURLField]){
 			myMenu = [[URLMenu copyWithZone:[NSMenu menuZone]] autorelease];
 			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
             if([tableView numberOfSelectedRows] == 1)

@@ -1227,13 +1227,12 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (NSString *)stringValueOfField:(NSString *)field inherit:(BOOL)inherit {
-	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 		
-	if([typeManager isRatingField:field]){
+	if([field isRatingField]){
 		return [NSString stringWithFormat:@"%i", [self ratingValueOfField:field]];
-	}else if([typeManager isBooleanField:field]){
+	}else if([field isBooleanField]){
 		return [NSString stringWithBool:[self boolValueOfField:field]];
-    }else if([typeManager isTriStateField:field]){
+    }else if([field isTriStateField]){
 		return [NSString stringWithTriStateValue:[self triStateValueOfField:field]];
 	}else if([field isEqualToString:BDSKPubTypeString]){
 		return [self pubType];
@@ -1248,13 +1247,12 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 
 - (void)setField:(NSString *)field toStringValue:(NSString *)value{
     OBASSERT([field isEqualToString:BDSKAllFieldsString] == NO);
-	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 	
-	if([typeManager isBooleanField:field]){
+	if([field isBooleanField]){
 		[self setField:field toBoolValue:[value booleanValue]];
-    }else if([typeManager isTriStateField:field]){
+    }else if([field isTriStateField]){
         [self setField:field toTriStateValue:[value triStateValue]];
-	}else if([typeManager isRatingField:field]){
+	}else if([field isRatingField]){
 		[self setField:field toRatingValue:[value intValue]];
 	}else if([field isEqualToString:BDSKPubTypeString]){
 		[self setPubType:value];
@@ -1266,13 +1264,12 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (int)intValueOfField:(NSString *)field {
-	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 		
-	if([typeManager isRatingField:field]){
+	if([field isRatingField]){
 		return [self ratingValueOfField:field];
-	}else if([typeManager isBooleanField:field]){
+	}else if([field isBooleanField]){
 		return (int)[self boolValueOfField:field];
-    }else if([typeManager isTriStateField:field]){
+    }else if([field isTriStateField]){
 		return (int)[self triStateValueOfField:field];
 	}else{
 		return [NSString isEmptyString:[self valueOfField:field]] ? 0 : 1;
@@ -1348,11 +1345,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     SEL selector = (void *)CFDictionaryGetValue(selectorTable, (CFStringRef)field);
     if(NULL == selector){
         
-        BibTypeManager *typeManager = [BibTypeManager sharedManager];
-
-        if([typeManager isBooleanField:field]){
+        if([field isBooleanField]){
             return [self boolValueOfField:field] == [substring booleanValue];
-        } else if([typeManager isTriStateField:field]){
+        } else if([field isTriStateField]){
             return [self triStateValueOfField:field] == [substring triStateValue];
         }
     }
@@ -2137,7 +2132,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSURL *url = [self URLForField:field];
     
-    if([[BibTypeManager sharedManager] isLocalFileField:field] && (url = [url fileURLByResolvingAliases]) == nil)
+    if([field isLocalFileField] && (url = [url fileURLByResolvingAliases]) == nil)
         return [NSImage missingFileImage];
     
     return [NSImage imageForURL:url];
@@ -2150,16 +2145,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
     NSURL *url = [self URLForField:field];
     
-    if([[BibTypeManager sharedManager] isLocalFileField:field] && (url = [url fileURLByResolvingAliases]) == nil)
+    if([field isLocalFileField] && (url = [url fileURLByResolvingAliases]) == nil)
         return [NSImage smallMissingFileImage];
     
     return [NSImage smallImageForURL:url];
 }
 
 - (NSURL *)URLForField:(NSString *)field{
-    if([[BibTypeManager sharedManager] isLocalFileField:field]){
+    if([field isLocalFileField]){
         return [self localFileURLForField:field];
-    } else if([[BibTypeManager sharedManager] isRemoteURLField:field])
+    } else if([field isRemoteURLField])
         return [self remoteURLForField:field];
     else 
         [NSException raise:NSInvalidArgumentException format:@"Field \"%@\" is not a valid URL field.", field];
@@ -2380,11 +2375,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	NSMutableSet *mutableGroupSet;
 	
-    if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field]){
+    if([field isSingleValuedField]){
 		// types and journals should be added as a whole
 		mutableGroupSet = [[NSMutableSet alloc] initCaseInsensitiveWithCapacity:1];
 		[mutableGroupSet addObject:value];
-	}else if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field]){
+	}else if([field isPersonField]){
 		mutableGroupSet = BDSKCreateFuzzyAuthorCompareMutableSet();
         [mutableGroupSet addObjectsFromArray:[self peopleArrayForField:field]];
 	}else{
@@ -2406,7 +2401,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (BOOL)isContainedInGroupNamed:(id)name forField:(NSString *)field {
-    OBASSERT([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field] ? [name isKindOfClass:[BibAuthor class]] : 1);
+    OBASSERT([field isPersonField] ? [name isKindOfClass:[BibAuthor class]] : 1);
 	return [[self groupsForField:field] containsObject:name];
 }
 
@@ -2432,8 +2427,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		if(operation ==  BDSKOperationAsk || operation == BDSKOperationIgnore)
 			return operation;
 	}else{
-		if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field] || 
-		   [NSString isEmptyString:oldString])
+		if([field isSingleValuedField] || [NSString isEmptyString:oldString])
 			operation = BDSKOperationSet;
 		else
 			operation = BDSKOperationAppend;
@@ -2449,7 +2443,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [string appendString:oldString];
         
 		// Use default separator string, unless this is an author/editor field
-        if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field])
+        if([field isPersonField])
             [string appendString:@" and "];
         else
             [string appendString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
@@ -2485,8 +2479,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			return operation;
 	}
 	
-	if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field] || 
-	   [NSString isEmptyString:oldString] || [groupNames count] < 2)
+	if([field isSingleValuedField] || [NSString isEmptyString:oldString] || [groupNames count] < 2)
 		operation = BDSKOperationSet;
 	else
 		operation = BDSKOperationAppend; // Append really means Remove here
@@ -2525,7 +2518,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 	
 	// handle authors separately
-    if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field]){
+    if([field isPersonField]){
 		OBASSERT([groupName isKindOfClass:[BibAuthor class]]);
 		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
 		BibAuthor *auth;
@@ -2619,8 +2612,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			return operation;
 	}
 	
-	if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field] || 
-	   [NSString isEmptyString:oldString] || [groupNames count] < 2)
+	if([field isSingleValuedField] || [NSString isEmptyString:oldString] || [groupNames count] < 2)
 		operation = BDSKOperationSet;
 	else
 		operation = BDSKOperationAppend; // Append really means Replace here
@@ -2644,7 +2636,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 	
 	// handle authors separately
-    if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field]){
+    if([field isPersonField]){
 		OBASSERT([groupName isKindOfClass:[BibAuthor class]]);
 		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
 		BibAuthor *auth;
@@ -2765,7 +2757,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (void)addPDFMetadataToFileForLocalURLField:(NSString *)field;
 {
-    NSParameterAssert([[BibTypeManager sharedManager] isLocalFileField:field]);
+    NSParameterAssert([field isLocalFileField]);
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata]){
         NSError *error = nil;
@@ -2822,7 +2814,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     spotlightMetadataChanged = YES;    
     
     // invalidate people (authors, editors, etc.) if necessary
-    if ([BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key]) {
+    if ([BDSKAllFieldsString isEqualToString:key] || [key isPersonField]) {
         [people release];
         people = nil;
     }
@@ -2905,7 +2897,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [self setDateModified:nil];
     }
     
-    if([document isDocument] && ([[BibTypeManager sharedManager] isURLField:key] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
+    if([document isDocument] && ([key isURLField] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
                                                             object:(BibDocument *)document
                                                           userInfo:[self searchIndexInfo]];

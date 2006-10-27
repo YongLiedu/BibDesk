@@ -593,7 +593,7 @@ The groupedPublications array is a subset of the publications array, developed b
     } else {
         
         BDSKCountedSet *countedSet;
-        if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField])
+        if([groupField isPersonField])
             countedSet = [[BDSKCountedSet alloc] initFuzzyAuthorCountedSet];
         else
             countedSet = [[BDSKCountedSet alloc] initCaseInsensitive:YES withCapacity:[publications count]];
@@ -778,7 +778,7 @@ The groupedPublications array is a subset of the publications array, developed b
     CFMutableDictionaryRef rowDict;
     
     // group objects are either BibAuthors or NSStrings; we need to use case-insensitive or fuzzy author matching, since that's the way groups are checked for containment
-    if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField]){
+    if([groupField isPersonField]){
         rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKFuzzyDictionaryKeyCallBacks, &OFIntegerDictionaryValueCallbacks);
     } else {
         rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &BDSKCaseInsensitiveStringKeyDictionaryCallBacks, &OFIntegerDictionaryValueCallbacks);
@@ -1492,7 +1492,7 @@ The groupedPublications array is a subset of the publications array, developed b
 			count++;
 		}else if(rv == BDSKOperationAsk){
 			NSString *otherButton = nil;
-			if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
+			if([[self currentGroupField] isSingleValuedField] == NO)
 				otherButton = NSLocalizedString(@"Append", @"Append");
 			
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
@@ -1536,7 +1536,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Remove from group")];
             count = [pubs count];
             continue;
-        } else if ([group isCategory] && [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[(BDSKCategoryGroup *)group key]]) {
+        } else if ([group isCategory] && [[(BDSKCategoryGroup *)group key] isSingleValuedField]) {
             continue;
         }
 		

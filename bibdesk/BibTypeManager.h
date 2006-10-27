@@ -249,3 +249,16 @@
 - (NSCharacterSet *)fragileCiteKeyCharacterSet;
 
 @end
+
+@interface NSString (BDSKTypeExtensions)
+
+- (BOOL)isBooleanField;
+- (BOOL)isTriStateField;
+- (BOOL)isRatingField;
+- (BOOL)isLocalFileField;
+- (BOOL)isRemoteURLField;
+- (BOOL)isPersonField;
+- (BOOL)isSingleValuedField;
+- (BOOL)isURLField;
+
+@end

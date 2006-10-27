@@ -66,7 +66,7 @@
 - (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount {
     NSZone *zone = [self zone];
 	[[super init] release];
-    id aName = ([[[BibTypeManager sharedManager] personFieldsSet] containsObject:aKey]) ? [BibAuthor emptyAuthor] : @"";
+    id aName = ([aKey isPersonField]) ? [BibAuthor emptyAuthor] : @"";
     return [[BDSKEmptyGroup allocWithZone:zone] initWithName:aName key:aKey count:aCount];
 }
 
@@ -106,7 +106,7 @@
 - (BOOL)hasEditableName { return YES; }
 
 - (BOOL)isEditable {
-    return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key];
+    return [key isPersonField];
 }
 
 @end
