@@ -1578,9 +1578,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	NSSet *reqKeys = [[NSSet alloc] initWithArray:[btm requiredFieldsForType:[self pubType]]];
 
     static NSDateFormatter *dateFormatter = nil;
-    if(dateFormatter == nil)
-        dateFormatter = [[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString]
-															 allowNaturalLanguage:NO];
+    if(dateFormatter == nil) {
+        dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateStyle:NSDateFormatterFullStyle];
+        [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
+    }
     
     valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[self citeKey]]
                                                attributes:typeAttributes];

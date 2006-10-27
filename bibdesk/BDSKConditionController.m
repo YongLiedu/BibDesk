@@ -107,9 +107,9 @@
     [[dateTextField superview] retain];
     [[toDateTextField superview] retain];
     
+    // @@ can we safely upgrade to NSDateFormatterShortStyle and drop natural language?
     NSDateFormatter *formatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] allowNaturalLanguage:YES] autorelease];
-    if ([formatter respondsToSelector:@selector(setGeneratesCalendarDates:)])
-        [formatter setGeneratesCalendarDates:YES];
+    [formatter setGeneratesCalendarDates:YES];
     [dateTextField setFormatter:formatter];
     [toDateTextField setFormatter:formatter];
 	

@@ -89,10 +89,12 @@
 
     NSString *tcID = [tableColumn identifier];
     
-    // Shark shows this is a performance hit if we call NSUserDefaults every time, so we'll cache it (presumably it doesn't change that often anyway).
-    static NSString *shortDateFormatString = nil;
-    if(shortDateFormatString == nil)
-        shortDateFormatString = [[[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString] copy];
+    static NSDateFormatter *shortDateFormatter = nil;
+    if(shortDateFormatter == nil) {
+        shortDateFormatter = [[NSDateFormatter alloc] init];
+        [shortDateFormatter setDateStyle:NSDateFormatterShortStyle];
+        [shortDateFormatter setTimeStyle:NSDateFormatterNoStyle];
+    }
     
     if(row >= 0 && tView == tableView){ // sortedRow can be -1 if you delete the last pub and sortDescending is true
         pub = [shownPublications objectAtIndex:row];
@@ -107,9 +109,9 @@
 		}else if([tcID isEqualToString: BDSKContainerString] ){
 			return [pub container];
         }else if([tcID isEqualToString: BDSKDateAddedString]){
-            return [[pub dateAdded] descriptionWithCalendarFormat:shortDateFormatString];
+            return [shortDateFormatter stringFromDate:[pub dateAdded]];
         }else if([tcID isEqualToString: BDSKDateModifiedString]){
-			return [[pub dateModified] descriptionWithCalendarFormat:shortDateFormatString];
+			return [shortDateFormatter stringFromDate:[pub dateModified]];
         }else if([tcID isEqualToString: BDSKDateString] ){
 			NSString *value = [pub valueOfField:BDSKDateString];
 			if([NSString isEmptyString:value] == NO)
