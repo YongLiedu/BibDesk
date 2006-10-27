@@ -429,7 +429,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [contentView setFrame:frame];
     [contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [mainBox addSubview:contentView];
-    [contentView setHidden:YES];
     
     NSViewAnimation *animation;
     NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
@@ -439,8 +438,9 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [fadeOutDict release];
     [fadeInDict release];
     
-    [animation setAnimationBlockingMode:NSAnimationBlocking]; // docs say this is the default, but apparently it isn't
-    [animation setDuration:0.5];
+    [animation setAnimationBlockingMode:NSAnimationNonblockingThreaded];
+    [animation setDuration:0.75];
+    [animation setAnimationCurve:NSAnimationEaseIn];
     [animation startAnimation];
     
     [splitView retain];
@@ -454,34 +454,9 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     
 }
 
-// Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
-- (void)_restoreDocumentStateByRemovingSearchView:(NSView *)view
+// use the delegate method so we don't mess with the table's scrollview until animation is done (or it's unreliable)
+- (void)animationDidEnd:(NSAnimation*)animation
 {
-    
-    NSRect frame = [view frame];
-    [splitView setFrame:frame];
-    [mainBox addSubview:splitView];
-    [splitView setHidden:YES];
-    [splitView release];
-    
-    NSViewAnimation *animation;
-    NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
-    NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
-    
-    animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
-    [fadeOutDict release];
-    [fadeInDict release];
-    
-    [animation setAnimationBlockingMode:NSAnimationBlocking];
-    [animation setDuration:0.5];
-    [animation startAnimation];
-    
-    [view removeFromSuperview];
-    
-    [searchField setTarget:self];
-    [searchField setDelegate:self];
-    [searchField setAction:@selector(searchFieldAction:)];
-    
     NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
     
     if([titlesToSelect count]){
@@ -498,8 +473,41 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
                 [pubsToSelect addObject:item];
 		[self highlightBibs:pubsToSelect];
         [tableView scrollRowToCenter:[tableView selectedRow]];
-    } 
+        
+        // annoying to select something in the table and then have focus switch back to the search field
+        [documentWindow makeFirstResponder:(NSResponder *)tableView];
+    }     
+}
+
+// Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
+- (void)_restoreDocumentStateByRemovingSearchView:(NSView *)view
+{
     
+    NSRect frame = [view frame];
+    [splitView setFrame:frame];
+    [mainBox addSubview:splitView];
+    [splitView release];
+    
+    NSViewAnimation *animation;
+    NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
+    NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
+    
+    animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
+    [fadeOutDict release];
+    [fadeInDict release];
+    
+    [animation setAnimationBlockingMode:NSAnimationNonblockingThreaded];
+    [animation setDuration:0.75];
+    [animation setAnimationCurve:NSAnimationEaseIn];
+    [animation setDelegate:self];
+    [animation startAnimation];
+    
+    [view removeFromSuperview];
+    
+    [searchField setTarget:self];
+    [searchField setDelegate:self];
+    [searchField setAction:@selector(searchFieldAction:)];
+        
 }
 
 #pragma mark Find panel
