@@ -42,6 +42,7 @@
 #import "BibItem.h"
 #import "BibPrefController.h"
 #import "BibAppController.h"
+#import "BDSKDocumentProtocol.h"
 
 @implementation BibDeskParseFormatCommand
 
