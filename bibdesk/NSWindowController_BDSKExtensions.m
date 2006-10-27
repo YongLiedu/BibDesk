@@ -39,7 +39,9 @@
 #import "NSWindowController_BDSKExtensions.h"
 
 
-@interface NSWindow (BDSKExtensions) @end
+@interface NSWindow (BDSKExtensions)
+- (void)replacementSetRepresentedFilename:(NSString *)path;
+@end
 
 
 @implementation NSWindowController (BDSKExtensions)
