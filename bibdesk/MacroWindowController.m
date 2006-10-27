@@ -50,7 +50,7 @@
 #import "BDSKGroup.h"
 #import "BibItem.h"
 #import "BDSKMacroResolver.h"
-
+#import "NSWindowController_BDSKExtensions.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "BDSKTypeSelectHelper.h"
 
@@ -127,6 +127,10 @@
     if ([NSString isEmptyString:displayName] == NO)
         title = [NSString stringWithFormat:@"%@ - %@", title, displayName];
     return title;
+}
+
+- (NSString *)windowRepresentedFilename:(NSString *)path{
+    return [[macroResolver document] isDocument] ? path : @"";
 }
 
 - (BDSKMacroResolver *)macroResolver{

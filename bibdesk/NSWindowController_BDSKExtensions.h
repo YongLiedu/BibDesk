@@ -45,4 +45,6 @@
 - (IBAction)hideWindow:(id)sender;
 - (IBAction)toggleShowingWindow:(id)sender;
 
+- (NSString *)windowRepresentedFilename:(NSString *)path;
+
 @end

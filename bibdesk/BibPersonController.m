@@ -47,6 +47,7 @@
 #import "BDSKCollapsibleView.h"
 #import "BDSKDragImageView.h"
 #import "BDSKPublicationsArray.h"
+#import "NSWindowController_BDSKExtensions.h"
 #import <AddressBook/AddressBook.h>
 
 @implementation BibPersonController
@@ -114,6 +115,10 @@
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     return [person name];
+}
+
+- (NSString *)windowRepresentedFilename:(NSString *)path{
+    return [[[person publication] document] isDocument] ? path : @"";
 }
 
 #pragma mark accessors

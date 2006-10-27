@@ -79,6 +79,7 @@
 #import "BDSKWebOfScienceParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "PDFDocument_BDSKExtensions.h"
+#import "NSWindowController_BDSKExtensions.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -111,11 +112,6 @@ static int numberOfOpenEditors = 0;
 
 - (NSString *)windowNibName{
     return @"BibEditor";
-}
-
-- (NSString *)representedFilename{
-    NSString *fname = [publication localUrlPath];
-    return fname ? fname : @"";
 }
 
 - (id)initWithPublication:(BibItem *)aBib{
@@ -288,6 +284,11 @@ static int numberOfOpenEditors = 0;
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     return [publication displayTitle];
+}
+
+- (NSString *)windowRepresentedFilename:(NSString *)path{
+    NSString *fname = [publication localUrlPath];
+    return fname ? fname : @"";
 }
 
 - (BibItem *)publication{

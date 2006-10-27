@@ -39,6 +39,9 @@
 #import "NSWindowController_BDSKExtensions.h"
 
 
+@interface NSWindow (BDSKExtensions) @end
+
+
 @implementation NSWindowController (BDSKExtensions)
 
 - (BOOL)isWindowVisible;
@@ -56,6 +59,31 @@
     }else{
 		[self showWindow:sender];
     }
+}
+
+- (NSString *)windowRepresentedFilename:(NSString *)path;
+{
+    return path;
+}
+
+@end
+
+
+@implementation NSWindow (BDSKExtensions)
+
+static IMP originalSetRepresentedFilename;
+
++ (void)didLoad;
+{
+    originalSetRepresentedFilename = OBReplaceMethodImplementationWithSelector(self, @selector(setRepresentedFilename:), @selector(replacementSetRepresentedFilename:));
+}
+
+// see bug #1471488; overriding representedFilename is not sufficient; apparently the window doesn't use its accessor
+- (void)replacementSetRepresentedFilename:(NSString *)path;
+{
+    if ([self windowController])
+        path = [[self windowController] windowRepresentedFilename:path];
+    originalSetRepresentedFilename(self, _cmd, path);
 }
 
 @end

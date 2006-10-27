@@ -37,18 +37,6 @@
 
 @implementation BDSKDragWindow
 
-// see bug #1471488; now that BibEditor has a reference to its NSDocument, the document is used as represented filename
-// overriding representedFilename alone is not sufficient; apparently the window doesn't use its accessor
-- (void)setRepresentedFilename:(NSString *)fname{
-    // give the delegate (should be BibEditor) a chance to override
-    fname = [[self delegate] respondsToSelector:@selector(representedFilename)] ? [[self delegate] representedFilename] : fname;
-    [super setRepresentedFilename:fname];
-}
-
-- (NSString *)representedFilename{
-    return [[self delegate] respondsToSelector:_cmd] ? [[self delegate] performSelector:_cmd] : [super representedFilename];
-}
-
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender {
     if ([[self delegate] respondsToSelector:@selector(dragWindow:receiveDrag:)] && 
         [[self delegate] respondsToSelector:@selector(dragWindow:canReceiveDrag:)]) {
