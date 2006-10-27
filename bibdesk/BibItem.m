@@ -537,7 +537,8 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
         if(personStr != nil){
             // parse into an array of author objects
             tmpPeople = [[BibTeXParser authorsFromBibtexString:personStr withPublication:self] mutableCopy];
-            [people setObject:tmpPeople forKey:personType];
+            if([tmpPeople count])
+                [people setObject:tmpPeople forKey:personType];
             [tmpPeople release];
         }
     }
