@@ -260,5 +260,6 @@
 - (BOOL)isPersonField;
 - (BOOL)isSingleValuedField;
 - (BOOL)isURLField;
+- (BOOL)isNoteField;
 
 @end

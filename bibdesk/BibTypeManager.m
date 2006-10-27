@@ -623,5 +623,6 @@ static BibTypeManager *sharedInstance = nil;
 - (BOOL)isPersonField { return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:self]; }
 - (BOOL)isSingleValuedField { return [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:self]; }
 - (BOOL)isURLField { return [[BibTypeManager sharedManager] isURLField:self]; }
+- (BOOL)isNoteField { return [[BibTypeManager sharedManager] isNoteField:self]; }
 
 @end

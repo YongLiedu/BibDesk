@@ -1319,7 +1319,7 @@
 	
     
     // convert newlines to a single space, then collapse (RFE #1480354)
-    if ([[BibTypeManager sharedManager] isNoteField:selKey] == NO && [selString containsCharacterInSet:[NSCharacterSet newlineCharacterSet]] == YES) {
+    if ([selKey isNoteField] == NO && [selString containsCharacterInSet:[NSCharacterSet newlineCharacterSet]] == YES) {
         selString = [selString stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
         selString = [selString fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
     }

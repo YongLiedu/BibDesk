@@ -2101,7 +2101,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
     }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:tcID] ||
              [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID] ||
-             [[BibTypeManager sharedManager] isURLField:tcID]){
+             [tcID isURLField]){
         
         // use the triStateCompare: for URL fields so the subsort is more useful (this turns the URL comparison into empty/non-empty)
         sortDescriptor = [[NSSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(triStateCompare:)];

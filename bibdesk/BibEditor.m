@@ -1752,7 +1752,7 @@ static int numberOfOpenEditors = 0;
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     NSString *oldValue = [[[publication valueOfField:fieldName] copy] autorelease];
-    BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalFileField:fieldName];
+    BOOL isLocalFile = [fieldName isLocalFileField];
     NSURL *oldURL = (isLocalFile) ? [[publication URLForField:fieldName] fileURLByResolvingAliases] : nil;
     
     [publication setField:fieldName toValue:value];
@@ -2194,7 +2194,7 @@ static int numberOfOpenEditors = 0;
 
 - (BOOL)formCellHasFileIcon:(id)cell{
     NSString *title = [cell title];
-    if ([[BibTypeManager sharedManager] isURLField:title]) {
+    if ([title isURLField]) {
 		// if we inherit a field, we don't show the file icon but the arrow button
 		NSString *url = [publication valueOfField:title inherit:NO];
 		// we could also check for validity here
@@ -2274,7 +2274,7 @@ static int numberOfOpenEditors = 0;
 	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
 	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
 	
-	if ([[BibTypeManager sharedManager] isLocalFileField:field]) {
+	if ([field isLocalFileField]) {
 		if ([dragType isEqualToString:NSFilenamesPboardType]) {
 			return NSDragOperationEvery;
 		} else if ([dragType isEqualToString:NSURLPboardType]) {
@@ -2285,7 +2285,7 @@ static int numberOfOpenEditors = 0;
 				return NSDragOperationEvery;
 		}
 		return NSDragOperationNone;
-	} else if ([[BibTypeManager sharedManager] isRemoteURLField:field]){
+	} else if ([field isRemoteURLField]){
 		if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
 			return NSDragOperationEvery;
 		} else if ([dragType isEqualToString:NSURLPboardType]) {
@@ -2309,7 +2309,7 @@ static int numberOfOpenEditors = 0;
 	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
 	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     
-	if ([[BibTypeManager sharedManager] isLocalFileField:field]) {
+	if ([field isLocalFileField]) {
 		// a file, we link the local file field
 		NSURL *fileURL = nil;
 		
@@ -2339,7 +2339,7 @@ static int numberOfOpenEditors = 0;
         
 		return YES;
 		
-	} else if ([[BibTypeManager sharedManager] isRemoteURLField:field]){
+	} else if ([field isRemoteURLField]){
 		// Check first for webloc files because we want to treat them differently    
 		if ([dragType isEqualToString:BDSKWeblocFilePboardType]) {
 			

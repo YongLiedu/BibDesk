@@ -182,7 +182,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                         [tmpStr release];
                         
                         // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
-                        if([[BibTypeManager sharedManager] isNoteField:sFieldName]){
+                        if([sFieldName isNoteField]){
                             tmpStr = copyStringFromNoteField(field, buf, filePath, parserEncoding, &error);
                             if(nil == tmpStr){
                                 // this can happen with badly formed annote/abstract fields, and leads to data loss
