@@ -40,6 +40,9 @@
 #import "BDSKReadMeController.h"
 #import "NSError_BDSKExtensions.h"
 
+#define PROPERTY_LIST_URL @"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"
+#define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
+
 @interface BDSKUpdateChecker (Private)
 
 - (NSURL *)propertyListURL;
@@ -188,7 +191,7 @@ static id sharedInstance = nil;
 
 - (NSURL *)propertyListURL;
 {
-    return [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"];
+    return [NSURL URLWithString:PROPERTY_LIST_URL];
 }
 
 // we assume this is only called /after/ a successful plist download; if not, it returns nil
@@ -459,11 +462,16 @@ static id sharedInstance = nil;
 - (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
 {
     int button;
-    button = NSRunAlertPanel(NSLocalizedString(@"A New Version is Available", @"Alert when new version is available"),
-                             NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version"),
-                             NSLocalizedString(@"Download", @""), NSLocalizedString(@"View Release Notes", @"button title"), NSLocalizedString(@"Ignore",@"Ignore"), latestVersionNumber, nil);
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"A New Version is Available", @"Alert when new version is available")
+                                     defaultButton:NSLocalizedString(@"Download", @"")
+                                   alternateButton:NSLocalizedString(@"View Release Notes", @"button title")
+                                       otherButton:NSLocalizedString(@"Ignore",@"Ignore")
+                         informativeTextWithFormat:NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version"), latestVersionNumber];
+                                        
+    button = [alert runModal];
+    
     if (button == NSAlertDefaultReturn) {
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:DOWNLOAD_URL]];
     } else if (button == NSAlertAlternateReturn) {
         [self downloadAndDisplayReleaseNotes];
     }
