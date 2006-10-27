@@ -199,7 +199,7 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
                     
                     @try{ keyValue = [object valueForKeyPath:tag]; }
                     @catch (id exception) { keyValue = nil; }
-                    if (keyValue && [keyValue isEqual:@""] == NO && [keyValue isEqual:[NSNumber numberWithBool:NO]] == NO) {
+                    if ([keyValue isNotEmpty]) {
                         keyValue = [self stringByParsingTemplate:nonEmptyTemplate usingObject:object delegate:delegate];
                     } else if (emptyTemplate != nil) {
                         keyValue = [self stringByParsingTemplate:emptyTemplate usingObject:object delegate:delegate];
@@ -377,7 +377,7 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
                     
                     @try{ keyValue = [object valueForKeyPath:tag]; }
                     @catch (id exception) { keyValue = nil; }
-                    if (keyValue && [keyValue isEqual:@""] == NO && [keyValue isEqual:[NSNumber numberWithBool:NO]] == NO) {
+                    if ([keyValue isNotEmpty]) {
                         tmpAttrStr = [self attributedStringByParsingTemplate:nonEmptyTemplate usingObject:object delegate:delegate];
                     } else if (emptyTemplate != nil) {
                         tmpAttrStr = [self attributedStringByParsingTemplate:emptyTemplate usingObject:object delegate:delegate];
@@ -483,6 +483,10 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
     return [self description];
 }
 
+- (BOOL)isNotEmpty {
+    return YES;
+}
+
 @end
 
 
@@ -510,6 +514,7 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
 }
 
 @end
+
 
 @implementation NSString (BDSKTemplateParser)
 
@@ -556,6 +561,41 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
 - (NSString *)parenthesizedStringIfNotEmpty
 {
     return [self isEqualToString:@""] ? self : [NSString stringWithFormat:@"(%@)", self];
+}
+
+- (BOOL)isNotEmpty
+{
+    return [self isEqualToString:@""] == NO;
+}
+
+@end
+
+
+@implementation NSNumber (BDSKTemplateParser)
+
+- (BOOL)isNotEmpty
+{
+    return [self isEqualToNumber:[NSNumber numberWithBool:NO]] == NO;
+}
+
+@end
+
+
+@implementation NSArray (BDSKTemplateParser)
+
+- (BOOL)isNotEmpty
+{
+    return [self count] > 0;
+}
+
+@end
+
+
+@implementation NSDictionary (BDSKTemplateParser)
+
+- (BOOL)isNotEmpty
+{
+    return [self count] > 0;
 }
 
 @end
