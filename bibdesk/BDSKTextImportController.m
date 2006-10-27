@@ -263,14 +263,21 @@
     BibItem *newItem = (optionKey) ? [item copy] : [[BibItem alloc] init];
     
     // make the tableview stop editing:
-    [[self window] makeFirstResponder:[self window]];
-    
-    if ([item hasEmptyOrDefaultCiteKey])
-        [item setCiteKey:[item suggestedCiteKey]];
+    if([[self window] makeFirstResponder:[self window]] == NO)
+        [[self window] endEditingFor:nil];
     
 	[itemsAdded addObject:item];
     [document addPublication:item];
+    
+    if ([item hasEmptyOrDefaultCiteKey])
+        [item setCiteKey:[item suggestedCiteKey]];
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
+       [item needsToBeFiled] && [item canSetLocalUrl]){
+        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
+        [item setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+    }
     [item release];
+    
     item = newItem;
     [item setDocument:self];
 	
@@ -286,7 +293,8 @@
 
 - (IBAction)closeAction:(id)sender{
     // make the tableview stop editing:
-    [[self window] makeFirstResponder:[self window]];
+    if([[self window] makeFirstResponder:[self window]] == NO)
+        [[self window] endEditingFor:nil];
     [super dismiss:sender];
 }
 
@@ -439,12 +447,55 @@
 }
 
 - (IBAction)generateCiteKey:(id)sender{
-	[item setCiteKey:[item suggestedCiteKey]];
+    // make the tableview stop editing:
+    if([[self window] makeFirstResponder:[self window]] == NO)
+        [[self window] endEditingFor:nil];
+	
+    [item setCiteKey:[item suggestedCiteKey]];
     [[item undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
 }
 
 - (IBAction)showCiteKeyWarning:(id)sender{
     NSBeginAlertSheet(NSLocalizedString(@"Duplicate Cite Key", @""),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.",@""));
+}
+
+- (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSAlertAlternateReturn){
+        return;
+    }else if(returnCode == NSAlertOtherReturn){
+        [item setNeedsToBeFiled:YES];
+        return;
+    }
+    
+	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Move File",@"")];
+}
+
+- (IBAction)consolidateLinkedFiles:(id)sender{
+    // make the tableview stop editing:
+    if([[self window] makeFirstResponder:[self window]] == NO)
+        [[self window] endEditingFor:nil];
+	
+	if ([item canSetLocalUrl] == NO){
+		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
+		NSString *otherButton = nil;
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?",@""),
+			otherButton = NSLocalizedString(@"Wait",@"Wait");
+		}
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning",@"Warning") 
+                                         defaultButton:NSLocalizedString(@"File Now",@"File without waiting")
+                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
+                                           otherButton:otherButton
+                             informativeTextWithFormat:message];
+        [alert beginSheetModalForWindow:[self window]
+                          modalDelegate:self
+                         didEndSelector:@selector(consolidateAlertDidEnd:returnCode:contextInfo:) 
+                            contextInfo:NULL];
+	} else {
+        [self consolidateAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
+    }
 }
 
 #pragma mark WebView contextual menu actions
@@ -980,6 +1031,14 @@
 	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
 		int row = [itemTableView selectedRow];
 		return (row != -1 && ![macroTextFieldWC isEditing] && ![[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString]);
+	} else if ([menuItem action] == @selector(generateCiteKey:)) {
+		// need to set the title, as the document can change it in the main menu
+		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
+		return YES;
+	} else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
+		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
+		NSString *lurl = [item localUrlPath];
+		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	} else if ([menuItem action] == @selector(undo:)) {
         NSString *title = [undoManager undoActionName];
         title = [NSString isEmptyString:title] ? NSLocalizedString(@"Undo", @"Undo") : [NSString stringWithFormat:NSLocalizedString(@"Undo %@", @"Undo %@"), title];
@@ -1365,11 +1424,6 @@
         [self generateCiteKey:nil];
         if ([item hasEmptyOrDefaultCiteKey] == NO)
             [statusLine setStringValue:NSLocalizedString(@"Autogenerated Cite Key.", @"Autogenerated Cite Key.")];
-    }
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
-       [item needsToBeFiled] && [item canSetLocalUrl]){
-        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
-        [item setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
     }
     [itemTableView reloadData];
 }
