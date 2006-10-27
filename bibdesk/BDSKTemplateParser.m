@@ -39,6 +39,7 @@
 #import "BDSKTemplateParser.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
+#import "BibAuthor.h"
 
 #define STARTTAG_OPEN_DELIM @"<$"
 #define ENDTAG_OPEN_DELIM @"</$"
@@ -571,6 +572,15 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
 @end
 
 
+@implementation NSAttributedString (BDSKTemplateParser)
+
+- (BOOL)isNotEmpty
+{
+    return [self length] > 0;
+}
+
+@end
+
 @implementation NSNumber (BDSKTemplateParser)
 
 - (BOOL)isNotEmpty
@@ -596,6 +606,26 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
 - (BOOL)isNotEmpty
 {
     return [self count] > 0;
+}
+
+@end
+
+
+@implementation NSSet (BDSKTemplateParser)
+
+- (BOOL)isNotEmpty
+{
+    return [self count] > 0;
+}
+
+@end
+
+
+@implementation BibAuthor (BDSKTemplateParser)
+
+- (BOOL)isNotEmpty
+{
+    return [BibAuthor emptyAuthor] != self;
 }
 
 @end

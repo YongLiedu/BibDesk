@@ -80,15 +80,3 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 @interface NSScanner (BDSKTemplateParser)
 - (BOOL)scanEmptyLine;
 @end
-
-
-@interface NSNumber (BDSKTemplateParser)
-@end
-
-
-@interface NSArray (BDSKTemplateParser)
-@end
-
-
-@interface NSDictionary (BDSKTemplateParser)
-@end
