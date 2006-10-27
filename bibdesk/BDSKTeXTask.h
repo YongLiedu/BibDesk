@@ -92,10 +92,17 @@ enum {
 - (NSData *)PDFData;
 - (NSData *)RTFData;
 
+- (NSString *)logFilePath;
+- (NSString *)LTBFilePath;
+- (NSString *)LaTeXFilePath;
+- (NSString *)PDFFilePath;
+- (NSString *)RTFFilePath;
+
 - (BOOL)hasLTB;
 - (BOOL)hasLaTeX;
 - (BOOL)hasPDFData;
 - (BOOL)hasRTFData;
+
 - (BOOL)isProcessing;
 - (void)terminate;
 

@@ -358,6 +358,26 @@
     return data;
 }
 
+- (NSString *)logFilePath{
+    return logFilePath;
+}
+
+- (NSString *)LTBFilePath{
+    return [self hasLTB] ? bblFilePath : nil;
+}
+
+- (NSString *)LaTeXFilePath{
+    return [self hasLaTeX] ? bblFilePath : nil;
+}
+
+- (NSString *)PDFFilePath{
+    return [self hasPDFData] ? pdfFilePath : nil;
+}
+
+- (NSString *)RTFFilePath{
+    return [self hasRTFData] ? rtfFilePath : nil;
+}
+
 - (BOOL)hasLTB{
     volatile BOOL status = OFSimpleLockTry(&hasDataLock);
     if(!status)

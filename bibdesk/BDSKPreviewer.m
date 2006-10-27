@@ -131,6 +131,22 @@ static BDSKPreviewer *thePreviewer;
     return @"Previewer";
 }
 
+- (void)updateRepresentedFilename
+{
+    NSString *path = nil;
+	if([self previewState] == BDSKShowingPreviewState){
+        path = ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0) ? [texTask PDFFilePath] : [texTask RTFFilePath];
+        if(path == nil)
+            path = [texTask logFilePath];
+    }
+    [[self window] setRepresentedFilename:path ? path : @""];
+}
+
+- (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
+{
+    [self updateRepresentedFilename];
+}
+
 #pragma mark Actions
 
 - (IBAction)showWindow:(id)sender{
@@ -209,7 +225,7 @@ static BDSKPreviewer *thePreviewer;
         return;
     }
 	
-	NSString *message = nil;
+    NSString *message = nil;
     NSData *pdfData = nil;
 	NSAttributedString *attrString = nil;
 	static NSData *emptyMessagePDFData = nil;
@@ -217,7 +233,7 @@ static BDSKPreviewer *thePreviewer;
 	
 	// get the data to display
 	if(state == BDSKShowingPreviewState){
-		
+        
         NSData *rtfData = nil;
 		if([texTask hasRTFData] && (rtfData = [texTask RTFData]) != nil)
 			attrString = [[NSAttributedString alloc] initWithRTF:rtfData documentAttributes:NULL];
@@ -233,7 +249,7 @@ static BDSKPreviewer *thePreviewer;
 			pdfData = [self PDFDataWithString:errorString color:[NSColor redColor]];
 			[errorString release];
 		}
-		
+        
 	}else if(state == BDSKEmptyPreviewState){
 		
 		message = NSLocalizedString(@"No items are selected.", @"No items are selected.");
@@ -271,6 +287,7 @@ static BDSKPreviewer *thePreviewer;
         [ts addAttribute:NSForegroundColorAttributeName value:[NSColor grayColor] range:NSMakeRange(0, [ts length])];
 	}
     
+    [self updateRepresentedFilename];
 }	
 
 - (void)drawPreviewsForState:(int)state{
