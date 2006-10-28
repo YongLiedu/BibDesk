@@ -69,6 +69,7 @@
 #import "BDSKGroupTableView.h"
 #import "BDSKSplitView.h"
 #import "BDSKShellTask.h"
+#import "BDSKColoredBox.h"
 
 
 @implementation BibDocument (Actions)
