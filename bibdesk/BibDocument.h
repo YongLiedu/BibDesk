@@ -45,7 +45,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -95,7 +95,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
     IBOutlet BDSKSplitView* splitView;
-    IBOutlet NSBox* mainBox;
+    IBOutlet BDSKColoredBox* mainBox;
     // for the splitview double-click handling
     float lastPreviewHeight;
 	

@@ -110,6 +110,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKShellTask.h"
 #import "NSError_BDSKExtensions.h"
+#import "BDSKColoredBox.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -470,6 +471,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     
     // it might be replaced by the file content search view
     [splitView retain];
+    [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
     
     // TableView setup
     [tableView removeAllTableColumns];

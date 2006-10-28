@@ -5,6 +5,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = BDSKContainerView; 
         }, 
+        {CLASS = BDSKColoredBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }, 
         {
             CLASS = BDSKContainerView; 
             LANGUAGE = ObjC; 
@@ -155,7 +156,7 @@
                 groupMenu = NSMenu; 
                 groupSplitView = BDSKSplitView; 
                 groupTableView = BDSKGroupTableView; 
-                mainBox = NSBox; 
+                mainBox = BDSKColoredBox; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
