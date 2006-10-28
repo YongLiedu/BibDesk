@@ -441,42 +441,53 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [animation setAnimationBlockingMode:NSAnimationNonblockingThreaded];
     [animation setDuration:0.75];
     [animation setAnimationCurve:NSAnimationEaseIn];
+    [animation setDelegate:self];
     [animation startAnimation];
-    
-    [splitView retain];
-    [splitView removeFromSuperview];
-    
-    [searchField setTarget:fileSearchController];
-    [searchField setAction:@selector(search:)];
-    [searchField setDelegate:fileSearchController];
-    
-    [fileSearchController search:searchField];
-    
 }
 
 // use the delegate method so we don't mess with the table's scrollview until animation is done (or it's unreliable)
 - (void)animationDidEnd:(NSAnimation*)animation
 {
-    NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
-    
-    if([titlesToSelect count]){
+    if([splitView isHidden]){
         
-        // clear current selection (just in case)
-        [tableView deselectAll:nil];
+        [splitView retain];
+        [splitView removeFromSuperview];
         
-        // we match based on title, since that's all the index knows about the BibItem at present
-        NSMutableArray *pubsToSelect = [NSMutableArray array];
-		NSEnumerator *pubEnum = [shownPublications objectEnumerator];
-        BibItem *item;
-        while(item = [pubEnum nextObject])
-            if([titlesToSelect containsObject:[item title]]) 
-                [pubsToSelect addObject:item];
-		[self highlightBibs:pubsToSelect];
-        [tableView scrollRowToCenter:[tableView selectedRow]];
+        [searchField setTarget:fileSearchController];
+        [searchField setAction:@selector(search:)];
+        [searchField setDelegate:fileSearchController];
         
-        // annoying to select something in the table and then have focus switch back to the search field
-        [documentWindow makeFirstResponder:(NSResponder *)tableView];
-    }     
+        [fileSearchController search:searchField];
+        
+    } else {
+        
+        [[fileSearchController searchContentView] removeFromSuperview];
+        
+        [searchField setTarget:self];
+        [searchField setDelegate:self];
+        [searchField setAction:@selector(searchFieldAction:)];
+        
+        NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
+        
+        if([titlesToSelect count]){
+            
+            // clear current selection (just in case)
+            [tableView deselectAll:nil];
+            
+            // we match based on title, since that's all the index knows about the BibItem at present
+            NSMutableArray *pubsToSelect = [NSMutableArray array];
+            NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+            BibItem *item;
+            while(item = [pubEnum nextObject])
+                if([titlesToSelect containsObject:[item title]]) 
+                    [pubsToSelect addObject:item];
+            [self highlightBibs:pubsToSelect];
+            [tableView scrollRowToCenter:[tableView selectedRow]];
+            
+            // annoying to select something in the table and then have focus switch back to the search field
+            [documentWindow makeFirstResponder:(NSResponder *)tableView];
+        }
+    }
 }
 
 // Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
@@ -501,13 +512,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [animation setAnimationCurve:NSAnimationEaseIn];
     [animation setDelegate:self];
     [animation startAnimation];
-    
-    [view removeFromSuperview];
-    
-    [searchField setTarget:self];
-    [searchField setDelegate:self];
-    [searchField setAction:@selector(searchFieldAction:)];
-        
 }
 
 #pragma mark Find panel
