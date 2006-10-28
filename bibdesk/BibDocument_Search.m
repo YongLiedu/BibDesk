@@ -443,19 +443,47 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [animation setAnimationCurve:NSAnimationEaseIn];
     [animation setDelegate:self];
     [animation startAnimation];
-    
-    // @@ this is called immediately, before the animation is finished; is that OK?
-    [searchField setTarget:fileSearchController];
-    [searchField setAction:@selector(search:)];
-    [searchField setDelegate:fileSearchController];
-    
-    [fileSearchController search:searchField];
 }
 
 - (void)finishAnimation
 {
-    NSView *view = [splitView isHidden] ? splitView : [fileSearchController searchContentView];
-    [view removeFromSuperview];
+    if([splitView isHidden]){
+        
+        [splitView removeFromSuperview];
+        
+        [searchField setTarget:fileSearchController];
+        [searchField setAction:@selector(search:)];
+        [searchField setDelegate:fileSearchController];
+        
+        [fileSearchController search:searchField];
+        
+    } else {
+        
+        [searchField setTarget:self];
+        [searchField setDelegate:self];
+        [searchField setAction:@selector(searchFieldAction:)];
+        
+        NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
+        
+        if([titlesToSelect count]){
+            
+            // clear current selection (just in case)
+            [tableView deselectAll:nil];
+            
+            // we match based on title, since that's all the index knows about the BibItem at present
+            NSMutableArray *pubsToSelect = [NSMutableArray array];
+            NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+            BibItem *item;
+            while(item = [pubEnum nextObject])
+                if([titlesToSelect containsObject:[item title]]) 
+                    [pubsToSelect addObject:item];
+            [self highlightBibs:pubsToSelect];
+            [tableView scrollRowToCenter:[tableView selectedRow]];
+            
+            // @@ I don't think we should select the tableView, as the user was just editing the search field
+        }
+        
+    }
 }
 
 // use the delegate method so we don't remove the view too early, but this must be done on the main thread
@@ -485,31 +513,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [animation setAnimationCurve:NSAnimationEaseIn];
     [animation setDelegate:self];
     [animation startAnimation];
-    
-    // @@ this is called immediately, before the animation is finished; is that OK?
-    [searchField setTarget:self];
-    [searchField setDelegate:self];
-    [searchField setAction:@selector(searchFieldAction:)];
-    
-    NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
-    
-    if([titlesToSelect count]){
-        
-        // clear current selection (just in case)
-        [tableView deselectAll:nil];
-        
-        // we match based on title, since that's all the index knows about the BibItem at present
-        NSMutableArray *pubsToSelect = [NSMutableArray array];
-        NSEnumerator *pubEnum = [shownPublications objectEnumerator];
-        BibItem *item;
-        while(item = [pubEnum nextObject])
-            if([titlesToSelect containsObject:[item title]]) 
-                [pubsToSelect addObject:item];
-        [self highlightBibs:pubsToSelect];
-        [tableView scrollRowToCenter:[tableView selectedRow]];
-        
-        // @@ I don't think we should select the tableView, as the user was just editing the search field
-    }
 }
 
 #pragma mark Find panel
