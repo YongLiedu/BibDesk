@@ -21,7 +21,6 @@
             ACTIONS = {dismiss = id; }; 
             CLASS = BDSKSheetController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {}; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = BDSKTeXFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
