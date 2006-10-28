@@ -42,33 +42,40 @@
 
 #define PROPERTY_LIST_URL @"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
+#define BIBDESK_VERSION_KEY @"BibDesk"
 
 @interface BDSKUpdateChecker (Private)
 
 - (NSURL *)propertyListURL;
+- (NSURL *)releaseNotesURLForVersion:(NSString *)versionString;
+- (NSString *)keyForVersion:(NSString *)versionString;
+- (OFVersionNumber *)latestReleasedVersionNumber;
+- (OFVersionNumber *)latestReleasedVersionNumberForCurrentMajor;
+- (OFVersionNumber *)latestNotifiedVersionNumber;
+- (OFVersionNumber *)localVersionNumber;
+- (BOOL)downloadPropertyListFromServer:(NSError **)error;
+
 - (void)handleUpdateIntervalChanged:(NSNotification *)note;
 - (void)setUpdateTimer:(NSTimer *)aTimer;
-- (OFVersionNumber *)localVersionNumber;
-- (NSURL *)releaseNotesURL;
-- (NSString *)keyForCurrentMajorVersion;
-- (BOOL)downloadPropertyListFromServer:(NSError **)error;
-- (OFVersionNumber *)latestReleasedVersionNumber;
 - (CFGregorianUnits)updateCheckGregorianUnits;
 - (NSTimeInterval)updateCheckTimeInterval;
 - (NSDate *)nextUpdateCheckDate;
 - (BOOL)checkForNetworkAvailability:(NSError **)error;
 - (void)checkForUpdatesInBackground:(NSTimer *)timer;
 - (void)checkForUpdatesInBackground;
-- (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
+
+- (void)displayUpdateAvailableWindow:(NSString *)latestVersion alternativeVersion:(NSString *)altLatestVersion;
+- (void)downloadAndDisplayReleaseNotesForVersion:(NSString *)versionString;
 
 @end
 
-static id sharedInstance = nil;
+#pragma mark -
 
 @implementation BDSKUpdateChecker
 
 + (id)sharedChecker;
 {
+    static id sharedInstance = nil;
     if (nil == sharedInstance)
         sharedInstance = [[self alloc] init];
     return sharedInstance;
@@ -79,7 +86,13 @@ static id sharedInstance = nil;
     if (self = [super init]) {
         plistLock = [[NSLock alloc] init];
         propertyListFromServer = nil;
+        keyForCurrentMajorVersion = nil;
         updateTimer = nil;
+        
+        NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+        localVersionNumber = [[OFVersionNumber alloc] initWithVersionString:versionString];
+        keyForCurrentMajorVersion = [[self keyForVersion:versionString] retain];
+        
         [OFPreference addObserver:self 
                          selector:@selector(handleUpdateIntervalChanged:) 
                     forPreference:[OFPreference preferenceForKey:BDSKUpdateCheckIntervalKey]];
@@ -102,6 +115,12 @@ static id sharedInstance = nil;
     [plistLock unlock];
     [plistLock release];
     plistLock = nil;
+    
+    // ...well, also these, but they don't change and dealloc is never called anyway
+    [localVersionNumber release];
+    localVersionNumber = nil;
+    [keyForCurrentMajorVersion release];
+    keyForCurrentMajorVersion = nil;
     
     [super dealloc];
 }
@@ -152,17 +171,30 @@ static id sharedInstance = nil;
     }
     
     OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber];
+    OFVersionNumber *remoteVersionForCurrentMajor = [self latestReleasedVersionNumberForCurrentMajor];
+    OFVersionNumber *localVersion = [self localVersionNumber];
+    OFVersionNumber *notifiedVersion = [self latestNotifiedVersionNumber];
     
-    if (nil != remoteVersion) {
-        
-        if([remoteVersion compareToVersionNumber:[self localVersionNumber]] == NSOrderedDescending){
-            [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString]];
-        } else {
-            // tell user software is up to date
-            NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
-                            NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
-                            nil, nil, nil);                
-        }
+    // simplification if we already have the latest major
+    if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:remoteVersion] != NSOrderedAscending){
+        remoteVersion = nil;
+    }
+    
+    if(remoteVersion && (notifiedVersion == nil || [notifiedVersion compareToVersionNumber:remoteVersion] == NSOrderedAscending)){
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersion cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+    } else if(remoteVersionForCurrentMajor && (notifiedVersion == nil || [notifiedVersion compareToVersionNumber:remoteVersionForCurrentMajor] == NSOrderedAscending)){
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersionForCurrentMajor cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+    }
+    
+    if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:localVersion] == NSOrderedDescending){
+        [self displayUpdateAvailableWindow:[remoteVersionForCurrentMajor cleanVersionString] alternativeVersion:[remoteVersion cleanVersionString]];
+    } else if(remoteVersion && [remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
+        [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString] alternativeVersion:nil];
+    } else if(remoteVersionForCurrentMajor || remoteVersion){
+        // tell user software is up to date
+        NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
+                        NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
+                        nil, nil, nil);                
     } else {
         
         // likely an error page or other download failure
@@ -173,21 +205,11 @@ static id sharedInstance = nil;
 
 @end
 
+#pragma mark -
+
 @implementation BDSKUpdateChecker (Private)
 
-- (void)handleUpdateIntervalChanged:(NSNotification *)note;
-{
-    [self scheduleUpdateCheckIfNeeded];
-}
-
-- (void)setUpdateTimer:(NSTimer *)aTimer;
-{
-    if (updateTimer != aTimer) {
-        [updateTimer invalidate];
-        [updateTimer release];
-        updateTimer = [aTimer retain];
-    }
-}
+#pragma mark Property list
 
 - (NSURL *)propertyListURL;
 {
@@ -195,10 +217,10 @@ static id sharedInstance = nil;
 }
 
 // we assume this is only called /after/ a successful plist download; if not, it returns nil
-- (NSURL *)releaseNotesURL;
+- (NSURL *)releaseNotesURLForVersion:(NSString *)versionString;
 {
     [plistLock lock];
-    NSString *URLString = [[[[propertyListFromServer objectForKey:[self keyForCurrentMajorVersion]] objectForKey:@"ReleaseNotesBaseURL"] copy] autorelease];
+    NSString *URLString = [[[[propertyListFromServer objectForKey:[self keyForVersion:versionString]] objectForKey:@"ReleaseNotesBaseURL"] copy] autorelease];
     [plistLock unlock];
     
     NSString *resourcePath = [[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"];
@@ -212,11 +234,42 @@ static id sharedInstance = nil;
 }
 
 // string of the form BibDesk1.3 for BibDesk 1.3.x; update check info is keyed to a specific branch of development
-- (NSString *)keyForCurrentMajorVersion;
+- (NSString *)keyForVersion:(NSString *)versionString;
 {
-    OFVersionNumber *localVersion = [self localVersionNumber];
-    NSAssert([localVersion componentCount] == 3, @"expect 3 version components");
-    return [NSString stringWithFormat:@"%@%d.%d", @"BibDesk", [localVersion componentAtIndex:0], [localVersion componentAtIndex:1]];
+    OFVersionNumber *versionNumber = [[[OFVersionNumber alloc] initWithVersionString:versionString] autorelease];
+    NSAssert([versionNumber componentCount] > 1, @"expect at least 2 version components");
+    return [NSString stringWithFormat:@"%@%d.%d", BIBDESK_VERSION_KEY, [versionNumber componentAtIndex:0], [versionNumber componentAtIndex:1]];
+}
+
+- (OFVersionNumber *)latestReleasedVersionNumber;
+{
+    [plistLock lock];
+    NSString *versionString = [[[propertyListFromServer objectForKey:BIBDESK_VERSION_KEY] copy] autorelease];
+    [plistLock unlock];
+    OFVersionNumber *versionNumber = versionString ? [[[OFVersionNumber alloc] initWithVersionString:versionString] autorelease] : nil;
+    return versionNumber;
+}
+
+- (OFVersionNumber *)latestReleasedVersionNumberForCurrentMajor;
+{
+    [plistLock lock];
+    NSDictionary *thisBranchDictionary = [[propertyListFromServer objectForKey:keyForCurrentMajorVersion] copy];
+    [plistLock unlock];
+    OFVersionNumber *versionNumber = thisBranchDictionary ? [[[OFVersionNumber alloc] initWithVersionString:[thisBranchDictionary valueForKey:@"LatestVersion"]] autorelease] : nil;
+    [thisBranchDictionary release];
+    return versionNumber;
+}
+
+- (OFVersionNumber *)latestNotifiedVersionNumber;
+{
+    NSString *versionString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKUpdateLatestNotifiedVersionKey];
+    OFVersionNumber *versionNumber = [[[OFVersionNumber alloc] initWithVersionString:versionString] autorelease];
+    return versionNumber;
+}
+
+- (OFVersionNumber *)localVersionNumber;
+{
+    return localVersionNumber;
 }
 
 - (BOOL)downloadPropertyListFromServer:(NSError **)error;
@@ -270,12 +323,20 @@ static id sharedInstance = nil;
     return success;
 }
 
-- (OFVersionNumber *)latestReleasedVersionNumber;
+#pragma mark Automatic update checking
+
+- (void)handleUpdateIntervalChanged:(NSNotification *)note;
 {
-    [plistLock lock];
-    NSDictionary *thisBranchDictionary = [[[propertyListFromServer objectForKey:[self keyForCurrentMajorVersion]] copy] autorelease];
-    [plistLock unlock];
-    return thisBranchDictionary ? [[[OFVersionNumber alloc] initWithVersionString:[thisBranchDictionary valueForKey:@"LatestVersion"]] autorelease] : nil;
+    [self scheduleUpdateCheckIfNeeded];
+}
+
+- (void)setUpdateTimer:(NSTimer *)aTimer;
+{
+    if (updateTimer != aTimer) {
+        [updateTimer invalidate];
+        [updateTimer release];
+        updateTimer = [aTimer retain];
+    }
 }
 
 // returns the update check granularity
@@ -331,6 +392,7 @@ static id sharedInstance = nil;
     [self scheduleUpdateCheckIfNeeded];
 }
 
+// @@ is this used anywhere?
 - (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(unsigned int)recoveryOptionIndex;
 {
     BOOL didRecover = NO;
@@ -391,13 +453,6 @@ static id sharedInstance = nil;
     return success;
 }
 
-- (OFVersionNumber *)localVersionNumber;
-{
-    NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    OFVersionNumber *localVersion = [[[OFVersionNumber alloc] initWithVersionString:currVersionNumber] autorelease];
-    return localVersion;
-}
-
 - (void)checkForUpdatesInBackground;
 {
     // sanity check so we don't spawn dozens of threads
@@ -420,11 +475,31 @@ static id sharedInstance = nil;
     [self downloadPropertyListFromServer:&error];
     
     OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber];
+    OFVersionNumber *remoteVersionForCurrentMajor = [self latestReleasedVersionNumberForCurrentMajor];
+    OFVersionNumber *localVersion = [self localVersionNumber];
+    OFVersionNumber *notifiedVersion = [self latestNotifiedVersionNumber];
     
-    if(remoteVersion && [remoteVersion compareToVersionNumber:[self localVersionNumber]] == NSOrderedDescending){
-        [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:) forObject:self withObject:[remoteVersion cleanVersionString]];
+    // simplification if we're already have the latest major
+    if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:remoteVersion] != NSOrderedAscending){
+        remoteVersion = nil;
+    }
+    
+    // we only automatically notify for new releases of next major versions once
+    // @@ we might also notify only once per major instead of per version
+    if(notifiedVersion && [notifiedVersion compareToVersionNumber:remoteVersion] != NSOrderedAscending){
+        remoteVersion = nil;
+    } else if(remoteVersion){
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersion cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+    } else if(remoteVersionForCurrentMajor && (notifiedVersion == nil || [notifiedVersion compareToVersionNumber:remoteVersionForCurrentMajor] == NSOrderedAscending)){
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[remoteVersionForCurrentMajor cleanVersionString] forKey:BDSKUpdateLatestNotifiedVersionKey];
+    }
+    
+    if(remoteVersionForCurrentMajor && [remoteVersionForCurrentMajor compareToVersionNumber:localVersion] == NSOrderedDescending){
+        [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forObject:self withObject:[remoteVersionForCurrentMajor cleanVersionString] withObject:[remoteVersion cleanVersionString]];
+    } else if(remoteVersion && [remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
+        [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:alternativeVersion:) forObject:self withObject:[remoteVersion cleanVersionString] withObject:nil];
         
-    } else if(nil == remoteVersion && nil != error){
+    } else if((nil == remoteVersionForCurrentMajor || nil == remoteVersion) && nil != error){
         // was showing an alert for this, but apparently it's really common for the check to fail
         NSLog(@"%@", [error description]);
     }
@@ -432,9 +507,11 @@ static id sharedInstance = nil;
     numberOfConcurrentChecks--;
 }
 
-- (void)downloadAndDisplayReleaseNotes;
+#pragma mark Update notification
+
+- (void)downloadAndDisplayReleaseNotesForVersion:(NSString *)versionString;
 {
-    NSURL *theURL = [self releaseNotesURL];
+    NSURL *theURL = [self releaseNotesURLForVersion:versionString];
     NSURLRequest *request = [NSURLRequest requestWithURL:theURL cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
     NSURLResponse *response;
     
@@ -452,30 +529,36 @@ static id sharedInstance = nil;
         attrString = [[[NSAttributedString alloc] initWithString:NSLocalizedString(@"Download Failed", @"") attributeName:NSForegroundColorAttributeName attributeValue:[NSColor redColor]] autorelease];
     
     if (nil == releaseNotesWindowController)
-        releaseNotesWindowController = [[BDSKReadMeController alloc] initWithWindowNibName:@"ReadMe"];
+        releaseNotesWindowController = [[BDSKRelNotesController alloc] init];
     
     [releaseNotesWindowController setWindowTitle:NSLocalizedString(@"Latest Release Notes", @"")];
     [releaseNotesWindowController displayAttributedString:attrString];
     [releaseNotesWindowController showWindow:nil];
 }
 
-- (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
+- (void)displayUpdateAvailableWindow:(NSString *)latestVersion alternativeVersion:(NSString *)altLatestVersion;
 {
     int button;
+    NSString *message = nil;
+    
+    if(altLatestVersion != nil)
+        message = NSLocalizedString(@"A new version of BibDesk is available (versions %@ and %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version");
+    else
+        message = NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version");
+    
     NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"A New Version is Available", @"Alert when new version is available")
                                      defaultButton:NSLocalizedString(@"Download", @"")
                                    alternateButton:NSLocalizedString(@"View Release Notes", @"button title")
                                        otherButton:NSLocalizedString(@"Ignore",@"Ignore")
-                         informativeTextWithFormat:NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version"), latestVersionNumber];
+                         informativeTextWithFormat:message, latestVersion, altLatestVersion];
                                         
     button = [alert runModal];
     
     if (button == NSAlertDefaultReturn) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:DOWNLOAD_URL]];
     } else if (button == NSAlertAlternateReturn) {
-        [self downloadAndDisplayReleaseNotes];
+        [self downloadAndDisplayReleaseNotesForVersion:altLatestVersion ? altLatestVersion : latestVersion];
     }
-    
 }
 
 @end

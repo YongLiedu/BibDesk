@@ -189,6 +189,7 @@ extern NSString *BDSKShouldDisplayLastNameFirstKey;
 
 extern NSString *BDSKUpdateCheckIntervalKey;
 extern NSString *BDSKUpdateCheckLastDateKey;
+extern NSString *BDSKUpdateLatestNotifiedVersionKey;
 
 #pragma mark Field name strings
 

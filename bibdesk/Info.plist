@@ -771,8 +771,10 @@
 					<integer>1</integer>
 					<key>BDSKUpdateCheckLastDateKey</key>
 					<string></string>
-					<key>BDSKWarnOnCiteKeyChangeKey</key>
-					<true/>
+					<key>BDSKUpdateCheckLastDateKey</key>
+					<string></string>
+					<key>BDSKUpdateLatestNotifiedVersionKey</key>
+					<string></string>
 					<key>BDSKWarnOnDelete</key>
 					<true/>
 					<key>BDSKWarnOnRemovalFromGroupKey</key>
