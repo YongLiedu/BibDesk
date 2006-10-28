@@ -43,6 +43,7 @@
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
+#import "BDSKRISParser.h"
 #import "BDSKJSTORParser.h"
 #import "BDSKWebOfScienceParser.h"
 #import "BDSKParserProtocol.h"

@@ -277,6 +277,8 @@
 		CE5C29CE0AE14FEC00C3E6B5 /* BibDocument_Actions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */; };
 		CE6003280AF3E465000B5680 /* BDSKColoredBox.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6003260AF3E465000B5680 /* BDSKColoredBox.h */; };
 		CE6003290AF3E465000B5680 /* BDSKColoredBox.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6003270AF3E465000B5680 /* BDSKColoredBox.m */; };
+		CE600E2F0AF405D6000B5680 /* BDSKRISParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE600E2D0AF405D6000B5680 /* BDSKRISParser.h */; };
+		CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE600E2E0AF405D6000B5680 /* BDSKRISParser.m */; };
 		CE6775160A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */; };
 		CE6775170A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */; };
 		CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE67E314092B569000410758 /* BibEditorDrawer.nib */; };
@@ -1097,6 +1099,8 @@
 		CE5C29CC0AE14FEC00C3E6B5 /* BibDocument_Actions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibDocument_Actions.m; sourceTree = "<group>"; };
 		CE6003260AF3E465000B5680 /* BDSKColoredBox.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKColoredBox.h; sourceTree = "<group>"; };
 		CE6003270AF3E465000B5680 /* BDSKColoredBox.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKColoredBox.m; sourceTree = "<group>"; };
+		CE600E2D0AF405D6000B5680 /* BDSKRISParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKRISParser.h; sourceTree = "<group>"; };
+		CE600E2E0AF405D6000B5680 /* BDSKRISParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKRISParser.m; sourceTree = "<group>"; };
 		CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSDictionary_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSDictionary_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE67E315092B569000410758 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
@@ -1972,6 +1976,7 @@
 				F9022C3B0758027800C3F701 /* BDSKConverter.m */,
 				3D44F5610812A91D003C67F0 /* BDSKFormatParser.m */,
 				CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */,
+				CE600E2E0AF405D6000B5680 /* BDSKRISParser.m */,
 				F9022C5A075802E300C3F701 /* BDSKShellTask.m */,
 				CE325FCC0A1A74E9002D6E4C /* BDSKTemplateParser.m */,
 				F9DB895B08A54BBA00CB3D53 /* BDSKTeXTask.m */,
@@ -2195,6 +2200,7 @@
 				CE392ED208D034E4001CEAC8 /* BDSKRatingButtonCell.h */,
 				CE95A5790A88883300334DFA /* BDSKReadMeController.h */,
 				CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */,
+				CE600E2D0AF405D6000B5680 /* BDSKRISParser.h */,
 				CE564D230AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h */,
 				CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */,
 				CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */,
@@ -2638,6 +2644,7 @@
 				CEFA07F40AF0E52100A3B4B1 /* BDSKApplication.h in Headers */,
 				CEFA0F4E0AF1400900A3B4B1 /* BDSKDocumentProtocol.h in Headers */,
 				CE6003280AF3E465000B5680 /* BDSKColoredBox.h in Headers */,
+				CE600E2F0AF405D6000B5680 /* BDSKRISParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3410,6 +3417,7 @@
 				CE565BC00AEF848B002F0A24 /* BDSKPublicationsArray.m in Sources */,
 				CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */,
 				CE6003290AF3E465000B5680 /* BDSKColoredBox.m in Sources */,
+				CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

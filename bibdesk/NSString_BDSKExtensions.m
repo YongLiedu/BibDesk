@@ -283,6 +283,21 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 	return (nesting == 0);
 }
 
+- (BOOL)isPubMedString{ // sniff the string to see if it's or RIS
+    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
+    [scanner setCharactersToBeSkipped:nil];
+    BOOL isPubMed = NO;
+    
+    // skip leading whitespace
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+    
+    if([scanner scanString:@"PMID-" intoString:nil] &&
+       [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil]) // for Medline
+        isPubMed = YES;
+    [scanner release];
+    return isPubMed;
+}
+
 - (BOOL)isRISString{ // sniff the string to see if it's or RIS
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];
     [scanner setCharactersToBeSkipped:nil];
@@ -290,18 +305,11 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     // skip leading whitespace
     [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
-    int rewindLoc = [scanner scanLocation];
     
-    if([scanner scanString:@"PMID-" intoString:nil] &&
-       [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil]) // for Medline
+    if([scanner scanString:@"TY" intoString:nil] &&
+       [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil] &&
+       [scanner scanString:@"-" intoString:nil]) // for RIS
         isRIS = YES;
-    else {
-        [scanner setScanLocation:rewindLoc];
-        if([scanner scanString:@"TY" intoString:nil] &&
-           [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil] &&
-           [scanner scanString:@"-" intoString:nil]) // for RIS
-            isRIS = YES;
-    }
     [scanner release];
     return isRIS;
 }

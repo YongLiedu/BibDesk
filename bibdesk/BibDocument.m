@@ -71,6 +71,7 @@
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
+#import "BDSKRISParser.h"
 #import "BDSKJSTORParser.h"
 #import "BDSKWebOfScienceParser.h"
 

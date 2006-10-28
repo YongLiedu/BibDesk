@@ -1,5 +1,5 @@
 //
-//  PubMedParser.h
+//  BDSKRISParser.h
 //  BibDesk
 //
 //  Created by Michael McCracken on Sun Nov 16 2003.
@@ -39,14 +39,12 @@
 #import <Foundation/Foundation.h>
 #import "BDSKParserProtocol.h"
 
-@interface PubMedParser : NSObject <BDSKParser> {
+@interface BDSKRISParser : NSObject <BDSKParser> {
 }
 @end
 
-@interface NSString (PubMedExtensions)
-- (NSString *)stringByFixingRefMinerPubMedTags;
-- (NSString *)stringByConvertingHTMLToTeX;
-- (NSArray *)sourceLinesBySplittingString;
-+ (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
+@interface NSString (RISExtensions)
+- (NSString *)stringByFixingReferenceMinerString;
+- (NSString *)stringByFixingScopusEndTags;
 
 @end
