@@ -46,7 +46,6 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKCharacterConversion.h"
 #import "BDSKFindController.h"
-#import "BDSKFileContentSearchController.h"
 #import "BDSKScriptMenu.h"
 #import "BibDocument.h"
 #import "BibDocument_Search.h"
