@@ -342,6 +342,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [customStringArray release];
     [toolbarItems release];
 	[statusBar release];
+	[splitView release];
 	[texTask release];
     [macroWC release];
     [infoWC release];
@@ -466,6 +467,9 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         if (fraction > 0)
             [splitView setFraction:fraction];
     }
+    
+    // it might be replaced by the file content search view
+    [splitView retain];
     
     // TableView setup
     [tableView removeAllTableColumns];
