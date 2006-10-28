@@ -1,9 +1,10 @@
 {
     IBClasses = (
         {
+            ACTIONS = {download = id; }; 
             CLASS = BDSKReadMeController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {textView = NSTextView; }; 
+            OUTLETS = {downloadButton = NSButton; textView = NSTextView; }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {

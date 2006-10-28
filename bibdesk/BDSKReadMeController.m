@@ -38,6 +38,8 @@
 
 #import "BDSKReadMeController.h"
 
+#define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
+
 static BDSKReadMeController *sharedReadMeController = nil;
 static BDSKRelNotesController *sharedRelNotesController = nil;
 
@@ -60,14 +62,8 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
                                withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ReadMe" ofType:@"rtf"]]];
 }
 
-- (NSTextView *)textView { return textView; }
-
-- (void)displayAttributedString:(NSAttributedString *)attrString {
-    [[textView textStorage] setAttributedString:attrString];
-}
-
-- (void)setWindowTitle:(NSString *)aTitle {
-    [[self window] setTitle:aTitle];
+- (IBAction)download:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:DOWNLOAD_URL]];
 }
 
 @end
@@ -81,10 +77,22 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 }
 
 - (void)windowDidLoad {
-    [[self window] setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
-    [textView setString:@""];
-    [textView replaceCharactersInRange:[textView selectedRange]
-                               withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
+    if(self == sharedRelNotesController){
+        [[self window] setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
+        [textView setString:@""];
+        [textView replaceCharactersInRange:[textView selectedRange]
+                                   withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
+    } else {
+        [[self window] setTitle:NSLocalizedString(@"Latest Release Notes", @"Latest Release Notes")];
+        NSRect ignored, rect = [[textView enclosingScrollView] frame];
+        NSDivideRect(rect, &ignored, &rect, 61.0, NSMinYEdge);
+        [[textView enclosingScrollView] setFrame:rect];
+        [downloadButton setHidden:NO];
+    }
+}
+
+- (void)displayAttributedString:(NSAttributedString *)attrString {
+    [[textView textStorage] setAttributedString:attrString];
 }
 
 @end

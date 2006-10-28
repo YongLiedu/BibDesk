@@ -531,7 +531,6 @@
     if (nil == releaseNotesWindowController)
         releaseNotesWindowController = [[BDSKRelNotesController alloc] init];
     
-    [releaseNotesWindowController setWindowTitle:NSLocalizedString(@"Latest Release Notes", @"")];
     [releaseNotesWindowController displayAttributedString:attrString];
     [releaseNotesWindowController showWindow:nil];
 }

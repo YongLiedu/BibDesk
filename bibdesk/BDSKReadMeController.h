@@ -40,15 +40,14 @@
 
 
 @interface BDSKReadMeController : NSWindowController {
-IBOutlet NSTextView *textView;
+    IBOutlet NSTextView *textView;
+    IBOutlet NSButton *downloadButton;
 }
 + (id)sharedReadMeController;
-- (NSTextView *)textView;
-- (void)displayAttributedString:(NSAttributedString *)attrString;
-- (void)setWindowTitle:(NSString *)aTitle;
-
+- (IBAction)download:(id)sender;
 @end
 
 @interface BDSKRelNotesController : BDSKReadMeController {}
 + (id)sharedRelNotesController;
+- (void)displayAttributedString:(NSAttributedString *)attrString;
 @end
