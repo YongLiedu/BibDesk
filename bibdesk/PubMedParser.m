@@ -224,10 +224,15 @@ static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict
     // sometimes we have authors as "Feelgood, D.R.", but BibTeX and btparse need "Feelgood, D. R." for parsing
     // this leads to some unnecessary trailing space, though, in some cases (e.g. "Feelgood, D. R. ") so we can
     // either ignore it, be clever and not add it after the last ".", or add it everywhere and collapse it later
-    if(isAuthor)
+    if(isAuthor){
 		[value replaceOccurrencesOfString:@"." withString:@". " 
 			options:NSLiteralSearch range:NSMakeRange(0, [value length])];
-	
+        // see bug #1584054, PubMed now doesn't use a comma between the lastName and the firstName
+        // this should be OK for valid RIS, as that should be in the format "last, first"
+        int firstSpace = [value rangeOfString:@" "].location;
+        if([value rangeOfString:@","].location == NSNotFound && firstSpace != NSNotFound)
+            [value insertString:@"," atIndex:firstSpace];
+    }
 	// concatenate authors and keywords, as they can appear multiple times
 	// other duplicates keys should have at least different tags, so we use the tag instead
 	if(![NSString isEmptyString:oldString]){
