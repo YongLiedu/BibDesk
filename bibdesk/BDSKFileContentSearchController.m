@@ -81,7 +81,8 @@
     
     searchIndex = [[BDSKSearchIndex alloc] initWithDocument:aDocument];
     search = [[BDSKSearch alloc] initWithIndex:searchIndex delegate:self];
-
+    searchFieldDidEndEditing = NO;
+    
     return self;
 }
     
@@ -202,17 +203,66 @@
     }
 }
 
+- (void)setSearchField:(NSSearchField *)aSearchField
+{
+    if (nil != searchField) {
+        // disconnect the current searchfield
+        [searchField setTarget:nil];
+        [searchField setAction:NULL];
+        [searchField setDelegate:nil];  
+    }
+    
+    searchField = aSearchField;
+    
+    if (nil != aSearchField) {
+        searchField = aSearchField;
+        [searchField setTarget:self];
+        [searchField setAction:@selector(search:)];
+        [searchField setDelegate:self];
+        [self search:nil];
+    }     
+}
+
+- (void)controlTextDidEndEditing:(NSNotification *)aNotification
+{
+    // we get this message with an empty string when committing an edit, or with a non-empty string after clearing the searchfield (use it to see if this was a cancel action so we can handle it slightly differently in search:)
+    if ([[aNotification object] isEqual:searchField])
+        searchFieldDidEndEditing = YES;
+}
+
 - (IBAction)search:(id)sender
 {
     [searchKey autorelease];
-    searchKey = [[sender stringValue] copy];
-    [self rebuildResultsWithNewSearch:searchKey];
+    searchKey = [[searchField stringValue] copy];
+
+    if ([NSString isEmptyString:searchKey] ) {
+        // iTunes/Mail swap out their search view when clearing the searchfield, so we follow suit.  If the user clicks the cancel button, we want the searchfield to lose first responder status, but this doesn't happen by default (maybe depends on whether it sends immediately?  Xcode seems to work correctly).  Don't clear the array when restoring document state, since we may need the array controller's selected objects.
+
+        // we get a search: action after the cancel/controlTextDidEndEditing: combination, so see if this was a cancel action
+        if (searchFieldDidEndEditing)
+            [[searchContentView window] makeFirstResponder:nil];
+
+        [self restoreDocumentState:self];
+    } else {
+        
+        searchFieldDidEndEditing = NO;
+        // empty array; this takes care of updating the table for us
+        [self setResults:[NSArray array]];        
+        [stopButton setEnabled:YES];
+        // set before starting the search, or we can end up updating with it == YES
+        canceledSearch = NO;
+        [search searchForString:searchKey withOptions:kSKSearchOptionDefault];
+    }
 }
 
 - (void)restoreDocumentState:(id)sender
 {
     [self saveSortDescriptors];
     [self cancelCurrentSearch:nil];
+    
+    // disconnect the searchfield
+    [self setSearchField:nil];
+    
     [[self document] restoreDocumentStateByRemovingSearchView:[self searchContentView]];
 }
 
@@ -269,22 +319,6 @@
     // this will cancel updates to the tableview
     canceledSearch = YES;
 }    
-
-- (void)rebuildResultsWithNewSearch:(NSString *)searchString
-{            
-    if([NSString isEmptyString:searchString]){
-        // iTunes/Mail swap out their search view when clearing the searchfield. don't clear the array, though, since we may need the array controller's selected objects
-        [self restoreDocumentState:self];
-    } else {
-    
-        // empty array; this takes care of updating the table for us
-        [self setResults:[NSArray array]];        
-        [stopButton setEnabled:YES];
-        // set before starting the search, or we can end up updating with it == YES
-        canceledSearch = NO;
-        [search searchForString:searchString withOptions:kSKSearchOptionDefault];
-    }
-}
 
 #pragma mark -
 #pragma mark Document interaction

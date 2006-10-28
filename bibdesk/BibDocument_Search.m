@@ -450,15 +450,12 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     if([splitView isHidden]){
         
         [splitView removeFromSuperview];
-        
-        [searchField setTarget:fileSearchController];
-        [searchField setAction:@selector(search:)];
-        [searchField setDelegate:fileSearchController];
-        
-        [fileSearchController search:searchField];
+        // connect the searchfield to the controller and start the search
+        [fileSearchController setSearchField:searchField];
         
     } else {
         
+        // reconnect the searchfield
         [searchField setTarget:self];
         [searchField setDelegate:self];
         [searchField setAction:@selector(searchFieldAction:)];
@@ -480,7 +477,9 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
             [self highlightBibs:pubsToSelect];
             [tableView scrollRowToCenter:[tableView selectedRow]];
             
-            // @@ I don't think we should select the tableView, as the user was just editing the search field
+            // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
+            if ([[documentWindow firstResponder] isEqual:[searchField currentEditor]] == NO)
+                [documentWindow makeFirstResponder:(NSResponder *)tableView];
         }
         
     }

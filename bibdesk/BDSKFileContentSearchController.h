@@ -89,6 +89,8 @@
     
     IBOutlet BDSKEdgeView *topBarView;
 	NSView *searchContentView;
+    BOOL searchFieldDidEndEditing;
+    NSSearchField *searchField;
 }
 
 // Use this method to instantiate a search controller for use within a document window
@@ -97,8 +99,9 @@
 - (NSView *)searchContentView;
 // This method returns the titles of all selected items (the text content of the rows)
 - (NSArray *)titlesOfSelectedItems;
+// Use this to connect a search field and initiate a search
+- (void)setSearchField:(NSSearchField *)aSearchField;
 
-- (void)rebuildResultsWithNewSearch:(NSString *)searchString;
 - (void)setResults:(NSArray *)newResults;
 
 - (void)saveSortDescriptors;
