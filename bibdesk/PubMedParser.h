@@ -42,11 +42,3 @@
 @interface PubMedParser : NSObject <BDSKParser> {
 }
 @end
-
-@interface NSString (PubMedExtensions)
-- (NSString *)stringByFixingRefMinerPubMedTags;
-- (NSString *)stringByConvertingHTMLToTeX;
-- (NSArray *)sourceLinesBySplittingString;
-+ (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
-
-@end

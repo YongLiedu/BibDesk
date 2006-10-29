@@ -37,7 +37,7 @@
  */
 
 #import "BDSKJSTORParser.h"
-#import "PubMedParser.h"
+#import "NSString_BDSKExtensions.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"

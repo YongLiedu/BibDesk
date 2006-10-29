@@ -37,11 +37,19 @@
  */
 
 #import "BDSKRISParser.h"
-#import "PubMedParser.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
-#import "AGRegex/AGRegex.h"
+#import <AGRegex/AGRegex.h>
+#import "NSString_BDSKExtensions.h"
+
+
+@interface NSString (RISExtensions)
+- (NSString *)stringByFixingReferenceMinerString;
+- (NSString *)stringByFixingScopusEndTags;
+
+@end
+
 
 @interface BDSKRISParser (Private)
 
@@ -212,11 +220,6 @@ static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict
     if(isAuthor){
 		[value replaceOccurrencesOfString:@"." withString:@". " 
 			options:NSLiteralSearch range:NSMakeRange(0, [value length])];
-        // see bug #1584054, PubMed now doesn't use a comma between the lastName and the firstName
-        // this should be OK for valid RIS, as that should be in the format "last, first"
-        int firstSpace = [value rangeOfString:@" "].location;
-        if([value rangeOfString:@","].location == NSNotFound && firstSpace != NSNotFound)
-            [value insertString:@"," atIndex:firstSpace];
     }
 	// concatenate authors and keywords, as they can appear multiple times
 	// other duplicates keys should have at least different tags, so we use the tag instead
@@ -304,70 +307,6 @@ static void mergePageNumbers(NSMutableDictionary *dict)
 @end
 
 @implementation NSString (RISExtensions)
-
-- (NSString *)stringByConvertingHTMLToTeX;
-{
-    static NSCharacterSet *asciiSet = nil;
-    if(asciiSet == nil)
-        asciiSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(0, 127)] retain];
-    
-    // set these up here, so we don't autorelease them every time we parse an entry
-    // Some entries from Compendex have spaces in the tags, which is why we match 0-1 spaces between each character.
-    static AGRegex *findSubscriptLeadingTag = nil;
-    if(findSubscriptLeadingTag == nil)
-        findSubscriptLeadingTag = [[AGRegex alloc] initWithPattern:@"< ?s ?u ?b ?>"];
-    static AGRegex *findSubscriptOrSuperscriptTrailingTag = nil;
-    if(findSubscriptOrSuperscriptTrailingTag == nil)
-        findSubscriptOrSuperscriptTrailingTag = [[AGRegex alloc] initWithPattern:@"< ?/ ?s ?u ?[bp] ?>"];
-    static AGRegex *findSuperscriptLeadingTag = nil;
-    if(findSuperscriptLeadingTag == nil)
-        findSuperscriptLeadingTag = [[AGRegex alloc] initWithPattern:@"< ?s ?u ?p ?>"];
-    
-    // This one might require some explanation.  An entry with TI of "Flapping flight as a bifurcation in Re<sub>&omega;</sub>"
-    // was run through the html conversion to give "...Re<sub>$\omega$</sub>", then the find sub/super regex replaced the sub tags to give
-    // "...Re$_$omega$$", which LaTeX barfed on.  So, we now search for <sub></sub> tags with matching dollar signs inside, and remove the inner
-    // dollar signs, since we'll use the dollar signs from our subsequent regex search and replace; however, we have to
-    // reject the case where there is a <sub><\sub> by matching [^<]+ (at least one character which is not <), or else it goes to the next </sub> tag
-    // and deletes dollar signs that it shouldn't touch.  Yuck.
-    static AGRegex *findNestedDollar = nil;
-    if(findNestedDollar == nil)
-        findNestedDollar = [[AGRegex alloc] initWithPattern:@"(< ?s ?u ?[bp] ?>[^<]+)(\\$)(.*)(\\$)(.*< ?/ ?s ?u ?[bp] ?>)"];
-    
-    // Run the value string through the HTML2LaTeX conversion, to clean up &theta; and friends.
-    // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
-    // stuff will get munged.  Unfortunately, the C code for HTML2LaTeX will destroy accented characters, so we only send it ASCII, and just keep
-    // the accented characters to let BDSKConverter deal with them later.
-    
-    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
-    NSString *asciiAndHTMLChars, *nonAsciiAndHTMLChars;
-    NSMutableString *fullString = [[NSMutableString alloc] initWithCapacity:[self length]];
-    
-    while(![scanner isAtEnd]){
-        if([scanner scanCharactersFromSet:asciiSet intoString:&asciiAndHTMLChars])
-            [fullString appendString:[NSString TeXStringWithHTMLString:asciiAndHTMLChars]];
-		if([scanner scanUpToCharactersFromSet:asciiSet intoString:&nonAsciiAndHTMLChars])
-			[fullString appendString:nonAsciiAndHTMLChars];
-    }
-    [scanner release];
-    
-    NSString *newValue = [[fullString copy] autorelease];
-    [fullString release];
-    
-    // see if we have nested math modes and try to fix them; see note earlier on findNestedDollar
-    if([findNestedDollar findInString:newValue] != nil){
-        NSLog(@"WARNING: found nested math mode; trying to repair...");
-        newValue = [findNestedDollar replaceWithString:@"$1$3$5"
-                                              inString:newValue];
-    }
-    
-    // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
-    // that Compendex (and possibly others) give us.
-    newValue = [findSubscriptLeadingTag replaceWithString:@"\\$_{" inString:newValue];
-    newValue = [findSuperscriptLeadingTag replaceWithString:@"\\$^{" inString:newValue];
-    newValue = [findSubscriptOrSuperscriptTrailingTag replaceWithString:@"}\\$" inString:newValue];
-    
-    return newValue;
-}
 
 - (NSString *)stringByFixingReferenceMinerString;
 {

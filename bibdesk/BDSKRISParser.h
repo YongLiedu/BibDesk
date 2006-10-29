@@ -42,9 +42,3 @@
 @interface BDSKRISParser : NSObject <BDSKParser> {
 }
 @end
-
-@interface NSString (RISExtensions)
-- (NSString *)stringByFixingReferenceMinerString;
-- (NSString *)stringByFixingScopusEndTags;
-
-@end

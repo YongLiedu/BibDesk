@@ -38,7 +38,7 @@
 
 #import "BDSKWebOfScienceParser.h"
 #import "BibItem.h"
-#import "PubMedParser.h"
+#import "NSString_BDSKExtensions.h"
 #import "BibTypeManager.h"
 
 static void mergePageNumbers(NSMutableDictionary *dict)
