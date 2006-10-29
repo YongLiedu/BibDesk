@@ -286,9 +286,8 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     if ([dragType isEqualToString:NSFilenamesPboardType]) {
 		NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
         count = [fileNames count];
-        NSString *filePath = count ? [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0] : nil;
-		if (filePath)
-            image = [NSImage imageForFile:filePath];
+		if (count)
+            image = [[NSWorkspace sharedWorkspace] iconForFiles:fileNames];
     }
     
     return image ? [image dragImageWithCount:count] : nil;

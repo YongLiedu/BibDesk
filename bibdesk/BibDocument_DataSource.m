@@ -715,9 +715,7 @@
     if ([dragType isEqualToString:NSFilenamesPboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilenamesPboardType];
 		count = [fileNames count];
-        NSURL *fileURL = count ? [NSURL fileURLWithPath:[[pb propertyListForType:NSFilenamesPboardType] objectAtIndex:0]] : nil;
-        fileURL = [fileURL fileURLByResolvingAliases];
-		image = fileURL != nil ? [NSImage imageForURL:fileURL] : [NSImage missingFileImage];
+		image = [[NSWorkspace sharedWorkspace] iconForFiles:fileNames];
     
     } else if ([dragType isEqualToString:NSURLPboardType]) {
         count = 1;
@@ -727,7 +725,7 @@
 	} else if ([dragType isEqualToString:NSFilesPromisePboardType]) {
 		NSArray *fileNames = [pb propertyListForType:NSFilesPromisePboardType];
 		count = [fileNames count];
-        image = [NSImage imageForFileType:[[fileNames lastObject] pathExtension]];
+        image = [[NSWorkspace sharedWorkspace] iconForFiles:fileNames];
     
 	} else {
 		OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
