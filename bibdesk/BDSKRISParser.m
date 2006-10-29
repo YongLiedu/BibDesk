@@ -38,7 +38,6 @@
 
 #import "BDSKRISParser.h"
 #import "PubMedParser.h"
-#import "html2tex.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
