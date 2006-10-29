@@ -37,6 +37,7 @@
  */
 
 #import "BDSKWebOfScienceParser.h"
+#import "BDSKParserProtocol.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibTypeManager.h"

@@ -37,6 +37,7 @@
  */
 
 #import "BDSKJSTORParser.h"
+#import "BDSKParserProtocol.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"

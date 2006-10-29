@@ -37,8 +37,7 @@
  */
 
 #import "BDSKReferenceMinerParser.h"
-#import "PubMedParser.h"
-#import "BDSKRISParser.h"
+#import "BDSKParserProtocol.h"
 #import <AGRegex/AGRegex.h>
 #import "NSString_BDSKExtensions.h"
 

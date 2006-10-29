@@ -37,6 +37,7 @@
  */
 
 #import "BDSKRISParser.h"
+#import "BDSKParserProtocol.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"

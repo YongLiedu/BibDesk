@@ -38,6 +38,11 @@
 
 #import <Foundation/NSObject.h>
 #import "NSString_BDSKExtensions.h"
+#import "PubMedParser.h"
+#import "BDSKRISParser.h"
+#import "BDSKReferenceMinerParser.h"
+#import "BDSKJSTORParser.h"
+#import "BDSKWebOfScienceParser.h"
 
 @protocol BDSKParser <NSObject>
 
@@ -46,7 +51,6 @@
 
 @end
 
-@class PubMedParser, BDSKRISParser, BDSKReferenceMinerParser, BDSKJSTORParser, BDSKWebOfScienceParser;
 
 static inline Class <BDSKParser> BDSKParserForStringType(int stringType){
     switch(stringType){

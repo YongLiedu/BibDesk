@@ -70,11 +70,7 @@
 #import "BDSKMainTableView.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
-#import "PubMedParser.h"
-#import "BDSKRISParser.h"
-#import "BDSKReferenceMinerParser.h"
-#import "BDSKJSTORParser.h"
-#import "BDSKWebOfScienceParser.h"
+#import "BDSKParserProtocol.h"
 
 #import "ApplicationServices/ApplicationServices.h"
 #import "BDSKImagePopUpButton.h"
