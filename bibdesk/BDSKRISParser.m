@@ -45,9 +45,7 @@
 
 
 @interface NSString (RISExtensions)
-- (NSString *)stringByFixingReferenceMinerString;
 - (NSString *)stringByFixingScopusEndTags;
-
 @end
 
 
@@ -104,9 +102,6 @@ static BibItem *createBibItemWithRISDictionary(NSMutableDictionary *pubDict);
     
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
-    
-    if([itemString rangeOfString:@"Amazon" options:0 range:NSMakeRange(0,6)].location != NSNotFound)
-        itemString = [itemString stringByFixingReferenceMinerString]; // run a crude hack for fixing the broken RIS that we get for Amazon entries from Reference Miner
     
     itemString = [itemString stringByFixingScopusEndTags];
         
@@ -307,39 +302,6 @@ static void mergePageNumbers(NSMutableDictionary *dict)
 @end
 
 @implementation NSString (RISExtensions)
-
-- (NSString *)stringByFixingReferenceMinerString;
-{
-    //
-    // For cleaning up reference miner output for Amazon references.  Use an NSLog to see
-    // what it's giving us, then compare with <http://www.refman.com/support/risformat_intro.asp>.  We'll
-    // fix it up enough to separate the references and save typing the author/title, but the date is just
-    // too messed up to bother with.
-    //
-	NSString *tmpStr;
-	
-    // this is what Ref Miner uses to mark the beginning; should be TY key instead, so we'll fake it; this means the actual type doesn't get set
-    AGRegex *start = [AGRegex regexWithPattern:@"^Amazon,RM[0-9]{3}," options:AGRegexMultiline];
-    tmpStr = [start replaceWithString:@"" inString:self];
-    
-    start = [AGRegex regexWithPattern:@"^ITEM" options:AGRegexMultiline];
-    tmpStr = [start replaceWithString:@"TY  - " inString:tmpStr];
-    
-    // special case for handling the url; others we just won't worry about
-    AGRegex *url = [AGRegex regexWithPattern:@"^URL- " options:AGRegexMultiline];
-    tmpStr = [url replaceWithString:@"UR  - " inString:tmpStr];
-    
-    AGRegex *tag2Regex = [AGRegex regexWithPattern:@"^([A-Z]{2})- " options:AGRegexMultiline];
-    tmpStr = [tag2Regex replaceWithString:@"$1  - " inString:tmpStr];
-    
-    AGRegex *tag3Regex = [AGRegex regexWithPattern:@"^([A-Z]{3})- " options:AGRegexMultiline];
-    tmpStr = [tag3Regex replaceWithString:@"$1 - " inString:tmpStr];
-    
-    AGRegex *ends = [AGRegex regexWithPattern:@"(?<!\\A)^TY  - " options:AGRegexMultiline];
-    tmpStr = [ends replaceWithString:@"ER  - \r\nTY  - " inString:tmpStr];
-	
-    return [tmpStr stringByAppendingString:@"\r\nER  - "];	
-}
 
 - (NSString *)stringByFixingScopusEndTags;
 {    

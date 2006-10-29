@@ -46,12 +46,13 @@
 
 @end
 
-@class PubMedParser, BDSKRISParser, BDSKJSTORParser, BDSKWebOfScienceParser;
+@class PubMedParser, BDSKRISParser, BDSKReferenceMinerParser, BDSKJSTORParser, BDSKWebOfScienceParser;
 
 static inline Class <BDSKParser> BDSKParserForStringType(int stringType){
     switch(stringType){
 		case BDSKPubMedStringType: return [PubMedParser class];
 		case BDSKRISStringType: return [BDSKRISParser class];
+		case BDSKRefManStringType: return [BDSKReferenceMinerParser class];
 		case BDSKJSTORStringType: return [BDSKJSTORParser class];
         case BDSKWOSStringType: return [BDSKWebOfScienceParser class];
         default: return Nil;

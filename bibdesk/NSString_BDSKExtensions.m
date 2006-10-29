@@ -284,6 +284,28 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 	return (nesting == 0);
 }
 
+- (BOOL)isBibTeXString{
+    AGRegex *btRegex = [[AGRegex alloc] initWithPattern:@"^@[[:alpha:]]+[ \t]*[{(].+?[ \t]*," options:AGRegexMultiline];
+    
+    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
+    NSString *normalizedString = [self stringByNormalizingSpacesAndLineBreaks];
+    BOOL found = ([btRegex findInString:normalizedString] != nil);
+    [btRegex release];
+    return found;
+}
+
+- (BOOL)isNoKeyBibTeXString{
+	// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get from Bookends and EndNote, respectively.
+	AGRegex *theRegex = [[AGRegex alloc]  initWithPattern:@"^@[[:alpha:]]+{,?$" options:AGRegexMultiline];
+    
+    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
+    NSString *normalizedString = [self stringByNormalizingSpacesAndLineBreaks];
+    BOOL found = ([theRegex findInString:normalizedString] != nil);
+    [theRegex release];
+				
+    return found;
+}
+
 - (BOOL)isPubMedString{ // sniff the string to see if it's or RIS
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];
     [scanner setCharactersToBeSkipped:nil];
@@ -315,30 +337,28 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return isRIS;
 }
 
+- (BOOL)isRefManString{ // sniff the string to see if it's or RIS
+    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
+    [scanner setCharactersToBeSkipped:nil];
+    BOOL isRefMan = NO;
+    
+    // skip leading whitespace
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+    
+    if([scanner scanString:@"Amazon,RM" intoString:NULL] &&
+       [scanner scanInt:NULL] &&
+       [scanner scanString:@",ITEM- " intoString:NULL])
+        isRefMan = YES;
+    else if([scanner scanString:@"PubMed,RM" intoString:NULL] &&
+       [scanner scanInt:NULL] &&
+       [scanner scanString:@",PMID- " intoString:NULL]) 
+        isRefMan = YES;
+    [scanner release];
+    return isRefMan;
+}
+
 - (BOOL)isJSTORString{ // sniff the string to see if it's JSTOR
 	return [self hasPrefix:@"JSTOR CITATION LIST"];
-}
-
-- (BOOL)isBibTeXString{
-    AGRegex *btRegex = [[AGRegex alloc] initWithPattern:@"^@[[:alpha:]]+[ \t]*[{(].+?[ \t]*," options:AGRegexMultiline];
-    
-    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
-    NSString *normalizedString = [self stringByNormalizingSpacesAndLineBreaks];
-    BOOL found = ([btRegex findInString:normalizedString] != nil);
-    [btRegex release];
-    return found;
-}
-
-- (BOOL)isNoKeyBibTeXString{
-	// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get from Bookends and EndNote, respectively.
-	AGRegex *theRegex = [[AGRegex alloc]  initWithPattern:@"^@[[:alpha:]]+{,?$" options:AGRegexMultiline];
-    
-    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
-    NSString *normalizedString = [self stringByNormalizingSpacesAndLineBreaks];
-    BOOL found = ([theRegex findInString:normalizedString] != nil);
-    [theRegex release];
-				
-    return found;
 }
 
 - (BOOL)isWebOfScienceString{
@@ -349,6 +369,10 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 - (int)contentStringType{
 	if([self isBibTeXString])
 		return BDSKBibTeXStringType;
+	if([self isRefManString])
+		return BDSKRefManStringType;
+	if([self isPubMedString])
+		return BDSKPubMedStringType;
 	if([self isRISString])
 		return BDSKRISStringType;
 	if([self isJSTORString])
@@ -438,61 +462,6 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         return NSMakeRange(cmdStartRange.location, (lbraceRange.location - cmdStartRange.location));
     }
     
-}
-
-- (NSString *)stringByAddingRISEndTagsToPubMedString;
-{
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:self];
-    NSMutableString *fixedString = [[NSMutableString alloc] initWithCapacity:[self length]];
-    
-    NSString *scannedString = [scanner readFullTokenUpToString:@"PMID- "];
-    unsigned start;
-    unichar prevChar;
-    BOOL scannedPMID = NO;
-    
-    // this means we scanned some garbage before the PMID tag, or else this isn't a PubMed string...
-    OBPRECONDITION(scannedString == nil);
-    
-    do {
-        
-        start = scannerScanLocation(scanner);
-        
-        // scan past the PMID tag
-        scannedPMID = scannerReadString(scanner, @"PMID- ");
-        OBPRECONDITION(scannedPMID);
-        
-        // scan to the next PMID tag
-        scannedString = [scanner readFullTokenUpToString:@"PMID- "];
-        [fixedString appendString:[self substringWithRange:NSMakeRange(start, scannerScanLocation(scanner) - start)]];
-        
-        // see if the previous character is a newline; if not, then some clod put a "PMID- " in the text
-        if(scannerScanLocation(scanner)){
-            prevChar = *(scanner->scanLocation - 1);
-            if(BDIsNewlineCharacter(prevChar))
-                [fixedString appendString:@"ER  - \r\n"];
-        }
-        
-        OBASSERT(scannedString);
-        
-    } while(scannerHasData(scanner));
-    
-    OBPOSTCONDITION(!scannerHasData(scanner));
-    
-    [scanner release];
-    OBPOSTCONDITION(![NSString isEmptyString:fixedString]);
-    
-#if OMNI_FORCE_ASSERTIONS
-    // Here's our reference method, which caused swap death on large strings (AGRegex uses a lot of autoreleased NSData objects)
-	NSString *tmpStr;
-	
-    AGRegex *regex = [AGRegex regexWithPattern:@"(?<!\\A)^PMID- " options:AGRegexMultiline];
-    tmpStr = [regex replaceWithString:@"ER  - \r\nPMID- " inString:self];
-	
-    tmpStr = [tmpStr stringByAppendingString:@"ER  - \r\n"];
-    OBPOSTCONDITION([tmpStr isEqualToString:fixedString]);
-#endif
-    
-    return [fixedString autorelease];
 }
 
 - (NSString *)stringByConvertingHTMLToTeX;

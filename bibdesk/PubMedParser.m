@@ -45,7 +45,13 @@
 
 
 @interface NSString (PubMedExtensions)
-- (NSString *)stringByFixingRefMinerPubMedTags;
+/*!
+@method     stringByAddingRISEndTagsToPubMedString
+@abstract   Adds ER tags to a stream of PubMed records, so it's (more) valid RIS
+@discussion (comprehensive description)
+@result     (description)
+*/
+- (NSString *)stringByAddingRISEndTagsToPubMedString;
 @end
 
 
@@ -86,16 +92,8 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict);
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
     
-    // get rid of any leading whitespace or newlines, so our range checks at the beginning are more reliable
-    // don't trim trailing whitespace/newlines, since that breaks parsing PubMed (possibly the RIS end tag regex?)
-    itemString = [itemString stringByTrimmingPrefixCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
-    
-    // the only problem here is the stuff that Ref Miner prepends to the PMID; other than that, it's just PubMed output
-    if([itemString rangeOfString:@"PubMed,RM" options:0 range:NSMakeRange(0, 9)].location != NSNotFound)
-        itemString = [itemString stringByFixingRefMinerPubMedTags];
     
     itemString = [itemString stringByAddingRISEndTagsToPubMedString];
         
@@ -290,12 +288,59 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict)
 
 @implementation NSString (PubMedExtensions)
 
-- (NSString *)stringByFixingRefMinerPubMedTags;
-{    
-    // Reference Miner puts its own goo at the front of each entry, so we remove it.  From looking at
-    // the input string in gdb, we're getting something like "PubMed,RM122,PMID- 15639629," as the first line.
-    AGRegex *startTags = [AGRegex regexWithPattern:@"^PubMed,RM[0-9]{3}," options:AGRegexMultiline];
-    return [startTags replaceWithString:@"" inString:self];
+- (NSString *)stringByAddingRISEndTagsToPubMedString;
+{
+    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:self];
+    NSMutableString *fixedString = [[NSMutableString alloc] initWithCapacity:[self length]];
+    
+    NSString *scannedString = [scanner readFullTokenUpToString:@"PMID- "];
+    unsigned start;
+    unichar prevChar;
+    BOOL scannedPMID = NO;
+    
+    // this means we scanned some garbage before the PMID tag, or else this isn't a PubMed string...
+    OBPRECONDITION(scannedString == nil);
+    
+    do {
+        
+        start = scannerScanLocation(scanner);
+        
+        // scan past the PMID tag
+        scannedPMID = scannerReadString(scanner, @"PMID- ");
+        OBPRECONDITION(scannedPMID);
+        
+        // scan to the next PMID tag
+        scannedString = [scanner readFullTokenUpToString:@"PMID- "];
+        [fixedString appendString:[self substringWithRange:NSMakeRange(start, scannerScanLocation(scanner) - start)]];
+        
+        // see if the previous character is a newline; if not, then some clod put a "PMID- " in the text
+        if(scannerScanLocation(scanner)){
+            prevChar = *(scanner->scanLocation - 1);
+            if(BDIsNewlineCharacter(prevChar))
+                [fixedString appendString:@"ER  - \r\n"];
+        }
+        
+        OBASSERT(scannedString);
+        
+    } while(scannerHasData(scanner));
+    
+    OBPOSTCONDITION(!scannerHasData(scanner));
+    
+    [scanner release];
+    OBPOSTCONDITION(![NSString isEmptyString:fixedString]);
+    
+#if OMNI_FORCE_ASSERTIONS
+    // Here's our reference method, which caused swap death on large strings (AGRegex uses a lot of autoreleased NSData objects)
+	NSString *tmpStr;
+	
+    AGRegex *regex = [AGRegex regexWithPattern:@"(?<!\\A)^PMID- " options:AGRegexMultiline];
+    tmpStr = [regex replaceWithString:@"ER  - \r\nPMID- " inString:self];
+	
+    tmpStr = [tmpStr stringByAppendingString:@"ER  - \r\n"];
+    OBPOSTCONDITION([tmpStr isEqualToString:fixedString]);
+#endif
+    
+    return [fixedString autorelease];
 }
 
 @end

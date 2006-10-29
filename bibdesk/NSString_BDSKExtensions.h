@@ -46,6 +46,7 @@ enum {
 	BDSKNoKeyBibTeXStringType, 
 	BDSKPubMedStringType, 
 	BDSKRISStringType, 
+	BDSKRefManStringType, 
 	BDSKJSTORStringType, 
 	BDSKWOSStringType
 };
@@ -185,25 +186,7 @@ An inline buffer is used for speed in accessing each character.
 */
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range;
 
-/*!
-    @method     isRISString
-    @abstract   Check to see if the string is RIS by scanning for "TY  - ", which should appear in an RIS string.
-    @discussion See the <a href="http://www.refman.com/support/risformat_intro.asp">RIS specification</a> for details on the format.  The heuristics here could be improved,
-                but this is mainly intended to be a quick check of the pasteboard, not a full parser.
-    @result     A Boolean.
-*/
-- (BOOL)isRISString;
-
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range;
-
-/*!
-    @method     isPubMedString
-    @abstract   Check to see if the string is PubMed by scanning for "PMID- ", which should appear in an RIS string.
-    @discussion See the <a href="http://www.refman.com/support/risformat_intro.asp">RIS specification</a> for details on the format.  The heuristics here could be improved,
-                but this is mainly intended to be a quick check of the pasteboard, not a full parser.
-    @result     A Boolean.
-*/
-- (BOOL)isPubMedString;
 
 /*!
     @method     isBibTeXString
@@ -220,6 +203,33 @@ An inline buffer is used for speed in accessing each character.
     @result     (description)
 */
 - (BOOL)isNoKeyBibTeXString;
+
+/*!
+    @method     isPubMedString
+    @abstract   Check to see if the string is PubMed by scanning for "PMID- ", which should appear in an RIS string.
+    @discussion See the <a href="http://www.refman.com/support/risformat_intro.asp">RIS specification</a> for details on the format.  The heuristics here could be improved,
+                but this is mainly intended to be a quick check of the pasteboard, not a full parser.
+    @result     A Boolean.
+*/
+- (BOOL)isPubMedString;
+
+/*!
+    @method     isRISString
+    @abstract   Check to see if the string is RIS by scanning for "TY  - ", which should appear in an RIS string.
+    @discussion See the <a href="http://www.refman.com/support/risformat_intro.asp">RIS specification</a> for details on the format.  The heuristics here could be improved,
+                but this is mainly intended to be a quick check of the pasteboard, not a full parser.
+    @result     A Boolean.
+*/
+- (BOOL)isRISString;
+
+/*!
+    @method     isRefManString
+    @abstract   Check to see if the string is "RIS" from Reference Manager by scanning for "Amazon,RM" or "PubMed:RM".
+    @discussion See the <a href="http://www.refman.com/support/risformat_intro.asp">RIS specification</a> for details on the format.  The heuristics here could be improved,
+                but this is mainly intended to be a quick check of the pasteboard, not a full parser.
+    @result     A Boolean.
+*/
+- (BOOL)isRefManString;
 
 /*!
     @method     isJSTORString
@@ -256,14 +266,6 @@ An inline buffer is used for speed in accessing each character.
 @result     Returns an altered NSString
 */
 - (NSString *)stringWithPhoneyCiteKeys:(NSString *)tmpKey;
-
-/*!
-@method     stringByAddingRISEndTagsToPubMedString
-@abstract   Adds ER tags to a stream of PubMed records, so it's (more) valid RIS
-@discussion (comprehensive description)
-@result     (description)
-*/
-- (NSString *)stringByAddingRISEndTagsToPubMedString;
 
 - (NSString *)stringByConvertingHTMLToTeX;
 + (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;

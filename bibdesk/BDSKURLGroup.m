@@ -42,6 +42,7 @@
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
 #import "BDSKRISParser.h"
+#import "BDSKReferenceMinerParser.h"
 #import "BDSKJSTORParser.h"
 #import "BDSKWebOfScienceParser.h"
 #import "BDSKSharedGroup.h"
