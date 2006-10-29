@@ -18,16 +18,17 @@
 
 #if defined (OMNI_ASSERTIONS_ON)
 
-#define BDSKLOGIMETHOD() \
-NSLog(@"-[%@ %@] (%@ line %d)", [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
+#define log_method() \
+NSLog(@"%@[%@ %@] (%@ line %d)", OBPointerIsClass(self) ? @"+" : @"-", \
+      [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
 
-#define BDSKLOGCMETHOD() \
-NSLog(@"+[%@ %@] (%@ line %d)", [self class], NSStringFromSelector(_cmd), __FILENAMEASNSSTRING__, __LINE__)
+#define log_function() \
+NSLog(@"%s (%@ line %d)", __PRETTY_FUNCTION__, __FILENAMEASNSSTRING__, __LINE__)
 
 #else
 
-#define BDSKLOGIMETHOD();
-#define BDSKLOGCMETHOD();
+#define log_method();
+#define log_function();
 
 #endif
 
