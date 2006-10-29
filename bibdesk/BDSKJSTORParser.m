@@ -201,9 +201,6 @@ static void splitDateString(NSMutableDictionary *pubDict)
 					[newBI release];
 				}
 				
-				// fix the date
-				splitDateString(pubDict);
-				
 				// reset these for the next pub
 				[pubDict removeAllObjects];
 				
