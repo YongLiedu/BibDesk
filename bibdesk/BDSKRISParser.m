@@ -44,22 +44,8 @@
 #import "NSString_BDSKExtensions.h"
 
 
-@interface NSString (RISExtensions)
-- (NSString *)stringByFixingScopusEndTags;
-@end
-
-
 @interface BDSKRISParser (Private)
 
-/*!
-@function	addStringToDict
- @abstract   Used to add additional strings to an existing dictionary entry.
- @discussion This is useful for multiple authors and multiple keywords, so we don't wipe them out by overwriting.
- @param      wholeValue String object that we are adding (e.g. <tt>Ann Author</tt>).
- @param	pubDict NSMutableDictionary containing the current publication.
- @param	theKey NSString object with the key that we are adding an item to (e.g. <tt>Author</tt>).
- */
-static void addStringToDict(NSMutableString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey);
 /*!
 @function   isDuplicateAuthor
  @abstract   Check to see if we have a duplicate author in the list
@@ -70,19 +56,9 @@ static void addStringToDict(NSMutableString *wholeValue, NSMutableDictionary *pu
  @result     Returns YES if it's a duplicate
  */
 static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
-/*!
-@function   mergePageNumbers
- @abstract   Elsevier/ScienceDirect RIS output has SP for start page and EP for end page.  If we find
- both of those in the entry, we merge them and add them back into the dictionary as
- SP--EP forKey:Pages.
- @param      dict NSMutableDictionary containing a single RIS bibliography entry
- */
-static void mergePageNumbers(NSMutableDictionary *dict);
 
-// creates a new BibItem from the dictionary
-// caller is responsible for releasing the returned item
-static BibItem *createBibItemWithRISDictionary(NSMutableDictionary *pubDict);
 @end
+
 
 @implementation BDSKRISParser
 
@@ -96,14 +72,10 @@ static BibItem *createBibItemWithRISDictionary(NSMutableDictionary *pubDict);
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
     
-    // get rid of any leading whitespace or newlines, so our range checks at the beginning are more reliable
-    // don't trim trailing whitespace/newlines, since that breaks parsing RIS (possibly the RIS end tag regex?)
-    itemString = [itemString stringByTrimmingPrefixCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
     
-    itemString = [itemString stringByFixingScopusEndTags];
+    itemString = [self stringByFixingInputString:itemString];
         
     BibItem *newBI = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
@@ -135,7 +107,7 @@ static BibItem *createBibItemWithRISDictionary(NSMutableDictionary *pubDict);
 			
 			// first save the last key/value pair if necessary
 			if(tag && ![tag isEqualToString:@"ER"]){
-				addStringToDict(mutableValue, pubDict, tag);
+				[self addString:mutableValue toDictionary:pubDict forTag:tag];
 			}
 			
 			// get the tag...
@@ -146,7 +118,12 @@ static BibItem *createBibItemWithRISDictionary(NSMutableDictionary *pubDict);
 				// we are done with this publication
 				
 				if([[pubDict allKeys] count] > 0){
-					newBI = createBibItemWithRISDictionary(pubDict);
+                    [self fixPublicationDictionary:pubDict];
+                    newBI = [[BibItem alloc] initWithType:[self pubTypeFromDictionary:pubDict]
+                                                 fileType:BDSKBibtexString
+                                                  citeKey:nil
+                                                pubFields:pubDict
+                                                    isNew:YES];
 					[returnArray addObject:newBI];
 					[newBI release];
 				}
@@ -187,11 +164,8 @@ static BibItem *createBibItemWithRISDictionary(NSMutableDictionary *pubDict);
     return returnArray;
 }
 
-@end
-
-@implementation BDSKRISParser (Private)
-
-static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict, NSString *tag){
++ (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
+{
 	NSString *key = nil;
 	NSString *oldString = nil;
     NSString *newString = nil;
@@ -251,63 +225,50 @@ static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict
     }
 }
 
-static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor){ // check to see if it's a duplicate; this relies on the whitespace around the " and ", and is basically a hack for Scopus
-    NSArray *oldAuthArray = [oldList componentsSeparatedByString:@" and "];
-    return [oldAuthArray containsObject:newAuthor];
-}
-
-static BibItem *createBibItemWithRISDictionary(NSMutableDictionary *pubDict)
++ (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
 {
-    
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
-    BibItem *newBI = nil;
     NSString *type = BDSKArticleString;
-    
-    // fix up the page numbers if necessary
-    mergePageNumbers(pubDict);
-	
-    // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]] != nil)
         type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]];
-    
-    newBI = [[BibItem alloc] initWithType:type
-								 fileType:BDSKBibtexString
-								  citeKey:nil
-								pubFields:pubDict
-                                    isNew:YES];
-    
-    return newBI;
+    return type;
 }
 
 static NSString *RISStartPageString = @"Sp";
 static NSString *RISEndPageString = @"Ep";
 
-static void mergePageNumbers(NSMutableDictionary *dict)
++ (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
 {
-    NSString *start = [dict objectForKey:RISStartPageString];
-    NSString *end = [dict objectForKey:RISEndPageString];
+    // fix up the page numbers if necessary
+    NSString *start = [pubDict objectForKey:RISStartPageString];
+    NSString *end = [pubDict objectForKey:RISEndPageString];
     
     if(start != nil && end != nil){
        NSMutableString *merge = [start mutableCopy];
        [merge appendString:@"--"];
        [merge appendString:end];
-       [dict setObject:merge forKey:BDSKPagesString];
+       [pubDict setObject:merge forKey:BDSKPagesString];
        [merge release];
        
-       [dict removeObjectForKey:RISStartPageString];
-       [dict removeObjectForKey:RISEndPageString];
+       [pubDict removeObjectForKey:RISStartPageString];
+       [pubDict removeObjectForKey:RISEndPageString];
 	}
+}
+
++ (NSString *)stringByFixingInputString:(NSString *)inputString;
+{
+    // Scopus doesn't put the end tag RE on a separate line.
+    AGRegex *endTag = [AGRegex regexWithPattern:@"([^\r\n])ER  - $" options:AGRegexMultiline];
+    return [endTag replaceWithString:@"$1\r\nER  - " inString:self];
 }
 
 @end
 
-@implementation NSString (RISExtensions)
+@implementation BDSKRISParser (Private)
 
-- (NSString *)stringByFixingScopusEndTags;
-{    
-    // Scopus doesn't put the end tag RE on a separate line.
-    AGRegex *endTag = [AGRegex regexWithPattern:@"([^\r\n])ER  - $" options:AGRegexMultiline];
-    return [endTag replaceWithString:@"$1\r\nER  - " inString:self];
+static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor){ // check to see if it's a duplicate; this relies on the whitespace around the " and ", and is basically a hack for Scopus
+    NSArray *oldAuthArray = [oldList componentsSeparatedByString:@" and "];
+    return [oldAuthArray containsObject:newAuthor];
 }
 
 @end

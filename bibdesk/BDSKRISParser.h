@@ -41,4 +41,8 @@
 
 @interface BDSKRISParser : NSObject <BDSKParser> {
 }
++ (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
++ (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
++ (NSString *)stringByFixingInputString:(NSString *)inputString;
++ (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
 @end

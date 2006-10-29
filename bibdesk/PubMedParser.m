@@ -44,146 +44,10 @@
 #import "NSString_BDSKExtensions.h"
 
 
-@interface NSString (PubMedExtensions)
-/*!
-@method     stringByAddingRISEndTagsToPubMedString
-@abstract   Adds ER tags to a stream of PubMed records, so it's (more) valid RIS
-@discussion (comprehensive description)
-@result     (description)
-*/
-- (NSString *)stringByAddingRISEndTagsToPubMedString;
-@end
-
-
-@interface PubMedParser (Private)
-
-/*!
-@function	addStringToDict
- @abstract   Used to add additional strings to an existing dictionary entry.
- @discussion This is useful for multiple authors and multiple keywords, so we don't wipe them out by overwriting.
- @param      wholeValue String object that we are adding (e.g. <tt>Ann Author</tt>).
- @param	pubDict NSMutableDictionary containing the current publication.
- @param	theKey NSString object with the key that we are adding an item to (e.g. <tt>Author</tt>).
- */
-static void addStringToDict(NSMutableString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey);
-/*!
-@function   chooseAuthors
- @abstract   PubMed has full author tags (FAU) which duplicate the AU. If available, we use those 
- for the Author field as it contains more information, otherwise we take AU. 
- @param      dict NSMutableDictionary containing a single RIS bibliography entry
- */
-static void chooseAuthors(NSMutableDictionary *dict);
-
-// creates a new BibItem from the dictionary
-// caller is responsible for releasing the returned item
-static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict);
-@end
-
-
 @implementation PubMedParser
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError{
-    return [PubMedParser itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
-}
-
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError
-                        frontMatter:(NSMutableString *)frontMatter
-                           filePath:(NSString *)filePath{
-    
-    // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
-    itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
-    
-    itemString = [itemString stringByAddingRISEndTagsToPubMedString];
-        
-    BibItem *newBI = nil;
-    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
-    
-    //dictionary is the publication entry
-    NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
-    
-    NSArray *sourceLines = [itemString sourceLinesBySplittingString];
-    
-    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
-    NSString *sourceLine = nil;
-    
-    NSString *tag = nil;
-    NSString *value = nil;
-    NSMutableString *mutableValue = [NSMutableString string];
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
-    NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-    
-    NSSet *tagsNotToConvert = [NSSet setWithObjects:@"UR", @"L1", @"L2", @"L3", @"L4", nil];
-    
-    // This is used for stripping extraneous characters from BibTeX year fields
-    AGRegex *findYearString = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
-    
-    while(sourceLine = [sourceLineE nextObject]){
-
-        if(([sourceLine length] > 5 && [[sourceLine substringWithRange:NSMakeRange(4,2)] isEqualToString:@"- "]) ||
-           [sourceLine isEqualToString:@"ER  -"]){
-			// this is a "key - value" line
-			
-			// first save the last key/value pair if necessary
-			if(tag && ![tag isEqualToString:@"ER"]){
-				addStringToDict(mutableValue, pubDict, tag);
-			}
-			
-			// get the tag...
-            tag = [[sourceLine substringWithRange:NSMakeRange(0,4)] 
-						stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
-			
-			if([tag isEqualToString:@"ER"]){
-				// we are done with this publication
-				
-				if([[pubDict allKeys] count] > 0){
-					newBI = createBibItemWithPubMedDictionary(pubDict);
-					[returnArray addObject:newBI];
-					[newBI release];
-				}
-				
-				// reset these for the next pub
-				[pubDict removeAllObjects];
-				
-				// we don't care about the rest, ER has no value
-				continue;
-			}
-			
-			// get the value...
-			value = [[sourceLine substringWithRange:NSMakeRange(6,[sourceLine length]-6)]
-						stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
-			
-			// don't convert specials in URL/link fields, bug #1244625
-			if(![tagsNotToConvert containsObject:tag])
-				value = [value stringByConvertingHTMLToTeX];
-		
-			// Scopus returns a PY with //// after it.  Others may return a full date, where BibTeX wants a year.  
-			// Use a regex to find a substring with four consecutive digits and use that instead.  Not sure how robust this is.
-			if([[typeManager fieldNameForPubMedTag:tag] isEqualToString:BDSKYearString])
-				value = [findYearString replaceWithString:@"$2" inString:value];
-			
-			[mutableValue setString:value];                
-			
-		} else {
-			// this is a continuation of a multiline value
-			[mutableValue appendString:@" "];
-			[mutableValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet]];
-        }
-        
-    }
-    
-    if(outError) *outError = nil;
-    
-    [pubDict release];
-    return returnArray;
-}
-
-@end
-
-@implementation PubMedParser (Private)
-
-static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict, NSString *tag){
++ (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
+{
 	NSString *key = nil;
 	NSString *oldString = nil;
     NSString *newString = nil;
@@ -248,50 +112,35 @@ static void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict
     }
 }
 
-static void chooseAuthors(NSMutableDictionary *dict){
++ (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
+{
+    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    NSString *type = BDSKArticleString;
+    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]] != nil)
+        type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]];
+    return type;
+}
+
++ (void)fixPublicationDictionary:(NSMutableDictionary *)pubDict;
+{
+    // choose the authors from the FAU or AU tag as available
     NSString *authors;
     
-    if(authors = [dict objectForKey:@"Fau"]){
-        [dict setObject:authors forKey:BDSKAuthorString];
-		[dict removeObjectForKey:@"Fau"];
+    if(authors = [pubDict objectForKey:@"Fau"]){
+        [pubDict setObject:authors forKey:BDSKAuthorString];
+		[pubDict removeObjectForKey:@"Fau"];
 		// should we remove the AU also?
-    }else if(authors = [dict objectForKey:@"Au"]){
-        [dict setObject:authors forKey:BDSKAuthorString];
-		[dict removeObjectForKey:@"Au"];
+    }else if(authors = [pubDict objectForKey:@"Au"]){
+        [pubDict setObject:authors forKey:BDSKAuthorString];
+		[pubDict removeObjectForKey:@"Au"];
 	}
 }
 
-static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict)
+// Adds ER tags to a stream of PubMed records, so it's (more) valid RIS
++ (NSString *)stringByFixingInputString:(NSString *)inputString;
 {
-    
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
-    BibItem *newBI = nil;
-    NSString *type = BDSKArticleString;
-    
-	// choose the authors from the FAU or AU tag as available
-    chooseAuthors(pubDict);
-	
-    // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
-    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]] != nil)
-		type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]];
-    
-    newBI = [[BibItem alloc] initWithType:type
-								 fileType:BDSKBibtexString
-								  citeKey:nil
-								pubFields:pubDict
-                                    isNew:YES];
-    
-    return newBI;
-}
-
-@end
-
-@implementation NSString (PubMedExtensions)
-
-- (NSString *)stringByAddingRISEndTagsToPubMedString;
-{
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:self];
-    NSMutableString *fixedString = [[NSMutableString alloc] initWithCapacity:[self length]];
+    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:inputString];
+    NSMutableString *fixedString = [[NSMutableString alloc] initWithCapacity:[inputString length]];
     
     NSString *scannedString = [scanner readFullTokenUpToString:@"PMID- "];
     unsigned start;
@@ -311,7 +160,7 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict)
         
         // scan to the next PMID tag
         scannedString = [scanner readFullTokenUpToString:@"PMID- "];
-        [fixedString appendString:[self substringWithRange:NSMakeRange(start, scannerScanLocation(scanner) - start)]];
+        [fixedString appendString:[inputString substringWithRange:NSMakeRange(start, scannerScanLocation(scanner) - start)]];
         
         // see if the previous character is a newline; if not, then some clod put a "PMID- " in the text
         if(scannerScanLocation(scanner)){
