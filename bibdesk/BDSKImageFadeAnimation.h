@@ -45,12 +45,14 @@
     CIFilter *filter;
 }
 
-// final image, after transition is complete
-- (void)setFinalImage:(NSImage *)anImage;
-- (NSImage *)finalImage;
-
+// set the final image, after transition is complete
+- (void)setTargetImage:(NSImage *)anImage;
 // use to set the starting point for the animation
-- (void)setCurrentImage:(NSImage *)anImage;
+- (void)setStartingImage:(NSImage *)anImage;
+
+// returns the image at the final time value
+- (NSImage *)finalImage;
+// returns the image at the current time value
 - (NSImage *)currentImage;
 
 @end

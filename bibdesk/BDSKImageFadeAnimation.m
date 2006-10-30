@@ -73,20 +73,26 @@
     [[self delegate] imageAnimationDidUpdate:self];
 }
 
-- (void)setCurrentImage:(NSImage *)anImage;
+- (void)setStartingImage:(NSImage *)anImage;
 {
     [filter setValue:[CIImage imageWithData:[anImage TIFFRepresentation]] forKey:@"inputImage"];
 }
 
-- (void)setFinalImage:(NSImage *)anImage;
+- (void)setTargetImage:(NSImage *)anImage;
 {
     [filter setValue:[CIImage imageWithData:[anImage TIFFRepresentation]] forKey:@"inputTargetImage"];
 }
 
 - (NSImage *)finalImage;
 {
+    NSNumber *inputTime = [filter valueForKey:@"inputTime"];
+    
     [filter setValue:[NSNumber numberWithInt:1] forKey:@"inputTime"];
-    return [self currentImage]; 
+    NSImage *currentImage = [self currentImage];
+    
+    // restore the input time, since calling -finalImage shouldn't interrupt the animation
+    [filter setValue:inputTime forKey:@"inputTime"];
+    return currentImage;
 }
 
 - (NSImage *)currentImage;

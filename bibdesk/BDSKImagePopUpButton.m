@@ -146,8 +146,8 @@
     NSImage *iconImage = [self iconImage];
     
     if (nil != iconImage && nil != newImage) {
-        [animation setFinalImage:newImage];
-        [animation setCurrentImage:iconImage];
+        [animation setTargetImage:newImage];
+        [animation setStartingImage:iconImage];
         [animation startAnimation];
     } else {
         [self setIconImage:newImage];
