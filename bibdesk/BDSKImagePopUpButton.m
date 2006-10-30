@@ -40,6 +40,7 @@
 #import "BDSKImagePopUpButton.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniAppKit/OAApplication.h>
+#import "BDSKImageFadeAnimation.h"
 
 @implementation BDSKImagePopUpButton
 
@@ -49,7 +50,6 @@
 
 - (id)initWithFrame:(NSRect)frameRect {
 	if (self = [super initWithFrame:frameRect]) {
-		currentTimer = nil;
 		highlight = NO;
 		delegate = nil;
 	}
@@ -58,7 +58,6 @@
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-		currentTimer = nil;
 		highlight = NO;
 		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
 		
@@ -86,7 +85,9 @@
 }
 
 - (void)dealloc{
-	[currentTimer invalidate];
+    [animation setDelegate:nil];
+    [animation stopAnimation];
+    [animation release];
 	[super dealloc];
 }
 
@@ -104,7 +105,6 @@
     return [[self cell] iconSize];
 }
 
-
 - (void) setIconSize:(NSSize)iconSize{
     [[self cell] setIconSize:iconSize];
 }
@@ -121,57 +121,37 @@
     return [[self cell] iconImage];
 }
 
-- (void)fadeIconImageToImage:(NSImage *)iconImage;{
-	// first make sure we stop a previous timer
-	if(currentTimer){
-		[currentTimer invalidate];
-		currentTimer = nil;
-    }
-	
-    if([self iconImage] == nil || iconImage == nil){
-        [self setIconImage:iconImage];
-        return;
-    }
-	
-	NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-		[NSNumber numberWithFloat:0], @"time", iconImage, @"newImage", [self iconImage], @"oldImage", nil];
-    currentTimer = [NSTimer scheduledTimerWithTimeInterval:0.03  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES];
+- (void)animationDidStop:(BDSKImageFadeAnimation *)anAnimation {
+    [self setIconImage:[anAnimation finalImage]];
 }
 
-- (void)timerFired:(NSTimer *)timer;{
+- (void)animationDidEnd:(BDSKImageFadeAnimation *)anAnimation {
+    [self setIconImage:[anAnimation finalImage]];
+}
+
+- (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
+    [self setIconImage:[anAnimation currentImage]];
+}
+
+- (void)fadeIconImageToImage:(NSImage *)newImage {
     
-    NSImage *newImage = [[timer userInfo] objectForKey:@"newImage"];
-    float time = [[[timer userInfo] objectForKey:@"time"] floatValue];
-	
-    time += 0.1;
-	
-    if(time >= M_PI_2){
-        [self setIconImage:newImage];
-		if(![timer isEqual:currentTimer]){
-			[timer invalidate]; // this should never happen
-		}else if(currentTimer){
-			[currentTimer invalidate];
-			currentTimer = nil;
-		}
-        return;
+    if (nil == animation) {
+        animation = [[BDSKImageFadeAnimation alloc] initWithDuration:1.0f animationCurve:NSAnimationEaseInOut];
+        [animation setDelegate:self];
+        [animation setAnimationBlockingMode:NSAnimationNonblocking];
+    } else if ([animation isAnimating]) {
+        [animation stopAnimation];
     }
     
-    NSNumber *timeNumber = [[NSNumber alloc] initWithFloat:time];
-	[[timer userInfo] setObject:timeNumber forKey:@"time"];
-    [timeNumber release];
-
-    // original image we started with
-    NSImage *oldImage = [[timer userInfo] objectForKey:@"oldImage"];
+    NSImage *iconImage = [self iconImage];
     
-    // we need a clear image to draw into, or else the shadows get superimposed
-    NSImage *image = [[NSImage alloc] initWithSize:[self iconSize]];
-    
-    [image lockFocus];
-    [oldImage dissolveToPoint:NSZeroPoint fraction:cos(time)]; // decreasing amount of old image
-    [newImage dissolveToPoint:NSZeroPoint fraction:sin(time)]; // increasing amount of new image
-    [image unlockFocus];
-    [self setIconImage:image];
-    [image release];
+    if (nil != iconImage && nil != newImage) {
+        [animation setFinalImage:newImage];
+        [animation setCurrentImage:iconImage];
+        [animation startAnimation];
+    } else {
+        [self setIconImage:newImage];
+    }
 }
 
 - (void)setIconImage:(NSImage *)iconImage{
