@@ -1,5 +1,5 @@
 //
-// BDSKParserProtocol.h
+// BDSKStringParser.h
 // Bibdesk
 //
 // Created by Adam Maxwell on 02/07/06.
@@ -37,28 +37,29 @@
  */
 
 #import <Foundation/NSObject.h>
-#import "NSString_BDSKExtensions.h"
-#import "PubMedParser.h"
-#import "BDSKRISParser.h"
-#import "BDSKReferenceMinerParser.h"
-#import "BDSKJSTORParser.h"
-#import "BDSKWebOfScienceParser.h"
 
-@protocol BDSKParser <NSObject>
+enum {
+	BDSKUnknownStringType = -1, 
+	BDSKBibTeXStringType, 
+	BDSKNoKeyBibTeXStringType, 
+	BDSKPubMedStringType, 
+	BDSKRISStringType, 
+	BDSKRefManStringType, 
+	BDSKJSTORStringType, 
+	BDSKWOSStringType
+};
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError;
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
+@interface BDSKStringParser : NSObject {
+}
+
++ (BOOL)canParseString:(NSString *)string;
+
++ (NSArray *)itemsFromString:(NSString *)itemString ofType:(int)stringType error:(NSError **)outError;
++ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError;
 
 @end
 
 
-static inline Class <BDSKParser> BDSKParserForStringType(int stringType){
-    switch(stringType){
-		case BDSKPubMedStringType: return [PubMedParser class];
-		case BDSKRISStringType: return [BDSKRISParser class];
-		case BDSKRefManStringType: return [BDSKReferenceMinerParser class];
-		case BDSKJSTORStringType: return [BDSKJSTORParser class];
-        case BDSKWOSStringType: return [BDSKWebOfScienceParser class];
-        default: return Nil;
-    }
-}
+@interface NSString (BDSKStringParserExtensions)
+- (int)contentStringType;
+@end
