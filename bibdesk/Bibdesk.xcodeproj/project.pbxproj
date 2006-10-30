@@ -598,6 +598,8 @@
 		F97BF0B9090AE7520063504B /* NSBezierPath_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */; };
 		F97BF0BA090AE7520063504B /* NSBezierPath_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */; };
 		F97BF344090B19520063504B /* smartFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F97BF343090B19520063504B /* smartFolderIcon.tiff */; };
+		F97FA7920AF56FA100C32BBA /* BDSKImageFadeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = F97FA7900AF56FA100C32BBA /* BDSKImageFadeAnimation.h */; };
+		F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */; };
 		F98AA6810971E3F400184BD8 /* BDSKTextViewCompletionController.h in Headers */ = {isa = PBXBuildFile; fileRef = F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */; };
 		F98DB3170A23C7730040D347 /* BDSKTemplate.h in Headers */ = {isa = PBXBuildFile; fileRef = F98DB3150A23C7730040D347 /* BDSKTemplate.h */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
@@ -1013,7 +1015,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1431,6 +1433,8 @@
 		F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSBezierPath_BDSKExtensions.h; sourceTree = "<group>"; };
 		F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSBezierPath_BDSKExtensions.m; sourceTree = "<group>"; };
 		F97BF343090B19520063504B /* smartFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = smartFolderIcon.tiff; path = Images/smartFolderIcon.tiff; sourceTree = "<group>"; };
+		F97FA7900AF56FA100C32BBA /* BDSKImageFadeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKImageFadeAnimation.h; sourceTree = "<group>"; };
+		F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKImageFadeAnimation.m; sourceTree = "<group>"; };
 		F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewCompletionController.h; sourceTree = "<group>"; };
 		F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewCompletionController.m; sourceTree = "<group>"; };
 		F98DB3150A23C7730040D347 /* BDSKTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTemplate.h; sourceTree = "<group>"; };
@@ -1800,6 +1804,7 @@
 				F97BE8F00907321F0063504B /* BDSKGroupTableView.m */,
 				CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */,
 				CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */,
+				F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */,
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlay.m */,
@@ -2182,6 +2187,7 @@
 				F97BE8EF0907321F0063504B /* BDSKGroupTableView.h */,
 				CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */,
 				CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */,
+				F97FA7900AF56FA100C32BBA /* BDSKImageFadeAnimation.h */,
 				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
@@ -2652,6 +2658,7 @@
 				CE6003280AF3E465000B5680 /* BDSKColoredBox.h in Headers */,
 				CE600E2F0AF405D6000B5680 /* BDSKRISParser.h in Headers */,
 				CE601A4E0AF4C488000B5680 /* BDSKReferenceMinerParser.h in Headers */,
+				F97FA7920AF56FA100C32BBA /* BDSKImageFadeAnimation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2763,6 +2770,7 @@
 					ProjectRef = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
 				},
 			);
+			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* BibDesk */,
 				3D8A5779082D3077008E818C /* BibDesk Help */,
@@ -3426,6 +3434,7 @@
 				CE6003290AF3E465000B5680 /* BDSKColoredBox.m in Sources */,
 				CE600E300AF405D6000B5680 /* BDSKRISParser.m in Sources */,
 				CE601A4F0AF4C488000B5680 /* BDSKReferenceMinerParser.m in Sources */,
+				F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
