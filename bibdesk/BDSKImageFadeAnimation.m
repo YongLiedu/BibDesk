@@ -100,10 +100,12 @@
     CIImage *image = [filter valueForKey:@"outputImage"];
     CGRect rect = [image extent];
     
+    // Numerous ways to do this:  we could also create a new NSImage, lockFocus on it, then use -[CIContext drawImage:atPoint:fromRect:].  No idea which one is faster, but I wanted to try something new.
     CGImageRef cgImage = [[[NSGraphicsContext currentContext] CIContext] createCGImage:image fromRect:rect];
     
     CFMutableDataRef data = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
-    CGImageDestinationRef imDest = CGImageDestinationCreateWithData(data, CFSTR("public.tiff"), 1, NULL);
+    
+    CGImageDestinationRef imDest = CGImageDestinationCreateWithData(data, kUTTypeTIFF, 1, NULL);
     CGImageDestinationAddImage(imDest, cgImage, NULL);
     CGImageDestinationFinalize(imDest);
     CFRelease(imDest);

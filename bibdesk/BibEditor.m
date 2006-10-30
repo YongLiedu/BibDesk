@@ -2848,7 +2848,7 @@ static int numberOfOpenEditors = 0;
 	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
 		NSMutableString *path = [[[lurl path] mutableCopy] autorelease];
         
-        if([NSString isEmptyString:path] == NO && [theUTI isEqualToUTI:@"com.adobe.pdf"]){
+        if([NSString isEmptyString:path] == NO && [theUTI isEqualToUTI:(NSString *)kUTTypePDF]){
             // escape single quotes that may be in the path; other characters should be handled by quoting in the command string
             [path replaceOccurrencesOfString:@"\'" withString:@"\\\'" options:0 range:NSMakeRange(0, [path length])];
             
