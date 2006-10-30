@@ -37,7 +37,6 @@
  */
 
 #import "BDSKJSTORParser.h"
-#import "BDSKParserProtocol.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
@@ -70,15 +69,11 @@ static void splitDateString(NSMutableDictionary *pubDict)
 
 @implementation BDSKJSTORParser
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError{
-    return [self itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
++ (BOOL)canParseString:(NSString *)string{
+	return [string hasPrefix:@"JSTOR CITATION LIST"];
 }
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError
-                        frontMatter:(NSMutableString *)frontMatter
-                           filePath:(NSString *)filePath{
++ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];

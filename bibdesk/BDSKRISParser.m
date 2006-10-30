@@ -37,7 +37,6 @@
  */
 
 #import "BDSKRISParser.h"
-#import "BDSKParserProtocol.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
@@ -63,15 +62,23 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
 
 @implementation BDSKRISParser
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError{
-    return [BDSKRISParser itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
++ (BOOL)canParseString:(NSString *)string{
+    NSScanner *scanner = [[NSScanner alloc] initWithString:string];
+    [scanner setCharactersToBeSkipped:nil];
+    BOOL isRIS = NO;
+    
+    // skip leading whitespace
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+    
+    if([scanner scanString:@"TY" intoString:nil] &&
+       [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil] &&
+       [scanner scanString:@"-" intoString:nil]) // for RIS
+        isRIS = YES;
+    [scanner release];
+    return isRIS;
 }
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError
-                        frontMatter:(NSMutableString *)frontMatter
-                           filePath:(NSString *)filePath{
++ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];

@@ -46,6 +46,21 @@
 
 @implementation PubMedParser
 
++ (BOOL)canParseString:(NSString *)string{
+    NSScanner *scanner = [[NSScanner alloc] initWithString:string];
+    [scanner setCharactersToBeSkipped:nil];
+    BOOL isPubMed = NO;
+    
+    // skip leading whitespace
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+    
+    if([scanner scanString:@"PMID-" intoString:nil] &&
+       [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil]) // for Medline
+        isPubMed = YES;
+    [scanner release];
+    return isPubMed;
+}
+
 + (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
 {
 	NSString *key = nil;

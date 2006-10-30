@@ -60,6 +60,7 @@
 #import "BDSKMacroResolver.h"
 #import "NSImage+Toolbox.h"
 #import "BibFiler.h"
+#import "BDSKStringParser.h"
 
 @interface BDSKTextImportController (Private)
 

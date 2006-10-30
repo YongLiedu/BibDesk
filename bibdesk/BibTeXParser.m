@@ -39,6 +39,7 @@
 #import "BibTeXParser.h"
 #import <BTParse/btparse.h>
 #import <BTParse/BDSKErrorObject.h>
+#import <AGRegex/AGRegex.h>
 #import "BibAppController.h"
 #include <stdio.h>
 #import "BibItem.h"
@@ -82,6 +83,28 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
 + (void)initialize{
     if(nil == parserLock)
         parserLock = [[NSLock alloc] init];
+}
+
++ (BOOL)canParseString:(NSString *)string{
+    AGRegex *btRegex = [[AGRegex alloc] initWithPattern:@"^@[[:alpha:]]+[ \t]*[{(].+?[ \t]*," options:AGRegexMultiline];
+    
+    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
+    NSString *normalizedString = [string stringByNormalizingSpacesAndLineBreaks];
+    BOOL found = ([btRegex findInString:normalizedString] != nil);
+    [btRegex release];
+    return found;
+}
+
++ (BOOL)canParseStringAfterFixingKeys:(NSString *)string{
+	// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get from Bookends and EndNote, respectively.
+	AGRegex *theRegex = [[AGRegex alloc]  initWithPattern:@"^@[[:alpha:]]+{,?$" options:AGRegexMultiline];
+    
+    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
+    NSString *normalizedString = [string stringByNormalizingSpacesAndLineBreaks];
+    BOOL found = ([theRegex findInString:normalizedString] != nil);
+    [theRegex release];
+				
+    return found;
 }
 
 /// libbtparse methods

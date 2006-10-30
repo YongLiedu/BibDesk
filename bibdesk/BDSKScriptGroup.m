@@ -42,7 +42,7 @@
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
 #import "BibTeXParser.h"
-#import "BDSKParserProtocol.h"
+#import "BDSKStringParser.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "BibAppController.h"
@@ -204,7 +204,7 @@
         NSMutableString *frontMatter = [NSMutableString string];
         pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:BDSKParserPasteDragString document:self error:&error];
     } else if (type != BDSKUnknownStringType){
-        pubs = [BDSKParserForStringType(type) itemsFromString:outputString error:&error];
+        pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {
         error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return BibTeX", @"")];
     }

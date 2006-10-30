@@ -63,6 +63,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKStringParser.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 

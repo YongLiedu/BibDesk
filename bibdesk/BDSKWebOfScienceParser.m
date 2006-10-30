@@ -37,7 +37,6 @@
  */
 
 #import "BDSKWebOfScienceParser.h"
-#import "BDSKParserProtocol.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibTypeManager.h"
@@ -142,18 +141,12 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
 
 @implementation BDSKWebOfScienceParser
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError{
-    return [self itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
++ (BOOL)canParseString:(NSString *)string{
+    // remove leading newlines in case this originates from copy/paste
+    return [[string stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] hasPrefix:@"FN ISI Export Format"];
 }
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError
-                        frontMatter:(NSMutableString *)frontMatter
-                           filePath:(NSString *)filePath{
-    
-    NSParameterAssert([itemString isWebOfScienceString]);
-    
++ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];

@@ -70,7 +70,7 @@
 #import "BDSKMainTableView.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
-#import "BDSKParserProtocol.h"
+#import "BDSKStringParser.h"
 
 #import "ApplicationServices/ApplicationServices.h"
 #import "BDSKImagePopUpButton.h"
@@ -1505,7 +1505,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
     NSError *error = nil;    
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
-    NSMutableArray *newPubs = nil;
+    NSArray *newPubs = nil;
     
     if(dataString == nil && outError){
         OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Interpret", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"need a single NSString format specifier"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
@@ -1513,10 +1513,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return NO;
     }
     
-	newPubs = [BDSKParserForStringType(type) itemsFromString:dataString
-                                                       error:&error
-                                                 frontMatter:frontMatter
-                                                    filePath:[absoluteURL path]];
+	newPubs = [BDSKStringParser itemsFromString:dataString ofType:type error:&error];
         
     if(outError) *outError = error;
     [self setPublications:newPubs undoable:NO];
@@ -1849,7 +1846,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         data = [[string stringWithPhoneyCiteKeys:@"FixMe"] dataUsingEncoding:NSUTF8StringEncoding];
         newPubs = [BibTeXParser itemsFromData:data document:self error:&parseError];
 	}else if (type != BDSKUnknownStringType){
-        newPubs = [BDSKParserForStringType(type) itemsFromString:string error:&parseError];
+        newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&parseError];
     }
     
     // The parser methods may return a non-empty array (partial data) if they failed; we check for parseError != nil as an error condition, then, although that's generally not correct

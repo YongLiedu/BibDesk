@@ -37,10 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKStringParser.h"
 
-@protocol BDSKParser;
-
-@interface BDSKWebOfScienceParser : NSObject <BDSKParser> {
+@interface BDSKWebOfScienceParser : BDSKStringParser {
 
 }
 

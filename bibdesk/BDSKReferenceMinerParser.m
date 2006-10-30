@@ -37,9 +37,9 @@
  */
 
 #import "BDSKReferenceMinerParser.h"
-#import "BDSKParserProtocol.h"
 #import <AGRegex/AGRegex.h>
-#import "NSString_BDSKExtensions.h"
+#import "PubMedparser.h"
+#import "BDSKRISParser.h"
 
 
 @interface NSString (ReferenceMinerExtensions)
@@ -50,15 +50,27 @@
 
 @implementation BDSKReferenceMinerParser
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError{
-    return [PubMedParser itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
++ (BOOL)canParseString:(NSString *)string{
+    NSScanner *scanner = [[NSScanner alloc] initWithString:string];
+    [scanner setCharactersToBeSkipped:nil];
+    BOOL isRefMan = NO;
+    
+    // skip leading whitespace
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+    
+    if([scanner scanString:@"Amazon,RM" intoString:NULL] &&
+       [scanner scanInt:NULL] &&
+       [scanner scanString:@",ITEM- " intoString:NULL])
+        isRefMan = YES;
+    else if([scanner scanString:@"PubMed,RM" intoString:NULL] &&
+       [scanner scanInt:NULL] &&
+       [scanner scanString:@",PMID- " intoString:NULL]) 
+        isRefMan = YES;
+    [scanner release];
+    return isRefMan;
 }
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
-                              error:(NSError **)outError
-                        frontMatter:(NSMutableString *)frontMatter
-                           filePath:(NSString *)filePath{
++ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     
     // get rid of any leading whitespace or newlines, so our range checks at the beginning are more reliable
     // don't trim trailing whitespace/newlines, since that breaks parsing PubMed (possibly the RIS end tag regex?)
@@ -70,11 +82,11 @@
     if([itemString rangeOfString:@"PubMed,RM" options:0 range:NSMakeRange(0, 9)].location != NSNotFound){
         // the only problem here is the stuff that Ref Miner prepends to the PMID; other than that, it's just PubMed output
         itemString = [itemString stringByFixingRefMinerPubMedTags];
-        return [PubMedParser itemsFromString:itemString error:outError frontMatter:frontMatter filePath:filePath];
+        return [PubMedParser itemsFromString:itemString error:outError];
     }else if([itemString rangeOfString:@"Amazon,RM" options:0 range:NSMakeRange(0,9)].location != NSNotFound){
         // run a crude hack for fixing the broken RIS that we get for Amazon entries from Reference Miner
         itemString = [itemString stringByFixingRefMinerAmazonString]; 
-        return [BDSKRISParser itemsFromString:itemString error:outError frontMatter:frontMatter filePath:filePath];
+        return [BDSKRISParser itemsFromString:itemString error:outError];
     }else if([itemString rangeOfString:@"Library of Congress,RM" options:0 range:NSMakeRange(0,22)].location != NSNotFound){
         // we're presently unable to parse LOC references
         if(outError)

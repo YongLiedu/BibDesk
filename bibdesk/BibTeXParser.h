@@ -43,6 +43,9 @@
 @interface BibTeXParser : NSObject {
 }
 
++ (BOOL)canParseString:(NSString *)string;
++ (BOOL)canParseStringAfterFixingKeys:(NSString *)string;
+
 /*!
     @method     itemsFromData:error:document:
     @abstract   Convenience method that returns an array of BibItems from the input NSData; used by the pasteboard.  Uses libbtparse to parse the data.

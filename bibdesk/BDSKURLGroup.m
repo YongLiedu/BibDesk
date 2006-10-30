@@ -44,7 +44,7 @@
 #import "BDSKSharedGroup.h"
 #import "BibAppController.h"
 #import "NSURL_BDSKExtensions.h"
-#import "BDSKParserProtocol.h"
+#import "BDSKStringParser.h"
 #import "NSError_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKPublicationsArray.h"
@@ -160,7 +160,7 @@
             NSMutableString *frontMatter = [NSMutableString string];
             pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:self error:&error];
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
-            pubs = [BDSKParserForStringType(type) itemsFromString:contentString error:&error frontMatter:nil filePath:filePath];
+            pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
         }
         if (pubs == nil || error) {
             failedDownload = YES;

@@ -74,7 +74,7 @@
 #import "BDSKMacroResolver.h"
 #import "NSMenu_BDSKExtensions.h"
 #import "BibTeXParser.h"
-#import "BDSKParserProtocol.h"
+#import "BDSKStringParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "PDFDocument_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"

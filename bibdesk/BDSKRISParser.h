@@ -37,10 +37,9 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "BDSKStringParser.h"
 
-@protocol BDSKParser;
-
-@interface BDSKRISParser : NSObject <BDSKParser> {
+@interface BDSKRISParser : BDSKStringParser {
 }
 + (void)addString:(NSMutableString *)value toDictionary:(NSMutableDictionary *)pubDict forTag:(NSString *)tag;
 + (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
