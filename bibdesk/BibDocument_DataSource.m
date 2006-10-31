@@ -751,17 +751,14 @@
                 inside = YES;
 				break;
 			case BDSKCiteDragCopyType:
-				// Are we using a custom citeString (from the drawer?
+				// Are we using a custom citeString (from the drawer?)
 				if (tv == ccTableView) { 
-					[s appendString:[self citeStringForPublications:promisedDraggedItems citeString:[customStringArray objectAtIndex:[dragRows firstIndex]]]];
+					[s appendString:[self citeStringForPublications:[NSArray arrayWithObject:firstItem] citeString:[customStringArray objectAtIndex:[dragRows firstIndex]]]];
 				} else {
-					[s appendString:[self citeStringForPublications:promisedDraggedItems citeString:[sud stringForKey:BDSKCiteStringKey]]];
+					[s appendString:[self citeStringForPublications:[NSArray arrayWithObject:firstItem] citeString:[sud stringForKey:BDSKCiteStringKey]]];
 				}
-				// trim to something reasonably short
-				if ([s length] > 40) {
-					[s setString:[s substringToIndex:40]];
+				if (count > 1) 
 					[s appendString:[NSString horizontalEllipsisString]];
-				}
 				break;
 			case BDSKPDFDragCopyType:
 			case BDSKRTFDragCopyType:
