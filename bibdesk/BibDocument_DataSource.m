@@ -733,7 +733,6 @@
         int index = (GetCurrentKeyModifiers() & optionKey) ? 1 : 0;
 		NSMutableString *s = [NSMutableString string];
 		BibItem *firstItem = [promisedDraggedItems objectAtIndex:0];
-		BOOL sep;
         
         dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
 		
@@ -752,29 +751,22 @@
                 inside = YES;
 				break;
 			case BDSKCiteDragCopyType:
-				sep = [sud boolForKey:BDSKSeparateCiteKey];
-				
-				if ([sud boolForKey:BDSKCitePrependTildeKey])
-					[s appendString:@"~"];
-				[s appendString:@"\\"];
-				if (tv == ccTableView) 
-					[s appendString:[customStringArray objectAtIndex:[dragRows firstIndex]]];
-				else
-					[s appendString:[sud stringForKey:BDSKCiteStringKey]];
-				[s appendString:[sud stringForKey:BDSKCiteStartBracketKey]];
-				[s appendString:[firstItem citeKey]];
-				if (count > 1 && sep == NO) {
-					[s appendString:@","];
+				// Are we using a custom citeString (from the drawer?
+				if (tv == ccTableView) { 
+					[s appendString:[self citeStringForPublications:promisedDraggedItems citeString:[customStringArray objectAtIndex:[dragRows firstIndex]]]];
+				} else {
+					[s appendString:[self citeStringForPublications:promisedDraggedItems citeString:[sud stringForKey:BDSKCiteStringKey]]];
+				}
+				// trim to something reasonably short
+				if ([s length] > 40) {
+					[s setString:[s substringToIndex:40]];
 					[s appendString:[NSString horizontalEllipsisString]];
 				}
-				[s appendString:[sud stringForKey:BDSKCiteEndBracketKey]];
-				if (count > 1 && sep == YES) 
-					[s appendString:[NSString horizontalEllipsisString]];
 				break;
 			case BDSKPDFDragCopyType:
 			case BDSKRTFDragCopyType:
 				[s appendString:@"["];
-				[s appendString:[firstItem citeKey]];
+				[s appendString:[firstItem citeKey]]; 
 				[s appendString:@"]"];
 				if (count > 1) 
 					[s appendString:[NSString horizontalEllipsisString]];

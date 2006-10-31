@@ -1046,12 +1046,6 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     return errorCode;
 }
 
-- (NSString *)citation{
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    return [NSString stringWithFormat:@"\\%@%@", [pw stringForKey:BDSKCiteStringKey], 
-            [pw stringForKey:BDSKCiteStartBracketKey], [self citeKey], [pw stringForKey:BDSKCiteEndBracketKey]]; 
-}
-
 #pragma mark Pub Fields
 
 - (NSDictionary *)pubFields{
