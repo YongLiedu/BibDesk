@@ -68,11 +68,18 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (id)init{
+    self = [self initWithSourceDocument:nil];
+    return self;
+}
+
+- (id)initWithSourceDocument:(NSDocument *)aDocument{
     if(self = [super init]){
-        if(thePreviewer){
+        if(aDocument == nil && thePreviewer){
             [self release];
-            self = thePreviewer;
+            self = [thePreviewer retain];
         } else {
+            sourceDocument = aDocument;
+            
             texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
             [texTask setDelegate:self];
             
@@ -93,7 +100,7 @@ static BDSKPreviewer *thePreviewer;
 #pragma mark UI setup and display
 
 - (void)awakeFromNib{
-    volatile float scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
+    volatile float scaleFactor = sourceDocument ? 0.0 : [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
     BDSKZoomableScrollView *scrollView;
 	
 	[self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
@@ -108,22 +115,27 @@ static BDSKPreviewer *thePreviewer;
     [self drawPreviewsForState:BDSKEmptyPreviewState];
     	
     scrollView = (BDSKZoomableScrollView*)[rtfPreviewView enclosingScrollView];
-	scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
+	scaleFactor = sourceDocument ? 1.0 : [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
 	[scrollView setScaleFactor:scaleFactor];
 	
-	// overlay the progressIndicator over the contentView
-	[progressOverlay overlayView:[[self window] contentView]];
-	// we use threads, so better let the progressIndicator also use them
-	[progressIndicator setUsesThreadedAnimation:YES];
-	
-	// register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
-    [[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleApplicationWillTerminate:)
-												 name:NSApplicationWillTerminateNotification
-											   object:NSApp];
+    if(self == thePreviewer){
+        // overlay the progressIndicator over the contentView
+        [progressOverlay overlayView:[[self window] contentView]];
+        // we use threads, so better let the progressIndicator also use them
+        [progressIndicator setUsesThreadedAnimation:YES];
+        
+        // register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleApplicationWillTerminate:)
+                                                     name:NSApplicationWillTerminateNotification
+                                                   object:NSApp];
+    }
     [OFPreference addObserver:self
                      selector:@selector(handlePreviewNeedsUpdate:)
                 forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
+    
+    [pdfView retain];
+    [[rtfPreviewView enclosingScrollView] retain];
 }
 
 - (NSString *)windowNibName
@@ -133,6 +145,8 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)updateRepresentedFilename
 {
+    if(self != thePreviewer)
+        return;
     NSString *path = nil;
 	if([self previewState] == BDSKShowingPreviewState){
         path = ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0) ? [texTask PDFFilePath] : [texTask RTFFilePath];
@@ -145,6 +159,22 @@ static BDSKPreviewer *thePreviewer;
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
     [self updateRepresentedFilename];
+}
+
+- (PDFView *)pdfView;
+{
+    [self window];
+    return pdfView;
+}
+
+- (NSTextView *)textView;
+{
+    [self window];
+    return rtfPreviewView;
+}
+
+- (BOOL)isVisible{
+    return [[pdfView window] isVisible] || [[rtfPreviewView window] isVisible];
 }
 
 #pragma mark Actions
@@ -176,8 +206,10 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification {
     id document = [[NSDocumentController sharedDocumentController] currentDocument];
-    if(document && [document respondsToSelector:@selector(updatePreviews:)])
+    if(sourceDocument == nil && document && [document respondsToSelector:@selector(updatePreviews:)])
         [document updatePreviews:nil];
+    else if(sourceDocument && [document respondsToSelector:@selector(updatePreviews:)])
+        [(id)sourceDocument updatePreviews:nil];
 }
 
 - (void)printDocument:(id)sender{ // first responder gets this
@@ -221,7 +253,7 @@ static BDSKPreviewer *thePreviewer;
 		[progressIndicator stopAnimation:nil];
 	
     // if we're offscreen, no point in doing any extra work; we want to be able to reset offscreen though
-    if(![self isWindowVisible] && state != BDSKEmptyPreviewState){
+    if(![self isVisible] && state != BDSKEmptyPreviewState){
         return;
     }
 	
@@ -360,21 +392,21 @@ static BDSKPreviewer *thePreviewer;
 #pragma mark Data accessors
 
 - (NSData *)PDFData{
-	if([texTask hasPDFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isWindowVisible]){
+	if([texTask hasPDFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isVisible]){
 		return [texTask PDFData];
 	}
 	return nil;
 }
 
 - (NSData *)RTFData{
-	if([texTask hasRTFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isWindowVisible]){
+	if([texTask hasRTFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isVisible]){
 		return [texTask RTFData];
 	}
 	return nil;
 }
 
 - (NSString *)LaTeXString{
-	if([texTask hasLaTeX] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isWindowVisible]){
+	if([texTask hasLaTeX] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isVisible]){
 		return [texTask LaTeXString];
 	}
 	return nil;
@@ -435,6 +467,8 @@ static BDSKPreviewer *thePreviewer;
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
+    [pdfView release];
+    [[rtfPreviewView enclosingScrollView] release];
     [messageQueue release];
 	[texTask release];
     OFSimpleLockFree(&stateLock);

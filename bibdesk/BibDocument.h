@@ -44,7 +44,7 @@
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
-@class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController;
+@class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox;
 
 enum {
@@ -89,6 +89,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 @interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKDocument>
 {
     IBOutlet NSTextView *previewField;
+    IBOutlet NSView *currentPreviewView;
     IBOutlet NSWindow* documentWindow;
     IBOutlet BDSKMainTableView *tableView;
     IBOutlet NSMenuItem *ctxCopyBibTex;
@@ -98,6 +99,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKColoredBox* mainBox;
     // for the splitview double-click handling
     float lastPreviewHeight;
+    BDSKPreviewer *previewer;
 	
 #pragma mark Toolbar variable declarations
 

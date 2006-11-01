@@ -342,6 +342,8 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [toolbarItems release];
 	[statusBar release];
 	[splitView release];
+    [[previewField enclosingScrollView] release];
+    [previewer release];
 	[texTask release];
     [macroWC release];
     [infoWC release];
@@ -470,6 +472,8 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     // it might be replaced by the file content search view
     [splitView retain];
     [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
+    
+    [[previewField enclosingScrollView] retain];
     
     // TableView setup
     [tableView removeAllTableColumns];
@@ -2668,6 +2672,26 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)displayPreviewForItems:(NSArray *)items{
+    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
+    NSView *view = [previewField enclosingScrollView];
+    
+    if(displayType == 4 || displayType == 5){
+        if(previewer == nil)
+            previewer = [[BDSKPreviewer alloc] initWithSourceDocument:self];
+        view = displayType == 5 ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)[previewer pdfView];
+        if(currentPreviewView != view){
+            [view setFrame:[currentPreviewView frame]];
+            [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+            currentPreviewView = view;
+        }
+        NSString *bibString = [items count] ? [self previewBibTeXStringForPublications:items] : nil;
+        [previewer updateWithBibTeXString:bibString];
+        return;
+    }else if(currentPreviewView != view){
+        [view setFrame:[currentPreviewView frame]];
+        [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+        currentPreviewView = view;
+    }
 
     if(NSIsEmptyRect([previewField visibleRect]))
         return;
@@ -2675,8 +2699,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     static NSAttributedString *noAttrDoubleLineFeed;
     if(noAttrDoubleLineFeed == nil)
         noAttrDoubleLineFeed = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:nil];
-    
-    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
     
     NSDictionary *bodyAttributes = nil;
     NSDictionary *titleAttributes = nil;

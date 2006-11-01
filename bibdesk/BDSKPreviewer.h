@@ -63,6 +63,8 @@
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet BDSKOverlay *progressOverlay;
     
+    NSDocument *sourceDocument;
+    
     BDSKPreviewMessageQueue *messageQueue;
 	volatile int previewState;
     
@@ -75,6 +77,11 @@
 	@result Pointer to the single BDSKPreviewer instance.
 */
 + (BDSKPreviewer *)sharedPreviewer;
+
+- (id)initWithSourceDocument:(NSDocument *)aDocument;
+
+- (PDFView *)pdfView;
+- (NSTextView *)textView;
 
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification;

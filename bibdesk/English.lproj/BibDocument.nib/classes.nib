@@ -142,6 +142,7 @@
                 ctxCopyBibTex = NSMenuItem; 
                 ctxCopyPDF = NSMenuItem; 
                 ctxCopyTex = NSMenuItem; 
+                currentPreviewView = NSView; 
                 customCiteDrawer = NSDrawer; 
                 documentWindow = NSWindow; 
                 exportAccessoryView = NSView; 
