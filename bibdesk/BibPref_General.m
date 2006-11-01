@@ -45,6 +45,8 @@
     [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRemovalFromGroupKey]];
     [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRenameGroupKey]];
     [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnCiteKeyChangeKey]];
+    [OFPreference addObserver:self selector:@selector(handleTemplatePrefsChanged:) forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
+    [self handleTemplatePrefsChanged:nil];
 }
 
 - (void)updateUI{
@@ -70,22 +72,6 @@
     
     [warnOnGenerateCiteKeysButton setState:([defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] == YES) ? NSOnState : NSOffState];
     
-}
-
-- (void)willBecomeCurrentPreferenceClient{
-    NSString *currentStyle = [defaults stringForKey:BDSKEmailTemplateKey];
-    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat]];
-    [emailTemplatePopup removeAllItems];
-    [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Default BibTeX Format")];
-    [emailTemplatePopup addItemsWithTitles:styles];
-    if ([NSString isEmptyString:currentStyle]) {
-        [emailTemplatePopup selectItemAtIndex:0];
-    } else if ([styles containsObject:currentStyle]) {
-        [emailTemplatePopup selectItemWithTitle:currentStyle];
-    } else {
-        [emailTemplatePopup selectItemAtIndex:0];
-        [defaults setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
-    }
 }
 
 // tags correspond to BDSKUpdateCheckInterval enum
@@ -180,6 +166,22 @@
 
 - (void)handleWarningPrefChanged:(NSNotification *)notification {
     [self updateUI];
+}
+
+- (void)handleTemplatePrefsChanged:(NSNotification *)notification {
+    NSString *currentStyle = [defaults stringForKey:BDSKEmailTemplateKey];
+    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat]];
+    [emailTemplatePopup removeAllItems];
+    [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Default BibTeX Format")];
+    [emailTemplatePopup addItemsWithTitles:styles];
+    if ([NSString isEmptyString:currentStyle]) {
+        [emailTemplatePopup selectItemAtIndex:0];
+    } else if ([styles containsObject:currentStyle]) {
+        [emailTemplatePopup selectItemWithTitle:currentStyle];
+    } else {
+        [emailTemplatePopup selectItemAtIndex:0];
+        [defaults setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
+    }
 }
 
 @end

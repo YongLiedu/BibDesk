@@ -49,6 +49,11 @@
                                              selector:@selector(handlePreviewDisplayChangedNotification:)
                                                  name:BDSKPreviewDisplayChangedNotification
                                                object:nil];
+    [OFPreference addObserver:self 
+                     selector:@selector(handleTemplatePrefsChangedNotification:) 
+                forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
+    
+    [self handleTemplatePrefsChangedNotification:nil];
     
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"All"), @"1", @"5", @"10", @"20", nil]];
     [self updateUI];
@@ -91,7 +96,7 @@
     
 }    
 
-- (void)willBecomeCurrentPreferenceClient{
+- (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification{
     NSString *currentStyle = [defaults stringForKey:BDSKPreviewTemplateStyleKey];
     NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
     [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];

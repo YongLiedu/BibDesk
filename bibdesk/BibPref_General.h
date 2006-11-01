@@ -66,5 +66,6 @@
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)handleWarningPrefChanged:(NSNotification *)notification;
+- (void)handleTemplatePrefsChanged:(NSNotification *)notification;
 
 @end
