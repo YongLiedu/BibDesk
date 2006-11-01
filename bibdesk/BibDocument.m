@@ -2676,6 +2676,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSView *view = [previewField enclosingScrollView];
     
     if(displayType == 4 || displayType == 5){
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
+            return;
         if(previewer == nil)
             previewer = [[BDSKPreviewer alloc] initWithSourceDocument:self];
         view = displayType == 5 ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)[previewer pdfView];
