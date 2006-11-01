@@ -205,6 +205,8 @@
 		CE2391610A334890009F3A5B /* BDSKDocumentInfoWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */; };
 		CE2391620A334890009F3A5B /* BDSKDocumentInfoWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */; };
 		CE23916A0A3348B2009F3A5B /* DocumentInfoWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE2391630A3348B1009F3A5B /* DocumentInfoWindow.nib */; };
+		CE27D95B0AF92BFD00419879 /* BDSKZoomableTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE27D9590AF92BFD00419879 /* BDSKZoomableTextView.h */; };
+		CE27D95C0AF92BFD00419879 /* BDSKZoomableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */; };
 		CE28346309176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE28346109176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h */; };
 		CE28346509176CA3006B4C63 /* BDSKGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9706DE409102DF500526FC8 /* BDSKGradientView.m */; };
 		CE28346609176CAF006B4C63 /* BDSKGradientView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9706DE309102DF500526FC8 /* BDSKGradientView.h */; };
@@ -1038,6 +1040,8 @@
 		CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDocumentInfoWindowController.h; sourceTree = "<group>"; };
 		CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDocumentInfoWindowController.m; sourceTree = "<group>"; };
 		CE2391640A3348B1009F3A5B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/DocumentInfoWindow.nib; sourceTree = "<group>"; };
+		CE27D9590AF92BFD00419879 /* BDSKZoomableTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKZoomableTextView.h; sourceTree = "<group>"; };
+		CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomableTextView.m; sourceTree = "<group>"; };
 		CE28346109176C88006B4C63 /* NSBezierPath_CoreImageExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSBezierPath_CoreImageExtensions.h; sourceTree = "<group>"; };
 		CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSBezierPath_CoreImageExtensions.m; sourceTree = "<group>"; };
 		CE28373F0917D31D006B4C63 /* BDSKEdgeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKEdgeView.h; sourceTree = "<group>"; };
@@ -1824,6 +1828,7 @@
 				F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */,
 				F9022C5C075802E300C3F701 /* BDSKZoomImageView.m */,
 				F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */,
+				CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */,
 				F9A6772C07D2D57F00782ACD /* MultiplePageView.m */,
 			);
 			name = Views;
@@ -2258,6 +2263,7 @@
 				F9F5ECCF0AE5E7C8007EBB31 /* BDSKURLGroup.h */,
 				F9E069B40981A03B00AEFBE7 /* BDSKWebOfScienceParser.h */,
 				F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */,
+				CE27D9590AF92BFD00419879 /* BDSKZoomableTextView.h */,
 				F9022C5B075802E300C3F701 /* BDSKZoomImageView.h */,
 				F920DAFA075C2B69000C5FCA /* BibAppController+Scripting.h */,
 				F9022C5D075802E300C3F701 /* BibAppController.h */,
@@ -2662,6 +2668,7 @@
 				CE600E2F0AF405D6000B5680 /* BDSKRISParser.h in Headers */,
 				CE601A4E0AF4C488000B5680 /* BDSKReferenceMinerParser.h in Headers */,
 				F97FA7920AF56FA100C32BBA /* BDSKImageFadeAnimation.h in Headers */,
+				CE27D95B0AF92BFD00419879 /* BDSKZoomableTextView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3438,6 +3445,7 @@
 				CE601A4F0AF4C488000B5680 /* BDSKReferenceMinerParser.m in Sources */,
 				F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */,
 				CE602A600AF65A9C000B5680 /* BDSKStringParser.m in Sources */,
+				CE27D95C0AF92BFD00419879 /* BDSKZoomableTextView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
