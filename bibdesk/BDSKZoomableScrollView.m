@@ -157,6 +157,46 @@ static float BDSKScaleMenuFontSize = 11.0;
     }
 }
 
+- (IBAction)zoomToActualSize:(id)sender{
+    [self setScaleFactor:1.0];
+}
+
+- (IBAction)zoomIn:(id)sender{
+    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    
+    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
+    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+    cnt++;
+    while (cnt >= numberOfDefaultItems) cnt--;
+    [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
+}
+
+- (IBAction)zoomOut:(id)sender{
+    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    
+    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
+    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+    cnt--;
+    if (cnt < 0) cnt++;
+    [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
+}
+
+- (BOOL)canZoomToActualSize{
+    return scaleFactor != 1.0;
+}
+
+- (BOOL)canZoomIn{
+    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+    return cnt < numberOfDefaultItems - 1;
+}
+
+- (BOOL)canZoomOut{
+    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+    return cnt > 0;
+}
+
 - (void)setHasHorizontalScroller:(BOOL)flag {
     if (!flag) [self setScaleFactor:1.0 adjustPopup:NO];
     [super setHasHorizontalScroller:flag];
@@ -189,6 +229,18 @@ static float BDSKScaleMenuFontSize = 11.0;
         buttonFrame.size.height = horizScrollerFrame.size.height - 1.0;
         [scalePopUpButton setFrame:buttonFrame];
     }
+}
+
+- (BOOL)validatMenuItem:(NSMenuItem *)menuItem{
+    if([menuItem action] == @selector(zoomIn:))
+        return [self canZoomIn];
+    else if([menuItem action] == @selector(zoomOut:))
+        return [self canZoomOut];
+    else if([menuItem action] == @selector(zoomToActualSize:))
+        return [self canZoomToActualSize];
+    else if ([[self superclass] instancesRespondToSelector:_cmd])
+        return [super validateMenuItem:menuItem];
+    return YES;
 }
 
 @end

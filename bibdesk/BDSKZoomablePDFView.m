@@ -268,7 +268,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         [self setScaleFactor:[selectedFactorObject floatValue] adjustPopup:NO];
 }
 
-- (void)setScaleFactor:(float)newScaleFactor {NSLog(@"%f",newScaleFactor);
+- (void)setScaleFactor:(float)newScaleFactor {
     NSPoint scrollPoint = (NSPoint)[self scrollPositionAsPercentage];
 	[self setScaleFactor:newScaleFactor adjustPopup:YES];
     [self setScrollPositionAsPercentage:scrollPoint];
@@ -320,6 +320,30 @@ static float BDSKScaleMenuFontSize = 11.0;
         if (cnt < 0) cnt++;
         [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
     }
+}
+
+- (BOOL)canZoomIn{
+    if ([super canZoomIn] == NO)
+        return NO;
+    if([self autoScales])   
+        return YES;
+    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    float scaleFactor = [self scaleFactor];
+    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
+    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+    return cnt < numberOfDefaultItems - 1;
+}
+
+- (BOOL)canZoomOut{
+    if ([super canZoomOut] == NO)
+        return NO;
+    if([self autoScales])   
+        return YES;
+    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    float scaleFactor = [self scaleFactor];
+    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
+    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+    return cnt > 0;
 }
 
 #pragma mark Scrollview

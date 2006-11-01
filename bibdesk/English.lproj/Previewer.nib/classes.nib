@@ -16,6 +16,7 @@
         {CLASS = BDSKZoomImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
         {CLASS = BDSKZoomablePDFView; LANGUAGE = ObjC; SUPERCLASS = PDFView; }, 
         {CLASS = BDSKZoomableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
+        {CLASS = BDSKZoomableTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {
             ACTIONS = {showFindPanel = id; showPreferencePanel = id; }; 
             CLASS = BibAppController; 

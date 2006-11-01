@@ -8,6 +8,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSScrollView; 
         }, 
+        {CLASS = BDSKZoomableTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {
             ACTIONS = {
                 bibTypeDidChange = id; 
