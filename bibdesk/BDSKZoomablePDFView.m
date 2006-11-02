@@ -44,6 +44,29 @@
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "NSURL_BDSKExtensions.h"
 
+@interface NSScrollView (BDSKZoomablePDFViewExtensions) @end
+
+@implementation NSScrollView (BDSKZoomablePDFViewExtensions)
+
+static IMP originalSetHasHorizontalScroller;
+
++ (void)didLoad{
+    originalSetHasHorizontalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
+}
+
+// hack to make sure the scrollView of our zommable PDF view always has a horizontal scroller
+- (void)replacementSetHasHorizontalScroller:(BOOL)flag {
+    BOOL isZoomable = NO;
+    @try{
+        // the documentView for a PDFView is a PDFMatteView, which has an ivar _pdfView
+        isZoomable = [[[self documentView] valueForKey:@"pdfView"] isKindOfClass:[BDSKZoomablePDFView class]];
+    }
+    @catch(id exception) {}
+    originalSetHasHorizontalScroller(self, _cmd, isZoomable || flag);
+}
+
+@end
+
 @interface PDFView (BDSKApplePrivateOverride)
 - (void)adjustScrollbars:(id)obj;
 @end
