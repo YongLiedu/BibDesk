@@ -47,6 +47,7 @@
 #import "BibDocument_Search.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BDSKPreviewer.h"
+#import "BDSKTeXTask.h"
 #import "BDSKMainTableView.h"
 #import "BDSKGroupTableView.h"
 #import "NSFileManager_BDSKExtensions.h"

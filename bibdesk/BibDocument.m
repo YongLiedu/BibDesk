@@ -2690,6 +2690,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [previewer updateWithBibTeXString:bibString];
         return;
     }else if(currentPreviewView != view){
+        [previewer updateWithBibTeXString:nil];
         [view setFrame:[currentPreviewView frame]];
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
         currentPreviewView = view;

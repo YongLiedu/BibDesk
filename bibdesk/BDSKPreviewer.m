@@ -36,6 +36,8 @@
 
 #import "BDSKPreviewer.h"
 #import "BibPrefController.h"
+#import "BDSKTeXTask.h"
+#import "BDSKOverlay.h"
 #import "BibAppController.h"
 #import "BDSKZoomableScrollView.h"
 #import "BDSKZoomablePDFView.h"
@@ -48,6 +50,8 @@
 #import <OmniFoundation/OFPreference.h>
 #import "NSWindowController_BDSKExtensions.h"
 
+static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
+
 enum {
 	BDSKUnknownPreviewState = -1,
 	BDSKEmptyPreviewState = 0,
@@ -56,15 +60,15 @@ enum {
 };
 
 /*! @const BDSKPreviewer helps to enforce a single object of this class */
-static BDSKPreviewer *thePreviewer;
+static BDSKPreviewer *sharedPreviewer;
 
 @implementation BDSKPreviewer
 
 + (BDSKPreviewer *)sharedPreviewer{
-    if (!thePreviewer) {
-        thePreviewer = [[BDSKPreviewer alloc] init];
+    if (sharedPreviewer == nil) {
+        sharedPreviewer = [[BDSKPreviewer alloc] init];
     }
-    return thePreviewer;
+    return sharedPreviewer;
 }
 
 - (id)init{
@@ -72,11 +76,11 @@ static BDSKPreviewer *thePreviewer;
     return self;
 }
 
-- (id)initWithSourceDocument:(NSDocument *)aDocument{
+- (id)initWithSourceDocument:(BibDocument *)aDocument{
     if(self = [super init]){
-        if(aDocument == nil && thePreviewer){
+        if(aDocument == nil && sharedPreviewer){
             [self release];
-            self = [thePreviewer retain];
+            self = [sharedPreviewer retain];
         } else {
             sourceDocument = aDocument;
             
@@ -92,6 +96,9 @@ static BDSKPreviewer *thePreviewer;
             // this reflects the currently expected state, not necessarily the actual state
             // it corresponds to the last drawing item added to the mainQueue
             previewState = BDSKUnknownPreviewState;
+            
+            // otherwise a document's previewer might mess up the windowmposition of the shared previewer
+            [self setShouldCascadeWindows:NO];
         }
     }
     return self;
@@ -100,25 +107,15 @@ static BDSKPreviewer *thePreviewer;
 #pragma mark UI setup and display
 
 - (void)awakeFromNib{
-    volatile float scaleFactor = sourceDocument ? 0.0 : [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
-    BDSKZoomableScrollView *scrollView;
+    volatile float pdfScaleFactor = 0.0;
+    volatile float rtfScaleFactor = 1.0;
 	
-	[self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
+    if(self == sharedPreviewer){
+        pdfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
+        rtfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
         
-    // empty document to avoid problem when zoom is set to auto
-    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:[self PDFDataWithString:@"" color:nil]] autorelease];
-    [pdfView setDocument:pdfDoc];
-    
-    // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
-    [pdfView setScaleFactor:scaleFactor];
-    
-    [self drawPreviewsForState:BDSKEmptyPreviewState];
-    	
-    scrollView = (BDSKZoomableScrollView*)[rtfPreviewView enclosingScrollView];
-	scaleFactor = sourceDocument ? 1.0 : [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
-	[scrollView setScaleFactor:scaleFactor];
-	
-    if(self == thePreviewer){
+        [self setWindowFrameAutosaveName:BDSKPreviewPanelFrameAutosaveName];
+        
         // overlay the progressIndicator over the contentView
         [progressOverlay overlayView:[[self window] contentView]];
         // we use threads, so better let the progressIndicator also use them
@@ -130,6 +127,17 @@ static BDSKPreviewer *thePreviewer;
                                                      name:NSApplicationWillTerminateNotification
                                                    object:NSApp];
     }
+        
+    // empty document to avoid problem when zoom is set to auto
+    PDFDocument *pdfDoc = [[[PDFDocument alloc] initWithData:[self PDFDataWithString:@"" color:nil]] autorelease];
+    [pdfView setDocument:pdfDoc];
+    
+    // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
+    [pdfView setScaleFactor:pdfScaleFactor];
+	[(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:rtfScaleFactor];
+    
+    [self drawPreviewsForState:BDSKEmptyPreviewState];
+    
     [OFPreference addObserver:self
                      selector:@selector(handlePreviewNeedsUpdate:)
                 forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
@@ -145,8 +153,6 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)updateRepresentedFilename
 {
-    if(self != thePreviewer)
-        return;
     NSString *path = nil;
 	if([self previewState] == BDSKShowingPreviewState){
         path = ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0) ? [texTask PDFFilePath] : [texTask RTFFilePath];
@@ -180,6 +186,7 @@ static BDSKPreviewer *thePreviewer;
 #pragma mark Actions
 
 - (IBAction)showWindow:(id)sender{
+    OBASSERT(self == sharedPreviewer);
 	[super showWindow:self];
 	[progressOverlay orderFront:sender];
 	[self handlePreviewNeedsUpdate:nil];
@@ -246,11 +253,13 @@ static BDSKPreviewer *thePreviewer;
 	
     NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
 	
-	// start or stop the spinning wheel
-	if(state == BDSKWaitingPreviewState)
-		[progressIndicator startAnimation:nil];
-    else
-		[progressIndicator stopAnimation:nil];
+    if(self == sharedPreviewer){
+        // start or stop the spinning wheel
+        if(state == BDSKWaitingPreviewState)
+            [progressIndicator startAnimation:nil];
+        else
+            [progressIndicator stopAnimation:nil];
+    }
 	
     // if we're offscreen, no point in doing any extra work; we want to be able to reset offscreen though
     if(![self isVisible] && state != BDSKEmptyPreviewState){
@@ -319,7 +328,8 @@ static BDSKPreviewer *thePreviewer;
         [ts addAttribute:NSForegroundColorAttributeName value:[NSColor grayColor] range:NSMakeRange(0, [ts length])];
 	}
     
-    [self updateRepresentedFilename];
+    if(self == sharedPreviewer)
+        [self updateRepresentedFilename];
 }	
 
 - (void)drawPreviewsForState:(int)state{
@@ -442,6 +452,8 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification{
+    OBASSERT(self == sharedPreviewer);
+    
 	// save the visibility of the previewer
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
     // save the scalefactors of the views
@@ -467,10 +479,13 @@ static BDSKPreviewer *thePreviewer;
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
+    // make sure we don't process anything else; the TeX task will take care of its own cleanup
+    [messageQueue removeAllInvocations];
+    [messageQueue release];
+    [texTask terminate];
+	[texTask release];
     [pdfView release];
     [[rtfPreviewView enclosingScrollView] release];
-    [messageQueue release];
-	[texTask release];
     OFSimpleLockFree(&stateLock);
     [super dealloc];
 }
