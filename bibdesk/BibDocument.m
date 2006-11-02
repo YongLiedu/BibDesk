@@ -1939,27 +1939,27 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	NSEnumerator *e = [filenames objectEnumerator];
 	NSString *fnStr = nil;
 	NSURL *url = nil;
-	BibItem *newBI = nil;
     	
 	while(fnStr = [e nextObject]){
         fnStr = [fnStr stringByStandardizingPath];
 		if(url = [NSURL fileURLWithPath:fnStr]){
             NSError *xerror = nil;
-			NSData *btData = nil;
+            BibItem *newBI = nil;
             
-            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey])
-                btData = [[NSFileManager defaultManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
-
-            if(btData == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
+            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey]){
+                NSData *btData = [[NSFileManager defaultManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
+                if(btData)
+                    newBI = [[BibTeXParser itemsFromData:btData document:self error:&xerror] firstObject];
+            }
+            
+            if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
             
-            if(newBI == nil && (btData == nil || (newBI = [[BibTeXParser itemsFromData:btData document:self error:&xerror] firstObject]) == nil))
+            if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
             
             [newBI setField:BDSKLocalUrlString toValue:[url absoluteString]];
 			[newPubs addObject:newBI];
-            
-            newBI = nil;
 		}
 	}
 	
