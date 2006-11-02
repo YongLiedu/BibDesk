@@ -838,13 +838,13 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
         if(data[cidx-1] == '{'){
             // scan up to the balanced brace
             for(braceDepth = 1; braceDepth > 0; cidx++){
-                if(data[cidx] == '{') braceDepth++;
-                if(data[cidx] == '}') braceDepth--;
+                if(data[cidx] == '{' && data[cidx-1] != '\\') braceDepth++;
+                if(data[cidx] == '}' && data[cidx-1] != '\\') braceDepth--;
             }
             cidx--;     // just advanced cidx one past the end of the field.
         }else if(data[cidx-1] == '"'){
             // scan up to the next quote.
-            for(; data[cidx] != '"'; cidx++);
+            for(; data[cidx] != '"' || data[cidx-1] == '\\'; cidx++);
         }else{ 
             // no brace and no quote => unknown problem
             NSString *errorString = [NSString stringWithFormat:NSLocalizedString(@"Unexpected delimiter \"%@\" encountered at line %d.", @""), [[[NSString alloc] initWithBytes:&data[cidx-1] length:1 encoding:encoding] autorelease], field->line];
