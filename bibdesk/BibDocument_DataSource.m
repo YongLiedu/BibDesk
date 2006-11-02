@@ -556,26 +556,35 @@
 			break;
 		case BDSKPDFDragCopyType:
 			mainType = NSPDFPboardType;
-			if([pubs isEqualToArray:[self selectedPublications]] &&
-			   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
-				// we are copying, and the previewer is showing, so we reuse it's PDF data if available
-				data = [[BDSKPreviewer sharedPreviewer] PDFData];
+			if([pubs isEqualToArray:[self selectedPublications]]){
+			   if([previewer isVisible])
+                    // we are copying, and the previewer is showing, so we reuse it's PDF data if available
+                    data = [previewer PDFData];
+			   if(data == nil && [[BDSKPreviewer sharedPreviewer] isVisible])
+                    // we are copying, and the previewer is showing, so we reuse it's PDF data if available
+                    data = [[BDSKPreviewer sharedPreviewer] PDFData];
 			}
 			break;
 		case BDSKRTFDragCopyType:
 			mainType = NSRTFPboardType;
-			if([pubs isEqualToArray:[self selectedPublications]] &&
-			   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
-				// we are copying, and the previewer is showing, so we reuse it's RTF data if available
-				data = [[BDSKPreviewer sharedPreviewer] RTFData];
+			if([pubs isEqualToArray:[self selectedPublications]]){
+			   if([previewer isVisible])
+                    // we are copying, and the previewer is showing, so we reuse it's RTF data if available
+                    data = [previewer RTFData];
+			   if(data == nil && [[BDSKPreviewer sharedPreviewer] isVisible])
+                    // we are copying, and the previewer is showing, so we reuse it's RTF data if available
+                    data = [[BDSKPreviewer sharedPreviewer] RTFData];
 			}
 			break;
 		case BDSKLaTeXDragCopyType:
 			mainType = NSStringPboardType;
-			if([pubs isEqualToArray:[self selectedPublications]] &&
-			   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
-				// we are copying, and the previewer is showing, so we reuse it's LaTeX string if available
-				string = [[BDSKPreviewer sharedPreviewer] LaTeXString];
+			if([pubs isEqualToArray:[self selectedPublications]]){
+			   if([previewer isVisible])
+                    // we are copying, and the previewer is showing, so we reuse it's LaTeX string if available
+                    string = [previewer LaTeXString];
+			   if(string == nil && [[BDSKPreviewer sharedPreviewer] isVisible])
+                    // we are copying, and the previewer is showing, so we reuse it's LaTeX string if available
+                    string = [[BDSKPreviewer sharedPreviewer] LaTeXString];
 			}
 			break;
 		case BDSKLTBDragCopyType:
