@@ -2587,8 +2587,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
-	id changedOwner = [[aNotification object] owner];
-	if(changedOwner && changedOwner != self)
+	id changedDoc = [[aNotification object] document];
+	if(changedDoc && changedDoc != self)
 		return; // only macro changes for ourselves or the global macros
 	
     [tableView reloadData];
