@@ -315,6 +315,13 @@ static float BDSKScaleMenuFontSize = 11.0;
         [super setScaleFactor:newScaleFactor];
 }
 
+- (void)setAutoScales:(BOOL)newAuto {
+    [super setAutoScales:newAuto];
+    
+    if(newAuto)
+		[scalePopUpButton selectItemAtIndex:0];
+}
+
 - (IBAction)zoomIn:(id)sender{
     if([self autoScales]){
         [super zoomIn:sender];
