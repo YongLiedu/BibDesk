@@ -38,7 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchIndex;
+@class BDSKSearchIndex, BDSKThreadSafeMutableArray;
+
 @protocol BDSKSearchIndexDelegate <NSObject>
 - (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
 - (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)index;
@@ -60,13 +61,11 @@ typedef struct _BDSKSearchIndexFlags
     id delegate;
     NSArray *initialObjectsToIndex;
     
-    NSMutableArray *notificationQueue;
+    BDSKThreadSafeMutableArray *notificationQueue;
     NSMachPort *notificationPort;
     pthread_t notificationThread;
     BDSKSearchIndexFlags flags;
     double progressValue;
-        
-    NSLock *queueLock;
 }
 
 - (id)initWithDocument:(id)aDocument;

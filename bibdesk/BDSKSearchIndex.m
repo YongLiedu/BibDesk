@@ -41,6 +41,7 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BibTypeManager.h"
+#import "BDSKThreadSafeMutableArray.h"
 
 @interface BDSKSearchIndex (Private)
 
@@ -119,7 +120,6 @@ void *setupThreading(void *anObject);
     [notificationPort release];
     [notificationQueue release];
     [titles release];
-    [queueLock release];
     if(index) CFRelease(index);
     [super dealloc];
 }
@@ -262,8 +262,7 @@ void *setupThreading(void *anObject)
         
         [self->notificationPort scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         
-        self->notificationQueue = [[NSMutableArray alloc] initWithCapacity:5];
-        self->queueLock = [[NSLock alloc] init];
+        self->notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
             
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKSearchIndexInfoChangedNotification object:self->document];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocAddItemNotification object:self->document];
@@ -315,9 +314,7 @@ void *setupThreading(void *anObject)
 {    
     if( pthread_equal(notificationThread, pthread_self()) == FALSE ){
         // Forward the notification to the correct thread
-        [queueLock lock];
         [notificationQueue addObject:note];
-        [queueLock unlock];
         [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
         
     } else {
@@ -411,16 +408,12 @@ void *setupThreading(void *anObject)
 - (void)handleMachMessage:(void *)msg
 {
 
-    [queueLock lock];
     while ( [notificationQueue count] ) {
         NSNotification *note = [[notificationQueue objectAtIndex:0] retain];
         [notificationQueue removeObjectAtIndex:0];
-        [queueLock unlock];
         [self processNotification:note];
         [note release];
-        [queueLock lock];
-    };
-    [queueLock unlock];
+    }
 }
 
 - (void)setInitialObjectsToIndex:(NSArray *)objects{
