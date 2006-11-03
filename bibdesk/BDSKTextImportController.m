@@ -1521,8 +1521,23 @@
     NSString *pbType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]];
     if ([NSStringPboardType isEqualToString:pbType]){
 
+        NSString *value = [pb stringForType:NSStringPboardType];
         NSString *key = [fields objectAtIndex:row];
-        [self recordChangingField:key toValue:[pb stringForType:NSStringPboardType]];
+        NSString *oldValue = [item valueOfField:key];
+        
+        if(([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) != 0 && 
+           [NSString isEmptyString:oldValue] == NO && 
+           [key isSingleValuedField] == NO){
+            
+            NSString *separator;
+            if([key isPersonField])
+                separator = @" and ";
+            else
+                separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+            value = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, value];
+        }
+        
+        [self recordChangingField:key toValue:value];
     }
     return YES;
 }
@@ -1537,6 +1552,19 @@
 	
     NSString *selKey = [fields objectAtIndex:index];
 	NSString *string = [pboard stringForType:NSStringPboardType];
+    NSString *oldValue = [item valueOfField:selKey];
+    
+    if(([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) != 0 && 
+       [NSString isEmptyString:oldValue] == NO && 
+       [selKey isSingleValuedField] == NO){
+        
+        NSString *separator;
+        if([selKey isPersonField])
+            separator = @" and ";
+        else
+            separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+        string = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, string];
+    }
 	
 	[self recordChangingField:selKey toValue:string];
 }
