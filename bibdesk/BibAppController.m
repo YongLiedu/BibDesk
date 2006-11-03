@@ -53,8 +53,6 @@
 #import "BDSKFormatParser.h"
 #import "BDAlias.h"
 #import "BDSKErrorObjectController.h"
-#import "NSMutableArray+ThreadSafety.h"
-#import "NSMutableDictionary+ThreadSafety.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "OFCharacterSet_BDSKExtensions.h"
 #import "BibDocument_Groups.h"

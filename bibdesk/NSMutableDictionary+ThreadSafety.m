@@ -37,7 +37,6 @@
  */
 
 #import "NSMutableDictionary+ThreadSafety.h"
-#import "BDSKCountedSet.h"
 
 @implementation NSMutableDictionary (ThreadSafety)
 
