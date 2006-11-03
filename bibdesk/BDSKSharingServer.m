@@ -47,7 +47,7 @@
 #import <libkern/OSAtomic.h>
 #import "BDSKSharedGroup.h"
 #import "BDSKAsynchronousDOServer.h"
-#import "NSMutableDictionary+ThreadSafety.h"
+#import "BDSKThreadSafeMutableDictionary.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -102,8 +102,7 @@ NSString *BDSKComputerName() {
 
 @interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread> {
     NSConnection *connection;
-    NSMutableDictionary *remoteClients;
-    NSLock *remoteClientsLock;
+    BDSKThreadSafeMutableDictionary *remoteClients;
 }
 
 + (NSString *)requiredProtocolVersion;
@@ -411,8 +410,7 @@ NSString *BDSKComputerName() {
 - (id)init
 {
     if(self = [super init]){
-        remoteClients = [[NSMutableDictionary alloc] init];
-        remoteClientsLock = [[NSLock alloc] init];
+        remoteClients = [[BDSKThreadSafeMutableDictionary alloc] init];
     }
     return self;
 }
@@ -420,12 +418,11 @@ NSString *BDSKComputerName() {
 - (void)dealloc
 {
     [remoteClients release];
-    [remoteClientsLock release];
     [super dealloc];
 }
 
 - (unsigned int)numberOfConnections { 
-    return [remoteClients countUsingLock:remoteClientsLock]; 
+    return [remoteClients count]; 
 }
 
 - (void)notifyClientConnectionsChanged;
@@ -508,7 +505,7 @@ NSString *BDSKComputerName() {
     if(maxConnections == 0)
         maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
     
-    BOOL allowConnection = [remoteClients countUsingLock:remoteClientsLock] < maxConnections;
+    BOOL allowConnection = [remoteClients count] < maxConnections;
     if(allowConnection){
         [newConnection setDelegate:self];
     } else {
@@ -550,13 +547,12 @@ NSString *BDSKComputerName() {
 
 - (oneway void)cleanup
 {
-    NSDictionary *copy = [remoteClients copyUsingLock:remoteClientsLock];
-    NSEnumerator *e = [copy keyEnumerator];
+    NSEnumerator *e = [remoteClients keyEnumerator];
     id proxyObject;
     NSString *key;
     
     while(key = [e nextObject]){
-        proxyObject = [[copy objectForKey:key] objectForKey:@"object"];
+        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
         @try {
             [proxyObject invalidate];
         }
@@ -565,8 +561,7 @@ NSString *BDSKComputerName() {
         }
         [[proxyObject connectionForProxy] invalidate];
     }
-    [copy release];
-    [remoteClients removeAllObjectsUsingLock:remoteClientsLock];
+    [remoteClients removeAllObjects];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
     NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:[BDSKSharingServer sharingName]];
@@ -591,31 +586,29 @@ NSString *BDSKComputerName() {
     
     [clientObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
     NSDictionary *clientInfo = [NSDictionary dictionaryWithObjectsAndKeys:clientObject, @"object", version, @"version", nil];
-    [remoteClients setObject:clientInfo forKey:identifier usingLock:remoteClientsLock];
+    [remoteClients setObject:clientInfo forKey:identifier];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
 - (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
 {
     NSParameterAssert(identifier != nil);
-    id proxyObject = [[remoteClients objectForKey:identifier usingLock:remoteClientsLock] objectForKey:@"object"];
+    id proxyObject = [[remoteClients objectForKey:identifier] objectForKey:@"object"];
     [[proxyObject connectionForProxy] invalidate];
-    [remoteClients removeObjectForKey:identifier usingLock:remoteClientsLock];
+    [remoteClients removeObjectForKey:identifier];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
 - (oneway void)notifyClientsOfChange;
 {
     // here is where we notify other hosts that something changed
-    // copy the dictionary since it's mutable
-    NSDictionary *copy = [remoteClients copyUsingLock:remoteClientsLock];
-    NSEnumerator *e = [copy keyEnumerator];
+    NSEnumerator *e = [remoteClients keyEnumerator];
     id proxyObject;
     NSString *key;
     
     while(key = [e nextObject]){
         
-        proxyObject = [[copy objectForKey:key] objectForKey:@"object"];
+        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
         
         @try {
             [proxyObject setNeedsUpdate:YES];
@@ -626,7 +619,6 @@ NSString *BDSKComputerName() {
             [self removeClientForIdentifier:key];
         }
     }
-    [copy release];
 }
 
 @end
