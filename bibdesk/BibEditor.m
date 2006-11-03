@@ -829,29 +829,31 @@ static int numberOfOpenEditors = 0;
 
 - (void)updateRecentDownloadsMenu:(NSMenu *)menu{
     
-    // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
-    NSString *query = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
-    
-    // limit the scope to the default downloads directory (from Internet Config)
-    [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:[[NSFileManager defaultManager] internetConfigDownloadURL]]];
-    
-    NSArray *paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:query attribute:(NSString *)kMDItemPath];
-    NSEnumerator *e = [paths objectEnumerator];
-    
-    NSString *filePath;
-    NSImage *image;
-    NSMenuItem *item;
-    
     [menu removeAllItems];
     
-    while(filePath = [e nextObject]){
-        image = [NSImage smallImageForFile:filePath];
+    // limit the scope to the default downloads directory (from Internet Config)
+    NSURL *downloadURL = [[NSFileManager defaultManager] internetConfigDownloadURL];
+    if(downloadURL){
+        // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
+        NSString *query = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
+        [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:downloadURL]];
         
-        item = [menu addItemWithTitle:[filePath lastPathComponent]
-                               action:@selector(setLocalURLPathFromMenuItem:)
-                        keyEquivalent:@""];
-        [item setRepresentedObject:filePath];
-        [item setImage:image];
+        NSArray *paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:query attribute:(NSString *)kMDItemPath];
+        NSEnumerator *e = [paths objectEnumerator];
+        
+        NSString *filePath;
+        NSImage *image;
+        NSMenuItem *item;
+        
+        while(filePath = [e nextObject]){
+            image = [NSImage smallImageForFile:filePath];
+            
+            item = [menu addItemWithTitle:[filePath lastPathComponent]
+                                   action:@selector(setLocalURLPathFromMenuItem:)
+                            keyEquivalent:@""];
+            [item setRepresentedObject:filePath];
+            [item setImage:image];
+        }
     }
 }
 
