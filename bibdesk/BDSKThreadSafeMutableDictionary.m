@@ -1,5 +1,5 @@
 //
-//  NSMutableDictionary+ThreadSafety.m
+//  BDSKThreadSafeMutableDictionary.m
 //  BibDesk
 //
 //  Created by Adam Maxwell on 01/27/05.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "NSMutableDictionary+ThreadSafety.h"
+#import "BDSKThreadSafeMutableDictionary.h"
 
 @implementation BDSKThreadSafeMutableDictionary
 

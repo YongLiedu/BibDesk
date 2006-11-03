@@ -1,5 +1,5 @@
 //
-//  NSMutableDictionary+ThreadSafety.h
+//  BDSKThreadSafeMutableDictionary.h
 //  BibDesk
 //
 //  Created by Adam Maxwell on 01/27/05.
