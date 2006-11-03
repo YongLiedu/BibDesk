@@ -37,25 +37,11 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
-@interface NSMutableDictionary (ThreadSafety)
-
-- (id)copyUsingLock:(NSLock *)aLock;
-- (id)objectForKey:(id)aKey usingLock:(NSLock *)aLock;
-- (void)removeObjectForKey:(id)aKey usingLock:(NSLock *)aLock;
-- (void)setObject:(id)anObject forKey:(id)aKey usingLock:(NSLock *)aLock;
-- (NSArray *)allKeysUsingLock:(NSLock *)aLock;
-- (NSArray *)allValuesUsingLock:(NSLock *)aLock;
-- (void)removeObjectsForKeys:(NSArray *)keyArray usingLock:(NSLock *)aLock;
-- (unsigned)countUsingLock:(NSLock *)aLock;
-- (void)removeAllObjectsUsingLock:(NSLock *)aLock;
-
-- (NSArray *)allKeysUsingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-- (id)objectForKey:(id)aKey usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-- (void)setObject:(id)obj forKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-- (void)removeObjectForKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-- (void)removeObjectsForKeys:(NSArray *)keys usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-
+@interface BDSKThreadSafeMutableDictionary : NSMutableDictionary {
+    NSMutableDictionary *embeddedDictionary;
+    NSLock *lock;
+}
 @end

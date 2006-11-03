@@ -38,132 +38,79 @@
 
 #import "NSMutableDictionary+ThreadSafety.h"
 
-@implementation NSMutableDictionary (ThreadSafety)
+@implementation BDSKThreadSafeMutableDictionary
 
-- (id)copyUsingLock:(NSLock *)aLock{
-    
-	id copy;
-	
-	[aLock lock];
-	copy = [self copy];
-    [aLock unlock];
+- (id)init {
+    if (self = [super init]) {
+        embeddedDictionary = [[NSMutableDictionary allocWithZone:[self zone]] init];
+		lock = [[NSLock allocWithZone:[self zone]] init];
+    }
+    return self;
+}
+
+- (id)initWithCapacity:(unsigned)capacity {
+    if (self = [super init]) {
+        embeddedDictionary = [[NSMutableDictionary allocWithZone:[self zone]] initWithCapacity:capacity];
+		lock = [[NSLock allocWithZone:[self zone]] init];
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    [lock lock];
+	id copy = [embeddedDictionary copy];
+    [lock unlock];
 	return copy;
 }
 
-- (id)objectForKey:(id)aKey usingLock:(NSLock *)aLock{
-
-    id result;
-    
-    [aLock lock];
-    result = [self objectForKey:aKey];
-    [[result retain] autorelease];
-    [aLock unlock];
-    
-    return result;
+- (id)mutableCopyWithZone:(NSZone *)zone {
+    [lock lock];
+	id copy = [[[self class] allocWithZone:zone] initWithDictionary:embeddedDictionary];
+    [lock unlock];
+	return copy;
 }
 
-- (void)removeObjectForKey:(id)aKey usingLock:(NSLock *)aLock{
-    
-    [aLock lock];
-    [self removeObjectForKey:aKey];
-    [aLock unlock];
+- (void)dealloc {
+    [lock lock];
+	[embeddedDictionary release];
+    embeddedDictionary = nil;
+    [lock unlock];
+	[lock release];
+    lock = nil;
+	[super dealloc];
 }
 
-- (void)setObject:(id)anObject forKey:(id)aKey usingLock:(NSLock *)aLock{
-    
-    [aLock lock];
-    [anObject retain];
-    [self setObject:anObject forKey:aKey];
-    [anObject release];
-    [aLock unlock];
-}
-
-- (NSArray *)allKeysUsingLock:(NSLock *)aLock{
-    
-    NSArray *result;
-    
-    [aLock lock];
-    result = [self allKeys];
-    [[result retain] autorelease];
-    [aLock unlock];
-    
-    return result;
-}
-
-- (NSArray *)allValuesUsingLock:(NSLock *)aLock{
-    
-    NSArray *result;
-    
-    [aLock lock];
-    result = [self allValues];
-    [[result retain] autorelease];
-    [aLock unlock];
-    
-    return result;
-}
-
-- (void)removeObjectsForKeys:(NSArray *)keyArray usingLock:(NSLock *)aLock{
-    
-    [aLock lock];
-    [self removeObjectsForKeys:keyArray];
-    [aLock unlock];
-}
-
-- (unsigned)countUsingLock:(NSLock *)aLock;
-{
-    unsigned int count;
-    [aLock lock];
-    count = [self count];
-    [aLock unlock];
+- (unsigned)count {
+    [lock lock];
+	unsigned count = [embeddedDictionary count];
+    [lock unlock];
     return count;
 }
 
-- (void)removeAllObjectsUsingLock:(NSLock *)aLock;
-{
-    [aLock lock];
-    [self removeAllObjects];
-    [aLock unlock];
+- (id)objectForKey:(id)key {
+    [lock lock];
+    id object = [embeddedDictionary objectForKey:key];
+    [lock unlock];
+    return object;
 }
 
-- (NSArray *)allKeysUsingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-{
-    NSArray *keys = nil;
-    [aLock lockForReading];
-    keys = [[[self allKeys] retain] autorelease];
-    [aLock unlockForReading];
-    return keys;
+- (NSEnumerator *)keyEnumerator {
+	[lock lock];
+	NSArray *keys = [embeddedDictionary allKeys];
+    [lock unlock];
+	return [keys objectEnumerator];
 }
 
-- (id)objectForKey:(id)aKey usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-{
-    id obj = nil;
-    [aLock lockForReading];
-    obj = [[[self objectForKey:aKey] retain] autorelease];
-    [aLock unlockForReading];
-    return obj;
+- (void)setObject:(id)object forKey:(id)key {
+    [lock lock];
+	[embeddedDictionary setObject:object forKey:key];
+    [lock unlock];
 }
 
-- (void)setObject:(id)obj forKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-{
-    [aLock lockForWriting];
-    [obj retain];
-    [self setObject:obj forKey:key];
-    [obj release];
-    [aLock unlockForWriting];
-}
-
-- (void)removeObjectForKey:(id)key usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-{
-    [aLock lockForWriting];
-    [self removeObjectForKey:key];
-    [aLock unlockForWriting];
-}
-
-- (void)removeObjectsForKeys:(NSArray *)keys usingReadWriteLock:(id <OFReadWriteLocking>)aLock;
-{
-    [aLock lockForWriting];
-    [self removeObjectsForKeys:keys];
-    [aLock unlockForWriting];
+- (void)removeObjectForKey:(id)key {
+    [lock lock];
+	[embeddedDictionary removeObjectForKey:key];
+    [lock unlock];
 }
 
 @end
