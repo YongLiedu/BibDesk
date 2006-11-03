@@ -117,12 +117,6 @@
     [lock unlock];
 }
 
-- (void)replaceObjectAtIndex:(unsigned)index withObject:object {
-    [lock lock];
-	[embeddedArray replaceObjectAtIndex:index withObject:object];
-    [lock unlock];
-}
-
 - (void)removeObjectAtIndex:(unsigned)index {
     [lock lock];
 	[embeddedArray removeObjectAtIndex:index];
