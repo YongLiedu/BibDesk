@@ -65,6 +65,7 @@
 #import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
+#import "BDSKOverlay.h"
 
 #import "BDSKTeXTask.h"
 #import "BDSKMainTableView.h"
@@ -2684,11 +2685,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             [view setFrame:[currentPreviewView frame]];
             [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
             currentPreviewView = view;
+            [[previewer progressOverlay] overlayView:currentPreviewView];
         }
         NSString *bibString = [items count] ? [self previewBibTeXStringForPublications:items] : nil;
         [previewer updateWithBibTeXString:bibString];
         return;
     }else if(currentPreviewView != view){
+        [[previewer progressOverlay] remove];
         [previewer updateWithBibTeXString:nil];
         [view setFrame:[currentPreviewView frame]];
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];

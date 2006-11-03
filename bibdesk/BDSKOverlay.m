@@ -93,6 +93,7 @@
 	
 	// if the parent is a floating panel, we also should be. Otherwise we won't get on top.
 	[self setFloatingPanel:([parentWindow isKindOfClass:[NSPanel class]] && [(NSPanel *)parentWindow isFloatingPanel])];
+    [self setHidesOnDeactivate:[parentWindow hidesOnDeactivate]];
     [self setLevel:[parentWindow level]];
 	[parentWindow addChildWindow:self ordered:NSWindowAbove];
 	

@@ -76,6 +76,7 @@
 
 - (PDFView *)pdfView;
 - (NSTextView *)textView;
+- (BDSKOverlay *)progressOverlay;
 
 - (BOOL)isVisible;
 

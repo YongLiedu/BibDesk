@@ -49,6 +49,7 @@
 #import "BDSKPrintableView.h"
 #import <OmniFoundation/OFPreference.h>
 #import "NSWindowController_BDSKExtensions.h"
+#import "BDSKCollapsibleView.h"
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
@@ -109,6 +110,12 @@ static BDSKPreviewer *sharedPreviewer;
 - (void)awakeFromNib{
     volatile float pdfScaleFactor = 0.0;
     volatile float rtfScaleFactor = 1.0;
+    BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[progressIndicator superview] superview];
+    
+    // we use threads, so better let the progressIndicator also use them
+    [progressIndicator setUsesThreadedAnimation:YES];
+    [collapsibleView setMinSize:[progressIndicator frame].size];
+    [collapsibleView setCollapseEdges:BDSKMinYEdgeMask | BDSKMaxXEdgeMask];
 	
     if(self == sharedPreviewer){
         pdfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
@@ -118,8 +125,6 @@ static BDSKPreviewer *sharedPreviewer;
         
         // overlay the progressIndicator over the contentView
         [progressOverlay overlayView:[[self window] contentView]];
-        // we use threads, so better let the progressIndicator also use them
-        [progressIndicator setUsesThreadedAnimation:YES];
         
         // register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -177,6 +182,11 @@ static BDSKPreviewer *sharedPreviewer;
 {
     [self window];
     return rtfPreviewView;
+}
+
+- (BDSKOverlay *)progressOverlay;
+{
+    return progressOverlay;
 }
 
 - (BOOL)isVisible{
@@ -253,13 +263,11 @@ static BDSKPreviewer *sharedPreviewer;
 	
     NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
 	
-    if(self == sharedPreviewer){
-        // start or stop the spinning wheel
-        if(state == BDSKWaitingPreviewState)
-            [progressIndicator startAnimation:nil];
-        else
-            [progressIndicator stopAnimation:nil];
-    }
+    // start or stop the spinning wheel
+    if(state == BDSKWaitingPreviewState)
+        [progressIndicator startAnimation:nil];
+    else
+        [progressIndicator stopAnimation:nil];
 	
     // if we're offscreen, no point in doing any extra work; we want to be able to reset offscreen though
     if(![self isVisible] && state != BDSKEmptyPreviewState){
