@@ -480,10 +480,8 @@
 		F90261AE096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */; };
 		F90C64060AC62B7B008B2DDA /* BDSKShellCommandFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F90C64040AC62B7B008B2DDA /* BDSKShellCommandFormatter.h */; };
 		F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */; };
-		F916E69407A9F9AB009EF011 /* NSMutableDictionary+ThreadSafety.h in Headers */ = {isa = PBXBuildFile; fileRef = F916E68A07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.h */; };
-		F916E69607A9F9AB009EF011 /* NSMutableDictionary+ThreadSafety.m in Sources */ = {isa = PBXBuildFile; fileRef = F916E68F07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.m */; };
-		F916E6AA07A9FB56009EF011 /* NSMutableArray+ThreadSafety.h in Headers */ = {isa = PBXBuildFile; fileRef = F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */; };
-		F916E6AC07A9FB56009EF011 /* NSMutableArray+ThreadSafety.m in Sources */ = {isa = PBXBuildFile; fileRef = F916E6A507A9FB56009EF011 /* NSMutableArray+ThreadSafety.m */; };
+		F916E69407A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */; };
+		F916E69607A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */; };
 		F918100E07583A5B00CF822D /* BDAlias.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C1B0758013E00C3F701 /* BDAlias.h */; };
 		F918100F07583A5B00CF822D /* BDSKCiteKeyFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */; };
 		F918101007583A5B00CF822D /* BDSKConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C3A0758027800C3F701 /* BDSKConverter.h */; };
@@ -1349,10 +1347,8 @@
 		F90C64040AC62B7B008B2DDA /* BDSKShellCommandFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKShellCommandFormatter.h; sourceTree = "<group>"; };
 		F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKShellCommandFormatter.m; sourceTree = "<group>"; };
 		F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AGRegex.xcodeproj; path = ../bibdesk_vendorsrc/agkit_sourceforge/agregex/AGRegex.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F916E68A07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+ThreadSafety.h"; sourceTree = "<group>"; };
-		F916E68F07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+ThreadSafety.m"; sourceTree = "<group>"; };
-		F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+ThreadSafety.h"; sourceTree = "<group>"; };
-		F916E6A507A9FB56009EF011 /* NSMutableArray+ThreadSafety.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+ThreadSafety.m"; sourceTree = "<group>"; };
+		F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKThreadSafeMutableDictionary.h; sourceTree = "<group>"; };
+		F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKThreadSafeMutableDictionary.m; sourceTree = "<group>"; };
 		F91B5C510764135B0011ED22 /* About the Scripts Menu.scpt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.scpt; name = "About the Scripts Menu.scpt"; path = "Scripting/About the Scripts Menu.scpt"; sourceTree = SOURCE_ROOT; };
 		F91B5CC7076579830011ED22 /* previewtemplate.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = previewtemplate.tex; sourceTree = "<group>"; };
 		F91B5CDF076579FE0011ED22 /* rssTemplate.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = rssTemplate.txt; sourceTree = SOURCE_ROOT; };
@@ -1868,8 +1864,6 @@
 				F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */,
 				CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */,
 				CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */,
-				F916E68F07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.m */,
-				F916E6A507A9FB56009EF011 /* NSMutableArray+ThreadSafety.m */,
 				CE564D240AECBA5B002F0A24 /* NSScanner_BDSKExtensions.m */,
 				F9022C9F0758038000C3F701 /* NSString_BDSKExtensions.m */,
 				F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */,
@@ -1939,6 +1933,7 @@
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
 				F98DB3160A23C7730040D347 /* BDSKTemplate.m */,
 				CE95AF160ADBE7C000CB20E7 /* BDSKTemplateObjectProxy.m */,
+				F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */,
 				F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */,
 				F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */,
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
@@ -2254,6 +2249,7 @@
 				F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */,
 				CE518F2509E526E000E97C3A /* BDSKTextViewFindController.h */,
 				F9DCEA4D094B7D1100AEE662 /* BDSKTextWithIconCell.h */,
+				F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */,
 				F963E42A0A1D7ADD00695DDC /* BDSKTreeNode.h */,
 				3D86633D0802C25800FF1724 /* BDSKTypeInfoEditor.h */,
 				3D7406910849F5430081EC6F /* BDSKTypeNameFormatter.h */,
@@ -2328,8 +2324,6 @@
 				F9022C9C0758038000C3F701 /* NSImage+Toolbox.h */,
 				CE573D2409F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h */,
 				F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */,
-				F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */,
-				F916E68A07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.h */,
 				F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */,
 				F9022C9E0758038000C3F701 /* NSString_BDSKExtensions.h */,
 				CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */,
@@ -2512,8 +2506,7 @@
 				3DAEA2ED07703F6000AF111A /* BDSKUndoManager.h in Headers */,
 				F92F4E4E0788DEFC001B8F82 /* BibPref_Files.h in Headers */,
 				F9273968078E58A600609739 /* Bibdesk_Prefix.pch in Headers */,
-				F916E69407A9F9AB009EF011 /* NSMutableDictionary+ThreadSafety.h in Headers */,
-				F916E6AA07A9FB56009EF011 /* NSMutableArray+ThreadSafety.h in Headers */,
+				F916E69407A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.h in Headers */,
 				F9D5A8CB07B9B94F0092E7E2 /* BDSKDragWindow.h in Headers */,
 				2730077D07CF20B500F2E485 /* BDSKBorderlessKeyWindow.h in Headers */,
 				2730078007CF20B500F2E485 /* MacroTextFieldWindowController.h in Headers */,
@@ -3292,8 +3285,7 @@
 				3DD300F6075C054D003FD2D7 /* BibField.m in Sources */,
 				3DAEA2EE07703F6000AF111A /* BDSKUndoManager.m in Sources */,
 				F92F4E4F0788DEFC001B8F82 /* BibPref_Files.m in Sources */,
-				F916E69607A9F9AB009EF011 /* NSMutableDictionary+ThreadSafety.m in Sources */,
-				F916E6AC07A9FB56009EF011 /* NSMutableArray+ThreadSafety.m in Sources */,
+				F916E69607A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.m in Sources */,
 				2730077E07CF20B500F2E485 /* BDSKBorderlessKeyWindow.m in Sources */,
 				2730077F07CF20B500F2E485 /* BDSKComplexString.m in Sources */,
 				2730078107CF20B500F2E485 /* MacroTextFieldWindowController.m in Sources */,
