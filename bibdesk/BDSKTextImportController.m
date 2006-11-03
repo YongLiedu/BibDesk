@@ -1318,6 +1318,19 @@
 	if ([NSString isEmptyString:selString] == YES)
 		return NO;
 	
+    NSString *oldValue = [item valueOfField:selKey];
+    
+    if(([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) != 0 && 
+       [NSString isEmptyString:oldValue] == NO && 
+       [selKey isSingleValuedField] == NO){
+        
+        NSString *separator;
+        if([selKey isPersonField])
+            separator = @" and ";
+        else
+            separator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
+        selString = [NSString stringWithFormat:@"%@%@%@", oldValue, separator, selString];
+    }
     
     // convert newlines to a single space, then collapse (RFE #1480354)
     if ([selKey isNoteField] == NO && [selString containsCharacterInSet:[NSCharacterSet newlineCharacterSet]] == YES) {
@@ -1475,10 +1488,6 @@
             return [NSString stringWithFormat:@"%@%d", [NSString commandKeyIndicatorString], row];
         else if(row < 20)
             return [NSString stringWithFormat:@"%@%@%d", [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], row - 10];
-        else if(row < 30)
-            return [NSString stringWithFormat:@"%@%@%d", [NSString controlKeyIndicatorString], [NSString commandKeyIndicatorString], row - 20];
-        else if(row < 40)
-            return [NSString stringWithFormat:@"%@%@%@%d", [NSString controlKeyIndicatorString], [NSString alternateKeyIndicatorString], [NSString commandKeyIndicatorString], row - 30];
         else return @"";
     }else{
         return [item valueOfField:key];
@@ -1863,8 +1872,6 @@
             BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 index += 10;
-            if (flags & NSControlKeyMask)
-                index += 20;
             if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
                 NSBeep();
                 rv = NO;
