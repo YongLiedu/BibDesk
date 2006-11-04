@@ -344,10 +344,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification;
 
-- (void)changeCrossrefKey:(NSString *)oldKey toKey:(NSString *)newKey;
-
-- (void)invalidateGroupsForCrossreffedCiteKey:(NSString *)key;
-
 /* Paste related methods */
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)error;
 - (NSArray *)newPublicationsFromArchivedData:(NSData *)data;

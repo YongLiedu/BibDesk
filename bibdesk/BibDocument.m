@@ -1653,39 +1653,42 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			[parentItems removeObject:aPub];
 			[selParentItems addObject:aPub];
 		}else{
-			NS_DURING
+            @try{
 				[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
-			NS_HANDLER
-				if([[localException name] isEqualToString:BDSKTeXifyException])
+            }
+            @catch(id exception){
+				if([[exception name] isEqualToString:BDSKTeXifyException])
 					NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
 				else
-					[localException raise];
-			NS_ENDHANDLER
+					[exception raise];
+			}
 		}
 	}
 	
 	e = [selParentItems objectEnumerator];
 	while(aPub = [e nextObject]){
-		NS_DURING
+        @try{
 			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
-		NS_HANDLER
-			if([[localException name] isEqualToString:BDSKTeXifyException])
+        }
+        @catch(id exception){
+			if([[exception name] isEqualToString:BDSKTeXifyException])
 				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
 			else
-				[localException raise];
-		NS_ENDHANDLER
+				[exception raise];
+		}
 	}
 	
 	e = [parentItems objectEnumerator];        
 	while(aPub = [e nextObject]){
-		NS_DURING
+        @try{
 			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
-		NS_HANDLER
-			if([[localException name] isEqualToString:BDSKTeXifyException])
+        }
+        @catch(id exception){
+			if([[exception name] isEqualToString:BDSKTeXifyException])
 				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
 			else
-				[localException raise];
-		NS_ENDHANDLER
+				[exception raise];
+		}
 	}
 					
 	[selItems release];
@@ -1903,13 +1906,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *fileName;
     NSString *contentString;
     NSMutableArray *array = [NSMutableArray array];
-    int type = -1;
+    int type = BDSKUnknownStringType;
     
     // some common types that people might use as attachments; we don't need to sniff these
     NSSet *unreadableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
     
     while(fileName = [e nextObject]){
-        type = -1;
+        type = BDSKUnknownStringType;
         
         // we /can/ create a string from these (usually), but there's no point in wasting the memory
         if([unreadableTypes containsObject:[fileName pathExtension]]){
@@ -1931,7 +1934,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 contentString = nil;
             }
         }
-        if(contentString == nil || type == -1)
+        if(contentString == nil || type == BDSKUnknownStringType)
             [unparseableFiles addObject:fileName];
     }
 
@@ -1981,37 +1984,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [newBI setField:BDSKUrlString toValue:[url absoluteString]];
     
 	return [NSArray arrayWithObject:newBI];
-}
-
-#pragma mark -
-#pragma mark Cite Key and Crossref lookup
-
-- (void)changeCrossrefKey:(NSString *)oldKey toKey:(NSString *)newKey{
-	if ([NSString isEmptyString:oldKey]) 
-		return;
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	
-	while (pub = [pubEnum nextObject]) {
-		if ([oldKey caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
-			[pub setField:BDSKCrossrefString toValue:newKey];
-        }
-	}
-}
-
-- (void)invalidateGroupsForCrossreffedCiteKey:(NSString *)key{
-	if ([NSString isEmptyString:key]) 
-		return;
-    
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	
-	while (pub = [pubEnum nextObject]) {
-		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
-			[pub invalidateGroupNames];
-        }
-	}
 }
 
 #pragma mark -
@@ -2579,17 +2551,30 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return;
 
 	NSString *changedKey = [userInfo objectForKey:@"key"];
+    BibItem *pub = [notification object];
+    NSString *key = [pub citeKey];
+    NSString *oldKey = nil;
+    NSEnumerator *pubEnum = [publications objectEnumerator];
     
-    // need to handle crossrefs if a cite key changed
+    // need to handle cite keys and crossrefs if a cite key changed
     if([changedKey isEqualToString:BDSKCiteKeyString]){
-        BibItem *pub = [notification object];
-        NSString *oldKey = [userInfo objectForKey:@"oldCiteKey"];
-        NSString *newKey = [pub citeKey];
-        [publications changeCiteKey:oldKey toCiteKey:newKey forItem:pub];
-		[self changeCrossrefKey:oldKey toKey:newKey];
+        oldKey = [userInfo objectForKey:@"oldCiteKey"];
+        [publications changeCiteKey:oldKey toCiteKey:key forItem:pub];
+        if([NSString isEmptyString:oldKey])
+            oldKey = nil;
     }
-
-    [self invalidateGroupsForCrossreffedCiteKey:[[notification object] citeKey]];
+    
+    while (pub = [pubEnum nextObject]) {
+        NSString *crossref = [pub valueOfField:BDSKCrossrefString inherit:NO];
+        if([NSString isEmptyString:crossref] == NO)
+            continue;
+        // invalidate groups that depend on inherited values
+        if ([key caseInsensitiveCompare:crossref] == NSOrderedSame)
+            [pub invalidateGroupNames];
+        // change the crossrefs if we change the parent cite key
+        if (oldKey && [oldKey caseInsensitiveCompare:crossref] == NSOrderedSame)
+            [pub setField:BDSKCrossrefString toValue:key];
+    }
     
     // queue for UI updating, in case the item is changed as part of a batch process such as Find & Replace or AutoFile
     [self queueSelectorOnce:@selector(handlePrivateBibItemChanged:) withObject:changedKey];
@@ -2950,7 +2935,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark TeXTask delegate
 
 - (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)aTexTask{
-	[self setStatus:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Generating data. Please wait", @"Generating data. Please wait..."), 0x2026]];
+	[self setStatus:[NSLocalizedString(@"Generating data. Please wait", @"Generating data. Please wait...") stringByAppendingEllipsis]];
 	[statusBar startAnimation:nil];
 	return YES;
 }
