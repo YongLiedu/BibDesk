@@ -425,87 +425,21 @@ static OSType finderSignatureBytes = 'MACS';
     return success;
 }
 
-// Gets the Finder comment (Spotlight comment) field via the Finder; this method takes 0.01s to execute, vs. 0.5s for NSAppleScript
-// Based on setComment:forPath: and http://developer.apple.com/samplecode/MoreAppleEvents/MoreAppleEvents.html (which is dated)
+// using AESendMessage for this will cause problems when we use it during a drop from Finder
 - (NSString *)commentForURL:(NSURL *)fileURL;
 {
     NSParameterAssert([fileURL isFileURL]);
     
-    OSErr err;
-    AEDesc fileDesc, builtEvent, replyEvent;
+    MDItemRef mdItem = NULL;
+    CFStringRef path = (CFStringRef)[fileURL path];
+    NSString *theComment = nil;
     
-    // create the format by modifying Omni's setComment:forPath: method and looking at the events in the debugger
-    const char *eventFormat = 
-        "'----': 'obj '{ "
-        "  form: enum(prop), "
-        "  seld: type(comt), "
-        "  want: type(prop), "
-        "  from: 'obj '{ " 
-        "      form: enum(indx), "
-        "      want: type(file), " 
-        "      seld: @,"
-        "      from: null() "
-        "              }"
-        "             } ";
-    
-    // pass a file URL, encoding as UTF8 after http://developer.apple.com/technotes/tn/tn2022.html
-    NSData *URLData = [[fileURL absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
-    AEInitializeDesc(&fileDesc);
-    err = AECreateDesc(typeFileURL, [URLData bytes], [URLData length], &fileDesc);
-    
-    AEInitializeDesc(&builtEvent);
-    AEInitializeDesc(&replyEvent);
-    AEBuildError error;
-
-    if(noErr == err)
-        err = AEBuildAppleEvent(kAECoreSuite, kAEGetData,
-                                typeApplSignature, &finderSignatureBytes, sizeof(finderSignatureBytes),
-                                kAutoGenerateReturnID, kAnyTransactionID,
-                                &builtEvent, &error,
-                                eventFormat,
-                                &fileDesc);
-    
-    AEDisposeDesc(&fileDesc);
-    
-    if(noErr == err)
-        err = AESendMessage(&builtEvent, &replyEvent, kAEWaitReply, kAEDefaultTimeout);
-    AEDisposeDesc(&builtEvent);
-    
-	AEDesc replyDesc;
-    AEInitializeDesc(&replyDesc);
-    
-    if(noErr == err)
-        err = AEGetParamDesc(&replyEvent, keyDirectObject, typeUnicodeText, &replyDesc);
-    AEDisposeDesc(&replyEvent);
-    
-    AEDesc utf8TextDesc;
-    AEInitializeDesc(&utf8TextDesc);
-    
-    if(noErr == err)
-        err = AECoerceDesc(&replyDesc, typeUTF8Text, &utf8TextDesc);
-    AEDisposeDesc(&replyDesc);
-    
-    CFStringRef comment = NULL;
-    if(noErr == err){
-        Size dataSize = AEGetDescDataSize(&utf8TextDesc);
-        CFIndex bufSize = dataSize;
-        UInt8 *buf = (UInt8 *)NSZoneMalloc(NULL, bufSize * sizeof(UInt8));
-        if(NULL != buf){
-            err = AEGetDescData(&utf8TextDesc, buf, dataSize);
-            if(noErr == err)
-                comment = CFStringCreateWithBytes(CFAllocatorGetDefault(), buf, bufSize, kCFStringEncodingUTF8, FALSE);
-            
-            NSZoneFree(NULL, buf);
-        }
+    if (path && (mdItem = MDItemCreate(CFGetAllocator(path), path))) {
+        theComment = (NSString *)MDItemCopyAttribute(mdItem, kMDItemFinderComment);
+        CFRelease(mdItem);
+        [theComment autorelease];
     }
-    AEDisposeDesc(&utf8TextDesc);    
-    
-    if (err != noErr) {
-        NSLog(@"AESend() --> %d", err);
-        if(GetMacOSStatusErrorString != NULL) 
-            NSLog(@"Error was %s", GetMacOSStatusErrorString(err));
-    }
-    return [(id)comment autorelease];
+    return theComment;
 }
 
 - (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;

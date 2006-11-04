@@ -2334,7 +2334,7 @@ static int numberOfOpenEditors = 0;
 
 		// perform autofile on delay; see comment in -[BibDocument (DataSource) tableView:acceptDrop:row:dropOperation:] about drags from Finder
         if ([field isEqualToString:BDSKLocalUrlString])
-            [self performSelector:@selector(autoFilePaper) withObject:nil afterDelay:0.7];
+            [self autoFilePaper];
 		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
         
 		return YES;

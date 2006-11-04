@@ -941,7 +941,7 @@
             [pub setField:field toValue:[theURL absoluteString]];
             
             if([field isEqualToString:BDSKLocalUrlString])
-                [pub autoFilePaperAfterDelay];
+                [pub autoFilePaper];
             
             [self highlightBib:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];

@@ -1805,7 +1805,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	[self highlightBibs:newPubs];
 	if (newFilePubs != nil){
         // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
-        [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaperAfterDelay)];
+        [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaper)];
     }
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
