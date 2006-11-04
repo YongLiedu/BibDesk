@@ -351,7 +351,7 @@ static NSImage *unlockedIcon = nil;
 
         // flag authentication failures so we get a prompt the next time around (in case our password was wrong)
         // we also get this if the user canceled, since an empty data will be returned
-        if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException]){
+        if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:NSFailedAuthenticationException]){
             
             // if the user didn't cancel, set an auth failure flag and show an alert
             if(flags.canceledAuthentication == 0){

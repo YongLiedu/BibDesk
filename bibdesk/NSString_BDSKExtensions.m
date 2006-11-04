@@ -1125,7 +1125,7 @@ http://home.planet.nl/~faase009/GNU.txt
         [self appendCharacter:'X'];
     }
     @catch(id localException){
-        if([[localException name] isEqualToString:NSInvalidArgumentException])
+        if([localException respondsToSelector:@selector(name)] && [[localException name] isEqual:NSInvalidArgumentException])
             return NO;
         else
             @throw;

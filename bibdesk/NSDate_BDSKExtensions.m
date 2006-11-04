@@ -289,7 +289,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     }
     @catch(id exception){
         failed = YES;
-        if([exception respondsToSelector:@selector(name)] == NO || [[exception name] isEqualToString:@"BDSKColloquialDateException"] == NO)
+        if([exception respondsToSelector:@selector(name)] == NO || [[exception name] isEqual:@"BDSKColloquialDateException"] == NO)
             @throw;
     }
     @finally{

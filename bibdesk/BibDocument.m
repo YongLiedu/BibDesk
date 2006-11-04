@@ -1657,10 +1657,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 				[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
             }
             @catch(id exception){
-				if([[exception name] isEqualToString:BDSKTeXifyException])
-					NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
-				else
-					[exception raise];
+                if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKTeXifyException])
+                    NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
+                else
+                    @throw;
 			}
 		}
 	}
@@ -1671,10 +1671,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
         }
         @catch(id exception){
-			if([[exception name] isEqualToString:BDSKTeXifyException])
+			if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKTeXifyException])
 				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
 			else
-				[exception raise];
+				@throw;
 		}
 	}
 	
@@ -1684,10 +1684,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
         }
         @catch(id exception){
-			if([[exception name] isEqualToString:BDSKTeXifyException])
+			if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKTeXifyException])
 				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
 			else
-				[exception raise];
+				@throw;
 		}
 	}
 					

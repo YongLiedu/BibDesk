@@ -364,10 +364,10 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                 [macros setObject:value forKey:key];
             }
             @catch(id exception){
-                if([[exception name] isEqualToString:BDSKComplexStringException])
-                    NSLog(@"Ignoring invalid complex macro: %@",[exception reason]);
+                if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKComplexStringException])
+                    NSLog(@"Ignoring invalid complex macro: %@", exception);
                 else
-                    NSLog(@"Ignoring exception %@ while parsing macro: %@", [exception name], [exception reason]);
+                    NSLog(@"Ignoring exception while parsing macro: %@", exception);
             }
             
         }
@@ -445,10 +445,10 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
             [macros setObject:value forKey:key];
         }
         @catch(id exception){
-            if([[exception name] isEqualToString:BDSKComplexStringException])
-                NSLog(@"Ignoring invalid complex macro: %@",[exception reason]);
+            if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKComplexStringException])
+                NSLog(@"Ignoring invalid complex macro: %@", exception);
             else
-                NSLog(@"Ignoring exception %@ while parsing macro: %@", [exception name], [exception reason]);
+                NSLog(@"Ignoring exception while parsing macro: %@", exception);
         }
 		
     }
