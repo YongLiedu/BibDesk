@@ -44,25 +44,57 @@
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "NSURL_BDSKExtensions.h"
 
-@interface NSScrollView (BDSKZoomablePDFViewExtensions) @end
+@interface NSScrollView (BDSKZoomablePDFViewExtensions) 
+- (void)replacementDealloc;
+- (BOOL)replacementHasHorizontalScroller;
+- (void)replacementSetHasHorizontalScroller:(BOOL)flag;
+
+// new API allows ignoring PDFView's attempts to remove the horizontal scroller
+- (void)setAlwaysHasHorizontalScroller:(BOOL)flag;
+
+@end
 
 @implementation NSScrollView (BDSKZoomablePDFViewExtensions)
 
-static IMP originalSetHasHorizontalScroller;
+static IMP originalSetHasHorizontalScroller = NULL;
+static BOOL (*originalHasHorizontalScroller)(id, SEL) = NULL;
+static IMP originalDealloc = NULL;
+
+static CFMutableSetRef nonretainedScrollviews = NULL;
 
 + (void)didLoad{
     originalSetHasHorizontalScroller = OBReplaceMethodImplementationWithSelector(self, @selector(setHasHorizontalScroller:), @selector(replacementSetHasHorizontalScroller:));
+    originalHasHorizontalScroller = (typeof(originalHasHorizontalScroller))OBReplaceMethodImplementationWithSelector(self, @selector(hasHorizontalScroller), @selector(replacementHasHorizontalScroller));
+    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
+    
+    // set doesn't retain, so no retain cycles; pointer equality used to compare views
+    nonretainedScrollviews = CFSetCreateMutable(CFAllocatorGetDefault(), 0, NULL);
 }
 
-// hack to make sure the scrollView of our zommable PDF view always has a horizontal scroller
-- (void)replacementSetHasHorizontalScroller:(BOOL)flag {
-    BOOL isZoomable = NO;
-    @try{
-        // the documentView for a PDFView is a PDFMatteView, which has an ivar _pdfView
-        isZoomable = [[[self documentView] valueForKey:@"pdfView"] isKindOfClass:[BDSKZoomablePDFView class]];
-    }
-    @catch(id exception) {}
-    originalSetHasHorizontalScroller(self, _cmd, isZoomable || flag);
+- (void)replacementDealloc;
+{
+    CFSetRemoveValue(nonretainedScrollviews, self);
+    originalDealloc(self, _cmd);
+}
+
+- (void)setAlwaysHasHorizontalScroller:(BOOL)flag;
+{
+    if (flag)
+        CFSetAddValue(nonretainedScrollviews, self);
+    else
+        CFSetRemoveValue(nonretainedScrollviews, self);
+}
+
+- (void)replacementSetHasHorizontalScroller:(BOOL)flag;
+{
+    if (CFSetContainsValue(nonretainedScrollviews, self))
+        flag = YES;
+    originalSetHasHorizontalScroller(self, _cmd, flag);
+}
+
+- (BOOL)replacementHasHorizontalScroller;
+{
+    return CFSetContainsValue(nonretainedScrollviews, self) ? YES : originalHasHorizontalScroller(self, _cmd);
 }
 
 @end
@@ -224,6 +256,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (scalePopUpButton == nil) {
         
         NSScrollView *scrollView = [self scrollView];
+        [scrollView setAlwaysHasHorizontalScroller:YES];
 
         unsigned cnt, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuLabels) / sizeof(NSString *));
         id curItem;
