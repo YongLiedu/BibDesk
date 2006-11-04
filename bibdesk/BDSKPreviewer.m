@@ -73,34 +73,22 @@ static BDSKPreviewer *sharedPreviewer;
 }
 
 - (id)init{
-    self = [self initWithSourceDocument:nil];
-    return self;
-}
-
-- (id)initWithSourceDocument:(BibDocument *)aDocument{
     if(self = [super init]){
-        if(aDocument == nil && sharedPreviewer){
-            [self release];
-            self = [sharedPreviewer retain];
-        } else {
-            sourceDocument = aDocument;
-            
-            texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
-            [texTask setDelegate:self];
-            
-            messageQueue = [[BDSKPreviewMessageQueue alloc] init];
-            [messageQueue startBackgroundProcessors:1];
-            [messageQueue setSchedulesBasedOnPriority:NO];
-            
-            OFSimpleLockInit(&stateLock);
-            
-            // this reflects the currently expected state, not necessarily the actual state
-            // it corresponds to the last drawing item added to the mainQueue
-            previewState = BDSKUnknownPreviewState;
-            
-            // otherwise a document's previewer might mess up the windowmposition of the shared previewer
-            [self setShouldCascadeWindows:NO];
-        }
+        texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
+        [texTask setDelegate:self];
+        
+        messageQueue = [[BDSKPreviewMessageQueue alloc] init];
+        [messageQueue startBackgroundProcessors:1];
+        [messageQueue setSchedulesBasedOnPriority:NO];
+        
+        OFSimpleLockInit(&stateLock);
+        
+        // this reflects the currently expected state, not necessarily the actual state
+        // it corresponds to the last drawing item added to the mainQueue
+        previewState = BDSKUnknownPreviewState;
+        
+        // otherwise a document's previewer might mess up the windowmposition of the shared previewer
+        [self setShouldCascadeWindows:NO];
     }
     return self;
 }
@@ -131,6 +119,10 @@ static BDSKPreviewer *sharedPreviewer;
                                                  selector:@selector(handleApplicationWillTerminate:)
                                                      name:NSApplicationWillTerminateNotification
                                                    object:NSApp];
+        
+        [OFPreference addObserver:self
+                         selector:@selector(handlePreviewNeedsUpdate:)
+                    forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
     }
         
     // empty document to avoid problem when zoom is set to auto
@@ -142,10 +134,6 @@ static BDSKPreviewer *sharedPreviewer;
 	[(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:rtfScaleFactor];
     
     [self drawPreviewsForState:BDSKEmptyPreviewState];
-    
-    [OFPreference addObserver:self
-                     selector:@selector(handlePreviewNeedsUpdate:)
-                forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
     
     [pdfView retain];
     [[rtfPreviewView enclosingScrollView] retain];
@@ -222,11 +210,10 @@ static BDSKPreviewer *sharedPreviewer;
 }
 
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification {
+    OBASSERT(self == sharedPreviewer);
     id document = [[NSDocumentController sharedDocumentController] currentDocument];
-    if(sourceDocument == nil && document && [document respondsToSelector:@selector(updatePreviews:)])
+    if([document respondsToSelector:@selector(updatePreviews:)])
         [document updatePreviews:nil];
-    else if(sourceDocument && [document respondsToSelector:@selector(updatePreviews:)])
-        [(id)sourceDocument updatePreviews:nil];
 }
 
 - (void)printDocument:(id)sender{ // first responder gets this

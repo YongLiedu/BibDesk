@@ -310,6 +310,10 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
                          selector:@selector(handleNameDisplayChangedNotification:)
                     forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayLastNameFirstKey]];
         
+        [OFPreference addObserver:self
+                         selector:@selector(handlePreviewNeedsUpdateNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
+        
     }
     return self;
 }
@@ -2527,6 +2531,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [self displayPreviewForItems:[self selectedPublications]];
 }
 
+- (void)handlePreviewNeedsUpdateNotification:(NSNotification *)notification{
+    if([previewer isVisible])
+        [self updatePreviews:nil];
+}
+
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
     // NB: this method gets called for setPublications: also, so checking for AddItemNotification might not do what you expect
 	if([[notification name] isEqualToString:BDSKDocDelItemNotification] == NO)
@@ -2679,7 +2688,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
             return;
         if(previewer == nil)
-            previewer = [[BDSKPreviewer alloc] initWithSourceDocument:self];
+            previewer = [[BDSKPreviewer alloc] init];
         view = displayType == 5 ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)[previewer pdfView];
         if(currentPreviewView != view){
             [view setFrame:[currentPreviewView frame]];

@@ -41,7 +41,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 
-@class BibDocument, BDSKPreviewMessageQueue, PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay;
+@class BDSKPreviewMessageQueue, PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay;
 
 /*!
     @class BDSKPreviewer
@@ -57,8 +57,6 @@
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet BDSKOverlay *progressOverlay;
     
-    BibDocument *sourceDocument;
-    
     BDSKPreviewMessageQueue *messageQueue;
 	volatile int previewState;
     
@@ -71,8 +69,6 @@
 	@result Pointer to the single BDSKPreviewer instance.
 */
 + (BDSKPreviewer *)sharedPreviewer;
-
-- (id)initWithSourceDocument:(BibDocument *)aDocument;
 
 - (PDFView *)pdfView;
 - (NSTextView *)textView;
