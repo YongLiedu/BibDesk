@@ -42,6 +42,6 @@
 
 @interface BDSKThreadSafeMutableDictionary : NSMutableDictionary {
     NSMutableDictionary *embeddedDictionary;
-    NSLock *lock;
+    pthread_rwlock_t rwlock;
 }
 @end

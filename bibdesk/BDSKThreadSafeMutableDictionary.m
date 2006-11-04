@@ -43,7 +43,7 @@
 - (id)init {
     if (self = [super init]) {
         embeddedDictionary = [[NSMutableDictionary allocWithZone:[self zone]] init];
-		lock = [[NSLock allocWithZone:[self zone]] init];
+		pthread_rwlock_init(&rwlock, NULL);
     }
     return self;
 }
@@ -51,66 +51,72 @@
 - (id)initWithCapacity:(unsigned)capacity {
     if (self = [super init]) {
         embeddedDictionary = [[NSMutableDictionary allocWithZone:[self zone]] initWithCapacity:capacity];
-		lock = [[NSLock allocWithZone:[self zone]] init];
+		pthread_rwlock_init(&rwlock, NULL);
     }
     return self;
 }
 
 - (id)copyWithZone:(NSZone *)zone {
-    [lock lock];
-	id copy = [embeddedDictionary copy];
-    [lock unlock];
+    pthread_rwlock_rdlock(&rwlock);
+    id copy = [embeddedDictionary copyWithZone:zone];
+    pthread_rwlock_unlock(&rwlock);
 	return copy;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)zone {
-    [lock lock];
+    pthread_rwlock_rdlock(&rwlock);
 	id copy = [[[self class] allocWithZone:zone] initWithDictionary:embeddedDictionary];
-    [lock unlock];
+    pthread_rwlock_unlock(&rwlock);
 	return copy;
 }
 
 - (void)dealloc {
-    [lock lock];
+    pthread_rwlock_wrlock(&rwlock);
 	[embeddedDictionary release];
     embeddedDictionary = nil;
-    [lock unlock];
-	[lock release];
-    lock = nil;
+    pthread_rwlock_unlock(&rwlock);
+    pthread_rwlock_destroy(&rwlock);
 	[super dealloc];
 }
 
 - (unsigned)count {
-    [lock lock];
+    pthread_rwlock_rdlock(&rwlock);
 	unsigned count = [embeddedDictionary count];
-    [lock unlock];
+    pthread_rwlock_unlock(&rwlock);
     return count;
 }
 
 - (id)objectForKey:(id)key {
-    [lock lock];
-    id object = [embeddedDictionary objectForKey:key];
-    [lock unlock];
+    pthread_rwlock_rdlock(&rwlock);
+    id object = [[[embeddedDictionary objectForKey:key] retain] autorelease];
+    pthread_rwlock_unlock(&rwlock);
     return object;
 }
 
 - (NSEnumerator *)keyEnumerator {
-	[lock lock];
-	NSArray *keys = [embeddedDictionary allKeys];
-    [lock unlock];
-	return [keys objectEnumerator];
+    pthread_rwlock_rdlock(&rwlock);
+    // copy in case it returns internal state
+	NSArray *keys = [[embeddedDictionary allKeys] copy];
+    pthread_rwlock_unlock(&rwlock);
+    NSEnumerator *enumerator = [keys objectEnumerator];
+    [keys release];
+	return enumerator;
 }
 
 - (void)setObject:(id)object forKey:(id)key {
-    [lock lock];
+    pthread_rwlock_wrlock(&rwlock);
+    [object retain]; // @@ retain the key?  I don't think Apple's sample did...
 	[embeddedDictionary setObject:object forKey:key];
-    [lock unlock];
+    [object release];
+    pthread_rwlock_unlock(&rwlock);
 }
 
 - (void)removeObjectForKey:(id)key {
-    [lock lock];
+    pthread_rwlock_wrlock(&rwlock);
+    id obj = [[embeddedDictionary objectForKey:key] retain];
 	[embeddedDictionary removeObjectForKey:key];
-    [lock unlock];
+    [obj autorelease];
+    pthread_rwlock_unlock(&rwlock);
 }
 
 @end
