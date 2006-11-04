@@ -41,6 +41,6 @@
 
 @interface BDSKThreadSafeMutableArray : NSMutableArray {
     NSMutableArray *embeddedArray;
-    NSLock *lock;
+    pthread_rwlock_t rwlock;
 }
 @end
