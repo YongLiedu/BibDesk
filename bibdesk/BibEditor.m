@@ -832,7 +832,7 @@ static int numberOfOpenEditors = 0;
     [menu removeAllItems];
     
     // limit the scope to the default downloads directory (from Internet Config)
-    NSURL *downloadURL = [[NSFileManager defaultManager] internetConfigDownloadURL];
+    NSURL *downloadURL = [[NSFileManager defaultManager] downloadFolderURL];
     if(downloadURL){
         // this was copied verbatim from a Finder saved search for all items of kind document modified in the last week
         NSString *query = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";

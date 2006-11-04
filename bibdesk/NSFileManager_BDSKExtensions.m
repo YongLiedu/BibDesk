@@ -207,7 +207,7 @@ typedef struct WLDragMapEntryStruct
 }
 
 // note: IC is not thread safe
-- (NSURL *)internetConfigDownloadURL;
+- (NSURL *)downloadFolderURL;
 {
     NSAssert([NSThread inMainThread], @"InternetConfig is not thread safe");
     OSStatus err;

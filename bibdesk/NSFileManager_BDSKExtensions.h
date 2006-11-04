@@ -45,7 +45,7 @@
 - (NSString *)currentApplicationSupportPathForCurrentUser;
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)applicationsDirectory;
-- (NSURL *)internetConfigDownloadURL;
+- (NSURL *)downloadFolderURL;
 
 - (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 
