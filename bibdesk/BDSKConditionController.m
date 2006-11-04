@@ -71,6 +71,13 @@
 	//NSLog(@"dealloc conditionController");
     [condition removeObserver:self forKeyPath:@"key"];
     [condition removeObserver:self forKeyPath:@"dateComparison"];
+    [condition removeObserver:self forKeyPath:@"stringComparison"];
+    [condition removeObserver:self forKeyPath:@"stringValue"];
+    [condition removeObserver:self forKeyPath:@"numberValue"];
+    [condition removeObserver:self forKeyPath:@"andNumberValue"];
+    [condition removeObserver:self forKeyPath:@"periodValue"];
+    [condition removeObserver:self forKeyPath:@"dateValue"];
+    [condition removeObserver:self forKeyPath:@"toDateValue"];
     filterController = nil;
 	[condition release];
     condition = nil;
@@ -119,7 +126,14 @@
     [self layoutValueControls];
 	
     [condition addObserver:self forKeyPath:@"key" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
-    [condition addObserver:self forKeyPath:@"dateComparison" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"dateComparison" options: NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"stringComparison" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"stringValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"numberValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"andNumberValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"periodValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"dateValue" options:NSKeyValueObservingOptionOld  context:NULL];
+    [condition addObserver:self forKeyPath:@"toDateValue" options:NSKeyValueObservingOptionOld  context:NULL];
 }
 
 - (NSView *)view {
@@ -222,16 +236,35 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     OBASSERT(object == condition);
     if(object == condition) {
+        NSUndoManager *undoManager = [filterController undoManager];
+        id oldValue = [change objectForKey:NSKeyValueChangeOldKey];
+        if (oldValue == [NSNull null])
+            oldValue = nil;
         if ([keyPath isEqualToString:@"key"]){
-            NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
-            NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
-            BOOL wasDate = ([oldKey isEqualToString:BDSKDateModifiedString] || [oldKey isEqualToString:BDSKDateAddedString]);
-            BOOL isDate = ([newKey isEqualToString:BDSKDateModifiedString] || [newKey isEqualToString:BDSKDateAddedString]);
+            NSString *newValue = [change objectForKey:NSKeyValueChangeNewKey];
+            BOOL wasDate = ([oldValue isEqualToString:BDSKDateModifiedString] || [oldValue isEqualToString:BDSKDateAddedString]);
+            BOOL isDate = ([newValue isEqualToString:BDSKDateModifiedString] || [newValue isEqualToString:BDSKDateAddedString]);
             if(wasDate != isDate){
                 [self layoutComparisonControls];
             }
+            [[undoManager prepareWithInvocationTarget:condition] setKey:oldValue];
         } else if ([keyPath isEqualToString:@"dateComparison"]) {
             [self layoutValueControls];
+            [[undoManager prepareWithInvocationTarget:condition] setDateComparison:[oldValue intValue]];
+        } else if ([keyPath isEqualToString:@"stringComparison"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setStringComparison:[oldValue intValue]];
+        } else if ([keyPath isEqualToString:@"stringValue"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setStringValue:oldValue];
+        } else if ([keyPath isEqualToString:@"numberValue"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setNumberValue:[oldValue intValue]];
+        } else if ([keyPath isEqualToString:@"andNumberValue"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setAndNumberValue:[oldValue intValue]];
+        } else if ([keyPath isEqualToString:@"periodValue"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setPeriodValue:[oldValue intValue]];
+        } else if ([keyPath isEqualToString:@"dateValue"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setDateValue:oldValue];
+        } else if ([keyPath isEqualToString:@"toDateValue"]) {
+            [[undoManager prepareWithInvocationTarget:condition] setToDateValue:oldValue];
         }
     }
 }

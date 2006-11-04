@@ -56,8 +56,8 @@
     self = [super init];
     if (self) {
 		filter = [aFilter retain];
-		[self setConditionControllers:[NSMutableArray arrayWithCapacity:[[filter conditions] count]]];
-		[self setConjunction:[filter conjunction]];
+		conditionControllers = [[NSMutableArray alloc] initWithCapacity:[[filter conditions] count]];
+		conjunction = [filter conjunction];
     }
     return self;
 }
@@ -69,6 +69,8 @@
     filter  = nil;
     [conditionControllers release];
     conditionControllers = nil;
+    [undoManager release];
+    undoManager = nil;
     [super dealloc];
 }
 
@@ -134,12 +136,18 @@
 
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
 	unsigned int index = [conditionControllers indexOfObject:aConditionController];
-    unsigned int count = [conditionControllers count];
 	if (index == NSNotFound) 
-		index = count - 1;
+		index = [conditionControllers count] - 1;
 	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
-    [conditionControllers insertObject:newController atIndex:index + 1];
-    [conditionsView insertView:[newController view] atIndex:index + 1];
+    [self insertConditionController:newController atIndex:index + 1];
+}
+
+- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)index {
+    [[[self undoManager] prepareWithInvocationTarget:self] removeConditionControllerAtIndex:index];
+	
+    unsigned int count = [conditionControllers count];
+    [conditionControllers insertObject:newController atIndex:index];
+    [conditionsView insertView:[newController view] atIndex:index];
     [newController setCanRemove:(count > 0)];
 	if (count == 1) {
         [[conditionControllers objectAtIndex:0] setCanRemove:YES];
@@ -149,6 +157,15 @@
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
+	unsigned int index = [conditionControllers indexOfObject:aConditionController];
+    [self removeConditionControllerAtIndex:index];
+}
+
+- (void)removeConditionControllerAtIndex:(unsigned int)index {
+    BDSKConditionController *aConditionController = [conditionControllers objectAtIndex:index];
+    
+    [[[self undoManager] prepareWithInvocationTarget:self] insertConditionController:aConditionController atIndex:index];
+    
     [conditionsView removeView:[aConditionController view]];
 	[conditionControllers removeObject:aConditionController]; 
 	if ([conditionControllers count] == 1) {
@@ -165,19 +182,48 @@
     return [[conditionControllers copy] autorelease];
 }
 
-- (void)setConditionControllers:(NSArray *)newConditionControllers {
-    if (conditionControllers != newConditionControllers) {
-        [conditionControllers release];
-        conditionControllers = [newConditionControllers mutableCopy];
-    }
-}
-
 - (BDSKConjunction)conjunction {
     return conjunction;
 }
 
 - (void)setConjunction:(BDSKConjunction)newConjunction {
+    [[[self undoManager] prepareWithInvocationTarget:self] setConjunction:conjunction];
 	conjunction = newConjunction;
+}
+
+#pragma mark Undo support
+
+- (NSUndoManager *)undoManager{
+    if(undoManager == nil)
+        undoManager = [[NSUndoManager alloc] init];
+    return undoManager;
+}
+
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
+    return [self undoManager];
+}
+
+- (IBAction)undo:(id)sender{
+    [[self undoManager] undo];
+}
+
+- (IBAction)redo:(id)sender{
+    [[self undoManager] redo];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+	if ([menuItem action] == @selector(undo:)) {
+        NSString *title = [undoManager undoActionName];
+        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Undo", @"Undo") : [NSString stringWithFormat:NSLocalizedString(@"Undo %@", @"Undo %@"), title];
+        [menuItem setTitle:title];
+        return [undoManager canUndo];
+	} else if ([menuItem action] == @selector(redo:)) {
+        NSString *title = [undoManager redoActionName];
+        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Redo", @"Redo") : [NSString stringWithFormat:NSLocalizedString(@"Redo %@", @"Redo %@"), title];
+        [menuItem setTitle:title];
+        return [undoManager canRedo];
+	}
+	return YES;
 }
 
 @end

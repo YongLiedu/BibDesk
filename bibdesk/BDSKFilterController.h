@@ -51,17 +51,22 @@
 	NSMutableArray *conditionControllers;
 	BDSKFilter *filter;
 	BDSKConjunction conjunction;
+    NSUndoManager *undoManager;
 }
 
 - (id)initWithFilter:(BDSKFilter *)aFilter;
 - (void)updateUI;
 - (BDSKFilter *)filter;
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController;
+- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)index;
 - (void)removeConditionController:(BDSKConditionController *)aConditionController;
+- (void)removeConditionControllerAtIndex:(unsigned int)index;
 - (BOOL)canRemoveCondition;
 - (NSArray *)conditionControllers;
-- (void)setConditionControllers:(NSArray *)newConditionControllers;
 - (BDSKConjunction)conjunction;
 - (void)setConjunction:(BDSKConjunction)newConjunction;
 
+- (NSUndoManager *)undoManager;
+- (IBAction)undo:(id)sender;
+- (IBAction)redo:(id)sender;
 @end
