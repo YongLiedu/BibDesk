@@ -247,7 +247,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 	previewState = state;
 	
 	// if empty, flush the queue as any remaining invocations are not valid anymore
-	if (state == BDSKEmptyPreviewState)
+	if (state != BDSKShowingPreviewState)
 		[messageQueue removeAllInvocations];
 		
     // start or stop the spinning wheel
@@ -341,21 +341,23 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     } else {
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState];
-		
+        // ignore output from a running tex task
+        ignoreOutput = YES;
         // put a new task on the queue
 		[messageQueue queueSelector:@selector(runWithBibTeXString:) forObject:texTask withObject:bibStr];
 	}	
 }
 
 - (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)texTask{
-	// not really necessary, as we would never be called when previews were reset
-	return ![self isEmpty];
+	ignoreOutput = [self isEmpty] || [messageQueue hasInvocations];
+    // not really necessary, as we would never be called when previews were reset
+	return ignoreOutput == NO;
 }
 
 - (void)texTask:(BDSKTeXTask *)aTexTask finishedWithResult:(BOOL)success{
 	
     // ignore this task if we finished a task that was running when the previews were reset or have more updates waiting
-	if([self isEmpty] == NO && [messageQueue hasInvocations] == NO) {
+	if([self isEmpty] == NO && [messageQueue hasInvocations] == NO && ignoreOutput == NO) {
         // if we didn't have success, the drawing method will show the log file
         [self displayPreviewsForState:BDSKShowingPreviewState];
     }

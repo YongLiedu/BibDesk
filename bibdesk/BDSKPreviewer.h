@@ -66,7 +66,7 @@ typedef enum {
     
     BDSKPreviewMessageQueue *messageQueue;
     BDSKPreviewState previewState;
-    
+    BOOL ignoreOutput;
 }
 
 /*!
