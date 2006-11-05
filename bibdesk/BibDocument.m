@@ -2949,10 +2949,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark Printing support
 
+- (IBAction)printDocument:(id)sender{
+    if(BDSKPDFPreviewDisplay == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey])
+        [[previewer pdfView] printWithInfo:[self printInfo] autoRotate:NO];
+    else
+        [super printDocument:sender];
+}
+
 - (NSView *)printableView{
     int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
     if(displayType == BDSKPDFPreviewDisplay){
-#warning we should create a separate pdf view for printing with custom settings
+        // we don't reach this, we let the pdfView do the printing
         return [previewer pdfView]; 
     }else if(displayType == BDSKRTFPreviewDisplay){
         BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
@@ -2969,23 +2976,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSPrintInfo *info = [self printInfo];
     [[info dictionary] addEntriesFromDictionary:printSettings];
     return [NSPrintOperation printOperationWithView:[self printableView] printInfo:info];
-}
-
-- (void)printShowingPrintPanel:(BOOL)showPanels {
-    // Obtain a custom view that will be printed
-    NSView *printView = [self printableView];
-	
-    // Construct the print operation and setup Print panel
-    NSPrintOperation *op = [NSPrintOperation printOperationWithView:printView
-                                                          printInfo:[self printInfo]];
-    [op setShowPanels:showPanels];
-    [op setCanSpawnSeparateThread:YES];
-    if (showPanels) {
-        // Add accessory view, if needed
-    }
-	
-    // Run operation, which shows the Print panel if showPanels was YES
-    [op runOperationModalForWindow:[self windowForSheet] delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark -

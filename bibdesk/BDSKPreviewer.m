@@ -166,6 +166,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (BDSKOverlay *)progressOverlay;
 {
+    [self window];
     return progressOverlay;
 }
 
@@ -210,17 +211,21 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 // first responder gets this
 - (void)printDocument:(id)sender{
-    NSView *printView = [[tabView selectedTabViewItem] view];
-    
-    // Construct the print operation and setup Print panel
-    NSPrintOperation *op = [NSPrintOperation printOperationWithView:printView
-                                                          printInfo:[NSPrintInfo sharedPrintInfo]];
-    [op setShowPanels:YES];
-    [op setCanSpawnSeparateThread:YES];
-    
-    // Run operation, which shows the Print panel if showPanels was YES
-    [op runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
-    
+    if([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0){
+        [pdfView printWithInfo:[NSPrintInfo sharedPrintInfo] autoRotate:NO];
+    }else{
+        BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
+        [printableView setAttributedString:[rtfPreviewView textStorage]];    
+        
+        // Construct the print operation and setup Print panel
+        NSPrintOperation *op = [NSPrintOperation printOperationWithView:printableView
+                                                              printInfo:[NSPrintInfo sharedPrintInfo]];
+        [op setShowPanels:YES];
+        [op setCanSpawnSeparateThread:YES];
+        
+        // Run operation, which shows the Print panel if showPanels was YES
+        [op runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
+    }
 }
 
 #pragma mark Drawing methods
