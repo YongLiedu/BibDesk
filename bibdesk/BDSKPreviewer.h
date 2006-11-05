@@ -153,15 +153,6 @@ typedef enum {
 - (BDSKPreviewState)previewState;
 
 /*!
-    @method     changePreviewState:
-    @abstract   Sets the current preview state to a new value. Returns a boolean to indicate whether a change was made. 
-    @discussion This accessor is thread safe. 
-	@param		state The integer indicating the state to set
-	@result		A boolean, return NO if the current state was aleady in the requested state.
-*/
-- (BOOL)changePreviewState:(BDSKPreviewState)state;
-
-/*!
     @method     handleApplicationWillTerminate:
     @abstract   Perform cleanup actions here, since this object never gets deallocated.
     @discussion (comprehensive description)

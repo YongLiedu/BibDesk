@@ -208,7 +208,8 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         [document updatePreviews:nil];
 }
 
-- (void)printDocument:(id)sender{ // first responder gets this
+// first responder gets this
+- (void)printDocument:(id)sender{
     NSView *printView = [[tabView selectedTabViewItem] view];
     
     // Construct the print operation and setup Print panel
@@ -238,16 +239,11 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     
     NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
 
-	// this should not be queued, so we know our expected state
-	if (![self changePreviewState:state])
-		return; // the last element in the queue was already in this state, so no need to add it again
+	previewState = state;
 	
-	// flush the queue as any remaining invocations are not valid anymore
+	// if empty, flush the queue as any remaining invocations are not valid anymore
 	if (state == BDSKEmptyPreviewState)
 		[messageQueue removeAllInvocations];
-
-    if ([self previewState] != state)
-		return; // we should already be in another state, so we ignore this one
 		
     // start or stop the spinning wheel
     if(state == BDSKWaitingPreviewState)
@@ -280,7 +276,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 			NSMutableString *errorString = [[NSMutableString alloc] initWithCapacity:200];
 			[errorString appendString:NSLocalizedString(@"TeX preview generation failed.  Please review the log below to determine the cause.", @"")];
 			[errorString appendString:@"\n\n"];
-			[errorString appendString:[texTask logFileString]];
+            NSString *logString = [texTask logFileString];
+            if (nil == logString)
+                logString = NSLocalizedString(@"Unable to read log file from TeX run.", @"");
+			[errorString appendString:logString];
 			pdfData = [self PDFDataWithString:errorString color:[NSColor redColor]];
 			[errorString release];
 		}
@@ -386,14 +385,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (BDSKPreviewState)previewState{
 	return previewState;
-}
-
-- (BOOL)changePreviewState:(BDSKPreviewState)state{
-	if (previewState == state) {
-		return NO;
-	}
-	previewState = state;
-	return YES;
 }
 
 #pragma mark Cleanup
