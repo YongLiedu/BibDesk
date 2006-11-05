@@ -454,10 +454,15 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (void)dealloc;
 {
-    [texTask terminate];
     [texTask release];
-    [bibString release];
     [super dealloc];
+}
+
+- (oneway void)cleanup{
+    [bibString release];
+    bibString = nil;
+    [texTask terminate];
+    [super cleanup];
 }
 
 // superclass overrides
