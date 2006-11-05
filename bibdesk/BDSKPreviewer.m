@@ -349,7 +349,8 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 	if([NSString isEmptyString:bibStr]){
 		// reset, also removes any waiting tasks from the queue
         [self displayPreviewsForState:BDSKEmptyPreviewState];
-		
+        // clean the server
+        [server runTeXTaskInBackgroundWithString:nil];
     } else {
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState];
@@ -487,7 +488,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     [bibString release];
     bibString = [aString retain];
     
-    if([texTask isProcessing])
+    if([texTask isProcessing] || bibString == nil)
         return;
     
     NSString *string;
