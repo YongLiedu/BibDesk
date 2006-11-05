@@ -44,6 +44,7 @@
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "BibDocument.h"
 #import "BDSKFontManager.h"
+#import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
 #import <OmniFoundation/OFPreference.h>
@@ -67,9 +68,9 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     NSString *bibString;
 }
 
-- (id)initWithTeXTask:(BDSKTeXTask *)aTeXTask;
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
+- (BDSKTeXTask *)texTask;
 - (void)runTeXTaskInBackgroundWithString:(NSString *)string;
 
 @end
@@ -93,8 +94,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (id)init{
     if(self = [super init]){
-        texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
-        
         // this reflects the currently expected state, not necessarily the actual state
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
@@ -102,7 +101,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
         
-        server = [[BDSKPreviewerServer alloc] initWithTeXTask:texTask];
+        server = [[BDSKPreviewerServer alloc] init];
         [server setDelegate:self];
     }
     return self;
@@ -162,10 +161,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (void)updateRepresentedFilename
 {
     NSString *path = nil;
-	if([self previewState] == BDSKShowingPreviewState){
-        path = ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0) ? [texTask PDFFilePath] : [texTask RTFFilePath];
+	if(previewState == BDSKShowingPreviewState){
+        path = ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0) ? [[server texTask] PDFFilePath] : [[server texTask] RTFFilePath];
         if(path == nil)
-            path = [texTask logFilePath];
+            path = [[server texTask] logFilePath];
     }
     [[self window] setRepresentedFilename:path ? path : @""];
 }
@@ -282,18 +281,19 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 	// get the data to display
 	if(state == BDSKShowingPreviewState){
         
-        NSData *rtfData = nil;
-		if([texTask hasRTFData] && (rtfData = [texTask RTFData]) != nil)
+        NSData *rtfData = [self RTFData];
+		if(rtfData != nil)
 			attrString = [[NSAttributedString alloc] initWithRTF:rtfData documentAttributes:NULL];
 		else
 			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****", @"");
 		
-		if([texTask hasPDFData] == NO || (pdfData = [texTask PDFData]) == nil){
+		pdfData = [self PDFData];
+        if(pdfData == nil){
 			// show the TeX log file in the view
 			NSMutableString *errorString = [[NSMutableString alloc] initWithCapacity:200];
 			[errorString appendString:NSLocalizedString(@"TeX preview generation failed.  Please review the log below to determine the cause.", @"")];
 			[errorString appendString:@"\n\n"];
-            NSString *logString = [texTask logFileString];
+            NSString *logString = [[server texTask] logFileString];
             if (nil == logString)
                 logString = NSLocalizedString(@"Unable to read log file from TeX run.", @"");
 			[errorString appendString:logString];
@@ -311,7 +311,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 		
 	}else if(state == BDSKWaitingPreviewState){
 		
-		message = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Generating preview", @"Generating preview..."), 0x2026];
+		message = [NSLocalizedString(@"Generating preview", @"Generating preview...") stringByAppendingEllipsis];
 		
 		if (generatingMessagePDFData == nil)
 			generatingMessagePDFData = [[self PDFDataWithString:message color:[NSColor grayColor]] retain];
@@ -361,7 +361,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (void)serverFinishedWithResult:(BOOL)success{
     // ignore this task if we finished a task that was running when the previews were reset
-	if([self isEmpty] == NO) {
+	if(previewState != BDSKEmptyPreviewState) {
         // if we didn't have success, the drawing method will show the log file
         [self displayPreviewsForState:BDSKShowingPreviewState];
     }
@@ -370,32 +370,25 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 #pragma mark Data accessors
 
 - (NSData *)PDFData{
-	if([texTask hasPDFData] && ![self isEmpty] && [self isVisible]){
-		return [texTask PDFData];
-	}
-	return nil;
+	if(previewState == BDSKEmptyPreviewState || [self isVisible] == NO)
+        return nil;
+    return [[server texTask] PDFData];
 }
 
 - (NSData *)RTFData{
-	if([texTask hasRTFData] && ![self isEmpty] && [self isVisible]){
-		return [texTask RTFData];
-	}
-	return nil;
+	if(previewState == BDSKEmptyPreviewState || [self isVisible] == NO)
+        return nil;
+    return [[server texTask] RTFData];
 }
 
 - (NSString *)LaTeXString{
-	if([texTask hasLaTeX] && ![self isEmpty] && [self isVisible]){
-		return [texTask LaTeXString];
-	}
-	return nil;
+	if(previewState == BDSKEmptyPreviewState || [self isVisible] == NO)
+        return nil;
+    return [[server texTask] LaTeXString];
 }
 
 - (BOOL)isEmpty{
-	return ([self previewState] == BDSKEmptyPreviewState);
-}
-
-- (BDSKPreviewState)previewState{
-	return previewState;
+	return (previewState == BDSKEmptyPreviewState);
 }
 
 #pragma mark Cleanup
@@ -424,9 +417,9 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     server = nil;
     
 	// call this here, since we can't guarantee that the task received the NSApplicationWillTerminate before we flushed the queue
-    [texTask terminate];
-	[texTask release]; // This removes the temporary directory. Doing this here as we are a singleton. 
-	texTask = nil;
+    //[texTask terminate];
+	//[texTask release]; // This removes the temporary directory. Doing this here as we are a singleton. 
+	//texTask = nil;
 }
 
 - (void)dealloc{
@@ -435,8 +428,8 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
     [server stopDOServer];
     [server release];
-    [texTask terminate];
-	[texTask release];
+    //[texTask terminate];
+	//[texTask release];
     [pdfView release];
     [[rtfPreviewView enclosingScrollView] release];
     [super dealloc];
@@ -448,11 +441,11 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 @implementation BDSKPreviewerServer
 
-- (id)initWithTeXTask:(BDSKTeXTask *)aTeXTask;
+- (id)init;
 {
     self = [super init];
     if(self){
-        texTask = [aTeXTask retain];
+        texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
         delegate = nil;
         bibString = nil;
     }
@@ -461,6 +454,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (void)dealloc;
 {
+    [texTask terminate];
     [texTask release];
     [bibString release];
     [super dealloc];
@@ -477,6 +471,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (id)delegate { return delegate; }
 
 - (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
+
+- (BDSKTeXTask *)texTask{
+    return texTask;
+}
 
 - (void)runTeXTaskInBackgroundWithString:(NSString *)string{
     [[self serverOnServerThread] runTeXTaskWithString:string];

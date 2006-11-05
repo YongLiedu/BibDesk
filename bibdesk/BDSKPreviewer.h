@@ -61,7 +61,6 @@ typedef enum {
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet BDSKOverlay *progressOverlay;
     
-	BDSKTeXTask *texTask;
     BDSKPreviewerServer *server;
     BDSKPreviewState previewState;
 }
@@ -132,21 +131,6 @@ typedef enum {
 		or there are updates waiting. This should be thread safe. 
 */
 - (NSString *)LaTeXString;
-
-/*!
-    @method     isEmpty
-    @abstract   Returns YES if the previews were empty, and should show the default message for an empty selection. 
-    @discussion This is mostly a convenience accessor to check if our data is valid. This accessor is thread safe. 
-*/
-- (BOOL)isEmpty;
-
-/*!
-    @method     previewState
-    @abstract   Returns an integer indicating the currently expected state of the previews.
-    @discussion This accessor is thread safe. 
-	@result		An integer indicating the currently expected state. 0 = empty, 1 = waiting, 2 = showing. 
-*/
-- (BDSKPreviewState)previewState;
 
 /*!
     @method     handleApplicationWillTerminate:
