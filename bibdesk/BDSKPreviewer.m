@@ -53,14 +53,13 @@
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
-/*! @const BDSKPreviewer helps to enforce a single object of this class */
-static BDSKPreviewer *sharedPreviewer;
-
 @implementation BDSKPreviewer
 
 + (BDSKPreviewer *)sharedPreviewer{
+    static BDSKPreviewer *sharedPreviewer = nil;
+
     if (sharedPreviewer == nil) {
-        sharedPreviewer = [[BDSKPreviewer alloc] init];
+        sharedPreviewer = [[self alloc] init];
     }
     return sharedPreviewer;
 }
@@ -84,6 +83,8 @@ static BDSKPreviewer *sharedPreviewer;
     return self;
 }
 
+- (BOOL)isSharedPreviewer { return [self isEqual:[[self class] sharedPreviewer]]; }
+
 #pragma mark UI setup and display
 
 - (void)awakeFromNib{
@@ -96,7 +97,7 @@ static BDSKPreviewer *sharedPreviewer;
     [collapsibleView setMinSize:[progressIndicator frame].size];
     [collapsibleView setCollapseEdges:BDSKMinYEdgeMask | BDSKMaxXEdgeMask];
 	
-    if(self == sharedPreviewer){
+    if([self isSharedPreviewer]){
         pdfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
         rtfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
         
@@ -175,7 +176,7 @@ static BDSKPreviewer *sharedPreviewer;
 #pragma mark Actions
 
 - (IBAction)showWindow:(id)sender{
-    OBASSERT(self == sharedPreviewer);
+    OBASSERT([self isSharedPreviewer]);
 	[super showWindow:self];
 	[progressOverlay orderFront:sender];
 	[self handlePreviewNeedsUpdate:nil];
@@ -201,7 +202,7 @@ static BDSKPreviewer *sharedPreviewer;
 }
 
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification {
-    OBASSERT(self == sharedPreviewer);
+    OBASSERT([self isSharedPreviewer]);
     id document = [[NSDocumentController sharedDocumentController] currentDocument];
     if([document respondsToSelector:@selector(updatePreviews:)])
         [document updatePreviews:nil];
@@ -321,7 +322,7 @@ static BDSKPreviewer *sharedPreviewer;
         [ts addAttribute:NSForegroundColorAttributeName value:[NSColor grayColor] range:NSMakeRange(0, [ts length])];
 	}
     
-    if(self == sharedPreviewer)
+    if([self isSharedPreviewer])
         [self updateRepresentedFilename];
 }
 
@@ -384,8 +385,7 @@ static BDSKPreviewer *sharedPreviewer;
 }
 
 - (BDSKPreviewState)previewState{
-	int state = previewState;
-	return state;
+	return previewState;
 }
 
 - (BOOL)changePreviewState:(BDSKPreviewState)state{
@@ -403,7 +403,7 @@ static BDSKPreviewer *sharedPreviewer;
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification{
-    OBASSERT(self == sharedPreviewer);
+    OBASSERT([self isSharedPreviewer]);
     
 	// save the visibility of the previewer
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
