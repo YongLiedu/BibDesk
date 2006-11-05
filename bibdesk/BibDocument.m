@@ -87,7 +87,6 @@
 #import "BDSKFileContentSearchController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKStatusBar.h"
-#import "BDSKPreviewMessageQueue.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
