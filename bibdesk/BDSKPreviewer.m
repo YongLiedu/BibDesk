@@ -90,12 +90,14 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (void)awakeFromNib{
     float pdfScaleFactor = 0.0;
     float rtfScaleFactor = 1.0;
-    BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[progressIndicator superview] superview];
+    BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[[progressOverlay contentView] subviews] firstObject];
+    NSSize minSize = [progressIndicator frame].size;
     
     // we use threads, so better let the progressIndicator also use them
     [progressIndicator setUsesThreadedAnimation:YES];
-    [collapsibleView setMinSize:[progressIndicator frame].size];
-    [collapsibleView setCollapseEdges:BDSKMinYEdgeMask | BDSKMaxXEdgeMask];
+    minSize.height += NSMinY([[progressIndicator superview] frame]);
+    [collapsibleView setMinSize:minSize];
+    [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
 	
     if([self isSharedPreviewer]){
         pdfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
