@@ -69,6 +69,8 @@ typedef struct _BDSKTeXTaskFlags {
     NSString *binDirPath;
 	
 	id delegate;
+    NSInvocation *taskShouldStartInvocation;
+    NSInvocation *taskFinishedInvocation;
     NSTask *currentTask;
 	
     BDSKTeXTaskFlags flags;

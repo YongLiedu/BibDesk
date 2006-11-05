@@ -145,6 +145,8 @@
     [pdfFilePath release];
     [rtfFilePath release];
     [logFilePath release];
+    [taskShouldStartInvocation release];
+    [taskFinishedInvocation release];
     OFSimpleLockFree(&processingLock);
     pthread_rwlock_destroy(&dataFileLock);
 	[super dealloc];
@@ -164,10 +166,36 @@
 
 - (void)setDelegate:(id)newDelegate {
 	delegate = newDelegate;
+    
+    SEL theSelector;
+    
+    // set invocations to nil before creating them, since we use that as a check before invoking
+    theSelector = @selector(texTaskShouldStartRunning:);
+    [taskShouldStartInvocation autorelease];
+    taskShouldStartInvocation = nil;
+    
+    if ([delegate respondsToSelector:theSelector]) {
+        taskShouldStartInvocation = [[NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:theSelector]] retain];
+        [taskShouldStartInvocation setTarget:delegate];
+        [taskShouldStartInvocation setSelector:theSelector];
+        [taskShouldStartInvocation setArgument:&self atIndex:2];
+    }
+    
+    [taskFinishedInvocation autorelease];
+    taskFinishedInvocation = nil;
+    theSelector = @selector(texTask:finishedWithResult:);
+
+    if ([delegate respondsToSelector:theSelector]) {
+        taskFinishedInvocation = [[NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:theSelector]] retain];
+        [taskFinishedInvocation setTarget:delegate];
+        [taskFinishedInvocation setSelector:theSelector];
+        [taskFinishedInvocation setArgument:&self atIndex:2];
+    }        
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
     // this is not effective if the user does a copy command that calls a TeX task, then quits the app before pasting, since the pasteboard asks for the data after NSApplicationWillTerminate
+    [self setDelegate:nil];
     [self terminate];
     [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
 }
@@ -202,20 +230,10 @@
         return NO;
     }
 
-    id theDelegate = [self delegate];
-    SEL theSelector = @selector(texTaskShouldStartRunning:);
-	if ([theDelegate respondsToSelector:theSelector]) {
+	if (nil != taskShouldStartInvocation) {
         BOOL shouldStart;
-        if ([NSThread inMainThread]) {
-            shouldStart = [theDelegate texTaskShouldStartRunning:self];
-        } else {
-            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[theDelegate methodSignatureForSelector:theSelector]];
-            [invocation setTarget:theDelegate];
-            [invocation setSelector:theSelector];
-            [invocation setArgument:&self atIndex:2];
-            [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
-            [invocation getReturnValue:&shouldStart];
-        }
+        [taskShouldStartInvocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
+        [taskShouldStartInvocation getReturnValue:&shouldStart];
         
         if (NO == shouldStart) {
             OFSimpleUnlock(&processingLock);
@@ -268,18 +286,9 @@
 		}
 	}
 	
-    theSelector = @selector(texTask:finishedWithResult:);
-	if ([theDelegate respondsToSelector:theSelector]){
-        if ([NSThread inMainThread]) {
-            [theDelegate texTask:self finishedWithResult:rv];
-        } else {
-            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[theDelegate methodSignatureForSelector:theSelector]];
-            [invocation setTarget:theDelegate];
-            [invocation setSelector:theSelector];
-            [invocation setArgument:&self atIndex:2];
-            [invocation setArgument:&rv atIndex:3];
-            [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
-        }
+	if (nil != taskFinishedInvocation) {
+        [taskFinishedInvocation setArgument:&rv atIndex:3];
+        [taskFinishedInvocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
 	}
 
 	OFSimpleUnlock(&processingLock);
