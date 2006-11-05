@@ -111,10 +111,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
                                                  selector:@selector(handleApplicationWillTerminate:)
                                                      name:NSApplicationWillTerminateNotification
                                                    object:NSApp];
-        
-        [OFPreference addObserver:self
-                         selector:@selector(handlePreviewNeedsUpdate:)
-                    forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
     }
         
     // empty document to avoid problem when zoom is set to auto
@@ -180,7 +176,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     OBASSERT([self isSharedPreviewer]);
 	[super showWindow:self];
 	[progressOverlay orderFront:sender];
-	[self handlePreviewNeedsUpdate:nil];
+	[(BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument] updatePreviewer:self];
     if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey])
         NSBeginAlertSheet(NSLocalizedString(@"Previewing is Disabled.", @"TeX preview is disabled"),
                           NSLocalizedString(@"Yes", @""),
@@ -200,13 +196,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     }else{
 		[self hideWindow:nil];
 	}
-}
-
-- (void)handlePreviewNeedsUpdate:(NSNotification *)notification {
-    OBASSERT([self isSharedPreviewer]);
-    id document = [[NSDocumentController sharedDocumentController] currentDocument];
-    if([document respondsToSelector:@selector(updatePreviews:)])
-        [document updatePreviews:nil];
 }
 
 // first responder gets this

@@ -263,15 +263,22 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)updatePreviews:(NSNotification *)aNotification;
 
-
-
 /*!
-    @method displayPreviewForItems
-    @abstract Handles writing the preview pane. (Not the PDF Preview)
-    @discussion itemIndexes is an array of NSNumbers that are the row indices of the selected items.
+    @method updatePreviewer:
+    @abstract Handles updating a previewer.
+    @discussion -
+    @param aPreviewer The previewer to update
     
 */
-- (void)displayPreviewForItems:(NSArray *)itemIndexes;
+- (void)updatePreviewer:(BDSKPreviewer *)aPreviewer;
+
+/*!
+    @method updatePreviewPane
+    @abstract Handles writing the preview pane. (Not the PDF Preview)
+    @discussion -
+    
+*/
+- (void)updatePreviewPane;
 
 /*!
 	@method bibTeXStringForPublications
@@ -425,6 +432,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @param      notification (description)
 */
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification;
+- (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification;
 - (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification;
 - (void)handleNameDisplayChangedNotification:(NSNotification *)notification;
 - (void)handleFlagsChangedNotification:(NSNotification *)notification;

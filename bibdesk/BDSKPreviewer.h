@@ -83,7 +83,6 @@ typedef enum {
 - (BOOL)isVisible;
 
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)handlePreviewNeedsUpdate:(NSNotification *)notification;
 
 /*!
     @method updateWithBibTeXString:

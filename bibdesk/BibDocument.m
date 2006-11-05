@@ -312,7 +312,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
                     forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayLastNameFirstKey]];
         
         [OFPreference addObserver:self
-                         selector:@selector(handlePreviewNeedsUpdateNotification:)
+                         selector:@selector(handleTeXPreviewNeedsUpdateNotification:)
                     forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
         
     }
@@ -2501,12 +2501,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
     // note: this is only supposed to handle the pretty-printed preview, /not/ the TeX preview
-    [self displayPreviewForItems:[self selectedPublications]];
+    [self updatePreviewPane];
 }
 
-- (void)handlePreviewNeedsUpdateNotification:(NSNotification *)notification{
+- (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification{
     if([previewer isVisible])
         [self updatePreviews:nil];
+    else if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
+            [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
+            [[NSDocumentController sharedDocumentController] currentDocument] == self)
+        [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
 }
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
@@ -2638,24 +2642,14 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return;
 
     OBASSERT([NSThread inMainThread]);
-            
-    NSArray *selPubs = [self selectedPublications];
     
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
-    [self displayPreviewForItems:selPubs];
-
+    [self updatePreviewPane];
+    
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
-	   [[BDSKPreviewer sharedPreviewer] isWindowVisible]){
-
-		if(!selPubs){
-			// clear the previews
-			[[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];
-			return;
-		}
-
-        NSString *bibString = [self previewBibTeXStringForPublications:selPubs];
-        [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:bibString];
-    }
+	   [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
+       [[NSDocumentController sharedDocumentController] currentDocument] == self)
+        [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
 }
 
 - (void)updatePreviews:(NSNotification *)aNotification{
@@ -2666,7 +2660,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self queueSelectorOnce:@selector(handlePrivateUpdatePreviews)];
 }
 
-- (void)displayPreviewForItems:(NSArray *)items{
+- (void)updatePreviewer:(BDSKPreviewer *)aPreviewer{
+    NSArray *items = [self selectedPublications];
+    NSString *bibString = [items count] ? [self previewBibTeXStringForPublications:items] : nil;
+    [aPreviewer updateWithBibTeXString:bibString];
+}
+
+- (void)updatePreviewPane{
     int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
     NSView *view = [previewField enclosingScrollView];
     
@@ -2682,8 +2682,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             currentPreviewView = view;
             [[previewer progressOverlay] overlayView:currentPreviewView];
         }
-        NSString *bibString = [items count] ? [self previewBibTeXStringForPublications:items] : nil;
-        [previewer updateWithBibTeXString:bibString];
+        [self updatePreviewer:previewer];
         return;
     }else if(currentPreviewView != view){
         [[previewer progressOverlay] remove];
@@ -2700,6 +2699,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(noAttrDoubleLineFeed == nil)
         noAttrDoubleLineFeed = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:nil];
     
+    NSArray *items = [self selectedPublications];
     NSDictionary *bodyAttributes = nil;
     NSDictionary *titleAttributes = nil;
     if (displayType == BDSKNotesPreviewDisplay || displayType == BDSKAbstractPreviewDisplay) {
