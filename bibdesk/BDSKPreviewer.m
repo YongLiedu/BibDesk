@@ -53,13 +53,6 @@
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
-enum {
-	BDSKUnknownPreviewState = -1,
-	BDSKEmptyPreviewState = 0,
-	BDSKWaitingPreviewState = 1,
-	BDSKShowingPreviewState = 2
-};
-
 /*! @const BDSKPreviewer helps to enforce a single object of this class */
 static BDSKPreviewer *sharedPreviewer;
 
@@ -80,14 +73,12 @@ static BDSKPreviewer *sharedPreviewer;
         messageQueue = [[BDSKPreviewMessageQueue alloc] init];
         [messageQueue startBackgroundProcessors:1];
         [messageQueue setSchedulesBasedOnPriority:NO];
-        
-        OFSimpleLockInit(&stateLock);
-        
+                
         // this reflects the currently expected state, not necessarily the actual state
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
         
-        // otherwise a document's previewer might mess up the windowmposition of the shared previewer
+        // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
     }
     return self;
@@ -96,8 +87,8 @@ static BDSKPreviewer *sharedPreviewer;
 #pragma mark UI setup and display
 
 - (void)awakeFromNib{
-    volatile float pdfScaleFactor = 0.0;
-    volatile float rtfScaleFactor = 1.0;
+    float pdfScaleFactor = 0.0;
+    float rtfScaleFactor = 1.0;
     BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[progressIndicator superview] superview];
     
     // we use threads, so better let the progressIndicator also use them
@@ -133,7 +124,7 @@ static BDSKPreviewer *sharedPreviewer;
     [pdfView setScaleFactor:pdfScaleFactor];
 	[(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:rtfScaleFactor];
     
-    [self drawPreviewsForState:BDSKEmptyPreviewState];
+    [self displayPreviewsForState:BDSKEmptyPreviewState];
     
     [pdfView retain];
     [[rtfPreviewView enclosingScrollView] retain];
@@ -242,14 +233,21 @@ static BDSKPreviewer *sharedPreviewer;
 	return data;
 }
 
-// This should only be called from the main thread
-- (void)performDrawingForState:(int)state{
+- (void)displayPreviewsForState:(BDSKPreviewState)state{
     
+    NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
+
+	// this should not be queued, so we know our expected state
+	if (![self changePreviewState:state])
+		return; // the last element in the queue was already in this state, so no need to add it again
+	
+	// flush the queue as any remaining invocations are not valid anymore
+	if (state == BDSKEmptyPreviewState)
+		[messageQueue removeAllInvocations];
+
     if ([self previewState] != state)
 		return; // we should already be in another state, so we ignore this one
-	
-    NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
-	
+		
     // start or stop the spinning wheel
     if(state == BDSKWaitingPreviewState)
         [progressIndicator startAnimation:nil];
@@ -325,48 +323,23 @@ static BDSKPreviewer *sharedPreviewer;
     
     if(self == sharedPreviewer)
         [self updateRepresentedFilename];
-}	
-
-- (void)drawPreviewsForState:(int)state{
-    
-	// this should not be queued, so we know our expected state
-	if (![self changePreviewState:state])
-		return; // the last element in the queue was already in this state, so no need to add it again
-	
-	// flush the queue as any remaining invocations are not valid anymore
-	if (state == BDSKEmptyPreviewState)
-		[messageQueue removeAllInvocations];
-
-	[[OFMessageQueue mainQueue] queueSelector:@selector(performDrawingForState:) forObject:self withInt:state];
 }
 
 #pragma mark TeX Tasks
 
 - (void)updateWithBibTeXString:(NSString *)bibStr{
     
-	// pool for MT
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
 	if([NSString isEmptyString:bibStr]){
 		// reset, also removes any waiting tasks from the queue
-		NS_DURING
-			[self drawPreviewsForState:BDSKEmptyPreviewState];
-		NS_HANDLER
-			NSLog(@"Failed to reset previews: %@", [localException reason]);
-		NS_ENDHANDLER
+        [self displayPreviewsForState:BDSKEmptyPreviewState];
 		
-    }else{
+    } else {
 		// this will start the spinning wheel
-		NS_DURING
-            [self drawPreviewsForState:BDSKWaitingPreviewState];
-		NS_HANDLER
-			NSLog(@"Failed to invalidate previews: %@", [localException reason]);
-		NS_ENDHANDLER
-		// put a new task on the queue
+        [self displayPreviewsForState:BDSKWaitingPreviewState];
+		
+        // put a new task on the queue
 		[messageQueue queueSelector:@selector(runWithBibTeXString:) forObject:texTask withObject:bibStr];
-	}
-	
-    [pool release];
+	}	
 }
 
 - (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)texTask{
@@ -375,23 +348,12 @@ static BDSKPreviewer *sharedPreviewer;
 }
 
 - (void)texTask:(BDSKTeXTask *)aTexTask finishedWithResult:(BOOL)success{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
-	if([self isEmpty] || [messageQueue hasInvocations]){
-		// we finished a task that was running when the previews were reset, or we have more updates waiting
-		// so we ignore the result of this task
-		[pool release];
-		return; 
+    // ignore this task if we finished a task that was running when the previews were reset or have more updates waiting
+	if([self isEmpty] == NO && [messageQueue hasInvocations] == NO) {
+        // if we didn't have success, the drawing method will show the log file
+        [self displayPreviewsForState:BDSKShowingPreviewState];
     }
-	
-	// if we didn't have success, the drawing method will show the log file
-	NS_DURING
-		[self drawPreviewsForState:BDSKShowingPreviewState];
-	NS_HANDLER
-		NSLog(@"Failed to draw previews: %@", [localException reason]);
-	NS_ENDHANDLER
-	
-	[pool release];
 }
 
 #pragma mark Data accessors
@@ -421,29 +383,23 @@ static BDSKPreviewer *sharedPreviewer;
 	return ([self previewState] == BDSKEmptyPreviewState);
 }
 
-- (int)previewState{
-	int state = BDSKUnknownPreviewState;
-	OFSimpleLock(&stateLock); // or Try?
-	state = previewState;
-	OFSimpleUnlock(&stateLock);
+- (BDSKPreviewState)previewState{
+	int state = previewState;
 	return state;
 }
 
-- (BOOL)changePreviewState:(int)state{
-	OFSimpleLock(&stateLock); // I don't think Try, as it would mean we might not add to the queue
+- (BOOL)changePreviewState:(BDSKPreviewState)state{
 	if (previewState == state) {
-		OFSimpleUnlock(&stateLock);
 		return NO;
 	}
 	previewState = state;
-	OFSimpleUnlock(&stateLock);
 	return YES;
 }
 
 #pragma mark Cleanup
 
 - (void)windowWillClose:(NSNotification *)notification{
-	[self drawPreviewsForState:BDSKEmptyPreviewState];
+	[self displayPreviewsForState:BDSKEmptyPreviewState];
 }
 
 - (void)handleApplicationWillTerminate:(NSNotification *)notification{
@@ -481,7 +437,6 @@ static BDSKPreviewer *sharedPreviewer;
 	[texTask release];
     [pdfView release];
     [[rtfPreviewView enclosingScrollView] release];
-    OFSimpleLockFree(&stateLock);
     [super dealloc];
 }
 @end

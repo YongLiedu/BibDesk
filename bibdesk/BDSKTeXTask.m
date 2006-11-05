@@ -205,7 +205,7 @@
 
 - (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(int)flag{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    volatile BOOL rv = YES;
+    BOOL rv = YES;
 
     if(!OFSimpleLockTry(&processingLock)){
         NSLog(@"%@ couldn't get processing lock", self);
@@ -213,11 +213,26 @@
         return NO;
     }
 
-	if ([[self delegate] respondsToSelector:@selector(texTaskShouldStartRunning:)] &&
-		![[self delegate] texTaskShouldStartRunning:self]){
-		OFSimpleUnlock(&processingLock);
-		[pool release];
-		return NO;
+    id theDelegate = [self delegate];
+    SEL theSelector = @selector(texTaskShouldStartRunning:);
+	if ([theDelegate respondsToSelector:theSelector]) {
+        BOOL shouldStart;
+        if ([NSThread inMainThread]) {
+            shouldStart = [theDelegate texTaskShouldStartRunning:self];
+        } else {
+            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[theDelegate methodSignatureForSelector:theSelector]];
+            [invocation setTarget:theDelegate];
+            [invocation setSelector:theSelector];
+            [invocation setArgument:&self atIndex:2];
+            [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
+            [invocation getReturnValue:&shouldStart];
+        }
+        
+        if (NO == shouldStart) {
+            OFSimpleUnlock(&processingLock);
+            [pool release];
+            return NO;
+        }
 	}
 
     OFSimpleLock(&hasDataLock);
@@ -286,8 +301,18 @@
 		}
 	}
 	
-	if ([[self delegate] respondsToSelector:@selector(texTask:finishedWithResult:)]){
-		[[self delegate] texTask:self finishedWithResult:rv];
+    theSelector = @selector(texTask:finishedWithResult:);
+	if ([theDelegate respondsToSelector:theSelector]){
+        if ([NSThread inMainThread]) {
+            [theDelegate texTask:self finishedWithResult:rv];
+        } else {
+            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[theDelegate methodSignatureForSelector:theSelector]];
+            [invocation setTarget:theDelegate];
+            [invocation setSelector:theSelector];
+            [invocation setArgument:&self atIndex:2];
+            [invocation setArgument:&rv atIndex:3];
+            [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
+        }
 	}
 
 	OFSimpleUnlock(&processingLock);

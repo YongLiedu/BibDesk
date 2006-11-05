@@ -43,6 +43,13 @@
 
 @class BDSKPreviewMessageQueue, PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay;
 
+typedef enum {
+	BDSKUnknownPreviewState = -1,
+	BDSKEmptyPreviewState   =  0,
+	BDSKWaitingPreviewState =  1,
+	BDSKShowingPreviewState =  2
+} BDSKPreviewState;
+
 /*!
     @class BDSKPreviewer
     @abstract TeX task manager and preview window controller
@@ -58,9 +65,8 @@
     IBOutlet BDSKOverlay *progressOverlay;
     
     BDSKPreviewMessageQueue *messageQueue;
-	volatile int previewState;
+    BDSKPreviewState previewState;
     
-    OFSimpleLockType stateLock;
 }
 
 /*!
@@ -90,20 +96,12 @@
 - (void)updateWithBibTeXString:(NSString *)bibStr;
 
 /*!
-    @method     drawPreviewsForState:
+    @method     displayPreviewsForState:
     @abstract   This will draw the previews or message in the appropriate views.
     @discussion This method sets the state flag and puts -performDrawingForState: on the main queue for drawing.
 	@param		state An integer indicating the preview state for which to draw.
 */
-- (void)drawPreviewsForState:(int)state;
-
-/*!
-    @method     performDrawingForState:
-    @abstract   Draws the previews or a message in their appropriate views and starts or stops the spinner.
-    @discussion This should only be called from the main thread. Don't call it directly, use -drawPreviewsForState.
-	@param		state An integer indicating the preview state for which to draw.
-*/
-- (void)performDrawingForState:(int)state;
+- (void)displayPreviewsForState:(BDSKPreviewState)state;
 
 /*!
     @method     PDFDataWithString:color:
@@ -152,7 +150,7 @@
     @discussion This accessor is thread safe. 
 	@result		An integer indicating the currently expected state. 0 = empty, 1 = waiting, 2 = showing. 
 */
-- (int)previewState;
+- (BDSKPreviewState)previewState;
 
 /*!
     @method     changePreviewState:
@@ -161,7 +159,7 @@
 	@param		state The integer indicating the state to set
 	@result		A boolean, return NO if the current state was aleady in the requested state.
 */
-- (BOOL)changePreviewState:(int)state;
+- (BOOL)changePreviewState:(BDSKPreviewState)state;
 
 /*!
     @method     handleApplicationWillTerminate:
