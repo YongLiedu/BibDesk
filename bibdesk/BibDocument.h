@@ -67,6 +67,15 @@ enum {
     BDSKTemplateDragCopyType
 };
 
+enum {
+    BDSKDetailsPreviewDisplay = 0,
+    BDSKNotesPreviewDisplay = 1,
+    BDSKAbstractPreviewDisplay = 2,
+    BDSKTemplatePreviewDisplay = 3,
+    BDSKPDFPreviewDisplay = 4,
+    BDSKRTFPreviewDisplay = 5
+};
+
 // our main document types
 extern NSString *BDSKBibTeXDocumentType;
 extern NSString *BDSKRISDocumentType;

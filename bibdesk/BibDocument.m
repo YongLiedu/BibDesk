@@ -78,6 +78,7 @@
 #import "BDSKRatingButton.h"
 #import "BDSKSplitView.h"
 #import "BDSKCollapsibleView.h"
+#import "BDSKZoomablePDFView.h"
 
 #import "BDSKMacroResolver.h"
 #import "MacroWindowController.h"
@@ -2669,13 +2670,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
     NSView *view = [previewField enclosingScrollView];
     
-#warning need an enumerated type for displayType
-    if(displayType == 4 || displayType == 5){
+    if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKRTFPreviewDisplay){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
             return;
         if(previewer == nil)
             previewer = [[BDSKPreviewer alloc] init];
-        view = displayType == 5 ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)[previewer pdfView];
+        view = displayType == BDSKRTFPreviewDisplay ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)[previewer pdfView];
         if(currentPreviewView != view){
             [view setFrame:[currentPreviewView frame]];
             [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
@@ -2702,7 +2702,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSDictionary *bodyAttributes = nil;
     NSDictionary *titleAttributes = nil;
-    if (displayType == 1 || displayType == 2) {
+    if (displayType == BDSKNotesPreviewDisplay || displayType == BDSKAbstractPreviewDisplay) {
         NSDictionary *cachedFonts = [[NSFontManager sharedFontManager] cachedFontsForPreviewPane];
         bodyAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, nil];
         titleAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, [NSNumber numberWithBool:YES], NSUnderlineStyleAttributeName, nil];
@@ -2740,7 +2740,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         attributedFormFeed = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%C", NSFormFeedCharacter] attributes:nil];
     
     switch(displayType){
-        case 0:
+        case BDSKDetailsPreviewDisplay:
             while(pub = [enumerator nextObject]){
                 if (isFirst == YES) isFirst = NO;
                 else [textStorage appendAttributedString:attributedFormFeed]; // page break for printing; doesn't display
@@ -2748,7 +2748,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
             break;
-        case 1:
+        case BDSKNotesPreviewDisplay:
             while(pub = [enumerator nextObject]){
                 // Write out the title
                 if(numberOfSelectedPubs > 1){
@@ -2768,7 +2768,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
             break;
-        case 2:
+        case BDSKAbstractPreviewDisplay:
             while(pub = [enumerator nextObject]){
                 // Write out the title
                 if(numberOfSelectedPubs > 1){
@@ -2788,7 +2788,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
             break;
-        case 3:
+        case BDSKTemplatePreviewDisplay:
             do{
                 NSString *style = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey];
                 BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
@@ -2949,11 +2949,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark Printing support
 
-#warning broken for PDF preview
 - (NSView *)printableView{
-    BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
-    [printableView setAttributedString:[previewField textStorage]];    
-    return [printableView autorelease];
+    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
+    if(displayType == BDSKPDFPreviewDisplay){
+#warning we should create a separate pdf view for printing with custom settings
+        return [previewer pdfView]; 
+    }else if(displayType == BDSKRTFPreviewDisplay){
+        BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
+        [printableView setAttributedString:[[previewer textView] textStorage]];    
+        return [printableView autorelease];
+    }else{
+        BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
+        [printableView setAttributedString:[previewField textStorage]];    
+        return [printableView autorelease];
+    }
 }
 
 - (NSPrintOperation *)printOperationWithSettings:(NSDictionary *)printSettings error:(NSError **)outError {
