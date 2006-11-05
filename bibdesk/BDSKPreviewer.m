@@ -41,7 +41,6 @@
 #import "BibAppController.h"
 #import "BDSKZoomableScrollView.h"
 #import "BDSKZoomablePDFView.h"
-#import "BDSKPreviewMessageQueue.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "BibDocument.h"
 #import "BDSKFontManager.h"
@@ -50,8 +49,36 @@
 #import <OmniFoundation/OFPreference.h>
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKCollapsibleView.h"
+#import "BDSKAsynchronousDOServer.h"
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
+
+@protocol BDSKPreviewerServerThread <BDSKAsyncDOServerThread>
+- (oneway void)runTeXTaskWithString:(NSString *)string;
+@end
+
+@protocol BDSKPreviewerServerMainThread <BDSKAsyncDOServerMainThread>
+- (oneway void)serverFinishedWithResult:(BOOL)success;
+@end
+
+@interface BDSKPreviewerServer : BDSKAsynchronousDOServer <BDSKPreviewerServerThread, BDSKPreviewerServerMainThread> {
+    BDSKTeXTask *texTask;
+    id delegate;
+    NSString *bibString;
+}
+
+- (id)initWithTeXTask:(BDSKTeXTask *)aTeXTask;
+- (id)delegate;
+- (void)setDelegate:(id)newDelegate;
+- (void)runTeXTaskInBackgroundWithString:(NSString *)string;
+
+@end
+
+@interface NSObject (BDSKPreviewerServerDelegate)
+- (void)serverFinishedWithResult:(BOOL)success;
+@end
+
+#pragma mark -
 
 @implementation BDSKPreviewer
 
@@ -67,18 +94,16 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (id)init{
     if(self = [super init]){
         texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
-        [texTask setDelegate:self];
         
-        messageQueue = [[BDSKPreviewMessageQueue alloc] init];
-        [messageQueue startBackgroundProcessors:1];
-        [messageQueue setSchedulesBasedOnPriority:NO];
-                
         // this reflects the currently expected state, not necessarily the actual state
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
         
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
+        
+        server = [[BDSKPreviewerServer alloc] initWithTeXTask:texTask];
+        [server setDelegate:self];
     }
     return self;
 }
@@ -236,10 +261,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     NSAssert2([NSThread inMainThread], @"-[%@ %@] must be called from the main thread!", [self class], NSStringFromSelector(_cmd));
 
 	previewState = state;
-	
-	// if empty, flush the queue as any remaining invocations are not valid anymore
-	if (state != BDSKShowingPreviewState)
-		[messageQueue removeAllInvocations];
 		
     // start or stop the spinning wheel
     if(state == BDSKWaitingPreviewState)
@@ -332,23 +353,14 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     } else {
 		// this will start the spinning wheel
         [self displayPreviewsForState:BDSKWaitingPreviewState];
-        // ignore output from a running tex task
-        ignoreOutput = YES;
-        // put a new task on the queue
-		[messageQueue queueSelector:@selector(runWithBibTeXString:) forObject:texTask withObject:bibStr];
+        // run the tex task in the background
+        [server runTeXTaskInBackgroundWithString:bibStr];
 	}	
 }
 
-- (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)texTask{
-	ignoreOutput = [self isEmpty] || [messageQueue hasInvocations];
-    // not really necessary, as we would never be called when previews were reset
-	return ignoreOutput == NO;
-}
-
-- (void)texTask:(BDSKTeXTask *)aTexTask finishedWithResult:(BOOL)success{
-	
-    // ignore this task if we finished a task that was running when the previews were reset or have more updates waiting
-	if([self isEmpty] == NO && [messageQueue hasInvocations] == NO && ignoreOutput == NO) {
+- (void)serverFinishedWithResult:(BOOL)success{
+    // ignore this task if we finished a task that was running when the previews were reset
+	if([self isEmpty] == NO) {
         // if we didn't have success, the drawing method will show the log file
         [self displayPreviewsForState:BDSKShowingPreviewState];
     }
@@ -357,21 +369,21 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 #pragma mark Data accessors
 
 - (NSData *)PDFData{
-	if([texTask hasPDFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isVisible]){
+	if([texTask hasPDFData] && ![self isEmpty] && [self isVisible]){
 		return [texTask PDFData];
 	}
 	return nil;
 }
 
 - (NSData *)RTFData{
-	if([texTask hasRTFData] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isVisible]){
+	if([texTask hasRTFData] && ![self isEmpty] && [self isVisible]){
 		return [texTask RTFData];
 	}
 	return nil;
 }
 
 - (NSString *)LaTeXString{
-	if([texTask hasLaTeX] && ![self isEmpty] && ![messageQueue hasInvocations] && [self isVisible]){
+	if([texTask hasLaTeX] && ![self isEmpty] && [self isVisible]){
 		return [texTask LaTeXString];
 	}
 	return nil;
@@ -406,9 +418,9 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
-    [messageQueue removeAllInvocations];
-    [messageQueue release];
-    messageQueue = nil;
+    [server stopDOServer];
+    [server release];
+    server = nil;
     
 	// call this here, since we can't guarantee that the task received the NSApplicationWillTerminate before we flushed the queue
     [texTask terminate];
@@ -420,12 +432,82 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
-    [messageQueue removeAllInvocations];
-    [messageQueue release];
+    [server stopDOServer];
+    [server release];
     [texTask terminate];
 	[texTask release];
     [pdfView release];
     [[rtfPreviewView enclosingScrollView] release];
     [super dealloc];
 }
+
+@end
+
+#pragma mark -
+
+@implementation BDSKPreviewerServer
+
+- (id)initWithTeXTask:(BDSKTeXTask *)aTeXTask;
+{
+    self = [super init];
+    if(self){
+        texTask = [aTeXTask retain];
+        delegate = nil;
+        bibString = nil;
+    }
+    return self;
+}
+
+- (void)dealloc;
+{
+    [texTask release];
+    [bibString release];
+    [super dealloc];
+}
+
+// superclass overrides
+
+- (Protocol *)protocolForServerThread { return @protocol(BDSKPreviewerServerThread); }
+
+- (Protocol *)protocolForMainThread { return @protocol(BDSKPreviewerServerMainThread); }
+
+// main thread API
+
+- (id)delegate { return delegate; }
+
+- (void)setDelegate:(id)newDelegate { delegate = newDelegate; }
+
+- (void)runTeXTaskInBackgroundWithString:(NSString *)string{
+    [[self serverOnServerThread] runTeXTaskWithString:string];
+}
+
+// Server thread protocol
+
+- (oneway void)runTeXTaskWithString:(NSString *)aString{
+    [bibString release];
+    bibString = [aString retain];
+    
+    if([texTask isProcessing])
+        return;
+    
+    NSString *string;
+    BOOL success;
+    
+    do{
+        string = bibString;
+        bibString = nil;
+        success = [texTask runWithBibTeXString:string];
+        [string release];
+    }while(bibString != nil);
+    
+    [[self serverOnMainThread] serverFinishedWithResult:success];
+}
+
+// Main thread protocol
+
+- (oneway void)serverFinishedWithResult:(BOOL)success{
+    if([delegate respondsToSelector:@selector(serverFinishedWithResult:)])
+        [delegate serverFinishedWithResult:success];
+}
+
 @end

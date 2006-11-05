@@ -39,9 +39,8 @@
 */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 
-@class BDSKPreviewMessageQueue, PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay;
+@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay, BDSKPreviewerServer;
 
 typedef enum {
 	BDSKUnknownPreviewState = -1,
@@ -56,17 +55,15 @@ typedef enum {
     @discussion ...
 */
 @interface BDSKPreviewer : NSWindowController {
-	BDSKTeXTask *texTask;
-	
     IBOutlet BDSKZoomablePDFView *pdfView;
     IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet BDSKOverlay *progressOverlay;
     
-    BDSKPreviewMessageQueue *messageQueue;
+	BDSKTeXTask *texTask;
+    BDSKPreviewerServer *server;
     BDSKPreviewState previewState;
-    BOOL ignoreOutput;
 }
 
 /*!
