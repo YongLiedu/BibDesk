@@ -2669,6 +2669,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
     NSView *view = [previewField enclosingScrollView];
     
+#warning need an enumerated type for displayType
     if(displayType == 4 || displayType == 5){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
             return;
@@ -2948,6 +2949,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark Printing support
 
+#warning broken for PDF preview
 - (NSView *)printableView{
     BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
     [printableView setAttributedString:[previewField textStorage]];    
