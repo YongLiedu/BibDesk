@@ -122,13 +122,9 @@
 		
 		delegate = nil;
         currentTask = nil;
-		hasLTB = NO;
-		hasLaTeX = NO;
-		hasPDFData = NO;
-		hasRTFData = NO;
+        memset(&flags, 0, sizeof(flags));
+
         OFSimpleLockInit(&processingLock);
-        OFSimpleLockInit(&hasDataLock);
-        OFSimpleLockInit(&currentTaskLock);
         pthread_rwlock_init(&dataFileLock, NULL);
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
@@ -150,8 +146,6 @@
     [rtfFilePath release];
     [logFilePath release];
     OFSimpleLockFree(&processingLock);
-    OFSimpleLockFree(&hasDataLock);
-    OFSimpleLockFree(&currentTaskLock);
     pthread_rwlock_destroy(&dataFileLock);
 	[super dealloc];
 }
@@ -184,13 +178,8 @@
     
     while ([self isProcessing] && currentTask){
         // if the task is still running after 2 seconds, kill it; we can't sleep here, because the main thread (usually this one) may be updating the UI for a task
-        if([referenceDate timeIntervalSinceNow] > -2 && OFSimpleLockTry(&currentTaskLock)){
-            [currentTask terminate];
-            currentTask = nil;
-            OFSimpleUnlock(&currentTaskLock);
-            break;
-        } else if([referenceDate timeIntervalSinceNow] > -2.1){ // just in case this ever happens
-            NSLog(@"%@ failed to lock for task %@", self, currentTask);
+        if([referenceDate timeIntervalSinceNow] > -2.0){
+            NSLog(@"Terminating task %@", self);
             [currentTask terminate];
             break;
         }
@@ -235,12 +224,10 @@
         }
 	}
 
-    OFSimpleLock(&hasDataLock);
-	hasLTB = NO;
-	hasLaTeX = NO;
-	hasPDFData = NO;
-	hasRTFData = NO;
-	OFSimpleUnlock(&hasDataLock);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasLTB);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasLaTeX);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasPDFData);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.hasRTFData);
     
 	// make sure the PATH environment variable is set correctly
     NSString *pdfTeXBinPathDir = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey] stringByDeletingLastPathComponent];
@@ -253,48 +240,28 @@
         setenv("PATH", [new_path cString], 1);
     }
         
-    NS_DURING
-        rv = ([self writeTeXFile:(flag == BDSKGenerateLTB)] &&
-              [self writeBibTeXFile:bibStr] &&
-              [self runTeXTasksForLaTeX]);
-    NS_HANDLER
-        NSLog(@"Failed to perform TeX tasks for LaTeX: %@", [localException reason]);
-        rv = NO;
-    NS_ENDHANDLER
+    rv = ([self writeTeXFile:(flag == BDSKGenerateLTB)] &&
+          [self writeBibTeXFile:bibStr] &&
+          [self runTeXTasksForLaTeX]);
     
     if(rv){
-		OFSimpleLock(&hasDataLock);
 		if (flag == BDSKGenerateLTB)
-			hasLTB = YES;
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLTB);
 		else
-			hasLaTeX = YES;
-		OFSimpleUnlock(&hasDataLock);
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasLaTeX);
 		
 		if(flag > BDSKGenerateLaTeX){
-			NS_DURING
-				rv = [self runTeXTasksForPDF];
-			NS_HANDLER
-				NSLog(@"Failed to perform TeX task for PDF: %@", [localException reason]);
-				rv = NO;
-			NS_ENDHANDLER
+            rv = [self runTeXTasksForPDF];
 			
 			if(rv){
-				OFSimpleLock(&hasDataLock);
-				hasPDFData = YES;
-				OFSimpleUnlock(&hasDataLock);
+
+                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasPDFData);
 				
 				if(flag > BDSKGeneratePDF){
-					NS_DURING
 						rv = [self runTeXTaskForRTF];
-					NS_HANDLER
-						NSLog(@"Failed to perform TeX task for RTF: %@", [localException reason]);
-						rv = NO;
-					NS_ENDHANDLER
 					
 					if(rv){
-						OFSimpleLock(&hasDataLock);
-						hasRTFData = YES;
-						OFSimpleUnlock(&hasDataLock);
+                        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.hasRTFData);
 					}
 				}
 			}
@@ -404,39 +371,19 @@
 }
 
 - (BOOL)hasLTB{
-    volatile BOOL status = OFSimpleLockTry(&hasDataLock);
-    if(!status)
-        return NO;
-    status = hasLTB;
-    OFSimpleUnlock(&hasDataLock);
-    return status;
+    return 1 == flags.hasLTB;
 }
 
 - (BOOL)hasLaTeX{
-    volatile BOOL status = OFSimpleLockTry(&hasDataLock);
-    if(!status)
-        return NO;
-    status = hasLaTeX;
-    OFSimpleUnlock(&hasDataLock);
-    return status;
+    return 1 == flags.hasLaTeX;
 }
 
 - (BOOL)hasPDFData{
-    volatile BOOL status = OFSimpleLockTry(&hasDataLock);
-    if(!status)
-        return NO;
-    status = hasPDFData;
-    OFSimpleUnlock(&hasDataLock);
-    return status;
+    return 1 == flags.hasPDFData;
 }
 
 - (BOOL)hasRTFData{
-    volatile BOOL status = OFSimpleLockTry(&hasDataLock);
-    if(!status)
-        return NO;
-    status = hasRTFData;
-    OFSimpleUnlock(&hasDataLock);
-    return status;
+    return 1 == flags.hasRTFData;
 }
 
 - (BOOL)isProcessing{
@@ -651,31 +598,27 @@
 }
 
 - (BOOL)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{
-    NSTask *task = [[NSTask alloc] init];
-    [task setCurrentDirectoryPath:workingDirPath];
-    [task setLaunchPath:binPath];
-    [task setArguments:arguments];
-    [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+    currentTask = [[NSTask alloc] init];
+    [currentTask setCurrentDirectoryPath:workingDirPath];
+    [currentTask setLaunchPath:binPath];
+    [currentTask setArguments:arguments];
+    [currentTask setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+    [currentTask setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+        
+    BOOL success = YES;
     
-    OFSimpleLock(&currentTaskLock);
-    currentTask = task;
-    // we keep the lock, as the task is now the currentTask
-    
-    volatile BOOL success = YES;
-    
-    NS_DURING
-        [task launch];
-    NS_HANDLER
-        if([task isRunning])
-            [task terminate];
-        NSLog(@"%@ %@ failed", [task description], [task launchPath]);
+    @try {
+        [currentTask launch];
+    }
+    @catch(id exception) {
+        if([currentTask isRunning])
+            [currentTask terminate];
+        NSLog(@"%@ %@ failed", [currentTask description], [currentTask launchPath]);
         success = NO;
-    NS_ENDHANDLER
+    }
     
     NSDate *hardLimit = [[NSDate alloc] initWithTimeIntervalSinceNow:10];
-    BOOL isRunning = [task isRunning];
-    OFSimpleUnlock(&currentTaskLock);
+    BOOL isRunning = [currentTask isRunning];
     
     while (isRunning){
         NSDate *limit = [[NSDate alloc] initWithTimeIntervalSinceNow:1]; // runs about 2x per second
@@ -685,23 +628,17 @@
         if([(NSDate *)[NSDate date] compare:hardLimit] == NSOrderedDescending){
             // no single task should take this long, so we'll bail out
             // this appears to happen occasionally if you're changing selection continuously
-            OFSimpleLock(&currentTaskLock);
-            [task terminate];
-            OFSimpleUnlock(&currentTaskLock);
+            [currentTask terminate];
             success = NO;
             break;
         }
-        OFSimpleLock(&currentTaskLock);
-        isRunning = [task isRunning];
-        OFSimpleUnlock(&currentTaskLock);
+        isRunning = [currentTask isRunning];
     }
     [hardLimit release];
     
-    OFSimpleLock(&currentTaskLock);
+    [currentTask release];
     currentTask = nil;
-    OFSimpleUnlock(&currentTaskLock);        
 
-    [task release];
     return success;
 }
 

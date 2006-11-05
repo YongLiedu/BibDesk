@@ -47,6 +47,12 @@ enum {
 	BDSKGenerateRTF = 3,
 };
 
+typedef struct _BDSKTeXTaskFlags {
+    volatile int32_t hasLTB __attribute__ ((aligned (4)));
+    volatile int32_t hasLaTeX __attribute__ ((aligned (4)));
+    volatile int32_t hasPDFData __attribute__ ((aligned (4)));
+    volatile int32_t hasRTFData __attribute__ ((aligned (4)));
+} BDSKTeXTaskFlags;
 
 @interface BDSKTeXTask : NSObject {
 	NSString *workingDirPath;
@@ -65,14 +71,9 @@ enum {
 	id delegate;
     NSTask *currentTask;
 	
-	volatile BOOL hasLTB;
-	volatile BOOL hasLaTeX;
-	volatile BOOL hasPDFData;
-	volatile BOOL hasRTFData;
+    BDSKTeXTaskFlags flags;
 
     OFSimpleLockType processingLock;    
-    OFSimpleLockType hasDataLock; 
-    OFSimpleLockType currentTaskLock;
     pthread_rwlock_t dataFileLock;
 }
 
