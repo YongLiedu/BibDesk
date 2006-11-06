@@ -260,7 +260,7 @@
 #pragma mark Actions
 
 - (IBAction)addItemAction:(id)sender{
-    int optionKey = [[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask;
+    int optionKey = [NSApp currentModifierFlags] & NSAlternateKeyMask;
     BibItem *newItem = (optionKey) ? [item copy] : [[BibItem alloc] init];
     
     // make the tableview stop editing:
@@ -1320,7 +1320,7 @@
 	
     NSString *oldValue = [item valueOfField:selKey];
     
-    if(([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) != 0 && 
+    if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
        [NSString isEmptyString:oldValue] == NO && 
        [selKey isSingleValuedField] == NO){
         
@@ -1525,7 +1525,7 @@
         NSString *key = [fields objectAtIndex:row];
         NSString *oldValue = [item valueOfField:key];
         
-        if(([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) != 0 && 
+        if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
            [NSString isEmptyString:oldValue] == NO && 
            [key isSingleValuedField] == NO){
             
@@ -1554,7 +1554,7 @@
 	NSString *string = [pboard stringForType:NSStringPboardType];
     NSString *oldValue = [item valueOfField:selKey];
     
-    if(([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) != 0 && 
+    if(([NSApp currentModifierFlags] & NSControlKeyMask) != 0 && 
        [NSString isEmptyString:oldValue] == NO && 
        [selKey isSingleValuedField] == NO){
         

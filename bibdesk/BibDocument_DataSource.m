@@ -406,7 +406,7 @@
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-    int index = (GetCurrentKeyModifiers() & optionKey) ? 1 : 0;
+    int index = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
 	int dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
     BOOL yn = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
@@ -740,7 +740,7 @@
     
 	} else {
 		OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-        int index = (GetCurrentKeyModifiers() & optionKey) ? 1 : 0;
+        int index = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
 		NSMutableString *s = [NSMutableString string];
 		BibItem *firstItem = [promisedDraggedItems objectAtIndex:0];
         

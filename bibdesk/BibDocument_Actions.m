@@ -156,7 +156,7 @@
 }
 
 - (IBAction)newPub:(id)sender{
-    if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask) {
+    if ([NSApp currentModifierFlags] & NSAlternateKeyMask) {
         [self createNewPubUsingCrossrefAction:sender];
     } else {
         [self createNewPub];

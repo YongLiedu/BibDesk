@@ -1220,7 +1220,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)addGroupButtonAction:(id)sender {
-    if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask)
+    if ([NSApp currentModifierFlags] & NSAlternateKeyMask)
         [self addSmartGroupAction:sender];
     else
         [self addStaticGroupAction:sender];

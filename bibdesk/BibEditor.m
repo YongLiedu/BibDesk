@@ -2421,9 +2421,8 @@ static int numberOfOpenEditors = 0;
     }
 
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
-    unsigned modifier = GetCurrentKeyModifiers();
     // get the correct cursor depending on the modifiers
-	if( (modifier & (optionKey | cmdKey)) == (optionKey | cmdKey) ){
+	if( ([NSApp currentModifierFlags] & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask) ){
 		return NSDragOperationLink;
     }else if (sourceDragMask & NSDragOperationCopy){
 		return NSDragOperationCopy;
@@ -2463,10 +2462,10 @@ static int numberOfOpenEditors = 0;
 
 	// Test a keyboard mask so that we can override all fields when dragging into the editor window (option)
 	// create a crossref (cmd-option), or fill empty fields (no modifiers)
-	unsigned modifier = GetCurrentKeyModifiers(); // use the Carbon function since [[NSApp currentEvent] modifierFlags] won't work if we're not the front app
+	unsigned modifierFlags = [NSApp currentModifierFlags]; // use the Carbon function since [NSApp currentModifierFlags] won't work if we're not the front app
 	
 	// we always have sourceDragMask & NSDragOperationLink here for some reason, so test the mask manually
-	if((modifier & (optionKey | cmdKey)) == (optionKey | cmdKey)){
+	if((modifierFlags & (NSAlternateKeyMask | NSCommandKeyMask)) == (NSAlternateKeyMask | NSCommandKeyMask)){
 		
 		// linking, try to set the crossref field
         NSString *crossref = [tempBI citeKey];
@@ -2504,7 +2503,7 @@ static int numberOfOpenEditors = 0;
         NSString *key = nil;
         NSString *oldValue = nil;
         NSString *newValue = nil;
-        BOOL shouldOverwrite = (modifier & optionKey) != 0;
+        BOOL shouldOverwrite = (modifierFlags & NSAlternateKeyMask) != 0;
         
         [publication setPubType:[tempBI pubType]]; // do we want this always?
         
