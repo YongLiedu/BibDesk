@@ -299,6 +299,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     BOOL isDateField = [dateFields containsObject:field];
     
     // if it's a date field, figure out a format string to use based on the given date component(s)
+    // this date format string is then made available to the BibItem as a global variable
     // don't convert substring->date->string, though, or it's no longer a substring and will only match exactly
     if(YES == isDateField){
         [BDSKDocumentFormatForSearchingDates release];
