@@ -79,10 +79,12 @@ static CFMutableSetRef nonretainedScrollviews = NULL;
 
 - (void)setAlwaysHasHorizontalScroller:(BOOL)flag;
 {
-    if (flag)
+    if (flag) {
         CFSetAddValue(nonretainedScrollviews, self);
-    else
+        [self setHasHorizontalScroller:YES];
+    } else {
         CFSetRemoveValue(nonretainedScrollviews, self);
+    }
 }
 
 - (void)replacementSetHasHorizontalScroller:(BOOL)flag;
