@@ -379,7 +379,6 @@
 		F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C490758027800C3F701 /* BDSKComplexStringFormatter.m */; };
 		F9022C79075802E300C3F701 /* BDSKPreviewer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C58075802E300C3F701 /* BDSKPreviewer.m */; };
 		F9022C7A075802E300C3F701 /* BDSKShellTask.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5A075802E300C3F701 /* BDSKShellTask.m */; };
-		F9022C7B075802E300C3F701 /* BDSKZoomImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5C075802E300C3F701 /* BDSKZoomImageView.m */; };
 		F9022C7C075802E300C3F701 /* BibAppController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C5E075802E300C3F701 /* BibAppController.m */; };
 		F9022C7D075802E300C3F701 /* BibAuthor.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C60075802E300C3F701 /* BibAuthor.m */; };
 		F9022C7E075802E300C3F701 /* BibDeskOpenCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C62075802E300C3F701 /* BibDeskOpenCommand.m */; };
@@ -492,7 +491,6 @@
 		F918101707583A5B00CF822D /* BDSKComplexStringFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C480758027800C3F701 /* BDSKComplexStringFormatter.h */; };
 		F918101A07583A5B00CF822D /* BDSKPreviewer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C57075802E300C3F701 /* BDSKPreviewer.h */; };
 		F918101B07583A5B00CF822D /* BDSKShellTask.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C59075802E300C3F701 /* BDSKShellTask.h */; };
-		F918101C07583A5B00CF822D /* BDSKZoomImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C5B075802E300C3F701 /* BDSKZoomImageView.h */; };
 		F918101D07583A5B00CF822D /* BibAppController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C5D075802E300C3F701 /* BibAppController.h */; };
 		F918101E07583A5B00CF822D /* BibAuthor.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C5F075802E300C3F701 /* BibAuthor.h */; };
 		F918102007583A5B00CF822D /* BibDocument+Menus.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C890758034000C3F701 /* BibDocument+Menus.h */; };
@@ -1218,8 +1216,6 @@
 		F9022C58075802E300C3F701 /* BDSKPreviewer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewer.m; sourceTree = "<group>"; };
 		F9022C59075802E300C3F701 /* BDSKShellTask.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKShellTask.h; sourceTree = "<group>"; };
 		F9022C5A075802E300C3F701 /* BDSKShellTask.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKShellTask.m; sourceTree = "<group>"; };
-		F9022C5B075802E300C3F701 /* BDSKZoomImageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKZoomImageView.h; sourceTree = "<group>"; };
-		F9022C5C075802E300C3F701 /* BDSKZoomImageView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomImageView.m; sourceTree = "<group>"; };
 		F9022C5D075802E300C3F701 /* BibAppController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibAppController.h; sourceTree = "<group>"; };
 		F9022C5E075802E300C3F701 /* BibAppController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibAppController.m; sourceTree = "<group>"; };
 		F9022C5F075802E300C3F701 /* BibAuthor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibAuthor.h; sourceTree = "<group>"; };
@@ -1822,7 +1818,6 @@
 				CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */,
 				F9DCEA4E094B7D1100AEE662 /* BDSKTextWithIconCell.m */,
 				F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */,
-				F9022C5C075802E300C3F701 /* BDSKZoomImageView.m */,
 				F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */,
 				CE27D95A0AF92BFD00419879 /* BDSKZoomableTextView.m */,
 				F9A6772C07D2D57F00782ACD /* MultiplePageView.m */,
@@ -2260,7 +2255,6 @@
 				F9E069B40981A03B00AEFBE7 /* BDSKWebOfScienceParser.h */,
 				F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */,
 				CE27D9590AF92BFD00419879 /* BDSKZoomableTextView.h */,
-				F9022C5B075802E300C3F701 /* BDSKZoomImageView.h */,
 				F920DAFA075C2B69000C5FCA /* BibAppController+Scripting.h */,
 				F9022C5D075802E300C3F701 /* BibAppController.h */,
 				F9022C5F075802E300C3F701 /* BibAuthor.h */,
@@ -2469,7 +2463,6 @@
 				F918101707583A5B00CF822D /* BDSKComplexStringFormatter.h in Headers */,
 				F918101A07583A5B00CF822D /* BDSKPreviewer.h in Headers */,
 				F918101B07583A5B00CF822D /* BDSKShellTask.h in Headers */,
-				F918101C07583A5B00CF822D /* BDSKZoomImageView.h in Headers */,
 				F918101D07583A5B00CF822D /* BibAppController.h in Headers */,
 				F918101E07583A5B00CF822D /* BibAuthor.h in Headers */,
 				F918102007583A5B00CF822D /* BibDocument+Menus.h in Headers */,
@@ -3249,7 +3242,6 @@
 				F9022C520758027800C3F701 /* BDSKComplexStringFormatter.m in Sources */,
 				F9022C79075802E300C3F701 /* BDSKPreviewer.m in Sources */,
 				F9022C7A075802E300C3F701 /* BDSKShellTask.m in Sources */,
-				F9022C7B075802E300C3F701 /* BDSKZoomImageView.m in Sources */,
 				F9022C7C075802E300C3F701 /* BibAppController.m in Sources */,
 				F9022C7D075802E300C3F701 /* BibAuthor.m in Sources */,
 				F9022C7E075802E300C3F701 /* BibDeskOpenCommand.m in Sources */,
