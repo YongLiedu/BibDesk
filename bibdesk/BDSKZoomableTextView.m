@@ -37,7 +37,7 @@
  */
 
 #import "BDSKZoomableTextView.h"
-
+#import "BDSKZoomableScrollView.h"
 
 @implementation BDSKZoomableTextView 
 

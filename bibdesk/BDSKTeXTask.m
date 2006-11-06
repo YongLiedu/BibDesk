@@ -44,6 +44,7 @@
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "UKDirectoryEnumerator.h"
 #import "BDSKShellCommandFormatter.h"
+#import <libkern/OSAtomic.h>
 
 @interface BDSKTeXTask (Private) 
 
