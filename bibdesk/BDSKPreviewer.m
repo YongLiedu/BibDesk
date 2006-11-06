@@ -47,7 +47,6 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
-#import <OmniFoundation/OFPreference.h>
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKAsynchronousDOServer.h"
@@ -370,25 +369,21 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 #pragma mark Data accessors
 
 - (NSData *)PDFData{
-	if(previewState == BDSKEmptyPreviewState || [self isVisible] == NO)
+	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
         return nil;
     return [[server texTask] PDFData];
 }
 
 - (NSData *)RTFData{
-	if(previewState == BDSKEmptyPreviewState || [self isVisible] == NO)
+	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
         return nil;
     return [[server texTask] RTFData];
 }
 
 - (NSString *)LaTeXString{
-	if(previewState == BDSKEmptyPreviewState || [self isVisible] == NO)
+	if(previewState != BDSKShowingPreviewState || [self isVisible] == NO)
         return nil;
     return [[server texTask] LaTeXString];
-}
-
-- (BOOL)isEmpty{
-	return (previewState == BDSKEmptyPreviewState);
 }
 
 #pragma mark Cleanup
@@ -419,7 +414,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [OFPreference removeObserver:self forPreference:nil];
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
     [server stopDOServer];
     [server release];
