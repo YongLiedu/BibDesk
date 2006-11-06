@@ -66,7 +66,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     BDSKTeXTask *texTask;
     id delegate;
     NSString *bibString;
-    BOOL serverDidSetup;
 }
 
 - (id)delegate;
@@ -442,7 +441,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
         delegate = nil;
         bibString = nil;
-        serverDidSetup = NO;
     }
     return self;
 }
@@ -458,10 +456,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     bibString = nil;
     [texTask terminate];
     [super cleanup];
-}
-
-- (void)serverDidSetup{
-    serverDidSetup = YES;
 }
 
 // superclass overrides
@@ -482,8 +476,9 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (void)runTeXTaskInBackgroundWithString:(NSString *)string{
     // the delayed perform is because [self serverOnServerThread] returns nil the first time this is received, since the server thread hasn't had time to set up completely
-    if (serverDidSetup)
-        [[self serverOnServerThread] runTeXTaskWithString:string];
+    id server = [self serverOnServerThread];
+    if (server)
+        [server runTeXTaskWithString:string];
     else
         [self performSelector:_cmd withObject:string afterDelay:0.1];
 }
