@@ -439,14 +439,6 @@
 		[itemTableView editColumn:2 row:row withEvent:nil select:YES];
 }
 
-- (IBAction)undo:(id)sender{
-    [undoManager undo];
-}
-
-- (IBAction)redo:(id)sender{
-    [undoManager redo];
-}
-
 - (IBAction)generateCiteKey:(id)sender{
     // make the tableview stop editing:
     if([[self window] makeFirstResponder:[self window]] == NO)
@@ -1040,16 +1032,6 @@
 		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
 		NSString *lurl = [item localUrlPath];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
-	} else if ([menuItem action] == @selector(undo:)) {
-        NSString *title = [undoManager undoActionName];
-        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Undo", @"Undo") : [NSString stringWithFormat:NSLocalizedString(@"Undo %@", @"Undo %@"), title];
-        [menuItem setTitle:title];
-        return [undoManager canUndo];
-	} else if ([menuItem action] == @selector(redo:)) {
-        NSString *title = [undoManager redoActionName];
-        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Redo", @"Redo") : [NSString stringWithFormat:NSLocalizedString(@"Redo %@", @"Redo %@"), title];
-        [menuItem setTitle:title];
-        return [undoManager canRedo];
 	}
 	return YES;
 }

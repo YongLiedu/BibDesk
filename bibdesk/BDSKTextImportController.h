@@ -123,8 +123,6 @@
 - (IBAction)stopOrReloadAction:(id)sender;
 - (IBAction)addField:(id)sender;
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
-- (IBAction)undo:(id)sender;
-- (IBAction)redo:(id)sender;
 - (IBAction)generateCiteKey:(id)sender;
 - (IBAction)showCiteKeyWarning:(id)sender;
 - (IBAction)consolidateLinkedFiles:(id)sender;

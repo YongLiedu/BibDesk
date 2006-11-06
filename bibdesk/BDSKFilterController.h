@@ -67,6 +67,5 @@
 - (void)setConjunction:(BDSKConjunction)newConjunction;
 
 - (NSUndoManager *)undoManager;
-- (IBAction)undo:(id)sender;
-- (IBAction)redo:(id)sender;
+
 @end

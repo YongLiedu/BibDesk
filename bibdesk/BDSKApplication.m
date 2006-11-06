@@ -47,9 +47,8 @@
 - (id)targetForAction:(SEL)anAction to:(id)aTarget from:(id)sender{
     if (anAction == @selector(undo:) || anAction == @selector(redo:)) {
         NSWindow *keyWindow = [self keyWindow];
-        id keyWindowDelegate = [keyWindow delegate];
-        if ([keyWindow isSheet] && [keyWindowDelegate respondsToSelector:anAction])
-            return keyWindowDelegate;
+        if ([keyWindow isSheet] && [keyWindow respondsToSelector:anAction])
+            return keyWindow;
     }
     return [super targetForAction:anAction to:aTarget from:sender];
 }
@@ -57,9 +56,8 @@
 - (BOOL)sendAction:(SEL)anAction to:(id)theTarget from:(id)sender{
     if (anAction == @selector(undo:) || anAction == @selector(redo:)) {
         NSWindow *keyWindow = [self keyWindow];
-        id keyWindowDelegate = [keyWindow delegate];
-        if ([keyWindow isSheet] && [keyWindowDelegate respondsToSelector:anAction])
-            return [super sendAction:anAction to:keyWindowDelegate from:sender];
+        if ([keyWindow isSheet] && [keyWindow respondsToSelector:anAction])
+            return [super sendAction:anAction to:keyWindow from:sender];
     }
     return [super sendAction:anAction to:theTarget from:sender];
 }

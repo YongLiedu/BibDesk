@@ -203,27 +203,4 @@
     return [self undoManager];
 }
 
-- (IBAction)undo:(id)sender{
-    [[self undoManager] undo];
-}
-
-- (IBAction)redo:(id)sender{
-    [[self undoManager] redo];
-}
-
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
-	if ([menuItem action] == @selector(undo:)) {
-        NSString *title = [undoManager undoActionName];
-        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Undo", @"Undo") : [NSString stringWithFormat:NSLocalizedString(@"Undo %@", @"Undo %@"), title];
-        [menuItem setTitle:title];
-        return [undoManager canUndo];
-	} else if ([menuItem action] == @selector(redo:)) {
-        NSString *title = [undoManager redoActionName];
-        title = [NSString isEmptyString:title] ? NSLocalizedString(@"Redo", @"Redo") : [NSString stringWithFormat:NSLocalizedString(@"Redo %@", @"Redo %@"), title];
-        [menuItem setTitle:title];
-        return [undoManager canRedo];
-	}
-	return YES;
-}
-
 @end
