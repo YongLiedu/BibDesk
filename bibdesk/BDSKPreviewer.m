@@ -66,6 +66,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     BDSKTeXTask *texTask;
     id delegate;
     NSString *bibString;
+    BOOL serverDidSetup;
 }
 
 - (id)delegate;
@@ -403,7 +404,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 	// save the visibility of the previewer
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[self isWindowVisible] forKey:BDSKShowingPreviewKey];
     // save the scalefactors of the views
-    volatile float scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
+    float scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
 
 	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey])
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
@@ -415,11 +416,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     [server stopDOServer];
     [server release];
     server = nil;
-    
-	// call this here, since we can't guarantee that the task received the NSApplicationWillTerminate before we flushed the queue
-    //[texTask terminate];
-	//[texTask release]; // This removes the temporary directory. Doing this here as we are a singleton. 
-	//texTask = nil;
 }
 
 - (void)dealloc{
@@ -428,8 +424,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
     [server stopDOServer];
     [server release];
-    //[texTask terminate];
-	//[texTask release];
     [pdfView release];
     [[rtfPreviewView enclosingScrollView] release];
     [super dealloc];
@@ -448,6 +442,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibpreview"];
         delegate = nil;
         bibString = nil;
+        serverDidSetup = NO;
     }
     return self;
 }
@@ -463,6 +458,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     bibString = nil;
     [texTask terminate];
     [super cleanup];
+}
+
+- (void)serverDidSetup{
+    serverDidSetup = YES;
 }
 
 // superclass overrides
@@ -482,7 +481,11 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 }
 
 - (void)runTeXTaskInBackgroundWithString:(NSString *)string{
-    [[self serverOnServerThread] runTeXTaskWithString:string];
+    // the delayed perform is because [self serverOnServerThread] returns nil the first time this is received, since the server thread hasn't had time to set up completely
+    if (serverDidSetup)
+        [[self serverOnServerThread] runTeXTaskWithString:string];
+    else
+        [self performSelector:_cmd withObject:string afterDelay:0.1];
 }
 
 // Server thread protocol
