@@ -2216,10 +2216,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (void)sortPubsByDefaultColumn{
 
     NSDictionary *windowSetup = [self mainWindowSetupDictionaryFromExtendedAttributes];        
+    NSString *colName = [windowSetup objectForKey:BDSKDefaultSortedTableColumnKey];
     
-    NSString *colName = nil == windowSetup ? [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey] : [windowSetup objectForKey:BDSKDefaultSortedTableColumnKey];
     if([NSString isEmptyString:colName])
-        return;
+        colName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey];
     
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:colName];
     if(tc == nil)
