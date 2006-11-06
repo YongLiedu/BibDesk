@@ -73,7 +73,6 @@
     searchKey = [[NSString alloc] initWithString:@""];
     canceledSearch = NO;
         
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDocumentCloseNotification:) name:BDSKDocumentWindowWillCloseNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     
     NSParameterAssert([aDocument conformsToProtocol:@protocol(BDSKSearchContentView)]);
@@ -173,7 +172,7 @@
 #pragma mark -
 #pragma mark Actions
 
-- (void)tableAction:(id)sender
+- (IBAction)tableAction:(id)sender
 {
     int row = [tableView clickedRow];
     if(row == -1)
@@ -242,7 +241,7 @@
         if (searchFieldDidEndEditing)
             [[searchContentView window] makeFirstResponder:nil];
 
-        [self restoreDocumentState:self];
+        [self restoreDocumentState];
     } else {
         
         searchFieldDidEndEditing = NO;
@@ -255,7 +254,7 @@
     }
 }
 
-- (void)restoreDocumentState:(id)sender
+- (void)restoreDocumentState
 {
     [self saveSortDescriptors];
     [self cancelCurrentSearch:nil];
@@ -311,7 +310,7 @@
     }
 }
 
-- (void)cancelCurrentSearch:(id)sender
+- (IBAction)cancelCurrentSearch:(id)sender
 {
     [search cancel];
     [stopButton setEnabled:NO];
@@ -323,21 +322,15 @@
 #pragma mark -
 #pragma mark Document interaction
 
-- (void)handleDocumentCloseNotification:(NSNotification *)notification
+- (void)stopSearching
 {
-    id aDocument = [notification object];
+    // cancel the search
+    [self cancelCurrentSearch:nil];
     
-    // necessary, otherwise we end up creating a retain cycle
-    if(aDocument == [self document]){
-        
-        // cancel the search
-        [self cancelCurrentSearch:nil];
-        
-        // stops the search index runloop so it will release the document
-        [searchIndex cancel];
-        [searchIndex release];
-        searchIndex = nil;
-	}
+    // stops the search index runloop so it will release the document
+    [searchIndex cancel];
+    [searchIndex release];
+    searchIndex = nil;
 }
 
 - (void)saveSortDescriptors

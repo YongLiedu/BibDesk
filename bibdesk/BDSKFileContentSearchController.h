@@ -105,13 +105,13 @@
 - (void)setResults:(NSArray *)newResults;
 
 - (void)saveSortDescriptors;
-- (void)cancelCurrentSearch:(id)sender;
-- (void)restoreDocumentState:(id)sender;
+- (void)restoreDocumentState;
+- (void)stopSearching;
 
 - (IBAction)search:(id)sender;
-- (void)tableAction:(id)sender;
+- (IBAction)cancelCurrentSearch:(id)sender;
+- (IBAction)tableAction:(id)sender;
 
-- (void)handleDocumentCloseNotification:(NSNotification *)notification;
 - (void)handleApplicationWillTerminate:(NSNotification *)notification;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 

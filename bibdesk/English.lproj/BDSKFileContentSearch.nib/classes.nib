@@ -3,12 +3,7 @@
         {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
         {
-            ACTIONS = {
-                cancelCurrentSearch = id; 
-                restoreDocumentState = id; 
-                search = id; 
-                tableAction = id; 
-            }; 
+            ACTIONS = {cancelCurrentSearch = id; search = id; tableAction = id; }; 
             CLASS = BDSKFileContentSearchController; 
             LANGUAGE = ObjC; 
             OUTLETS = {

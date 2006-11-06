@@ -616,10 +616,10 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 
     if([notification object] != documentWindow) // this is critical; 
         return;
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionary]];
+    
     isDocumentClosed = YES;
+    
+    [fileSearchController stopSearching];
     [customCiteDrawer close];
     [self saveSortOrder];
     [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL]];
@@ -627,6 +627,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
        [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
+       [[NSDocumentController sharedDocumentController] currentDocument] == self &&
        [tableView selectedRow] != -1 )
         [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 	

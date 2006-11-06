@@ -157,7 +157,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 		NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
 		[oldItem setState:NSOffState];
 		if ([searchField target] != self && [quickSearchKey isEqualToString:BDSKFileContentLocalizedString])
-			[fileSearchController restoreDocumentState:nil];
+			[fileSearchController restoreDocumentState];
 	}
 	
 	// set new key's menuitem to NSOnState
