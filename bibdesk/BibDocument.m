@@ -127,6 +127,9 @@ static NSString *BDSKMainWindowExtendedAttributeKey = @"net.sourceforge.bibdesk.
 static NSString *BDSKGroupSplitViewFractionKey = @"BDSKGroupSplitViewFractionKey";
 static NSString *BDSKMainTableSplitViewFractionKey = @"BDSKMainTableSplitViewFractionKey";
 static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
+static NSString *BDSKSelectedPublicationsKey = @"BDSKSelectedPublicationsKey";
+static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey";
+static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
@@ -364,6 +367,17 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         return @"BibDocument";
 }
 
+- (void)encodingAlertDidEnd:(NSAlert *)alert returnCode:(int)code contextInfo:(void *)ctxt {
+    if (NSAlertDefaultReturn == code) {
+        // setting delegate to nil ensures that xattrs won't be written out; the cleanup isn't an issue, since this doc just opened
+        [documentWindow setDelegate:nil];
+        [documentWindow close];
+        [self close];
+    } else {
+        NSLog(@"User decided to ignore an encoding warning.");
+    }    
+}
+
 - (void)showWindows{
     [super showWindows];
     
@@ -386,6 +400,23 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
             [self setFilterField:searchString];
         }
     }
+    
+    // some xattr setup has to be done after the window is on-screen
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    [self highlightItemForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]]];
+    NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
+    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    
+    // this is a sanity check; an encoding of zero is not valid, so is a signal we should ignore xattrs
+    NSStringEncoding encodingFromFile = [xattrDefaults intForKey:BDSKDocumentStringEncodingKey defaultValue:0];
+    if (encodingFromFile && encodingFromFile != [self documentStringEncoding]) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Document was opened with incorrect encoding", @"")
+                                         defaultButton:NSLocalizedString(@"Close", @"")
+                                       alternateButton:NSLocalizedString(@"Ignore", @"") otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The document was opened with encoding %@, but it was previously saved with encoding %@.  You should close it without saving and reopen with the correct encoding.", @""), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(encodingAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    }    
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
@@ -426,7 +457,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
     
-    // get document-specific attributes (returns nil if there are none)
+    // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
 
     NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
@@ -435,7 +466,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
     static NSPoint nextWindowLocation = {0.0, 0.0};
     
-    if (nil != xattrDefaults && NSEqualRects(frameRect, NSZeroRect) == NO) {
+    if (NSEqualRects(frameRect, NSZeroRect) == NO) {
         [[aController window] setFrame:frameRect display:YES];
         [aController setShouldCascadeWindows:NO];
         nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:NSMakePoint(NSMinX(frameRect), NSMaxY(frameRect))];
@@ -463,15 +494,13 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
     
     // set previous splitview frames
-    if (nil != xattrDefaults) {
-        float fraction;
-        fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
-        if (fraction > 0)
-            [groupSplitView setFraction:fraction];
-        fraction = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
-        if (fraction > 0)
-            [splitView setFraction:fraction];
-    }
+    float fraction;
+    fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
+    if (fraction > 0)
+        [groupSplitView setFraction:fraction];
+    fraction = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
+    if (fraction > 0)
+        [splitView setFraction:fraction];
     
     // it might be replaced by the file content search view
     [splitView retain];
@@ -482,9 +511,12 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
     // TableView setup
     [tableView removeAllTableColumns];
     
+    // this will use xattr defaults as necessary
 	[self setupDefaultTableColumns];
     [self sortPubsByDefaultColumn];
     
+    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[self currentGroupField]]];    
+
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
@@ -605,9 +637,15 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 
 }
 
-// returns nil if no attributes set
+// returns empty dictionary if no attributes set
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes {
-    return [self fileURL] ? [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL] : nil;
+    NSDictionary *dict = nil;
+    if ([self fileURL]) {
+        dict = [[NSFileManager defaultManager] propertyListFromExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey atPath:[[self fileURL] path] traverseLink:YES error:NULL];
+    }
+    if (nil == dict)
+        dict = [NSDictionary dictionary];
+    return dict;
 }
 
 - (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL {
@@ -626,6 +664,12 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
         [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
         [dictionary setFloatValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
+        
+        [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+        NSArray *selectedKeys = [[self selectedPublications] arrayByPerformingSelector:@selector(citeKey)];
+        [dictionary setObject:([selectedKeys count] ? selectedKeys : [NSArray array]) forKey:BDSKSelectedPublicationsKey];
+        [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
+        [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
 
         NSError *error;
         
@@ -2868,29 +2912,36 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
 }
 
-- (BOOL)highlightItemForPartialItem:(NSDictionary *)partialItem{
-    
-    // make sure we can see the publication, if it's still here
+- (BOOL)highlightItemForCiteKeys:(NSArray *)citeKeys {
+
+    // make sure we can see the publication, if it's still in the document
     [self selectGroup:allPublicationsGroup];
     [tableView deselectAll:self];
     [self setFilterField:@""];
-    
+
+    NSEnumerator *keyEnum = [citeKeys objectEnumerator];
+    NSString *key;
+    NSMutableArray *itemsToSelect = [NSMutableArray array];
+    while (key = [keyEnum nextObject]) {
+        BibItem *anItem = [publications itemForCiteKey:key];
+        if (anItem)
+            [itemsToSelect addObject:anItem];
+    }
+    [self highlightBibs:itemsToSelect];
+    return [itemsToSelect count];
+}
+
+- (BOOL)highlightItemForPartialItem:(NSDictionary *)partialItem{
+        
     NSString *itemKey = [partialItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
     if(itemKey == nil)
         itemKey = [partialItem objectForKey:BDSKCiteKeyString];
     
-    OBPOSTCONDITION(itemKey != nil);
-    
-    NSEnumerator *pubEnum = [shownPublications objectEnumerator];
-    BibItem *anItem;
     BOOL matchFound = NO;
+
+    if(itemKey != nil)
+        matchFound = [self highlightItemForCiteKeys:[NSArray arrayWithObject:itemKey]];
     
-    while(anItem = [pubEnum nextObject]){
-        if([[anItem citeKey] isEqualToString:itemKey]){
-            [self highlightBib:anItem];
-            matchFound = YES;
-        }
-    }
     return matchFound;
 }
 
