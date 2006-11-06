@@ -496,10 +496,10 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     // set previous splitview frames
     float fraction;
     fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
-    if (fraction > 0)
+    if (fraction >= 0)
         [groupSplitView setFraction:fraction];
     fraction = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
-    if (fraction > 0)
+    if (fraction >= 0)
         [splitView setFraction:fraction];
     
     // it might be replaced by the file content search view
@@ -2216,10 +2216,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (void)sortPubsByDefaultColumn{
 
     NSDictionary *windowSetup = [self mainWindowSetupDictionaryFromExtendedAttributes];        
-    NSString *colName = [windowSetup objectForKey:BDSKDefaultSortedTableColumnKey];
-    
-    if([NSString isEmptyString:colName])
-        colName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey];
+    NSString *colName = [windowSetup objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey]];
     
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:colName];
     if(tc == nil)
@@ -2293,17 +2290,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSArray *)defaultTableColumnIdentifiers {
-    NSArray *array = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKShownColsNamesKey];
-    if (nil == array)
-        array = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey];
-    return array;
+    return [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKShownColsNamesKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey]];
 }
 
 - (NSDictionary *)defaultTableColumnWidthsAndIdentifiers {
-    NSDictionary *dict = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey];
-    if (nil == dict)
-        dict = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
-    return dict;
+    return [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
 }
 
 - (void)setupDefaultTableColumns{
