@@ -667,7 +667,9 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         NSArray *selectedKeys = [[self selectedPublications] arrayByPerformingSelector:@selector(citeKey)];
-        [dictionary setObject:([selectedKeys count] ? selectedKeys : [NSArray array]) forKey:BDSKSelectedPublicationsKey];
+        if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
+            selectedKeys = [NSArray array];
+        [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
         [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
         [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
 
