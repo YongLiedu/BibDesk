@@ -51,10 +51,12 @@
     [encodingPopUpButton removeAllItems];
     [encodingPopUpButton addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
     
-    [texBinaryPathField setFormatter:[[[BDSKShellCommandFormatter alloc] init] autorelease]];
+    BDSKShellCommandFormatter *formatter = [[BDSKShellCommandFormatter alloc] init];
+    [texBinaryPathField setFormatter:formatter];
     [texBinaryPathField setDelegate:self];
-    [bibtexBinaryPathField setFormatter:[[[BDSKShellCommandFormatter alloc] init] autorelease]];
+    [bibtexBinaryPathField setFormatter:formatter];
     [bibtexBinaryPathField setDelegate:self];
+    [formatter release];
 }
 
 - (void)updateUI{
