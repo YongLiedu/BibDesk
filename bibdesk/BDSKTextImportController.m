@@ -1917,7 +1917,7 @@
     if ([chars length] == 0)
         return;
     unichar c = [chars characterAtIndex:0];
-    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
+    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask);
     
     static NSCharacterSet *fieldNameCharSet = nil;
     if (fieldNameCharSet == nil) 

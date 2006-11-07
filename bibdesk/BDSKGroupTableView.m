@@ -105,7 +105,7 @@
     if ([[theEvent characters] length] == 0)
         return;
     unichar c = [[theEvent characters] characterAtIndex:0];
-    unsigned int modifierFlags = ([theEvent modifierFlags] & 0xffff0000U);
+    unsigned int modifierFlags = ([theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask);
 	// modified from NSTableView-OAExtensions.h which uses a shared typeahead helper instance (which we can't access to force it to recache)
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableTypeAheadSelection"]) {
 

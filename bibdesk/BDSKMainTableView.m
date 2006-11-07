@@ -68,7 +68,7 @@
         return;
     unichar c = [[event characters] characterAtIndex:0];
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
-    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
+    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask);
     if (c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
         if([event modifierFlags] & NSShiftKeyMask)
             [[self delegate] pageUpInPreview:nil];

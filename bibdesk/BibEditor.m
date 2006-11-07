@@ -3596,7 +3596,7 @@ static int numberOfOpenEditors = 0;
     if (type != NSKeyDown && type != NSKeyUp)
         return NO;
     unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
-    unsigned int flags = [theEvent modifierFlags] & 0xffff0000U;
+    unsigned int flags = [theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     
     if((c == NSRightArrowFunctionKey || c == NSDownArrowFunctionKey) && (flags & NSCommandKeyMask) && (flags & NSAlternateKeyMask)){
         if([self indexOfTabViewItem:[self selectedTabViewItem]] == [self numberOfTabViewItems] - 1)
