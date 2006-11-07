@@ -252,7 +252,6 @@ extern NSString *BDSKMiscString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;
-extern NSString *BDSKDocumentWindowWillCloseNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKTableSelectionChangedNotification;
 extern NSString *BDSKGroupTableSelectionChangedNotification;
