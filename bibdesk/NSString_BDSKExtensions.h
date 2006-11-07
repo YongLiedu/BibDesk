@@ -364,9 +364,16 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByEscapingBasicXMLEntitiesUsingUTF8;
 - (NSString *)xmlString;
 
+#pragma mark Search string splitting
+
 - (NSArray *)allSearchComponents;
 - (NSArray *)andSearchComponents;
 - (NSArray *)orSearchComponents;
+
+#pragma mark Script arguments
+
+- (NSArray *)shellScriptArgumentsArray;
+- (NSArray *)appleScriptArgumentsArray;
 
 #pragma mark Empty lines
 

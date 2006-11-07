@@ -43,6 +43,6 @@
 
 + (NSString *)pathByRemovingArgumentsFromCommand:(NSString *)command;
 + (BOOL)isValidExecutableCommand:(NSString *)path;
-+ (NSString *)argumentsFromCommand:(NSString *)command;
++ (NSArray *)argumentsFromCommand:(NSString *)command;
 
 @end

@@ -37,6 +37,7 @@
  */
 
 #import "BDSKShellCommandFormatter.h"
+#import "NSString_BDSKExtensions.h"
 
 
 @implementation BDSKShellCommandFormatter
@@ -50,10 +51,10 @@
     return command;
 }
 
-+ (NSString *)argumentsFromCommand:(NSString *)command;
++ (NSArray *)argumentsFromCommand:(NSString *)command;
 {
     NSRange spaceRange = [command rangeOfString:@" "];
-    return (spaceRange.length) ? [command substringFromIndex:spaceRange.location + 1] : nil;
+    return (spaceRange.length) ? [[command substringFromIndex:spaceRange.location + 1] shellScriptArgumentsArray] : [NSArray array];
 }    
 
 + (BOOL)isValidExecutableCommand:(NSString *)command;

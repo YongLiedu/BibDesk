@@ -44,6 +44,7 @@
 #import "CFString_BDSKExtensions.h"
 #import "OFCharacterSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSScanner_BDSKExtensions.h"
 #import "html2tex.h"
 
 static AGRegex *tipRegex = nil;
@@ -1035,6 +1036,87 @@ http://home.planet.nl/~faase009/GNU.txt
             [orArray addObject:s];
     }
     return [orArray autorelease];
+}
+
+#pragma mark Script arguments
+
+// parses a space separated list of shell script argments
+// allows quoting parts of an argument and escaped characters outside quotes, according to shell rules
+- (NSArray *)shellScriptArgumentsArray {
+    static NSCharacterSet *specialChars = nil;
+    static NSCharacterSet *quoteChars = nil;
+    
+    if (specialChars == nil) {
+        NSMutableCharacterSet *tmpSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy];
+        [tmpSet addCharactersInString:@"\\\"'`"];
+        specialChars = [tmpSet copy];
+        [tmpSet release];
+        quoteChars = [[NSCharacterSet characterSetWithCharactersInString:@"\"'`"] retain];
+    }
+    
+    NSScanner *scanner = [NSScanner scannerWithString:self];
+    NSString *s = nil;
+    unichar ch = 0;
+    NSMutableString *currArg = [scanner isAtEnd] ? nil : [NSMutableString string];
+    NSMutableArray *arguments = [NSMutableArray array];
+    
+    [scanner setCharactersToBeSkipped:nil];
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+    
+    while ([scanner isAtEnd] == NO) {
+        if ([scanner scanUpToCharactersFromSet:specialChars intoString:&s])
+            [currArg appendString:s];
+        if ([scanner scanCharacter:&ch] == NO)
+            break;
+        if ([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:ch]) {
+            // argument separator, add the last one we found and ignore more whitespaces
+            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+            [arguments addObject:currArg];
+            currArg = [scanner isAtEnd] ? nil : [NSMutableString string];
+        } else if (ch == '\\') {
+            // escaped character
+            if ([scanner scanCharacter:&ch] == NO)
+                [NSException raise:NSInternalInconsistencyException format:@"Missing character"];
+            if ([currArg length] == 0 && [[NSCharacterSet newlineCharacterSet] characterIsMember:ch])
+                // ignore escaped newlines between arguments, as they should be considered whitespace
+                [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
+            else // real escaped character, just add the character, so we can ignore it if it is a special character
+                [currArg appendFormat:@"%C", ch];
+        } else if ([quoteChars characterIsMember:ch]) {
+            // quoted part of an argument, scan up to the matching quote
+            if ([scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(ch, 1)] intoString:&s])
+                [currArg appendString:s];
+            if ([scanner scanCharacter:NULL] == NO)
+                [NSException raise:NSInternalInconsistencyException format:@"Unmatched %C", ch];
+        }
+    }
+    if (currArg)
+        [arguments addObject:currArg];
+    return arguments;
+}
+
+// parses a comma separated list of AppleScript type arguments
+- (NSArray *)appleScriptArgumentsArray {
+    static NSCharacterSet *commaChars = nil;
+    if (commaChars == nil)
+        commaChars = [[NSCharacterSet characterSetWithCharactersInString:@","] retain];
+    
+    NSMutableArray *arguments = [NSMutableArray array];
+    NSScanner *scanner = [NSScanner scannerWithString:self];
+    unichar ch = 0;
+    id object;
+    
+    [scanner setCharactersToBeSkipped:nil];
+    
+    while ([scanner isAtEnd] == NO) {
+        if ([scanner scanAppleScriptValueUpToCharactersInSet:commaChars intoObject:&object])
+            [arguments addObject:object];
+        if ([scanner scanCharacter:&ch] == NO)
+            break;
+        if (ch != ',')
+            [NSException raise:NSInternalInconsistencyException format:@"Missing ,"];
+    }
+    return arguments;
 }
 
 #pragma mark Empty lines

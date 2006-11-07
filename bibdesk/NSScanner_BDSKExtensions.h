@@ -44,4 +44,6 @@
 - (BOOL)scanCharacter:(unichar *)ch;
 - (BOOL)peekCharacter:(unichar *)ch;
 
+- (BOOL)scanAppleScriptValueUpToCharactersInSet:stopSet intoObject:(id *)object;
+
 @end

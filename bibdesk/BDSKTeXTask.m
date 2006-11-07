@@ -562,11 +562,10 @@
 - (BOOL)runPDFTeXTask{
     NSString *command = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
 
-    NSString *argString = [BDSKShellCommandFormatter argumentsFromCommand:command];
+    NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
     NSString *pdftexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
     NSMutableArray *args = [NSMutableArray arrayWithObject:@"-interaction=batchmode"];
-    if (argString)
-        [args addObject:argString];
+    [args addObjectsFromArray:argArray];
     [args addObject:fileName];
     
     // This task runs latex on our tex file 
@@ -576,11 +575,10 @@
 - (BOOL)runBibTeXTask{
     NSString *command = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
 	
-    NSString *argString = [BDSKShellCommandFormatter argumentsFromCommand:command];
+    NSArray *argArray = [BDSKShellCommandFormatter argumentsFromCommand:command];
     NSString *bibtexbinpath = [BDSKShellCommandFormatter pathByRemovingArgumentsFromCommand:command];
     NSMutableArray *args = [NSMutableArray array];
-    if (argString)
-        [args addObject:argString];
+    [args addObjectsFromArray:argArray];
     [args addObject:fileName];
     
     // This task runs bibtex on our bib file 
