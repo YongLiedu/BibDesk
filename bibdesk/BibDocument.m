@@ -430,11 +430,16 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKRemoveExtendedAttributesFromDocuments"] && [self fileURL]) {
         [[NSFileManager defaultManager] removeAllExtendedAttributesAtPath:[[self fileURL] path] traverseLink:YES error:NULL];
     }
-        
-    [self setupToolbar];
-	[self setupSearchField];
     
-    // First remove the toolbar if we should, as it affects proper resizing of the window and splitViews
+    // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    
+    [quickSearchKey autorelease];
+    quickSearchKey = [[xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:quickSearchKey] retain];
+	[self setupSearchField];
+    [self setupToolbar];
+    
+    // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
 	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowStatusBarKey]) {
 		[self toggleStatusBar:nil];
@@ -456,9 +461,6 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     [groupCollapsibleView removeFromSuperview];
     [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
-    
-    // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
-    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
 
     NSRect frameRect = [xattrDefaults rectForKey:BDSKDocumentWindowFrameKey defaultValue:NSZeroRect];
     
@@ -515,8 +517,11 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 	[self setupDefaultTableColumns];
     [self sortPubsByDefaultColumn];
     
-    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[self currentGroupField]]];    
-
+    [sortGroupsKey autorelease];
+    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:sortGroupsKey] retain];
+    sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:sortGroupsDescending];
+    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[self currentGroupField]]];
+    
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
@@ -613,10 +618,6 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-
-    if([notification object] != documentWindow) // this is critical; 
-        return;
-    
     isDocumentClosed = YES;
     
     [fileSearchController stopSearching];
@@ -635,7 +636,6 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 	
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-
 }
 
 // returns empty dictionary if no attributes set
@@ -656,24 +656,26 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         
         // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-        [dictionary setBoolValue:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
-        [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
-        [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
+        
         [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
+        [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
+        [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+        [dictionary setBoolValue:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
         [dictionary setBoolValue:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
         [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
         [dictionary setFloatValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
-        
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
+        [dictionary setObject:quickSearchKey forKey:BDSKCurrentQuickSearchKey];
+        [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
+        
         NSArray *selectedKeys = [[self selectedPublications] arrayByPerformingSelector:@selector(citeKey)];
         if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
-        [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
         [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
-
+        
         NSError *error;
         
         if ([[NSFileManager defaultManager] setExtendedAttributeNamed:BDSKMainWindowExtendedAttributeKey 
