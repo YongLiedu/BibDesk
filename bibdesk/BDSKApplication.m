@@ -38,7 +38,8 @@
 
 #import "BDSKApplication.h"
 
-@interface NSResponder (BDSKApplication)
+@interface NSWindow (BDSKApplication)
+// these are implemented in AppKit as private methods
 - (void)undo:(id)obj;
 - (void)redo:(id)obj;
 @end
