@@ -68,14 +68,14 @@
         return;
     unichar c = [[event characters] characterAtIndex:0];
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
-    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask);
+    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
     if (c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
-        if([event modifierFlags] & NSShiftKeyMask)
+        if(flags & NSShiftKeyMask)
             [[self delegate] pageUpInPreview:nil];
         else
             [[self delegate] pageDownInPreview:nil];
 	// somehow alternate menu item shortcuts are not available globally, so we catch them here
-	}else if((c == NSDeleteCharacter) &&  ([event modifierFlags] & NSAlternateKeyMask)) {
+	}else if((c == NSDeleteCharacter) &&  (flags & NSAlternateKeyMask)) {
 		[[self delegate] alternateDelete:nil];
     // following methods should solve the mysterious problem of arrow/page keys not working for some users
     }else if(c == NSPageDownFunctionKey){

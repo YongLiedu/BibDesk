@@ -618,7 +618,7 @@
         return;
     unichar c = [[event characters] characterAtIndex:0];
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
-    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask);
+    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
     if (c == NSDeleteCharacter ||
         c == NSBackspaceCharacter) {
         [[self delegate] removeSelectedMacros:nil];
