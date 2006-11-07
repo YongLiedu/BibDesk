@@ -109,6 +109,7 @@
     } else if ([styles count]) {
         [previewTemplatePopup selectItemAtIndex:0];
         [defaults setObject:[styles objectAtIndex:0] forKey:BDSKPreviewTemplateStyleKey];
+        [defaults autoSynchronize];
         if ([defaults integerForKey:BDSKPreviewDisplayKey] == 3)
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
@@ -122,6 +123,7 @@
     int tag = [[sender selectedCell] tag];
     if(tag != [defaults integerForKey:BDSKPreviewDisplayKey]){
         [defaults setInteger:tag forKey:BDSKPreviewDisplayKey];
+        [defaults autoSynchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
 }
@@ -130,6 +132,7 @@
     int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
     if(maxNumber != [defaults integerForKey:BDSKPreviewMaxNumberKey]){
 		[defaults setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
+        [defaults autoSynchronize];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 	} else 
         [self updateUI];
@@ -139,6 +142,7 @@
     NSString *style = [sender title];
     if ([style isEqualToString:[defaults stringForKey:BDSKPreviewTemplateStyleKey]] == NO) {
         [defaults setObject:style forKey:BDSKPreviewTemplateStyleKey];
+        [defaults autoSynchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
 }
@@ -163,6 +167,7 @@
     [mutableArray replaceObjectAtIndex:rowIndex withObject:anObject];
     [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)addTerm:(id)sender
@@ -176,6 +181,7 @@
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[mutableArray count] - 1] byExtendingSelection:NO];
     [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
     [mutableArray release];
+    [defaults autoSynchronize];
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
@@ -195,6 +201,7 @@
     [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
     [tableView reloadData];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeAuthorDisplay:(id)sender;
@@ -217,7 +224,7 @@
     }
     OBPOSTCONDITION(prefKey);
     [defaults setBool:([clickedCell state] == NSOnState) forKey:prefKey];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 
@@ -272,6 +279,7 @@
             [defaults setFloat:[font pointSize] forKey:BDSKPreviewBaseFontSizeKey];
             [defaults setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+            [defaults autoSynchronize];
             return;
         case 4:
             fontNameKey = BDSKEditorFontNameKey;
@@ -283,6 +291,7 @@
     // set the name last, as that is observed for changes
     [defaults setFloat:[font pointSize] forKey:fontSizeKey];
     [defaults setObject:[font fontName] forKey:fontNameKey];
+    [defaults autoSynchronize];
 }
 
 - (void)changeFont:(id)sender{

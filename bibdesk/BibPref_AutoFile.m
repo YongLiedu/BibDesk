@@ -141,7 +141,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 
 - (IBAction)setPapersFolderPathFromTextField:(id)sender{
     [defaults setObject:[[sender stringValue] stringByStandardizingPath] forKey:BDSKPapersFolderPathKey];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
@@ -166,33 +166,36 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		NSString *path = [[sheet filenames] objectAtIndex: 0];
 		[defaults setObject:path forKey:BDSKPapersFolderPathKey];
 	}
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)clearPapersFolderLocationAction:(id)sender{
 	if ([sender state] == NSOnState) {
         [defaults setBool:NO forKey:BDSKAutoFileUsesRelativePathKey];
 		[self choosePapersFolderLocationAction:sender];
+        [defaults autoSynchronize];
 	} else {
 		[defaults setObject:@"" forKey:BDSKPapersFolderPathKey];
-		[self updateUI];
+		[self valuesHaveChanged];
 	}
 }
 
 - (IBAction)toggleUseRelativePathAction:(id)sender{
 	[defaults setBool:([useRelativePathCheckButton state] == NSOnState)
 			   forKey:BDSKAutoFileUsesRelativePathKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{
 	[defaults setBool:([filePapersAutomaticallyCheckButton state] == NSOnState)
 			   forKey:BDSKFilePapersAutomaticallyKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)toggleWarnOnMoveFolderAction:(id)sender{
 	[defaults setBool:([warnOnMoveFolderCheckButton state] == NSOnState)
 			   forKey:BDSKWarnOnMoveFolderKey];
+    [defaults autoSynchronize];
 }
 
 // presently just used to display the warning if the path for autofile was invalid
@@ -214,11 +217,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 
 - (IBAction)changeLocalUrlLowercase:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKLocalUrlLowercaseKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)setFormatCleanOption:(id)sender{
 	[defaults setInteger:[[sender selectedCell] tag] forKey:BDSKLocalUrlCleanOptionKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)localUrlFormatAdd:(id)sender{
@@ -295,7 +299,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		}
 	}
 	[[NSApp delegate] setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-	[self updateUI];
+    [self valuesHaveChanged];
 }
 
 #pragma mark Format sheet stuff

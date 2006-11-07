@@ -81,6 +81,7 @@
     [dragCopyTypes replaceObjectAtIndex:0 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeAlternateDragCopyFormat:(id)sender{
@@ -89,22 +90,24 @@
     [dragCopyTypes replaceObjectAtIndex:1 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changePrependTilde:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKCitePrependTildeKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)citeStringFieldChanged:(id)sender{
     [defaults setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
                  forKey:BDSKCiteStringKey];
     [self changeSeparateCite:separateCiteCheckButton];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)setCitationBracketStyle:(id)sender{
@@ -117,7 +120,7 @@
 		[defaults setObject:@"[" forKey:BDSKCiteStartBracketKey];
 		[defaults setObject:@"]" forKey:BDSKCiteEndBracketKey];
 	}
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{

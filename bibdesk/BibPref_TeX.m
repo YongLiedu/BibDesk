@@ -80,12 +80,12 @@
 
 -(IBAction)changeTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (IBAction)changeBibTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
@@ -97,6 +97,7 @@
     }else{
         [defaults setBool:YES forKey:BDSKUsesTeXKey];
     }
+    [defaults autoSynchronize];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
@@ -116,6 +117,7 @@
 
 - (IBAction)changeStyle:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
+    [defaults autoSynchronize];
 }
 
 - (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode path:(void *)path{
@@ -173,6 +175,7 @@
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
     NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
     [defaults setInteger:encoding forKey:BDSKTeXPreviewFileEncodingKey];        
+    [defaults autoSynchronize];
 }
 
 

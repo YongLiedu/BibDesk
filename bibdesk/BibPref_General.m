@@ -78,6 +78,7 @@
 - (IBAction)changeUpdateInterval:(id)sender{
     BDSKUpdateCheckInterval interval = [[sender selectedItem] tag];
     [defaults setInteger:interval forKey:BDSKUpdateCheckIntervalKey];
+    [defaults autoSynchronize];
     
     // an annoying dialog to be seen by annoying users...
     if (BDSKCheckForUpdatesNever == interval || BDSKCheckForUpdatesMonthly == interval) {
@@ -90,12 +91,13 @@
 
 - (IBAction)setAutoOpenFilePath:(id)sender{
     [defaults setObject:[[sender stringValue] stringByExpandingTildeInPath] forKey:BDSKDefaultBibFilePathKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{
     int n = [[sender selectedCell] tag];
     [defaults setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
-    [self updateUI];
+    [self valuesHaveChanged];
     if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
         [self chooseAutoOpenFile:nil];
 }
@@ -124,7 +126,7 @@
     [defaults setObject:path forKey:BDSKDefaultBibFilePathKey];
     [defaults setObject:path forKey:@"NSOpen"]; // -- what did this do?
     [defaults setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (IBAction)changeEmailTemplate:(id)sender{
@@ -132,30 +134,33 @@
     NSString *style = index == 0 ? @"" : [sender titleOfSelectedItem];
     if ([style isEqualToString:[defaults stringForKey:BDSKEmailTemplateKey]] == NO) {
         [defaults setObject:style forKey:BDSKEmailTemplateKey];
+        [defaults autoSynchronize];
     }
 }
 
 - (IBAction)changeEditOnPaste:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnDelete:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnDeleteKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRemovalFromGroupKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changeWarnOnRenameGroup:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
+    [defaults autoSynchronize];
 }
 
 - (void)dealloc{
@@ -165,7 +170,7 @@
 }
 
 - (void)handleWarningPrefChanged:(NSNotification *)notification {
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (void)handleTemplatePrefsChanged:(NSNotification *)notification {
@@ -181,6 +186,7 @@
     } else {
         [emailTemplatePopup selectItemAtIndex:0];
         [defaults setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
+        [defaults autoSynchronize];
     }
 }
 

@@ -86,7 +86,7 @@
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
 	[dict setObject:path forKey:name];
 	[defaults setObject:dict forKey:BDSKScriptHooksKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)removeScriptHook:(id)sender{
@@ -97,7 +97,7 @@
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
 	[dict removeObjectForKey:name];
 	[defaults setObject:dict forKey:BDSKScriptHooksKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (void)showOrChooseScriptFile:(id)sender {

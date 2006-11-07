@@ -79,28 +79,28 @@
 
 - (IBAction)changeAutoSort:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKAutoSortForCrossrefsKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changeWarnOnEditInherited:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnEditInheritedKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changeDuplicateBooktitle:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKDuplicateBooktitleKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changeForceDuplicateBooktitle:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKForceDuplicateBooktitleKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)deleteType:(id)sender{
     if([tableView selectedRow] != -1){
         [typesArray removeObjectAtIndex:[tableView selectedRow]];
-        [self updateUI];
+        [self valuesHaveChanged];
     }
 }
 

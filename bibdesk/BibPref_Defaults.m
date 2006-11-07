@@ -195,7 +195,7 @@ enum {
     [triStateFields release];
     
 	[defaultFieldsTableView reloadData];
-	[self updateUI];
+	[self valuesHaveChanged];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKCustomFieldsChangedNotification
 														object:self
@@ -286,6 +286,7 @@ enum {
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];
             [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+            [defaults autoSynchronize];
         }
         [globalMacroFilesTableView reloadData];
     }
@@ -318,6 +319,7 @@ enum {
         [globalMacroFiles addObject:file];
     }
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [defaults autoSynchronize];
     
     [globalMacroFilesTableView reloadData];
     
@@ -454,6 +456,7 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)delGlobalMacroFiles:(id)sender{
@@ -463,6 +466,7 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [defaults autoSynchronize];
 }
 
 @end

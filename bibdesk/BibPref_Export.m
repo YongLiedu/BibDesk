@@ -75,7 +75,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     } else {
         [self setItemNodes:[BDSKTemplate defaultServiceTemplates]];
     }
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (void)awakeFromNib
@@ -90,7 +90,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
     // this will synchronize prefs, as well
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (void)dealloc
@@ -137,7 +137,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     else if (BDSKServiceTemplateList == templatePrefList)
         [self setItemNodes:[BDSKTemplate defaultServiceTemplates]];
     else [NSException raise:NSInternalInconsistencyException format:@"Unrecognized templatePrefList parameter"];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -187,7 +187,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         [outlineView expandItem:newNode];
     }
     
-    [self updateUI];
+    [self valuesHaveChanged];
     [newNode release];
 }
 
@@ -202,7 +202,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     } else {
         NSBeep();
     }
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 #pragma mark Outline View
@@ -256,7 +256,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     }
     [aNode release];
     [panel orderOut:nil];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item;
@@ -422,7 +422,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             }
             selIndexes = [NSIndexSet indexSetWithIndex:[outlineView rowForItem:item] + index];
         } else return NO;
-        [self updateUI];
+        [self valuesHaveChanged];
         [outlineView selectRowIndexes:selIndexes byExtendingSelection:NO];
         return YES;
     } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
@@ -445,7 +445,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             [itemNodes removeObjectAtIndex:sourceIndex];
             [itemNodes insertObject:dropItem atIndex:index];
         }
-        [self updateUI];
+        [self valuesHaveChanged];
         [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:dropItem]] byExtendingSelection:NO];
         return YES;
     }

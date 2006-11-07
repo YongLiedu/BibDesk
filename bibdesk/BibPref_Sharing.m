@@ -102,7 +102,7 @@
 - (IBAction)togglePassword:(id)sender
 {
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKSharingRequiresPasswordKey];
-    [self updateUI];
+    [self valuesHaveChanged];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 
@@ -117,13 +117,14 @@
 {
     [defaults setObject:[sender stringValue] forKey:BDSKSharingNameKey];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 - (IBAction)toggleBrowsing:(id)sender
 {
     BOOL flag = ([sender state] == NSOnState);
     [defaults setBool:flag forKey:BDSKShouldLookForSharedFilesKey];
+    [defaults autoSynchronize];
     if(flag == YES)
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
     else
@@ -139,7 +140,7 @@
 
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
     
-    [self updateUI];
+    [self valuesHaveChanged];
 }
 
 @end

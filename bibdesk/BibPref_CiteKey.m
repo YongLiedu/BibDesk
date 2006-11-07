@@ -126,16 +126,17 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 
 - (IBAction)changeCiteKeyAutogenerate:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyAutogenerateKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)changeCiteKeyLowercase:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyLowercaseKey];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 - (IBAction)setFormatCleanOption:(id)sender{
 	[defaults setInteger:[[sender selectedCell] tag] forKey:BDSKCiteKeyCleanOptionKey];
+    [defaults autoSynchronize];
 }
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
@@ -208,7 +209,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		}
 	}
 	[[NSApp delegate] setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-	[self updateUI];
+	[self valuesHaveChanged];
 }
 
 #pragma mark Format sheet stuff
