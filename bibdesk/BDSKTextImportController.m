@@ -281,6 +281,7 @@
     
     item = newItem;
     [item setDocument:self];
+    [[self undoManager] removeAllActions];
 	
 	int numItems = [itemsAdded count];
 	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
@@ -308,6 +309,7 @@
     [item release];
     item = [[BibItem alloc] init];
     [item setDocument:self];
+    [[self undoManager] removeAllActions];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
     [citeKeyField setStringValue:[item citeKey]];
