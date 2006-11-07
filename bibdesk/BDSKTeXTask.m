@@ -301,62 +301,50 @@
 #pragma mark Data accessors
 
 - (NSString *)logFileString{
-    
-    if(pthread_rwlock_tryrdlock(&dataFileLock))
-        return nil;
-    NSData *data = [[NSData alloc] initWithContentsOfFile:logFilePath];
-    pthread_rwlock_unlock(&dataFileLock);
-
-    // @@ log files written using defaultCStringEncoding?  likely always ascii anyway...
-    NSString *string = [[NSString alloc] initWithData:data encoding:[NSString defaultCStringEncoding]];
-    [data release];
-    
-    return [string autorelease];
-}
+    NSString *string = nil;
+    if(0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+        // @@ unclear if log files will always be written with ASCII encoding
+        string = [NSString stringWithContentsOfFile:logFilePath encoding:NSASCIIStringEncoding error:NULL];
+        pthread_rwlock_unlock(&dataFileLock);
+    }
+    return string;    
+}    
 
 // the .bbl file contains either a LaTeX style bilbiography or an Amsrefs ltb style bibliography
 // which one was generated depends on the generatedTypes argument, and can be seen from the hasLTB and hasLaTeX flags
 - (NSString *)LTBString{
-	if (![self hasLTB])
-		return nil;
-    if(pthread_rwlock_tryrdlock(&dataFileLock))
-        return nil;
-    NSData *data = [[NSData alloc] initWithContentsOfFile:bblFilePath];
-    NSString *string = [[[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] autorelease];
-    [data release];
-    pthread_rwlock_unlock(&dataFileLock);
-    return string;
+    NSString *string = nil;
+    if([self hasLTB] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+        string = [NSString stringWithContentsOfFile:bblFilePath encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
+        pthread_rwlock_unlock(&dataFileLock);
+    }
+    return string;    
 }
 
 - (NSString *)LaTeXString{
-	if (![self hasLaTeX])
-		return nil;
-    if(pthread_rwlock_tryrdlock(&dataFileLock))
-        return nil;
-    NSData *data = [[NSData alloc] initWithContentsOfFile:bblFilePath];
-    NSString *string = [[[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] autorelease];
-    [data release];
-    pthread_rwlock_unlock(&dataFileLock);
+    NSString *string = nil;
+    if([self hasLaTeX] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+        string = [NSString stringWithContentsOfFile:bblFilePath encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey] error:NULL];
+        pthread_rwlock_unlock(&dataFileLock);
+    }
     return string;
 }
 
 - (NSData *)PDFData{
-	if (![self hasPDFData])
-		return nil;
-    if(pthread_rwlock_tryrdlock(&dataFileLock))
-        return nil;
-    NSData *data = [NSData dataWithContentsOfFile:pdfFilePath];
-    pthread_rwlock_unlock(&dataFileLock);
+    NSData *data = nil;
+    if ([self hasPDFData] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+        data = [NSData dataWithContentsOfFile:pdfFilePath];
+        pthread_rwlock_unlock(&dataFileLock);
+    }
     return data;
 }
 
 - (NSData *)RTFData{
-	if (![self hasRTFData])
-		return nil;
-    if(pthread_rwlock_tryrdlock(&dataFileLock))
-        return nil;
-    NSData *data = [NSData dataWithContentsOfFile:rtfFilePath];
-    pthread_rwlock_unlock(&dataFileLock);
+    NSData *data = nil;
+    if ([self hasRTFData] && 0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
+        data = [NSData dataWithContentsOfFile:rtfFilePath];
+        pthread_rwlock_unlock(&dataFileLock);
+    }
     return data;
 }
 
