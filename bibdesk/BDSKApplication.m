@@ -37,7 +37,11 @@
  */
 
 #import "BDSKApplication.h"
-#import "BDSKTextImportController.h"
+
+@interface NSResponder (BDSKApplication)
+- (void)undo:(id)obj;
+- (void)redo:(id)obj;
+@end
 
 @implementation BDSKApplication
 
