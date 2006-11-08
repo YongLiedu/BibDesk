@@ -1469,6 +1469,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     while(--index)
         [[[self windowControllers] objectAtIndex:index] close];
     
+    [macroResolver removeAllMacros];
+    
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
         [staticGroups release];
         staticGroups = nil;
