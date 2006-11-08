@@ -79,7 +79,9 @@ typedef enum {
 - (NSTextView *)textView;
 - (BDSKOverlay *)progressOverlay;
 
+- (float)PDFScaleFactor;
 - (void)setPDFScaleFactor:(float)scaleFactor;
+- (float)RTFScaleFactor;
 - (void)setRTFScaleFactor:(float)scaleFactor;
 
 - (BOOL)isVisible;

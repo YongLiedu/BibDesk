@@ -192,11 +192,27 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     return progressOverlay;
 }
 
+- (float)PDFScaleFactor;
+{
+    if([self isWindowLoaded])
+        return [pdfView autoScales] ? 0.0 : [pdfView scaleFactor];
+    else
+        return pdfScaleFactor;
+}
+
 - (void)setPDFScaleFactor:(float)scaleFactor;
 {
     pdfScaleFactor = scaleFactor;
     if([self isWindowLoaded])
         [pdfView setScaleFactor:scaleFactor];
+}
+
+- (float)RTFScaleFactor;
+{
+    if([self isWindowLoaded])
+        return [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] scaleFactor];
+    else
+        return rtfScaleFactor;
 }
 
 - (void)setRTFScaleFactor:(float)scaleFactor;

@@ -677,18 +677,17 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
         [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
         
-        NSDictionary *oldDict = [self mainWindowSetupDictionaryFromExtendedAttributes];
-        float scaleFactor;
-        if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]])
-            scaleFactor = [(BDSKZoomablePDFView *)currentPreviewView autoScales] ? 0.0 : [(BDSKZoomablePDFView *)currentPreviewView scaleFactor];
-        else
-            scaleFactor = [oldDict floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0];
-        [dictionary setFloatValue:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
-        if([currentPreviewView isKindOfClass:[BDSKZoomableScrollView class]])
-            scaleFactor = [(BDSKZoomableScrollView *)currentPreviewView scaleFactor];
-        else
-            scaleFactor = [oldDict floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0];
-        [dictionary setFloatValue:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
+        float pdfScaleFactor, rtfScaleFactor;
+        if(previewer){
+            pdfScaleFactor = [previewer PDFScaleFactor];
+            rtfScaleFactor = [previewer RTFScaleFactor];
+        }else{
+            NSDictionary *oldDict = [self mainWindowSetupDictionaryFromExtendedAttributes];
+            pdfScaleFactor = [oldDict floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0];
+            rtfScaleFactor = [oldDict floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0];
+        }
+        [dictionary setFloatValue:pdfScaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
+        [dictionary setFloatValue:rtfScaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
         
         NSError *error;
         
