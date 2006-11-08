@@ -322,6 +322,8 @@
 		CEAC51570A97730800B8DF43 /* BibDeskExportUsingTemplateCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAC51550A97730800B8DF43 /* BibDeskExportUsingTemplateCommand.m */; };
 		CEAE613E097FF60A000B618C /* BDSKJSTORParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */; };
 		CEAE613F097FF60A000B618C /* BDSKJSTORParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */; };
+		CEB7CAC30B01F5DD002F8814 /* editnext.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEB7CAC10B01F5DD002F8814 /* editnext.tiff */; };
+		CEB7CAC40B01F5DD002F8814 /* editprevious.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEB7CAC20B01F5DD002F8814 /* editprevious.tiff */; };
 		CEBA3F470A73CCAF00588BB7 /* BDSKSheetController.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBA3F450A73CCAF00588BB7 /* BDSKSheetController.h */; };
 		CEBA3F480A73CCAF00588BB7 /* BDSKSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBA3F460A73CCAF00588BB7 /* BDSKSheetController.m */; };
 		CEBA63D70A7CA0B500588BB7 /* BDSKCrossrefFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */; };
@@ -1151,6 +1153,8 @@
 		CEAE613D097FF60A000B618C /* BDSKJSTORParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKJSTORParser.m; sourceTree = "<group>"; };
 		CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSAttributedString_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSAttributedString_BDSKExtensions.m; sourceTree = "<group>"; };
+		CEB7CAC10B01F5DD002F8814 /* editnext.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = editnext.tiff; path = Images/editnext.tiff; sourceTree = "<group>"; };
+		CEB7CAC20B01F5DD002F8814 /* editprevious.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = editprevious.tiff; path = Images/editprevious.tiff; sourceTree = "<group>"; };
 		CEBA3F450A73CCAF00588BB7 /* BDSKSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSheetController.h; sourceTree = "<group>"; };
 		CEBA3F460A73CCAF00588BB7 /* BDSKSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSheetController.m; sourceTree = "<group>"; };
 		CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCrossrefFormatter.h; sourceTree = "<group>"; };
@@ -2033,7 +2037,6 @@
 		F9022DDA0758089500C3F701 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				F963E44F0A1D81AF00695DDC /* exportPrefs.tiff */,
 				CE7E207C0A0BF833009D04C3 /* GroupAddSmart_Pressed.tiff */,
 				CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */,
 				F9022DA20758088000C3F701 /* Action_Pressed.tiff */,
@@ -2058,6 +2061,9 @@
 				3D3EA7F307C19B7900DEEAA3 /* drawerRight.tiff */,
 				F9022DAC0758088000C3F701 /* drawerToolbarImage.tiff */,
 				F9022DAD0758088000C3F701 /* editdoc.tiff */,
+				CEB7CAC10B01F5DD002F8814 /* editnext.tiff */,
+				CEB7CAC20B01F5DD002F8814 /* editprevious.tiff */,
+				F963E44F0A1D81AF00695DDC /* exportPrefs.tiff */,
 				F9022DAE0758088000C3F701 /* find.tiff */,
 				CEBB8D8709C8B0D90074C79E /* Font.tiff */,
 				F9022DAF0758088000C3F701 /* FolderPenIcon.icns */,
@@ -3050,6 +3056,8 @@
 				CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */,
 				CE11A6350AE6BB77008C47AC /* urlFolderIcon.tiff in Resources */,
 				CE11B0060AE8FD53008C47AC /* scriptFolderIcon.tiff in Resources */,
+				CEB7CAC30B01F5DD002F8814 /* editnext.tiff in Resources */,
+				CEB7CAC40B01F5DD002F8814 /* editprevious.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
