@@ -243,7 +243,7 @@ static NSString *xattrError(int err, const char *path);
     BOOL replaceOnly = NO; // YES will only allow replacement (it will fail if the attr does not exist)
     
     if(options != nil){
-        noFollow = [[options objectForKey:@"FollowLinks"] boolValue];
+        noFollow = [[options objectForKey:@"NoFollowLinks"] boolValue];
         createOnly = [[options objectForKey:@"CreateOnly"] boolValue];
         replaceOnly = [[options objectForKey:@"ReplaceOnly"] boolValue];
     }
