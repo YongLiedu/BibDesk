@@ -118,10 +118,10 @@
 - (IBAction)addSmartGroupAction:(id)sender;
 - (IBAction)addStaticGroupAction:(id)sender;
 - (IBAction)addURLGroupAction:(id)sender;
-- (IBAction)dismissAddURLGroupSheet:(id)sender;
+- (IBAction)dismissURLGroupSheet:(id)sender;
 - (IBAction)chooseURLForGroupAction:(id)sender;
 - (IBAction)addScriptGroupAction:(id)sender;
-- (IBAction)dismissAddScriptGroupSheet:(id)sender;
+- (IBAction)dismissScriptGroupSheet:(id)sender;
 - (IBAction)chooseScriptForGroupAction:(id)sender;
 - (IBAction)addGroupButtonAction:(id)sender;
 - (IBAction)removeSelectedGroups:(id)sender;
@@ -130,9 +130,9 @@
 - (IBAction)selectAllPublicationsGroup:(id)sender;
 - (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
-- (void)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
-- (void)addURLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
-- (void)addScriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)URLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)scriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)mergeInExternalGroup:(id)sender;
 - (IBAction)mergeInExternalPublications:(id)sender;

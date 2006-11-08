@@ -349,7 +349,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     [toolbarItems release];
 	[statusBar release];
 	[splitView release];
-    [[previewField enclosingScrollView] release];
+    [[previewTextView enclosingScrollView] release];
     [previewer release];
 	[texTask release];
     [macroWC release];
@@ -508,7 +508,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     [splitView retain];
     [mainBox setBackgroundColor:[NSColor controlBackgroundColor]];
     
-    [[previewField enclosingScrollView] retain];
+    [[previewTextView enclosingScrollView] retain];
     
     // TableView setup
     [tableView removeAllTableColumns];
@@ -2707,7 +2707,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)updatePreviewPane{
     int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
-    NSView *view = [previewField enclosingScrollView];
+    NSView *view = [previewTextView enclosingScrollView];
     
     if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKRTFPreviewDisplay){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
@@ -2731,7 +2731,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         currentPreviewView = view;
     }
 
-    if(NSIsEmptyRect([previewField visibleRect]))
+    if(NSIsEmptyRect([previewTextView visibleRect]))
         return;
         
     static NSAttributedString *noAttrDoubleLineFeed;
@@ -2754,13 +2754,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (maxItems > 0 && [items count] > maxItems)
         items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
     
-    NSTextStorage *textStorage = [previewField textStorage];
+    NSTextStorage *textStorage = [previewTextView textStorage];
 
     // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
     NSRange zeroRange = NSMakeRange(0, 0);
     static NSArray *zeroRanges = nil;
     if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
-    [previewField setSelectedRanges:zeroRanges];
+    [previewTextView setSelectedRanges:zeroRanges];
             
     NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
     [layoutManager retain];
@@ -2856,7 +2856,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [layoutManager release];
     
     if([NSString isEmptyString:[searchField stringValue]] == NO)
-        [previewField highlightComponentsOfSearchString:[searchField stringValue]];
+        [previewTextView highlightComponentsOfSearchString:[searchField stringValue]];
     
 }
 
@@ -3013,7 +3013,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return [printableView autorelease];
     }else{
         BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
-        [printableView setAttributedString:[previewField textStorage]];    
+        [printableView setAttributedString:[previewTextView textStorage]];    
         return [printableView autorelease];
     }
 }

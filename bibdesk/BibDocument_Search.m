@@ -518,10 +518,10 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 #pragma mark Find panel
 
 - (NSString *)selectedStringForFind {
-	NSRange selRange = [previewField selectedRange];
+	NSRange selRange = [previewTextView selectedRange];
 	if (selRange.location == NSNotFound)
 		return nil;
-	return [[previewField string] substringWithRange:selRange];
+	return [[previewTextView string] substringWithRange:selRange];
 }
 
 - (IBAction)performFindPanelAction:(id)sender{

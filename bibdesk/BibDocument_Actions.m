@@ -716,10 +716,10 @@
 }
 
 - (void)pageDownInPreview:(id)sender{
-    NSPoint p = [previewField scrollPositionAsPercentage];
+    NSPoint p = [previewTextView scrollPositionAsPercentage];
     
-    float pageheight = NSHeight([[[previewField enclosingScrollView] documentView] bounds]);
-    float viewheight = NSHeight([[previewField enclosingScrollView] documentVisibleRect]);
+    float pageheight = NSHeight([[[previewTextView enclosingScrollView] documentView] bounds]);
+    float viewheight = NSHeight([[previewTextView enclosingScrollView] documentVisibleRect]);
     
     if(p.y > 0.99 || viewheight >= pageheight){ // select next row if the last scroll put us at the end
         int i = [[tableView selectedRowIndexes] lastIndex];
@@ -731,11 +731,11 @@
         [tableView scrollRowToVisible:i];
         return; // adjust page next time
     }
-    [previewField pageDown:sender];
+    [previewTextView pageDown:sender];
 }
 
 - (void)pageUpInPreview:(id)sender{
-    NSPoint p = [previewField scrollPositionAsPercentage];
+    NSPoint p = [previewTextView scrollPositionAsPercentage];
     
     if(p.y < 0.01){ // select previous row if we're already at the top
         int i = [[tableView selectedRowIndexes] firstIndex];
@@ -747,7 +747,7 @@
         [tableView scrollRowToVisible:i];
         return; // adjust page next time
     }
-    [previewField pageUp:sender];
+    [previewTextView pageUp:sender];
 }
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{

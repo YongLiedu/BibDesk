@@ -44,7 +44,7 @@
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
-@class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer;
+@class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox;
 
 enum {
@@ -97,13 +97,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 @interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKDocument>
 {
-    IBOutlet NSTextView *previewField;
+    IBOutlet NSTextView *previewTextView;
     IBOutlet NSView *currentPreviewView;
     IBOutlet NSWindow* documentWindow;
     IBOutlet BDSKMainTableView *tableView;
-    IBOutlet NSMenuItem *ctxCopyBibTex;
-    IBOutlet NSMenuItem *ctxCopyTex;
-    IBOutlet NSMenuItem *ctxCopyPDF;
     IBOutlet BDSKSplitView* splitView;
     IBOutlet BDSKColoredBox* mainBox;
     // for the splitview double-click handling
@@ -190,10 +187,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
     
-    IBOutlet NSWindow *addURLGroupSheet;
-    IBOutlet NSTextField *addURLField;
+    IBOutlet NSWindow *URLGroupSheet;
+    IBOutlet NSTextField *URLField;
     
-    IBOutlet NSWindow *addScriptGroupSheet;
+    IBOutlet NSWindow *scriptGroupSheet;
     IBOutlet NSTextField *scriptPathField;
     IBOutlet NSTextField *scriptArgumentsField;
     IBOutlet NSPopUpButton *scriptTypePopup;
@@ -204,7 +201,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSMutableArray *scriptGroups;
     NSMutableDictionary *sharedGroupSpinners;
     
-    id fileSearchController;
+    BDSKFileContentSearchController *fileSearchController;
 	
 	NSMutableDictionary *promisedPboardTypes;
     NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
