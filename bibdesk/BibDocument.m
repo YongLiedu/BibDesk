@@ -680,7 +680,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         NSDictionary *oldDict = [self mainWindowSetupDictionaryFromExtendedAttributes];
         float scaleFactor;
         if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]])
-            scaleFactor = [(BDSKZoomablePDFView *)currentPreviewView scaleFactor];
+            scaleFactor = [(BDSKZoomablePDFView *)currentPreviewView autoScales] ? 0.0 : [(BDSKZoomablePDFView *)currentPreviewView scaleFactor];
         else
             scaleFactor = [oldDict floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0];
         [dictionary setFloatValue:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
