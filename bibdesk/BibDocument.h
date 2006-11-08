@@ -192,7 +192,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
     IBOutlet NSWindow *scriptGroupSheet;
     IBOutlet NSTextField *scriptPathField;
-    IBOutlet NSTextField *scriptArgumentsField;
+    IBOutlet NSTextView *scriptArgumentsTextView;
     IBOutlet NSPopUpButton *scriptTypePopup;
     
     BOOL dragFromSharedGroups;

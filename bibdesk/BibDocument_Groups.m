@@ -1169,6 +1169,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)addScriptGroupAction:(id)sender {
     [scriptPathField setStringValue:@""];
+    [scriptArgumentsTextView setString:@""];
     [NSApp beginSheet:scriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(scriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
@@ -1178,7 +1179,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [sheet endEditingFor:nil];
         NSString *path = [scriptPathField stringValue];
         int type = [scriptTypePopup indexOfSelectedItem];
-        NSString *arguments = [scriptArgumentsField stringValue];
+        NSString *arguments = [scriptArgumentsTextView string];
 		BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
         unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
 		[self addScriptGroup:group];
@@ -1295,7 +1296,7 @@ The groupedPublications array is a subset of the publications array, developed b
             [sheet endEditingFor:nil];
         NSString *path = [scriptPathField stringValue];
         int type = [scriptTypePopup indexOfSelectedItem];
-        NSString *arguments = [scriptArgumentsField stringValue];
+        NSString *arguments = [scriptArgumentsTextView string];
 		BDSKScriptGroup *group = (BDSKScriptGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
 		[group setScriptPath:path];
 		[group setScriptArguments:arguments];
@@ -1337,7 +1338,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	} else if ([group isScript]) {
         [scriptPathField setStringValue:[(BDSKScriptGroup *)group scriptPath]];
         [scriptTypePopup selectItemAtIndex:[(BDSKScriptGroup *)group scriptType]];
-        [scriptArgumentsField setStringValue:[(BDSKScriptGroup *)group scriptArguments]];
+        [scriptArgumentsTextView setString:[(BDSKScriptGroup *)group scriptArguments]];
         [NSApp beginSheet:scriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(changeScriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 	}
 }

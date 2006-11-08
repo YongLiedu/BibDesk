@@ -157,7 +157,7 @@
                 removeCustomCiteStringButton = NSButton; 
                 saveAccessoryView = NSView; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
-                scriptArgumentsField = NSTextField; 
+                scriptArgumentsTextView = NSTextView; 
                 scriptGroupSheet = NSWindow; 
                 scriptPathField = NSTextField; 
                 scriptTypePopup = NSPopUpButton; 

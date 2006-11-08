@@ -75,7 +75,7 @@
     unichar ch = 0;
     id tmpObject = nil;
     
-    [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+    [self scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
     
     if ([self peekCharacter:&ch] == NO)
         return NO;
@@ -168,7 +168,7 @@
         if ([self scanUpToCharactersFromSet:stopSet intoString:&s])
             tmpObject = [s stringByRemovingSurroundingWhitespace];
     }
-    [self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+    [self scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
     if (object != NULL)
         *object = tmpObject;
     return nil != tmpObject;
