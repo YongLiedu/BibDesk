@@ -47,6 +47,7 @@
 #import "BDSKGroupTableView.h"
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKZoomablePDFView.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
 NSString *BDSKDocumentFormatForSearchingDates = nil;
@@ -518,10 +519,16 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 #pragma mark Find panel
 
 - (NSString *)selectedStringForFind {
-	NSRange selRange = [previewTextView selectedRange];
-	if (selRange.location == NSNotFound)
-		return nil;
-	return [[previewTextView string] substringWithRange:selRange];
+    if([currentPreviewView isKindOfClass:[NSScrollView class]]){
+        NSTextView *textView = (NSTextView *)[(NSScrollView *)currentPreviewView documentView];
+        NSRange selRange = [textView selectedRange];
+        if (selRange.location == NSNotFound)
+            return nil;
+        return [[textView string] substringWithRange:selRange];
+    }else if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]]){
+        return [[(BDSKZoomablePDFView *)currentPreviewView currentSelection] string];
+    }
+    return nil;
 }
 
 - (IBAction)performFindPanelAction:(id)sender{
