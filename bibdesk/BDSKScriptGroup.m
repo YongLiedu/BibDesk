@@ -99,6 +99,7 @@
     [self terminate];
     OFSimpleLockFree(&processingLock);
     OFSimpleLockFree(&currentTaskLock);
+    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [scriptPath release];
     [scriptArguments release];
     [argsArray release];

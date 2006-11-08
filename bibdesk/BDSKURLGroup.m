@@ -79,6 +79,7 @@
 - (void)dealloc;
 {
     [self terminate];
+    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [URL release];
     [filePath release];
     [publications release];
