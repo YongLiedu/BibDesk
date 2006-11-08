@@ -71,6 +71,7 @@
 #import "BDSKShellTask.h"
 #import "BDSKColoredBox.h"
 #import "BDSKStringParser.h"
+#import "BDSKZoomablePDFView.h"
 
 
 @implementation BibDocument (Actions)
@@ -716,28 +717,47 @@
 }
 
 - (void)pageDownInPreview:(id)sender{
-    NSPoint p = [previewTextView scrollPositionAsPercentage];
+    BOOL shouldSelectNextItem = NO;
     
-    float pageheight = NSHeight([[[previewTextView enclosingScrollView] documentView] bounds]);
-    float viewheight = NSHeight([[previewTextView enclosingScrollView] documentVisibleRect]);
-    
-    if(p.y > 0.99 || viewheight >= pageheight){ // select next row if the last scroll put us at the end
-        int i = [[tableView selectedRowIndexes] lastIndex];
-		if (i == NSNotFound)
-			i = 0;
-		else if (i < [tableView numberOfRows])
-			i++;
-		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [tableView scrollRowToVisible:i];
-        return; // adjust page next time
+    if([currentPreviewView isKindOfClass:[NSScrollView class]]){
+        NSScrollView *scrollView = (NSScrollView *)currentPreviewView;
+        NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
+        shouldSelectNextItem = (p.y > 0.99 || NSHeight([scrollView documentVisibleRect]) >= NSHeight([[scrollView documentView] bounds]));
+        if(shouldSelectNextItem == NO)
+            [[scrollView documentView] pageDown:sender];
+    }else if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]]){
+        shouldSelectNextItem = ([(BDSKZoomablePDFView *)currentPreviewView canGoToNextPage] == NO);
+        if(shouldSelectNextItem == NO)
+            [(BDSKZoomablePDFView *)currentPreviewView goToNextPage:sender];
     }
-    [previewTextView pageDown:sender];
+    
+    if(shouldSelectNextItem){ // select next row if the last scroll put us at the end
+        int i = [[tableView selectedRowIndexes] lastIndex];
+        if (i == NSNotFound)
+            i = 0;
+        else if (i < [tableView numberOfRows])
+            i++;
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+        [tableView scrollRowToVisible:i];
+    }
 }
 
 - (void)pageUpInPreview:(id)sender{
-    NSPoint p = [previewTextView scrollPositionAsPercentage];
+    BOOL shouldSelectNextItem = NO;
     
-    if(p.y < 0.01){ // select previous row if we're already at the top
+    if([currentPreviewView isKindOfClass:[NSScrollView class]]){
+        NSScrollView *scrollView = (NSScrollView *)currentPreviewView;
+        NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
+        shouldSelectNextItem = (p.y < 0.01);
+        if(shouldSelectNextItem == NO)
+            [[scrollView documentView] pageUp:sender];
+    }else if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]]){
+        shouldSelectNextItem = ([(BDSKZoomablePDFView *)currentPreviewView canGoToPreviousPage] == NO);
+        if(shouldSelectNextItem == NO)
+            [(BDSKZoomablePDFView *)currentPreviewView goToPreviousPage:sender];
+    }
+    
+    if(shouldSelectNextItem){ // select previous row if we're already at the top
         int i = [[tableView selectedRowIndexes] firstIndex];
 		if (i == NSNotFound)
 			i = 0;
@@ -745,9 +765,7 @@
 			i--;
 		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
         [tableView scrollRowToVisible:i];
-        return; // adjust page next time
     }
-    [previewTextView pageUp:sender];
 }
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
