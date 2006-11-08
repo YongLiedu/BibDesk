@@ -1240,7 +1240,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)removeSelectedGroups:(id)sender {
 	NSIndexSet *rowIndexes = [groupTableView selectedRowIndexes];
-    unsigned int rowIndex = [rowIndexes firstIndex];
+    unsigned int rowIndex = [rowIndexes lastIndex];
 	BDSKGroup *group;
 	unsigned int count = 0;
 	
@@ -1259,7 +1259,7 @@ The groupedPublications array is a subset of the publications array, developed b
 			[self removeScriptGroup:(BDSKScriptGroup *)group];
 			count++;
         }
-		rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
+		rowIndex = [rowIndexes indexLessThanIndex:rowIndex];
 	}
 	if (count == 0) {
 		NSBeep();
