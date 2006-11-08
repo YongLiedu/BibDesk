@@ -79,6 +79,7 @@
 #import "BDSKSplitView.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKZoomablePDFView.h"
+#import "BDSKZoomableScrollView.h"
 
 #import "BDSKMacroResolver.h"
 #import "MacroWindowController.h"
@@ -675,6 +676,19 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
             selectedKeys = [NSArray array];
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
         [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
+        
+        NSDictionary *oldDict = [self mainWindowSetupDictionaryFromExtendedAttributes];
+        float scaleFactor;
+        if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]])
+            scaleFactor = [(BDSKZoomablePDFView *)currentPreviewView scaleFactor];
+        else
+            scaleFactor = [oldDict floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0];
+        [dictionary setFloatValue:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
+        if([currentPreviewView isKindOfClass:[BDSKZoomableScrollView class]])
+            scaleFactor = [(BDSKZoomableScrollView *)currentPreviewView scaleFactor];
+        else
+            scaleFactor = [oldDict floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0];
+        [dictionary setFloatValue:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
         
         NSError *error;
         
@@ -2712,8 +2726,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKRTFPreviewDisplay){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
             return;
-        if(previewer == nil)
+        if(previewer == nil){
             previewer = [[BDSKPreviewer alloc] init];
+            NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+            [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
+            [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
+        }
         view = displayType == BDSKRTFPreviewDisplay ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)[previewer pdfView];
         if(currentPreviewView != view){
             [view setFrame:[currentPreviewView frame]];

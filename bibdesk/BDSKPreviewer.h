@@ -61,6 +61,9 @@ typedef enum {
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet BDSKOverlay *progressOverlay;
     
+    float pdfScaleFactor;
+    float rtfScaleFactor;
+    
     BDSKPreviewerServer *server;
     BDSKPreviewState previewState;
 }
@@ -75,6 +78,9 @@ typedef enum {
 - (PDFView *)pdfView;
 - (NSTextView *)textView;
 - (BDSKOverlay *)progressOverlay;
+
+- (void)setPDFScaleFactor:(float)scaleFactor;
+- (void)setRTFScaleFactor:(float)scaleFactor;
 
 - (BOOL)isVisible;
 

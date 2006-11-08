@@ -87,6 +87,8 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
     if (sharedPreviewer == nil) {
         sharedPreviewer = [[self alloc] init];
+        [sharedPreviewer setPDFScaleFactor:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey]];
+        [sharedPreviewer setRTFScaleFactor:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey]];
     }
     return sharedPreviewer;
 }
@@ -96,6 +98,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         // this reflects the currently expected state, not necessarily the actual state
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
+        
+        // these do not necessarily reflect the actual scale factors of the views, used to set them before the nib is loaded
+        pdfScaleFactor = 0.0;
+        rtfScaleFactor = 1.0;
         
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
@@ -111,8 +117,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 #pragma mark UI setup and display
 
 - (void)awakeFromNib{
-    float pdfScaleFactor = 0.0;
-    float rtfScaleFactor = 1.0;
     BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[[progressOverlay contentView] subviews] firstObject];
     NSSize minSize = [progressIndicator frame].size;
     
@@ -123,9 +127,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     [collapsibleView setCollapseEdges:BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
 	
     if([self isSharedPreviewer]){
-        pdfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
-        rtfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
-        
         [self setWindowFrameAutosaveName:BDSKPreviewPanelFrameAutosaveName];
         
         // overlay the progressIndicator over the contentView
@@ -189,6 +190,20 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 {
     [self window];
     return progressOverlay;
+}
+
+- (void)setPDFScaleFactor:(float)scaleFactor;
+{
+    pdfScaleFactor = scaleFactor;
+    if([self isWindowLoaded])
+        [pdfView setScaleFactor:scaleFactor];
+}
+
+- (void)setRTFScaleFactor:(float)scaleFactor;
+{
+    rtfScaleFactor = scaleFactor;
+    if([self isWindowLoaded])
+        [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:scaleFactor];
 }
 
 - (BOOL)isVisible{
