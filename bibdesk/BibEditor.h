@@ -412,6 +412,8 @@
 */
 - (void)makeKeyField:(NSString *)fieldName;
 
+- (void)selectTabWithIdentifier:(NSString *)identifier;
+
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
@@ -429,6 +431,9 @@
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
 - (IBAction)deletePub:(id)sender;
+
+- (IBAction)editPreviousPub:(id)sender;
+- (IBAction)editNextPub:(id)sender;
 
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 

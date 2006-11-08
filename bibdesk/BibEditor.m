@@ -1326,6 +1326,10 @@ static int numberOfOpenEditors = 0;
     if(sel > -1) [bibFields selectTextAtIndex:sel];
 }
 
+- (void)selectTabWithIdentifier:(NSString *)identifier{
+    [tabView selectTabViewItemWithIdentifier:identifier];
+}
+
 // ----------------------------------------------------------------------------------------
 #pragma mark ||  delete-Field-Sheet Support
 // ----------------------------------------------------------------------------------------
@@ -2170,6 +2174,22 @@ static int numberOfOpenEditors = 0;
 	} else {
         [self deletePubAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:NULL];
     }
+}
+
+- (IBAction)editPreviousPub:(id)sender{
+    BibEditor *editor = [[self document] editPubBeforePub:publication];
+    if([[self window] firstResponder] == bibFields)
+        [editor makeKeyField:[[bibFields selectedCell] title]];
+    else
+        [editor selectTabWithIdentifier:[[tabView selectedTabViewItem] identifier]];
+}
+
+- (IBAction)editNextPub:(id)sender{
+    BibEditor *editor = [[self document] editPubAfterPub:publication];
+    if([[self window] firstResponder] == bibFields)
+        [editor makeKeyField:[[bibFields selectedCell] title]];
+    else
+        [editor selectTabWithIdentifier:[[tabView selectedTabViewItem] identifier]];
 }
 
 #pragma mark BDSKForm delegate methods

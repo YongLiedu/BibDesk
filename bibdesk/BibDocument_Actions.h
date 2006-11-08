@@ -116,6 +116,9 @@
 */
 - (BibEditor *)editPub:(BibItem *)pub;
 
+- (BibEditor *)editPubBeforePub:(BibItem *)pub;
+- (BibEditor *)editPubAfterPub:(BibItem *)pub;
+
 /*!
     @method editAction:
     @abstract General edit action. Edits the selected publications or the selected smart group, depending on the selected tableView. 

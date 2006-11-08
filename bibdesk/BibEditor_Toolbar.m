@@ -49,6 +49,8 @@ NSString *BibEditorToolbarActionItemIdentifier = @"BibEditorToolbarActionItemIde
 NSString *BibEditorToolbarAuthorTableItemIdentifier = @"BibEditorToolbarAuthorTableItemIdentifier";
 NSString *BibEditorToolbarDeleteItemIdentifier = @"BibEditorToolbarDeleteItemIdentifier";
 NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddWithCrossrefItemIdentifier";
+NSString *BibEditorToolbarEditPreviousItemIdentifier = @"BibEditorToolbarEditPreviousItemIdentifier";
+NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextItemIdentifier";
 
 @implementation BibEditor (Toolbar)
 
@@ -194,6 +196,28 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
     [toolbarItems setObject:item forKey:BibEditorToolbarAddWithCrossrefItemIdentifier];
     [item release];
     
+    // Previous
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarEditPreviousItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Previous",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Edit Previous Item",@"")];
+    [item setToolTip:NSLocalizedString(@"Edit previous publication",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageNamed: @"editprevious"]];
+    [item setAction:@selector(editNextPub:)];
+    [toolbarItems setObject:item forKey:BibEditorToolbarEditPreviousItemIdentifier];
+    [item release];
+    
+    // Next
+    item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarEditNextItemIdentifier];
+    [item setLabel:NSLocalizedString(@"Next",@"")];
+    [item setPaletteLabel:NSLocalizedString(@"Edit Next Item",@"")];
+    [item setToolTip:NSLocalizedString(@"Edit next publication",@"")];
+    [item setTarget:self];
+    [item setImage:[NSImage imageNamed: @"editnext"]];
+    [item setAction:@selector(editNextPub:)];
+    [toolbarItems setObject:item forKey:BibEditorToolbarEditNextItemIdentifier];
+    [item release];
+    
     // Attach the toolbar to the document window
     [[self window] setToolbar: toolbar];
 }
@@ -232,6 +256,8 @@ NSString *BibEditorToolbarAddWithCrossrefItemIdentifier = @"BibEditorToolbarAddW
         BibEditorToolbarActionItemIdentifier,
 		BibEditorToolbarDeleteItemIdentifier,
 		BibEditorToolbarAddWithCrossrefItemIdentifier,
+        BibEditorToolbarEditPreviousItemIdentifier,
+        BibEditorToolbarEditNextItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
 		NSToolbarSpaceItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 

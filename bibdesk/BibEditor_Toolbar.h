@@ -49,6 +49,8 @@ extern NSString*	BibEditorToolbarActionItemIdentifier;
 extern NSString*	BibEditorToolbarAuthorTableItemIdentifier;
 extern NSString*	BibEditorToolbarDeleteItemIdentifier;
 extern NSString*	BibEditorToolbarAddWithCrossrefItemIdentifier;
+extern NSString*	BibEditorToolbarEditPreviousItemIdentifier;
+extern NSString*	BibEditorToolbarEditNextItemIdentifier;
 
 @interface BibEditor (Toolbar)
 

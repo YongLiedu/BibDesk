@@ -328,6 +328,28 @@
     return e;
 }
 
+- (BibEditor *)editPubBeforePub:(BibItem *)pub{
+    int index = [shownPublications indexOfObject:pub];
+    if(index == NSNotFound){
+        NSBeep();
+        return nil;
+    }
+    if(index-- == 0)
+        index = [shownPublications count] - 1;
+    return [self editPub:[shownPublications objectAtIndex:index]];
+}
+
+- (BibEditor *)editPubAfterPub:(BibItem *)pub{
+    int index = [shownPublications indexOfObject:pub];
+    if(index == NSNotFound){
+        NSBeep();
+        return nil;
+    }
+    if(++index == [shownPublications count])
+        index = 0;
+    return [self editPub:[shownPublications objectAtIndex:index]];
+}
+
 - (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSAlertDefaultReturn)
         return;
