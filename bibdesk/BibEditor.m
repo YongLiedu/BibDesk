@@ -1295,7 +1295,7 @@ static int numberOfOpenEditors = 0;
         [publication addField:newField];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
 		[self setupForm];
-		[self makeKeyField:newField];
+		[self setKeyField:newField];
     }
 }
 
@@ -1314,20 +1314,62 @@ static int numberOfOpenEditors = 0;
     [addFieldController release];
 }
 
-- (void)makeKeyField:(NSString *)fieldName{
-    int sel = -1;
-    int i = 0;
+#pragma mark Key field
 
-    for (i = 0; i < [bibFields numberOfRows]; i++) {
-        if ([[[bibFields cellAtIndex:i] title] isEqualToString:fieldName]) {
-            sel = i;
-        }
+- (NSString *)keyField{
+    NSString *keyField = nil;
+    NSString *tabId = [[tabView selectedTabViewItem] identifier];
+    if([tabId isEqualToString:BDSKBibtexString]){
+        id firstResponder = [[self window] firstResponder];
+        if ([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor])
+            firstResponder = [firstResponder delegate];
+        if(firstResponder == bibFields)
+            keyField = [[bibFields selectedCell] title];
+        else if(firstResponder == extraBibFields)
+            keyField = [[extraBibFields keyCell] title];
+        else if(firstResponder == citeKeyField)
+            keyField = BDSKCiteKeyString;
+        else if(firstResponder == bibTypeButton)
+            keyField = BDSKPubTypeString;
+    }else{
+        keyField = tabId;
     }
-    if(sel > -1) [bibFields selectTextAtIndex:sel];
+    return keyField;
 }
 
-- (void)selectTabWithIdentifier:(NSString *)identifier{
-    [tabView selectTabViewItemWithIdentifier:identifier];
+- (void)setKeyField:(NSString *)fieldName{
+    if([NSString isEmptyString:fieldName]){
+        return;
+    }else if([fieldName isNoteField]){
+        [tabView selectTabViewItemWithIdentifier:fieldName];
+    }else if([fieldName isEqualToString:BDSKPubTypeString]){
+        [[self window] makeFirstResponder:bibTypeButton];
+    }else if([fieldName isEqualToString:BDSKCiteKeyString]){
+        [citeKeyField selectText:nil];
+    }else if([fieldName isBooleanField] || [fieldName isTriStateField] || [fieldName isRatingField]){
+        int i, j, numRows = [extraBibFields numberOfRows], numCols = [extraBibFields numberOfColumns];
+        id cell;
+        
+        for (i = 0; i < numRows; i++) {
+            for (j = 0; j < numCols; j++) {
+                cell = [extraBibFields cellAtRow:i column:j];
+                if ([[cell title] isEqualToString:fieldName]) {
+                    [[self window] makeFirstResponder:extraBibFields];
+                    [extraBibFields setKeyCell:cell];
+                    return;
+                }
+            }
+        }
+    }else{
+        int i, numRows = [bibFields numberOfRows];
+
+        for (i = 0; i < numRows; i++) {
+            if ([[[bibFields cellAtIndex:i] title] isEqualToString:fieldName]) {
+                [bibFields selectTextAtIndex:i];
+                return;
+            }
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------------------
@@ -1399,7 +1441,7 @@ static int numberOfOpenEditors = 0;
     [publication removeField:oldField];
     [[self undoManager] setActionName:NSLocalizedString(@"Change Field Name",@"")];
     [self setupForm];
-    [self makeKeyField:newField];
+    [self setKeyField:newField];
 }
 
 - (IBAction)raiseChangeFieldName:(id)sender{
@@ -2134,7 +2176,7 @@ static int numberOfOpenEditors = 0;
     if(parent){
         BibEditor *editor = [[self document] editPub:parent];
         if(editor && field)
-            [editor makeKeyField:field];
+            [editor setKeyField:field];
     }
 }
 
@@ -2178,18 +2220,12 @@ static int numberOfOpenEditors = 0;
 
 - (IBAction)editPreviousPub:(id)sender{
     BibEditor *editor = [[self document] editPubBeforePub:publication];
-    if([[self window] firstResponder] == bibFields)
-        [editor makeKeyField:[[bibFields selectedCell] title]];
-    else
-        [editor selectTabWithIdentifier:[[tabView selectedTabViewItem] identifier]];
+    [editor setKeyField:[self keyField]];
 }
 
 - (IBAction)editNextPub:(id)sender{
     BibEditor *editor = [[self document] editPubAfterPub:publication];
-    if([[self window] firstResponder] == bibFields)
-        [editor makeKeyField:[[bibFields selectedCell] title]];
-    else
-        [editor selectTabWithIdentifier:[[tabView selectedTabViewItem] identifier]];
+    [editor setKeyField:[self keyField]];
 }
 
 #pragma mark BDSKForm delegate methods

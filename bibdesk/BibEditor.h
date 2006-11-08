@@ -405,14 +405,8 @@
 */
 - (IBAction)duplicateTitleToBooktitle:(id)sender;
 
-/*!
-    @method     makeKeyField:
-    @abstract   Selects the field and makes it key. 
-    @discussion (comprehensive description)
-*/
-- (void)makeKeyField:(NSString *)fieldName;
-
-- (void)selectTabWithIdentifier:(NSString *)identifier;
+- (NSString *)keyField;
+- (void)setKeyField:(NSString *)fieldName;
 
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;

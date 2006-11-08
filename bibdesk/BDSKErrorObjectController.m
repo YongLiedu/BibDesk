@@ -241,7 +241,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     if (pub) {
         // if we have an error for a pub, it should be from a BibDocument. Otherwise we would have ignored it, see endObservingErrorsForDocument:...
         BibEditor *pubEditor = [(BibDocument *)[pub document] editPub:pub];
-        [pubEditor makeKeyField:BDSKAuthorString];
+        [pubEditor setKeyField:BDSKAuthorString];
     } else if (nil == fileName || [[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
         [editor showWindow:self];
         [editor gotoLine:[errObj lineNumber]];
