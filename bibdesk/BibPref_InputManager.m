@@ -42,7 +42,7 @@
 #import "BibTypeManager.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKTextWithIconCell.h"
-#import "BDSKSearchResult.h"
+#import "NSSet_BDSKExtensions.h"
 #import "BibAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
@@ -50,6 +50,7 @@
 CFStringRef BDSKInputManagerID = CFSTR("net.sourceforge.bibdesk.inputmanager");
 CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles that we recognize");
 
+static NSString *BDSKBundleIdentifierKey = @"bundleIdentifierKey";
 static int tableIconSize = 24;
 
 @implementation BibPref_InputManager
@@ -74,6 +75,9 @@ static int tableIconSize = 24;
     [[tableView tableColumnWithIdentifier:@"AppList"] setDataCell:cell];
     [tableView setRowHeight:(tableIconSize + 2)];
 
+    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:OATextWithIconCellStringKey ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
+    [arrayController setSortDescriptors:[NSArray arrayWithObject:sort]];
+    
     [self updateUI];
 }
 
@@ -81,15 +85,17 @@ static int tableIconSize = 24;
     NSParameterAssert(identifiers);
         
     NSString *bundleID;
-    NSEnumerator *identifierE = [identifiers objectEnumerator];
-    
+
     // use a set so we don't add duplicate items to the array (not that it's particularly harmful)
-    NSMutableSet *applicationSet = [NSMutableSet set];
+    NSMutableSet *currentBundleIdentifiers = [NSMutableSet caseInsensitiveStringSet];
+    [currentBundleIdentifiers addObjectsFromArray:[[arrayController content] valueForKey:OATextWithIconCellStringKey]];
     
-    while(bundleID = [identifierE nextObject]){
+    NSEnumerator *identifierE = [identifiers objectEnumerator];
+        
+    while((bundleID = [identifierE nextObject]) && ([currentBundleIdentifiers containsObject:bundleID] == NO)){
     
         CFURLRef theURL = nil;
-        BDSKSearchResult *dictionary = [[BDSKSearchResult alloc] initWithKey:bundleID caseInsensitive:YES];
+        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] initWithCapacity:2];
         
         OSStatus err = LSFindApplicationForInfo( kLSUnknownCreator,
                                                  (CFStringRef)bundleID,
@@ -100,22 +106,19 @@ static int tableIconSize = 24;
         if(err == noErr){
             [dictionary setValue:[[(NSURL *)theURL lastPathComponent] stringByDeletingPathExtension] forKey:OATextWithIconCellStringKey];
             [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)theURL] forKey:OATextWithIconCellImageKey];
+            [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         } else {
             // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
             [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@""), bundleID] forKey:OATextWithIconCellStringKey];
             [dictionary setValue:[NSImage iconWithSize:NSMakeSize(tableIconSize, tableIconSize) forToolboxCode:kGenericApplicationIcon] forKey:OATextWithIconCellImageKey];
+            [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         }
         
-        [applicationSet addObject:dictionary];
+        [arrayController addObject:dictionary];
         [dictionary release];
     
     }
-    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"dictionary.string" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
-    [self willChangeValueForKey:@"applications"];
-    [applications addObjectsFromSet:applicationSet];
-    [applications sortUsingDescriptors:[NSArray arrayWithObject:sort]];
-    [self didChangeValueForKey:@"applications"];
-    
+    [arrayController rearrangeObjects];
     [self synchronizePreferences];
 }
 
@@ -123,14 +126,8 @@ static int tableIconSize = 24;
 - (void)synchronizePreferences{
     
     // this should be a unique list of the identifiers that we previously had in prefs; bundles are compared case-insensitively
-    NSMutableSet *applicationSet = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &OFCaseInsensitiveStringSetCallbacks);
-    [applicationSet autorelease];
-    
-    NSEnumerator *enumerator = [applications objectEnumerator];
-    BDSKSearchResult *dictionary;
-    
-    while(dictionary = [enumerator nextObject])
-        [applicationSet addObject:[dictionary valueForKey:@"comparisonKey"]];
+    NSMutableSet *applicationSet = [NSMutableSet caseInsensitiveStringSet];
+    [applicationSet addObjectsFromArray:[[arrayController content] valueForKey:BDSKBundleIdentifierKey]];
     
     CFPreferencesSetAppValue(BDSKInputManagerLoadableApplications, (CFArrayRef)[applicationSet allObjects], BDSKInputManagerID);
     BOOL success = CFPreferencesAppSynchronize( (CFStringRef)BDSKInputManagerID );
@@ -150,8 +147,6 @@ static int tableIconSize = 24;
     BOOL isCurrent;
     if([[NSApp delegate] isInputManagerInstalledAndCurrent:&isCurrent])
         [enableButton setTitle:isCurrent ? NSLocalizedString(@"Reinstall",@"Reinstall input manager") : NSLocalizedString(@"Update", @"Update input manager")];
-    
-    [tableView reloadData];
     
     // this is a hack to show the blue highlight for the tableview, since it keeps losing first responder status
     [[controlBox window] makeFirstResponder:tableView];
@@ -267,12 +262,10 @@ static int tableIconSize = 24;
 }
 
 - (IBAction)removeApplication:(id)sender{
-    if([tableView selectedRow] != -1){
-        [self willChangeValueForKey:@"applications"];
-        [applications removeObjectAtIndex:[tableView selectedRow]];
-        [self didChangeValueForKey:@"applications"];
-        [self synchronizePreferences];
-    }
+    unsigned int selIndex = [arrayController selectionIndex];
+    if (NSNotFound != selIndex)
+        [arrayController removeObjectAtArrangedObjectIndex:selIndex];
+    [self synchronizePreferences];
     [self updateUI];
 }
 
