@@ -113,6 +113,11 @@
     }
 }
 
+- (void)setUndoManager:(NSUndoManager *)newUndoManager{
+    [super setUndoManager:newUndoManager];
+    [filter setUndoManager:newUndoManager];
+}
+
 - (BOOL)containsItem:(BibItem *)item {
 	return [filter testItem:item];
 }
