@@ -61,6 +61,8 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKURLGroupSheetController.h"
+#import "BDSKScriptGroupSheetController.h"
 
 @implementation BibDocument (Groups)
 
@@ -1129,74 +1131,38 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)addURLGroupAction:(id)sender {
-    [URLField setStringValue:@"http://"];
-    [NSApp beginSheet:URLGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(URLGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    BDSKURLGroupSheetController *sheetController = [[BDSKURLGroupSheetController alloc] init];
+    [sheetController beginSheetModalForWindow:documentWindow
+                                modalDelegate:self
+                               didEndSelector:@selector(URLGroupSheetDidEnd:returnCode:contextInfo:)
+                                  contextInfo:NULL];
+    [sheetController release];
 }
 
-- (void)URLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        if ([sheet makeFirstResponder:nil] == NO)
-            [sheet endEditingFor:nil];
-        NSString *urlString = [URLField stringValue];
-        NSURL *url = nil;
-        if ([urlString rangeOfString:@"://"].location == NSNotFound) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
-                url = [NSURL fileURLWithPath:urlString];
-            else
-                url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
-        } else
-            url = [NSURL URLWithString:urlString];
-		BDSKURLGroup *group = [[BDSKURLGroup alloc] initWithURL:url];
-		[self addURLGroup:group];
-		[group release];
+        unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
+		[self addURLGroup:[sheetController group]];
+        
+		[groupTableView reloadData];
+		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group",@"Add external file group")];
 	}
-	
-}
-
-- (IBAction)dismissURLGroupSheet:(id)sender {
-    [URLGroupSheet orderOut:sender];
-    [NSApp endSheet:URLGroupSheet returnCode:[sender tag]];
-}
-
-- (void)chooseURLPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
-        NSURL *url = [[oPanel URLs] firstObject];
-        [URLField setStringValue:[url absoluteString]];
-    }
-}
-
-- (IBAction)chooseURLForGroupAction:(id)sender {
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:NO];
-    [oPanel setResolvesAliases:NO];
-    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
-    
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:URLGroupSheet
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseURLPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
 }
 
 - (IBAction)addScriptGroupAction:(id)sender {
-    [scriptPathField setStringValue:@""];
-    [scriptArgumentsTextView setString:@""];
-    [NSApp beginSheet:scriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(scriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    BDSKScriptGroupSheetController *sheetController = [[BDSKScriptGroupSheetController alloc] init];
+    [sheetController beginSheetModalForWindow:documentWindow
+                                modalDelegate:self
+                               didEndSelector:@selector(scriptGroupSheetDidEnd:returnCode:contextInfo:)
+                                  contextInfo:NULL];
+    [sheetController release];
 }
 
-- (void)scriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
+- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        if ([sheet makeFirstResponder:nil] == NO)
-            [sheet endEditingFor:nil];
-        NSString *path = [scriptPathField stringValue];
-        int type = [scriptTypePopup indexOfSelectedItem];
-        NSString *arguments = [scriptArgumentsTextView string];
-		BDSKScriptGroup *group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
         unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
-		[self addScriptGroup:group];
-		[group release];
+		[self addScriptGroup:[sheetController group]];
         
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
@@ -1205,43 +1171,6 @@ The groupedPublications array is a subset of the publications array, developed b
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
-}
-
-- (IBAction)dismissScriptGroupSheet:(id)sender {
-    NSString *path = [scriptPathField stringValue];
-    BOOL isDir;
-    if ([sender tag] == NSOKButton && (NO == [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] || isDir || NO == [[NSFileManager defaultManager] isExecutableFileAtPath:path])) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Invalid Script Path")
-                                         defaultButton:nil
-                                       alternateButton:nil
-                                           otherButton:nil
-                            informativeTextWithFormat:NSLocalizedString(@"The path does not point to a valid script.", @"")];
-        [alert beginSheetModalForWindow:scriptGroupSheet modalDelegate:self didEndSelector:NULL contextInfo:NULL];
-        return;
-    }
-    [scriptGroupSheet orderOut:sender];
-    [NSApp endSheet:scriptGroupSheet returnCode:[sender tag]];
-}
-
-- (void)chooseScriptPanelDidEnd:(NSOpenPanel *)oPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-    if (returnCode == NSOKButton) {
-        NSURL *url = [[oPanel URLs] firstObject];
-        [scriptPathField setStringValue:[url path]];
-    }
-}
-
-- (IBAction)chooseScriptForGroupAction:(id)sender {
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:NO];
-    [oPanel setResolvesAliases:NO];
-    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
-    
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-                    modalForWindow:scriptGroupSheet
-                     modalDelegate:self 
-                    didEndSelector:@selector(chooseScriptPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
 }
 
 - (IBAction)addGroupButtonAction:(id)sender {
@@ -1283,42 +1212,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 }
 
-- (void)changeURLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
-	if(returnCode == NSOKButton){
-        if ([sheet makeFirstResponder:nil] == NO)
-            [sheet endEditingFor:nil];
-        NSString *urlString = [URLField stringValue];
-        NSURL *url = nil;
-        if ([urlString rangeOfString:@"://"].location == NSNotFound) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
-                url = [NSURL fileURLWithPath:urlString];
-            else
-                url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
-        } else
-            url = [NSURL URLWithString:urlString];
-		BDSKURLGroup *group = (BDSKURLGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
-		[group setURL:url];
-		[[self undoManager] setActionName:NSLocalizedString(@"Edit External File Group",@"Edit external file group")];
-	}
-	
-}
-
-- (void)changeScriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
-	if(returnCode == NSOKButton){
-        if ([sheet makeFirstResponder:nil] == NO)
-            [sheet endEditingFor:nil];
-        NSString *path = [scriptPathField stringValue];
-        int type = [scriptTypePopup indexOfSelectedItem];
-        NSString *arguments = [scriptArgumentsTextView string];
-		BDSKScriptGroup *group = (BDSKScriptGroup *)[self objectInGroupsAtIndex:[groupTableView selectedRow]];
-		[group setScriptPath:path];
-		[group setScriptArguments:arguments];
-		[group setScriptType:type];
-		[[self undoManager] setActionName:NSLocalizedString(@"Edit Script Group",@"Edit script group")];
-	}
-	
-}
-
 - (IBAction)editGroupAction:(id)sender {
 	if ([groupTableView numberOfSelectedRows] != 1) {
 		NSBeep();
@@ -1338,7 +1231,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	if ([group isSmart]) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
-        
         [filterController beginSheetModalForWindow:documentWindow];
         [filterController release];
 	} else if ([group isCategory]) {
@@ -1346,13 +1238,13 @@ The groupedPublications array is a subset of the publications array, developed b
         OBASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
 	} else if ([group isURL]) {
-        [URLField setStringValue:[[(BDSKURLGroup *)group URL] absoluteString]];
-        [NSApp beginSheet:URLGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(changeURLGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+        BDSKURLGroupSheetController *sheetController = [(BDSKURLGroupSheetController *)[BDSKURLGroupSheetController alloc] initWithGroup:(BDSKURLGroup *)group];
+        [sheetController beginSheetModalForWindow:documentWindow];
+        [sheetController release];
 	} else if ([group isScript]) {
-        [scriptPathField setStringValue:[(BDSKScriptGroup *)group scriptPath]];
-        [scriptTypePopup selectItemAtIndex:[(BDSKScriptGroup *)group scriptType]];
-        [scriptArgumentsTextView setString:[(BDSKScriptGroup *)group scriptArguments]];
-        [NSApp beginSheet:scriptGroupSheet modalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(changeScriptGroupSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+        BDSKScriptGroupSheetController *sheetController = [(BDSKScriptGroupSheetController *)[BDSKScriptGroupSheetController alloc] initWithGroup:(BDSKScriptGroup *)group];
+        [sheetController beginSheetModalForWindow:documentWindow];
+        [sheetController release];
 	}
 }
 

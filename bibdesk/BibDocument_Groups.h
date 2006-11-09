@@ -38,7 +38,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKFilterController;
+@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController;
 
 @interface BibDocument (Groups)
 
@@ -118,11 +118,7 @@
 - (IBAction)addSmartGroupAction:(id)sender;
 - (IBAction)addStaticGroupAction:(id)sender;
 - (IBAction)addURLGroupAction:(id)sender;
-- (IBAction)dismissURLGroupSheet:(id)sender;
-- (IBAction)chooseURLForGroupAction:(id)sender;
 - (IBAction)addScriptGroupAction:(id)sender;
-- (IBAction)dismissScriptGroupSheet:(id)sender;
-- (IBAction)chooseScriptForGroupAction:(id)sender;
 - (IBAction)addGroupButtonAction:(id)sender;
 - (IBAction)removeSelectedGroups:(id)sender;
 - (IBAction)editGroupAction:(id)sender;
@@ -131,8 +127,8 @@
 - (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
-- (void)URLGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
-- (void)scriptGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)mergeInExternalGroup:(id)sender;
 - (IBAction)mergeInExternalPublications:(id)sender;
