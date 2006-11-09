@@ -66,6 +66,11 @@
 
 @implementation NSMutableSet (BDSKExtensions)
 
++ (id)caseInsensitiveStringSet;
+{
+    return [(id)CFSetCreateMutable(kCFAllocatorDefault, 0, &BDSKCaseInsensitiveStringSetCallBacks) autorelease];
+}
+
 - (id)initCaseInsensitive
 {
 	self = [self initCaseInsensitiveWithCapacity:0];

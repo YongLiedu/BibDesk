@@ -44,6 +44,8 @@
 
 @interface NSMutableSet (BDSKExtensions)
 
++ (id)caseInsensitiveStringSet;
+
 - (id)initCaseInsensitive;
 - (id)initCaseInsensitiveWithCapacity:(unsigned)numItems;
 
