@@ -706,13 +706,18 @@ The groupedPublications array is a subset of the publications array, developed b
 			shouldUpdate = YES;
     }
     
-    [groupTableView reloadData];
-    
-    if(shouldUpdate == YES){
-        // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
+    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-		[self displaySelectedGroups];
+        [self sortGroupsByKey:sortGroupsKey];
         [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    }else{
+        [groupTableView reloadData];
+        if(shouldUpdate == YES){
+            // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
+            NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+            [self displaySelectedGroups];
+            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+        }
     }
 }
 
