@@ -206,6 +206,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	NSMutableDictionary *promisedPboardTypes;
     NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
     
+    NSMutableDictionary *defaultTableColumnWidths;
+    
     BOOL isDocumentClosed;
 }
 

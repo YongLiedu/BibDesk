@@ -361,6 +361,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 	[promisedPboardTypes release];
     [sharedGroups release];
     [sharedGroupSpinners release];
+    [defaultTableColumnWidths release];
     [super dealloc];
 }
 
@@ -2240,7 +2241,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return;
     
     lastSelectedColumnForSort = [tc retain];
-    sortDescending = nil == windowSetup ? [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey] : [windowSetup boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    sortDescending = [windowSetup  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
     [self sortPubsByColumn:nil];
     [tableView setHighlightedTableColumn:tc];
 }
@@ -2306,16 +2307,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	return [headerTitleCache objectForKey:field];
 }
 
-- (NSArray *)defaultTableColumnIdentifiers {
-    return [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKShownColsNamesKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey]];
-}
-
-- (NSDictionary *)defaultTableColumnWidthsAndIdentifiers {
-    return [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
-}
-
 - (void)setupDefaultTableColumns{
-    [self setupTableColumnsWithIdentifiers:[self defaultTableColumnIdentifiers]];
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    defaultTableColumnWidths = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey] mutableCopy];
+    [defaultTableColumnWidths addEntriesFromDictionary:[xattrDefaults objectForKey:BDSKColumnWidthsKey]];
+    NSArray *defaultTableColumnIdentifiers = [xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey]];
+    [self setupTableColumnsWithIdentifiers:defaultTableColumnIdentifiers];
 }
 
 //note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
@@ -2326,9 +2323,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *colName;
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
     
-    // get width settings from this doc's xattrs or from prefs
-    NSDictionary *tcWidthsByIdentifier = [self defaultTableColumnWidthsAndIdentifiers];
-    NSNumber *tcWidth = nil;
+    float tcWidth = 0.0;
     NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
 	
     NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[identifiers count]];
@@ -2383,10 +2378,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSEnumerator *columnsE = [columns objectEnumerator];
 	
     while(tc = [columnsE nextObject]){
-        if(tcWidthsByIdentifier && 
-		  (tcWidth = [tcWidthsByIdentifier objectForKey:[tc identifier]])){
-			[tc setWidth:[tcWidth floatValue]];
-        }
+        if(tcWidth = [defaultTableColumnWidths floatForKey:[tc identifier] defaultValue:0.0])
+			[tc setWidth:tcWidth];
 
 		[tableView addTableColumn:tc];
     }

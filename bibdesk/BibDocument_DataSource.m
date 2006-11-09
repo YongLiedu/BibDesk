@@ -352,10 +352,12 @@
 	if([notification object] != tableView) return;
       
     // current setting will override those already in the prefs; we may not be displaying all the columns in prefs right now, but we want to preserve their widths
-    NSMutableDictionary *columns = [NSMutableDictionary dictionary];
-    [columns addEntriesFromDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
-    [columns addEntriesFromDictionary:[self currentTableColumnWidthsAndIdentifiers]];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:columns forKey:BDSKColumnWidthsKey];
+    NSDictionary *currentWidths = [self currentTableColumnWidthsAndIdentifiers];
+    NSMutableDictionary *defaultWidths = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey] mutableCopy];
+    [defaultWidths addEntriesFromDictionary:currentWidths];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
+    [defaultWidths release];
+    [defaultTableColumnWidths addEntriesFromDictionary:currentWidths];
 }
 
 
