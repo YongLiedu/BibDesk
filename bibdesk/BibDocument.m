@@ -361,7 +361,6 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 	[promisedPboardTypes release];
     [sharedGroups release];
     [sharedGroupSpinners release];
-    [defaultTableColumnWidths release];
     [super dealloc];
 }
 
@@ -2308,10 +2307,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)setupDefaultTableColumns{
-    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    defaultTableColumnWidths = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey] mutableCopy];
-    [defaultTableColumnWidths addEntriesFromDictionary:[xattrDefaults objectForKey:BDSKColumnWidthsKey]];
-    NSArray *defaultTableColumnIdentifiers = [xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey]];
+    NSArray *defaultTableColumnIdentifiers = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKShownColsNamesKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey]];
     [self setupTableColumnsWithIdentifiers:defaultTableColumnIdentifiers];
 }
 
@@ -2325,6 +2321,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     float tcWidth = 0.0;
     NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
+    
+    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
+    [defaultTableColumnWidths addEntriesFromDictionary:[[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey]];
 	
     NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[identifiers count]];
 	
@@ -2369,6 +2368,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			}else{	
 				[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
 			}
+            
+            if(tcWidth = [defaultTableColumnWidths floatForKey:colName defaultValue:0.0])
+                [tc setWidth:tcWidth];
 		}
 		
 		[columns addObject:tc];
@@ -2377,12 +2379,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [tableView removeAllTableColumns];
     NSEnumerator *columnsE = [columns objectEnumerator];
 	
-    while(tc = [columnsE nextObject]){
-        if(tcWidth = [defaultTableColumnWidths floatForKey:[tc identifier] defaultValue:0.0])
-			[tc setWidth:tcWidth];
-
+    while(tc = [columnsE nextObject])
 		[tableView addTableColumn:tc];
-    }
+    
     [tableView setHighlightedTableColumn: lastSelectedColumnForSort]; 
     [tableView tableViewFontChanged:nil];
     
