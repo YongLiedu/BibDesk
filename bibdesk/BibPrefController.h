@@ -145,7 +145,6 @@ extern NSString *BDSKWarnOnRenameGroupKey;
 extern NSString *BDSKWarnOnRemovalFromGroupKey;
 
 extern NSString *BDSKCurrentQuickSearchKey;
-extern NSString *BDSKCurrentQuickSearchTextDictKey;
 extern NSString *BDSKQuickSearchKeys;
 
 extern NSString *BDSKPapersFolderPathKey;

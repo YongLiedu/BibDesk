@@ -158,7 +158,6 @@ NSString *BDSKWarnOnRenameGroupKey = @"BDSKWarnOnRenameGroup";
 NSString *BDSKWarnOnRemovalFromGroupKey = @"BDSKWarnOnRemovalFromGroupKey";
 
 NSString *BDSKCurrentQuickSearchKey = @"Current Quick Search Key";
-NSString *BDSKCurrentQuickSearchTextDictKey = @"Current Quick Search Text Dictionary";
 NSString *BDSKQuickSearchKeys = @"Quick Search Keys";
 
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
