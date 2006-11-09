@@ -46,4 +46,5 @@
     SEL selector;
     BOOL ascending;
 }
++ (BDSKTableSortDescriptor *)tableSortDescriptorForIndentifier:(NSString *)tcID ascending:(BOOL)ascend;
 @end

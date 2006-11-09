@@ -344,7 +344,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)setDocumentInfoWithoutUndo:(NSDictionary *)dict;
 - (void)setDocumentInfo:(NSDictionary *)dict;
 - (NSString *)documentInfoForKey:(NSString *)key;
-- (void)setDocumentInfo:(NSString *)value forKey:(NSString *)key;
 - (id)valueForUndefinedKey:(NSString *)key;
 - (NSString *)documentInfoString;
 - (IBAction)showDocumentInfoWindow:(id)sender;

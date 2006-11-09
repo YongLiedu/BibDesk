@@ -40,6 +40,7 @@
 #import <OmniBase/assertions.h>
 #import <OmniBase/OBUtilities.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
+#import "BibTypeManager.h"
 
 @interface NSObject (FastKVC)
 
@@ -77,6 +78,106 @@
 @end
 
 @implementation BDSKTableSortDescriptor
+
++ (BDSKTableSortDescriptor *)tableSortDescriptorForIndentifier:(NSString *)tcID ascending:(BOOL)ascend{
+
+    NSParameterAssert([NSString isEmptyString:tcID] == NO);
+    
+    BDSKTableSortDescriptor *sortDescriptor = nil;
+    
+	if([tcID isEqualToString:BDSKCiteKeyString]){
+		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"citeKey" ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKTitleString]){
+		
+		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"title.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+		
+	}else if([tcID isEqualToString:BDSKContainerString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"container.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKDateString]){
+		
+		sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"date" ascending:ascend selector:@selector(compare:)];		
+        
+	}else if([tcID isEqualToString:BDSKDateAddedString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"dateAdded" ascending:ascend selector:@selector(compare:)];
+        
+	}else if([tcID isEqualToString:BDSKDateModifiedString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"dateModified" ascending:ascend selector:@selector(compare:)];
+        
+	}else if([tcID isEqualToString:BDSKFirstAuthorString] ||
+             [tcID isEqualToString:BDSKAuthorString] || [tcID isEqualToString:@"Authors"]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"firstAuthor" ascending:ascend selector:@selector(sortCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKSecondAuthorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"secondAuthor" ascending:ascend selector:@selector(sortCompare:)];
+		
+	}else if([tcID isEqualToString:BDSKThirdAuthorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"thirdAuthor" ascending:ascend selector:@selector(sortCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKLastAuthorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"lastAuthor" ascending:ascend selector:@selector(sortCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKFirstAuthorEditorString] ||
+             [tcID isEqualToString:BDSKAuthorEditorString]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"firstAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKSecondAuthorEditorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"secondAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
+		
+	}else if([tcID isEqualToString:BDSKThirdAuthorEditorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"thirdAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKLastAuthorEditorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"lastAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKEditorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"pubEditors.@firstObject" ascending:ascend selector:@selector(sortCompare:)];
+
+	}else if([tcID isEqualToString:BDSKPubTypeString]){
+
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"pubType" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+        
+    }else if([tcID isEqualToString:BDSKItemNumberString]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"fileOrder" ascending:ascend selector:@selector(compare:)];		
+        
+    }else if([tcID isEqualToString:BDSKBooktitleString]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"Booktitle.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
+        
+    }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:tcID] ||
+             [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID] ||
+             [tcID isURLField]){
+        
+        // use the triStateCompare: for URL fields so the subsort is more useful (this turns the URL comparison into empty/non-empty)
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(triStateCompare:)];
+        
+    }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey] containsObject:tcID]){
+        
+        // Use NSSortDescriptor instead of the BDSKTableSortDescriptor, so 0 values are handled correctly; if we ever store these as NSNumbers, the selector must be changed to compare:.
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(numericCompare:)];
+        
+    }else{
+        // this assumes that all other columns must be NSString objects
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
+	}
+ 
+    OBASSERT(sortDescriptor);
+    return [sortDescriptor autorelease];
+}
 
 - (void)cacheKeys;
 {
