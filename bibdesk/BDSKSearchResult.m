@@ -37,70 +37,81 @@
  */
 
 #import "BDSKSearchResult.h"
-
+#import "NSAttributedString_BDSKExtensions.h"
+#import "NSImage+ToolBox.h"
+#import "BDSKSearchIndex.h"
+#import "BDSKFile.h"
 
 @implementation BDSKSearchResult
 
-- (id)initWithKey:(NSString *)key caseInsensitive:(BOOL)flag
+- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)theScore;
 {
-    if(self = [super init]){
-        // need to make sure the hash is case-insensitive also
-        comparisonKey = (flag ? [[key lowercaseString] copy] : [key copy]);
-        dictionary = [[NSMutableDictionary alloc] initWithCapacity:3];
-        hash = [comparisonKey hash];
-    }
-    return self;
-}
+    
+    NSParameterAssert(NULL != index);
+    NSParameterAssert(NULL != skDocument);
+        
+    if ((self = [super init])) {
+        
+        NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
+        file = [[BDSKFile alloc] initWithURL:theURL];
 
-- (id)initWithKey:(NSString *)key
-{    
-    return [self initWithKey:key caseInsensitive:NO];
+        image = [[NSImage imageForURL:theURL] retain];
+        NSString *theTitle = [anIndex titleForURL:theURL];
+        
+        if (nil == theTitle)
+            theTitle = [theURL path];
+        [theURL release];
+
+        string = [theTitle copy];
+        attributedString = [[NSAttributedString alloc] initWithTeXString:string attributes:nil collapseWhitespace:NO];
+        
+        score = [[NSNumber alloc] initWithFloat:theScore];
+    }
+    
+    return self;
 }
 
 - (void)dealloc
 {
-    [comparisonKey release];
-    [dictionary release];
+    [file release];
+    [attributedString release];
+    [string release];
+    [image release];
+    [score release];
     [super dealloc];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] initWithKey:comparisonKey];
+    BDSKSearchResult *copy = [[[self class] allocWithZone:zone] init];
+    copy->file = [file copy];
+    copy->string = [string copy];
+    copy->attributedString = [attributedString copy];
+    copy->image = [image retain];
+    copy->score = [score retain];
+    return copy;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"Comparison key: %@ \n\t %@", comparisonKey, dictionary];
-}
-
-- (NSString *)comparisonKey
-{
-    return comparisonKey;
+    return [NSString stringWithFormat:@"File: %@ \n\t string = \"%@\"", file, string];
 }
 
 - (unsigned int)hash
 {
-    return hash;
+    return [file hash];
 }
 
-- (BOOL)isEqual:(id)anObject
+- (BOOL)isEqual:(BDSKSearchResult *)anObject
 {
-    if(anObject == self)
-        return YES;
-    
-    return ([[anObject comparisonKey] isEqualToString:comparisonKey] ? YES : NO);
+    return [anObject isKindOfClass:isa] ? [anObject->file isEqual:file] : NO;
 }
 
-- (id)valueForUndefinedKey:(NSString *)key
-{
-    return [dictionary valueForKey:key];
-}
-
-- (void)setValue:(id)value forUndefinedKey:(NSString *)key
-{
-    [dictionary setValue:value forKey:key];
-}
+- (NSImage *)image { return image; }
+- (NSString *)string { return string; }
+- (NSAttributedString *)attributedString { return attributedString; }
+- (NSNumber *)score { return score; }
+- (NSURL *)URL { return [file fileURL]; }
 
 @end
 

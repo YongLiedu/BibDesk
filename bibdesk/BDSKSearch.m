@@ -41,12 +41,6 @@
 #import "BDSKSearchResult.h"
 #import "BDSKSearchIndex.h"
 
-@interface BDSKSearchResult (BDSKSearch)
-
-- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
-
-@end
-
 @interface BDSKSearchPrivateIvars : NSObject
 {
  @private
@@ -301,49 +295,5 @@
 - (SKDocumentID *)documentIDBuffer { return __ids; }
 - (float *)scoreBuffer { return __scores; }
 - (SKDocumentRef *)documentRefBuffer { return __docs; }
-
-@end
-
-
-// convenient init method for search result; could give it members for some variables (title, score)
-
-#import "NSAttributedString_BDSKExtensions.h"
-
-@implementation BDSKSearchResult (BDSKSearch)
-
-- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
-{
-
-    NSParameterAssert(NULL != index);
-    NSParameterAssert(NULL != skDocument);
-    
-    NSURL *theURL = (NSURL *)SKDocumentCopyURL(skDocument);
-    NSString *pathKey = [theURL path];
-        
-    if ((self = [self initWithKey:pathKey])){
-        
-        // the table column is bound to the dictionary with an empty key path; the OATextIconCell is smart enough to recognize that it has a dictionary object value and ask for its keys
-                
-        [self setValue:theURL forKey:@"url"];
-        [self setValue:[NSImage imageForURL:theURL] forKey:OATextWithIconCellImageKey];
-        
-        NSString *title = [anIndex titleForURL:theURL];
-        if (nil == title)
-            title = pathKey;
-                
-        NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithTeXString:title attributes:nil collapseWhitespace:NO];
-        [self setValue:attributedTitle forKey:OATextWithIconCellStringKey]; 
-        [attributedTitle release];
-        [self setValue:title forKey:@"title"];
-                
-        NSNumber *theScore = [[NSNumber alloc] initWithFloat:score];
-        [self setValue:theScore forKey:@"score"];
-        [theScore release];
-    }
-    
-    [theURL release];
-    return self;
-}
-        
 
 @end

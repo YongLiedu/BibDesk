@@ -221,17 +221,14 @@ textRect.origin.y += vOffset; \
     _oaFlags.settingUpFieldEditor = NO;
 }
 
-- (void)setObjectValue:(id <NSObject, NSCopying>)obj;
+- (void)setObjectValue:(id <NSCopying>)obj;
 {
-    if ([obj isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *dictionary = (NSDictionary *)obj;
-        
-        [super setObjectValue:[dictionary objectForKey:OATextWithIconCellStringKey]];
-        [self setIcon:[dictionary objectForKey:OATextWithIconCellImageKey]];
-    } else {
-        [super setObjectValue:obj];
-        [self setIcon:nil];
-    }
+    [self setIcon:[(NSObject *)obj valueForKey:OATextWithIconCellImageKey]];
+    // using -[self/super setAttributedStringValue:] causes an endless loop and blows the stack
+    id objectValue = [(NSObject *)obj valueForKey:@"attributedString"];
+    if (nil == objectValue)
+        objectValue = [(NSObject *)obj valueForKey:OATextWithIconCellStringKey];
+    [super setObjectValue:objectValue];
 }
 
 // API
@@ -361,3 +358,20 @@ textRect.origin.y += vOffset; \
 
 @end
 
+// Category that implements -[NSObject valueForKey:] with OATextWithIconCellStringKey and OATextWithIconCellImageKey, so we can use any object that is KVC-compliant for -string or -attributedString and -image.
+@interface NSObject (BDSKTextWithIconCell) @end
+@implementation NSObject (BDSKTextWithIconCell)
+- (id)attributedString { return nil; }
+- (id)string { return nil; }
+- (id)image { return nil; }
+@end
+
+// special cases for strings
+@interface NSAttributedString (BDSKTextWithIconCell) @end
+@implementation NSAttributedString (BDSKTextWithIconCell)
+- (id)attributedString { return self; }
+@end
+@interface NSString (BDSKTextWithIconCell) @end
+@implementation NSString (BDSKTextWithIconCell)
+- (NSString *)string { return self; }
+@end

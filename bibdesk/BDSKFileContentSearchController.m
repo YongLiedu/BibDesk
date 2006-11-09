@@ -154,7 +154,7 @@
 
 - (NSArray *)titlesOfSelectedItems
 {
-    return [[resultsArrayController selectedObjects] valueForKey:@"title"];
+    return [[resultsArrayController selectedObjects] valueForKey:@"string"];
 }
 
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
@@ -179,7 +179,7 @@
         return;
     
     BOOL isDir;
-    NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"url"];
+    NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] URL];
     
     OBASSERT(fileURL);
     OBASSERT(searchKey);
