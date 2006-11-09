@@ -2100,7 +2100,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // should never be nil at this point
     OBPRECONDITION(lastSortedTableColumnIdentifier);
     
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIndentifier:[tableColumn identifier] ascending:!sortDescending], [BDSKTableSortDescriptor tableSortDescriptorForIndentifier:lastSortedTableColumnIdentifier ascending:!sortDescending], nil];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:[tableColumn identifier] ascending:!sortDescending], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:lastSortedTableColumnIdentifier ascending:!sortDescending], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
 

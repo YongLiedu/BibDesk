@@ -66,7 +66,7 @@
         CFStringRef firstKey = CFStringCreateWithSubstring(alloc, (CFStringRef)aKey, CFRangeMake(0, rangeOfDot.location));
         CFIndex nextStartingIndex = rangeOfDot.location + rangeOfDot.length;
         CFStringRef restOfPath = CFStringCreateWithSubstring(alloc, (CFStringRef)aKey, CFRangeMake(nextStartingIndex, keyPathLength - nextStartingIndex));
-        value = [[self valueForKey:(NSString *)firstKey] valueForKeyPath:(NSString *)restOfPath];
+        value = [[self valueForKey:(NSString *)firstKey] bdsk_valueForKeyPath:(NSString *)restOfPath];
 
         CFRelease(firstKey);
         CFRelease(restOfPath);
@@ -79,7 +79,7 @@
 
 @implementation BDSKTableSortDescriptor
 
-+ (BDSKTableSortDescriptor *)tableSortDescriptorForIndentifier:(NSString *)tcID ascending:(BOOL)ascend{
++ (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend{
 
     NSParameterAssert([NSString isEmptyString:tcID] == NO);
     
@@ -256,6 +256,7 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
         }
     } 	
     
+    // we use the IMP directly since performSelector: returns an id
     typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
     comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
     NSComparisonResult result = comparator(value1, selector, value2);
@@ -266,7 +267,7 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
 - (NSComparisonResult)compareObject:(id)object1 toObject:(id)object2 {
 
     id value1, value2;
-
+    OBASSERT_NOT_REACHED("Inefficient code path; use -[NSArray sortedArrayUsingMergesortWithDescriptors:] instead");
     // get the values in bulk; since the same keypath is used for both objects, why compute it twice?
     __GetValuesUsingCache(self, object1, object2, &value1, &value2);
     return [self compareEndObject:object1 toEndObject:object2];
