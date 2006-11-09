@@ -502,6 +502,22 @@ The groupedPublications array is a subset of the publications array, developed b
         }
     }
     
+    // reset the dictionary of spinners
+    if (sharedGroupSpinners == nil) {
+        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+    } else {
+        NSEnumerator *groupEnum = [sharedGroups objectEnumerator];
+        BDSKSharedGroup *group;
+        id uniqueID;
+        while (group = [groupEnum nextObject]) {
+            if([array indexOfObjectIdenticalTo:group] != NSNotFound)
+                continue;
+            uniqueID = [group uniqueID];
+            [[sharedGroupSpinners objectForKey:uniqueID] removeFromSuperview];
+            [sharedGroupSpinners removeObjectForKey:uniqueID];
+        }
+    }
+    
     [sharedGroups release];
     sharedGroups = nil;
     if (array != nil) {
@@ -509,14 +525,6 @@ The groupedPublications array is a subset of the publications array, developed b
         // now sort using the current column and order
         SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
         [sharedGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
-    }
-    
-    // reset the dictionary of spinners
-    if (sharedGroupSpinners == nil) {
-        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
-    } else {
-        [[sharedGroupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-        [sharedGroupSpinners removeAllObjects];
     }
     
     [groupTableView reloadData];
