@@ -656,7 +656,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
         
         // We could set each of these as a separate attribute name on the file, but then we'd need to muck around with prepending net.sourceforge.bibdesk. to each key, and that seems messy.
-        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        NSMutableDictionary *dictionary = [[self mainWindowSetupDictionaryFromExtendedAttributes] mutableCopy];
         
         [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
@@ -677,17 +677,14 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         [dictionary setObject:selectedKeys forKey:BDSKSelectedPublicationsKey];
         [dictionary setPointValue:[[tableView enclosingScrollView] scrollPositionAsPercentage] forKey:BDSKDocumentScrollPercentageKey];
         
-        float pdfScaleFactor, rtfScaleFactor;
         if(previewer){
-            pdfScaleFactor = [previewer PDFScaleFactor];
-            rtfScaleFactor = [previewer RTFScaleFactor];
-        }else{
-            NSDictionary *oldDict = [self mainWindowSetupDictionaryFromExtendedAttributes];
-            pdfScaleFactor = [oldDict floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0];
-            rtfScaleFactor = [oldDict floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0];
+            [dictionary setFloatValue:[previewer PDFScaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
+            [dictionary setFloatValue:[previewer RTFScaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
         }
-        [dictionary setFloatValue:pdfScaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
-        [dictionary setFloatValue:rtfScaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
+        
+        if(fileSearchController){
+            [dictionary setObject:[fileSearchController sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
+        }
         
         NSError *error;
         
@@ -697,6 +694,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
             NSLog(@"%@: %@", self, error);
         }
         
+        [dictionary release];
     } 
 }
 

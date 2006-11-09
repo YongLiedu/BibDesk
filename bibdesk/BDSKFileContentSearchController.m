@@ -112,11 +112,6 @@
     [textCell setDrawsHighlight:NO];
     [[tableView tableColumnWithIdentifier:@"name"] setDataCell:textCell];
     [textCell release];
-        
-    // preserve sort behavior between launches (set in windowWillClose:)
-    NSData *sortDescriptorData = [[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey];
-    if(sortDescriptorData != nil)
-        [resultsArrayController setSortDescriptors:[NSUnarchiver unarchiveObjectWithData:sortDescriptorData]];
     
     OBPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -281,6 +276,18 @@
     return results;
 }
 
+- (NSData *)sortDescriptorData
+{
+    [self window];
+    return [NSArchiver archivedDataWithRootObject:[resultsArrayController sortDescriptors]];
+}
+
+- (void)setSortDescriptorData:(NSData *)data
+{
+    [self window];
+    [resultsArrayController setSortDescriptors:[NSUnarchiver unarchiveObjectWithData:data]];
+}
+
 #pragma mark -
 #pragma mark SearchKit methods
 
@@ -335,9 +342,7 @@
 
 - (void)saveSortDescriptors
 {
-    NSData *sortDescriptorData = [NSArchiver archivedDataWithRootObject:[resultsArrayController sortDescriptors]];
-    OBPRECONDITION(sortDescriptorData);
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:sortDescriptorData forKey:BDSKFileContentSearchSortDescriptorKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
 }
 
 - (void)windowWillClose:(NSNotification *)notification

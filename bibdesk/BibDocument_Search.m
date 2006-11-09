@@ -423,9 +423,13 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     [tableView reloadData];
     [self sortPubsByColumn:nil];
     
-    if(fileSearchController == nil)
+    if(fileSearchController == nil){
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
-
+        NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey defaultObject:[[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey]];
+        if(sortDescriptorData)
+            [fileSearchController setSortDescriptorData:sortDescriptorData];
+    }
+    
     NSView *contentView = [fileSearchController searchContentView];
     NSRect frame = [splitView frame];
     [contentView setFrame:frame];

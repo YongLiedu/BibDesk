@@ -104,6 +104,9 @@
 
 - (void)setResults:(NSArray *)newResults;
 
+- (NSData *)sortDescriptorData;
+- (void)setSortDescriptorData:(NSData *)data;
+
 - (void)saveSortDescriptors;
 - (void)restoreDocumentState;
 - (void)stopSearching;

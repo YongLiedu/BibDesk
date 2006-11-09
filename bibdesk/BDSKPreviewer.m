@@ -87,8 +87,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
     if (sharedPreviewer == nil) {
         sharedPreviewer = [[self alloc] init];
-        [sharedPreviewer setPDFScaleFactor:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey]];
-        [sharedPreviewer setRTFScaleFactor:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey]];
     }
     return sharedPreviewer;
 }
@@ -98,10 +96,6 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         // this reflects the currently expected state, not necessarily the actual state
         // it corresponds to the last drawing item added to the mainQueue
         previewState = BDSKUnknownPreviewState;
-        
-        // these do not necessarily reflect the actual scale factors of the views, used to set them before the nib is loaded
-        pdfScaleFactor = 0.0;
-        rtfScaleFactor = 1.0;
         
         // otherwise a document's previewer might mess up the window position of the shared previewer
         [self setShouldCascadeWindows:NO];
@@ -117,6 +111,8 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 #pragma mark UI setup and display
 
 - (void)awakeFromNib{
+    float pdfScaleFactor = 0.0;
+    float rtfScaleFactor = 1.0;
     BDSKCollapsibleView *collapsibleView = (BDSKCollapsibleView *)[[[progressOverlay contentView] subviews] firstObject];
     NSSize minSize = [progressIndicator frame].size;
     
@@ -131,6 +127,9 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         
         // overlay the progressIndicator over the contentView
         [progressOverlay overlayView:[[self window] contentView]];
+        
+        pdfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
+        rtfScaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
         
         // register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -194,32 +193,26 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
 - (float)PDFScaleFactor;
 {
-    if([self isWindowLoaded])
-        return [pdfView autoScales] ? 0.0 : [pdfView scaleFactor];
-    else
-        return pdfScaleFactor;
+    [self window];
+    return [pdfView autoScales] ? 0.0 : [pdfView scaleFactor];
 }
 
 - (void)setPDFScaleFactor:(float)scaleFactor;
 {
-    pdfScaleFactor = scaleFactor;
-    if([self isWindowLoaded])
-        [pdfView setScaleFactor:scaleFactor];
+    [self window];
+    [pdfView setScaleFactor:scaleFactor];
 }
 
 - (float)RTFScaleFactor;
 {
-    if([self isWindowLoaded])
-        return [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] scaleFactor];
-    else
-        return rtfScaleFactor;
+    [self window];
+    return [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] scaleFactor];
 }
 
 - (void)setRTFScaleFactor:(float)scaleFactor;
 {
-    rtfScaleFactor = scaleFactor;
-    if([self isWindowLoaded])
-        [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:scaleFactor];
+    [self window];
+    [(BDSKZoomableScrollView *)[rtfPreviewView enclosingScrollView] setScaleFactor:scaleFactor];
 }
 
 - (BOOL)isVisible{
