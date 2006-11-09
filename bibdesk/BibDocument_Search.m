@@ -276,7 +276,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	}
 	
 	[tableView deselectAll:nil];
-    // @@ performance: this kills us on large files, since it gets called for every updateGroupsPreservingSelection (any add/del)
+    // @@ performance: this kills us on large files, since it gets called for every updateCategoryGroupsPreservingSelection (any add/del)
 	[self sortPubsByColumn:nil]; // resort
 	[self updateUI];
 	if(pubsToSelect)

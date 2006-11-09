@@ -451,7 +451,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
     // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
-	[self updateGroupsPreservingSelection:NO];
+	[self updateCategoryGroupsPreservingSelection:NO];
 }
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
@@ -578,7 +578,7 @@ The groupedPublications array is a subset of the publications array, developed b
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
 // and a count, and a group knows how to compare itself with other groups for sorting/equality, but doesn't know 
 // which pubs are associated with it
-- (void)updateGroupsPreservingSelection:(BOOL)preserve{
+- (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve{
     // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
     [groupTableView setDelegate:nil];
     

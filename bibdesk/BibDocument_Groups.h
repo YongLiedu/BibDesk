@@ -87,7 +87,7 @@
 - (NSMutableArray *)staticGroups;
 
 - (NSArray *)selectedGroups;
-- (void)updateGroupsPreservingSelection:(BOOL)preserve;
+- (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
 - (void)displaySelectedGroups;
 - (void)selectGroup:(BDSKGroup *)aGroup;
 - (void)selectGroups:(NSArray *)theGroups;

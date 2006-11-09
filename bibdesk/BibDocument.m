@@ -594,7 +594,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         [[BDSKSharingServer defaultServer] enableSharing];
     
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
-    [self updateGroupsPreservingSelection:NO];
+    [self updateCategoryGroupsPreservingSelection:NO];
     [self updateAllSmartGroups];
 }
 
@@ -1474,6 +1474,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
         [staticGroups release];
         staticGroups = nil;
+        // updating smart and category groups is done by the notification of setPublications:
+        [self sortGroupsByKey:sortGroupsKey]; // resort
 		[tableView deselectAll:self]; // clear before resorting
 		[self searchFieldAction:searchField]; // redo the search
         [self sortPubsByColumn:nil]; // resort
@@ -2573,7 +2575,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[self setFilterField:@""]; // clear the search when adding
 
     // this handles the remaining UI updates necessary (tableView and previews)
-	[self updateGroupsPreservingSelection:YES];
+	[self updateCategoryGroupsPreservingSelection:YES];
     // update smart group counts
     [self updateAllSmartGroups];
 }
@@ -2587,7 +2589,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([[self currentGroupField] isEqualToString:changedKey]){
         // this handles all UI updates if we call it, so don't bother with any others
-        [self updateGroupsPreservingSelection:YES];
+        [self updateCategoryGroupsPreservingSelection:YES];
     } else if(![[searchField stringValue] isEqualToString:@""] && 
        ([quickSearchKey isEqualToString:changedKey] || [quickSearchKey isEqualToString:BDSKAllFieldsString]) ){
         // don't perform a search if the search field is empty
