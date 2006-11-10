@@ -113,7 +113,9 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (NSArray *)selectedGroups {
-	return [groups objectsAtIndexes:[groupTableView selectedRowIndexes]];
+    NSIndexSet *indexSet = [groupTableView selectedRowIndexes];
+    NSParameterAssert(nil != indexSet);
+	return [groups objectsAtIndexes:indexSet];
 }
 
 #pragma mark Notification handlers
