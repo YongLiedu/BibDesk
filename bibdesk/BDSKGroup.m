@@ -76,12 +76,18 @@ static unsigned currentUniqueID = 0;
 // NSCoding protocol, should never be used
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
-    return nil;
+    if (self = [super init]) {
+        uniqueID = [decoder decodeIntForKey:@"uniqueID"];
+        name = [[decoder decodeObjectForKey:@"name"] retain];
+        count = [decoder decodeIntForKey:@"count"];
+    }
+    return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
+    [coder encodeInt:uniqueID forKey:@"uniqueID"];
+    [coder encodeObject:name forKey:@"name"];
+    [coder encodeInt:count forKey:@"count"];
 }
 
 // NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point

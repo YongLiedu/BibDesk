@@ -177,6 +177,17 @@ static NSImage *unlockedIcon = nil;
     [super dealloc];
 }
 
+- (id)initWithCoder:(NSCoder *)aCoder
+{
+    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
+    return nil;
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
+}
+
 // Logging
 
 - (NSString *)description;

@@ -40,7 +40,9 @@
 
 @class BibItem;
 
-@interface BDSKGroup : NSObject <NSCopying> {
+/* note that NSCoding support is presently limited in some cases */
+
+@interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
 	int count;
     unsigned uniqueID;

@@ -70,6 +70,18 @@
     return [[BDSKEmptyGroup allocWithZone:zone] initWithName:aName key:aKey count:aCount];
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        key = [[decoder decodeObjectForKey:@"key"] retain];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [super encodeWithCoder:coder];
+    [coder encodeObject:key forKey:@"key"];
+}
+
 - (void)dealloc {
     [key release];
     [super dealloc];

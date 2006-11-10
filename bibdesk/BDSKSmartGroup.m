@@ -71,6 +71,18 @@
 	return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        filter = [[decoder decodeObjectForKey:@"filter"] retain];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [super encodeWithCoder:coder];
+    [coder encodeObject:filter forKey:@"filter"];
+}
+
 - (void)dealloc {
     [filter release];
     [super dealloc];
