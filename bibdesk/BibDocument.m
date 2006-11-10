@@ -134,6 +134,7 @@ static NSString *BDSKDocumentWindowFrameKey = @"BDSKDocumentWindowFrameKey";
 static NSString *BDSKSelectedPublicationsKey = @"BDSKSelectedPublicationsKey";
 static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey";
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
+static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
@@ -405,10 +406,14 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     
     // some xattr setup has to be done after the window is on-screen
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    [self highlightItemForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]]];
+    
+    NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
+    if ([groupData length])
+        [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
+    [self highlightItemForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-    
+        
     // this is a sanity check; an encoding of zero is not valid, so is a signal we should ignore xattrs
     NSStringEncoding encodingFromFile = [xattrDefaults intForKey:BDSKDocumentStringEncodingKey defaultValue:0];
     if (encodingFromFile && encodingFromFile != [self documentStringEncoding]) {
@@ -670,6 +675,9 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         [dictionary setObject:quickSearchKey forKey:BDSKCurrentQuickSearchKey];
         [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
+        
+        // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
+        [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
         
         NSArray *selectedKeys = [[self selectedPublications] arrayByPerformingSelector:@selector(citeKey)];
         if ([selectedKeys count] == 0 || [self hasExternalGroupsSelected])
@@ -2824,10 +2832,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
 }
 
-- (BOOL)highlightItemForCiteKeys:(NSArray *)citeKeys {
+- (BOOL)highlightItemForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag {
 
     // make sure we can see the publication, if it's still in the document
-    [self selectGroup:[groups allPublicationsGroup]];
+    if (flag)
+        [self selectGroup:[groups allPublicationsGroup]];
     [tableView deselectAll:self];
     [self setFilterField:@""];
 
@@ -2852,7 +2861,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     BOOL matchFound = NO;
 
     if(itemKey != nil)
-        matchFound = [self highlightItemForCiteKeys:[NSArray arrayWithObject:itemKey]];
+        matchFound = [self highlightItemForCiteKeys:[NSArray arrayWithObject:itemKey] selectLibrary:YES];
     
     return matchFound;
 }
