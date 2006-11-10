@@ -114,8 +114,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSArray *)selectedGroups {
     NSIndexSet *indexSet = [groupTableView selectedRowIndexes];
-    NSParameterAssert(nil != indexSet);
-	return [groups objectsAtIndexes:indexSet];
+    // returns nil when groupTableView doesn't exist yet
+	return nil == indexSet ? nil : [groups objectsAtIndexes:indexSet];
 }
 
 #pragma mark Notification handlers
@@ -416,9 +416,20 @@ The groupedPublications array is a subset of the publications array, developed b
     [self searchFieldAction:searchField]; // redo the search to update the table
 }
 
+- (void)selectGroups:(NSArray *)theGroups{
+    unsigned count = [groups count];
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    while(count--){
+        if([theGroups containsObject:[groups objectAtIndex:count]])
+            [indexes addIndex:count];
+    }
+    
+    [groupTableView deselectAll:nil];
+    [groupTableView selectRowIndexes:indexes byExtendingSelection:NO];
+}
+
 - (void)selectGroup:(BDSKGroup *)aGroup{
-    unsigned index = [groups indexOfObjectIdenticalTo:aGroup];
-    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+    [self selectGroups:[NSArray arrayWithObject:aGroup]];
 }
 
 // force the smart groups to refilter their items, so the group content and count get redisplayed
