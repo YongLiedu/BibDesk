@@ -319,10 +319,6 @@
         sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
     
 	[urlGroups addObject:group];
-    
-    SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
-    [urlGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
-    
 	[group setUndoManager:[self undoManager]];
     [groupTableView reloadData];
 }
@@ -356,10 +352,6 @@
         sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
     
 	[scriptGroups addObject:group];
-    
-    SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
-    [scriptGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
-    
 	[group setUndoManager:[self undoManager]];
     [groupTableView reloadData];
 }
@@ -1141,12 +1133,14 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
+        unsigned int insertIndex = NSMaxRange([self rangeOfURLGroups]);
 		[self addURLGroup:[sheetController group]];
         
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group",@"Add external file group")];
+		// updating of the tables is done when finishing the edit of the name
 	}
 }
 
