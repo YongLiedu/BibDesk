@@ -82,6 +82,8 @@ extern NSString *BDSKRISDocumentType;
 extern NSString *BDSKMinimalBibTeXDocumentType;
 extern NSString *BDSKWOSDocumentType;
 extern NSString *BDSKLTBDocumentType;
+extern NSString *BDSKEndNoteDocumentType;
+extern NSString *BDSKMODSDocumentType;
 extern NSString *BDSKAtomDocumentType;
 
 // Some pasteboard types used by the document for dragging and copying.

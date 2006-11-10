@@ -118,6 +118,8 @@ NSString *BDSKRISDocumentType = @"RIS/Medline File";
 NSString *BDSKMinimalBibTeXDocumentType = @"Minimal BibTeX Database";
 NSString *BDSKWOSDocumentType = @"Web of Science File";
 NSString *BDSKLTBDocumentType = @"Amsrefs LTB";
+NSString *BDSKEndNoteDocumentType = @"EndNote XML";
+NSString *BDSKMODSDocumentType = @"MODS XML";
 NSString *BDSKAtomDocumentType = @"Atom XML";
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
@@ -1157,6 +1159,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         data = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:YES error:&error];
     }else if ([aType isEqualToString:BDSKLTBDocumentType]){
         data = [self LTBDataForPublications:items encoding:encoding error:&error];
+    }else if ([aType isEqualToString:BDSKEndNoteDocumentType]){
+        data = [self endNoteDataForPublications:items];
+    }else if ([aType isEqualToString:BDSKMODSDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"mods"]]){
+        data = [self MODSDataForPublications:items];
     }else if ([aType isEqualToString:BDSKAtomDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"atom"]]){
         data = [self atomDataForPublications:items];
     }else{

@@ -44,6 +44,8 @@
 				<string>Minimal BibTeX Database</string>
 				<string>RIS/Medline File</string>
 				<string>Amsrefs LTB</string>
+				<string>EndNote XML</string>
+				<string>MODS XML</string>
 				<string>Atom XML</string>
 			</array>
 		</dict>
@@ -97,6 +99,8 @@
 				<string>Minimal BibTeX Database</string>
 				<string>RIS/Medline File</string>
 				<string>Amsrefs LTB</string>
+				<string>EndNote XML</string>
+				<string>MODS XML</string>
 				<string>Atom XML</string>
 			</array>
 		</dict>
@@ -169,6 +173,34 @@
 			</array>
 			<key>CFBundleTypeName</key>
 			<string>Amsrefs LTB</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>xml</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>EndNote XML</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mod</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>MODS XML</string>
 			<key>CFBundleTypeRole</key>
 			<string>None</string>
 			<key>LSTypeIsPackage</key>
@@ -769,8 +801,6 @@
 					<false/>
 					<key>BDSKUpdateCheckIntervalKey</key>
 					<integer>1</integer>
-					<key>BDSKUpdateCheckLastDateKey</key>
-					<string></string>
 					<key>BDSKUpdateCheckLastDateKey</key>
 					<string></string>
 					<key>BDSKUpdateLatestNotifiedVersionKey</key>
