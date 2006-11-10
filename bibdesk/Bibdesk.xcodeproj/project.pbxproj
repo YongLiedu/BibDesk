@@ -349,8 +349,8 @@
 		CEEFDE020B03ED0200668BB0 /* BDSKScriptGroupSheetController.h in Headers */ = {isa = PBXBuildFile; fileRef = CEEFDDFE0B03ED0200668BB0 /* BDSKScriptGroupSheetController.h */; };
 		CEEFDE030B03ED0200668BB0 /* BDSKURLGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEFDDFF0B03ED0200668BB0 /* BDSKURLGroupSheetController.m */; };
 		CEEFDE040B03ED0200668BB0 /* BDSKURLGroupSheetController.h in Headers */ = {isa = PBXBuildFile; fileRef = CEEFDE000B03ED0200668BB0 /* BDSKURLGroupSheetController.h */; };
-		CEEFDEC10B03F4B400668BB0 /* BDSKScriptGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFDEC00B03F4B400668BB0 /* BDSKScriptGroupSheet.nib */; };
-		CEEFDECB0B03F4CB00668BB0 /* BDSKURLGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFDECA0B03F4CB00668BB0 /* BDSKURLGroupSheet.nib */; };
+		CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */; };
+		CEEFE2B70B03FB0100668BB0 /* BDSKURLGroupSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEEFE2B60B03FB0100668BB0 /* BDSKURLGroupSheet.nib */; };
 		CEF7295609CC88AB00802D48 /* BDSKFieldSheetController.h in Headers */ = {isa = PBXBuildFile; fileRef = CEF7295409CC88AB00802D48 /* BDSKFieldSheetController.h */; };
 		CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7295509CC88AB00802D48 /* BDSKFieldSheetController.m */; };
 		CEF7295A09CC88EB00802D48 /* AddFieldSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF7295809CC88EB00802D48 /* AddFieldSheet.nib */; };
@@ -1708,10 +1708,10 @@
 				CE38FB92091D953900BCB69D /* BDSKFilter.nib */,
 				F97965E20869098200050427 /* BDSKFindPanel.nib */,
 				CE22E1CF0A8CCFBD002CEFB8 /* BDSKOrphanedFilesFinder.nib */,
-				CEEFDEC00B03F4B400668BB0 /* BDSKScriptGroupSheet.nib */,
+				CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */,
 				CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */,
 				3D8663770802CF5C00FF1724 /* BDSKTypeInfoEditor.nib */,
-				CEEFDECA0B03F4CB00668BB0 /* BDSKURLGroupSheet.nib */,
+				CEEFE2B60B03FB0100668BB0 /* BDSKURLGroupSheet.nib */,
 				F9022CC2075804A600C3F701 /* BibDocument.nib */,
 				F9022CC4075804A600C3F701 /* BibEditor.nib */,
 				CE67E314092B569000410758 /* BibEditorDrawer.nib */,
@@ -3078,8 +3078,8 @@
 				CE11B0060AE8FD53008C47AC /* scriptFolderIcon.tiff in Resources */,
 				CEB7CAC30B01F5DD002F8814 /* editnext.tiff in Resources */,
 				CEB7CAC40B01F5DD002F8814 /* editprevious.tiff in Resources */,
-				CEEFDECB0B03F4CB00668BB0 /* BDSKURLGroupSheet.nib in Resources */,
-				CEEFDEC10B03F4B400668BB0 /* BDSKScriptGroupSheet.nib in Resources */,
+				CEEFE2B70B03FB0100668BB0 /* BDSKURLGroupSheet.nib in Resources */,
+				CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3731,7 +3731,7 @@
 			name = BibPref_ScriptHooks.nib;
 			sourceTree = "<group>";
 		};
-		CEEFDEC00B03F4B400668BB0 /* BDSKScriptGroupSheet.nib */ = {
+		CEEFE2B20B03FAF500668BB0 /* BDSKScriptGroupSheet.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				CEEFDE6B0B03EED300668BB0 /* English */,
@@ -3739,7 +3739,7 @@
 			name = BDSKScriptGroupSheet.nib;
 			sourceTree = "<group>";
 		};
-		CEEFDECA0B03F4CB00668BB0 /* BDSKURLGroupSheet.nib */ = {
+		CEEFE2B60B03FB0100668BB0 /* BDSKURLGroupSheet.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				CEEFDE650B03EEC400668BB0 /* English */,
