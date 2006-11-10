@@ -175,7 +175,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 		
 		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
         
-        isDocumentClosed = NO;
+        docState.isDocumentClosed = NO;
         
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
@@ -183,8 +183,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         // need to set this for new documents
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
 
-		sortDescending = NO;
-		sortGroupsDescending = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSortGroupsDescendingKey];
+		docState.sortDescending = NO;
 		sortGroupsKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSortGroupsKey] retain];
 		
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -520,7 +519,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     
     [sortGroupsKey autorelease];
     sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:sortGroupsKey] retain];
-    sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:sortGroupsDescending];
+    docState.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSortGroupsDescendingKey]];
     [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[self currentGroupField]]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
@@ -532,7 +531,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     // workaround for IB flakiness...
     NSSize drawerSize = [customCiteDrawer contentSize];
     [customCiteDrawer setContentSize:NSMakeSize(100.0, drawerSize.height)];
-	showingCustomCiteDrawer = NO;
+	docState.showingCustomCiteDrawer = NO;
 	
 	// ImagePopUpButtons setup
 	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
@@ -569,7 +568,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 	[headerCell setAction:@selector(changeGroupFieldAction:)];
 	[headerCell setTarget:self];
 	[headerCell setMenu:[self groupFieldsMenu]];
-	[headerCell setIndicatorImage:[NSImage imageNamed:sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+	[headerCell setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
     [headerCell setUsesItemFromMenu:NO];
 	[headerCell setTitle:currentGroupField];
     if([headerCell itemWithTitle:currentGroupField])
@@ -618,7 +617,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    isDocumentClosed = YES;
+    docState.isDocumentClosed = YES;
     
     [fileSearchController stopSearching];
     [customCiteDrawer close];
@@ -660,9 +659,9 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
         [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
-        [dictionary setBoolValue:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+        [dictionary setBoolValue:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-        [dictionary setBoolValue:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
+        [dictionary setBoolValue:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
         [dictionary setRectValue:[documentWindow frame] forKey:BDSKDocumentWindowFrameKey];
         [dictionary setFloatValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
@@ -943,7 +942,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSRect savFrame = [saveAccessoryView frame];
     savFrame.size.width = NSWidth([accessoryView frame]);
     
-    if(NSSaveToOperation == currentSaveOperationType){
+    if(NSSaveToOperation == docState.currentSaveOperationType){
         savFrame.origin = NSMakePoint(0.0, SAVE_ENCODING_VIEW_OFFSET);
         [saveAccessoryView setFrame:savFrame];
         [exportAccessoryView addSubview:saveAccessoryView];
@@ -959,7 +958,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [saveTextEncodingPopupButton selectItemWithTitle:documentEncodingName];
     [saveTextEncodingPopupButton setEnabled:YES];
     
-    if(NSSaveToOperation == currentSaveOperationType){
+    if(NSSaveToOperation == docState.currentSaveOperationType){
         [exportSelectionCheckButton setState:NSOffState];
         [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0];
     }
@@ -979,7 +978,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 - (void)runModalSavePanelForSaveOperation:(NSSaveOperationType)saveOperation delegate:(id)delegate didSaveSelector:(SEL)didSaveSelector contextInfo:(void *)contextInfo {
     // Override so we can determine if this is a save, saveAs or export operation, so we can prepare the correct accessory view
-    currentSaveOperationType = saveOperation;
+    docState.currentSaveOperationType = saveOperation;
     [super runModalSavePanelForSaveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
 }
 
@@ -1047,7 +1046,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
              error:(NSError **)outError {
     // Override so we can determine if this is an autosave in writeToURL:ofType:error:.
     // This is necessary on 10.4 to keep from calling the clearChangeCount hack for an autosave, which incorrectly marks the document as clean.
-    currentSaveOperationType = saveOperation;
+    docState.currentSaveOperationType = saveOperation;
     return [super writeToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteOriginalContentsURL error:outError];
 }
 
@@ -1057,7 +1056,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *nsError = nil;
     NSArray *items = publications;
     
-    if(currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
+    if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
         items = [self selectedPublications];
     
     NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
@@ -1071,7 +1070,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if (theItem)
             [self highlightBib:theItem];
         
-        NSString *errTitle = NSAutosaveOperation == currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"") : NSLocalizedString(@"Unable to save file", @"");
+        NSString *errTitle = NSAutosaveOperation == docState.currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"") : NSLocalizedString(@"Unable to save file", @"");
         
         // @@ do this in fileWrapperOfType:forPublications:error:?  should just use error localizedDescription
         NSString *errMsg = [nsError valueForKey:NSLocalizedRecoverySuggestionErrorKey];
@@ -1082,7 +1081,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [nsError setValue:errMsg forKey:NSLocalizedRecoverySuggestionErrorKey];        
     }
     // needed because of finalize changes; don't send -clearChangeCount if the save failed for any reason, or if we're autosaving!
-    else if (currentSaveOperationType != NSAutosaveOperation)
+    else if (docState.currentSaveOperationType != NSAutosaveOperation)
         [self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
     
     // setting to nil is okay
@@ -1145,7 +1144,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSParameterAssert(encoding != 0);
     
     // export operations need their own encoding
-    if(NSSaveToOperation == currentSaveOperationType)
+    if(NSSaveToOperation == docState.currentSaveOperationType)
         encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
         
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
@@ -1604,11 +1603,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding{
-    documentStringEncoding = encoding;
+    docState.documentStringEncoding = encoding;
 }
 
 - (NSStringEncoding)documentStringEncoding{
-    return documentStringEncoding;
+    return docState.documentStringEncoding;
 }
 
 #pragma mark -
@@ -2080,16 +2079,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(lastSelectedColumnForSort == nil)
             return;
         tableColumn = lastSelectedColumnForSort; // use the previous one
-        sortDescending = !sortDescending; // we'll reverse this again in the next step
+        docState.sortDescending = !docState.sortDescending; // we'll reverse this again in the next step
     }
     
     if (lastSelectedColumnForSort == tableColumn) {
         // User clicked same column, change sort order
-        sortDescending = !sortDescending;
+        docState.sortDescending = !docState.sortDescending;
     } else {
         // User clicked new column, change old/new column headers,
         // save new sorting selector, and re-sort the array.
-        sortDescending = NO;
+        docState.sortDescending = NO;
         if (lastSelectedColumnForSort) {
             [tableView setIndicatorImage: nil
                            inTableColumn: lastSelectedColumnForSort];
@@ -2102,7 +2101,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // should never be nil at this point
     OBPRECONDITION(lastSortedTableColumnIdentifier);
     
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:[tableColumn identifier] ascending:!sortDescending], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:lastSortedTableColumnIdentifier ascending:!sortDescending], nil];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:[tableColumn identifier] ascending:!docState.sortDescending], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:lastSortedTableColumnIdentifier ascending:!docState.sortDescending], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
 
@@ -2114,7 +2113,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [shownPublications mergeSortUsingDescriptors:sortDescriptors];
 
     // Set the graphic for the new column header
-    [tableView setIndicatorImage: (sortDescending ?
+    [tableView setIndicatorImage: (docState.sortDescending ?
                                    [NSImage imageNamed:@"NSDescendingSortIndicator"] :
                                    [NSImage imageNamed:@"NSAscendingSortIndicator"])
                    inTableColumn: tableColumn];
@@ -2140,7 +2139,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return;
     
     lastSelectedColumnForSort = [tc retain];
-    sortDescending = [windowSetup  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
+    docState.sortDescending = [windowSetup  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
     [self sortPubsByColumn:nil];
     [tableView setHighlightedTableColumn:tc];
 }
@@ -2149,9 +2148,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     [pw setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
-    [pw setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    [pw setBool:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
-    [pw setBool:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
+    [pw setBool:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
 }  
 
 #pragma mark -
@@ -2472,7 +2471,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)handlePrivateBibItemChanged:(NSString *)changedKey{
     // we can be called from a queue after the document was closed
-    if (isDocumentClosed)
+    if (docState.isDocumentClosed)
         return;
 
 	[self updateAllSmartGroups];
@@ -2584,7 +2583,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)handlePrivateUpdatePreviews{
     // we can be called from a queue after the document was closed
-    if (isDocumentClosed)
+    if (docState.isDocumentClosed)
         return;
 
     OBASSERT([NSThread inMainThread]);
@@ -2602,7 +2601,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // Coalesce these notifications here, since something like select all -> generate cite keys will force a preview update for every
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
-    if (isDocumentClosed == NO)
+    if (docState.isDocumentClosed == NO)
         [self queueSelectorOnce:@selector(handlePrivateUpdatePreviews)];
 }
 

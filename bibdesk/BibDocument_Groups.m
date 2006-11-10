@@ -199,7 +199,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if (array != nil) {
         // now sort using the current column and order
         SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
-        [array sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
+        [array sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
     }
     [groups setSharedGroups:array];
     [array release];
@@ -335,7 +335,7 @@ The groupedPublications array is a subset of the publications array, developed b
         // now sort using the current column and order
         SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ?
                             @selector(countCompare:) : @selector(nameCompare:);
-        [mutableGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
+        [mutableGroups sortUsingSelector:sortSelector ascending:!docState.sortGroupsDescending];
         
         // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
         // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
@@ -1239,16 +1239,16 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)sortGroupsByKey:(NSString *)key{
     if (key == nil) {
         // clicked the sort arrow in the table header, change sort order
-        sortGroupsDescending = !sortGroupsDescending;
+        docState.sortGroupsDescending = !docState.sortGroupsDescending;
     } else if ([key isEqualToString:sortGroupsKey]) {
 		// same key, resort
     } else {
         // change key
         // save new sorting selector, and re-sort the array.
         if ([key isEqualToString:BDSKGroupCellStringKey])
-			sortGroupsDescending = NO;
+			docState.sortGroupsDescending = NO;
 		else
-			sortGroupsDescending = YES; // more appropriate for default count sort
+			docState.sortGroupsDescending = YES; // more appropriate for default count sort
 		[sortGroupsKey release];
         sortGroupsKey = [key retain];
 	}
@@ -1259,22 +1259,22 @@ The groupedPublications array is a subset of the publications array, developed b
     // cache the selection
 	NSArray *selectedGroups = [self selectedGroups];
     
-	NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!sortGroupsDescending  selector:@selector(compare:)];
+	NSSortDescriptor *countSort = [[NSSortDescriptor alloc] initWithKey:@"numberValue" ascending:!docState.sortGroupsDescending  selector:@selector(compare:)];
     [countSort autorelease];
 
     // could use "name" as key path, but then we'd still have to deal with names that are not NSStrings
-    NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!sortGroupsDescending  selector:@selector(nameCompare:)];
+    NSSortDescriptor *nameSort = [[NSSortDescriptor alloc] initWithKey:@"self" ascending:!docState.sortGroupsDescending  selector:@selector(nameCompare:)];
     [nameSort autorelease];
 
     NSArray *sortDescriptors;
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        if(sortGroupsDescending)
+        if(docState.sortGroupsDescending)
             // doc bug: this is supposed to return a copy of the receiver, but sending -release results in a zombie error
             nameSort = [countSort reversedSortDescriptor];
         sortDescriptors = [NSArray arrayWithObjects:countSort, nameSort, nil];
     } else {
-        if(sortGroupsDescending)
+        if(docState.sortGroupsDescending)
             countSort = [countSort reversedSortDescriptor];
         sortDescriptors = [NSArray arrayWithObjects:nameSort, countSort, nil];
     }
@@ -1283,7 +1283,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // Set the graphic for the new column header
 	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
-	[headerPopup setIndicatorImage:[NSImage imageNamed:sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+	[headerPopup setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
 
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];

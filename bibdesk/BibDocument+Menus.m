@@ -533,7 +533,7 @@
 
 - (BOOL) validateToggleToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
-	if(showingCustomCiteDrawer){
+	if(docState.showingCustomCiteDrawer){
 		s = NSLocalizedString(@"Hide Custom \\cite Commands",@"");
 		[menuItem setTitle:s];
 	}else{

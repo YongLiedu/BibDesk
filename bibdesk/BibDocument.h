@@ -103,12 +103,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKMainTableView *tableView;
     IBOutlet BDSKSplitView* splitView;
     IBOutlet BDSKColoredBox* mainBox;
-    // for the splitview double-click handling
-    float lastPreviewHeight;
+    
     BDSKPreviewer *previewer;
 	
 #pragma mark Toolbar variable declarations
-
+    
     NSMutableDictionary *toolbarItems;
     NSToolbarItem *editPubButton;
     NSToolbarItem *delPubButton;
@@ -127,23 +126,19 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSButton *addCustomCiteStringButton;
     IBOutlet NSButton *removeCustomCiteStringButton;
     NSMutableArray* customStringArray;
-	BOOL showingCustomCiteDrawer;
     
     BDSKPublicationsArray *publications;    // holds all the publications
     NSMutableArray *shownPublications;    // holds the ones we want to show.
     // All display related operations should use shownPublications
-    // in aspect oriented objective c i could have coded that assertion!
 
     NSString *quickSearchKey;
    
 	NSMutableString *frontMatter;    // for preambles, and stuff
     NSTableColumn *lastSelectedColumnForSort;
     NSString *sortGroupsKey;
-    BOOL sortDescending;
-    BOOL sortGroupsDescending;
 	
 	BDSKTeXTask *texTask;
-	
+    
     // --------------------------------------------------------------------------------------
 	IBOutlet NSMenu * fileMenu;
 	IBOutlet NSMenu * URLMenu;
@@ -160,7 +155,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSView *exportAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
     IBOutlet NSButton *exportSelectionCheckButton;
-    NSStringEncoding documentStringEncoding;
 	
     BDSKMacroResolver *macroResolver;
     MacroWindowController *macroWC;
@@ -175,22 +169,30 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSMutableArray *groupedPublications;
 	NSString *currentGroupField;
     IBOutlet BDSKSplitView *groupSplitView;
-	float lastGroupViewWidth;
     
     IBOutlet BDSKImagePopUpButton *groupActionButton;
     IBOutlet NSButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
     
-    BOOL dragFromSharedGroups;
     NSMutableDictionary *sharedGroupSpinners;
     
     BDSKFileContentSearchController *fileSearchController;
 	
 	NSMutableDictionary *promisedPboardTypes;
-    NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
     
-    BOOL isDocumentClosed;
+    struct _docState {
+        float               lastPreviewHeight;  // for the splitview double-click handling
+        float               lastGroupViewWidth;
+        NSStringEncoding    documentStringEncoding;
+        NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
+        BOOL                showingCustomCiteDrawer;
+        BOOL                sortDescending;
+        BOOL                sortGroupsDescending;
+        BOOL                dragFromSharedGroups;
+        BOOL                isDocumentClosed;
+    } docState;
+    
 }
 
 

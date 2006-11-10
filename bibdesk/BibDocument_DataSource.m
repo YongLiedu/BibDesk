@@ -415,7 +415,7 @@
     
 	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
 
-    dragFromSharedGroups = NO;
+    docState.dragFromSharedGroups = NO;
 	
     if(tv == groupTableView){
 		if([rowIndexes containsIndex:0]){
@@ -439,7 +439,7 @@
                 }
                 pubs = pubsInGroup;
             }
-            dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
+            docState.dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
 		}
 		if([pubs count] == 0){
             NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @""),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
@@ -465,12 +465,12 @@
         pubs = [self selectedPublications];
         dragCopyType = 1; // only type that makes sense here
         
-        dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
+        docState.dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
     }else if(tv == tableView){
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
-        dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+        docState.dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
@@ -857,7 +857,7 @@
     }else if(tv == tableView){
         if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
-		if ([info draggingSource] == groupTableView && dragFromSharedGroups && [groupTableView selectedRow] == 0) {
+		if ([info draggingSource] == groupTableView && docState.dragFromSharedGroups && [groupTableView selectedRow] == 0) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
@@ -877,7 +877,7 @@
         else
             return NSDragOperationEvery;
     }else if(tv == groupTableView){
-		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups) {
+		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && docState.dragFromSharedGroups) {
             if (row != 0)
                 return NSDragOperationNone;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
@@ -993,7 +993,7 @@
         BDSKGroup *group = [[[groups objectAtIndex:row] retain] autorelease];
         BOOL shouldSelect = [[self selectedGroups] containsObject:group];
 		
-		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
+		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && docState.dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
         } else if([info draggingSource] == groupTableView || [group isValidDropTarget] == NO) {
             return NO;

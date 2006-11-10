@@ -772,26 +772,26 @@
 	if (sender == splitView) {
 		// first = table, second = preview
 		if(NSHeight([secondView frame]) != 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
-			lastPreviewHeight = NSHeight(secondFrame); // cache this
-			firstFrame.size.height += lastPreviewHeight;
+			docState.lastPreviewHeight = NSHeight(secondFrame); // cache this
+			firstFrame.size.height += docState.lastPreviewHeight;
 			secondFrame.size.height = 0;
 		} else {
-			if(lastPreviewHeight == 0)
-				lastPreviewHeight = NSHeight([sender frame]) / 3; // a reasonable value for uncollapsing the first time
-			secondFrame.size.height = lastPreviewHeight;
-			firstFrame.size.height = NSHeight([sender frame]) - lastPreviewHeight - [sender dividerThickness];
+			if(docState.lastPreviewHeight == 0)
+				docState.lastPreviewHeight = NSHeight([sender frame]) / 3; // a reasonable value for uncollapsing the first time
+			secondFrame.size.height = docState.lastPreviewHeight;
+			firstFrame.size.height = NSHeight([sender frame]) - docState.lastPreviewHeight - [sender dividerThickness];
 		}
 	} else {
 		// first = group, second = table+preview
 		if(NSWidth([firstView frame]) != 0){
-			lastGroupViewWidth = NSWidth(firstFrame); // cache this
-			secondFrame.size.width += lastGroupViewWidth;
+			docState.lastGroupViewWidth = NSWidth(firstFrame); // cache this
+			secondFrame.size.width += docState.lastGroupViewWidth;
 			firstFrame.size.width = 0;
 		} else {
-			if(lastGroupViewWidth == 0)
-				lastGroupViewWidth = 120; // a reasonable value for uncollapsing the first time
-			firstFrame.size.width = lastGroupViewWidth;
-			secondFrame.size.width = NSWidth([sender frame]) - lastGroupViewWidth - [sender dividerThickness];
+			if(docState.lastGroupViewWidth == 0)
+				docState.lastGroupViewWidth = 120; // a reasonable value for uncollapsing the first time
+			firstFrame.size.width = docState.lastGroupViewWidth;
+			secondFrame.size.width = NSWidth([sender frame]) - docState.lastGroupViewWidth - [sender dividerThickness];
 		}
 	}
 	
@@ -804,10 +804,10 @@
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
     [customCiteDrawer toggle:sender];
-	if(showingCustomCiteDrawer){
-		showingCustomCiteDrawer = NO;
+	if(docState.showingCustomCiteDrawer){
+		docState.showingCustomCiteDrawer = NO;
 	}else{
-		showingCustomCiteDrawer = YES;
+		docState.showingCustomCiteDrawer = YES;
 	}
 }
 
