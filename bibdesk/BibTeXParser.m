@@ -53,6 +53,7 @@
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKDocumentProtocol.h"
+#import "BDSKGroupsArray.h"
 
 static NSString *BibTeXParserInternalException = @"BibTeXParserInternalException";
 static NSLock *parserLock = nil;
@@ -807,13 +808,13 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
                 if(range.location != NSNotFound){
                     [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
                     if (isSmartGroup == TRUE)
-                        [document setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                        [[document groups] setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                     else if (isStaticGroup == TRUE)
-                        [document setStaticGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                        [[document groups] setStaticGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                     else if (isURLGroup == TRUE)
-                        [document setURLGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                        [[document groups] setURLGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                     else
-                        [document setScriptGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                        [[document groups] setScriptGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                 }
             }
         }

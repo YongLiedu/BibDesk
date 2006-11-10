@@ -36,6 +36,7 @@
  */
 
 #import "BibDocument_Groups.h"
+#import "BDSKGroupsArray.h"
 #import "BDSKDocumentProtocol.h"
 #import "BibDocument_Actions.h"
 #import "BDSKGroupCell.h"
@@ -66,351 +67,34 @@
 
 @implementation BibDocument (Groups)
 
-#pragma mark Indexed accessors
-
-- (unsigned int)countOfGroups {
-    return [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [smartGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 2 : 1) /* add 1 for all publications group */ ;
-}
-
-- (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
-    unsigned int count;
-    
-    if (index == 0)
-		return allPublicationsGroup;
-    index -= 1;
-    
-    if (lastImportGroup != nil) {
-        if (index == 0)
-            return lastImportGroup;
-        index -= 1;
-    }
-    
-    count = [sharedGroups count];
-    if (index < count)
-        return [sharedGroups objectAtIndex:index];
-    index -= count;
-    
-    count = [urlGroups count];
-    if (index < count)
-        return [urlGroups objectAtIndex:index];
-    index -= count;
-    
-    count = [scriptGroups count];
-    if (index < count)
-        return [scriptGroups objectAtIndex:index];
-    index -= count;
-    
-	count = [smartGroups count];
-    if (index < count)
-		return [smartGroups objectAtIndex:index];
-    index -= count;
-    
-    count = [[self staticGroups] count];
-    if (index < count)
-        return [[self staticGroups] objectAtIndex:index];
-    index -= count;
-    
-    return [categoryGroups objectAtIndex:index];
-}
-
-// mutable to-many accessor:  not presently used
-- (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)index {
-    // we don't actually put it in the requested place, rather put it at the end of the current array
-	if ([group isSmart]) 
-		[self addSmartGroup:(BDSKSmartGroup *)group];
-	else if ([group isStatic])
-		[self addStaticGroup:(BDSKStaticGroup *)group];
-    else
-        OBASSERT_NOT_REACHED("invalid insertion index for group");
-}
-
-// mutable to-many accessor:  not presently used
-- (void)removeObjectFromGroupsAtIndex:(unsigned int)index {
-    NSRange smartRange = [self rangeOfSmartGroups];
-    NSRange staticRange = [self rangeOfStaticGroups];
-    
-    if (NSLocationInRange(index, smartRange))
-        [smartGroups removeObject:[smartGroups objectAtIndex:(index - smartRange.location)]];
-    else if (NSLocationInRange(index, staticRange))
-        [staticGroups removeObjectAtIndex:(index - staticRange.location)];
-    else
-        OBASSERT_NOT_REACHED("group cannot be removed");
-
-}
-
-#pragma mark Index ranges of groups
-
-- (NSRange)rangeOfSharedGroups{
-    return NSMakeRange((lastImportGroup == nil) ? 1 : 2, [sharedGroups count]);
-}
-
-- (NSRange)rangeOfURLGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfSharedGroups]), [urlGroups count]);
-}
-
-- (NSRange)rangeOfScriptGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfURLGroups]), [scriptGroups count]);
-}
-
-- (NSRange)rangeOfSmartGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfScriptGroups]), [smartGroups count]);
-}
-
-- (NSRange)rangeOfStaticGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfSmartGroups]), [[self staticGroups] count]);
-}
-
-- (NSRange)rangeOfCategoryGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfStaticGroups]), [categoryGroups count]);
-}
-
-- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange sharedRange = [self rangeOfSharedGroups];
-    unsigned int maxCount = MIN([indexes count], sharedRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&sharedRange];
-}
-
-- (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange urlRange = [self rangeOfURLGroups];
-    unsigned int maxCount = MIN([indexes count], urlRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&urlRange];
-}
-
-- (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange scriptRange = [self rangeOfScriptGroups];
-    unsigned int maxCount = MIN([indexes count], scriptRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&scriptRange];
-}
-
-- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange smartRange = [self rangeOfSmartGroups];
-    unsigned int maxCount = MIN([indexes count], smartRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&smartRange];
-}
-
-- (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange staticRange = [self rangeOfStaticGroups];
-    unsigned int maxCount = MIN([indexes count], staticRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&staticRange];
-}
-
-- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange categoryRange = [self rangeOfCategoryGroups];
-    unsigned int maxCount = MIN([indexes count], categoryRange.length);
-    unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&categoryRange];
-}
-
-- (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange sharedRange = [self rangeOfSharedGroups];
-    return [indexes intersectsIndexesInRange:sharedRange];
-}
+#pragma mark Selected group types
 
 - (BOOL)hasSharedGroupsSelected{
-    return [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-- (BOOL)hasURLGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange urlRange = [self rangeOfURLGroups];
-    return [indexes intersectsIndexesInRange:urlRange];
+    return [groups hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasURLGroupsSelected{
-    return [self hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-- (BOOL)hasScriptGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange scriptRange = [self rangeOfScriptGroups];
-    return [indexes intersectsIndexesInRange:scriptRange];
+    return [groups hasURLGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasScriptGroupsSelected{
-    return [self hasScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange smartRange = [self rangeOfSmartGroups];
-    return [indexes intersectsIndexesInRange:smartRange];
+    return [groups hasScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasSmartGroupsSelected{
-    return [self hasSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-- (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange staticRange = [self rangeOfStaticGroups];
-    return [indexes intersectsIndexesInRange:staticRange];
+    return [groups hasSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasStaticGroupsSelected{
-    return [self hasStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange categoryRange = [self rangeOfCategoryGroups];
-    return [indexes intersectsIndexesInRange:categoryRange];
+    return [groups hasStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasCategoryGroupsSelected{
-    return [self hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-- (BOOL)hasExternalGroupsAtIndexes:(NSIndexSet *)indexes{
-    return [self hasSharedGroupsAtIndexes:indexes] || [self hasURLGroupsAtIndexes:indexes] || [self hasScriptGroupsAtIndexes:indexes];
+    return [groups hasCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 - (BOOL)hasExternalGroupsSelected{
-    return [self hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-}
-
-#pragma mark Accessors
-
-- (NSMutableArray *)staticGroups{
-    if (staticGroups == nil) {
-        staticGroups = [[NSMutableArray alloc] init];
-        
-        NSEnumerator *groupEnum = [tmpStaticGroups objectEnumerator];
-        NSDictionary *groupDict;
-        BDSKStaticGroup *group = nil;
-        NSMutableArray *pubArray = nil;
-        NSString *name;
-        NSArray *keys;
-        NSEnumerator *keyEnum;
-        NSString *key;
-        
-        while (groupDict = [groupEnum nextObject]) {
-            @try {
-                name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
-                keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
-                keyEnum = [keys objectEnumerator];
-                pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
-                while (key = [keyEnum nextObject]) 
-                    [pubArray addObjectsFromArray:[publications allItemsForCiteKey:key]];
-                group = [[BDSKStaticGroup alloc] initWithName:name publications:pubArray];
-                [group setUndoManager:[self undoManager]];
-                [staticGroups addObject:group];
-            }
-            @catch(id exception) {
-                NSLog(@"Ignoring exception \"%@\" while parsing static groups data.", exception);
-            }
-            @finally {
-                [group release];
-                group = nil;
-                [pubArray release];
-                pubArray = nil;
-            }
-        }
-        
-        [tmpStaticGroups release];
-        tmpStaticGroups = nil;
-    }
-    return staticGroups;
-}
-
-- (void)addURLGroup:(BDSKURLGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] removeURLGroup:group];
-	
-    if (sharedGroupSpinners == nil)
-        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
-    
-	[urlGroups addObject:group];
-	[group setUndoManager:[self undoManager]];
-    [groupTableView reloadData];
-}
-
-- (void)removeURLGroup:(BDSKURLGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
-	
-    NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
-    [spinner removeFromSuperview];
-    [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
-    
-    BDSKMacroResolver *resolver = [group macroResolver];
-    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-    NSWindowController *wc;
-    while(wc = [wcEnum nextObject]){
-        if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver){
-            [wc hideWindow:nil];
-            break;
-        }
-    }
-    
-	[group setUndoManager:nil];
-	[urlGroups removeObjectIdenticalTo:group];
-    [groupTableView reloadData];
-}
-
-- (void)addScriptGroup:(BDSKScriptGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] removeScriptGroup:group];
-	
-    if (sharedGroupSpinners == nil)
-        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
-    
-	[scriptGroups addObject:group];
-	[group setUndoManager:[self undoManager]];
-    [groupTableView reloadData];
-}
-
-- (void)removeScriptGroup:(BDSKScriptGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
-	
-    NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
-    [spinner removeFromSuperview];
-    [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
-    
-    BDSKMacroResolver *resolver = [group macroResolver];
-    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-    NSWindowController *wc;
-    while(wc = [wcEnum nextObject]){
-        if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver){
-            [wc hideWindow:nil];
-            break;
-        }
-    }
-    
-	[group setUndoManager:nil];
-	[scriptGroups removeObjectIdenticalTo:group];
-    [groupTableView reloadData];
-}
-
-- (void)addSmartGroup:(BDSKSmartGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
-    
-    // update the count
-	[group filterItems:publications];
-	
-	[smartGroups addObject:group];
-	[group setUndoManager:[self undoManager]];
-    [groupTableView reloadData];
-}
-
-- (void)removeSmartGroup:(BDSKSmartGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
-	
-	[group setUndoManager:nil];
-	[smartGroups removeObjectIdenticalTo:group];
-    [groupTableView reloadData];
-}
-
-- (void)addStaticGroup:(BDSKStaticGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
-	
-	[group setUndoManager:[self undoManager]];
-	[[self staticGroups] addObject:group];
-    [groupTableView reloadData];
-}
-
-- (void)removeStaticGroup:(BDSKStaticGroup *)group {
-	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
-	
-	[group setUndoManager:nil];
-	[[self staticGroups] removeObjectIdenticalTo:group];
-    [groupTableView reloadData];
+    return [groups hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
 
 /* 
@@ -434,7 +118,7 @@ The groupedPublications array is a subset of the publications array, developed b
     unsigned int rowIndex = [rowIndexes firstIndex];
 	
 	while (rowIndexes != nil && rowIndex != NSNotFound) {
-		[array addObject:[self objectInGroupsAtIndex:rowIndex]];
+		[array addObject:[groups objectAtIndex:rowIndex]];
         rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
 	}
 	return [array autorelease];
@@ -483,7 +167,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView setDelegate:nil];
 	NSArray *selectedGroups = [self selectedGroups];
 	
-    NSArray *array = [[BDSKSharingBrowser sharedBrowser] sharedGroups];
+    NSMutableArray *array = [[[BDSKSharingBrowser sharedBrowser] sharedGroups] mutableCopy];
     
     id document;
     NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
@@ -500,7 +184,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if (sharedGroupSpinners == nil) {
         sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
     } else {
-        NSEnumerator *groupEnum = [sharedGroups objectEnumerator];
+        NSEnumerator *groupEnum = [[groups sharedGroups] objectEnumerator];
         BDSKSharedGroup *group;
         id uniqueID;
         while (group = [groupEnum nextObject]) {
@@ -512,23 +196,22 @@ The groupedPublications array is a subset of the publications array, developed b
         }
     }
     
-    [sharedGroups release];
-    sharedGroups = nil;
     if (array != nil) {
-        sharedGroups = [array mutableCopy];
         // now sort using the current column and order
         SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
-        [sharedGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
+        [array sortUsingSelector:sortSelector ascending:!sortGroupsDescending];
     }
+    [groups setSharedGroups:array];
+    [array release];
     
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
 	// select the current groups, if still around. Otherwise select Library
 	if([selectedGroups count] != 0){
-		unsigned int row = [self countOfGroups];
+		unsigned int row = [groups count];
 		while(row--){
-			if([selectedGroups containsObject:[self objectInGroupsAtIndex:row]])
+			if([selectedGroups containsObject:[groups objectAtIndex:row]])
 				[selIndexes addIndex:row];
 		}
 	}
@@ -547,7 +230,7 @@ The groupedPublications array is a subset of the publications array, developed b
     BDSKGroup *group = [notification object];
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
-    if ([urlGroups containsObject:group] == NO)
+    if ([[groups URLGroups] containsObject:group] == NO)
         return; /// must be from another document
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
@@ -563,7 +246,7 @@ The groupedPublications array is a subset of the publications array, developed b
     BDSKGroup *group = [notification object];
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
-    if ([scriptGroups containsObject:group] == NO)
+    if ([[groups scriptGroups] containsObject:group] == NO)
         return; /// must be from another document
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
@@ -573,6 +256,28 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
+}
+
+- (void)handleWillRemoveExternalGroupNotification:(NSNotification *)notification{
+	BDSKGroup *group = [notification object];
+    
+    NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
+    [spinner removeFromSuperview];
+    [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+    
+    BDSKMacroResolver *resolver = [(id)group macroResolver];
+    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+    NSWindowController *wc;
+    while(wc = [wcEnum nextObject]){
+        if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver){
+            [wc hideWindow:nil];
+            break;
+        }
+    }
+}
+
+- (void)handleAddRemoveGroupNotification:(NSNotification *)notification{
+    [groupTableView reloadData];
 }
 
 #pragma mark UI updating
@@ -590,7 +295,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     if ([NSString isEmptyString:groupField]) {
         
-        [categoryGroups removeAllObjects];
+        [groups setCategoryGroups:[NSArray array]];
         
     } else {
         
@@ -640,23 +345,23 @@ The groupedPublications array is a subset of the publications array, developed b
             [group release];
         }
         
-        [categoryGroups setArray:mutableGroups];
+        [groups setCategoryGroups:mutableGroups];
         [countedSet release];
         [mutableGroups release];
         
     }
     
     // update the count for the first item, not sure if it should be done here
-    [allPublicationsGroup setCount:[publications count]];
+    [[groups allPublicationsGroup] setCount:[publications count]];
 	
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
 	// select the current group, if still around. Otherwise select Library
 	if(preserve && [selectedGroups count] != 0){
-		unsigned int row = [self countOfGroups];
+		unsigned int row = [groups count];
 		while(row--){
-			if([selectedGroups containsObject:[self objectInGroupsAtIndex:row]])
+			if([selectedGroups containsObject:[groups objectAtIndex:row]])
 				[selIndexes addIndex:row];
 		}
 	}
@@ -682,10 +387,10 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)selectGroups:(NSArray *)theGroups{
-    unsigned count = [self countOfGroups];
+    unsigned count = [groups count];
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
     while(count--){
-        if([theGroups containsObject:[self objectInGroupsAtIndex:count]])
+        if([theGroups containsObject:[groups objectAtIndex:count]])
             [indexes addIndex:count];
     }
 
@@ -698,12 +403,12 @@ The groupedPublications array is a subset of the publications array, developed b
 // if this becomes slow, we could make filters thread safe and update them in the background
 - (void)updateAllSmartGroups{
 
-	NSRange smartRange = [self rangeOfSmartGroups];
+	NSRange smartRange = [groups rangeOfSmartGroups];
     unsigned int row = NSMaxRange(smartRange);
 	BOOL shouldUpdate = NO;
     
     while(NSLocationInRange(--row, smartRange)){
-		[(BDSKSmartGroup *)[self objectInGroupsAtIndex:row] filterItems:publications];
+		[(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
 		if([groupTableView isRowSelected:row])
 			shouldUpdate = YES;
     }
@@ -730,11 +435,11 @@ The groupedPublications array is a subset of the publications array, developed b
     NSArray *array;
     
     // optimize for single selections
-    if ([selectedGroups count] == 1 && [selectedGroups containsObject:allPublicationsGroup]) {
+    if ([selectedGroups count] == 1 && [selectedGroups containsObject:[groups allPublicationsGroup]]) {
         array = publications;
     } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected])) {
         unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
-        BDSKGroup *group = [self objectInGroupsAtIndex:rowIndex];
+        BDSKGroup *group = [groups objectAtIndex:rowIndex];
         array = [(id)group publications];
     } else {
         // multiple selections are never shared groups, so they are contained in the publications
@@ -778,7 +483,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
     NSIndexSet *visibleIndexes = [NSIndexSet indexSetWithIndexesInRange:indexRange];
     unsigned int cnt = [visibleIndexes count];
-    NSRange categoryRange = [self rangeOfCategoryGroups];
+    NSRange categoryRange = [groups rangeOfCategoryGroups];
     NSString *groupField = [self currentGroupField];
 
     // Mutable dictionary with fixed capacity using NSObjects for keys with ints for values; this gives us a fast lookup of row name->index.  Dictionaries can use any pointer-size element for a key or value; see /Developer/Examples/CoreFoundation/Dictionary.  Keys are retained rather than copied for efficiency.  Shark says that BibAuthors are created with alloc/init when using the copy callbacks, so NSShouldRetainWithZone() must be returning NO?
@@ -796,7 +501,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // exclude smart and shared groups
     while(cnt != NSNotFound){
 		if(NSLocationInRange(cnt, categoryRange))
-			CFDictionaryAddValue(rowDict, (void *)[[categoryGroups objectAtIndex:cnt - categoryRange.location] name], (void *)cnt);
+			CFDictionaryAddValue(rowDict, (void *)[[[groups categoryGroups] objectAtIndex:cnt - categoryRange.location] name], (void *)cnt);
         cnt = [visibleIndexes indexGreaterThanIndex:cnt];
     }
     
@@ -850,8 +555,8 @@ The groupedPublications array is a subset of the publications array, developed b
     CFRelease(rowDict);
     
     // handle smart and static groups separately, since they have a different approach to containment
-    NSMutableIndexSet *staticAndSmartIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:[self rangeOfSmartGroups]];
-    [staticAndSmartIndexes addIndexesInRange:[self rangeOfStaticGroups]];
+    NSMutableIndexSet *staticAndSmartIndexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfSmartGroups]];
+    [staticAndSmartIndexes addIndexesInRange:[groups rangeOfStaticGroups]];
     
     if([staticAndSmartIndexes count]){
         rowIndexes = [tableView selectedRowIndexes];
@@ -868,7 +573,7 @@ The groupedPublications array is a subset of the publications array, developed b
             
             // may not be worth it to check for visibility...
             while(groupIndex != NSNotFound && [visibleIndexes containsIndex:groupIndex]){
-                aGroup = [self objectInGroupsAtIndex:groupIndex];
+                aGroup = [groups objectAtIndex:groupIndex];
                 if([aGroup containsItem:pub])
                     [indexSet addIndex:groupIndex];
                 groupIndex = [staticAndSmartIndexes indexGreaterThanIndex:groupIndex];
@@ -881,9 +586,9 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:[self rangeOfSharedGroups]];
-    [indexes addIndexesInRange:[self rangeOfURLGroups]];
-    [indexes addIndexesInRange:[self rangeOfScriptGroups]];
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:[groups rangeOfSharedGroups]];
+    [indexes addIndexesInRange:[groups rangeOfURLGroups]];
+    [indexes addIndexesInRange:[groups rangeOfScriptGroups]];
     [indexes addIndex:0];
     return indexes;
 }
@@ -973,7 +678,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	[array addObject:newGroupField];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupAddRemoveNotification
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
     
@@ -1037,7 +742,7 @@ The groupedPublications array is a subset of the publications array, developed b
                                                           userInfo:[NSDictionary dictionary]];
     }
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupAddRemoveNotification
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldAddRemoveNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionaryWithObjectsAndKeys:oldGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeRemoval], NSKeyValueChangeKindKey, nil]];        
 }
@@ -1060,7 +765,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [removeFieldController release];
 }    
 
-- (void)handleGroupAddRemoveNotification:(NSNotification *)notification{
+- (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification{
     // Handle changes to the popup from other documents.  The userInfo for this notification uses key-value observing keys: NSKeyValueChangeNewKey is the affected field (whether add/remove), and NSKeyValueChangeKindKey will be either insert/remove
     if([notification object] != self){
         NSPopUpButtonCell *headerCell = [groupTableView popUpHeaderCell];
@@ -1096,8 +801,8 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
-        unsigned int insertIndex = NSMaxRange([self rangeOfSmartGroups]);
-		[self addSmartGroup:group];
+        unsigned int insertIndex = NSMaxRange([groups rangeOfSmartGroups]);
+		[groups addSmartGroup:group];
 		[group release];
 		
 		[groupTableView reloadData];
@@ -1111,8 +816,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (IBAction)addStaticGroupAction:(id)sender {
     BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
-    unsigned int insertIndex = NSMaxRange([self rangeOfStaticGroups]);
-    [self addStaticGroup:group];
+    unsigned int insertIndex = NSMaxRange([groups rangeOfStaticGroups]);
+    [groups addStaticGroup:group];
     [group release];
     
     [groupTableView reloadData];
@@ -1133,8 +838,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        unsigned int insertIndex = NSMaxRange([self rangeOfURLGroups]);
-		[self addURLGroup:[sheetController group]];
+        unsigned int insertIndex = NSMaxRange([groups rangeOfURLGroups]);
+		[groups addURLGroup:[sheetController group]];
         
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
@@ -1155,8 +860,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
-        unsigned int insertIndex = NSMaxRange([self rangeOfScriptGroups]);
-		[self addScriptGroup:[sheetController group]];
+        unsigned int insertIndex = NSMaxRange([groups rangeOfScriptGroups]);
+		[groups addScriptGroup:[sheetController group]];
         
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
@@ -1181,18 +886,18 @@ The groupedPublications array is a subset of the publications array, developed b
 	unsigned int count = 0;
 	
 	while (rowIndexes != nil && rowIndex != NSNotFound) {
-		group = [self objectInGroupsAtIndex:rowIndex];
+		group = [groups objectAtIndex:rowIndex];
 		if ([group isSmart] == YES) {
-			[self removeSmartGroup:(BDSKSmartGroup *)group];
+			[groups removeSmartGroup:(BDSKSmartGroup *)group];
 			count++;
-		} else if ([group isStatic] == YES && group != lastImportGroup) {
-			[self removeStaticGroup:(BDSKStaticGroup *)group];
+		} else if ([group isStatic] == YES && group != [groups lastImportGroup]) {
+			[groups removeStaticGroup:(BDSKStaticGroup *)group];
 			count++;
 		} else if ([group isURL] == YES) {
-			[self removeURLGroup:(BDSKURLGroup *)group];
+			[groups removeURLGroup:(BDSKURLGroup *)group];
 			count++;
 		} else if ([group isScript] == YES) {
-			[self removeScriptGroup:(BDSKScriptGroup *)group];
+			[groups removeScriptGroup:(BDSKScriptGroup *)group];
 			count++;
         }
 		rowIndex = [rowIndexes indexLessThanIndex:rowIndex];
@@ -1215,7 +920,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	int row = [groupTableView selectedRow];
 	OBASSERT(row != -1);
 	if(row <= 0) return;
-	BDSKGroup *group = [self objectInGroupsAtIndex:row];
+	BDSKGroup *group = [groups objectAtIndex:row];
 	
     if ([group isEditable] == NO) {
 		NSBeep();
@@ -1270,7 +975,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)editNewGroupWithSelection:(id)sender{
-    NSArray *names = [[self staticGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
+    NSArray *names = [[groups staticGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     NSString *name = baseName;
@@ -1286,14 +991,14 @@ The groupedPublications array is a subset of the publications array, developed b
     
     group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
     
-    [self addStaticGroup:group];    
+    [groups addStaticGroup:group];    
     [groupTableView deselectAll:nil];
     
-    i = [[self staticGroups] indexOfObject:group];
+    i = [[groups staticGroups] indexOfObject:group];
     OBASSERT(i != NSNotFound);
     
     if(i != NSNotFound){
-        i += [self rangeOfStaticGroups].location;
+        i += [groups rangeOfStaticGroups].location;
         [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
         [groupTableView scrollRowToVisible:i];
         
@@ -1319,11 +1024,11 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)refreshURLGroups:(id)sender{
-    [urlGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+    [[groups URLGroups] makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
 }
 
 - (IBAction)refreshScriptGroups:(id)sender{
-    [scriptGroups makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
+    [[groups scriptGroups] makeObjectsPerformSelector:@selector(setPublications:) withObject:nil];
 }
 
 - (IBAction)refreshAllExternalGroups:(id)sender{
@@ -1369,10 +1074,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	[self addPublications:newPubs];
 	[self highlightBibs:newPubs];
     
-    if(lastImportGroup == nil)
-        lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:newPubs];
-    else 
-        [lastImportGroup setPublications:newPubs];
+    [groups setLastImportedPublications:newPubs];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Merge Shared Publications",@"")];
     
@@ -1380,7 +1082,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && [group isExternal] == NO && group != allPublicationsGroup && group != lastImportGroup);
+	OBASSERT([group isSmart] == NO && [group isExternal] == NO && group != [groups allPublicationsGroup] && group != [groups lastImportGroup]);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1434,7 +1136,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
-		if([group isSmart] == YES || [group isExternal] == YES || group == allPublicationsGroup || group == lastImportGroup)
+		if([group isSmart] == YES || [group isExternal] == YES || group == [groups allPublicationsGroup] || group == [groups lastImportGroup])
 			continue;
 		
 		if (groupName == nil)
@@ -1577,27 +1279,7 @@ The groupedPublications array is a subset of the publications array, developed b
         sortDescriptors = [NSArray arrayWithObjects:nameSort, countSort, nil];
     }
     
-    BDSKGroup *emptyGroup = nil;
-    
-    if ([categoryGroups count] > 0) {
-        id firstName = [[categoryGroups objectAtIndex:0] name];
-        if ([firstName isEqual:@""] || [firstName isEqual:[BibAuthor emptyAuthor]]) {
-            emptyGroup = [[categoryGroups objectAtIndex:0] retain];
-            [categoryGroups removeObjectAtIndex:0];
-        }
-    }
-    
-    [sharedGroups sortUsingDescriptors:sortDescriptors];
-    [urlGroups sortUsingDescriptors:sortDescriptors];
-    [scriptGroups sortUsingDescriptors:sortDescriptors];
-    [smartGroups sortUsingDescriptors:sortDescriptors];
-    [[self staticGroups] sortUsingDescriptors:sortDescriptors];
-    [categoryGroups sortUsingDescriptors:sortDescriptors];
-	
-    if (emptyGroup != nil) {
-        [categoryGroups insertObject:emptyGroup atIndex:0];
-        [emptyGroup release];
-    }
+    [groups sortUsingDescriptors:sortDescriptors];
     
     // Set the graphic for the new column header
 	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
@@ -1608,10 +1290,10 @@ The groupedPublications array is a subset of the publications array, developed b
 	
 	// select the current groups. Otherwise select Library
 	if([selectedGroups count] != 0){
-		unsigned int groupsCount = [self countOfGroups];
+		unsigned int groupsCount = [groups count];
 		unsigned int row = -1;
 		while(++row < groupsCount){
-			if([selectedGroups containsObject:[self objectInGroupsAtIndex:row]])
+			if([selectedGroups containsObject:[groups objectAtIndex:row]])
 				[selIndexes addIndex:row];
 		}
 	}
@@ -1622,295 +1304,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     // reset ourself as delegate
     [groupTableView setDelegate:self];
-}
-
-#pragma mark Serializing
-
-- (void)setSmartGroupsFromSerializedData:(NSData *)data {
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	id plist = [NSPropertyListSerialization propertyListFromData:data
-												mutabilityOption:NSPropertyListImmutable
-														  format:&format 
-												errorDescription:&error];
-	
-	if (error) {
-		NSLog(@"Error deserializing: %@", error);
-        [error release];
-		return;
-	}
-	if ([plist isKindOfClass:[NSArray class]] == NO) {
-		NSLog(@"Serialized smart groups was no array.");
-		return;
-	}
-	
-    NSEnumerator *groupEnum = [plist objectEnumerator];
-    NSDictionary *groupDict;
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
-    BDSKSmartGroup *group = nil;
-    BDSKFilter *filter = nil;
-    
-    while (groupDict = [groupEnum nextObject]) {
-        @try {
-            filter = [[BDSKFilter alloc] initWithDictionary:groupDict];
-            group = [[BDSKSmartGroup alloc] initWithName:[groupDict objectForKey:@"group name"] count:0 filter:filter];
-            [group setUndoManager:[self undoManager]];
-            [array addObject:group];
-        }
-        @catch(id exception) {
-            NSLog(@"Ignoring exception \"%@\" while parsing smart groups data.", exception);
-        }
-        @finally {
-            [group release];
-            group = nil;
-            [filter release];
-            filter = nil;
-        }
-    }
-	
-	[smartGroups setArray:array];
-}
-
-- (void)setStaticGroupsFromSerializedData:(NSData *)data {
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	id plist = [NSPropertyListSerialization propertyListFromData:data
-												mutabilityOption:NSPropertyListImmutable
-														  format:&format 
-												errorDescription:&error];
-	
-	if (error) {
-		NSLog(@"Error deserializing: %@", error);
-        [error release];
-		return;
-	}
-	if ([plist isKindOfClass:[NSArray class]] == NO) {
-		NSLog(@"Serialized static groups was no array.");
-		return;
-	}
-	
-    tmpStaticGroups = [plist retain];
-}
-
-- (void)setURLGroupsFromSerializedData:(NSData *)data {
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	id plist = [NSPropertyListSerialization propertyListFromData:data
-												mutabilityOption:NSPropertyListImmutable
-														  format:&format 
-												errorDescription:&error];
-	
-	if (error) {
-		NSLog(@"Error deserializing: %@", error);
-        [error release];
-		return;
-	}
-	if ([plist isKindOfClass:[NSArray class]] == NO) {
-		NSLog(@"Serialized URL groups was no array.");
-		return;
-	}
-	
-    NSString *name = nil;
-    NSURL *url = nil;
-    NSEnumerator *groupEnum = [plist objectEnumerator];
-    NSDictionary *groupDict;
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
-    BDSKURLGroup *group = nil;
-    
-    while (groupDict = [groupEnum nextObject]) {
-        @try {
-            name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
-            url = [NSURL URLWithString:[groupDict objectForKey:@"URL"]];
-            group = [[BDSKURLGroup alloc] initWithName:name URL:url];
-            [group setUndoManager:[self undoManager]];
-            [array addObject:group];
-        }
-        @catch(id exception) {
-            NSLog(@"Ignoring exception \"%@\" while parsing URL groups data.", exception);
-        }
-        @finally {
-            [group release];
-            group = nil;
-        }
-    }
-	
-	[urlGroups setArray:array];
-}
-
-- (void)setScriptGroupsFromSerializedData:(NSData *)data {
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	id plist = [NSPropertyListSerialization propertyListFromData:data
-												mutabilityOption:NSPropertyListImmutable
-														  format:&format 
-												errorDescription:&error];
-	
-	if (error) {
-		NSLog(@"Error deserializing: %@", error);
-        [error release];
-		return;
-	}
-	if ([plist isKindOfClass:[NSArray class]] == NO) {
-		NSLog(@"Serialized URL groups was no array.");
-		return;
-	}
-	
-    NSString *name = nil;
-    NSString *path = nil;
-    NSString *arguments = nil;
-    int type;
-    NSEnumerator *groupEnum = [plist objectEnumerator];
-    NSDictionary *groupDict;
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
-    BDSKScriptGroup *group = nil;
-    
-    while (groupDict = [groupEnum nextObject]) {
-        @try {
-            name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
-            path = [[groupDict objectForKey:@"script path"] stringByUnescapingGroupPlistEntities];
-            arguments = [groupDict objectForKey:@"script arguments"];
-            if ([arguments isKindOfClass:[NSArray class]]) // legacy
-                arguments = [(NSArray *)arguments componentsJoinedByString:@" "];
-            arguments = [arguments stringByUnescapingGroupPlistEntities];
-            type = [[groupDict objectForKey:@"script type"] intValue];
-            group = [[BDSKScriptGroup alloc] initWithName:name scriptPath:path scriptArguments:arguments scriptType:type];
-            [group setName:[groupDict objectForKey:@"group name"]];
-            [group setUndoManager:[self undoManager]];
-            [array addObject:group];
-        }
-        @catch(id exception) {
-            NSLog(@"Ignoring exception \"%@\" while parsing URL groups data.", exception);
-        }
-        @finally {
-            [group release];
-            group = nil;
-        }
-    }
-	
-	[scriptGroups setArray:array];
-}
-
-- (NSData *)serializedSmartGroupsData {
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[smartGroups count]];
-    NSString *name;
-    NSMutableDictionary *groupDict;
-	NSEnumerator *groupEnum = [smartGroups objectEnumerator];
-	BDSKSmartGroup *group;
-	
-	while (group = [groupEnum nextObject]) {
-        name = [[group stringValue] stringByEscapingGroupPlistEntities];
-		groupDict = [[[group filter] dictionaryValue] mutableCopy];
-		[groupDict setObject:name forKey:@"group name"];
-		[array addObject:groupDict];
-		[groupDict release];
-	}
-	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
-															  format:format 
-													errorDescription:&error];
-    	
-	if (error) {
-		NSLog(@"Error serializing: %@", error);
-        [error release];
-		return nil;
-	}
-	return data;
-}
-
-- (NSData *)serializedStaticGroupsData {
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[[self staticGroups] count]];
-	NSString *keys;
-    NSString *name;
-    NSDictionary *groupDict;
-	NSEnumerator *groupEnum = [[self staticGroups] objectEnumerator];
-	BDSKStaticGroup *group;
-	
-	while (group = [groupEnum nextObject]) {
-        name = [[group stringValue] stringByEscapingGroupPlistEntities];
-		keys = [[[group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@","];
-        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", keys, @"keys", nil];
-		[array addObject:groupDict];
-		[groupDict release];
-	}
-	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
-															  format:format 
-													errorDescription:&error];
-    	
-	if (error) {
-		NSLog(@"Error serializing: %@", error);
-        [error release];
-		return nil;
-	}
-	return data;
-}
-
-- (NSData *)serializedURLGroupsData {
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
-    NSString *name;
-    NSString *url;
-    NSDictionary *groupDict;
-	NSEnumerator *groupEnum = [urlGroups objectEnumerator];
-	BDSKURLGroup *group;
-	
-	while (group = [groupEnum nextObject]) {
-        name = [[group stringValue] stringByEscapingGroupPlistEntities];
-        url = [[group URL] absoluteString];
-        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", url, @"URL", nil];
-		[array addObject:groupDict];
-		[groupDict release];
-	}
-	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
-															  format:format 
-													errorDescription:&error];
-    	
-	if (error) {
-		NSLog(@"Error serializing: %@", error);
-        [error release];
-		return nil;
-	}
-	return data;
-}
-
-- (NSData *)serializedScriptGroupsData {
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[urlGroups count]];
-    NSString *name;
-    NSString *path;
-    NSString *args;
-    NSNumber *type;
-    NSDictionary *groupDict;
-	NSEnumerator *groupEnum = [scriptGroups objectEnumerator];
-	BDSKScriptGroup *group;
-	
-	while (group = [groupEnum nextObject]) {
-        name = [[group stringValue] stringByEscapingGroupPlistEntities];
-        path = [[group scriptPath] stringByEscapingGroupPlistEntities];
-        args = [[group scriptArguments] stringByEscapingGroupPlistEntities];
-        type = [NSNumber numberWithInt:[group scriptType]];
-        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"group name", path, @"script path", args, @"script arguments", type, @"script type", nil];
-		[array addObject:groupDict];
-		[groupDict release];
-	}
-	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
-															  format:format 
-													errorDescription:&error];
-    	
-	if (error) {
-		NSLog(@"Error serializing: %@", error);
-        [error release];
-		return nil;
-	}
-	return data;
 }
 
 @end

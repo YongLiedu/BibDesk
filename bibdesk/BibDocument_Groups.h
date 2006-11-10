@@ -42,49 +42,16 @@
 
 @interface BibDocument (Groups)
 
-- (unsigned int)countOfGroups;
-- (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index;
-
-- (NSRange)rangeOfSharedGroups;
-- (NSRange)rangeOfURLGroups;
-- (NSRange)rangeOfScriptGroups;
-- (NSRange)rangeOfSmartGroups;
-- (NSRange)rangeOfStaticGroups;
-- (NSRange)rangeOfCategoryGroups;
-- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
-- (unsigned int)numberOfURLGroupsAtIndexes:(NSIndexSet *)indexes;
-- (unsigned int)numberOfScriptGroupsAtIndexes:(NSIndexSet *)indexes;
-- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
-- (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
-- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
-- (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsSelected;
-- (BOOL)hasURLGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasURLGroupsSelected;
-- (BOOL)hasScriptGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasScriptGroupsSelected;
-- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSmartGroupsSelected;
-- (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasStaticGroupsSelected;
-- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasCategoryGroupsSelected;
-- (BOOL)hasExternalGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasExternalGroupsSelected;
-
-- (void)addURLGroup:(BDSKURLGroup *)group;
-- (void)removeURLGroup:(BDSKURLGroup *)group;
-- (void)addScriptGroup:(BDSKScriptGroup *)group;
-- (void)removeScriptGroup:(BDSKScriptGroup *)group;
-- (void)addSmartGroup:(BDSKSmartGroup *)group;
-- (void)removeSmartGroup:(BDSKSmartGroup *)group;
-- (void)addStaticGroup:(BDSKStaticGroup *)group;
-- (void)removeStaticGroup:(BDSKStaticGroup *)group;
 
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
-
-- (NSMutableArray *)staticGroups;
 
 - (NSArray *)selectedGroups;
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
@@ -104,13 +71,15 @@
 - (IBAction)removeGroupFieldAction:(id)sender;
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
-- (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
+- (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification;
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
 - (void)handleURLGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification;
+- (void)handleWillRemoveExternalGroupNotification:(NSNotification *)notification;
+- (void)handleAddRemoveGroupNotification:(NSNotification *)notification;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
@@ -136,15 +105,6 @@
 - (IBAction)refreshURLGroups:(id)sender;
 - (IBAction)refreshScriptGroups:(id)sender;
 - (IBAction)refreshAllExternalGroups:(id)sender;
-
-- (void)setSmartGroupsFromSerializedData:(NSData *)data;
-- (void)setStaticGroupsFromSerializedData:(NSData *)data;
-- (void)setURLGroupsFromSerializedData:(NSData *)data;
-- (void)setScriptGroupsFromSerializedData:(NSData *)data;
-- (NSData *)serializedSmartGroupsData;
-- (NSData *)serializedStaticGroupsData;
-- (NSData *)serializedURLGroupsData;
-- (NSData *)serializedScriptGroupsData;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;

@@ -47,6 +47,7 @@
 #import "BDSKTemplate.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument_Actions.h"
+#import "BDSKGroupsArray.h"
 
 @implementation BibDocument (Menus)
 
@@ -284,9 +285,9 @@
 	if([selIndexes firstIndex] == 0) {
         return [self validateDeleteSelectionMenuItem:menuItem];
     } else {
-        m = [self numberOfStaticGroupsAtIndexes:selIndexes];
+        m = [groups numberOfStaticGroupsAtIndexes:selIndexes];
         if ([[self currentGroupField] isSingleValuedField] == NO)
-            m += [self numberOfCategoryGroupsAtIndexes:selIndexes];
+            m += [groups numberOfCategoryGroupsAtIndexes:selIndexes];
     }
 	
 	if (n == 0 || m == 0) {
@@ -624,10 +625,10 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    int n = [self numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [self numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [self numberOfURLGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [self numberOfScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    int n = [groups numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
+            [groups numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
+            [groups numberOfURLGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
+            [groups numberOfScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 	
 	NSString *s = @"";
 	
@@ -659,7 +660,7 @@
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 &&
 		row > 0 &&
-        [[self objectInGroupsAtIndex:row] hasEditableName]) {
+        [[groups objectAtIndex:row] hasEditableName]) {
 		// single group selection
 		return YES;
 	} else {
@@ -674,7 +675,7 @@
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
 		// single group selection
-        return [[self objectInGroupsAtIndex:row] isEditable];
+        return [[groups objectAtIndex:row] isEditable];
 	} else {
 		// multiple selection or no smart group selected
 		return NO;
@@ -819,7 +820,7 @@
 }
 
 - (BOOL)validateRefreshURLGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [urlGroups count] > 0;
+    return [[groups URLGroups] count] > 0;
 }
 
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{

@@ -48,6 +48,7 @@
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKGroupsArray.h"
 
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
@@ -116,7 +117,7 @@
         }
     }
 	
-	if (isSingleValued && [self numberOfCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 1) {
+	if (isSingleValued && [groups numberOfCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 1) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"alert title")
                                          defaultButton:nil
                                        alternateButton:nil
@@ -175,7 +176,7 @@
 - (IBAction)removeSelectedPubs:(id)sender{
 	NSArray *selectedGroups = [self selectedGroups];
 	
-	if([selectedGroups containsObject:allPublicationsGroup]){
+	if([selectedGroups containsObject:[groups allPublicationsGroup]]){
 		[self deleteSelectedPubs:sender];
 	}else{
 		BOOL canRemove = NO;

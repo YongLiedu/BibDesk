@@ -42,7 +42,7 @@
 
 @protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate, BDSKDocument;
 
-@class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray;
+@class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox;
@@ -171,13 +171,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSString *promiseDragColumnIdentifier;
 
     IBOutlet BDSKGroupTableView *groupTableView;
-    NSMutableArray *categoryGroups;
-    NSMutableArray *smartGroups;
-    NSMutableArray *staticGroups;
-    NSMutableArray *tmpStaticGroups;
+    BDSKGroupsArray *groups;
     NSMutableArray *groupedPublications;
-	BDSKGroup *allPublicationsGroup;
-	BDSKStaticGroup *lastImportGroup;
 	NSString *currentGroupField;
     IBOutlet BDSKSplitView *groupSplitView;
 	float lastGroupViewWidth;
@@ -188,9 +183,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKGradientView *groupGradientView;
     
     BOOL dragFromSharedGroups;
-    NSMutableArray *sharedGroups;
-    NSMutableArray *urlGroups;
-    NSMutableArray *scriptGroups;
     NSMutableDictionary *sharedGroupSpinners;
     
     BDSKFileContentSearchController *fileSearchController;
@@ -320,6 +312,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
 */
 - (BDSKPublicationsArray *)publications;
+- (BDSKGroupsArray *)groups;
 - (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray;
 - (void)getCopyOfMacrosOnMainThread:(NSMutableDictionary *)dstDict;
 - (void)insertPublications:(NSArray *)pubs atIndexes:(NSIndexSet *)indexes;

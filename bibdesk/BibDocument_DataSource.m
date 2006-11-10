@@ -65,6 +65,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKStringParser.h"
+#import "BDSKGroupsArray.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -78,7 +79,7 @@
     }else if(tView == (NSTableView *)ccTableView){
         return [customStringArray count];
     }else if(tView == groupTableView){
-        return [self countOfGroups];
+        return [groups count];
     }else{
 // should raise an exception or something
         return 0;
@@ -166,7 +167,7 @@
     }else if(tView == (NSTableView *)ccTableView){
         return [customStringArray objectAtIndex:row];
     }else if(tView == groupTableView){
-		return [self objectInGroupsAtIndex:row];
+		return [groups objectAtIndex:row];
     }else return nil;
 }
 
@@ -224,7 +225,7 @@
 			}
 		}
 	}else if(tv == groupTableView){
-		BDSKGroup *group = [self objectInGroupsAtIndex:row];
+		BDSKGroup *group = [groups objectAtIndex:row];
 		// we need to check for this because for some reason setObjectValue:... is called when the row is selected in this tableView
 		if([NSString isEmptyString:object] || [[group stringValue] isEqualToString:object])
 			return;
@@ -253,9 +254,9 @@
     if(tv == (NSTableView *)ccTableView){
 		return YES;
 	}else if(tv == groupTableView){
-		if ([[self objectInGroupsAtIndex:row] hasEditableName] == NO) 
+		if ([[groups objectAtIndex:row] hasEditableName] == NO) 
 			return NO;
-		else if (NSLocationInRange(row, [self rangeOfCategoryGroups]) &&
+		else if (NSLocationInRange(row, [groups rangeOfCategoryGroups]) &&
 				 [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey]) {
 			
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
@@ -288,7 +289,7 @@
                 [aCell setEnabled:NO];
         }
     } else if (tv == groupTableView) {
-        BDSKGroup *group = [self objectInGroupsAtIndex:row];
+        BDSKGroup *group = [groups objectAtIndex:row];
         if ([group isExternal] == NO) return;
         
         NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
@@ -424,7 +425,7 @@
 			pubs = [NSArray arrayWithArray:groupedPublications];
 		}else if([rowIndexes count] == 1){
             // a single row, not necessarily the selected one
-            BDSKGroup *group = [self objectInGroupsAtIndex:[rowIndexes firstIndex]];
+            BDSKGroup *group = [groups objectAtIndex:[rowIndexes firstIndex]];
             if ([group isExternal]) {
                 pubs = [NSArray arrayWithArray:[(id)group publications]];
 			} else {
@@ -438,7 +439,7 @@
                 }
                 pubs = pubsInGroup;
             }
-            dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
+            dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
 		}
 		if([pubs count] == 0){
             NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @""),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
@@ -464,12 +465,12 @@
         pubs = [self selectedPublications];
         dragCopyType = 1; // only type that makes sense here
         
-        dragFromSharedGroups = [self hasExternalGroupsAtIndexes:rowIndexes];
+        dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
     }else if(tv == tableView){
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
-        dragFromSharedGroups = [self hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+        dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
@@ -884,7 +885,7 @@
         }
             
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == ccTableView || [info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[self objectInGroupsAtIndex:row]  isValidDropTarget] == NO || (type == nil && [info draggingSource] != tableView) || (row == 0 && [info draggingSource] == tableView)) 
+        if([info draggingSource] == ccTableView || [info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[groups objectAtIndex:row]  isValidDropTarget] == NO || (type == nil && [info draggingSource] != tableView) || (row == 0 && [info draggingSource] == tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
@@ -989,7 +990,7 @@
         NSArray *pubs = nil;
         
         // retain is required to fix bug #1356183
-        BDSKGroup *group = [[[self objectInGroupsAtIndex:row] retain] autorelease];
+        BDSKGroup *group = [[[groups objectAtIndex:row] retain] autorelease];
         BOOL shouldSelect = [[self selectedGroups] containsObject:group];
 		
 		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
@@ -1177,13 +1178,13 @@
     } else if(typeSelectHelper == [groupTableView typeSelectHelper]){
         
         int i;
-		int groupCount = [self countOfGroups];
+		int groupCount = [groups count];
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:groupCount];
         BDSKGroup *group;
         
 		OBPRECONDITION(groupCount);
         for(i = 0; i < groupCount; i++){
-			group = [self objectInGroupsAtIndex:i];
+			group = [groups objectAtIndex:i];
             [array addObject:[group stringValue]];
 		}
         return array;

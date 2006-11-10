@@ -46,6 +46,7 @@
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKGroupsArray.h"
 
 #import "BDSKUndoManager.h"
 #import "MultiplePageView.h"
@@ -144,15 +145,9 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         publications = [[BDSKPublicationsArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
-        categoryGroups = [[NSMutableArray alloc] initWithCapacity:1];
-        smartGroups = [[NSMutableArray alloc] initWithCapacity:1];
-        urlGroups = [[NSMutableArray alloc] initWithCapacity:1];
-        scriptGroups = [[NSMutableArray alloc] initWithCapacity:1];
-        staticGroups = nil;
-        tmpStaticGroups = nil;
-		allPublicationsGroup = [[BDSKGroup alloc] initWithAllPublications];
-		lastImportGroup = nil;
-                
+        groups = [[BDSKGroupsArray alloc] init];
+        [groups setDocument:self];
+        
         frontMatter = [[NSMutableString alloc] initWithString:@""];
 		
         documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
@@ -205,8 +200,8 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
                  object:self];
 
 		[nc addObserver:self
-               selector:@selector(handleGroupAddRemoveNotification:)
-	               name:BDSKGroupAddRemoveNotification
+               selector:@selector(handleGroupFieldAddRemoveNotification:)
+	               name:BDSKGroupFieldAddRemoveNotification
                  object:nil];
 
 		// register for selection changes notifications:
@@ -278,6 +273,16 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
                  object:nil];
         
         [nc addObserver:self
+               selector:@selector(handleWillRemoveExternalGroupNotification:)
+                   name:BDSKWillRemoveExternalGroupNotification
+                 object:nil];
+        
+        [nc addObserver:self
+               selector:@selector(handleAddRemoveGroupNotification:)
+                   name:BDSKAddRemoveGroupNotification
+                 object:nil];
+        
+        [nc addObserver:self
                selector:@selector(handleFlagsChangedNotification:)
                    name:OAFlagsChangedNotification
                  object:nil];
@@ -338,11 +343,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     [publications release];
     [shownPublications release];
     [groupedPublications release];
-    [categoryGroups release];
-    [smartGroups release];
-    [staticGroups release];
-    [allPublicationsGroup release];
-    [lastImportGroup release];
+    [groups release];
     [frontMatter release];
     [documentInfo release];
     [quickSearchKey release];
@@ -359,7 +360,6 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
 	[promisedPboardTypes release];
-    [sharedGroups release];
     [sharedGroupSpinners release];
     [super dealloc];
 }
@@ -396,7 +396,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
         
         OBPOSTCONDITION(fileURL != nil);
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
-            [self selectGroup:allPublicationsGroup];
+            [self selectGroup:[groups allPublicationsGroup]];
             [self setSelectedSearchFieldKey:BDSKAllFieldsString];
             [self setFilterField:searchString];
         }
@@ -583,7 +583,6 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
     
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
-    sharedGroups = nil;
     sharedGroupSpinners = nil;
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
@@ -767,8 +766,8 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 														object:self
 													  userInfo:notifInfo];	
     
-    [lastImportGroup removePublicationsInArray:pubs];
-    [[self staticGroups] makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
+    [[groups lastImportGroup] removePublicationsInArray:pubs];
+    [[groups staticGroups] makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
     
 	[publications removeObjectsAtIndexes:indexes];
 	
@@ -789,6 +788,14 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 	NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:[publications indexOfObjectIdenticalTo:pub]];
     [self removePublicationsAtIndexes:indexes];
 }
+
+#pragma mark Groups accessors
+
+- (BDSKGroupsArray *)groups{
+    return groups;
+}
+
+#pragma mark -
 
 - (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray{
     if([NSThread inMainThread] == NO){
@@ -863,7 +870,7 @@ static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentag
 
 - (IBAction)showMacrosWindow:(id)sender{
     if ([self hasExternalGroupsSelected]) {
-        BDSKMacroResolver *resolver = [(id<BDSKDocument>)[self objectInGroupsAtIndex:[groupTableView selectedRow]] macroResolver];
+        BDSKMacroResolver *resolver = [(id<BDSKDocument>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
         MacroWindowController *controller = nil;
         NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
         NSWindowController *wc;
@@ -1316,24 +1323,24 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         }
         
         // The data from groups is always UTF-8, and we shouldn't convert it; the comment key strings should be representable in any encoding
-        if([staticGroups count] > 0){
+        if([[groups staticGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" useEncoding:encoding];
-            [outputData appendData:[self serializedStaticGroupsData]];
+            [outputData appendData:[groups serializedStaticGroupsData]];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
-        if([smartGroups count] > 0){
+        if([[groups smartGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" useEncoding:encoding];
-            [outputData appendData:[self serializedSmartGroupsData]];
+            [outputData appendData:[groups serializedSmartGroupsData]];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
-        if([urlGroups count] > 0){
+        if([[groups URLGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" useEncoding:encoding];
-            [outputData appendData:[self serializedURLGroupsData]];
+            [outputData appendData:[groups serializedURLGroupsData]];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
-        if([scriptGroups count] > 0){
+        if([[groups scriptGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" useEncoding:encoding];
-            [outputData appendData:[self serializedScriptGroupsData]];
+            [outputData appendData:[groups serializedScriptGroupsData]];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         [outputData appendDataFromString:@"\n" useEncoding:encoding];
@@ -1468,8 +1475,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [macroResolver removeAllMacros];
     
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
-        [staticGroups release];
-        staticGroups = nil;
         // updating smart and category groups is done by the notification of setPublications:
         [self sortGroupsByKey:sortGroupsKey]; // resort
 		[tableView deselectAll:self]; // clear before resorting
@@ -1882,10 +1887,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // set up the smart group that shows the latest import
     // @@ do this for items added via the editor?  doesn't seem as useful
-    if(lastImportGroup == nil)
-        lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:newPubs];
-    else 
-        [lastImportGroup setPublications:newPubs];
+    [groups setLastImportedPublications:newPubs];
     
     if(temporaryCiteKey != nil)
         [self reportTemporaryCiteKeys:temporaryCiteKey forNewDocument:NO];
@@ -2820,7 +2822,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (BOOL)highlightItemForCiteKeys:(NSArray *)citeKeys {
 
     // make sure we can see the publication, if it's still in the document
-    [self selectGroup:allPublicationsGroup];
+    [self selectGroup:[groups allPublicationsGroup]];
     [tableView deselectAll:self];
     [self setFilterField:@""];
 
