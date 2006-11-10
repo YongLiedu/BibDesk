@@ -851,17 +851,18 @@
     
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+    id draggingSource = [info draggingSource];
     
     if(tv == (NSTableView *)ccTableView){
         return NSDragOperationNone;// can't drag into that tv.
     }else if(tv == tableView){
         if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
-		if ([info draggingSource] == groupTableView && docState.dragFromSharedGroups && [groupTableView selectedRow] == 0) {
+		if (draggingSource == groupTableView && docState.dragFromSharedGroups && [groupTableView selectedRow] == 0) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
-        if([info draggingSource] == tableView || [info draggingSource] == groupTableView || [info draggingSource] == ccTableView || type == nil) {
+        if(draggingSource == tableView || draggingSource == groupTableView || draggingSource == ccTableView) {
 			// can't copy onto same table
 			return NSDragOperationNone;
 		}
@@ -877,7 +878,7 @@
         else
             return NSDragOperationEvery;
     }else if(tv == groupTableView){
-		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && docState.dragFromSharedGroups) {
+		if ((draggingSource == groupTableView || draggingSource == tableView) && docState.dragFromSharedGroups) {
             if (row != 0)
                 return NSDragOperationNone;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
@@ -885,12 +886,12 @@
         }
             
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == ccTableView || [info draggingSource] == groupTableView || row >= [tv numberOfRows] || [[groups objectAtIndex:row]  isValidDropTarget] == NO || (type == nil && [info draggingSource] != tableView) || (row == 0 && [info draggingSource] == tableView)) 
+        if(draggingSource == ccTableView || draggingSource == groupTableView || row >= [tv numberOfRows] || [[groups objectAtIndex:row]  isValidDropTarget] == NO || type == nil || (row == 0 && draggingSource == tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
         [tv setDropRow:row dropOperation:NSTableViewDropOn];
-        if([info draggingSource] == tableView){
+        if(draggingSource == tableView){
             if([type isEqualToString:BDSKBibItemPboardType])
                 return NSDragOperationLink;
             else
@@ -913,7 +914,7 @@
 	
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
-	
+    
     if(tv == (NSTableView *)ccTableView){
         return NO; // can't drag into that tv.
     } else if(tv == tableView){
@@ -988,16 +989,17 @@
         }
     } else if(tv == groupTableView){
         NSArray *pubs = nil;
+        id draggingSource = [info draggingSource];
         
         // retain is required to fix bug #1356183
         BDSKGroup *group = [[[groups objectAtIndex:row] retain] autorelease];
         BOOL shouldSelect = [[self selectedGroups] containsObject:group];
 		
-		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && docState.dragFromSharedGroups && row == 0) {
+		if ((draggingSource == groupTableView || draggingSource == tableView) && docState.dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
-        } else if([info draggingSource] == groupTableView || [group isValidDropTarget] == NO) {
+        } else if(draggingSource == groupTableView || [group isValidDropTarget] == NO) {
             return NO;
-        } else if([info draggingSource] == tableView){
+        } else if(draggingSource == tableView){
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [self promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
