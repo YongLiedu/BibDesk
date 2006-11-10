@@ -57,10 +57,8 @@
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
 - (void)displaySelectedGroups;
 - (void)selectGroup:(BDSKGroup *)aGroup;
-- (void)selectGroups:(NSArray *)theGroups;
 
 - (void)updateAllSmartGroups;
-- (NSArray *)publicationsInCurrentGroups;
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group;
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray;
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName;

@@ -41,7 +41,7 @@
 
 @class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BibDocument;
 
-@interface BDSKGroupsArray : NSMutableArray {
+@interface BDSKGroupsArray : NSArray {
     BDSKGroup *allPublicationsGroup;
     BDSKStaticGroup *lastImportGroup;
     NSMutableArray *sharedGroups;
@@ -97,6 +97,8 @@
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
 - (void)setTmpStaticGroups:(NSArray *)array;
 - (void)setCategoryGroups:(NSArray *)array;
+
+- (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
 
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
