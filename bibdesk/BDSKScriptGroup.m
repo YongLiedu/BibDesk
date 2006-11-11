@@ -121,6 +121,14 @@
     [super dealloc];
 }
 
+- (BOOL)isEqual:(id)other {
+	if ([super isEqual:other])
+		return [[self scriptPath] isEqualToString:[(BDSKScriptGroup *)other scriptPath]] &&
+               [[self scriptArguments] isEqualToString:[(BDSKScriptGroup *)other scriptArguments]] &&
+               [self scriptType] == [(BDSKScriptGroup *)other scriptType];
+	else return NO;
+}
+
 - (NSString *)description;
 {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\t\tname: %@\n\tscript path: %@\n }", [self class], self, name, scriptPath];

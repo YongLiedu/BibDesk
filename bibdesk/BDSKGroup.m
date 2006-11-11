@@ -77,15 +77,14 @@ static unsigned currentUniqueID = 0;
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super init]) {
-        uniqueID = [decoder decodeIntForKey:@"uniqueID"];
         name = [[decoder decodeObjectForKey:@"name"] retain];
         count = [decoder decodeIntForKey:@"count"];
+        uniqueID = ++currentUniqueID;
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeInt:uniqueID forKey:@"uniqueID"];
     [coder encodeObject:name forKey:@"name"];
     [coder encodeInt:count forKey:@"count"];
 }

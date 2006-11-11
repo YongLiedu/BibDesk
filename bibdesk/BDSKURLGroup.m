@@ -106,6 +106,12 @@
     isRetrieving = NO;
 }
 
+- (BOOL)isEqual:(id)other {
+	if ([super isEqual:other])
+		return [[self URL] isEqual:[(BDSKURLGroup *)other URL]];
+	else return NO;
+}
+
 // Logging
 
 - (NSString *)description;
