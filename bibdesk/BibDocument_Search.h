@@ -43,13 +43,6 @@ extern NSString *BDSKDocumentFormatForSearchingDates;
 @interface BibDocument (Search)
 
 /*!
-@method     setupSearchField
- @abstract   Sets up quick search field.
- @discussion This method is called from awakeFromNib. 
- */
-- (void)setupSearchField;
-
-/*!
 @method     searchFieldMenu
  @abstract   builds the quick search menu template for the NSSearchField
  @discussion this is only used in setupSearchField if not BDSK_USING_JAGUAR. 

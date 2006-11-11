@@ -135,6 +135,7 @@ static NSString *BDSKSelectedPublicationsKey = @"BDSKSelectedPublicationsKey";
 static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey";
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
+static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
@@ -443,7 +444,9 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     
     [quickSearchKey autorelease];
     quickSearchKey = [[xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:quickSearchKey] retain];
-	[self setupSearchField];
+    [searchField setRecentSearches:[xattrDefaults objectForKey:BDSKRecentSearchesKey defaultObject:[NSArray array]]];
+	[[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+	[self setSelectedSearchFieldKey:quickSearchKey];
     [self setupToolbar];
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
@@ -674,6 +677,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         [dictionary setObject:quickSearchKey forKey:BDSKCurrentQuickSearchKey];
+        [dictionary setObject:[searchField recentSearches] forKey:BDSKRecentSearchesKey];
         [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)

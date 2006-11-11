@@ -114,17 +114,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	return cellMenu;
 }
 
-- (void)setupSearchField{
-	
-	NSSearchFieldCell *searchCell = [searchField cell];
-	[searchCell setSearchMenuTemplate:[self searchFieldMenu]];
-	[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),quickSearchKey]];
-	[searchCell setRecentsAutosaveName:[NSString stringWithFormat:NSLocalizedString(@"%@ recent searches autosave ",@""),[self fileName]]];
-	
-	// set the search key's menuitem to NSOnState
-	[self setSelectedSearchFieldKey:quickSearchKey];
-}
-
 -(NSString*) filterField {
 	return [searchField stringValue];
 }
@@ -153,27 +142,24 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),newKey]];
 
 	NSMenu *templateMenu = [searchCell searchMenuTemplate];
-	if(![quickSearchKey isEqualToString:newKey]){
+	if([quickSearchKey isEqualToString:newKey] == NO){
 		// find current key's menuitem and set it to NSOffState
 		NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
 		[oldItem setState:NSOffState];
 		if ([searchField target] != self && [quickSearchKey isEqualToString:BDSKFileContentLocalizedString])
 			[fileSearchController restoreDocumentState];
+		[quickSearchKey release];
+		quickSearchKey = [newKey copy];
 	}
 	
 	// set new key's menuitem to NSOnState
-	NSMenuItem *newItem = [templateMenu itemWithTitle:newKey];
+	NSMenuItem *newItem = [templateMenu itemWithTitle:quickSearchKey];
 	[newItem setState:NSOnState];
     
     // @@ weird...this is required or else the checkmark doesn't show up
 	[searchCell setSearchMenuTemplate:templateMenu];
-    
-	if(newKey != quickSearchKey){
-		[quickSearchKey release];
-		quickSearchKey = [newKey copy];
-	}
 
-	if([newKey isEqualToString:BDSKFileContentLocalizedString])
+	if([quickSearchKey isEqualToString:BDSKFileContentLocalizedString])
 		[self searchByContent:searchField];
  
 	[self hidePublicationsWithoutSubstring:[searchField stringValue] //newQueryString
