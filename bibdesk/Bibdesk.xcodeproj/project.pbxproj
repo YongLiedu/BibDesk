@@ -371,7 +371,7 @@
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		CEFA07F40AF0E52100A3B4B1 /* BDSKApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */; };
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
-		CEFA0F4E0AF1400900A3B4B1 /* BDSKDocumentProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFA0F4C0AF1400900A3B4B1 /* BDSKDocumentProtocol.h */; };
+		CEFA0F4E0AF1400900A3B4B1 /* BDSKOwnerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */; };
 		CEFDBDBD0AEA86BA009EE99D /* BDSKSmartGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */; };
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC50AEA86F0009EE99D /* BDSKStaticGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFDBDC30AEA86F0009EE99D /* BDSKStaticGroup.h */; };
@@ -1209,7 +1209,7 @@
 		CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTableSortDescriptor.m; sourceTree = "<group>"; };
 		CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKApplication.h; sourceTree = "<group>"; };
 		CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKApplication.m; sourceTree = "<group>"; };
-		CEFA0F4C0AF1400900A3B4B1 /* BDSKDocumentProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDocumentProtocol.h; sourceTree = "<group>"; };
+		CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOwnerProtocol.h; sourceTree = "<group>"; };
 		CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
 		CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSmartGroup.m; sourceTree = "<group>"; };
 		CEFDBDC30AEA86F0009EE99D /* BDSKStaticGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStaticGroup.h; sourceTree = "<group>"; };
@@ -2184,7 +2184,7 @@
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
 				CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */,
-				CEFA0F4C0AF1400900A3B4B1 /* BDSKDocumentProtocol.h */,
+				CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */,
 				CEEC70DF093B6EC200A64F54 /* BDSKDragImageView.h */,
 				F9022C400758027800C3F701 /* BDSKMainTableView.h */,
 				F9022C420758027800C3F701 /* BDSKDragWindow.h */,
@@ -2678,7 +2678,7 @@
 				CE564D250AECBA5B002F0A24 /* NSScanner_BDSKExtensions.h in Headers */,
 				CE565BBF0AEF848B002F0A24 /* BDSKPublicationsArray.h in Headers */,
 				CEFA07F40AF0E52100A3B4B1 /* BDSKApplication.h in Headers */,
-				CEFA0F4E0AF1400900A3B4B1 /* BDSKDocumentProtocol.h in Headers */,
+				CEFA0F4E0AF1400900A3B4B1 /* BDSKOwnerProtocol.h in Headers */,
 				CE6003280AF3E465000B5680 /* BDSKColoredBox.h in Headers */,
 				CE600E2F0AF405D6000B5680 /* BDSKRISParser.h in Headers */,
 				CE601A4E0AF4C488000B5680 /* BDSKReferenceMinerParser.h in Headers */,

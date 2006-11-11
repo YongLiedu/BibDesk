@@ -1,5 +1,5 @@
 //
-//  BDSKDocumentProtocol.h
+//  BDSKOwnerProtocol.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/26/06.
@@ -41,7 +41,7 @@
 @class BDSKPublicationsArray, BDSKMacroResolver;
 
 // this protocol describes the methods for a stand-in for the document, documents of BibItem and BDSKMacroResolver should conform to this
-@protocol BDSKDocument <NSObject>
+@protocol BDSKOwner <NSObject>
 
 - (BOOL)isDocument;
 - (BDSKPublicationsArray *)publications;
