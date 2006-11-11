@@ -137,6 +137,10 @@
     return macroResolver;
 }
 
+- (id<BDSKOwner>)contentOwner{
+    return [macroResolver owner];
+}
+
 - (void)refreshMacros{
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
     [macros release];

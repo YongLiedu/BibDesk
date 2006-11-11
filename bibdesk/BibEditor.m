@@ -293,6 +293,10 @@ static int numberOfOpenEditors = 0;
     return publication;
 }
 
+- (id<BDSKOwner>)contentOwner{
+    return [publication owner];
+}
+
 - (void)awakeFromNib{
 	
 	if (documentSnoopDrawer != nil) {

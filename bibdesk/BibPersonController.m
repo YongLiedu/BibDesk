@@ -136,6 +136,10 @@
     }
 }
 
+- (id<BDSKOwner>)contentOwner{
+    return [[person publication] owner];
+}
+
 - (BibAuthor *)person {
     return person;
 }

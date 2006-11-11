@@ -174,14 +174,8 @@ The groupedPublications array is a subset of the publications array, developed b
     NSWindowController *wc;
     
     while(wc = [wcEnum nextObject]){
-        id doc = nil;
-        if([wc isKindOfClass:[MacroWindowController class]])
-            doc = [[(MacroWindowController *)wc macroResolver] owner];
-        else if([wc isKindOfClass:[BibEditor class]])
-            doc = [[(BibEditor *)wc publication] owner];
-        else if([wc isKindOfClass:[BibPersonController class]])
-            doc = [[[(BibPersonController *)wc person] publication] owner];
-        if([doc isKindOfClass:[BDSKSharedGroup class]] && [array containsObject:doc] == NO)
+        id owner = [wc contentOwner];
+        if([owner isKindOfClass:[BDSKSharedGroup class]] && [array containsObject:owner] == NO)
             [wc hideWindow:nil];
     }
     
@@ -280,14 +274,8 @@ The groupedPublications array is a subset of the publications array, developed b
     NSWindowController *wc;
     
     while(wc = [wcEnum nextObject]){
-        id doc = nil;
-        if([wc isKindOfClass:[MacroWindowController class]])
-            doc = [[(MacroWindowController *)wc macroResolver] owner];
-        else if([wc isKindOfClass:[BibEditor class]])
-            doc = [[(BibEditor *)wc publication] owner];
-        else if([wc isKindOfClass:[BibPersonController class]])
-            doc = [[[(BibPersonController *)wc person] publication] owner];
-        if(doc && [groupsToRemove containsObject:doc])
+        id owner = [wc contentOwner];
+        if(owner && [groupsToRemove containsObject:owner])
             [wc hideWindow:nil];
     }
 }

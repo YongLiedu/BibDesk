@@ -38,12 +38,15 @@
 
 #import <Cocoa/Cocoa.h>
 
+@protocol BDSKOwner;
 
 @interface NSWindowController (BDSKExtensions)
 
 - (BOOL)isWindowVisible;
 - (IBAction)hideWindow:(id)sender;
 - (IBAction)toggleShowingWindow:(id)sender;
+
+- (id<BDSKOwner>)contentOwner;
 
 @end
 

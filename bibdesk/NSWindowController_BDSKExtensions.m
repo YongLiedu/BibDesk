@@ -63,6 +63,8 @@
     }
 }
 
+- (id<BDSKOwner>)contentOwner{ return nil; }
+
 @end
 
 
