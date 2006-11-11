@@ -169,15 +169,20 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     NSMutableArray *array = [[[BDSKSharingBrowser sharedBrowser] sharedGroups] mutableCopy];
     
-    id document;
+    // remove all windowControllers for shared groups that were removed
     NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
     NSWindowController *wc;
+    
     while(wc = [wcEnum nextObject]){
-        if([wc isKindOfClass:[MacroWindowController class]]){
-            document = [[(MacroWindowController*)wc macroResolver] document];
-            if ([document isKindOfClass:[BDSKSharedGroup class]] && [array containsObjectIdenticalTo:document] == NO)
-                [wc hideWindow:nil];
-        }
+        id doc = nil;
+        if([wc isKindOfClass:[MacroWindowController class]])
+            doc = [[(MacroWindowController *)wc macroResolver] document];
+        else if([wc isKindOfClass:[BibEditor class]])
+            doc = [[(BibEditor *)wc publication] document];
+        else if([wc isKindOfClass:[BibPersonController class]])
+            doc = [[[(BibPersonController *)wc person] publication] document];
+        if([doc isKindOfClass:[BDSKSharedGroup class]] && [array containsObject:doc] == NO)
+            [wc hideWindow:nil];
     }
     
     // reset the dictionary of spinners
