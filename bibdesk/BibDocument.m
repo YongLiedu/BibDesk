@@ -1484,6 +1484,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     [[sharedGroupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [sharedGroupSpinners removeAllObjects];
+    [groups setLastImportedPublications:[NSArray array]];
     
     [macroResolver removeAllMacros];
     [groups removeAllStaticGroups];
