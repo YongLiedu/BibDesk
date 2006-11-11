@@ -1517,6 +1517,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // better do this here, so we don't remove them when reading the data fails
     [macroResolver removeAllMacros];
     [groups removeAllNonSharedGroups]; // this also removes spinners and editor windows for external groups
+    [frontMatter setString:@""];
     
 	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
