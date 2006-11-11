@@ -57,17 +57,3 @@
 - (void)pasteboardChangedOwner:(NSPasteboard *)pboard;
 
 @end
-
-@interface NSPasteboard (JCRDragWellExtensions)
-
-- (BOOL) hasType:(id)aType; /*"Returns TRUE if aType is one of the types
-available from the receiving pastebaord."*/
-
-- (BOOL) containsFiles; /*"Returns TRUE if there are filenames available
-    in the receiving pasteboard."*/
-
-- (BOOL) containsURL;
-
-- (BOOL)containsUnparseableFile;
-
-@end

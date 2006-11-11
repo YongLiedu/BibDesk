@@ -69,6 +69,12 @@
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
+@interface NSPasteboard (BDSKExtensions)
+- (BOOL)containsUnparseableFile;
+@end
+
+#pragma mark -
+
 @implementation BibDocument (DataSource)
 
 #pragma mark TableView data source
@@ -1027,6 +1033,73 @@
     return NO;
 }
 
+#pragma mark HFS Promise drags
+
+// promise drags (currently used for webloc files)
+- (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet;
+{
+
+    unsigned rowIdx = [indexSet firstIndex];
+    NSMutableDictionary *fullPathDict = [NSMutableDictionary dictionaryWithCapacity:[indexSet count]];
+    
+    // We're supposed to return this to our caller (usually the Finder); just an array of file names, not full paths
+    NSMutableArray *fileNames = [NSMutableArray arrayWithCapacity:[indexSet count]];
+    
+    NSURL *url = nil;
+    NSString *fullPath = nil;
+    BibItem *theBib = nil;
+    
+    // this ivar stores the field name (e.g. Url, L2)
+    NSString *fieldName = [self promiseDragColumnIdentifier];
+    BOOL isLocalFile = [fieldName isLocalFileField];
+    
+    NSString *originalPath;
+    NSString *fileName;
+    NSString *basePath = [dropDestination path];
+
+    while(rowIdx != NSNotFound){
+        theBib = [shownPublications objectAtIndex:rowIdx];
+        if(isLocalFile){
+            originalPath = [theBib localFilePathForField:fieldName];
+            fileName = [originalPath lastPathComponent];
+            NSParameterAssert(fileName);
+            fullPath = [basePath stringByAppendingPathComponent:fileName];
+            [fileNames addObject:fileName];
+            // create a dictionary with each original file path (source) as key, and destination path as value
+            [fullPathDict setValue:fullPath forKey:originalPath];
+            
+        } else if((url = [theBib remoteURLForField:fieldName])){
+                fullPath = [[basePath stringByAppendingPathComponent:[theBib displayTitle]] stringByAppendingPathExtension:@"webloc"];
+                // create a dictionary with each destination file path as key (handed to us from the Finder/dropDestination) and each item's URL as value
+                [fullPathDict setValue:url forKey:fullPath];
+                [fileNames addObject:[theBib displayTitle]];
+        }
+        rowIdx = [indexSet indexGreaterThanIndex:rowIdx];
+    }
+    [self setPromiseDragColumnIdentifier:nil];
+    
+    // We generally want to run promised file creation in the background to avoid blocking our UI, although webloc files are so small it probably doesn't matter.
+    if(isLocalFile)
+        [[NSFileManager defaultManager] copyFilesInBackgroundThread:fullPathDict];
+    else
+        [[NSFileManager defaultManager] createWeblocFilesInBackgroundThread:fullPathDict];
+
+    return fileNames;
+}
+
+- (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
+{
+    if(promiseDragColumnIdentifier != identifier){
+        [promiseDragColumnIdentifier release];
+        promiseDragColumnIdentifier = [identifier copy];
+    }
+}
+
+- (NSString *)promiseDragColumnIdentifier;
+{
+    return promiseDragColumnIdentifier;
+}
+
 #pragma mark TableView actions
 
 // the next 3 are called from tableview actions defined in NSTableView_OAExtensions
@@ -1079,6 +1152,7 @@
         [self editPubCmd:nil];
 }
 
+#pragma mark -
 #pragma mark Lazy Pasteboard
 
 - (void)setPromisedItems:(NSArray *)items types:(NSArray *)types dragCopyType:(int)dragCopyType forPasteboard:(NSPasteboard *)pboard {
@@ -1135,6 +1209,7 @@
 	[self clearPromisedTypesForPasteboard:pboard];
 }
 
+#pragma mark -
 #pragma mark TypeSelectHelper delegate
 
 // used for status bar
@@ -1223,72 +1298,7 @@
     [tv scrollRowToVisible:itemIndex];
 }
 
-#pragma mark HFS Promise drags
-// promise drags (currently used for webloc files)
-- (NSArray *)tableView:(NSTableView *)tv namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedRowsWithIndexes:(NSIndexSet *)indexSet;
-{
-
-    unsigned rowIdx = [indexSet firstIndex];
-    NSMutableDictionary *fullPathDict = [NSMutableDictionary dictionaryWithCapacity:[indexSet count]];
-    
-    // We're supposed to return this to our caller (usually the Finder); just an array of file names, not full paths
-    NSMutableArray *fileNames = [NSMutableArray arrayWithCapacity:[indexSet count]];
-    
-    NSURL *url = nil;
-    NSString *fullPath = nil;
-    BibItem *theBib = nil;
-    
-    // this ivar stores the field name (e.g. Url, L2)
-    NSString *fieldName = [self promiseDragColumnIdentifier];
-    BOOL isLocalFile = [fieldName isLocalFileField];
-    
-    NSString *originalPath;
-    NSString *fileName;
-    NSString *basePath = [dropDestination path];
-
-    while(rowIdx != NSNotFound){
-        theBib = [shownPublications objectAtIndex:rowIdx];
-        if(isLocalFile){
-            originalPath = [theBib localFilePathForField:fieldName];
-            fileName = [originalPath lastPathComponent];
-            NSParameterAssert(fileName);
-            fullPath = [basePath stringByAppendingPathComponent:fileName];
-            [fileNames addObject:fileName];
-            // create a dictionary with each original file path (source) as key, and destination path as value
-            [fullPathDict setValue:fullPath forKey:originalPath];
-            
-        } else if((url = [theBib remoteURLForField:fieldName])){
-                fullPath = [[basePath stringByAppendingPathComponent:[theBib displayTitle]] stringByAppendingPathExtension:@"webloc"];
-                // create a dictionary with each destination file path as key (handed to us from the Finder/dropDestination) and each item's URL as value
-                [fullPathDict setValue:url forKey:fullPath];
-                [fileNames addObject:[theBib displayTitle]];
-        }
-        rowIdx = [indexSet indexGreaterThanIndex:rowIdx];
-    }
-    [self setPromiseDragColumnIdentifier:nil];
-    
-    // We generally want to run promised file creation in the background to avoid blocking our UI, although webloc files are so small it probably doesn't matter.
-    if(isLocalFile)
-        [[NSFileManager defaultManager] copyFilesInBackgroundThread:fullPathDict];
-    else
-        [[NSFileManager defaultManager] createWeblocFilesInBackgroundThread:fullPathDict];
-
-    return fileNames;
-}
-
-- (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
-{
-    if(promiseDragColumnIdentifier != identifier){
-        [promiseDragColumnIdentifier release];
-        promiseDragColumnIdentifier = [identifier copy];
-    }
-}
-
-- (NSString *)promiseDragColumnIdentifier;
-{
-    return promiseDragColumnIdentifier;
-}
-
+#pragma mark -
 #pragma mark Tracking rects
 
 - (BOOL)tableView:(NSTableView *)tv shouldTrackTableColumn:(NSTableColumn *)tableColumn row:(int)row;
@@ -1319,22 +1329,9 @@
 
 @end
 
+#pragma mark -
 
-// From JCR:
-//To make it more readable, I'd added this category to NSPasteboard:
-
-@implementation NSPasteboard (JCRDragWellExtensions)
-
-- (BOOL) hasType:(id)aType /*"Returns TRUE if aType is one of the types
-available from the receiving pastebaord."*/
-{ return ([[self types] indexOfObject:aType] == NSNotFound ? NO : YES); }
-
-- (BOOL) containsFiles /*"Returns TRUE if there are filenames available
-    in the receiving pasteboard."*/
-{ return [self hasType:NSFilenamesPboardType]; }
-
-- (BOOL) containsURL
-{return [self hasType:NSURLPboardType];}
+@implementation NSPasteboard (BDSKExtensions)
 
 - (BOOL)containsUnparseableFile{
     NSString *type = [self availableTypeFromArray:[NSArray arrayWithObject:NSFilenamesPboardType]];
