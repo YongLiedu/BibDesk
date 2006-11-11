@@ -68,6 +68,7 @@
 - (BOOL)editSelectedCellAsMacro;
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif;
+- (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif;
 
 @end
 

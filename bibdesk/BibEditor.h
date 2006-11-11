@@ -413,6 +413,7 @@
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
 
 - (void)bibWillBeRemoved:(NSNotification *)notification;
+- (void)groupWillBeRemoved:(NSNotification *)notification;
 
 /*!
 	@method     openParentItemForField:

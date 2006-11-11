@@ -103,6 +103,11 @@
                                              selector:@selector(handleBibItemChanged:)
                                                  name:BDSKBibItemChangedNotification
                                                object:nil];
+    if(isEditable == NO)
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(handleGroupWillBeRemoved:)
+                                                         name:BDSKAddRemoveGroupNotification
+                                                       object:nil];
 
 	[self updateUI];
     [pubsTableView setDoubleAction:@selector(openSelectedPub:)];
@@ -134,10 +139,6 @@
         [publications release];
         publications = [pubs copy];
     }
-}
-
-- (id<BDSKOwner>)contentOwner{
-    return [[person publication] owner];
 }
 
 - (BibAuthor *)person {
@@ -174,6 +175,13 @@
 - (void)handleBibItemChanged:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
     [self setPublications:nil];
+}
+
+- (void)handleGroupWillBeRemoved:(NSNotification *)note{
+	NSArray *groups = [[note userInfo] objectForKey:@"groups"];
+	
+	if ([groups containsObject:[[person publication] owner]])
+		[self close];
 }
 
 - (void)openSelectedPub:(id)sender{

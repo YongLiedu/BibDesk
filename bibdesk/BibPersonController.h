@@ -72,6 +72,7 @@
 - (void)updateUI;
 - (void)handlePubListChanged:(NSNotification *)notification;
 - (void)handleBibItemChanged:(NSNotification *)note;
+- (void)handleGroupWillBeRemoved:(NSNotification *)note;
 - (void)openSelectedPub:(id)sender;
 - (void)changeNameToString:(NSString *)newNameString;
 

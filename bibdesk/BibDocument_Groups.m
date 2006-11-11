@@ -169,32 +169,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     NSMutableArray *array = [[[BDSKSharingBrowser sharedBrowser] sharedGroups] mutableCopy];
     
-    // remove all windowControllers for shared groups that were removed
-    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-    NSWindowController *wc;
-    
-    while(wc = [wcEnum nextObject]){
-        id owner = [wc contentOwner];
-        if([owner isKindOfClass:[BDSKSharedGroup class]] && [array containsObject:owner] == NO)
-            [wc hideWindow:nil];
-    }
-    
-    // reset the dictionary of spinners
-    if (sharedGroupSpinners == nil) {
-        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
-    } else {
-        NSEnumerator *groupEnum = [[groups sharedGroups] objectEnumerator];
-        BDSKSharedGroup *group;
-        id uniqueID;
-        while (group = [groupEnum nextObject]) {
-            if([array indexOfObjectIdenticalTo:group] != NSNotFound)
-                continue;
-            uniqueID = [group uniqueID];
-            [[sharedGroupSpinners objectForKey:uniqueID] removeFromSuperview];
-            [sharedGroupSpinners removeObjectForKey:uniqueID];
-        }
-    }
-    
     if (array != nil) {
         // now sort using the current column and order
         SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
@@ -268,15 +242,6 @@ The groupedPublications array is a subset of the publications array, developed b
         NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
         [spinner removeFromSuperview];
         [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
-    }
-    
-    NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-    NSWindowController *wc;
-    
-    while(wc = [wcEnum nextObject]){
-        id owner = [wc contentOwner];
-        if(owner && [groupsToRemove containsObject:owner])
-            [wc hideWindow:nil];
     }
 }
 

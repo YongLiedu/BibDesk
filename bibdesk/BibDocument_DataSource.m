@@ -298,6 +298,9 @@
         BDSKGroup *group = [groups objectAtIndex:row];
         if ([group isExternal] == NO) return;
         
+        if (sharedGroupSpinners == nil) 
+            sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+        
         NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
         
         if ([group isRetrieving]) {

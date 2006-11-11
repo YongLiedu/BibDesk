@@ -53,6 +53,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "BDSKTypeSelectHelper.h"
+#import "BibDocument.h"
 
 @implementation MacroWindowController
 
@@ -85,6 +86,12 @@
                                                          selector:@selector(handleMacroChangedNotification:)
                                                              name:BDSKMacroDefinitionChangedNotification
                                                            object:[BDSKMacroResolver defaultMacroResolver]];
+            }
+            if (isEditable == NO) {
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(handleGroupWillBeRemovedNotification:)
+                                                             name:BDSKAddRemoveGroupNotification
+                                                           object:nil];
             }
         }
         
@@ -137,8 +144,11 @@
     return macroResolver;
 }
 
-- (id<BDSKOwner>)contentOwner{
-    return [macroResolver owner];
+- (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif{
+	NSArray *groups = [[notif userInfo] objectForKey:@"groups"];
+	
+	if ([groups containsObject:[macroResolver owner]])
+		[self close];
 }
 
 - (void)refreshMacros{

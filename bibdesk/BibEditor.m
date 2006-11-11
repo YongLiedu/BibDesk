@@ -293,10 +293,6 @@ static int numberOfOpenEditors = 0;
     return publication;
 }
 
-- (id<BDSKOwner>)contentOwner{
-    return [publication owner];
-}
-
 - (void)awakeFromNib{
 	
 	if (documentSnoopDrawer != nil) {
@@ -2173,6 +2169,13 @@ static int numberOfOpenEditors = 0;
 	if ([pubs containsObject:publication])
 		[self close];
 }
+	
+- (void)groupWillBeRemoved:(NSNotification *)notification{
+	NSArray *groups = [[notification userInfo] objectForKey:@"groups"];
+	
+	if ([groups containsObject:[publication owner]])
+		[self close];
+}
 
 // these methods are for crossref interaction with the form
 - (void)openParentItemForField:(NSString *)field{
@@ -3560,6 +3563,11 @@ static int numberOfOpenEditors = 0;
 											 selector:@selector(bibWillBeRemoved:)
 												 name:BDSKDocWillRemoveItemNotification
 											   object:[self document]];
+    if(isEditable == NO)
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(groupWillBeRemoved:)
+                                                     name:BDSKAddRemoveGroupNotification
+                                                   object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(finalizeChanges:)
 												 name:BDSKFinalizeChangesNotification
