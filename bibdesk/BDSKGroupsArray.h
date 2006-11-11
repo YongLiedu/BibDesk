@@ -95,14 +95,13 @@
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
-- (void)setTmpStaticGroups:(NSArray *)array;
+- (void)removeAllStaticGroups;
 - (void)setCategoryGroups:(NSArray *)array;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
 
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
-- (NSUndoManager *)undoManager;
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)setStaticGroupsFromSerializedData:(NSData *)data;

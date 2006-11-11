@@ -1486,6 +1486,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [sharedGroupSpinners removeAllObjects];
     
     [macroResolver removeAllMacros];
+    [groups removeAllStaticGroups];
     
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
         // updating smart and category groups is done by the notification of setPublications:
