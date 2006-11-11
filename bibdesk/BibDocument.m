@@ -1482,13 +1482,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     while(--index)
         [[[self windowControllers] objectAtIndex:index] close];
     
-    [[sharedGroupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [sharedGroupSpinners removeAllObjects];
-    [groups setLastImportedPublications:[NSArray array]];
-    
-    [macroResolver removeAllMacros];
-    [groups removeAllStaticGroups];
-    
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
         // updating smart and category groups is done by the notification of setPublications:
         [self sortGroupsByKey:sortGroupsKey]; // resort
@@ -1515,6 +1508,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if (outError) *outError = error;
         return NO;
     }
+    
+    // make sure we clear all macros and groups that are saved in the file, should only have those for revert
+    // better do this here, so we don't remove them when reading the data fails
+    [macroResolver removeAllMacros];
+    [groups removeAllNonSharedGroups]; // this also removes spinners and editor windows for external groups
     
 	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];

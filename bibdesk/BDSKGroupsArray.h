@@ -95,8 +95,8 @@
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 - (void)addStaticGroup:(BDSKStaticGroup *)group;
 - (void)removeStaticGroup:(BDSKStaticGroup *)group;
-- (void)removeAllStaticGroups;
 - (void)setCategoryGroups:(NSArray *)array;
+- (void)removeAllNonSharedGroups;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
 

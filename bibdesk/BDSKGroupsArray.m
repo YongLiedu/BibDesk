@@ -302,7 +302,8 @@
 - (void)removeURLGroup:(BDSKURLGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
 	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:group], @"groups", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
     
 	[group setUndoManager:nil];
 	[urlGroups removeObjectIdenticalTo:group];
@@ -322,7 +323,8 @@
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
 	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:group], @"groups", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
     
 	[group setUndoManager:nil];
 	[scriptGroups removeObjectIdenticalTo:group];
@@ -370,16 +372,30 @@
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
 }
-
-- (void)removeAllStaticGroups {
-    [staticGroups removeAllObjects];
-}
  
 - (void)setCategoryGroups:(NSArray *)array{
     if(categoryGroups != array){
        [categoryGroups release];
        categoryGroups = [array mutableCopy]; 
     }
+}
+
+// this should only be used just before reading from file, in particular revert, so we shouldn't make this undoable
+- (void)removeAllNonSharedGroups {
+    NSMutableArray *extGroups = [NSMutableArray arrayWithArray:urlGroups];
+    [extGroups addObjectsFromArray:scriptGroups];
+    if([extGroups count]) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:extGroups, @"groups", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
+    }
+    
+    [lastImportGroup setPublications:[NSArray array]];
+    [urlGroups removeAllObjects];
+    [scriptGroups removeAllObjects];
+    [staticGroups removeAllObjects];
+    [smartGroups removeAllObjects];
+    [staticGroups removeAllObjects];
+    [categoryGroups removeAllObjects];
 }
 
 #pragma mark Document

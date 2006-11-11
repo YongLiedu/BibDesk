@@ -64,6 +64,8 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKURLGroupSheetController.h"
 #import "BDSKScriptGroupSheetController.h"
+#import "BibEditor.h"
+#import "BibPersonController.h"
 
 @implementation BibDocument (Groups)
 
@@ -257,20 +259,31 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleWillRemoveExternalGroupNotification:(NSNotification *)notification{
-	BDSKGroup *group = [notification object];
+    NSArray *groupsToRemove = [[notification userInfo] valueForKey:@"groups"];
+    NSEnumerator *groupEnum = [groupsToRemove objectEnumerator];
+    BDSKGroup *group;
+    NSProgressIndicator *spinner;
+    NSMutableSet *macroResolvers = [NSMutableSet set];
     
-    NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
-    [spinner removeFromSuperview];
-    [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+    while(group = [groupEnum nextObject]){
+        NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
+        [spinner removeFromSuperview];
+        [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+    }
     
-    BDSKMacroResolver *resolver = [(id)group macroResolver];
     NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
     NSWindowController *wc;
+    
     while(wc = [wcEnum nextObject]){
-        if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver){
+        id doc = nil;
+        if([wc isKindOfClass:[MacroWindowController class]])
+            doc = [[(MacroWindowController *)wc macroResolver] document];
+        else if([wc isKindOfClass:[BibEditor class]])
+            doc = [[(BibEditor *)wc publication] document];
+        else if([wc isKindOfClass:[BibPersonController class]])
+            doc = [[[(BibPersonController *)wc person] publication] document];
+        if(doc && [groupsToRemove containsObject:doc])
             [wc hideWindow:nil];
-            break;
-        }
     }
 }
 
