@@ -398,7 +398,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         
         OBPOSTCONDITION(fileURL != nil);
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
-            [self selectGroup:[groups allPublicationsGroup]];
+            [self selectAllPublicationsGroup:nil];
             [self setSelectedSearchFieldKey:BDSKAllFieldsString];
             [self setFilterField:searchString];
         }
@@ -2838,7 +2838,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
     // make sure we can see the publication, if it's still in the document
     if (flag)
-        [self selectGroup:[groups allPublicationsGroup]];
+        [self selectAllPublicationsGroup:nil];
     [tableView deselectAll:self];
     [self setFilterField:@""];
 
