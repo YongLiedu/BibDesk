@@ -1401,7 +1401,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *RISString = [self RISStringForPublications:items];
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }
 	return data;
 }
@@ -1416,7 +1416,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if(bibString == nil || 
 	   [texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateLTB] == NO || 
 	   [texTask hasLTB] == NO) {
-        if (error) OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to run TeX processes for these publications", @""), nil);
+        if (error) OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to run TeX processes for these publications", @""), nil);
 		return nil;
     }
     
@@ -1426,7 +1426,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSData *data = [s dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        OFError(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }        
 	return data;
 }
@@ -1527,7 +1527,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
 		if(string == nil){
-            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This document does not appear to be a text file.", @""), nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This document does not appear to be a text file.", @""), nil);
             if(outError) *outError = error;
             
             // bypass the partial data warning, since we have no data
@@ -1537,13 +1537,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		}else if (type == BDSKNoKeyBibTeXStringType){
-            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @""), nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @""), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
             return NO;
 		}else if (type == BDSKUnknownStringType){
-            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @""), nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @""), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
@@ -1601,7 +1601,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSArray *newPubs = nil;
     
     if(dataString == nil && outError){
-        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Interpret", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"need a single NSString format specifier"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Interpret", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"need a single NSString format specifier"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
         *outError = error;
         return NO;
     }
@@ -1874,7 +1874,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             newPubs = [self newPublicationForURL:pbURL error:&error];
 	}else{
         // errors are key, value
-        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"BibDesk couldn't find any files or bibliography information in the data it received."), nil);
+        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"BibDesk couldn't find any files or bibliography information in the data it received."), nil);
 	}
 	
     if (newPubs == nil || error != nil){
@@ -1967,12 +1967,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
         // return an error when we inserted temporary keys, let the caller decide what to do with it
         // don't override a parseError though, as that is probably more relevant
-        OFError(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys"), @"temporaryCiteKey", @"FixMe", nil);
+        OFErrorWithInfo(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys"), @"temporaryCiteKey", @"FixMe", nil);
     }
 
     // we reach this for unsupported data types (BDSKUnknownStringType)
 	if ([newPubs count] == 0 && parseError == nil)
-        OFError(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"BibDesk couldn't find bibliography data in this text.", @"Error message when pasting unknown text in."), nil);
+        OFErrorWithInfo(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"BibDesk couldn't find bibliography data in this text.", @"Error message when pasting unknown text in."), nil);
 
 	if(outError) *outError = parseError;
     return newPubs;
@@ -2057,7 +2057,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSArray *)newPublicationForURL:(NSURL *)url error:(NSError **)error {
     if(url == nil){
-        OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find expected URL on the pasteboard", @"BibDesk couldn't find any URL in the data it received."), nil);
+        OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find expected URL on the pasteboard", @"BibDesk couldn't find any URL in the data it received."), nil);
         return nil;
     }
     

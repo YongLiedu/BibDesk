@@ -254,7 +254,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                 } // end generate BibItem from ENTRY metatype.
             }else{
                 // wasn't ok, record it and deal with it later.
-                OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
+                OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
             }
             bt_free_ast(entry);
 
@@ -265,7 +265,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
         if([exception isEqual:BibTeXParserInternalException] == NO)
             @throw;
         else
-            OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Encoding conversion failure", @""), NSStringEncodingErrorKey, [NSNumber numberWithInt:parserEncoding], nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Encoding conversion failure", @""), NSStringEncodingErrorKey, [NSNumber numberWithInt:parserEncoding], nil);
     }
     
     @finally {
@@ -744,7 +744,7 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
             [errorObject report];
             [errorObject release];
             
-            OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
+            OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
         }else{
             [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
         }
@@ -849,13 +849,13 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
         }else{ 
             // no brace and no quote => unknown problem
             NSString *errorString = [NSString stringWithFormat:NSLocalizedString(@"Unexpected delimiter \"%@\" encountered at line %d.", @""), [[[NSString alloc] initWithBytes:&data[cidx-1] length:1 encoding:encoding] autorelease], field->line];
-            OFError(error, BDSKParserError, NSLocalizedDescriptionKey, errorString, nil);
+            OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, errorString, nil);
         }
         returnString = [[NSString alloc] initWithBytes:&data[field->down->offset] length:(cidx- (field->down->offset)) encoding:encoding];
         if (NO == checkStringForEncoding(returnString, field->line, filePath, encoding))
             @throw BibTeXParserInternalException;
     }else{
-        OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
+        OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
     }
     return returnString;
 }

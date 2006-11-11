@@ -88,7 +88,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
     
 	NSRange startRange = [itemString rangeOfString:@"--------------------------------------------------------------------------------\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"JSTOR delimiter not found", @""), nil);
+        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"JSTOR delimiter not found", @""), nil);
         if(outError) *outError = error;
 		return returnArray;
     }

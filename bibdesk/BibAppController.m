@@ -1151,7 +1151,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         
         NSString *cachePath = [fileManager spotlightCacheFolderPathByCreating:&error];
         if(cachePath == nil){
-            OFError(&error, NSCocoaErrorDomain, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create the cache folder for Spotlight metadata.", @""), nil);
+            OFErrorWithInfo(&error, NSCocoaErrorDomain, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create the cache folder for Spotlight metadata.", @""), nil);
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", cachePath] userInfo:nil];
         }
         
