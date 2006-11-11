@@ -1064,7 +1064,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];    
 	[self addPublications:newPubs];
-	[self highlightBibs:newPubs];
+	[self selectPublications:newPubs];
     
     [groups setLastImportedPublications:newPubs];
 	

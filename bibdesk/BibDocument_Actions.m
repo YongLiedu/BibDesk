@@ -126,7 +126,7 @@
         [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     
-    [self highlightBib:newBI];
+    [self selectPublication:newBI];
     [self editPub:newBI];
 }
 
@@ -302,7 +302,7 @@
     NSArray *newPubs = [[NSArray alloc] initWithArray:[self selectedPublications] copyItems:YES];
     
     [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
-    [self highlightBibs:newPubs];
+    [self selectPublications:newPubs];
     [newPubs release];
 	
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
@@ -1057,7 +1057,7 @@
 	
 	if (moved) {
 		[self sortPubsByColumn:nil];
-		[self highlightBibs:selectedPubs];
+		[self selectPublications:selectedPubs];
 		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"")];
 	}
 }
@@ -1074,7 +1074,7 @@
     BibItem *parent = [item crossrefParent];
     if(parent){
         [tableView deselectAll:nil];
-        [self highlightBib:parent];
+        [self selectPublication:parent];
         [tableView scrollRowToCenter:[tableView selectedRow]];
     } else
         NSBeep(); // if no parent found
@@ -1192,7 +1192,7 @@
     }
     
     [removeSet release];
-	[self highlightBibs:pubsToRemove];
+	[self selectPublications:pubsToRemove];
     [pubsToRemove release];
 
     if(countOfItems)

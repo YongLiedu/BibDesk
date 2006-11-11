@@ -642,7 +642,7 @@ enum {
 
     [self findAndReplaceInItems:[NSArray arrayWithObject:selItem] ofDocument:theDocument];
     // make sure we only highlight this item
-    [theDocument highlightBib:selItem];
+    [theDocument selectPublication:selItem];
 }
 
 - (void)findAndHighlightWithReplace:(BOOL)replace next:(BOOL)next{
@@ -702,7 +702,7 @@ enum {
         }
     }
     
-    [theDocument highlightBib:[currItems objectAtIndex:indexOfSelectedItem]];
+    [theDocument selectPublication:[currItems objectAtIndex:indexOfSelectedItem]];
 }
 
 - (void)replaceAllInSelection:(BOOL)selection{

@@ -410,7 +410,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
     if ([groupData length])
         [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
-    [self highlightItemForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
+    [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
         
@@ -1078,7 +1078,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // get offending BibItem if possible
         BibItem *theItem = [nsError valueForKey:BDSKUnderlyingItemErrorKey];
         if (theItem)
-            [self highlightBib:theItem];
+            [self selectPublication:theItem];
         
         NSString *errTitle = NSAutosaveOperation == docState.currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"") : NSLocalizedString(@"Unable to save file", @"");
         
@@ -1632,9 +1632,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *tmpKey = [(NSString *)contextInfo autorelease];
     if(returnCode == NSAlertDefaultReturn){
         NSArray *selItems = [self selectedPublications];
-        [self highlightBibs:[[self publications] allItemsForCiteKey:tmpKey]];
+        [self selectPublications:[[self publications] allItemsForCiteKey:tmpKey]];
         [self generateCiteKeysForSelectedPublications];
-        [self highlightBibs:selItems];
+        [self selectPublications:selItems];
     }
 }
 
@@ -1648,7 +1648,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return;
     
     if(isNew)
-        [self highlightBibs:tmpKeyItems];
+        [self selectPublications:tmpKeyItems];
     
     NSString *infoFormat = isNew ? NSLocalizedString(@"This document was opened using the temporary cite key \"%@\" for the selected publications.  In order to use your file with BibTeX, you must generate valid cite keys for all of these items.  Do you want me to do this now?", @"")
                             : NSLocalizedString(@"New items are added using the temporary cite key \"%@\".  In order to use your file with BibTeX, you must generate valid cite keys for these items.  Do you want me to do this now?", @"");
@@ -1884,7 +1884,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	
     [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];    
 	[self addPublications:newPubs];
-	[self highlightBibs:newPubs];
+	[self selectPublications:newPubs];
 	if (newFilePubs != nil){
         // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
         [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaper)];
@@ -2138,7 +2138,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [tableView reloadData];
 
     // fix the selection
-    [self highlightBibs:pubsToSelect];
+    [self selectPublications:pubsToSelect];
     [tableView scrollRowToCenter:[tableView selectedRow]]; // just go to the last one
 
     // reset ourself as delegate
@@ -2834,7 +2834,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
 }
 
-- (BOOL)highlightItemForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag {
+- (BOOL)selectItemsForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag {
 
     // make sure we can see the publication, if it's still in the document
     if (flag)
@@ -2850,11 +2850,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if (anItem)
             [itemsToSelect addObject:anItem];
     }
-    [self highlightBibs:itemsToSelect];
+    [self selectPublications:itemsToSelect];
     return [itemsToSelect count];
 }
 
-- (BOOL)highlightItemForPartialItem:(NSDictionary *)partialItem{
+- (BOOL)selectItemForPartialItem:(NSDictionary *)partialItem{
         
     NSString *itemKey = [partialItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
     if(itemKey == nil)
@@ -2863,16 +2863,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     BOOL matchFound = NO;
 
     if(itemKey != nil)
-        matchFound = [self highlightItemForCiteKeys:[NSArray arrayWithObject:itemKey] selectLibrary:YES];
+        matchFound = [self selectItemsForCiteKeys:[NSArray arrayWithObject:itemKey] selectLibrary:YES];
     
     return matchFound;
 }
 
-- (void)highlightBib:(BibItem *)bib{
-	[self highlightBibs:[NSArray arrayWithObject:bib]];
+- (void)selectPublication:(BibItem *)bib{
+	[self selectPublications:[NSArray arrayWithObject:bib]];
 }
 
-- (void)highlightBibs:(NSArray *)bibArray{
+- (void)selectPublications:(NSArray *)bibArray{
     
 	NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
 	NSEnumerator *pubEnum = [bibArray objectEnumerator];

@@ -343,7 +343,7 @@
     if(document == nil)
         NSLog(@"document at URL %@ failed to open for reason: %@", fileURL, [error localizedFailureReason]);
     else
-        if(![document highlightItemForPartialItem:dictionary])
+        if(![document selectItemForPartialItem:dictionary])
             NSBeep();
     
     return document;

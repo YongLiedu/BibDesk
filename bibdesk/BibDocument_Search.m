@@ -280,7 +280,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	[self sortPubsByColumn:nil]; // resort
 	[self updateUI];
 	if(pubsToSelect)
-		[self highlightBibs:pubsToSelect];
+		[self selectPublications:pubsToSelect];
 }
         
 - (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
@@ -480,7 +480,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
             while(item = [pubEnum nextObject])
                 if([titlesToSelect containsObject:[item title]]) 
                     [pubsToSelect addObject:item];
-            [self highlightBibs:pubsToSelect];
+            [self selectPublications:pubsToSelect];
             [tableView scrollRowToCenter:[tableView selectedRow]];
             
             // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview

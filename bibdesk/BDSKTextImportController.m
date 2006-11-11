@@ -776,7 +776,7 @@
     [webView setFrameLoadDelegate:nil];
     [webView setUIDelegate:nil];
 	// select the items we just added
-	[document highlightBibs:itemsAdded];
+	[document selectPublications:itemsAdded];
 	[itemsAdded removeAllObjects];
     
     [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];

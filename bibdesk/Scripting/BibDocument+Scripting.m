@@ -143,7 +143,7 @@ Getting and setting the selection of the table
 	
 	while (item = [itemEnum nextObject])
 		[pubsToSelect addObject:[publications objectAtIndex:[item index]]];
-	[self highlightBibs:pubsToSelect];
+	[self selectPublications:pubsToSelect];
 }
 
 

@@ -945,7 +945,7 @@
             if([field isEqualToString:BDSKLocalUrlString])
                 [pub autoFilePaper];
             
-            [self highlightBib:pub];
+            [self selectPublication:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
             return YES;
             
@@ -975,7 +975,7 @@
                                     [selItems addObjectsFromArray:items];
                             }
                         }
-                        [self highlightBibs:selItems];
+                        [self selectPublications:selItems];
                         
                         return YES;
                     }
