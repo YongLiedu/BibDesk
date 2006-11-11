@@ -465,12 +465,12 @@
         pubs = [self selectedPublications];
         dragCopyType = 1; // only type that makes sense here
         
-        docState.dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
+        docState.dragFromSharedGroups = [self hasExternalGroupsSelected];
     }else if(tv == tableView){
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
-        docState.dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+        docState.dragFromSharedGroups = [self hasExternalGroupsSelected];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
