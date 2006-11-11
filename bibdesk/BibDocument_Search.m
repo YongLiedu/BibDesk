@@ -48,6 +48,8 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKZoomablePDFView.h"
+#import "BDSKPreviewer.h"
+#import "BDSKOverlay.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
 NSString *BDSKDocumentFormatForSearchingDates = nil;
@@ -441,6 +443,8 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 {
     if([splitView isHidden]){
         
+        [[previewer progressOverlay] remove];
+        
         [splitView removeFromSuperview];
         // connect the searchfield to the controller and start the search
         [fileSearchController setSearchField:searchField];
@@ -490,6 +494,9 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     NSRect frame = [view frame];
     [splitView setFrame:frame];
     [mainBox addSubview:splitView];
+    
+    if(currentPreviewView != [previewTextView enclosingScrollView])
+        [[previewer progressOverlay] overlayView:currentPreviewView];
     
     NSViewAnimation *animation;
     NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
