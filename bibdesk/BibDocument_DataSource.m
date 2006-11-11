@@ -858,7 +858,7 @@
     }else if(tv == tableView){
         if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
-		if (draggingSource == groupTableView && docState.dragFromSharedGroups && [groupTableView selectedRow] == 0) {
+		if (draggingSource == groupTableView && docState.dragFromSharedGroups && [self hasAllPublicationsGroupSelected]) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }

@@ -69,6 +69,10 @@
 
 #pragma mark Selected group types
 
+- (BOOL)hasAllPublicationsGroupSelected{
+    return [groupTableView selectedRow] == 0;
+}
+
 - (BOOL)hasSharedGroupsSelected{
     return [groups hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 }
@@ -375,7 +379,7 @@ The groupedPublications array is a subset of the publications array, developed b
     NSArray *array;
     
     // optimize for single selections
-    if ([selectedGroups count] == 1 && [selectedGroups containsObject:[groups allPublicationsGroup]]) {
+    if ([selectedGroups count] == 1 && [self hasAllPublicationsGroupSelected]) {
         array = publications;
     } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected])) {
         unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];

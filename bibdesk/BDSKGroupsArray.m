@@ -79,7 +79,7 @@
 }
 
 - (unsigned int)count {
-    return [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [smartGroups count] + [[self staticGroups] count] + [categoryGroups count] + (lastImportGroup ? 2 : 1) /* add 1 for all publications group */ ;
+    return [sharedGroups count] + [urlGroups count] + [scriptGroups count] + [smartGroups count] + [[self staticGroups] count] + [categoryGroups count] + ([lastImportGroup count] ? 2 : 1) /* add 1 for all publications group */ ;
 }
 
 - (id)objectAtIndex:(unsigned int)index {
@@ -89,7 +89,7 @@
 		return allPublicationsGroup;
     index -= 1;
     
-    if (lastImportGroup != nil) {
+    if ([lastImportGroup count] != 0) {
         if (index == 0)
             return lastImportGroup;
         index -= 1;
@@ -198,7 +198,7 @@
 #pragma mark Index ranges of groups
 
 - (NSRange)rangeOfSharedGroups{
-    return NSMakeRange((lastImportGroup == nil) ? 1 : 2, [sharedGroups count]);
+    return NSMakeRange([lastImportGroup count] == 0 ? 1 : 2, [sharedGroups count]);
 }
 
 - (NSRange)rangeOfURLGroups{

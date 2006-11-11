@@ -42,6 +42,7 @@
 
 @interface BibDocument (Groups)
 
+- (BOOL)hasAllPublicationsGroupSelected;
 - (BOOL)hasSharedGroupsSelected;
 - (BOOL)hasURLGroupsSelected;
 - (BOOL)hasScriptGroupsSelected;
