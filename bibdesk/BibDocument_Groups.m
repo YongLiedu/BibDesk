@@ -239,9 +239,11 @@ The groupedPublications array is a subset of the publications array, developed b
     NSMutableSet *macroResolvers = [NSMutableSet set];
     
     while(group = [groupEnum nextObject]){
-        NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
-        [spinner removeFromSuperview];
-        [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+        if(spinner = [sharedGroupSpinners objectForKey:[group uniqueID]]){
+            [spinner stopAnimation:nil];
+            [spinner removeFromSuperview];
+            [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+        }
     }
 }
 
