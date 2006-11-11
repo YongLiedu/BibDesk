@@ -55,7 +55,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 */
 - (NSScriptObjectSpecifier *) objectSpecifier {
     // only items belonging to a BibDocument are scriptable
-    BibDocument *myDoc = (BibDocument *)[self document];
+    BibDocument *myDoc = (BibDocument *)[self owner];
 	NSArray * ar = [myDoc publications];
 	unsigned index = [ar indexOfObjectIdenticalTo:self];
     if (index != NSNotFound) {
@@ -289,7 +289,7 @@ Extra wrapping of the created and modified date methods to
 	}
 
     NSError *error = nil;
-    NSArray *newPubs = [BibTeXParser itemsFromData:data document:[self document] error:&error];
+    NSArray *newPubs = [BibTeXParser itemsFromData:data document:[self owner] error:&error];
 	
 	// try to do some error handling for AppleScript
 	if(error) {

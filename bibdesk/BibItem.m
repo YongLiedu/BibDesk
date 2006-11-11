@@ -35,7 +35,7 @@
 
 
 #import "BibItem.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKCountedSet.h"
 #import "BDSKGroup.h"
@@ -210,7 +210,7 @@ static CFDictionaryRef selectorTable = NULL;
         
         people = nil;
         
-        document = nil;
+        owner = nil;
         
         [self setFileType:inFileType];
         [self setPubTypeWithoutUndo:type];
@@ -258,7 +258,7 @@ static CFDictionaryRef selectorTable = NULL;
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             // set by the document, which we don't archive
-            document = nil;
+            owner = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
@@ -487,23 +487,23 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 
 #pragma mark Document
 
-- (id<BDSKDocument>)document {
-    return document;
+- (id<BDSKOwner>)owner {
+    return owner;
 }
 
-- (void)setDocument:(id<BDSKDocument>)newDocument {
-    if (document != newDocument) {
-		document = newDocument;
+- (void)setOwner:(id<BDSKOwner>)newOwner {
+    if (owner != newOwner) {
+		owner = newOwner;
 	}
 }
 
 - (NSUndoManager *)undoManager { // this may be nil
-    return [document undoManager];
+    return [owner undoManager];
 }
 
 // accessors for fileorder
 - (NSNumber *)fileOrder{
-    return [[document publications] orderOfItem:self];
+    return [[owner publications] orderOfItem:self];
 }
 
 - (NSString *)fileType { 
@@ -783,7 +783,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	if ([NSString isEmptyString:key])
 		return nil;
 	
-	return [[document publications] itemForCiteKey:key];
+	return [[owner publications] itemForCiteKey:key];
 }
 
 // Container is an aspect of the BibItem that depends on the type of the item
@@ -909,7 +909,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	[self updateMetadataForKey:BDSKPubTypeString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", document, @"document", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", owner, @"owner", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -955,7 +955,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", oldCiteKey, @"oldCiteKey", document, @"document", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", oldCiteKey, @"oldCiteKey", owner, @"owner", nil];
 
     [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
     [oldCiteKey release];
@@ -982,7 +982,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 - (NSString *)suggestedCiteKey
 {
     NSString *suggestion = [self citeKey];
-    if ([self hasEmptyOrDefaultCiteKey] || [[document publications] citeKeyIsUsed:suggestion byItemOtherThan:self])
+    if ([self hasEmptyOrDefaultCiteKey] || [[owner publications] citeKeyIsUsed:suggestion byItemOtherThan:self])
         suggestion = nil;
     
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
@@ -1016,7 +1016,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
 				return NO;
 		} else if ([fieldName hasPrefix:@"Document: "]) {
-			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
+			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
 				return NO;
 		} else {
 			if ([NSString isEmptyString:[self valueOfField:fieldName]]) {
@@ -1030,7 +1030,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 - (BOOL)isValidCiteKey:(NSString *)proposedCiteKey{
 	if ([NSString isEmptyString:proposedCiteKey] == YES)
         return NO;
-    return ([[document publications] citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
+    return ([[owner publications] citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
 }
 
 - (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey{
@@ -1038,9 +1038,9 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     if ([NSString isEmptyString:aCrossref] == NO) {
         if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
             errorCode = BDSKSelfCrossrefError;
-        else if ([NSString isEmptyString:[[[document publications] itemForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
+        else if ([NSString isEmptyString:[[[owner publications] itemForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
             errorCode = BDSKChainCrossrefError;
-        else if ([[document publications] citeKeyIsCrossreffed:aCiteKey])
+        else if ([[owner publications] citeKeyIsCrossreffed:aCiteKey])
             errorCode = BDSKIsCrossreffedCrossrefError;
     }
     return errorCode;
@@ -1079,7 +1079,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 		
 		[self setPubFields:newFields];
 		
-		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", document, @"document", nil]; // cmh: maybe not the best info, but handled correctly
+		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", owner, @"owner", nil]; // cmh: maybe not the best info, but handled correctly
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 															object:self
 														  userInfo:notifInfo];
@@ -1118,9 +1118,9 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	
 	NSDictionary *notifInfo;
 	if(oldValue != nil && value != nil)
-		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type", oldValue, @"oldValue", document, @"document", nil];
+		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type", oldValue, @"oldValue", owner, @"owner", nil];
 	else
-		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", document, @"document", nil];
+		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", owner, @"owner", nil];
     [oldValue release];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -1176,7 +1176,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	[self updateMetadataForKey:key];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", document, @"document", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", owner, @"owner", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -1209,7 +1209,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	[self updateMetadataForKey:key];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type", document, @"document", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type", owner, @"owner", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -2201,11 +2201,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)localUrlPathInheriting:(BOOL)inherit{
-	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:inherit];
+	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:inherit];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field{
-	return [self localFilePathForField:field relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFilePathForField:field relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:YES];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
@@ -2213,7 +2213,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
-	return [self localFileURLForField:field relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFileURLForField:field relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:YES];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
@@ -2254,7 +2254,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (BOOL)isValidLocalUrlPath:(NSString *)proposedPath{
     if ([NSString isEmptyString:proposedPath])
         return NO;
-    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
+    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
@@ -2262,7 +2262,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSString *)suggestedLocalUrl{
 	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
     
     NSString *oldPath = [self localUrlPathInheriting:NO];
     if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
@@ -2285,7 +2285,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
-		[NSString isEmptyString:[[document fileName] stringByDeletingLastPathComponent]]))
+		[NSString isEmptyString:[[owner fileName] stringByDeletingLastPathComponent]]))
 		return NO;
 	
 	NSEnumerator *fEnum = [requiredFields objectEnumerator];
@@ -2296,10 +2296,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             if([self hasEmptyOrDefaultCiteKey])
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
-			if ([NSString isEmptyString:[document fileName]])
+			if ([NSString isEmptyString:[owner fileName]])
 				return NO;
 		} else if ([fieldName hasPrefix:@"Document: "]) {
-			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
+			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
 				return NO;
 		} else if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
@@ -2330,10 +2330,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		return NO;
 	
 	if ([self canSetLocalUrl]) {
-        OBASSERT([document isDocument]);
-        if ([document isDocument]) {
+        OBASSERT([owner isDocument]);
+        if ([owner isDocument]) {
             [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
-                                  fromDocument:(BibDocument *)document
+                                  fromDocument:(BibDocument *)owner
                                          check:NO]; 
             return YES;
 		} else {
@@ -2346,11 +2346,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)documentFileName {
-    return [document fileName];
+    return [owner fileName];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key {
-    return [document documentInfoForKey:key];
+    return [owner documentInfoForKey:key];
 }
 
 #pragma mark -
@@ -2402,7 +2402,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)addToGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [document isDocument]);
+	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     // don't add it twice
 	id groupName = [group name];
@@ -2453,7 +2453,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [document isDocument]);
+	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
@@ -2586,7 +2586,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [document isDocument]);
+	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
@@ -2888,9 +2888,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [self setDateModified:nil];
     }
     
-    if([document isDocument] && ([key isURLField] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
+    if([owner isDocument] && ([key isURLField] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
-                                                            object:(BibDocument *)document
+                                                            object:(BibDocument *)owner
                                                           userInfo:[self searchIndexInfo]];
     }
 }

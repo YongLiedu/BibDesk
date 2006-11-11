@@ -41,9 +41,9 @@
 
 @class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, MacroTableViewWindowController;
 @class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKTypeSelectHelper;
-@protocol BDSKDocument;
+@protocol BDSKOwner;
 
-@interface BDSKTextImportController : BDSKSheetController <BDSKDocument> {
+@interface BDSKTextImportController : BDSKSheetController <BDSKOwner> {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* citeKeyField;

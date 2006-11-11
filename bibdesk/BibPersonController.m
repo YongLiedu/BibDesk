@@ -38,7 +38,7 @@
 
 #import "BibPersonController.h"
 #import "BibTypeManager.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BibAuthor.h"
@@ -67,7 +67,7 @@
         [self setPerson:aPerson];
         publications = nil;
         
-        isEditable = [[[person publication] document] isDocument];
+        isEditable = [[[person publication] owner] isDocument];
         
         [person setPersonController:self];
 	}
@@ -118,14 +118,14 @@
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    return [[[person publication] document] isDocument] ? nil : @"";
+    return [[[person publication] owner] isDocument] ? nil : @"";
 }
 
 #pragma mark accessors
 
 - (NSArray *)publications{
     if (publications == nil)
-        publications = [[[[[person publication] document] publications] itemsForAuthor:person] retain];
+        publications = [[[[[person publication] owner] publications] itemsForAuthor:person] retain];
     return publications;
 }
 

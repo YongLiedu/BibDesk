@@ -283,7 +283,7 @@
     if (row == -1) return;
     if (tv == tableView) {
         if ([aCell isKindOfClass:[NSButtonCell class]]) {
-            if ([[shownPublications objectAtIndex:row] document] == self) 
+            if ([[shownPublications objectAtIndex:row] owner] == self) 
                 [aCell setEnabled:YES];
             else
                 [aCell setEnabled:NO];

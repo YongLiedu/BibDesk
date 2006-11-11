@@ -37,7 +37,7 @@
  */
 
 #import "BDSKSharedGroup.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
 #import "NSArray_BDSKExtensions.h"
@@ -159,7 +159,7 @@ static NSImage *unlockedIcon = nil;
     if(self = [super initWithName:[aService name] count:0]){
 
         publications = nil;
-        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         needsUpdate = YES;
         
         server = [[BDSKSharedGroupServer alloc] initWithGroup:self andService:aService];
@@ -214,10 +214,10 @@ static NSImage *unlockedIcon = nil;
 - (void)setPublications:(NSArray *)newPublications;
 {
     if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
         
         if (publications == nil)
             [macroResolver removeAllMacros];

@@ -233,7 +233,7 @@ static BibFiler *sharedFiler = nil;
 			}else{
                 // make sure the UI is notified that the linked file has changed, as this is often called after setField:toValue:
                 NSString *value = [paper valueOfField:field];
-                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", field, @"key", @"Change", @"type", doc, @"document", value, @"oldValue", nil];
+                NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", field, @"key", @"Change", @"type", doc, @"owner", value, @"oldValue", nil];
                 [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
                                                                     object:paper
                                                                   userInfo:notifInfo];

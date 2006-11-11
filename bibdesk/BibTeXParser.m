@@ -52,7 +52,7 @@
 #import "BDSKErrorObjectController.h"
 #import "BDSKStringNode.h"
 #import "BDSKMacroResolver.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BDSKGroupsArray.h"
 
 static NSString *BibTeXParserInternalException = @"BibTeXParserInternalException";
@@ -109,11 +109,11 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
 }
 
 /// libbtparse methods
-+ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKDocument>)anOwner error:(NSError **)outError{
++ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKOwner>)anOwner error:(NSError **)outError{
     return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString document:anOwner error:outError];
 }
 
-+ (NSMutableArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKDocument>)anOwner error:(NSError **)outError{
++ (NSMutableArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner error:(NSError **)outError{
     
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if ([inData length] == 0)

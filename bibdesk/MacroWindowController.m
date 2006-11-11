@@ -37,7 +37,7 @@
  */
 
 #import "MacroWindowController.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BibPrefController.h" // for notification name declarations
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
@@ -71,7 +71,7 @@
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
 		macroTextFieldWC = nil;
         
-        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver document] isDocument]);
+        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
         
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
@@ -122,15 +122,15 @@
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     NSString *title = NSLocalizedString(@"Macros", @"title for macros window");
-    if ([[macroResolver document] isKindOfClass:[BDSKGroup class]])
-        title = [NSString stringWithFormat:@"%@ - %@", title, [(BDSKGroup *)[macroResolver document] stringValue]];
+    if ([[macroResolver owner] isKindOfClass:[BDSKGroup class]])
+        title = [NSString stringWithFormat:@"%@ - %@", title, [(BDSKGroup *)[macroResolver owner] stringValue]];
     if ([NSString isEmptyString:displayName] == NO)
         title = [NSString stringWithFormat:@"%@ - %@", title, displayName];
     return title;
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    return [[macroResolver document] isDocument] ? nil : @"";
+    return [[macroResolver owner] isDocument] ? nil : @"";
 }
 
 - (BDSKMacroResolver *)macroResolver{
@@ -486,7 +486,7 @@
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
     // if this is called, we shouldn't belong to a group
-	BibDocument *document = (BibDocument *)[macroResolver document];
+	BibDocument *document = (BibDocument *)[macroResolver owner];
 	
     BOOL hadCircular = NO;
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];

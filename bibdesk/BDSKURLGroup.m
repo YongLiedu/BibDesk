@@ -37,7 +37,7 @@
  */
 
 #import "BDSKURLGroup.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import <WebKit/WebKit.h>
 #import "BibTeXParser.h"
 #import "BDSKWebOfScienceParser.h"
@@ -66,7 +66,7 @@
     if(self = [super initWithName:aName count:0]){
         
         publications = nil;
-        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         URL = [aURL copy];
         isRetrieving = NO;
         failedDownload = NO;
@@ -90,7 +90,7 @@
 - (void)dealloc;
 {
     [self terminate];
-    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [URL release];
     [filePath release];
     [publications release];
@@ -246,10 +246,10 @@
         [self terminate];
     
     if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
         
         if (publications == nil)
             [macroResolver removeAllMacros];

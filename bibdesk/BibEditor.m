@@ -37,7 +37,7 @@
 
 #import "BibEditor.h"
 #import "BibEditor_Toolbar.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDAlias.h"
@@ -118,7 +118,7 @@ static int numberOfOpenEditors = 0;
         numberOfOpenEditors++;
         
         publication = [aBib retain];
-        isEditable = [[publication document] isDocument];
+        isEditable = [[publication owner] isDocument];
         
         // has to be before we call [self window] because that calls windowDidLoad:.
         pdfSnoopViewLoaded = NO;
@@ -218,7 +218,7 @@ static int numberOfOpenEditors = 0;
     [[extraBibFields enclosingScrollView] setFrame:frame];
 	[edgeView addSubview:[extraBibFields enclosingScrollView]];
 
-    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication document] macroResolver]];
+    formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];
     crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
     
     [self setupForm];
@@ -2088,8 +2088,8 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{
-	id changedDocument = [[notification object] document];
-	if(changedDocument && changedDocument != [publication document])
+	id changedOwner = [[notification object] owner];
+	if(changedOwner && changedOwner != [publication owner])
 		return; // only macro changes for our own document or the global macros
 	
 	NSArray *cells = [bibFields cells];
@@ -2295,7 +2295,7 @@ static int numberOfOpenEditors = 0;
     if (control != bibFields) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
-		return [[NSApp delegate] possibleMatches:[[[publication document] macroResolver] allMacroDefinitions] 
+		return [[NSApp delegate] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];

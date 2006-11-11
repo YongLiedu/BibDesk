@@ -37,7 +37,7 @@
  */
 
 #import "BibField.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 
 /* cmh
 A wrapper object around the fields to access them in AppleScript. 
@@ -106,7 +106,7 @@ A wrapper object around the fields to access them in AppleScript.
 
 - (void)setBibTeXString:(NSString *)newValue {
     NS_DURING
-		NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[[bibItem document] macroResolver]];
+		NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[[bibItem owner] macroResolver]];
 		[bibItem setField:name toValue:value];
     NS_HANDLER
 		NSBeep();

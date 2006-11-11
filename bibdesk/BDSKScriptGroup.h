@@ -41,14 +41,14 @@
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 
 @class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver;
-@protocol BDSKDocument;
+@protocol BDSKOwner;
 
 enum {
     BDSKShellScriptType,
     BDSKAppleScriptType
 };
 
-@interface BDSKScriptGroup : BDSKMutableGroup <BDSKDocument> {
+@interface BDSKScriptGroup : BDSKMutableGroup <BDSKOwner> {
     BDSKPublicationsArray *publications;
     BDSKMacroResolver *macroResolver;
     NSString *scriptPath;

@@ -42,7 +42,7 @@
 #import "BibItem.h"
 #import "BibPrefController.h"
 #import "BibAppController.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 
 @implementation BibDeskParseFormatCommand
 
@@ -98,13 +98,13 @@
     BOOL isLocalFile = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field];
     NSString *papersFolderPath = nil;
     if (isLocalFile)
-        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub document]];
+        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
 	
     NSString *suggestion = nil;
     if ([field isEqualToString:BDSKCiteKeyString]) {
         suggestion = [pub citeKey];
     } else if (isLocalFile) {
-        suggestion = [pub localFilePathForField:field relativeTo:[[[pub document] fileName] stringByDeletingLastPathComponent] inherit:NO];
+        suggestion = [pub localFilePathForField:field relativeTo:[[[pub owner] fileName] stringByDeletingLastPathComponent] inherit:NO];
         if ([suggestion hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
             suggestion = [suggestion substringFromIndex:[papersFolderPath length]];
         else

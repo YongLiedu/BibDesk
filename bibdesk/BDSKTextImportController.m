@@ -37,7 +37,7 @@
  */
 
 #import "BDSKTextImportController.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
 #import "BibTypeManager.h"
 #import "MacroTextFieldWindowController.h"
@@ -112,7 +112,7 @@
     if(self){
         document = doc;
         item = [[BibItem alloc] init];
-        [item setDocument:self];
+        [item setOwner:self];
         fields = [[NSMutableArray alloc] init];
 		bookmarks = [[NSMutableArray alloc] init];
         showingWebView = NO;
@@ -280,7 +280,7 @@
     [item release];
     
     item = newItem;
-    [item setDocument:self];
+    [item setOwner:self];
     [[self undoManager] removeAllActions];
 	
 	int numItems = [itemsAdded count];
@@ -308,7 +308,7 @@
 - (IBAction)clearAction:(id)sender{
     [item release];
     item = [[BibItem alloc] init];
-    [item setDocument:self];
+    [item setOwner:self];
     [[self undoManager] removeAllActions];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
@@ -579,7 +579,7 @@
     return [self undoManager];
 }
 
-#pragma mark BDSKDocument protocol
+#pragma mark BDSKOwner protocol
 
 - (BDSKPublicationsArray *)publications {
     return [document publications];

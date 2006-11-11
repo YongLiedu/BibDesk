@@ -37,7 +37,7 @@
  */
 
 #import "BDSKScriptGroup.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BDSKShellTask.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
@@ -71,7 +71,7 @@
         aName = [[path lastPathComponent] stringByDeletingPathExtension];
     if(self = [super initWithName:aName count:0]){
         publications = nil;
-        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         scriptPath = [path retain];
         scriptArguments = [arguments retain];
         argsArray = nil;
@@ -110,7 +110,7 @@
     [self terminate];
     OFSimpleLockFree(&processingLock);
     OFSimpleLockFree(&currentTaskLock);
-    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [scriptPath release];
     [scriptArguments release];
     [argsArray release];
@@ -267,10 +267,10 @@
         [self terminate];
     
     if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
+        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
         
         if (publications == nil)
             [macroResolver removeAllMacros];

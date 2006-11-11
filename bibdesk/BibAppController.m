@@ -35,7 +35,7 @@
  */
 
 #import "BibAppController.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import <Carbon/Carbon.h>
 #import "BibPrefController.h"
 #import "BibItem.h"
@@ -546,10 +546,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 	requiredFieldsForLocalUrl = [newFields retain];
 }
 
-- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKDocument>)document {
+- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner {
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	if ([NSString isEmptyString:papersFolderPath])
-		papersFolderPath = [[document fileName] stringByDeletingLastPathComponent];
+		papersFolderPath = [[owner fileName] stringByDeletingLastPathComponent];
 	if ([NSString isEmptyString:papersFolderPath])
 		papersFolderPath = NSHomeDirectory();
 	return [papersFolderPath stringByExpandingTildeInPath];
@@ -1078,7 +1078,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
     while(item = [itemE nextObject]){   
         // these should all be items belonging to a BibDocument, see remark before itemsMatchingSearchConstraints:
-		[(BibDocument *)[item document] editPub:item];
+		[(BibDocument *)[item owner] editPub:item];
     }
 
 }

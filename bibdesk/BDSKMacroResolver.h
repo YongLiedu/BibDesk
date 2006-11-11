@@ -39,18 +39,18 @@
 #import <Cocoa/Cocoa.h>
 
 @class BibDocument;
-@protocol BDSKDocument;
+@protocol BDSKOwner;
 
 @interface BDSKMacroResolver : NSObject {
     NSMutableDictionary *macroDefinitions;
-    id<BDSKDocument>document;
+    id<BDSKOwner>owner;
 }
 
 + (id)defaultMacroResolver;
 
-- (id)initWithDocument:(id<BDSKDocument>)aDocument;
+- (id)initWithOwner:(id<BDSKOwner>)anOwner;
 
-- (id<BDSKDocument>)document;
+- (id<BDSKOwner>)owner;
 - (NSUndoManager *)undoManager;
 - (NSString *)bibTeXString;
 - (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey;

@@ -35,7 +35,7 @@
  */
 
 #import "BibDocument.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BibDocument_DataSource.h"
@@ -170,7 +170,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
 		[texTask setDelegate:self];
         
-        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
+        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
@@ -338,7 +338,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         [[self undoManager] removeAllActionsWithTarget:self];
     }
     // workaround for crash: to reproduce, create empty doc, hit cmd-n for new editor window, then cmd-q to quit, choose "don't save"; this results in an -undoManager message to the dealloced document
-    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
     [macroResolver release];
@@ -618,7 +618,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 	return YES;
 }
 
-// this is needed for the BDSKDocument protocol
+// this is needed for the BDSKOwner protocol
 - (NSUndoManager *)undoManager {
     return [super undoManager];
 }
@@ -719,10 +719,10 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         }
         
 		// current publications (if any) will no longer have a document
-		[publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+		[publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         
 		[publications setArray:newPubs];
-		[publications makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
+		[publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
 		
 		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocSetPublicationsNotification
@@ -746,7 +746,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 		
 	[publications insertObjects:pubs atIndexes:indexes];        
     
-	[pubs makeObjectsPerformSelector:@selector(setDocument:) withObject:self];
+	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
@@ -780,7 +780,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     
 	[publications removeObjectsAtIndexes:indexes];
 	
-	[pubs makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
+	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [[NSFileManager defaultManager] removeSpotlightCacheFilesForCiteKeys:[pubs arrayByPerformingSelector:@selector(citeKey)]];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
@@ -879,7 +879,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 
 - (IBAction)showMacrosWindow:(id)sender{
     if ([self hasExternalGroupsSelected]) {
-        BDSKMacroResolver *resolver = [(id<BDSKDocument>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
+        BDSKMacroResolver *resolver = [(id<BDSKOwner>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
         MacroWindowController *controller = nil;
         NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
         NSWindowController *wc;
@@ -2511,7 +2511,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	NSDictionary *userInfo = [notification userInfo];
     
     // see if it's ours
-	if([userInfo objectForKey:@"document"] != self)
+	if([userInfo objectForKey:@"owner"] != self)
         return;
 
 	NSString *changedKey = [userInfo objectForKey:@"key"];
@@ -2545,8 +2545,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification{
-	id changedDoc = [[aNotification object] document];
-	if(changedDoc && changedDoc != self)
+	id changedOwner = [[aNotification object] owner];
+	if(changedOwner && changedOwner != self)
 		return; // only macro changes for ourselves or the global macros
 	
     [tableView reloadData];

@@ -37,7 +37,7 @@
 #import <Cocoa/Cocoa.h>
 
 @class OFMessageQueu, BibDocument;
-@protocol BDSKDocument;
+@protocol BDSKOwner;
 
 /*!
     @class BibAppController
@@ -77,7 +77,7 @@
 - (NSArray *)requiredFieldsForLocalUrl;
 - (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
 
-- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKDocument>)document;
+- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner;
 
 /*!
 @method addString:forCompletionEntry:

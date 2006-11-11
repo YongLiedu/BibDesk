@@ -79,13 +79,13 @@ It can be used with
 			// we want to open a publication
 			BibItem * pub = (BibItem*)dPO;
             // only publications belonging to a BibDocument are scriptable
-			[(BibDocument *)[pub document] editPub:pub];
+			[(BibDocument *)[pub owner] editPub:pub];
 		}
 		else if ([dPO isKindOfClass:[BibAuthor class]]) {
 			// we want to open an author
 			BibAuthor * author = (BibAuthor *) dPO;
             // only publications belonging to a BibDocument are scriptable
-            BibDocument *doc = (BibDocument *)[[author publication] document];
+            BibDocument *doc = (BibDocument *)[[author publication] owner];
             [doc showPerson:author];
 		}
 		else {

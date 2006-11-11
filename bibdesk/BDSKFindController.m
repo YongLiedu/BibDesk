@@ -908,7 +908,7 @@ enum {
     
     while(bibItem = [pubE nextObject]){
         // don't touch shared items
-        if ([bibItem document] != theDocument) 
+        if ([bibItem owner] != theDocument) 
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
@@ -960,7 +960,7 @@ enum {
 	
     while(bibItem = [pubE nextObject]){
         // don't touch shared items
-        if ([bibItem document] != theDocument) 
+        if ([bibItem owner] != theDocument) 
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
@@ -1016,7 +1016,7 @@ enum {
 
     while(bibItem = [pubE nextObject]){
         // don't touch shared items
-        if ([bibItem document] != theDocument) 
+        if ([bibItem owner] != theDocument) 
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];

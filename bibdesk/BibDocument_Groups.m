@@ -37,7 +37,7 @@
 
 #import "BibDocument_Groups.h"
 #import "BDSKGroupsArray.h"
-#import "BDSKDocumentProtocol.h"
+#import "BDSKOwnerProtocol.h"
 #import "BibDocument_Actions.h"
 #import "BDSKGroupCell.h"
 #import "NSImage+Toolbox.h"
@@ -176,11 +176,11 @@ The groupedPublications array is a subset of the publications array, developed b
     while(wc = [wcEnum nextObject]){
         id doc = nil;
         if([wc isKindOfClass:[MacroWindowController class]])
-            doc = [[(MacroWindowController *)wc macroResolver] document];
+            doc = [[(MacroWindowController *)wc macroResolver] owner];
         else if([wc isKindOfClass:[BibEditor class]])
-            doc = [[(BibEditor *)wc publication] document];
+            doc = [[(BibEditor *)wc publication] owner];
         else if([wc isKindOfClass:[BibPersonController class]])
-            doc = [[[(BibPersonController *)wc person] publication] document];
+            doc = [[[(BibPersonController *)wc person] publication] owner];
         if([doc isKindOfClass:[BDSKSharedGroup class]] && [array containsObject:doc] == NO)
             [wc hideWindow:nil];
     }
@@ -282,11 +282,11 @@ The groupedPublications array is a subset of the publications array, developed b
     while(wc = [wcEnum nextObject]){
         id doc = nil;
         if([wc isKindOfClass:[MacroWindowController class]])
-            doc = [[(MacroWindowController *)wc macroResolver] document];
+            doc = [[(MacroWindowController *)wc macroResolver] owner];
         else if([wc isKindOfClass:[BibEditor class]])
-            doc = [[(BibEditor *)wc publication] document];
+            doc = [[(BibEditor *)wc publication] owner];
         else if([wc isKindOfClass:[BibPersonController class]])
-            doc = [[[(BibPersonController *)wc person] publication] document];
+            doc = [[[(BibPersonController *)wc person] publication] owner];
         if(doc && [groupsToRemove containsObject:doc])
             [wc hideWindow:nil];
     }
