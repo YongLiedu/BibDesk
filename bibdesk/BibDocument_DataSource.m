@@ -818,7 +818,7 @@
 		NSPoint point = NSMakePoint(3.0, 2.0); // offset of the string
 		NSColor *color = [NSColor secondarySelectedControlColor];
 		
-        if (size.width == 0 || size.height == 0) {
+        if (size.width <= 0 || size.height <= 0) {
             NSLog(@"string size was zero");
             size = NSMakeSize(30.0,20.0); // work around bug in NSAttributedString
         }

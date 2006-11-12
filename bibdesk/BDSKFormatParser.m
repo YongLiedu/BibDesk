@@ -69,7 +69,7 @@
 	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
 	NSString *string, *authSep, *nameSep, *etal, *slash;
-	int number, numAuth, i, uniqueNumber;
+	unsigned int number, numAuth, i, uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSArray *authArray;
 	NSMutableArray *arr;
@@ -113,9 +113,9 @@
 							// look for #names
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (int)(nextChar - '0');
+								numAuth = (unsigned)(nextChar - '0');
 								// scan for #chars per name
-								if (![scanner scanInt:&number]) number = 0;
+								if (![scanner scanUnsignedInt:&number]) number = 0;
 							}
 						}
 					}
@@ -173,7 +173,7 @@
 							// look for #names
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (int)(nextChar - '0');
+								numAuth = (unsigned)(nextChar - '0');
 							}
 						}
 					}
@@ -216,7 +216,7 @@
 					if (isLocalFile) {
 						string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 					}
-					if (![scanner scanInt:&number]) number = 0;
+					if (![scanner scanUnsignedInt:&number]) number = 0;
 					if (number > 0 && [string length] > number) {
 						[parsedStr appendString:[string substringToIndex:number]];
 					} else {
@@ -226,7 +226,7 @@
 				case 'T':
 					// title, optional #words
                     string = [pub title];
-					if (![scanner scanInt:&number]) number = 0;
+					if (![scanner scanUnsignedInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
 						// split the title into words using the same methodology as addString:forCompletionEntry:
@@ -294,7 +294,7 @@
 						[scanner scanString:@"]" intoString:NULL];
 					}
 					string = [pub stringValueOfField:BDSKKeywordsString];
-					if (![scanner scanInt:&number]) number = 0;
+					if (![scanner scanUnsignedInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
 						// split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
@@ -379,7 +379,7 @@
 							[scanner scanString:@"]" intoString:NULL];
 						}
 					
-						if (![scanner scanInt:&number]) number = 0;
+						if (![scanner scanUnsignedInt:&number]) number = 0;
 						if (![fieldName isEqualToString:BDSKCiteKeyString] &&
 							[string isEqualToString:BDSKCiteKeyString]) {
 							string = [pub citeKey];
@@ -408,7 +408,7 @@
 					if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&string] &&
 						[scanner scanString:@"}" intoString:NULL]) {
-						if (![scanner scanInt:&number]) number = 3;
+						if (![scanner scanUnsignedInt:&number]) number = 3;
 				
 						string = [[pub stringValueOfField:string] acronymValueIgnoringWordLength:number];
 						string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
@@ -441,7 +441,7 @@
                                 }
                             }
                         }
-						if (![scanner scanInt:&number]) number = 0;
+						if (![scanner scanUnsignedInt:&number]) number = 0;
                         i = [pub intValueOfField:string];
                         string = (i == 0 ? noValue : (i > 0 ? yesValue : mixedValue));
                         if (number > 0 && [string length] > number) {
@@ -460,7 +460,7 @@
 						[scanner scanUpToString:@"}" intoString:&string] &&
 						[scanner scanString:@"}" intoString:NULL]) {
 					
-						if (![scanner scanInt:&number]) number = 0;
+						if (![scanner scanUnsignedInt:&number]) number = 0;
                         string = [pub documentInfoForKey:string];
 						if (string != nil) {
 							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
@@ -477,21 +477,21 @@
 					break;
 				case 'r':
 					// random lowercase letters
-					if (![scanner scanInt:&number]) number = 1;
+					if (![scanner scanUnsignedInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%c",'a' + (char)(rand() % 26)];
 					}
 					break;
 				case 'R':
 					// random uppercase letters
-					if (![scanner scanInt:&number]) number = 1;
+					if (![scanner scanUnsignedInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%c",'A' + (char)(rand() % 26)];
 					}
 					break;
 				case 'd':
 					// random digits
-					if (![scanner scanInt:&number]) number = 1;
+					if (![scanner scanUnsignedInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%i",(int)(rand() % 10)];
 					}
@@ -520,7 +520,7 @@
 						uniqueSpecifier = specifier;
 						prefixStr = parsedStr;
 						parsedStr = [NSMutableString string];
-						if (![scanner scanInt:&uniqueNumber]) uniqueNumber = 1;
+						if (![scanner scanUnsignedInt:&uniqueNumber]) uniqueNumber = 1;
 					}
 					else {
 						NSLog(@"Specifier %%%C can only be used once in the format.", specifier);
@@ -808,7 +808,7 @@
 	BOOL foundUnique = NO;
 	NSMutableAttributedString *attrString = nil;
 	NSString *errorMsg = nil;
-	int location = 0;
+	unsigned int location = 0;
 	
 	if (attrFormatString != NULL)
 		attrString = [[NSMutableAttributedString alloc] init];

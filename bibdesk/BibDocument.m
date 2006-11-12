@@ -2237,7 +2237,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *colName;
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
     
-    float tcWidth = 0.0;
+    NSNumber *tcWidth;
     NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
     
     NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
@@ -2287,8 +2287,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 				[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
 			}
             
-            if(tcWidth = [defaultTableColumnWidths floatForKey:colName defaultValue:0.0])
-                [tc setWidth:tcWidth];
+            if(tcWidth = [defaultTableColumnWidths objectForKey:colName])
+                [tc setWidth:[tcWidth intValue]];
 		}
 		
 		[columns addObject:tc];

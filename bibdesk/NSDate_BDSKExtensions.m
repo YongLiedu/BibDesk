@@ -169,7 +169,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
                 count = [countStr intValue];
 
         // this occurs if the first token was unrecognizable
-        if(count == 0 || ABS(count) == HUGE_VAL)
+        if(count == 0 || ABS(count) >= HUGE_VAL)
             @throw parseException;
         
         [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];

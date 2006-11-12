@@ -193,8 +193,8 @@
 	}
 	winFrame.size.height += shiftHeight;
 	winFrame.origin.y -= shiftHeight;
-	if (minSize.height != 0.0) minSize.height += shiftHeight;
-	if (maxSize.height != 0.0) maxSize.height += shiftHeight;
+	if (minSize.height > 0.0) minSize.height += shiftHeight;
+	if (maxSize.height > 0.0) maxSize.height += shiftHeight;
 	if (winFrame.size.height < 0.0) winFrame.size.height = 0.0;
 	if (minSize.height < 0.0) minSize.height = 0.0;
 	if (maxSize.height < 0.0) maxSize.height = 0.0;
@@ -262,10 +262,8 @@
 }
 
 - (void)setTextOffset:(float)offset {
-    if (textOffset != offset) {
-        textOffset = offset;
-        [self setNeedsDisplay:YES];
-    }
+    textOffset = offset;
+    [self setNeedsDisplay:YES];
 }
 
 #pragma mark Icons

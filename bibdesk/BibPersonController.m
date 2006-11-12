@@ -352,12 +352,12 @@
     NSRect pubsFrame = [pubsView frame];
     NSRect pickerFrame = [pickerView frame];
     
-    if(NSHeight(pickerFrame) != 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+    if(NSHeight(pickerFrame) > 0.0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
         lastPickerHeight = NSHeight(pickerFrame); // cache this
         pubsFrame.size.height += lastPickerHeight;
         pickerFrame.size.height = 0;
     } else {
-        if(lastPickerHeight == 0)
+        if(lastPickerHeight <= 0)
             lastPickerHeight = 150.0; // a reasonable value to start
 		pickerFrame.size.height = lastPickerHeight;
         pubsFrame.size.height = NSHeight([splitView frame]) - lastPickerHeight - [splitView dividerThickness];

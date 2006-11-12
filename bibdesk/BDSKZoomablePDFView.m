@@ -273,7 +273,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {
             [scalePopUpButton addItemWithTitle:NSLocalizedStringFromTable(BDSKDefaultScaleMenuLabels[cnt], @"ZoomValues", nil)];
             curItem = [scalePopUpButton itemAtIndex:cnt];
-            [curItem setRepresentedObject:(BDSKDefaultScaleMenuFactors[cnt] != 0.0 ? [NSNumber numberWithFloat:BDSKDefaultScaleMenuFactors[cnt]] : nil)];
+            [curItem setRepresentedObject:(BDSKDefaultScaleMenuFactors[cnt] > 0.0 ? [NSNumber numberWithFloat:BDSKDefaultScaleMenuFactors[cnt]] : nil)];
         }
         // select the appropriate item, adjusting the scaleFactor if necessary
         if([self autoScales])

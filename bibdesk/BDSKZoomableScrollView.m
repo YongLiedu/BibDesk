@@ -64,7 +64,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {
             [scalePopUpButton addItemWithTitle:NSLocalizedStringFromTable(BDSKDefaultScaleMenuLabels[cnt], @"ZoomValues", nil)];
             curItem = [scalePopUpButton itemAtIndex:cnt];
-            if (BDSKDefaultScaleMenuFactors[cnt] != 0.0) {
+            if (BDSKDefaultScaleMenuFactors[cnt] > 0.0) {
                 [curItem setRepresentedObject:[NSNumber numberWithFloat:BDSKDefaultScaleMenuFactors[cnt]]];
             }
         }
@@ -136,7 +136,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
     }
 	
-	if (scaleFactor != newScaleFactor) {
+	if (fabs(scaleFactor - newScaleFactor) > 0.01) {
 		NSSize curDocFrameSize, newDocBoundsSize;
 		NSView *documentView = [self documentView];
 		NSView *clipView = [documentView superview];
@@ -182,7 +182,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (BOOL)canZoomToActualSize{
-    return scaleFactor != 1.0;
+    return fabs(scaleFactor - 1.0) > 0.01;
 }
 
 - (BOOL)canZoomIn{

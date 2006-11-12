@@ -97,7 +97,7 @@ static int MAX_RATING = 5;
             CFDictionaryAddValue(ratings, (const void *)i, (const void *)[[ratingString copy] autorelease]);
             [ratingString appendCharacter:(0x278A + i)];
         } while(i++ < MAX_RATING);
-        OBPOSTCONDITION([(id)ratings count] == MAX_RATING + 1);
+        OBPOSTCONDITION((int)[(id)ratings count] == MAX_RATING + 1);
     }
     return (NSString *)CFDictionaryGetValue(ratings, (const void *)rating);
 }

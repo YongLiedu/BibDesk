@@ -70,12 +70,10 @@
         [self setFrameSize:newSize];
     
     // resize the window up to a maximal size
-    if (dh != 0.0f) {
-        NSRect winFrame = [[self window] frame];
-        winFrame.size.height += dh;
-        winFrame.origin.y -= dh;
-        [[self window] setFrame:winFrame display:YES animate:YES];
-    }
+    NSRect winFrame = [[self window] frame];
+    winFrame.size.height += dh;
+    winFrame.origin.y -= dh;
+    [[self window] setFrame:winFrame display:YES animate:YES];
     
     if (newHeight > oldHeight)
         [self setFrameSize:newSize];

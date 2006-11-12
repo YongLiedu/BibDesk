@@ -771,24 +771,24 @@
 	
 	if (sender == splitView) {
 		// first = table, second = preview
-		if(NSHeight([secondView frame]) != 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+		if(NSHeight([secondView frame]) > 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
 			docState.lastPreviewHeight = NSHeight(secondFrame); // cache this
 			firstFrame.size.height += docState.lastPreviewHeight;
 			secondFrame.size.height = 0;
 		} else {
-			if(docState.lastPreviewHeight == 0)
+			if(docState.lastPreviewHeight <= 0)
 				docState.lastPreviewHeight = NSHeight([sender frame]) / 3; // a reasonable value for uncollapsing the first time
 			secondFrame.size.height = docState.lastPreviewHeight;
 			firstFrame.size.height = NSHeight([sender frame]) - docState.lastPreviewHeight - [sender dividerThickness];
 		}
 	} else {
 		// first = group, second = table+preview
-		if(NSWidth([firstView frame]) != 0){
+		if(NSWidth([firstView frame]) > 0){
 			docState.lastGroupViewWidth = NSWidth(firstFrame); // cache this
 			secondFrame.size.width += docState.lastGroupViewWidth;
 			firstFrame.size.width = 0;
 		} else {
-			if(docState.lastGroupViewWidth == 0)
+			if(docState.lastGroupViewWidth <= 0)
 				docState.lastGroupViewWidth = 120; // a reasonable value for uncollapsing the first time
 			firstFrame.size.width = docState.lastGroupViewWidth;
 			secondFrame.size.width = NSWidth([sender frame]) - docState.lastGroupViewWidth - [sender dividerThickness];

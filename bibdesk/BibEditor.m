@@ -3259,12 +3259,12 @@ static int numberOfOpenEditors = 0;
     NSRect formFrame = [form frame];
     NSRect matrixFrame = [matrix frame];
     
-    if(NSHeight([matrix frame]) != 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+    if(NSHeight([matrix frame]) > 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
         lastMatrixHeight = NSHeight(matrixFrame); // cache this
         formFrame.size.height += lastMatrixHeight;
         matrixFrame.size.height = 0;
     } else {
-        if(lastMatrixHeight == 0)
+        if(lastMatrixHeight <= 0)
             lastMatrixHeight = NSHeight([extraBibFields frame]); // a reasonable value to start
 		matrixFrame.size.height = lastMatrixHeight;
         formFrame.size.height = NSHeight([splitView frame]) - lastMatrixHeight - [splitView dividerThickness];
@@ -3519,7 +3519,7 @@ static int numberOfOpenEditors = 0;
         [bibFields drawRect:NSZeroRect];// this forces the calculation of the titleWidth
         float offset = [[bibFields cellAtIndex:0] titleWidth] + NSMinX([splitView frame]) + FORM_OFFSET + 4.0;
         NSRect frame = [citeKeyField frame];
-        if(offset != NSMinX(frame) && offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
+        if(offset >= NSMaxX([citeKeyTitle frame]) + 8.0){
             frame.size.width = NSMaxX(frame) - offset;
             frame.origin.x = offset;
             [citeKeyField setFrame:frame];

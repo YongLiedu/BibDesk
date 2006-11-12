@@ -428,10 +428,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     // save the scalefactors of the views
     float scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
 
-	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey])
+	if (fabs(scaleFactor - [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey]) > 0.01)
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
 	scaleFactor = [(BDSKZoomableScrollView*)[rtfPreviewView enclosingScrollView] scaleFactor];
-	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey])
+	if (fabs(scaleFactor - [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey]) > 0.01)
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
     
     // make sure we don't process anything else; the TeX task will take care of its own cleanup
