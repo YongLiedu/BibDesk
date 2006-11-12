@@ -59,7 +59,7 @@ static NSDictionary *cachedFontsForPreviewPane = nil;
 + (float)previewFontBaseSize;
 {
     float defaultSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewBaseFontSizeKey];
-    return (defaultSize == 0 ? [NSFont systemFontSize] : defaultSize);
+    return (defaultSize <= 0.1 ? [NSFont systemFontSize] : defaultSize);
 }
 
 + (NSFont *)titleFontForFamily:(NSString *)tryFamily;
