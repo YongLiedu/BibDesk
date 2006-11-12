@@ -26,9 +26,9 @@
 @end
 
 @interface NSNumber (KFAppleScriptHandlerAdditionsPrivate)
-+ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(int)bytes;
-+ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(int)bytes;
-+ (id) kfNumberWithFloatP:(void *)float_p byteCount:(int)bytes;
++ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(unsigned int)bytes;
++ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(unsigned int)bytes;
++ (id) kfNumberWithFloatP:(void *)float_p byteCount:(unsigned int)bytes;
 @end
 
 @implementation NSObject (KFAppleScriptHandlerAdditions)
@@ -241,7 +241,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
 
 @implementation NSNumber (KFAppleScriptHandlerAdditions)
 
--(id)kfDescriptorValueWithFloatP:(void *)float_p byteCount:(int)bytes
+-(id)kfDescriptorValueWithFloatP:(void *)float_p byteCount:(unsigned int)bytes
 {
     NSAppleEventDescriptor *resultDesc = nil;
     float floatVal;
@@ -278,7 +278,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultDesc;
 }
 
--(id)kfDescriptorValueWithSignedIntP:(void *)int_p byteCount:(int)bytes
+-(id)kfDescriptorValueWithSignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSAppleEventDescriptor *resultDesc;
     int intVal;
@@ -307,7 +307,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultDesc;
 }
 
--(id)kfDescriptorValueWithUnsignedIntP:(void *)int_p byteCount:(int)bytes
+-(id)kfDescriptorValueWithUnsignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSAppleEventDescriptor *resultDesc;
     unsigned int uIntVal;
@@ -469,7 +469,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultNumber;
 }
 
-+ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(int)bytes
++ (id) kfNumberWithSignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSNumber *resultNumber = nil;
     
@@ -502,7 +502,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultNumber;
 }
 
-+ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(int)bytes
++ (id) kfNumberWithUnsignedIntP:(void *)int_p byteCount:(unsigned int)bytes
 {
     NSNumber *resultNumber = nil;
     
@@ -535,7 +535,7 @@ static inline int areEqualEncodings(const char *enc1, const char *enc2)
     return resultNumber;
 }
 
-+ (id) kfNumberWithFloatP:(void *)float_p byteCount:(int)bytes
++ (id) kfNumberWithFloatP:(void *)float_p byteCount:(unsigned int)bytes
 {
     NSNumber *resultNumber= nil;
     
