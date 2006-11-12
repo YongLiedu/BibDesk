@@ -96,3 +96,70 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 }
 
 @end
+
+@implementation BDSKExceptionViewer
+
++ (id)sharedViewer {
+    static id sharedInstance = nil;
+    @try {
+        if (sharedInstance == nil) {
+            sharedInstance = [[self alloc] init];
+            [sharedInstance window];
+        }
+    }
+    @catch(id exception){
+        NSLog(@"caught exception %@ in exception viewer", exception);
+    }    
+    return sharedInstance;
+}
+
+- (void)reportError:(id)sender {
+    @try {
+        NSString *body = [NSString stringWithFormat:@"%@\n\n\t ***** ERROR LOG ***** \n\n%@", NSLocalizedString(@"Please tell us what you were doing at the time this error occurred.", @""), [textView string]];
+        
+        OAInternetConfig *ic = [OAInternetConfig internetConfig];
+        [ic launchMailTo:@"bibdesk-develop@lists.sourceforge.net"
+              carbonCopy:nil
+         blindCarbonCopy:nil
+                 subject:@"BibDesk Error"
+                    body:body
+             attachments:nil];
+    }
+    @catch(id exception){
+        NSLog(@"caught exception %@ in exception viewer", exception);
+    }
+}
+
+- (void)windowDidLoad {
+    @try {
+        [[self window] setTitle:NSLocalizedString(@"Error Log", @"")];
+        NSRect ignored, rect = [[textView enclosingScrollView] frame];
+        NSDivideRect(rect, &ignored, &rect, 61.0, NSMinYEdge);
+        [[textView enclosingScrollView] setFrame:rect];
+        [downloadButton setHidden:NO];
+        [downloadButton setTitle:NSLocalizedString(@"Report Error", @"")];
+        [downloadButton setAction:@selector(reportError:)];
+        [downloadButton setTarget:self];
+        [downloadButton sizeToFit];
+    }
+    @catch(id exception){
+        NSLog(@"caught exception %@ in exception viewer", exception);
+    }    
+}
+
+- (void)displayString:(NSString *)string {
+    @try {
+        [textView setString:string];
+        [[textView textStorage] addAttribute:NSFontAttributeName value:[NSFont userFixedPitchFontOfSize:10.0f] range:NSMakeRange(0, [[textView textStorage] length])];
+        [self showWindow:nil];
+        
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"An Error Occurred", @"") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:NSLocalizedString(@"The following diagnostic information may be useful to the application developer.  Please report this error.", @"")];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+    }
+    @catch(id exception){
+        NSLog(@"caught exception %@ in exception viewer", exception);
+    }    
+}
+
+@end
+
