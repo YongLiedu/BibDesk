@@ -47,6 +47,14 @@
 
 @implementation BDSKController
 
+- (id)init;
+{
+    self = [super init];
+    // Omni adds NSLogOtherExceptionMask for debug builds, which logs complex string exceptions
+    [[NSExceptionHandler defaultExceptionHandler] setExceptionHandlingMask:NSLogUncaughtExceptionMask|NSLogUncaughtSystemExceptionMask|NSLogUncaughtRuntimeErrorMask|NSLogTopLevelExceptionMask];
+    return self;
+}
+
 // copied from superclass' implementation
 static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertionHandlerException";
 
