@@ -99,90 +99,101 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 @interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView, BDSKOwner>
 {
-    IBOutlet NSTextView *previewTextView;
-    IBOutlet NSView *currentPreviewView;
+#pragma mark Main tableview pane variables
+
     IBOutlet NSWindow* documentWindow;
     IBOutlet BDSKMainTableView *tableView;
     IBOutlet BDSKSplitView* splitView;
     IBOutlet BDSKColoredBox* mainBox;
     
+    IBOutlet BDSKStatusBar *statusBar;
+    
+    BDSKFileContentSearchController *fileSearchController;
+    
+#pragma mark Group pane variables
+
+    IBOutlet BDSKGroupTableView *groupTableView;
+    IBOutlet BDSKSplitView *groupSplitView;
+    IBOutlet BDSKImagePopUpButton *groupActionButton;
+    IBOutlet NSButton *groupAddButton;
+    IBOutlet BDSKCollapsibleView *groupCollapsibleView;
+    IBOutlet BDSKGradientView *groupGradientView;
+    NSMutableDictionary *sharedGroupSpinners;
+	NSString *currentGroupField;
+    
+#pragma mark Preview variables
+
+    IBOutlet NSTextView *previewTextView;
+    IBOutlet NSView *currentPreviewView;
     BDSKPreviewer *previewer;
 	
-#pragma mark Toolbar variable declarations
+#pragma mark Toolbar variables
     
     NSMutableDictionary *toolbarItems;
-    NSToolbarItem *editPubButton;
-    NSToolbarItem *delPubButton;
 	
-#pragma mark SearchField variable declarations
+	IBOutlet BDSKImagePopUpButton * actionMenuButton;
+	IBOutlet BDSKImagePopUpButton * groupActionMenuButton;
 		
-	IBOutlet NSSearchField *searchField; 
-	NSToolbarItem *searchFieldToolbarItem;
+	IBOutlet NSSearchField *searchField;
+    
+    NSString *quickSearchKey;
 
-    IBOutlet BDSKStatusBar *statusBar;
-
-#pragma mark Custom Cite-String drawer variable declarations:
+#pragma mark Custom Cite-String drawer variables
 
     IBOutlet NSDrawer* customCiteDrawer;
     IBOutlet NSTableView* ccTableView;
     IBOutlet NSButton *addCustomCiteStringButton;
     IBOutlet NSButton *removeCustomCiteStringButton;
     NSMutableArray* customStringArray;
-    
-    BDSKPublicationsArray *publications;    // holds all the publications
-    NSMutableArray *shownPublications;    // holds the ones we want to show.
-    // All display related operations should use shownPublications
 
-    NSString *quickSearchKey;
-   
-	NSMutableString *frontMatter;    // for preambles, and stuff
+#pragma mark Sorting variables
+
     NSTableColumn *lastSelectedColumnForSort;
     NSString *sortGroupsKey;
-	
-	BDSKTeXTask *texTask;
     
-    // --------------------------------------------------------------------------------------
+#pragma mark Menu variables
+
 	IBOutlet NSMenu * fileMenu;
 	IBOutlet NSMenu * URLMenu;
 	IBOutlet NSMenu * groupMenu;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet NSMenu * columnsMenu;
-	IBOutlet BDSKImagePopUpButton * actionMenuButton;
-	IBOutlet BDSKImagePopUpButton * groupActionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
 
-    // ----------------------------------------------------------------------------------------
-    // stuff for the accessory views
+#pragma mark Accessory view variables
+
     IBOutlet NSView *saveAccessoryView;
     IBOutlet NSView *exportAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
     IBOutlet NSButton *exportSelectionCheckButton;
+    
+#pragma mark Publications and Groups variables
+
+    BDSKPublicationsArray *publications;  // holds all the publications
+    NSMutableArray *groupedPublications;  // holds publications in the selected groups
+    NSMutableArray *shownPublications;    // holds the ones we want to show.
+    // All display related operations should use shownPublications
+   
+    BDSKGroupsArray *groups;
 	
+#pragma mark Macros, Document Info and Front Matter variables
+
     BDSKMacroResolver *macroResolver;
     MacroWindowController *macroWC;
 	
     NSMutableDictionary *documentInfo;
     BDSKDocumentInfoWindowController *infoWC;
     
-    NSString *promiseDragColumnIdentifier;
-
-    IBOutlet BDSKGroupTableView *groupTableView;
-    BDSKGroupsArray *groups;
-    NSMutableArray *groupedPublications;
-	NSString *currentGroupField;
-    IBOutlet BDSKSplitView *groupSplitView;
-    
-    IBOutlet BDSKImagePopUpButton *groupActionButton;
-    IBOutlet NSButton *groupAddButton;
-    IBOutlet BDSKCollapsibleView *groupCollapsibleView;
-    IBOutlet BDSKGradientView *groupGradientView;
-    
-    NSMutableDictionary *sharedGroupSpinners;
-    
-    BDSKFileContentSearchController *fileSearchController;
+	NSMutableString *frontMatter;    // for preambles, and stuff
 	
+#pragma mark Copy & Drag related variables
+
+	BDSKTeXTask *texTask;
+    NSString *promiseDragColumnIdentifier;
 	NSMutableDictionary *promisedPboardTypes;
     
+#pragma mark Scalar state variables
+
     struct _docState {
         float               lastPreviewHeight;  // for the splitview double-click handling
         float               lastGroupViewWidth;

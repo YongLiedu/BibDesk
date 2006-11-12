@@ -246,20 +246,12 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
 		NSToolbarCustomizeToolbarItemIdentifier, nil];
 }
 
+/*
 - (void) toolbarWillAddItem: (NSNotification *) notif {
     NSToolbarItem *addedItem = [[notif userInfo] objectForKey: @"item"];
 
-    if([[addedItem itemIdentifier] isEqualToString: BibDocumentToolbarSearchItemIdentifier]) {
-//		searchFieldToolbarItem = addedItem;
-    }else if([[addedItem itemIdentifier] isEqualToString: BibDocumentToolbarDeleteItemIdentifier]){
-//        delPubButton = addedItem;
-    }else if([[addedItem itemIdentifier] isEqualToString: BibDocumentToolbarEditItemIdentifier]){
-//        editPubButton = addedItem;
-    }
-
 }
 
-/*
 - (void) toolbarDidRemoveItem: (NSNotification *) notif {
     // Optional delegate method   After an item is removed from a toolbar the notification is sent   self allows
     // the chance to tear down information related to the item that may have been cached   The notification object
