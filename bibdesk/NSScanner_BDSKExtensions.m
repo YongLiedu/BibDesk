@@ -41,6 +41,19 @@
 
 @implementation NSScanner (BDSKExtensions)
 
+- (BOOL)scanUnsignedInt:(unsigned int *)unsignedValue{
+    unsigned rewindLocation = [self scanLocation];
+    int intValue = 0;
+    BOOL returnValue = [self scanInt:&intValue];
+    if (returnValue && intValue < 0) {
+        [self setScanLocation:rewindLocation];
+        returnValue == NO;
+    }
+    if (returnValue && unsignedValue != NULL)
+        *unsignedValue = intValue;
+    return returnValue;
+}
+
 - (BOOL)scanCharacter:(unichar *)ch {
     if ([self isAtEnd])
         return NO;
