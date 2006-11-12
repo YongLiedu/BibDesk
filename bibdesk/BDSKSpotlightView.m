@@ -79,7 +79,7 @@ static CIFilter *cropFilter = nil;
     NSEnumerator *rectEnum = [highlightRects objectEnumerator];
     NSValue *value;
         
-    int maximumBlur = 10;
+    unsigned int maximumBlur = 10;
     float blurPadding = maximumBlur * 2;
 
     // we make the bounds larger so the blurred edges will fall outside the view

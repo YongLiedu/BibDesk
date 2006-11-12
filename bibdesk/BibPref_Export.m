@@ -428,7 +428,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
         id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
         if ([dropItem isLeaf]) {
-            unsigned int sourceIndex = [[item children] indexOfObject:dropItem];
+            int sourceIndex = [[item children] indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
             if (sourceIndex < index)
@@ -436,7 +436,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             [item removeChild:dropItem];
             [item insertChild:dropItem atIndex:index];
         } else {
-            unsigned int sourceIndex = [itemNodes indexOfObject:dropItem];
+            int sourceIndex = [itemNodes indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
             if (sourceIndex < index)

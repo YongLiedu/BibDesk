@@ -217,7 +217,7 @@
     
     // deletion changes the scroll position
     NSPoint scrollLocation = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-    unsigned lastIndex = [[tableView selectedRowIndexes] lastIndex];
+    int lastIndex = [[tableView selectedRowIndexes] lastIndex];
 	[self removePublications:[self selectedPublications]];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
     
@@ -342,7 +342,7 @@
 }
 
 - (BibEditor *)editPubAfterPub:(BibItem *)pub{
-    int index = [shownPublications indexOfObject:pub];
+    unsigned int index = [shownPublications indexOfObject:pub];
     if(index == NSNotFound){
         NSBeep();
         return nil;

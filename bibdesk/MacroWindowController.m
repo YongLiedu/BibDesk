@@ -327,7 +327,7 @@
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     NSUndoManager *undoMan = [[self window] undoManager];
 	if([undoMan isUndoingOrRedoing]) return;
-    NSParameterAssert(row >= 0 && row < [macros count]);    
+    NSParameterAssert(row >= 0 && row < (int)[macros count]);    
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
     

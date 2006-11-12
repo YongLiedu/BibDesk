@@ -113,7 +113,7 @@
 {
     OFScheduler *scheduler;
     NSString *selectedItem = nil;
-    int selectedIndex, foundIndex;
+    unsigned int selectedIndex, foundIndex;
     unsigned int searchStringLength;
     unsigned int selectedItemLength;
     NSRange range;

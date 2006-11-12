@@ -208,7 +208,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(int)index;
+- (BibAuthor *)authorAtIndex:(unsigned int)index;
 
 /*!
     @method authorAtIndex:inherit:
@@ -218,7 +218,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit;
+- (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
 
 /*!
     @method     lastAuthor
@@ -323,7 +323,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(int)index;
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index;
 
 /*!
     @method authorOrEditorAtIndex:inherit:
@@ -333,7 +333,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(int)index inherit:(BOOL)inherit;
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
 
 /*!
     @method crossrefParent

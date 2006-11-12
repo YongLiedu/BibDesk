@@ -501,7 +501,7 @@ NSString *BDSKComputerName() {
 {
     // set the child connection's delegate so we get authentication messages
     // this hidden pref will be zero by default, but we'll add a limit here just in case it's needed
-    static int maxConnections = 0;
+    static unsigned int maxConnections = 0;
     if(maxConnections == 0)
         maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
     

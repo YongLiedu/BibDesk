@@ -339,7 +339,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 // Returns the bibtex value of the string.
 - (NSString *)stringAsBibTeXString{
-    int i = 0;
+    unsigned int i = 0;
     NSMutableString *retStr = [NSMutableString string];
         
     for( i = 0; i < [nodes count]; i++){

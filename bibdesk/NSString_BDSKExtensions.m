@@ -855,7 +855,7 @@ http://home.planet.nl/~faase009/GNU.txt
 
 - (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
 {
-    CFIndex length = [prefix length];
+    unsigned int length = [prefix length];
     if(prefix == nil || length > [self length])
         return NO;
     

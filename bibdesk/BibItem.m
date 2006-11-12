@@ -669,11 +669,11 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     return [self peopleStringForDisplayFromField:BDSKAuthorString];
 }
 
-- (BibAuthor *)authorAtIndex:(int)index{ 
+- (BibAuthor *)authorAtIndex:(unsigned int)index{ 
     return [self authorAtIndex:index inherit:YES];
 }
 
-- (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsInheriting:inherit];
 	if ([auths count] > index)
         return [auths objectAtIndex:index];
@@ -762,11 +762,11 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     return [self peopleStringForDisplayFromField:([[self peopleArrayForField:BDSKAuthorString] count] ? BDSKAuthorString : BDSKEditorString)];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(int)index{ 
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index{ 
     return [self authorOrEditorAtIndex:index inherit:YES];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(int)index inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsOrEditorsInheriting:inherit];
 	if ([auths count] > index)
         return [auths objectAtIndex:index];

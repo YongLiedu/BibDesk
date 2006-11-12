@@ -86,7 +86,7 @@
 - (void)setDownloading:(BOOL)downloading;
 - (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
-- (BOOL)addCurrentSelectionToFieldAtIndex:(int)index;
+- (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)index;
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value;
 - (BOOL)autoFilePaper;
 
@@ -1279,7 +1279,7 @@
 
 #pragma mark Editing
 
-- (BOOL)addCurrentSelectionToFieldAtIndex:(int)index{
+- (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)index{
     if ([fields count] <= index)
         return NO;
     

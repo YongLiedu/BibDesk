@@ -141,7 +141,7 @@
 	float border = ([self isBordered] ? 1 : 0);
 	float margin = 0;
 	float offset;
-	int newRating;
+	unsigned int newRating;
 
 	float innerWidth = OUTER_SIZE * maxRating;
 	NSSize buttonSize = NSMakeSize(innerWidth, OUTER_SIZE);
@@ -310,7 +310,7 @@
 	NSRect rect = NSMakeRect(NSMinX(buttonRect) + margin + 0.5f * (OUTER_SIZE - MARKER_SIZE), NSMinY(buttonRect) + 0.5f * (NSHeight(buttonRect) - MARKER_SIZE), MARKER_SIZE, MARKER_SIZE);
 	NSColor *color = ([self isEnabled]) ? [NSColor grayColor] : [NSColor lightGrayColor];
 	BOOL selected = NO;
-	int i = 0;
+	unsigned int i = 0;
 	
 	if ([controlView isKindOfClass:[NSTableView class]]) {
 		NSTableView *tv = (NSTableView *)controlView;

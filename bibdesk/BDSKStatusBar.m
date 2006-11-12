@@ -379,7 +379,7 @@
 		[progressIndicator removeFromSuperview];
 		progressIndicator = nil;
 	} else {
-		if ([progressIndicator style] == style)
+		if ((int)[progressIndicator style] == style)
 			return;
 		progressIndicator = [[NSProgressIndicator alloc] init];
 		[progressIndicator setAutoresizingMask:NSViewMinXMargin | NSViewMinYMargin | NSViewMaxYMargin];

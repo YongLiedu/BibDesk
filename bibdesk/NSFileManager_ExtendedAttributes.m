@@ -73,7 +73,7 @@ static NSString *xattrError(int err, const char *path);
         return nil;
     }
     
-    unsigned idx, start = 0;
+    int idx, start = 0;
 
     NSString *attribute = nil;
     NSMutableArray *attrs = [NSMutableArray array];

@@ -310,7 +310,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 
 - (void)rebuildToolTips {
     NSRange rowRange, columnRange;
-    int rowIndex, columnIndex;
+    unsigned int rowIndex, columnIndex;
 	NSTableColumn *tableColumn;
 
     if (![_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)])

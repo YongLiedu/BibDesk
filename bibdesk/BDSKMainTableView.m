@@ -145,7 +145,7 @@
     
     NSRange rowRange = [self rowsInRect:[self visibleRect]];
     NSRange columnRange = [self columnsInRect:[self visibleRect]];
-    int rowIndex, columnIndex;
+    unsigned int rowIndex, columnIndex;
 	NSTableColumn *tableColumn;
     NSTrackingRectTag tag;
     BOOL assumeInside = [[self delegate] respondsToSelector:@selector(tableView:mouseEnteredTableColumn:row:)];

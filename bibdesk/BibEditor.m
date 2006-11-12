@@ -664,7 +664,7 @@ static int numberOfOpenEditors = 0;
 - (void)updateSafariRecentDownloadsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
 		
-	int i = 0;
+	unsigned int i = 0;
 	unsigned numberOfItems = [historyArray count];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
@@ -700,7 +700,7 @@ static int numberOfOpenEditors = 0;
 - (void)updateSafariRecentURLsMenu:(NSMenu *)menu{
 	NSArray *historyArray = [self safariDownloadHistory];
 	unsigned numberOfItems = [historyArray count];
-	int i = 0;
+	unsigned int i = 0;
     
     [menu removeAllItems];
 	
@@ -750,7 +750,7 @@ static int numberOfOpenEditors = 0;
 	NSArray *historyArray = (NSArray *) CFPreferencesCopyAppValue(CFSTR("NSRecentDocumentRecords"), CFSTR("com.apple.Preview"));
     NSMutableSet *previewRecentPaths = [[NSMutableSet alloc] initWithCapacity:10];
 	
-	int i = 0;
+	unsigned int i = 0;
 	unsigned numberOfItems = [(NSArray *)historyArray count];
 	for (i = 0; i < numberOfItems; i ++){
 		itemDict = [(NSArray *)historyArray objectAtIndex:i];
