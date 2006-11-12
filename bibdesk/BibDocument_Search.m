@@ -280,37 +280,29 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     if(BDStringHasAccentedCharacters((CFStringRef)substring))
         doLossySearch = NO;
     
-    
     static NSSet *dateFields = nil;
     if(nil == dateFields)
         dateFields = [[NSSet alloc] initWithObjects:BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil];
     
-    BOOL isDateField = [dateFields containsObject:field];
-    
     // if it's a date field, figure out a format string to use based on the given date component(s)
     // this date format string is then made available to the BibItem as a global variable
     // don't convert substring->date->string, though, or it's no longer a substring and will only match exactly
-    if(YES == isDateField){
+    if([dateFields containsObject:field]){
         [BDSKDocumentFormatForSearchingDates release];
         BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
-        NSCalendarDate *date = [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates];
-        if(nil == date){
+        if(nil == [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates]){
             [BDSKDocumentFormatForSearchingDates release];
             BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString] copy];
-            date = [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates];
         }
     }
         
     NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
-    NSEnumerator *andEnum = [[substring andSearchComponents] objectEnumerator];
-    NSEnumerator *orEnum = [[substring orSearchComponents] objectEnumerator];
+    NSArray *andComponents = [substring andSearchComponents];
+    NSArray *orComponents = [substring orSearchComponents];
     
-    NSString *componentSubstring = nil;
-    BibItem *pub = nil;
-    NSEnumerator *pubEnum;
-    NSMutableArray *andResultsArray = [[NSMutableArray alloc] initWithCapacity:50];
-
-    NSSet *copySet;
+    int i, j, pubCount = [arrayToSearch count], andCount = [andComponents count], orCount = [orComponents count];
+    BibItem *pub;
+    BOOL match;
 
     // cache the IMP for the BibItem search method, since we're potentially calling it several times per item
     typedef BOOL (*searchIMP)(id, SEL, id, unsigned int, id, BOOL);
@@ -318,71 +310,28 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     searchIMP itemMatches = (searchIMP)[BibItem instanceMethodForSelector:matchSelector];
     OBASSERT(NULL != itemMatches);
     
-    // for each AND term, enumerate the entire publications array and search for a match; if we get a match, add it to a mutable set
-        
-    while(componentSubstring = [andEnum nextObject]){
-        
-        pubEnum = [arrayToSearch objectEnumerator];
-        while(pub = [pubEnum nextObject]){
-            
-            if(itemMatches(pub, matchSelector, componentSubstring, searchMask, field, doLossySearch))
-                [aSet addObject:pub];
-
+    for(i = 0; i < pubCount; i++){
+        pub = [arrayToSearch objectAtIndex:i];
+        match = YES;
+        for(j = 0; j < andCount; j++){
+            if(itemMatches(pub, matchSelector, [andComponents objectAtIndex:j], searchMask, field, doLossySearch) == NO){
+                match = NO;
+                break;
+            }
         }
-        copySet = [aSet copy];
-        [andResultsArray addObject:copySet];
-        [copySet release];
-        [aSet removeAllObjects]; // don't forget this step!
-    }
-
-    // Get all of the OR matches, each in a separate set added to orResultsArray
-    NSMutableArray *orResultsArray = [[NSMutableArray alloc] initWithCapacity:50];
-    
-    while(componentSubstring = [orEnum nextObject]){
-        
-        pubEnum = [arrayToSearch objectEnumerator];
-        while(pub = [pubEnum nextObject]){
-            
-            if(itemMatches(pub, matchSelector, componentSubstring, searchMask, field, doLossySearch))
-                [aSet addObject:pub];
-            
+        if(orCount > 0 && match == NO){
+            for(j = 0; j < orCount; j++){
+                if(itemMatches(pub, matchSelector, [orComponents objectAtIndex:j], searchMask, field, doLossySearch) == YES){
+                    match = YES;
+                    break;
+                }
+            }
         }
-        copySet = [aSet copy];
-        [orResultsArray addObject:copySet];
-        [copySet release];
-        [aSet removeAllObjects]; // don't forget this step!
+        if(match)
+            [aSet addObject:pub];
     }
     
-    // we need to sort the set so we always start with the shortest one
-    static NSArray *setLengthSortDescriptors = nil;
-    if(setLengthSortDescriptors == nil){
-        NSSortDescriptor *setLengthSort = [[NSSortDescriptor alloc] initWithKey:@"self.@count" ascending:YES selector:@selector(compare:)];
-        setLengthSortDescriptors = [[NSArray alloc] initWithObjects:setLengthSort, nil];
-        [setLengthSort release];
-    }
-    
-    [andResultsArray sortUsingDescriptors:setLengthSortDescriptors];
-    NSEnumerator *e = [andResultsArray objectEnumerator];
-    
-    // don't start out by intersecting an empty set
-    [aSet setSet:[e nextObject]];
-
-    // now get the intersection of all successive results from the AND terms
-    while(copySet = [e nextObject]){
-        [aSet intersectSet:copySet];
-    }
-    [andResultsArray release];
-    
-    // union the results from the OR search
-    e = [orResultsArray objectEnumerator];
-    
-    while(copySet = [e nextObject]){
-        [aSet unionSet:copySet];
-    }
-    [orResultsArray release];
-        
     return [aSet allObjects];
-    
 }
 
 #pragma mark File Content Search
