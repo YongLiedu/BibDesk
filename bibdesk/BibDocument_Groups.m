@@ -236,7 +236,6 @@ The groupedPublications array is a subset of the publications array, developed b
     NSEnumerator *groupEnum = [groupsToRemove objectEnumerator];
     BDSKGroup *group;
     NSProgressIndicator *spinner;
-    NSMutableSet *macroResolvers = [NSMutableSet set];
     
     while(group = [groupEnum nextObject]){
         if(spinner = [sharedGroupSpinners objectForKey:[group uniqueID]]){
