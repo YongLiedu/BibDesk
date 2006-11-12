@@ -211,7 +211,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     BDSKErrorEditor *editor = [manager mainEditor];
     
     if(editor == nil && create){
-        editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[document fileName]];
+        editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[[document fileURL] path]];
         [manager addEditor:editor isMain:YES];
         [editor release];
     }

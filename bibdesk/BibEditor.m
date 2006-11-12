@@ -1886,7 +1886,7 @@ static int numberOfOpenEditors = 0;
 			if ([publication hasEmptyOrDefaultCiteKey])
 				[missingFields addObject:field];
 		} else if ([field isEqualToString:@"Document Filename"]) {
-			if ([NSString isEmptyString:[[self document] fileName]])
+			if ([NSString isEmptyString:[[[self document] fileURL] path]])
 				[missingFields addObject:field];
 		} else if ([field isEqualToString:BDSKAuthorEditorString]) {
 			if ([NSString isEmptyString:[publication valueOfField:BDSKAuthorString]] && [NSString isEmptyString:[publication valueOfField:BDSKEditorString]])

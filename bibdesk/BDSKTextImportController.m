@@ -589,8 +589,8 @@
     return [document macroResolver];
 }
 
-- (NSString *)fileName {
-    return [document fileName];
+- (NSURL *)fileURL {
+    return [document fileURL];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key {

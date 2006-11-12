@@ -289,7 +289,7 @@
 
 - (NSUndoManager *)undoManager { return nil; }
 
-- (NSString *)fileName { return nil; }
+- (NSURL *)fileURL { return nil; }
 
 - (NSString *)documentInfoForKey:(NSString *)key { return nil; }
 

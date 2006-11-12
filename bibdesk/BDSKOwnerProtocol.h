@@ -47,7 +47,7 @@
 - (BDSKPublicationsArray *)publications;
 - (BDSKMacroResolver *)macroResolver;
 - (NSUndoManager *)undoManager;
-- (NSString *)fileName;
+- (NSURL *)fileURL;
 - (NSString *)documentInfoForKey:(NSString *)key;
 
 @end

@@ -1452,7 +1452,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // create some useful metadata, with an option to disable for the paranoid
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExportAttributesKey"]){
-        [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"") stringByAppendingString:[[self fileName] lastPathComponent]], NSTitleDocumentAttribute, nil]];
+        [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"") stringByAppendingString:[[[self fileURL] path] lastPathComponent]], NSTitleDocumentAttribute, nil]];
     }
     
     if (format & BDSKRTFTemplateFormat) {
@@ -2982,8 +2982,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 // just create this setter to avoid a run time warning
 - (void)setDisplayName:(NSString *)newName{}
 
-- (NSString *)fileName {
-    return [super fileName];
+// avoid warning for BDSKOwner protocol conformance
+- (NSURL *)fileURL {
+    return [super fileURL];
 }
 
 - (BOOL)isDocument{

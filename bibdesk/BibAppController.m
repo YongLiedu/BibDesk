@@ -549,7 +549,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 - (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner {
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	if ([NSString isEmptyString:papersFolderPath])
-		papersFolderPath = [[owner fileName] stringByDeletingLastPathComponent];
+		papersFolderPath = [[[owner fileURL] path] stringByDeletingLastPathComponent];
 	if ([NSString isEmptyString:papersFolderPath])
 		papersFolderPath = NSHomeDirectory();
 	return [papersFolderPath stringByExpandingTildeInPath];

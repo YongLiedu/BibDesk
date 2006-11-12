@@ -2201,11 +2201,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)localUrlPathInheriting:(BOOL)inherit{
-	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:inherit];
+	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[[owner fileURL] path] stringByDeletingLastPathComponent] inherit:inherit];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field{
-	return [self localFilePathForField:field relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFilePathForField:field relativeTo:[[[owner fileURL] path] stringByDeletingLastPathComponent] inherit:YES];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
@@ -2213,7 +2213,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
-	return [self localFileURLForField:field relativeTo:[[owner fileName] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFileURLForField:field relativeTo:[[[owner fileURL] path] stringByDeletingLastPathComponent] inherit:YES];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
@@ -2285,7 +2285,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
-		[NSString isEmptyString:[[owner fileName] stringByDeletingLastPathComponent]]))
+		[NSString isEmptyString:[[[owner fileURL] path] stringByDeletingLastPathComponent]]))
 		return NO;
 	
 	NSEnumerator *fEnum = [requiredFields objectEnumerator];
@@ -2296,7 +2296,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             if([self hasEmptyOrDefaultCiteKey])
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
-			if ([NSString isEmptyString:[owner fileName]])
+			if ([NSString isEmptyString:[[owner fileURL] path]])
 				return NO;
 		} else if ([fieldName hasPrefix:@"Document: "]) {
 			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
@@ -2346,7 +2346,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)documentFileName {
-    return [owner fileName];
+    return [[owner fileURL] path];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key {
