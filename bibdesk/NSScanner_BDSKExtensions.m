@@ -47,7 +47,7 @@
     BOOL returnValue = [self scanInt:&intValue];
     if (returnValue && intValue < 0) {
         [self setScanLocation:rewindLocation];
-        returnValue == NO;
+        returnValue = NO;
     }
     if (returnValue && unsignedValue != NULL)
         *unsignedValue = intValue;
