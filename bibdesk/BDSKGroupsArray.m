@@ -102,12 +102,6 @@
 		return libraryGroup;
     index -= 1;
     
-    if ([lastImportGroup count] != 0) {
-        if (index == 0)
-            return lastImportGroup;
-        index -= 1;
-    }
-    
     count = [sharedGroups count];
     if (index < count)
         return [sharedGroups objectAtIndex:index];
@@ -122,6 +116,12 @@
     if (index < count)
         return [scriptGroups objectAtIndex:index];
     index -= count;
+    
+    if ([lastImportGroup count] != 0) {
+        if (index == 0)
+            return lastImportGroup;
+        index -= 1;
+    }
     
 	count = [smartGroups count];
     if (index < count)
@@ -174,7 +174,7 @@
 #pragma mark Index ranges of groups
 
 - (NSRange)rangeOfSharedGroups{
-    return NSMakeRange([lastImportGroup count] == 0 ? 1 : 2, [sharedGroups count]);
+    return NSMakeRange(1, [sharedGroups count]);
 }
 
 - (NSRange)rangeOfURLGroups{
@@ -186,7 +186,9 @@
 }
 
 - (NSRange)rangeOfSmartGroups{
-    return NSMakeRange(NSMaxRange([self rangeOfScriptGroups]), [smartGroups count]);
+    unsigned startIndex = NSMaxRange([self rangeOfScriptGroups]);
+    if([lastImportGroup count] > 0) startIndex++;
+    return NSMakeRange(startIndex, [smartGroups count]);
 }
 
 - (NSRange)rangeOfStaticGroups{
