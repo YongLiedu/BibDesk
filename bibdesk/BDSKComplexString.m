@@ -49,27 +49,25 @@ static Class BDSKComplexStringClass = Nil;
 
 static BDSKMacroResolver *macroResolverForUnarchiving = nil;
 
-#define SAFE_ALLOCA_SIZE (8 * 8192)
+#define STACK_BUFFER_SIZE 256
 
-static 
+static inline
 CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolver *macroResolver)
 {
 	BDSKStringNode *node = nil;
-    BDSKStringNode **stringNodes;
-    int iMax = [nodes count];
+    BDSKStringNode **stringNodes, *stackBuffer[STACK_BUFFER_SIZE];
     
-    if(nodes == nil || iMax == 0)
-        return nil;
+    int iMax = nil == nodes ? 0 : CFArrayGetCount((CFArrayRef)nodes);
+    
+    if(0 == iMax) return nil;
         
-    // Allocate memory on the stack using alloca() if possible, so we don't have malloc/free overhead; since the array of string nodes is typically small, this should almost always work.
-    BOOL usedMalloc = NO;
-    size_t bufSize = sizeof(BDSKStringNode *) * iMax;
-    if(bufSize < SAFE_ALLOCA_SIZE){
-        stringNodes = (BDSKStringNode **)alloca(bufSize);
-        usedMalloc = NO;
-    } else if(stringNodes = (BDSKStringNode **)NSZoneMalloc(complexStringExpansionZone, bufSize))
-        usedMalloc = YES;
-    else [NSException raise:NSInternalInconsistencyException format:@"Unable to malloc memory in zone %@", NSZoneName(complexStringExpansionZone)];
+    if (iMax > STACK_BUFFER_SIZE) {
+        stringNodes = (BDSKStringNode **)NSZoneMalloc(complexStringExpansionZone, sizeof(BDSKStringNode *) * iMax);
+        if (NULL == stringNodes)
+            [NSException raise:NSInternalInconsistencyException format:@"Unable to malloc memory in zone %@", NSZoneName(complexStringExpansionZone)];
+    } else {
+        stringNodes = stackBuffer;
+    }
 
     // This avoids the overhead of calling objectAtIndex: or using an enumerator, since we can now just increment a pointer to traverse the contents of the array.
     CFArrayGetValues((CFArrayRef)nodes, (CFRange){0, iMax}, (const void **)stringNodes);
@@ -78,7 +76,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
     CFStringRef nodeVal, expandedValue;
     
-    // Increment this pointer, in case we need to free it later (if alloca didn't work)
+    // Increment a different pointer, in case we need to free stringNodes later
     BDSKStringNode **stringNodeIdx = stringNodes;
     
     while(iMax--){
@@ -96,7 +94,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     
     OBPOSTCONDITION(!BDIsEmptyString(mutStr));
     
-    if(usedMalloc) NSZoneFree(complexStringExpansionZone, stringNodes);
+    if(stackBuffer != stringNodes) NSZoneFree(complexStringExpansionZone, stringNodes);
     
     return mutStr;
 }
