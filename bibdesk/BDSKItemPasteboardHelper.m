@@ -255,7 +255,7 @@
         [texTask terminate];
         [texTask release];
         texTask = nil;
-        [self performSelector:@selector(release) withObject:nil afterDelay:0.0]; // delay because otherwise we crash
+        [self autorelease]; // using release leads to a crash
     }
 }
 
