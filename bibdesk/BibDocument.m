@@ -2876,7 +2876,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)selectPublications:(NSArray *)bibArray{
     
-	NSIndexSet *indexes = [bibArray indexesOfObjectsIdenticalTo:bibArray];
+	NSIndexSet *indexes = [shownPublications indexesOfObjectsIdenticalTo:bibArray];
     
     if([indexes count]){
         [tableView selectRowIndexes:indexes byExtendingSelection:NO];
