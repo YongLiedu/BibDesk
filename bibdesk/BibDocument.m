@@ -406,8 +406,10 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
-    if ([groupData length])
-        [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
+    if ([groupData length]) {
+        @try{ [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]]; }
+        @catch(id exception){ NSLog(@"Ignoring exception while unarchiving saved group selection: \"%@\"", exception); }
+    }
     [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
