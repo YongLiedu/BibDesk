@@ -196,8 +196,19 @@ static NSString *xattrError(int err, const char *path);
     if (nil == data) {
         if (outError) *outError = [NSError errorWithDomain:@"BDSKErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, error, NSUnderlyingErrorKey, nil]];
     } else {
+        // we compress plist types, but check just in case...
+        NSData *decompressedData = data;
+        if ([decompressedData mightBeCompressed]) {
+            @try {
+                decompressedData = [data decompressedBzip2Data];
+            }
+            @catch(id exception) {
+                NSLog(@"property list for extended attribute %@ at path %@ couldn't be decompressed", attr, path);
+                decompressedData = data;
+            }
+        }
         NSString *errorString;
-        plist = [NSPropertyListSerialization propertyListFromData:data 
+        plist = [NSPropertyListSerialization propertyListFromData:decompressedData 
                                                  mutabilityOption:NSPropertyListImmutable 
                                                            format:NULL 
                                                  errorDescription:&errorString];
@@ -279,7 +290,16 @@ static NSString *xattrError(int err, const char *path);
         [errorString release];
         success = NO;
     } else {
-        success = [self setExtendedAttributeNamed:attr toValue:data atPath:path options:options error:error];
+        // try to compress; this saves significant space under some conditions and avoids the size error
+        NSData *compressedData;
+        @try {
+            compressedData = [data compressedBzip2Data];
+        }
+        @catch(id exception) {
+            compressedData = data;
+            NSLog(@"property list could not be compressed for attribute %@ at path %@", attr, path);
+        }
+        success = [self setExtendedAttributeNamed:attr toValue:compressedData atPath:path options:options error:error];
     }
     return success;
 }
