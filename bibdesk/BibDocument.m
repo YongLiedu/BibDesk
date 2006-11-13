@@ -407,6 +407,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
     if ([groupData length]) {
+        // !!! remove for release
         @try{ [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]]; }
         @catch(id exception){ NSLog(@"Ignoring exception while unarchiving saved group selection: \"%@\"", exception); }
     }
