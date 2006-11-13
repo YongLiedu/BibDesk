@@ -1224,7 +1224,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	[headerPopup setIndicatorImage:[NSImage imageNamed:docState.sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
 
     [groupTableView reloadData];
-	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
 	// select the current groups. Otherwise select Library
 	[self selectGroups:selectedGroups];
