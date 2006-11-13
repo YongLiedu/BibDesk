@@ -667,6 +667,7 @@
 			   [texTask hasPDFData]){
 				[pboard setData:[texTask PDFData] forType:NSPDFPboardType];
 			}else{
+				[pboard setData:nil forType:NSPDFPboardType];
 				NSBeep();
 			}
 		}else if([type isEqualToString:NSRTFPboardType]){
@@ -676,6 +677,7 @@
 			   [texTask hasRTFData]){
 				[pboard setData:[texTask RTFData] forType:NSRTFPboardType];
 			}else{
+				[pboard setData:nil forType:NSRTFPboardType];
 				NSBeep();
 			}
 		}else if([type isEqualToString:NSStringPboardType]){
@@ -688,6 +690,7 @@
 				   [texTask hasLTB]){
 					[pboard setString:[texTask LTBString] forType:NSStringPboardType];
 				}else{
+                    [pboard setData:nil forType:NSStringPboardType];
 					NSBeep();
 				}
 			}else{
@@ -696,6 +699,7 @@
 				   [texTask hasLaTeX]){
 					[pboard setString:[texTask LaTeXString] forType:NSStringPboardType];
 				}else{
+                    [pboard setData:nil forType:NSStringPboardType];
 					NSBeep();
 				}
 			}
