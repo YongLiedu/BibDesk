@@ -51,7 +51,7 @@ static BDSKMacroResolver *macroResolverForUnarchiving = nil;
 
 #define SAFE_ALLOCA_SIZE (8 * 8192)
 
-static inline
+static 
 CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolver *macroResolver)
 {
 	BDSKStringNode *node = nil;

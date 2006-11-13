@@ -134,7 +134,7 @@ Boolean __BDStringContainsWhitespace(CFStringRef string, CFIndex length)
     return FALSE;
 }
 
-static inline
+static
 CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef allocator, CFStringRef aString)
 {
     
@@ -223,7 +223,7 @@ Boolean __BDStringContainsWhitespaceOrNewline(CFStringRef string, CFIndex length
     return FALSE;
 }
 
-static inline
+static
 CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef aString)
 {
     
@@ -378,7 +378,7 @@ void __BDDeleteTeXCommandsForSorting(CFMutableStringRef mutableString)
     }
 }
 
-static inline 
+static 
 uint32_t __BDFastHash(CFStringRef aString)
 {
     
@@ -451,7 +451,7 @@ uint32_t __BDFastHash(CFStringRef aString)
     return fastHash;
 }
 
-static inline
+static
 CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef allocator, CFStringRef aString)
 {
     
