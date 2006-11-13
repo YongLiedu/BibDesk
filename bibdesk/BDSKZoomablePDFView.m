@@ -361,7 +361,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if([self autoScales]){
         [super zoomIn:sender];
     }else{
-        unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+        int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
         float scaleFactor = [self scaleFactor];
         
         // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
@@ -376,7 +376,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if([self autoScales]){
         [super zoomOut:sender];
     }else{
-        unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+        int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
         float scaleFactor = [self scaleFactor];
         
         // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)

@@ -47,7 +47,7 @@
 - (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)theScore;
 {
     
-    NSParameterAssert(NULL != index);
+    NSParameterAssert(nil != anIndex);
     NSParameterAssert(NULL != skDocument);
         
     if ((self = [super init])) {

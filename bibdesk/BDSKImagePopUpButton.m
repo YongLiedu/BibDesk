@@ -161,7 +161,6 @@
 
 - (NSImage *)arrowImage{
     return [[self cell] arrowImage];
-	[self setNeedsDisplay:YES];
 }
 
 - (void)setArrowImage:(NSImage *)arrowImage{

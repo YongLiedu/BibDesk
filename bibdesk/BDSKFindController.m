@@ -674,7 +674,7 @@ enum {
 
     NSEnumerator *selPubE = [[theDocument selectedPublications] objectEnumerator];
     BibItem *selItem = [selPubE nextObject];
-    unsigned int indexOfSelectedItem;
+    int indexOfSelectedItem;
     if(selItem == nil){ // no selection, so select the first one
         indexOfSelectedItem = 0;
     } else {        
@@ -690,7 +690,7 @@ enum {
         indexOfSelectedItem = [currItems indexOfObjectIdenticalTo:selItem];
         if(indexOfSelectedItem != NSNotFound){ // we've already selected an item from the search results...so select the next one
             if(next){
-				if(++indexOfSelectedItem >= [currItems count])
+				if(++indexOfSelectedItem >= (int)[currItems count])
 					indexOfSelectedItem = 0; // wrap around
 			}else{
 				if(--indexOfSelectedItem < 0)

@@ -150,8 +150,8 @@ NSString *BDSKComputerName() {
         CFArrayAppendValue(keys, key);
         BDSKHostNameChangedNotification = (NSString *)key;
         
-        assert(BDSKComputerNameChangedNotification);
-        assert(BDSKHostNameChangedNotification);
+        OBASSERT(BDSKComputerNameChangedNotification);
+        OBASSERT(BDSKHostNameChangedNotification);
 
         if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
             fprintf(stderr, "unable to register for dynamic store notifications.\n");

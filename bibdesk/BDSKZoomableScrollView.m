@@ -162,7 +162,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (IBAction)zoomIn:(id)sender{
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     
     // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
     while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
@@ -172,7 +172,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (IBAction)zoomOut:(id)sender{
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+    int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
     
     // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
     while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;

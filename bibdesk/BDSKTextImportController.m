@@ -1338,7 +1338,6 @@
 							  ofString:[textView string]];
 
 	}
-	return charRange;
 }
 
 - (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{

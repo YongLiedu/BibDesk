@@ -89,8 +89,6 @@
 - (void)setRating:(unsigned int)newRating {
 	if (newRating > maxRating)
 		newRating = maxRating;
-	if (newRating < 0)
-		newRating = 0;
 	rating = newRating;
 }
 

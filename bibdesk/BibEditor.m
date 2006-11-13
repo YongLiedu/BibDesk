@@ -2289,7 +2289,6 @@ static int numberOfOpenEditors = 0;
 							  ofString:[textView string]];
 
 	}
-	return charRange;
 }
 
 - (BOOL)control:(NSControl *)control textViewShouldAutoComplete:(NSTextView *)textview {
