@@ -52,6 +52,21 @@
 }
 
 // this may give unexpected results if you have multiple instances of an object in an array; it will return only the lowest index
+- (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
+{
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    unsigned index;
+    NSEnumerator *objEnum = [objects objectEnumerator];
+	id obj;
+    while(obj = [objEnum nextObject]){
+        index = [self indexOfObject:obj];
+        if(index != NSNotFound) 
+            [indexes addIndex:index];
+    }
+    return indexes;
+}
+
+// this may give unexpected results if you have multiple instances of an object in an array; it will return only the lowest index
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 {
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
@@ -60,8 +75,8 @@
 	id obj;
     while(obj = [objEnum nextObject]){
         index = [self indexOfObjectIdenticalTo:obj];
-        if(index == NSNotFound) [NSException raise:NSInvalidArgumentException format:@"Object %@ does not exist in %@", obj, self];
-        [indexes addIndex:index];
+        if(index != NSNotFound) 
+            [indexes addIndex:index];
     }
     return indexes;
 }

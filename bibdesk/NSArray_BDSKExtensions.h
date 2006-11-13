@@ -43,6 +43,7 @@
 
 - (id)firstObject;
 - (NSArray *)arrayDroppingFirstObject;
+- (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 
 @end

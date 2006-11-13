@@ -313,20 +313,9 @@ The groupedPublications array is a subset of the publications array, developed b
     [[groups allPublicationsGroup] setCount:[publications count]];
 	
     [groupTableView reloadData];
-	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
-	// select the current group, if still around. Otherwise select Library
-	if(preserve && [selectedGroups count] != 0){
-		unsigned int row = [groups count];
-		while(row--){
-			if([selectedGroups containsObject:[groups objectAtIndex:row]])
-				[selIndexes addIndex:row];
-		}
-	}
-	if ([selIndexes count] == 0)
-		[selIndexes addIndex:0];
-	[groupTableView selectRowIndexes:selIndexes byExtendingSelection:NO];
-    [selIndexes release];
+	// select the current groups, if still around. Otherwise select Library
+	[self selectGroups:selectedGroups];
 	
 	[self displaySelectedGroups]; // the selection may not have changed, so we won't get this from the notification
     
@@ -381,15 +370,12 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)selectGroups:(NSArray *)theGroups{
-    unsigned count = [groups count];
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    while(count--){
-        if([theGroups containsObject:[groups objectAtIndex:count]])
-            [indexes addIndex:count];
-    }
+    NSIndexSet *indexes = [groups indexesOfObjects:theGroups];
     
-    [groupTableView deselectAll:nil];
-    [groupTableView selectRowIndexes:indexes byExtendingSelection:NO];
+    if([indexes count] == 0)
+        [groupTableView deselectAll:nil];
+    else
+        [groupTableView selectRowIndexes:indexes byExtendingSelection:NO];
 }
 
 - (void)selectGroup:(BDSKGroup *)aGroup{
@@ -1022,7 +1008,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     newPubs = [self newPublicationsFromArchivedData:data];
     
-    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];    
+    [self selectAllPublicationsGroup:nil];    
 	[self addPublications:newPubs];
 	[self selectPublications:newPubs];
     
@@ -1241,17 +1227,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
 	
 	// select the current groups. Otherwise select Library
-	if([selectedGroups count] != 0){
-		unsigned int groupsCount = [groups count];
-		unsigned int row = -1;
-		while(++row < groupsCount){
-			if([selectedGroups containsObject:[groups objectAtIndex:row]])
-				[selIndexes addIndex:row];
-		}
-	}
-	if ([selIndexes count] == 0)
-		[selIndexes addIndex:0];
-	[groupTableView selectRowIndexes:selIndexes byExtendingSelection:NO];
+	[self selectGroups:selectedGroups];
 	[self displaySelectedGroups];
 	
     // reset ourself as delegate

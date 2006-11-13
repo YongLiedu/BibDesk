@@ -1882,7 +1882,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if ([newPubs count] == 0) 
 		return YES; // nothing to do
 	
-    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];    
+    [self selectAllPublicationsGroup:nil];    
 	[self addPublications:newPubs];
 	[self selectPublications:newPubs];
 	if (newFilePubs != nil){
@@ -2874,16 +2874,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)selectPublications:(NSArray *)bibArray{
     
-	NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-	NSEnumerator *pubEnum = [bibArray objectEnumerator];
-	BibItem *bib;
-	int i;
-	
-	while(bib = [pubEnum nextObject]){
-		i = [shownPublications indexOfObjectIdenticalTo:bib];    
-		if(i != NSNotFound)
-			[indexes addIndex:i];
-	}
+	NSIndexSet *indexes = [bibArray indexesOfObjectsIdenticalTo:bibArray];
     
     if([indexes count]){
         [tableView selectRowIndexes:indexes byExtendingSelection:NO];

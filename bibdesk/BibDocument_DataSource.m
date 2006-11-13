@@ -959,7 +959,7 @@
             return YES;
             
         }else{
-            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+            [self selectAllPublicationsGroup:nil];
             
             if([type isEqualToString:NSFilenamesPboardType]){
                 NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
@@ -1144,7 +1144,7 @@
 - (void)moveLeft:(id)sender{
     if([documentWindow firstResponder] != groupTableView && [documentWindow makeFirstResponder:groupTableView])
         if([groupTableView numberOfSelectedRows] == 0)
-            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+            [self selectAllPublicationsGroup:nil];
 }
 
 - (void)moveRight:(id)sender{

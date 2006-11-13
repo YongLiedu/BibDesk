@@ -352,7 +352,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     // here we avoid the table selection change notification that will result in an endless loop
     id tableDelegate = [groupTableView delegate];
     [groupTableView setDelegate:nil];
-    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    [groupTableView deselectAll:nil];
     [groupTableView setDelegate:tableDelegate];
     
     // this is what displaySelectedGroup normally ends up doing
