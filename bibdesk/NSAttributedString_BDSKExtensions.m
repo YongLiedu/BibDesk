@@ -140,7 +140,6 @@ static void applyAttributesToString(const void *value, void *context)
 
         // set the attributed string up with default attributes, after parsing and fixing the mutable string
         mas = [[NSMutableAttributedString alloc] initWithString:mutableString attributes:attributes]; 
-        [mutableString release];
 
         // now apply the previously determined attributes and ranges to the attributed string
         CFArrayApplyFunction((CFArrayRef)attributeDictionaries, CFRangeMake(0, numberOfDictionaries), applyAttributesToString, mas);
