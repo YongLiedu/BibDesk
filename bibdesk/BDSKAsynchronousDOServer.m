@@ -172,10 +172,10 @@
 
 - (void)stopDOServer;
 {
-    // we're in the main thread, so set the stop flag
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags.shouldKeepRunning);
     // this cleans up the connections, ports and proxies on both sides
     [serverOnServerThread cleanup];
+    // we're in the main thread, so set the stop flag
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags.shouldKeepRunning);
     
     // clean up the connection in the main thread; don't invalidate the ports, since they're still in use
     [mainThreadConnection setRootObject:nil];
