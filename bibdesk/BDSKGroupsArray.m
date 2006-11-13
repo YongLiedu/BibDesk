@@ -583,10 +583,7 @@
         @try {
             name = [[groupDict objectForKey:@"group name"] stringByUnescapingGroupPlistEntities];
             path = [[groupDict objectForKey:@"script path"] stringByUnescapingGroupPlistEntities];
-            arguments = [groupDict objectForKey:@"script arguments"];
-            if ([arguments isKindOfClass:[NSArray class]]) // legacy
-                arguments = [(NSArray *)arguments componentsJoinedByString:@" "];
-            arguments = [arguments stringByUnescapingGroupPlistEntities];
+            arguments = [[groupDict objectForKey:@"script arguments"] stringByUnescapingGroupPlistEntities];
             type = [[groupDict objectForKey:@"script type"] intValue];
             group = [[BDSKScriptGroup alloc] initWithName:name scriptPath:path scriptArguments:arguments scriptType:type];
             [group setName:[groupDict objectForKey:@"group name"]];
