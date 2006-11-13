@@ -331,9 +331,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 }
 
 - (void)dealloc{
-#if DEBUG
-    NSLog(@"bibdoc dealloc");
-#endif
     [fileSearchController release];
     if ([self undoManager]) {
         [[self undoManager] removeAllActionsWithTarget:self];

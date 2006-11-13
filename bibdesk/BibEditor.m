@@ -129,9 +129,6 @@ static int numberOfOpenEditors = 0;
         forceEndEditing = NO;
         didSetupForm = NO;
     }
-#if DEBUG
-    NSLog(@"BibEditor alloc");
-#endif
     return self;
 }
 
@@ -303,9 +300,6 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)dealloc{
-#if DEBUG
-    NSLog(@"BibEditor dealloc");
-#endif
     numberOfOpenEditors--;
     [publication release];
 	[authorTableView setDelegate:nil];

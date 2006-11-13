@@ -76,9 +76,6 @@
 }
 
 - (void)dealloc{
-#if DEBUG
-    NSLog(@"personcontroller dealloc");
-#endif
     [pubsTableView setDelegate:nil];
     [pubsTableView setDataSource:nil];
     [person setPersonController:nil];
