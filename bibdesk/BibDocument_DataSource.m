@@ -549,7 +549,6 @@
 }
 	
 - (BOOL)writePublications:(NSArray *)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard{
-	NSMutableArray *promisedTypes = [NSMutableArray arrayWithObjects:BDSKBibItemPboardType, nil];
 	NSString *mainType = nil;
 	NSString *string = nil;
 	NSData *data = nil;
