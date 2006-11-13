@@ -2854,10 +2854,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			if([monthValue isComplex])
 				monthValue = [(BDSKStringNode *)[[monthValue nodes] objectAtIndex:0] value];
 			if (!monthValue) monthValue = @"";
-			NSString *dateStr = [NSString stringWithFormat:@"%@-15-%@", monthValue, yearValue];
-            NSDate *date = [[NSDate alloc] initWithMonthDayYearString:dateStr];
-            theDate = [[NSCalendarDate alloc] initWithString:[date description]];
-            [date release];
+            theDate = [[NSCalendarDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-%@", monthValue, yearValue]];
 			[self setDate:theDate];
             [theDate release];
 		}else{

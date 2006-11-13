@@ -87,7 +87,7 @@ static CFDateFormatterRef numericDateFormatter = NULL;
     if(enLocale) CFRelease(enLocale);
 }
     
-- (NSDate *)initWithMonthDayYearString:(NSString *)dateString;
+- (id)initWithMonthDayYearString:(NSString *)dateString;
 {    
    [[self init] release];
     self = nil;
@@ -309,6 +309,17 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     NSCalendarDate *date = [self initWithString:dateString];
 
     return (date != nil ? date : [[NSCalendarDate dateWithNaturalLanguageString:dateString] retain]);
+}
+
+// override this NSDate method so we can return an NSCalendarDate efficiently
+- (NSCalendarDate *)initWithMonthDayYearString:(NSString *)dateString;
+{        
+    NSDate *date = [[NSDate alloc] initWithMonthDayYearString:dateString];
+    NSTimeInterval time = [date timeIntervalSinceReferenceDate];
+    self = [self initWithTimeIntervalSinceReferenceDate:time];
+    [date release];
+    
+    return self;
 }
 
 - (NSString *)dateDescription{

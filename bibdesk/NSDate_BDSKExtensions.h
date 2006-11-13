@@ -57,7 +57,7 @@ enum {
     @param      dateString (description)
     @result     (description)
 */
-- (NSDate *)initWithMonthDayYearString:(NSString *)dateString;
+- (id)initWithMonthDayYearString:(NSString *)dateString;
 + (id)dateWithColloquialString:(NSString *)string;
 
 @end
