@@ -70,6 +70,7 @@
 	NSScanner *scanner = [NSScanner scannerWithString:format];
 	NSString *string, *authSep, *nameSep, *etal, *slash;
 	unsigned int number, numAuth, i, uniqueNumber;
+    int intValue;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSArray *authArray;
 	NSMutableArray *arr;
@@ -442,8 +443,8 @@
                             }
                         }
 						if (![scanner scanUnsignedInt:&number]) number = 0;
-                        i = [pub intValueOfField:string];
-                        string = (i == 0 ? noValue : (i == 1 ? yesValue : mixedValue));
+                        intValue = [pub intValueOfField:string];
+                        string = (intValue == 0 ? noValue : (intValue == 1 ? yesValue : mixedValue));
                         if (number > 0 && [string length] > number) {
                             [parsedStr appendString:[string substringToIndex:number]];
                         } else {
