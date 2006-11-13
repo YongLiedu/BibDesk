@@ -42,7 +42,7 @@
 
 @interface BibDocument (Groups)
 
-- (BOOL)hasAllPublicationsGroupSelected;
+- (BOOL)hasLibraryGroupSelected;
 - (BOOL)hasSharedGroupsSelected;
 - (BOOL)hasURLGroupsSelected;
 - (BOOL)hasScriptGroupsSelected;
@@ -92,7 +92,7 @@
 - (IBAction)removeSelectedGroups:(id)sender;
 - (IBAction)editGroupAction:(id)sender;
 - (IBAction)renameGroupAction:(id)sender;
-- (IBAction)selectAllPublicationsGroup:(id)sender;
+- (IBAction)selectLibraryGroup:(id)sender;
 - (IBAction)changeIntersectGroupsAction:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;

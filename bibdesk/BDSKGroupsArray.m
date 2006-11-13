@@ -60,7 +60,7 @@
 
 - (id)init {
     if(self = [super init]) {
-        allPublicationsGroup = [[BDSKGroup alloc] initWithAllPublications];
+        libraryGroup = [[BDSKGroup alloc] initLibraryGroup];
         lastImportGroup = nil;
         sharedGroups = [[NSMutableArray alloc] init];
         urlGroups = [[NSMutableArray alloc] init];
@@ -74,7 +74,7 @@
 }
 
 - (void)dealloc {
-    [allPublicationsGroup release];
+    [libraryGroup release];
     [lastImportGroup release];
     [sharedGroups release];
     [urlGroups release];
@@ -99,7 +99,7 @@
     [self updateStaticGroupsIfNeeded];
     
     if (index == 0)
-		return allPublicationsGroup;
+		return libraryGroup;
     index -= 1;
     
     if ([lastImportGroup count] != 0) {
@@ -138,8 +138,8 @@
 
 #pragma mark Subarray Accessors
 
-- (BDSKGroup *)allPublicationsGroup{
-    return allPublicationsGroup;
+- (BDSKGroup *)libraryGroup{
+    return libraryGroup;
 }
 
 - (BDSKStaticGroup *)lastImportGroup{

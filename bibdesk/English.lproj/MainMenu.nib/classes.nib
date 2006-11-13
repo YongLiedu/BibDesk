@@ -136,9 +136,9 @@
                 saveAsBDSKDocument = id; 
                 searchByContent = id; 
                 selectAllPublications = id; 
-                selectAllPublicationsGroup = id; 
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
+                selectLibraryGroup = id; 
                 selectPossibleDuplicates = id; 
                 sendToLyX = id; 
                 showDocumentInfoWindow = id; 

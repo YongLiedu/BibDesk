@@ -58,11 +58,11 @@
 - (id)initWithName:(id)aName count:(int)aCount;
 
 /*!
-	@method initWithAllPublications
+	@method initLibraryGroup
 	@abstract Initializes and returns a new Library group. 
 	@discussion -
 */
-- (id)initWithAllPublications;
+- (id)initLibraryGroup;
 
 /*!
 	@method uniqueID

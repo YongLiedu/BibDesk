@@ -867,7 +867,7 @@
     }else if(tv == tableView){
         if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
-		if (draggingSource == groupTableView && docState.dragFromSharedGroups && [self hasAllPublicationsGroupSelected]) {
+		if (draggingSource == groupTableView && docState.dragFromSharedGroups && [self hasLibraryGroupSelected]) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
@@ -959,7 +959,7 @@
             return YES;
             
         }else{
-            [self selectAllPublicationsGroup:nil];
+            [self selectLibraryGroup:nil];
             
             if([type isEqualToString:NSFilenamesPboardType]){
                 NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
@@ -1144,7 +1144,7 @@
 - (void)moveLeft:(id)sender{
     if([documentWindow firstResponder] != groupTableView && [documentWindow makeFirstResponder:groupTableView])
         if([groupTableView numberOfSelectedRows] == 0)
-            [self selectAllPublicationsGroup:nil];
+            [self selectLibraryGroup:nil];
 }
 
 - (void)moveRight:(id)sender{

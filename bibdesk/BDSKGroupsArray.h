@@ -42,7 +42,7 @@
 @class BDSKGroup, BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BibDocument;
 
 @interface BDSKGroupsArray : NSArray {
-    BDSKGroup *allPublicationsGroup;
+    BDSKGroup *libraryGroup;
     BDSKStaticGroup *lastImportGroup;
     NSMutableArray *sharedGroups;
     NSMutableArray *urlGroups;
@@ -76,7 +76,7 @@
 - (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasExternalGroupsAtIndexes:(NSIndexSet *)indexes;
 
-- (BDSKGroup *)allPublicationsGroup;
+- (BDSKGroup *)libraryGroup;
 - (BDSKStaticGroup *)lastImportGroup;
 - (NSArray *)sharedGroups;
 - (NSArray *)URLGroups;

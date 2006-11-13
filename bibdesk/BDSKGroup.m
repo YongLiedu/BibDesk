@@ -39,11 +39,12 @@
 #import "BDSKGroup.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKOwnerProtocol.h"
 #import <OmniBase/OBUtilities.h>
 
 
 // a private subclass for the All Publication group
-@interface BDSKAllPublicationsGroup : BDSKGroup @end
+@interface BDSKLibraryGroup : BDSKGroup @end
 
 
 @implementation BDSKGroup
@@ -56,10 +57,10 @@ static unsigned currentUniqueID = 0;
     return self;
 }
 
-- (id)initWithAllPublications {
+- (id)initLibraryGroup {
 	NSZone *zone = [self zone];
 	[[super init] release];
-	self = [[BDSKAllPublicationsGroup allocWithZone:zone] init];
+	self = [[BDSKLibraryGroup allocWithZone:zone] init];
 	return self;
 }
 
@@ -188,17 +189,17 @@ static unsigned currentUniqueID = 0;
 
 #pragma mark -
 
-@implementation BDSKAllPublicationsGroup
+@implementation BDSKLibraryGroup
 
-static NSString *BDSKAllPublicationsLocalizedString = nil;
+static NSString *BDSKLibraryLocalizedString = nil;
 
 + (void)initialize{
     OBINITIALIZE;
-    BDSKAllPublicationsLocalizedString = [NSLocalizedString(@"Library", @"group name for all pubs") copy];
+    BDSKLibraryLocalizedString = [NSLocalizedString(@"Library", @"group name for library") copy];
 }
 
 - (id)init {
-	self = [super initWithName:BDSKAllPublicationsLocalizedString count:0];
+	self = [super initWithName:BDSKLibraryLocalizedString count:0];
     return self;
 }
 
@@ -210,7 +211,11 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     
 	return image;
 }
- 
+
+- (BOOL)containsItem:(BibItem *)item {
+    return [[item owner] isDocument];
+}
+
 @end
 
 #pragma mark -

@@ -71,7 +71,7 @@
 
 #pragma mark Selected group types
 
-- (BOOL)hasAllPublicationsGroupSelected{
+- (BOOL)hasLibraryGroupSelected{
     return [groupTableView selectedRow] == 0;
 }
 
@@ -310,7 +310,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     // update the count for the first item, not sure if it should be done here
-    [[groups allPublicationsGroup] setCount:[publications count]];
+    [[groups libraryGroup] setCount:[publications count]];
 	
     [groupTableView reloadData];
 	
@@ -328,7 +328,7 @@ The groupedPublications array is a subset of the publications array, developed b
     NSArray *array;
     
     // optimize for single selections
-    if ([selectedGroups count] == 1 && [self hasAllPublicationsGroupSelected]) {
+    if ([selectedGroups count] == 1 && [self hasLibraryGroupSelected]) {
         array = publications;
     } else if ([selectedGroups count] == 1 && ([self hasExternalGroupsSelected] || [self hasStaticGroupsSelected])) {
         unsigned int rowIndex = [[groupTableView selectedRowIndexes] firstIndex];
@@ -899,7 +899,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	
 }
 
-- (IBAction)selectAllPublicationsGroup:(id)sender {
+- (IBAction)selectLibraryGroup:(id)sender {
 	[groupTableView deselectAll:sender];
 }
 
@@ -1008,7 +1008,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     newPubs = [self newPublicationsFromArchivedData:data];
     
-    [self selectAllPublicationsGroup:nil];    
+    [self selectLibraryGroup:nil];    
 	[self addPublications:newPubs];
 	[self selectPublications:newPubs];
     
@@ -1020,7 +1020,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && [group isExternal] == NO && group != [groups allPublicationsGroup] && group != [groups lastImportGroup]);
+	OBASSERT([group isSmart] == NO && [group isExternal] == NO && group != [groups libraryGroup] && group != [groups lastImportGroup]);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
@@ -1074,7 +1074,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
-		if([group isSmart] == YES || [group isExternal] == YES || group == [groups allPublicationsGroup] || group == [groups lastImportGroup])
+		if([group isSmart] == YES || [group isExternal] == YES || group == [groups libraryGroup] || group == [groups lastImportGroup])
 			continue;
 		
 		if (groupName == nil)

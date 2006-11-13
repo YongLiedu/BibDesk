@@ -176,7 +176,7 @@
 - (IBAction)removeSelectedPubs:(id)sender{
 	NSArray *selectedGroups = [self selectedGroups];
 	
-	if([self hasAllPublicationsGroupSelected]){
+	if([self hasLibraryGroupSelected]){
 		[self deleteSelectedPubs:sender];
 	}else{
 		BOOL canRemove = NO;

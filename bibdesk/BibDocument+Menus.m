@@ -731,7 +731,7 @@
     return ([documentWindow isKeyWindow] == YES);
 }
 
-- (BOOL)validateSelectAllPublicationsGroupMenuItem:(NSMenuItem *)menuItem{
+- (BOOL)validateSelectLibraryGroupMenuItem:(NSMenuItem *)menuItem{
     return ([documentWindow isKeyWindow] == YES);
 }
 
@@ -946,8 +946,8 @@
 	else if (act == @selector(deselectAllPublications:)){
         return [self validateDeselectAllPublicationsMenuItem:menuItem];
     }
-	else if (act == @selector(selectAllPublicationsGroup:)){
-        return [self validateSelectAllPublicationsGroupMenuItem:menuItem];
+	else if (act == @selector(selectLibraryGroup:)){
+        return [self validateSelectLibraryGroupMenuItem:menuItem];
     }
 	else if (act == @selector(selectDuplicates:)){
         return [self validateSelectDuplicatesMenuItem:menuItem];
