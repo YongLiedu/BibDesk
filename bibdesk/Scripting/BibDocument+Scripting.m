@@ -39,6 +39,7 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BDSKTeXTask.h"
+#import "BDSKItemPasteboardHelper.h"
 
 /* ssp
 Category on BibDocument to implement a few additional functions needed for scripting
@@ -147,12 +148,13 @@ Getting and setting the selection of the table
 }
 
 
-- (NSTextStorage*) textStorageForBibString:(NSString*) bibString {
-    NSData *data = nil;
-    if([texTask runWithBibTeXString:bibString] && [texTask hasRTFData])
-        data = [texTask RTFData];
+- (NSTextStorage*) textStorageForPublications:(NSArray *)pubs {
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
+    [pboardHelper declareType:NSRTFPboardType dragCopyType:BDSKRTFDragCopyType forItems:pubs forPasteboard:pboard];
+    NSData *data = [pboard dataForType:NSRTFPboardType];
+    [pboardHelper clearPromisedTypesForPasteboard:pboard];
     
-    if(!data) return [[[NSTextStorage alloc] init] autorelease];
+    if(data == nil) return [[[NSTextStorage alloc] init] autorelease];
     	
 	return [[[NSTextStorage alloc] initWithRTF:data documentAttributes:NULL] autorelease];
 }

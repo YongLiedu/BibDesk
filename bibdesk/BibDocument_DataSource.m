@@ -66,6 +66,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKStringParser.h"
 #import "BDSKGroupsArray.h"
+#import "BDSKItemPasteboardHelper.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -552,7 +553,6 @@
 	NSString *mainType = nil;
 	NSString *string = nil;
 	NSData *data = nil;
-    BOOL yn = YES;
 	
 	switch(dragCopyType){
 		case BDSKBibTeXDragCopyType:
@@ -632,89 +632,20 @@
             }while(0);
 	}
     
-	[pboard declareTypes:[NSArray arrayWithObjects:mainType, BDSKBibItemPboardType, nil] owner:self];
+	[pboardHelper declareType:mainType dragCopyType:dragCopyType forItems:pubs forPasteboard:pboard];
 	
-	if([mainType isEqualToString:NSStringPboardType]){
-		if(string == nil) // This should be a LaTeX string. We provide it lazily when needed 
-			[promisedTypes insertObject:NSStringPboardType atIndex:0];
-		else
-			yn = [pboard setString:string forType:NSStringPboardType];
-	}else if(mainType){
-		if(data == nil) // We provide the data lazily when needed 
-			[promisedTypes insertObject:mainType atIndex:0];
-		else
-			yn = [pboard setData:data forType:mainType];
-	}
+    if(string != nil)
+        [pboardHelper setString:string forType:mainType forPasteboard:pboard];
+	else if(data != nil)
+        [pboardHelper setData:data forType:mainType forPasteboard:pboard];
 	
-	[self setPromisedItems:pubs types:promisedTypes dragCopyType:dragCopyType forPasteboard:pboard];
+	//[self setPromisedItems:pubs types:promisedTypes dragCopyType:dragCopyType forPasteboard:pboard];
 
-    return yn;
+    return YES;
 }
 
 - (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation{
-	[self clearPromisedTypesForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
-}
-
-// we generate PDF, RTF and archived items data only when they are dropped or pasted
-- (void)pasteboard:(NSPasteboard *)pboard provideDataForType:(NSString *)type{
-	NSArray *items = [self promisedItemsForPasteboard:pboard];
-	
-	if(items != nil){
-		if([type isEqualToString:NSPDFPboardType]){
-			NSString *bibString = [self previewBibTeXStringForPublications:items];
-			if(bibString != nil && 
-			   [texTask runWithBibTeXString:bibString generatedTypes:BDSKGeneratePDF] && 
-			   [texTask hasPDFData]){
-				[pboard setData:[texTask PDFData] forType:NSPDFPboardType];
-			}else{
-				[pboard setData:nil forType:NSPDFPboardType];
-				NSBeep();
-			}
-		}else if([type isEqualToString:NSRTFPboardType]){
-			NSString *bibString = [self previewBibTeXStringForPublications:items];
-			if(bibString != nil && 
-			   [texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateRTF] && 
-			   [texTask hasRTFData]){
-				[pboard setData:[texTask RTFData] forType:NSRTFPboardType];
-			}else{
-				[pboard setData:nil forType:NSRTFPboardType];
-				NSBeep();
-			}
-		}else if([type isEqualToString:NSStringPboardType]){
-			// this must be LaTeX or amsrefs LTB
-			NSString *bibString = [self previewBibTeXStringForPublications:items];
-			int dragCopyType = [self promisedDragCopyTypeForPasteboard:pboard];
-			if(dragCopyType == BDSKLTBDragCopyType){
-				if(bibString != nil && 
-				   [texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateLTB] && 
-				   [texTask hasLTB]){
-					[pboard setString:[texTask LTBString] forType:NSStringPboardType];
-				}else{
-                    [pboard setData:nil forType:NSStringPboardType];
-					NSBeep();
-				}
-			}else{
-				if(bibString != nil && 
-				   [texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateLaTeX] && 
-				   [texTask hasLaTeX]){
-					[pboard setString:[texTask LaTeXString] forType:NSStringPboardType];
-				}else{
-                    [pboard setData:nil forType:NSStringPboardType];
-					NSBeep();
-				}
-			}
-		}else if([type isEqualToString:BDSKBibItemPboardType]){
-            NSMutableData *data = [NSMutableData data];
-            NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-            
-            [archiver encodeObject:items forKey:@"publications"];
-            [archiver finishEncoding];
-            [archiver release];
-			
-            [pboard setData:data forType:BDSKBibItemPboardType];
-		}
-	}
-	[self removePromisedType:type forPasteboard:pboard];
+	[pboardHelper clearPromisedTypesForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
 }
 
 - (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
@@ -732,7 +663,7 @@
     
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
     NSString *dragType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, NSFilesPromisePboardType, NSPDFPboardType, NSRTFPboardType, NSStringPboardType, nil]];
-	NSArray *promisedDraggedItems = [self promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+	NSArray *promisedDraggedItems = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
 	int dragCopyType = -1;
 	int count = 0;
     BOOL inside = NO;
@@ -1015,7 +946,7 @@
         } else if(draggingSource == tableView){
             // we already have these publications, so we just want to add them to the group, not the document
             
-			pubs = [self promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
         } else {
             if([self addPublicationsFromPasteboard:pboard error:NULL] == NO)
                 return NO;
@@ -1157,63 +1088,6 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
     } else if([documentWindow firstResponder] == tableView)
         [self editPubCmd:nil];
-}
-
-#pragma mark -
-#pragma mark Lazy Pasteboard
-
-- (void)setPromisedItems:(NSArray *)items types:(NSArray *)types dragCopyType:(int)dragCopyType forPasteboard:(NSPasteboard *)pboard {
-	NSString *dict = [NSDictionary dictionaryWithObjectsAndKeys:items, @"items", [[types mutableCopy] autorelease], @"types", [NSNumber numberWithInt:dragCopyType], @"dragCopyType", nil];
-	[promisedPboardTypes setObject:dict forKey:[pboard name]];
-}
-
-- (NSArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard {
-	return [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"types"];
-}
-
-- (NSArray *)promisedItemsForPasteboard:(NSPasteboard *)pboard {
-	return [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"items"];
-}
-
-- (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard {
-	return [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] intValue];
-}
-
-- (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard {
-	NSMutableArray *types = [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"types"];
-	[types removeObject:type];
-	if([types count] == 0)
-		[self clearPromisedTypesForPasteboard:pboard];
-}
-
-- (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard {
-	[promisedPboardTypes removeObjectForKey:[pboard name]];
-}
-
-- (void)providePromisedTypesForPasteboard:(NSPasteboard *)pboard {
-	NSArray *types = [[self promisedTypesForPasteboard:pboard] copy]; // we need to copy as types can be removed
-	NSEnumerator *typeEnum = nil;
-	NSString *type;
-	
-	if (types == nil) return;
-	typeEnum = [types objectEnumerator];
-	[types release];
-	
-	while (type = [typeEnum nextObject]) 
-		[self pasteboard:pboard provideDataForType:type];
-}
-
-- (void)providePromisedTypes {
-	NSEnumerator *nameEnum = [[promisedPboardTypes allKeys] objectEnumerator];
-	NSString *name;
-    
-	while (name = [nameEnum nextObject])
-        [self providePromisedTypesForPasteboard:[NSPasteboard pasteboardWithName:name]];
-}
-
-// NSPasteboard delegate method for the owner
-- (void)pasteboardChangedOwner:(NSPasteboard *)pboard {
-	[self clearPromisedTypesForPasteboard:pboard];
 }
 
 #pragma mark -

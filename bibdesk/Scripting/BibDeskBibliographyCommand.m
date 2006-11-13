@@ -64,24 +64,21 @@ ssp: 2004-07-11
 	// Determine the document responsible for this
 	NSIndexSpecifier * index = [param objectAtIndex:0];
 	NSScriptObjectSpecifier * parent = [index containerSpecifier];
-	BibDocument * myBib = [parent objectsByEvaluatingSpecifier];
-	NSLog([myBib description]);
-	if (!myBib) return nil;
+	BibDocument *doc = [parent objectsByEvaluatingSpecifier];
+	//NSLog([doc description]);
+	if (doc == nil) return nil;
 	
 	// run through the array
 	NSEnumerator *e = [(NSArray*)param objectEnumerator];
-	NSArray * thePubs = [myBib publications];
+	NSArray *allPubs = [doc publications];
     NSIndexSpecifier *i;
-	int  n ;
-	NSMutableString *bibString = [NSMutableString string];
+	NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[allPubs count]];
 	
-	while (i = [e nextObject]) {
-		n = [i index];
-		[bibString appendString:[[thePubs objectAtIndex:n] bibTeXString]];
-	}
+	while (i = [e nextObject])
+		[pubs addObject:[allPubs objectAtIndex:[i index]]];
 	
 	// make RTF and return it.
-	NSTextStorage * ts = [myBib textStorageForBibString:bibString];
+	NSTextStorage * ts = [doc textStorageForPublications:pubs];
 	
 	return ts;
 }

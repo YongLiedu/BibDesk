@@ -50,6 +50,6 @@
 - (NSArray*) selection;
 - (void) setSelection: (NSArray*) newSelection;
 
-- (NSTextStorage*) textStorageForBibString:(NSString*) bibString;
+- (NSTextStorage*) textStorageForPublications:(NSArray *)pubs;
 
 @end

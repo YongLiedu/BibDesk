@@ -68,7 +68,7 @@
 #import "BDSKPreviewer.h"
 #import "BDSKOverlay.h"
 
-#import "BDSKTeXTask.h"
+#import "BDSKItemPasteboardHelper.h"
 #import "BDSKMainTableView.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
@@ -168,16 +168,14 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
             quickSearchKey = [BDSKTitleString copy];
         }
 		
-		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
-		[texTask setDelegate:self];
-        
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
         [self setUndoManager:newUndoManager];
 		
-		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
+        pboardHelper = [[BDSKItemPasteboardHelper alloc] init];
+        [pboardHelper setDelegate:self];
         
         docState.isDocumentClosed = NO;
         
@@ -339,6 +337,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [OFPreference removeObserver:self forPreference:nil];
+    [pboardHelper release];
     [macroResolver release];
     [publications release];
     [shownPublications release];
@@ -353,13 +352,11 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 	[splitView release];
     [[previewTextView enclosingScrollView] release];
     [previewer release];
-	[texTask release];
     [macroWC release];
     [infoWC release];
     [promiseDragColumnIdentifier release];
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
-	[promisedPboardTypes release];
     [sharedGroupSpinners release];
     [super dealloc];
 }
@@ -641,8 +638,8 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
        [tableView selectedRow] != -1 )
         [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 	
-	[self providePromisedTypes];
-	
+	[pboardHelper absolveDelegateResponsibility];
+    
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -1412,16 +1409,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
-	NSString *bibString = [self previewBibTeXStringForPublications:items];
-	if(bibString == nil || 
-	   [texTask runWithBibTeXString:bibString generatedTypes:BDSKGenerateLTB] == NO || 
-	   [texTask hasLTB] == NO) {
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
+    [pboardHelper declareType:NSStringPboardType dragCopyType:BDSKLTBDragCopyType forItems:items forPasteboard:pboard];
+    NSString *ltbString = [pboard stringForType:NSStringPboardType];
+    [pboardHelper clearPromisedTypesForPasteboard:pboard];
+	if(ltbString == nil){
         if (error) OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to run TeX processes for these publications", @""), nil);
 		return nil;
     }
     
     NSMutableString *s = [NSMutableString stringWithString:@"\\documentclass{article}\n\\usepackage{amsrefs}\n\\begin{document}\n\n"];
-	[s appendString:[texTask LTBString]];
+	[s appendString:ltbString];
 	[s appendString:@"\n\\end{document}\n"];
     
     NSData *data = [s dataUsingEncoding:encoding allowLossyConversion:NO];
@@ -2900,17 +2898,20 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 #pragma mark -
-#pragma mark TeXTask delegate
+#pragma mark BDSKItemPasteboardHelper delegate
 
-- (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)aTexTask{
+- (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)helper{
 	[self setStatus:[NSLocalizedString(@"Generating data. Please wait", @"Generating data. Please wait...") stringByAppendingEllipsis]];
 	[statusBar startAnimation:nil];
-	return YES;
 }
 
-- (void)texTask:(BDSKTeXTask *)aTexTask finishedWithResult:(BOOL)success{
+- (void)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)helper{
 	[statusBar stopAnimation:nil];
 	[self updateUI];
+}
+
+- (NSString *)pasteboardHelper:(BDSKItemPasteboardHelper *)pboardHelper bibTeXStringForItems:(NSArray *)items{
+    return [self previewBibTeXStringForPublications:items];
 }
 
 #pragma mark -

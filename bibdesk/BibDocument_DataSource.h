@@ -35,25 +35,15 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
-@class BibAuthor;
 
 /*! @category  BibDocument(DataSource)
 @discussion Additions to BibDocument for handling table views.
 */
 @interface BibDocument (DataSource)
+
 - (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
 - (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
 - (NSString *)promiseDragColumnIdentifier;
 - (NSDictionary *)currentTableColumnWidthsAndIdentifiers;
-
-- (void)setPromisedItems:(NSArray *)items types:(NSArray *)types dragCopyType:(int)dragCopyType forPasteboard:(NSPasteboard *)pboard;
-- (NSArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard;
-- (NSArray *)promisedItemsForPasteboard:(NSPasteboard *)pboard;
-- (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard;
-- (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
-- (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard;
-- (void)providePromisedTypesForPasteboard:(NSPasteboard *)pboard;
-- (void)providePromisedTypes;
-- (void)pasteboardChangedOwner:(NSPasteboard *)pboard;
 
 @end

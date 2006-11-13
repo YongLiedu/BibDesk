@@ -43,7 +43,7 @@
 @protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate, BDSKOwner;
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
-@class AGRegex, BDSKTeXTask, BDSKMacroResolver;
+@class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox;
 
@@ -188,9 +188,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	
 #pragma mark Copy & Drag related variables
 
-	BDSKTeXTask *texTask;
     NSString *promiseDragColumnIdentifier;
-	NSMutableDictionary *promisedPboardTypes;
+    BDSKItemPasteboardHelper *pboardHelper;
     
 #pragma mark Scalar state variables
 
