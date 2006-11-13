@@ -51,34 +51,52 @@
     return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
 }
 
-// this may give unexpected results if you have multiple instances of an object in an array; it will return only the lowest index
-- (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
+/* theSelector should be either indexOfObject:inRange: or indexOfObjectIdenticalTo:inRange */
+static inline 
+NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *objectsToFind, SEL theSelector)
 {
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
     unsigned index;
-    NSEnumerator *objEnum = [objects objectEnumerator];
+    NSEnumerator *objEnum = [objectsToFind objectEnumerator];
 	id obj;
+    unsigned count = [arrayToSearch count];
+    
+    NSRange range = NSMakeRange(0, count);
+    
+    typedef unsigned int (*indexIMP)(id, SEL, id, NSRange);
+    indexIMP indexOfObjectInRange = (indexIMP)[arrayToSearch methodForSelector:theSelector];
+    
     while(obj = [objEnum nextObject]){
-        index = [self indexOfObject:obj];
-        if(index != NSNotFound) 
+        
+        // see if we have the first occurrence of this object
+        index = indexOfObjectInRange(arrayToSearch, theSelector, obj, range);
+        
+        while(index != NSNotFound){ 
             [indexes addIndex:index];
+            
+            // shift search range to the right
+            range.location = index + 1;
+            range.length = count - index - 1;
+            
+            // NSArray seems to handle out-of-range here, but we'll be careful anyway
+            index = NSMaxRange(range) < count ? indexOfObjectInRange(arrayToSearch, theSelector, obj, range) : NSNotFound;
+        }
+        
+        // resetting to max range is always valid
+        range.location = 0;
+        range.length = count;
     }
-    return indexes;
+    return indexes;        
 }
 
-// this may give unexpected results if you have multiple instances of an object in an array; it will return only the lowest index
+- (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
+{
+    return __BDIndexesOfObjectsUsingSelector(self, objects, @selector(indexOfObject:inRange:));
+}
+    
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 {
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    unsigned index;
-    NSEnumerator *objEnum = [objects objectEnumerator];
-	id obj;
-    while(obj = [objEnum nextObject]){
-        index = [self indexOfObjectIdenticalTo:obj];
-        if(index != NSNotFound) 
-            [indexes addIndex:index];
-    }
-    return indexes;
+    return __BDIndexesOfObjectsUsingSelector(self, objects, @selector(indexOfObjectIdenticalTo:inRange:));
 }
 
 @end
