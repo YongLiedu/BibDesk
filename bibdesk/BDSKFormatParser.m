@@ -443,7 +443,7 @@
                         }
 						if (![scanner scanUnsignedInt:&number]) number = 0;
                         i = [pub intValueOfField:string];
-                        string = (i == 0 ? noValue : (i > 0 ? yesValue : mixedValue));
+                        string = (i == 0 ? noValue : (i == 1 ? yesValue : mixedValue));
                         if (number > 0 && [string length] > number) {
                             [parsedStr appendString:[string substringToIndex:number]];
                         } else {
