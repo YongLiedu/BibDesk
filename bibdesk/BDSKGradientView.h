@@ -41,7 +41,7 @@
 
 @interface BDSKGradientView : NSView
 {
-    @private;
+    @private
     CIColor *startColor;
     CIColor *endColor;
 }
