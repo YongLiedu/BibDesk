@@ -50,15 +50,23 @@
 		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
 		[texTask setDelegate:self];
         delegate = nil;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:BDSKApplicationWillTerminateNotification object:nil];
     }
     return self;
 }
 
 - (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [texTask terminate];
     [texTask release];
     [promisedPboardTypes release];
     [super dealloc];
+}
+
+- (void)handleApplicationWillTerminateNotification:(NSNotification *)aNotification{
+    // the built-in AppKit variant of this comes too late, when the temporary workingDir of the texTask is already removed
+    [self provideAllPromisedTypes];
 }
 
 - (id)delegate{
@@ -244,7 +252,10 @@
     if(promisedPboardTypes != nil && delegate == nil){
         [promisedPboardTypes release];
         promisedPboardTypes = nil; // this is a sign that we have released ourselves
-        [self performSelector:@selector(release) withObject:nil afterDelay:30.0]; // delay because we might still get a pasteboardChangedOwner:
+        [texTask terminate];
+        [texTask release];
+        texTask = nil;
+        [self performSelector:@selector(release) withObject:nil afterDelay:0.0]; // delay because otherwise we crash
     }
 }
 

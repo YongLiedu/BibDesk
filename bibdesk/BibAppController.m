@@ -299,6 +299,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
+    // this can be observed before the tmpPath is removed (e.g. for delayed pasteboard), as the NS version will come after this method finishes
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKApplicationWillTerminateNotification object:self];
+    
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *tmpDirPath = [self temporaryBaseDirectoryCreating:NO];
 	if(tmpDirPath && [fm fileExistsAtPath:tmpDirPath])

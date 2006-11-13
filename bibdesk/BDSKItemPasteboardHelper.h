@@ -63,6 +63,8 @@
 - (void)provideAllPromisedTypes;
 - (void)absolveResponsibility;
 
+- (void)handleApplicationWillTerminateNotification:(NSNotification *)aNotification;
+
 @end
 
 
