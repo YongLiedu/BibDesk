@@ -489,9 +489,7 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
 
 static inline void
 __BDDeleteCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetRef charSet)
-{
-    OBASSERT([(NSMutableString *)theString isMutableString]);
-    
+{    
     CFStringInlineBuffer inlineBuffer;
     CFIndex length = CFStringGetLength(theString);
     CFIndex cnt = 0;
