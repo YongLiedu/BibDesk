@@ -61,17 +61,30 @@ NSString *BDSKFileContentLocalizedString = nil;
 - (id)initWithFrame:(NSRect)frame {
     if (self = [super initWithFrame:frame]) {
         searchKey = nil;
+        [[self cell] setSearchMenuTemplate:[self searchFieldMenu]];
     }
     return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super initWithCoder:decoder]) {
+        searchKey = [[decoder decodeObjectForKey:@"searchKey"] retain];
+        NSMenu *templateMenu = [self searchFieldMenu];
+        if(searchKey)
+            [[templateMenu itemWithTitle:searchKey] setState:NSOnState];
+        [[self cell] setSearchMenuTemplate:templateMenu];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+	[super encodeWithCoder:encoder];
+	[encoder encodeObject:searchKey forKey:@"searchKey"];
 }
 
 - (void)dealloc{
     [searchKey release];
     [super dealloc];
-}
-
-- (void)awakeFromNib{
-    [[self cell] setSearchMenuTemplate:[self searchFieldMenu]];
 }
 
 - (NSString *)searchKey {
