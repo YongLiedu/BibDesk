@@ -79,6 +79,7 @@
 
 - (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner;
 
+- (void)addNamesForCompletion:(NSArray *)name;
 /*!
 @method addString:forCompletionEntry:
     @abstract 

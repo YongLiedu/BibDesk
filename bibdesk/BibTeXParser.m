@@ -178,7 +178,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                 // Adding a new BibItem
                 tmpStr = copyCheckedString(bt_entry_type(entry), entry->line, filePath, parserEncoding);
                 if (nil == tmpStr) @throw BibTeXParserInternalException;
-                entryType = [tmpStr lowercaseString];
+                entryType = [tmpStr entryType];
                 [tmpStr release];
                 
                 if (bt_entry_metatype (entry) != BTE_REGULAR){
@@ -222,8 +222,9 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                         if (nil == complexString)
                             @throw BibTeXParserInternalException;
                         
-                        // add the expanded values to the autocomplete dictionary
-                        [[NSApp delegate] addString:complexString forCompletionEntry:sFieldName];
+                        // add the expanded values to the autocomplete dictionary; authors are handled elsewhere
+                        if ([sFieldName isPersonField] == NO)
+                            [[NSApp delegate] addString:complexString forCompletionEntry:sFieldName];
                         
                         [dictionary setObject:complexString forKey:sFieldName];
                         [complexString release];
@@ -559,7 +560,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [authors addObject:anAuthor];
         [anAuthor release];
     }
-    
+    [[NSApp delegate] addNamesForCompletion:(NSArray *)names];
 	CFRelease(names);
 	return authors;
 }

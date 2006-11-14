@@ -127,7 +127,7 @@
     if([object isEqualToString:@""])
         [typesArray removeObjectAtIndex:row];
     else
-        [typesArray replaceObjectAtIndex:row withObject:[object lowercaseString]];
+        [typesArray replaceObjectAtIndex:row withObject:[(NSString *)object entryType]];
     [self updateUI];
 }
 

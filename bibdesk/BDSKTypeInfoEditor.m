@@ -473,7 +473,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	if (tv == typeTableView) {
 		oldValue = [types objectAtIndex:row];
-		newValue = [(NSString *)object lowercaseString];
+		newValue = [(NSString *)object entryType];
 		if (![newValue isEqualToString:oldValue] && 
 			![types containsObject:newValue]) {
 			

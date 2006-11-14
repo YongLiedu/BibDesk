@@ -560,7 +560,20 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 #pragma mark Auto-completion stuff
 
+- (void)addNamesForCompletion:(NSArray *)names {
+    NSMutableSet *nameSet = [autoCompletionDict objectForKey:BDSKAuthorString];
+    if (nil == nameSet) {
+        nameSet = [[NSMutableSet alloc] initWithCapacity:500];
+        [autoCompletionDict setObject:nameSet forKey:BDSKAuthorString];
+        [nameSet release];
+    }
+    [nameSet addObjectsFromArray:names];
+}
+
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
+    
+    // ??? there's a check further on that expands complex strings before adding them; one of these should be removed 
+#warning is this still correct?
     // adding complex strings can lead to a crash after the containing document closes, and it is rather meaningless anyway
     if ([string isComplex])
         return;
@@ -572,11 +585,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
 
-	if(BDIsEmptyString((CFStringRef)entry) || [numericFields containsObject:entry] || [typeMan isURLField:entry])	
+	if(BDIsEmptyString((CFStringRef)entry) || [numericFields containsObject:entry] || [typeMan isURLField:entry] || [entry isPersonField])	
 		return;
-	if([entry isEqualToString:BDSKEditorString])	
-		entry = BDSKAuthorString;
-	else if([entry isEqualToString:BDSKBooktitleString])	
+
+    if([entry isEqualToString:BDSKBooktitleString])	
 		entry = BDSKTitleString;
 	
 	NSMutableSet *completionSet = [autoCompletionDict objectForKey:entry];
@@ -595,11 +607,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
     // more efficient for the splitting functions
     if([string isComplex]) string = [NSString stringWithString:string];
-    
-    if([entry isEqualToString:BDSKAuthorString]){
-        [completionSet addObjectsFromArray:[[string componentsSeparatedByString:@" and "] arrayByPerformingSelector:@selector(fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace)]];
-        return;
-    }
     
     NSCharacterSet *acSet = [NSCharacterSet autocompletePunctuationCharacterSet];
     if([string rangeOfCharacterFromSet:acSet].location != NSNotFound){

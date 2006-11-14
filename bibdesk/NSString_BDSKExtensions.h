@@ -146,8 +146,16 @@
 #pragma mark TeX parsing
 
 /*!
+    @method     entryType
+    @abstract   Wrapper around lowercaseString for BibTeX types, caching values.  Note that lowercasing is an implementation detail, and this allows us to change at any time.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)entryType;
+    
+/*!
     @method     fieldName
-    @abstract   Wrapper around capitalizedString that caches them for use as BibTeX fields.
+    @abstract   Wrapper around capitalizedString that caches them for use as BibTeX fields.  Note that capitalizing is an implementation detail, and this allows us to change at any time.
     @discussion (comprehensive description)
     @result     (description)
 */

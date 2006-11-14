@@ -211,6 +211,21 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 #pragma mark TeX parsing
 
+- (NSString *)entryType;
+{
+    // we could save a little memory by using a case-insensitive dictionary, but this is faster (and these strings are small)
+    static NSMutableDictionary *entryDictionary = nil;
+    if (nil == entryDictionary)
+        entryDictionary = [[NSMutableDictionary alloc] initWithCapacity:100];
+    
+    NSString *entryType = [entryDictionary objectForKey:self];
+    if (nil == entryType) {
+        entryType = [self lowercaseString];
+        [entryDictionary setObject:entryType forKey:self];
+    }
+    return entryType;
+}
+
 - (NSString *)fieldName;
 {
     // we could save a little memory by using a case-insensitive dictionary, but this is faster (and these strings are small)

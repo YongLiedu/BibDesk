@@ -74,7 +74,7 @@
     r = [partialString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]];
     if ( r.location != NSNotFound) {
         // this is a BibDesk requirement, since we expect type names to be lowercase
-        *newString = [partialString lowercaseString];
+        *newString = [partialString entryType];
         return NO;
     }
     else return YES;

@@ -2794,7 +2794,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (void)setPubTypeWithoutUndo:(NSString *)newType{
-    newType = [newType lowercaseString];
+    newType = [newType entryType];
     OBASSERT(![NSString isEmptyString:newType]);
 	if(![[self pubType] isEqualToString:newType]){
 		[pubType release];
