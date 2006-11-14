@@ -136,13 +136,12 @@ Getting and setting the selection of the table
 
 
 - (void) setSelection: (NSArray *) newSelection {
-	//NSLog(@"setSelection:");
 	NSEnumerator *itemEnum = [newSelection objectEnumerator];
-	// debugging revealed that we get an array of NSIndexspecifiers and not of BibItem
+	// debugging revealed that we get an array of NSIndexSpecifiers and not of BibItem
+    // the index is relative to all the publications the document (AS container), not the shownPublications
 	NSIndexSpecifier *item;
 	NSMutableArray *pubsToSelect = [NSMutableArray arrayWithCapacity:[newSelection count]];
 	
-#warning should use shownPublications?
 	while (item = [itemEnum nextObject])
 		[pubsToSelect addObject:[publications objectAtIndex:[item index]]];
 	[self selectPublications:pubsToSelect];
