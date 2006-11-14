@@ -609,6 +609,10 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     return [super undoManager];
 }
 
+- (BOOL)isCurrentDocument {
+    return [[[NSDocumentController sharedDocumentController] currentDocument] isEqual:self];
+}
+
 - (void)windowWillClose:(NSNotification *)notification{
     docState.isDocumentClosed = YES;
     
@@ -620,7 +624,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
        [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-       [[NSDocumentController sharedDocumentController] currentDocument] == self &&
+       [self isCurrentDocument] &&
        [tableView selectedRow] != -1 )
         [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 	
@@ -2164,7 +2168,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self updatePreviews:nil];
     else if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
             [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-            [[NSDocumentController sharedDocumentController] currentDocument] == self)
+            [self isCurrentDocument])
         [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
 }
 
@@ -2303,7 +2307,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
 	   [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-       [[NSDocumentController sharedDocumentController] currentDocument] == self)
+       [self isCurrentDocument])
         [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
 }
 
