@@ -884,10 +884,6 @@
 	else if (act == @selector(printDocument:)) {
 		return [self validatePrintDocumentMenuItem:menuItem];
 	}
-#warning now private in tableview
-	else if (act == @selector(columnsMenuSelectTableColumn:)) {
-		return ([[menuItem menu] numberOfItems] > 3);
-	}
 	else if (act == @selector(toggleStatusBar:)) {
 		return [self validateToggleStatusBarMenuItem:menuItem];
 	}

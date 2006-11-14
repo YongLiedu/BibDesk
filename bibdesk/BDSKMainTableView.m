@@ -448,4 +448,14 @@
 	}
 }
 
+- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem{
+	SEL action = [menuItem action];
+	if (action == @selector(columnsMenuSelectTableColumn:))
+		return ([self numberOfColumns] > 1);
+	else if (action == @selector(columnsMenuAddTableColumn:))
+        return YES;
+	else
+        return [super validateMenuItem:menuItem];
+}
+
 @end
