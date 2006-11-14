@@ -567,33 +567,27 @@
 		case BDSKPDFDragCopyType:
 			mainType = NSPDFPboardType;
 			if([pubs isEqualToArray:[self selectedPublications]]){
-			   if([previewer isVisible])
-                    // we are copying, and the previewer is showing, so we reuse it's PDF data if available
-                    data = [previewer PDFData];
-			   if(data == nil && [[BDSKPreviewer sharedPreviewer] isVisible])
-                    // we are copying, and the previewer is showing, so we reuse it's PDF data if available
+                // reuse the PDF data from a previewer if available
+                data = [previewer PDFData];
+                if(data == nil && [[NSDocumentController sharedDocumentController] currentDocument] == self)
                     data = [[BDSKPreviewer sharedPreviewer] PDFData];
 			}
 			break;
 		case BDSKRTFDragCopyType:
 			mainType = NSRTFPboardType;
 			if([pubs isEqualToArray:[self selectedPublications]]){
-			   if([previewer isVisible])
-                    // we are copying, and the previewer is showing, so we reuse it's RTF data if available
-                    data = [previewer RTFData];
-			   if(data == nil && [[BDSKPreviewer sharedPreviewer] isVisible])
-                    // we are copying, and the previewer is showing, so we reuse it's RTF data if available
+                // reuse the RTF data from a previewer if available
+                data = [previewer RTFData];
+                if(data == nil && [[NSDocumentController sharedDocumentController] currentDocument] == self)
                     data = [[BDSKPreviewer sharedPreviewer] RTFData];
 			}
 			break;
 		case BDSKLaTeXDragCopyType:
 			mainType = NSStringPboardType;
 			if([pubs isEqualToArray:[self selectedPublications]]){
-			   if([previewer isVisible])
-                    // we are copying, and the previewer is showing, so we reuse it's LaTeX string if available
-                    string = [previewer LaTeXString];
-			   if(string == nil && [[BDSKPreviewer sharedPreviewer] isVisible])
-                    // we are copying, and the previewer is showing, so we reuse it's LaTeX string if available
+                // reuse the LaTeX string from a previewer if available
+                string = [previewer LaTeXString];
+                if(string == nil && [[NSDocumentController sharedDocumentController] currentDocument] == self)
                     string = [[BDSKPreviewer sharedPreviewer] LaTeXString];
 			}
 			break;
@@ -637,8 +631,6 @@
         [pboardHelper setString:string forType:mainType forPasteboard:pboard];
 	else if(data != nil)
         [pboardHelper setData:data forType:mainType forPasteboard:pboard];
-	
-	//[self setPromisedItems:pubs types:promisedTypes dragCopyType:dragCopyType forPasteboard:pboard];
 
     return YES;
 }
