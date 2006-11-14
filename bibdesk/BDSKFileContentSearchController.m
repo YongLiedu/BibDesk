@@ -238,6 +238,14 @@
         [stopButton setEnabled:YES];
         // set before starting the search, or we can end up updating with it == YES
         canceledSearch = NO;
+        
+        // may be hidden if we called restoreDocumentState while indexing
+        if ([searchIndex isIndexing] && [progressView isHiddenOrHasHiddenAncestor]) {
+            [progressView setHidden:NO];
+            // setHidden:NO doesn't seem to apply to subviews
+            [indexProgressBar setHidden:NO];
+        }
+        
         [search searchForString:[searchField stringValue] withOptions:kSKSearchOptionDefault];
     }
 }
@@ -249,6 +257,9 @@
     
     // disconnect the searchfield
     [self setSearchField:nil];
+    
+    // hide this so it doesn't flash during the transition
+    [progressView setHidden:YES];
     
     [[self document] restoreDocumentStateByRemovingSearchView:[self searchContentView]];
 }
