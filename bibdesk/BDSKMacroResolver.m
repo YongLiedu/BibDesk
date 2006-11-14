@@ -147,7 +147,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     if ([macroDef isComplex] == NO) 
         return NO;
     
-    OBASSERT([(BDSKComplexString *)macroDef macroResolver] == self);
+    OBASSERT([[(BDSKComplexString *)macroDef macroResolver] isEqual:self]);
     
     NSEnumerator *nodeE = [[macroDef nodes] objectEnumerator];
     BDSKStringNode *node;

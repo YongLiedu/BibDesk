@@ -203,13 +203,13 @@
 }
 
 - (BOOL)validatePasteMenuItem:(NSMenuItem *)menuItem{
-	return ([documentWindow isKeyWindow] == YES && [documentWindow firstResponder] == tableView);
+	return ([documentWindow isKeyWindow] == YES && [[documentWindow firstResponder] isEqual:tableView]);
 }
 
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	if ([documentWindow firstResponder] != tableView ||
+	if ([[documentWindow firstResponder] isEqual:tableView] == NO ||
 		[self numberOfSelectedPubs] == 0 ||
         [self hasExternalGroupsSelected] == YES)
 		return NO;

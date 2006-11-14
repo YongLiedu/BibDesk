@@ -827,7 +827,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		if ([group isSmart] == YES) {
 			[groups removeSmartGroup:(BDSKSmartGroup *)group];
 			count++;
-		} else if ([group isStatic] == YES && group != [groups lastImportGroup]) {
+		} else if ([group isStatic] == YES && [group isEqual:[groups lastImportGroup]] == NO) {
 			[groups removeStaticGroup:(BDSKStaticGroup *)group];
 			count++;
 		} else if ([group isURL] == YES) {
@@ -1020,7 +1020,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && [group isExternal] == NO && group != [groups libraryGroup] && group != [groups lastImportGroup]);
+	OBASSERT([group isSmart] == NO && [group isExternal] == NO && [group isEqual:[groups libraryGroup]] == NO && [group isEqual:[groups lastImportGroup]] == NO);
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];

@@ -317,7 +317,7 @@
 	NSWindowController *wc;
 	
 	while(wc = [wcEnum nextObject]){
-		if([wc isKindOfClass:[BibEditor class]] && [(BibEditor*)wc publication] == pub){
+		if([wc isKindOfClass:[BibEditor class]] && [[(BibEditor*)wc publication] isEqual:pub]){
 			e = (BibEditor*)wc;
 			break;
 		}

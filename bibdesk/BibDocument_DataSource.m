@@ -291,7 +291,7 @@
     if (row == -1) return;
     if (tv == tableView) {
         if ([aCell isKindOfClass:[NSButtonCell class]]) {
-            if ([[shownPublications objectAtIndex:row] owner] == self) 
+            if ([[[shownPublications objectAtIndex:row] owner] isEqual:self]) 
                 [aCell setEnabled:YES];
             else
                 [aCell setEnabled:NO];
@@ -656,7 +656,7 @@
 			if([pubs isEqualToArray:[self selectedPublications]]){
                 // reuse the PDF data from a previewer if available
                 data = [previewer PDFData];
-                if(data == nil && [[NSDocumentController sharedDocumentController] currentDocument] == self)
+                if(data == nil && [self isCurrentDocument])
                     data = [[BDSKPreviewer sharedPreviewer] PDFData];
 			}
 			break;
@@ -665,7 +665,7 @@
 			if([pubs isEqualToArray:[self selectedPublications]]){
                 // reuse the RTF data from a previewer if available
                 data = [previewer RTFData];
-                if(data == nil && [[NSDocumentController sharedDocumentController] currentDocument] == self)
+                if(data == nil && [self isCurrentDocument])
                     data = [[BDSKPreviewer sharedPreviewer] RTFData];
 			}
 			break;
@@ -674,7 +674,7 @@
 			if([pubs isEqualToArray:[self selectedPublications]]){
                 // reuse the LaTeX string from a previewer if available
                 string = [previewer LaTeXString];
-                if(string == nil && [[NSDocumentController sharedDocumentController] currentDocument] == self)
+                if(string == nil && [self isCurrentDocument])
                     string = [[BDSKPreviewer sharedPreviewer] LaTeXString];
 			}
 			break;

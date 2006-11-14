@@ -382,7 +382,7 @@ static BibFiler *sharedFiler = nil;
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    if ([notification object] == window) {
+    if ([[notification object] isEqual:window]) {
         [[self mutableArrayValueForKey:@"errorInfoDicts"] removeAllObjects];
         [tv reloadData]; // this is necessary to avoid an exception
         [document release];

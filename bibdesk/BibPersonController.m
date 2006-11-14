@@ -288,7 +288,7 @@
     if(isEditable == NO)
         return NO;
     
-    if ([sender draggingSource] == view)
+    if ([[sender draggingSource] isEqual:view])
 		return NSDragOperationNone;
 	
 	NSPasteboard *pboard = [sender draggingPasteboard];

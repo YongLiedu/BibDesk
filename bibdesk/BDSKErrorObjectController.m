@@ -295,7 +295,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     while (index--) {
         manager = [managers objectAtIndex:index];
-        if([manager sourceDocument] == document){
+        if([[manager sourceDocument] isEqual:document]){
             [manager setSourceDocument:nil];
             [manager removeClosedEditors];
         }
@@ -327,7 +327,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     while (index--) {
 		errObj = [self objectInErrorsAtIndex:index];
-        if ([errObj editor] == editor) {
+        if ([[errObj editor] isEqual:editor]) {
             [self removeObjectFromErrorsAtIndex:index];
     	}
     }

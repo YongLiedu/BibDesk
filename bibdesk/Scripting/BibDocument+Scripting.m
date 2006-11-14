@@ -40,15 +40,10 @@
 #import "BibItem.h"
 #import "BDSKTeXTask.h"
 #import "BDSKItemPasteboardHelper.h"
+#import "BDSKOwnerProtocol.h"
 
-/* ssp
-Category on BibDocument to implement a few additional functions needed for scripting
-*/
 @implementation BibDocument (Scripting)
 
-/* cmh: 2004-1-28
-Scripting Key-Value coding methods to access publications
-*/
 - (BibItem *)valueInPublicationsAtIndex:(unsigned int)index {
     return [publications objectAtIndex:index];
 }
@@ -68,10 +63,6 @@ Scripting Key-Value coding methods to access publications
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-
-/* ssp: 2004-08-03
-Scripting Key-Value coding method to access an author by his name
-*/
 - (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
@@ -107,21 +98,10 @@ Scripting Key-Value coding method to access an author by his name
 	return nil;
 }
 
-
-
-/* ssp: 2004-07-22
-Getting the displayed publications.
-*/
 - (NSArray*) displayedPublications {
 	return shownPublications;
 }
 
-
-
-
-/* ssp: 2004-07-11
-Getting and setting the selection of the table
-*/
 - (NSArray*) selection { 
     NSMutableArray *selection = [NSMutableArray arrayWithCapacity:[self numberOfSelectedPubs]];
     NSEnumerator *pubE = [[self selectedPublications] objectEnumerator];
@@ -129,11 +109,10 @@ Getting and setting the selection of the table
     
     // only items belonging to the document can be accessed through AppleScript
     // items from external groups have no scriptable container, and AppleScript accesses properties of the document
-    while ((pub = [pubE nextObject]) && ([pub owner] == self)) 
+    while ((pub = [pubE nextObject]) && ([[pub owner] isEqual:self])) 
         [selection addObject:pub];
     return selection;
 }
-
 
 - (void) setSelection: (NSArray *) newSelection {
 	NSEnumerator *itemEnum = [newSelection objectEnumerator];
@@ -146,7 +125,6 @@ Getting and setting the selection of the table
 		[pubsToSelect addObject:[publications objectAtIndex:[item index]]];
 	[self selectPublications:pubsToSelect];
 }
-
 
 - (NSTextStorage*) textStorageForPublications:(NSArray *)pubs {
     NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];

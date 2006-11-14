@@ -312,7 +312,7 @@
 	
 	if ([controlView isKindOfClass:[NSTableView class]]) {
 		NSTableView *tv = (NSTableView *)controlView;
-		if ([[tv window] isKeyWindow] && [[tv window] firstResponder] == tv && [tv isRowSelected:[tv rowAtPoint:cellFrame.origin]]) {
+		if ([[tv window] isKeyWindow] && [[[tv window] firstResponder] isEqual:tv] && [tv isRowSelected:[tv rowAtPoint:cellFrame.origin]]) {
 			color = ([self isEnabled]) ? [NSColor whiteColor] : [NSColor lightGrayColor];
 			selected = YES;
 		}

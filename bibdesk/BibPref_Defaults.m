@@ -361,7 +361,7 @@ enum {
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-    if ([aNotification object] == defaultFieldsTableView) {
+    if ([[aNotification object] isEqual:defaultFieldsTableView]) {
         int row = [defaultFieldsTableView selectedRow];
         if(row == -1){
             [delSelectedDefaultFieldButton setEnabled:NO];

@@ -150,7 +150,7 @@
 	OBASSERT(contentView != nil);
 	
 	if ([self superview]) {
-		OBASSERT([self superview] == contentView);
+		OBASSERT([[self superview] isEqual:contentView]);
 		viewFrame.size.height += shiftHeight;
 		if ([contentView isFlipped] == NO)
 			viewFrame.origin.y -= shiftHeight;

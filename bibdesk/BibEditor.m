@@ -2848,7 +2848,7 @@ static int numberOfOpenEditors = 0;
     NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:lurl];
 
-	if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
+	if ([[documentSnoopDrawer contentView] isEqual:pdfSnoopContainerView]) {
 
 		if (!lurl || pdfSnoopViewLoaded) return;
 
@@ -2902,7 +2902,7 @@ static int numberOfOpenEditors = 0;
         [pdfDocument release];
         pdfSnoopViewLoaded = YES;
 	}
-	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
+	else if ([[documentSnoopDrawer contentView] isEqual:textSnoopContainerView]) {
 		NSMutableString *path = [[[lurl path] mutableCopy] autorelease];
         
         if([NSString isEmptyString:path] == NO && [theUTI isEqualToUTI:(NSString *)kUTTypePDF]){
@@ -2920,7 +2920,7 @@ static int numberOfOpenEditors = 0;
             [documentSnoopTextView setString:NSLocalizedString(@"This entry does not have a Local-Url.", @"")];
         }
 	}
-	else if ([documentSnoopDrawer contentView] == webSnoopContainerView) {
+	else if ([[documentSnoopDrawer contentView] isEqual:webSnoopContainerView]) {
 		if (!webSnoopViewLoaded) {
 			NSURL *rurl = [publication remoteURL];
 			if (rurl == nil) return;
@@ -3422,7 +3422,7 @@ static int numberOfOpenEditors = 0;
 	int editedRow = -1;
 	int editedColumn = -1;
 	NSRange selection;
-	if([firstResponder isKindOfClass:[NSText class]] && [(NSText *)firstResponder delegate] == bibFields){
+	if([firstResponder isKindOfClass:[NSText class]] && [[(NSText *)firstResponder delegate] isEqual:bibFields]){
 		fieldEditor = (NSText *)firstResponder;
 		selection = [fieldEditor selectedRange];
 		editedTitle = [(NSFormCell *)[bibFields selectedCell] title];
@@ -3614,7 +3614,7 @@ static int numberOfOpenEditors = 0;
 		[viewRemoteButton setIconImage:icon];
         [viewRemoteButton setIconActionEnabled:YES];
         [viewRemoteToolbarItem setToolTip:rurl];
-		if([documentSnoopDrawer contentView] == webSnoopContainerView)
+		if([[documentSnoopDrawer contentView] isEqual:webSnoopContainerView])
 			drawerShouldReopen = drawerWasOpen;
     }else{
         [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];

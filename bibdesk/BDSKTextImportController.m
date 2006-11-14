@@ -1402,9 +1402,9 @@
 // @@ should we do some more error chacking for valid entries and cite keys, as well as showing warnings for formatter errors?
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification {
-	if([aNotification object] == itemTableView){
+	if([[aNotification object] isEqual:itemTableView]){
 		[tableCellFormatter setEditAsComplexString:NO];
-	}else if([aNotification object] == citeKeyField){
+	}else if([[aNotification object] isEqual:citeKeyField]){
         [item setCiteKey:[citeKeyField stringValue]];
         [[item undoManager] setActionName:NSLocalizedString(@"Edit Cite Key",@"")];
         [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];

@@ -521,7 +521,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
 	if ([self canEditTableView:tv row:row]) {
 		[cell setTextColor:[NSColor controlTextColor]]; // when selected, this is automatically changed to white
-	} else if ([[self window] isKeyWindow] && [[self window] firstResponder] == tv && [tv isRowSelected:row]) {
+	} else if ([[self window] isKeyWindow] && [[[self window] firstResponder] isEqual:tv] && [tv isRowSelected:row]) {
 		[cell setTextColor:[NSColor lightGrayColor]]; // selected disabled
 	} else {
 		[cell setTextColor:[NSColor darkGrayColor]]; // unselected disabled

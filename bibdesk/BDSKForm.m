@@ -132,7 +132,7 @@
 		while (keepOn) {
 			theEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
 			mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-			isInside = ([self cellForButtonAtPoint:mouseLoc] == cell);
+			isInside = ([[self cellForButtonAtPoint:mouseLoc] isEqual:cell]);
 			switch ([theEvent type]) {
 				case NSLeftMouseDragged:
 					[cell setButtonHighlighted:isInside];

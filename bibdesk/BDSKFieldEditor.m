@@ -156,7 +156,7 @@
 static inline BOOL completionWindowIsVisibleForTextView(NSTextView *textView)
 {
     BDSKTextViewCompletionController *controller = [BDSKTextViewCompletionController sharedController];
-    return ([[controller completionWindow] isVisible] && [controller currentTextView] == textView);
+    return ([[controller completionWindow] isVisible] && [[controller currentTextView] isEqual:textView]);
 }
 
 static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextView *textView)

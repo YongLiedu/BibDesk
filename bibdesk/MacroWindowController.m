@@ -302,7 +302,7 @@
 #pragma mark NSControl text delegate
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification {
-	if ([aNotification object] == tableView)
+	if ([[aNotification object] isEqual:tableView])
 		[tableCellFormatter setEditAsComplexString:NO];
 }
 
@@ -441,7 +441,7 @@
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
     if ([info draggingSource]) {
-        if([info draggingSource] == tableView)
+        if([[info draggingSource] isEqual:tableView])
         {
             // can't copy onto same table
             return NSDragOperationNone;

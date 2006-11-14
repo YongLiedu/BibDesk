@@ -128,7 +128,7 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-    if ([aNotification object] == searchTextForm) {
+    if ([[aNotification object] isEqual:searchTextForm]) {
         // validate the search string as a regex
         AGRegex *regex = [AGRegex regexWithPattern:[[searchTextForm cellAtIndex:0] stringValue]];
         if (regex == nil) {
