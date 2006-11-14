@@ -199,10 +199,10 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                     field = NULL;
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
-                        //Get fieldname as a capitalized NSString
+                        // Get fieldname as a capitalized NSString
                         tmpStr = copyCheckedString(fieldname, field->line, filePath, parserEncoding);
                         if (nil == tmpStr) @throw BibTeXParserInternalException;
-                        sFieldName = [tmpStr capitalizedString];
+                        sFieldName = [tmpStr fieldName];
                         [tmpStr release];
                         
                         // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.

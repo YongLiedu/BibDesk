@@ -186,7 +186,7 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
         key = BDSKNumberString;
 	else
         key = [[BibTypeManager sharedManager] fieldNameForPubMedTag:tag];
-	if(key == nil) key = [tag capitalizedString];
+	if(key == nil) key = [tag fieldName];
 	oldString = [pubDict objectForKey:key];
 	
 	BOOL isAuthor = [key isPersonField];
@@ -215,7 +215,7 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
             newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];
 		}else{
 			// we already had a tag mapping to the same fieldname, so use the tag instead
-			key = [tag capitalizedString];
+			key = [tag fieldName];
             oldString = [pubDict objectForKey:key];
             if (![NSString isEmptyString:oldString]){
                 newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];

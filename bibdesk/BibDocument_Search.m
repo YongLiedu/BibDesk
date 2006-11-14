@@ -174,7 +174,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     if(returnCode == NSCancelButton || [NSString isEmptyString:newSearchKey])
         return;
     
-    newSearchKey = [newSearchKey capitalizedString];
+    newSearchKey = [newSearchKey fieldName];
     NSMutableArray *newSearchKeys = [NSMutableArray arrayWithCapacity:10];
     [newSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     [newSearchKeys addObject:newSearchKey];

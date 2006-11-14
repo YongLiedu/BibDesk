@@ -856,7 +856,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
             queryKey = BDSKCiteKeyString;
         
         if(queryKey && queryString) // make sure we have both a key and a value
-            [searchConstraints setObject:queryString forKey:[queryKey capitalizedString]]; // BibItem field names are capitalized
+            [searchConstraints setObject:queryString forKey:[queryKey fieldName]]; // BibItem field names are capitalized
     }
     
     return searchConstraints;

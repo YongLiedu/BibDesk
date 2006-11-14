@@ -77,7 +77,7 @@
         key = @"Issn";
 	else
         key = [[BibTypeManager sharedManager] fieldNameForPubMedTag:tag];
-    if(key == nil || [key isEqualToString:BDSKAuthorString]) key = [tag capitalizedString];
+    if(key == nil || [key isEqualToString:BDSKAuthorString]) key = [tag fieldName];
 	oldString = [pubDict objectForKey:key];
 	
 	BOOL isAuthor = ([key isEqualToString:@"Fau"] ||
@@ -109,7 +109,7 @@
             newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];
 		}else{
 			// we already had a tag mapping to the same fieldname, so use the tag instead
-			key = [tag capitalizedString];
+			key = [tag fieldName];
             oldString = [pubDict objectForKey:key];
             if (![NSString isEmptyString:oldString]){
                 newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];

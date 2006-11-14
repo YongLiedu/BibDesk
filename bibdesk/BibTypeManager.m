@@ -471,7 +471,7 @@ static BibTypeManager *sharedInstance = nil;
     NSString *name = [fieldNameForJSTORTagDict objectForKey:tag];
 	if(name == nil){
 		name = [fieldDescriptionForJSTORTagDict objectForKey:tag];
-		name = [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+		name = [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
 	}
 	return name;
 }
@@ -480,7 +480,7 @@ static BibTypeManager *sharedInstance = nil;
     NSArray *tags = [fieldDescriptionForJSTORTagDict allKeysForObject:name];
     if([tags count])
 		return [fieldNameForJSTORTagDict objectForKey:[tags objectAtIndex:0]];
-	return [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+	return [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
 }
 
 - (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type{
@@ -491,7 +491,7 @@ static BibTypeManager *sharedInstance = nil;
     NSString *name = [fieldNameForWebOfScienceTagDict objectForKey:tag];
 	if(name == nil){
 		name = [fieldDescriptionForWebOfScienceTagDict objectForKey:tag];
-		name = [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+		name = [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
         if(name == nil)
             name = tag; // guard against a nil return; it turns out that not all WOS tags are documented
 	}
@@ -503,7 +503,7 @@ static BibTypeManager *sharedInstance = nil;
     NSArray *tags = [fieldDescriptionForWebOfScienceTagDict allKeysForObject:name];
     if([tags count])
         return [fieldNameForWebOfScienceTagDict objectForKey:[tags objectAtIndex:0]];
-    return [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+    return [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
 }    
 
 - (BOOL)isRemoteURLField:(NSString *)field{

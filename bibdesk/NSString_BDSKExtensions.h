@@ -145,6 +145,13 @@
 
 #pragma mark TeX parsing
 
+/*!
+    @method     fieldName
+    @abstract   Wrapper around capitalizedString that caches them for use as BibTeX fields.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)fieldName;
 
 /*!
 @method     indexOfRightBraceMatchingLeftBraceAtIndex:

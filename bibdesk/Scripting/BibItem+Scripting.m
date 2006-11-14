@@ -73,7 +73,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 */
 - (BibField *)valueInBibFieldsWithName:(NSString *)name
 {
-	return [[[BibField alloc] initWithName:[name capitalizedString] bibItem:self] autorelease];
+	return [[[BibField alloc] initWithName:[name fieldName] bibItem:self] autorelease];
 }
 
 - (NSArray *)bibFields
@@ -84,7 +84,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	NSMutableArray *bibFields = [NSMutableArray arrayWithCapacity:5];
 	
 	while (name = [fEnum nextObject]) {
-		field = [[BibField alloc] initWithName:[name capitalizedString] bibItem:self];
+		field = [[BibField alloc] initWithName:[name fieldName] bibItem:self];
 		[bibFields addObject:field];
 		[field release];
 	}

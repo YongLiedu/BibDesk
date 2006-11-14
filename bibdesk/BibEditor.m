@@ -1283,7 +1283,7 @@ static int numberOfOpenEditors = 0;
         return;
     
     NSArray *currentFields = [publication allFieldNames];
-    newField = [newField capitalizedString];
+    newField = [newField fieldName];
     if([currentFields containsObject:newField] == NO){
 		[tabView selectFirstTabViewItem:nil];
         [publication addField:newField];
@@ -1423,7 +1423,7 @@ static int numberOfOpenEditors = 0;
 
 - (void)changeFieldNameSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *oldField = [oldFieldNamePopUp titleOfSelectedItem];
-    NSString *newField = [[newFieldNameComboBox stringValue] capitalizedString];
+    NSString *newField = [[newFieldNameComboBox stringValue] fieldName];
     
     if(returnCode == NSCancelButton || [NSString isEmptyString:newField] || 
        [newField isEqualToString:oldField] || [[publication allFieldNames] containsObject:newField])

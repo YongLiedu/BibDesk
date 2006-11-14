@@ -487,7 +487,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	else if (tv == requiredTableView) {
 		oldValue = [currentRequiredFields objectAtIndex:row];
-		newValue = [(NSString *)object capitalizedString];
+		newValue = [(NSString *)object fieldName];
 		if (![newValue isEqualToString:oldValue] && 
 			![currentRequiredFields containsObject:newValue] && 
 			![currentOptionalFields containsObject:newValue]) {
@@ -499,7 +499,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	else if (tv == optionalTableView) {
 		oldValue = [currentOptionalFields objectAtIndex:row];
-		newValue = [(NSString *)object capitalizedString];
+		newValue = [(NSString *)object fieldName];
 		if (![newValue isEqualToString:oldValue] && 
 			![currentRequiredFields containsObject:newValue] && 
 			![currentOptionalFields containsObject:newValue]) {

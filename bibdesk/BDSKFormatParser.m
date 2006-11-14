@@ -862,7 +862,7 @@
 				break;
 			}
 			string = [self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type]; // cite-key sanitization is strict, so we use that for fieldnames
-			string = [string capitalizedString]; // we need to have BibTeX field names capitalized
+			string = [string fieldName]; // we need to have BibTeX field names capitalized
 			if ([string isEqualToString:@"Cite-Key"] || [string isEqualToString:@"Citekey"])
 				string = BDSKCiteKeyString;
 			AppendStringToFormatStrings(@"{", specAttr);

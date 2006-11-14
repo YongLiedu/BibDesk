@@ -46,6 +46,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
 #import "html2tex.h"
+#import "NSDictionary_BDSKExtensions.h"
 
 static AGRegex *tipRegex = nil;
 static AGRegex *andRegex = nil;
@@ -209,6 +210,21 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 }
 
 #pragma mark TeX parsing
+
+- (NSString *)fieldName;
+{
+    // we could save a little memory by using a case-insensitive dictionary, but this is faster (and these strings are small)
+    static NSMutableDictionary *fieldDictionary = nil;
+    if (nil == fieldDictionary)
+        fieldDictionary = [[NSMutableDictionary alloc] initWithCapacity:100];
+    
+    NSString *fieldName = [fieldDictionary objectForKey:self];
+    if (nil == fieldName) {
+        fieldName = [self capitalizedString];
+        [fieldDictionary setObject:fieldName forKey:self];
+    }
+    return fieldName;
+}
 
 - (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned)startLoc
 {

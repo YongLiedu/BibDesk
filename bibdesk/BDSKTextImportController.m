@@ -403,7 +403,7 @@
 
 - (void)addFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 	NSString *newField = [addFieldController field];
-    newField = [newField capitalizedString];
+    newField = [newField fieldName];
     
     if(newField == nil || [fields containsObject:newField])
         return;
@@ -1587,7 +1587,7 @@
     if(!searchString)
         [statusLine setStringValue:[self isInTemporaryTypeSelectMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
     else
-        [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @""), [searchString capitalizedString]]];
+        [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @""), [searchString fieldName]]];
 }
 
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
@@ -1783,7 +1783,7 @@
     
     while(metaName = [metaTagKeyE nextObject]){
         NSString *fieldName = [typeMan fieldNameForDublinCoreTerm:metaName];
-        fieldName = (fieldName ? fieldName : [metaName capitalizedString]);
+        fieldName = (fieldName ? fieldName : [metaName fieldName]);
         NSString *fieldValue = [metaTagDict objectForKey:metaName];
         
         // Special-case DC.date to get month and year, but still insert "DC.date"

@@ -72,7 +72,7 @@
     if ( r.location != NSNotFound || 
         ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) )
 		return NO; // BibTeX chokes if the first character of a field name is a digit
-	NSString *capitalizedString = [partialString capitalizedString];
+	NSString *capitalizedString = [partialString fieldName];
     if (![capitalizedString isEqualToString:partialString]) {
 		// This is a BibDesk requirement, since we expect field names to be capitalized; BibTeX is case-insensitive of itself.  This will convert "FieldName" to "Fieldname" and "Field-name" to "Field-Name".
 		*newString = capitalizedString;
