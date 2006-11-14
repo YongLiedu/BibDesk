@@ -46,6 +46,12 @@ static NSString *__rangeKey = @"__BDSKRange";
 
 static NSArray *copyAttributeDictionariesAndFixString(NSMutableString *mutableString, NSDictionary *attributes)
 {
+    OBASSERT(nil != mutableString);
+    
+    // we need something to copy and add to the array
+    if (nil == attributes)
+        attributes = [NSDictionary dictionary];
+    
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
     NSString *texStyle = nil;    
     NSMutableDictionary *attrs;
