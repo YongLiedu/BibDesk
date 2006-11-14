@@ -2854,7 +2854,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			if([monthValue isComplex])
 				monthValue = [(BDSKStringNode *)[[monthValue nodes] objectAtIndex:0] value];
 			if (!monthValue) monthValue = @"";
-            theDate = [[NSCalendarDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-%@", monthValue, yearValue]];
+            theDate = [[NSCalendarDate alloc] initWithYear:[yearValue intValue] 
+                                                     month:[monthValue intValue] 
+                                                       day:15 /* avoid month boundary cases */
+                                                      hour:0 minute:0 second:0 
+                                                  timeZone:[NSTimeZone defaultTimeZone]];
 			[self setDate:theDate];
             [theDate release];
 		}else{
@@ -2911,7 +2915,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (id)valueForUndefinedKey:(NSString *)key{
-    key = [key capitalizedString];
+    key = [key fieldName];
     if (key == nil)
         return nil;
     [usedFields addObject:key];
@@ -2928,7 +2932,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (BOOL)isUsedField:(NSString *)name{
-    BOOL isUsed = [usedFields containsObject:[name capitalizedString]];
+    BOOL isUsed = [usedFields containsObject:[name fieldName]];
     [usedFields addObject:name];
     return isUsed;
 }
