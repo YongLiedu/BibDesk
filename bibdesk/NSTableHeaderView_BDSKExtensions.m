@@ -55,7 +55,11 @@ static IMP originalMouseDown;
 	int column = [self columnAtPoint:location];
 	NSTableColumn *tableColumn = nil;
     
-	if ([delegate respondsToSelector:@selector(tableView:menuForTableHeaderColumn:)]) {
+	if ([tableView respondsToSelector:@selector(menuForTableHeaderColumn:)]) {
+        if (column != -1)
+            tableColumn = [[tableView tableColumns] objectAtIndex:column];
+		return [tableView menuForTableHeaderColumn:tableColumn];
+	} else if ([delegate respondsToSelector:@selector(tableView:menuForTableHeaderColumn:)]) {
         if (column != -1)
             tableColumn = [[tableView tableColumns] objectAtIndex:column];
 		return [delegate tableView:tableView menuForTableHeaderColumn:tableColumn];

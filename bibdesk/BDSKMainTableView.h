@@ -47,10 +47,15 @@
     // datasource methods to support this are over in BibDocument_DataSource
     BDSKTypeSelectHelper *typeSelectHelper;
     NSMutableArray *trackingRects;
+    NSMenu *columnsMenu;
 }
 
 - (BDSKTypeSelectHelper *)typeSelectHelper;
 - (void)rebuildTrackingRects;
+
+- (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
+- (NSMenu *)columnsMenu;
+
 @end
 
 
@@ -58,4 +63,6 @@
 - (BOOL)tableView:(NSTableView *)aTableView shouldTrackTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView mouseEnteredTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView mouseExitedTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+- (void)tableViewColumnsDidChange:(NSNotification *)aNotification;
+- (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
 @end

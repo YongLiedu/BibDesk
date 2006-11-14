@@ -47,8 +47,6 @@
                 changeMainTableFont = id; 
                 changePreviewDisplay = id; 
                 clearQuickSearch = id; 
-                columnsMenuAddTableColumn = id; 
-                columnsMenuSelectTableColumn = id; 
                 consolidateLinkedFiles = id; 
                 copy = id; 
                 copyAsAction = id; 
@@ -131,7 +129,6 @@
                 actionMenuFirstItem = NSMenuItem; 
                 addCustomCiteStringButton = NSButton; 
                 ccTableView = NSTableView; 
-                columnsMenu = NSMenu; 
                 currentPreviewView = NSView; 
                 customCiteDrawer = NSDrawer; 
                 documentWindow = NSWindow; 

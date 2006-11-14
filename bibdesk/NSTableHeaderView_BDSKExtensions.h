@@ -46,3 +46,7 @@
 @interface NSObject (NSTableViewBDSKExtendedDelegate)
 - (NSMenu *)tableView:(NSTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn;
 @end
+
+@interface NSTableView (NSTableHeaderViewMenu)
+- (NSMenu *)menuForTableHeaderColumn:(NSTableColumn *)aTableColumn;
+@end

@@ -67,6 +67,7 @@
 #import "BDSKStringParser.h"
 #import "BDSKGroupsArray.h"
 #import "BDSKItemPasteboardHelper.h"
+#import "NSMenu_BDSKExtensions.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -347,6 +348,17 @@
     }
 }
 
+- (void)tableViewColumnsDidChange:(NSNotification *)aNotification{
+    // @@ is this really necessary?
+    [self updateUI];
+}
+
+- (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView{
+    NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
+    [defaultTableColumnWidths addEntriesFromDictionary:[[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey]];
+    return defaultTableColumnWidths;
+}
+
 - (NSDictionary *)currentTableColumnWidthsAndIdentifiers {
     NSEnumerator *tcE = [[tableView tableColumns] objectEnumerator];
     NSTableColumn *tc = nil;
@@ -375,6 +387,79 @@
     
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[tableView tableColumnIdentifiers]
                                                       forKey:BDSKShownColsNamesKey];
+}
+
+- (void)tableView:(NSTableView *)tv didClickTableColumn:(NSTableColumn *)tableColumn{
+	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
+    if ([[NSApp currentEvent] type] == NSRightMouseDown) 
+        return;
+    if (tableView == tv){
+        [self sortPubsByColumn:tableColumn];
+	}else if (groupTableView == tv){
+        [self sortGroupsByKey:nil];
+	}
+
+}
+
+- (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column {
+	NSMenu *myMenu = nil;
+    NSMenuItem *theItem = nil;
+    
+	if (column == -1 || row == -1) 
+		return nil;
+	
+	if(tv == tableView){
+		
+		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
+        NSURL *theURL = nil;
+        
+		if([tcId isLocalFileField]){
+			myMenu = [[fileMenu copyWithZone:[NSMenu menuZone]] autorelease];
+			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
+			[[myMenu itemAtIndex:1] setRepresentedObject:tcId];
+            if([tableView numberOfSelectedRows] == 1)
+                theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
+            if(nil != theURL){
+                theItem = [myMenu insertItemWithTitle:NSLocalizedString(@"Open With", @"Open with") 
+                                    andSubmenuOfApplicationsForURL:theURL atIndex:1];
+            }
+		}else if([tcId isRemoteURLField]){
+			myMenu = [[URLMenu copyWithZone:[NSMenu menuZone]] autorelease];
+			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
+            if([tableView numberOfSelectedRows] == 1)
+                theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
+            if(nil != theURL){
+                theItem = [myMenu insertItemWithTitle:NSLocalizedString(@"Open With", @"Open with") 
+                                    andSubmenuOfApplicationsForURL:theURL atIndex:1];
+            }            
+		}else{
+			myMenu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
+		}
+		
+	}else if (tv == groupTableView){
+		myMenu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
+	}else{
+		return nil;
+	}
+	
+	// kick out every item we won't need:
+	int i = [myMenu numberOfItems];
+    BOOL wasSeparator = YES;
+	
+	while (--i >= 0) {
+		theItem = (NSMenuItem*)[myMenu itemAtIndex:i];
+		if ([self validateMenuItem:theItem] == NO || ((wasSeparator || i == 0) && [theItem isSeparatorItem]))
+			[myMenu removeItem:theItem];
+        else
+            wasSeparator = [theItem isSeparatorItem];
+	}
+	while([myMenu numberOfItems] > 0 && [(NSMenuItem*)[myMenu itemAtIndex:0] isSeparatorItem])	
+		[myMenu removeItemAtIndex:0];
+	
+	if([myMenu numberOfItems] == 0)
+		return nil;
+	
+	return myMenu;
 }
 
 - (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{

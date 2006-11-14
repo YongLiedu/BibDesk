@@ -157,7 +157,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	IBOutlet NSMenu * URLMenu;
 	IBOutlet NSMenu * groupMenu;
 	IBOutlet NSMenu * actionMenu;
-	IBOutlet NSMenu * columnsMenu;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
 
 #pragma mark Accessory view variables
@@ -372,10 +371,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)updateUI;
 
-- (void)setupDefaultTableColumns;
-
-- (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
-
 /*!
     @method     sortPubsByColumn:
     @abstract   Sorts the publications table by the given table column.  Pass nil for the table column to re-sort the previously sorted column with the same order.
@@ -392,33 +387,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)sortPubsByDefaultColumn;
 
 /*!
-    @method columnsMenuSelectTableColumn
-    @abstract handles when we choose an already-existing tablecolumn name in the menu
-    @discussion \253discussion\273
-    
-*/
-- (IBAction)columnsMenuSelectTableColumn:(id)sender;
-/*!
-    @method columnsMenuAddTableColumn
-    @abstract called by the "add other..." menu item
-    @discussion \253discussion\273
-    
-*/
-- (IBAction)columnsMenuAddTableColumn:(id)sender;
-
-/*!
     @method     columnsMenu
     @abstract   Returnes the columns menu
     @discussion (comprehensive description)
 */
 - (NSMenu *)columnsMenu;
-
-/*!
-    @method     updateColumnsMenu
-    @abstract   Updates the columns menu
-    @discussion (comprehensive description)
-*/
-- (void)updateColumnsMenu;
 
 /*!
     @method     handlePreviewDisplayChangedNotification:
