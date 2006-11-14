@@ -560,15 +560,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 	[[groupActionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[groupActionButton cell] setUsesItemFromMenu:NO];
 	[[groupActionButton cell] setRefreshesMenu:NO];
-	
-	BDSKImagePopUpButton *cornerViewButton = (BDSKImagePopUpButton*)[tableView cornerView];
-	[cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
-	[cornerViewButton setShowsMenuWhenIconClicked:YES];
-	[[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
-	[[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
-	[[cornerViewButton cell] setUsesItemFromMenu:NO];
-	[[cornerViewButton cell] setRefreshesMenu:NO];
-	[cornerViewButton setMenu:[self columnsMenu]];
     
 	BDSKHeaderPopUpButtonCell *headerCell = (BDSKHeaderPopUpButtonCell *)[groupTableView popUpHeaderCell];
 	[headerCell setAction:@selector(changeGroupFieldAction:)];

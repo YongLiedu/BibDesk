@@ -45,6 +45,8 @@
 #import "BDSKFieldSheetController.h"
 #import "BibTypeManager.h"
 #import "BDSKRatingButtonCell.h"
+#import "BDSKImagePopUpButton.h"
+#import "BDSKImagePopUpButtonCell.h"
 
 
 @interface BDSKMainTableView (Private)
@@ -63,6 +65,18 @@
 
 - (void)awakeFromNib{
     [super awakeFromNib]; // this updates the font
+    
+	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]]){
+        BDSKImagePopUpButton *cornerViewButton = (BDSKImagePopUpButton*)[self cornerView];
+        [cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
+        [cornerViewButton setShowsMenuWhenIconClicked:YES];
+        [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
+        [[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+        [[cornerViewButton cell] setUsesItemFromMenu:NO];
+        [[cornerViewButton cell] setRefreshesMenu:NO];
+        [cornerViewButton setMenu:[self columnsMenu]];
+    }
+    
     typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
     [typeSelectHelper setDataSource:[self delegate]]; // which is the bibdocument
     [typeSelectHelper setCyclesSimilarResults:YES];
