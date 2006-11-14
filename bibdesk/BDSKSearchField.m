@@ -110,11 +110,25 @@ NSString *BDSKFileContentLocalizedString = nil;
 	NSMenuItem *newItem = [templateMenu itemWithTitle:searchKey];
 	[newItem setState:NSOnState];
     
-    // @@ weird...this is required or else the checkmark doesn't show up
+    // reset the template, since we can't modify the actual menu directly
 	[searchCell setSearchMenuTemplate:templateMenu];
     
     [NSApp sendAction:[self action] to:[self target] from:self];
 }
+
+// assert some assumptions that are made at various places
+
+- (void)setTarget:(id)obj {
+    if (obj) NSParameterAssert([obj respondsToSelector:[self action]]);
+    [super setTarget:obj];
+}
+
+- (void)setAction:(SEL)anAction {
+    NSParameterAssert(@selector(search:) == anAction);
+    [super setAction:anAction];
+}
+
+- (SEL)action { return @selector(search:); }
 
 @end
 
@@ -142,7 +156,7 @@ NSString *BDSKFileContentLocalizedString = nil;
 	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Types", @"Searchfield menu separator title") action:NULL keyEquivalent:@""];
     [cellMenu addItemWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
     
-    // add a separator if we have this option; it and "Any Field" are special (and "File Content" looks out of place between "Any Field" and "Author")
+    // add a separator; "File Content" and "Any Field" are special (and "File Content" looks out of place between "Any Field" and "Author")
     [cellMenu addItemWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[anItem setTarget:self];
     [cellMenu addItem:[NSMenuItem separatorItem]];
