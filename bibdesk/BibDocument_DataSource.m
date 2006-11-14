@@ -324,9 +324,11 @@
             rect = BDSKCenterRectVertically(rect, size.height, [tv isFlipped]);
             
             [spinner setFrame:rect];
-            if([[tv subviews] containsObject:spinner] == NO)
+            if([spinner isDescendantOf:tv] == NO) {
                 [tv addSubview:spinner];
-            [spinner startAnimation:nil];
+                [spinner startAnimation:nil];
+            }
+            
         } else if (spinner != nil) {
             [spinner stopAnimation:nil];
             [spinner removeFromSuperview];
