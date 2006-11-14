@@ -129,8 +129,8 @@ Getting and setting the selection of the table
     
     // only items belonging to the document can be accessed through AppleScript
     // items from external groups have no scriptable container, and AppleScript accesses properties of the document
-    while (pub = [pubE nextObject]) 
-        if ([pub owner] != self) [selection addObject:pub];
+    while ((pub = [pubE nextObject]) && ([pub owner] == self)) 
+        [selection addObject:pub];
     return selection;
 }
 
@@ -142,6 +142,7 @@ Getting and setting the selection of the table
 	NSIndexSpecifier *item;
 	NSMutableArray *pubsToSelect = [NSMutableArray arrayWithCapacity:[newSelection count]];
 	
+#warning should use shownPublications?
 	while (item = [itemEnum nextObject])
 		[pubsToSelect addObject:[publications objectAtIndex:[item index]]];
 	[self selectPublications:pubsToSelect];
