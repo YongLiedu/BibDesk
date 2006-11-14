@@ -101,10 +101,9 @@
 }
 
 - (int)intValueOfField:(NSString *)field { 
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    if ([typeMan isBooleanField:field] || [typeMan isRatingField:field])
+    if ([field isBooleanField] || [field isRatingField])
         return 0;
-    else if ([typeMan isTriStateField:field])
+    else if ([field isTriStateField])
         return -1;
     else if ([pubFields objectForKey:field] != nil)
         return 1;

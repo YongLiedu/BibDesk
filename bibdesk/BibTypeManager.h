@@ -90,8 +90,8 @@
     NSMutableSet *ratingFieldsSet;
     NSMutableSet *triStateFieldsSet;
     NSMutableSet *booleanFieldsSet;
-    NSMutableSet *singleValuedGroupFields;
-    NSMutableSet *invalidGroupFields;
+    NSMutableSet *singleValuedGroupFieldsSet;
+    NSMutableSet *invalidGroupFieldsSet;
 }
 + (BibTypeManager *)sharedManager;
 
@@ -123,8 +123,8 @@
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
-- (NSSet *)invalidGroupFields;
-- (NSSet *)singleValuedGroupFields;
+- (NSSet *)invalidGroupFieldsSet;
+- (NSSet *)singleValuedGroupFieldsSet;
 - (NSArray *)bibTypesForFileType:(NSString *)fileType;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
@@ -150,18 +150,15 @@
 - (NSString *)bibtexTypeForDublinCoreType:(NSString *)type;
 
 
-- (BOOL)isURLField:(NSString *)field;
-- (BOOL)isRemoteURLField:(NSString *)field;
-- (BOOL)isLocalFileField:(NSString *)field;    
 - (NSSet *)localFileFieldsSet;
+- (NSSet *)remoteURLFieldsSet;
 - (NSSet *)allURLFieldsSet;
 - (NSSet *)noteFieldsSet;
-
 - (NSSet *)personFieldsSet;
-- (BOOL)isRatingField:(NSString *)field;
-- (BOOL)isTriStateField:(NSString *)field;
-- (BOOL)isBooleanField:(NSString *)field;
-- (BOOL)isNoteField:(NSString *)field;
+- (NSSet *)booleanFieldsSet;
+- (NSSet *)triStateFieldsSet;
+- (NSSet *)ratingFieldsSet;
+- (NSSet *)numericFieldsSet;
 
 /*!
     @method     RISTagForBibTeXFieldName:
@@ -258,8 +255,10 @@
 - (BOOL)isLocalFileField;
 - (BOOL)isRemoteURLField;
 - (BOOL)isPersonField;
-- (BOOL)isSingleValuedField;
 - (BOOL)isURLField;
 - (BOOL)isNoteField;
+- (BOOL)isNumericField;
+- (BOOL)isSingleValuedField;
+- (BOOL)isInvalidGroupField;
 
 @end

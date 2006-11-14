@@ -2233,7 +2233,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSEnumerator *shownColNamesE = [identifiers objectEnumerator];
     NSTableColumn *tc;
     NSString *colName;
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
     
     NSNumber *tcWidth;
     NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
@@ -2255,21 +2254,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
 			[tc setEditable:NO];
 
-            if([typeManager isURLField:colName]){
+            if([colName isURLField]){
                 [tc setDataCell:imageCell];
-            }else if([typeManager isRatingField:colName]){
+            }else if([colName isRatingField]){
 				BDSKRatingButtonCell *ratingCell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
 				[ratingCell setBordered:NO];
 				[ratingCell setAlignment:NSCenterTextAlignment];
                 [tc setDataCell:ratingCell];
-            }else if([typeManager isBooleanField:colName]){
+            }else if([colName isBooleanField]){
 				NSButtonCell *switchButtonCell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
 				[switchButtonCell setButtonType:NSSwitchButton];
 				[switchButtonCell setImagePosition:NSImageOnly];
 				[switchButtonCell setControlSize:NSSmallControlSize];
                 [switchButtonCell setAllowsMixedState:NO];
                 [tc setDataCell:switchButtonCell];
-			}else if([typeManager isTriStateField:colName]){
+			}else if([colName isTriStateField]){
 				NSButtonCell *switchButtonCell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
 				[switchButtonCell setButtonType:NSSwitchButton];
 				[switchButtonCell setImagePosition:NSImageOnly];

@@ -572,20 +572,11 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     
-    // ??? there's a check further on that expands complex strings before adding them; one of these should be removed 
-#warning is this still correct?
-    // adding complex strings can lead to a crash after the containing document closes, and it is rather meaningless anyway
-    if ([string isComplex])
-        return;
+    // more efficient for the splitting and checking functions
+    // also adding complex strings can lead to a crash after the containing document closes
+    if([string isComplex]) string = [NSString stringWithString:string];
     
-    // @@ could move this to the type manager and union all excluded fields
-    static NSSet *numericFields = nil;
-	if (numericFields == nil)
-		numericFields = [[NSSet alloc] initWithObjects:BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil];
-
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
-
-	if(BDIsEmptyString((CFStringRef)entry) || [numericFields containsObject:entry] || [typeMan isURLField:entry] || [entry isPersonField])	
+	if(BDIsEmptyString((CFStringRef)entry) || [entry isNumericField] || [entry isURLField] || [entry isPersonField])	
 		return;
 
     if([entry isEqualToString:BDSKBooktitleString])	
@@ -599,14 +590,12 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         [completionSet release];
     }
 
-    if([[typeMan invalidGroupFields] containsObject:entry] ||
-	   [[typeMan singleValuedGroupFields] containsObject:entry]){ // add the whole string 
+    if([entry isInvalidGroupField] ||
+	   [entry isSingleValuedField]){ // add the whole string 
         [completionSet addObject:[string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]];
         return;
     }
     
-    // more efficient for the splitting functions
-    if([string isComplex]) string = [NSString stringWithString:string];
     
     NSCharacterSet *acSet = [NSCharacterSet autocompletePunctuationCharacterSet];
     if([string rangeOfCharacterFromSet:acSet].location != NSNotFound){
@@ -636,7 +625,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 		entry = BDSKTitleString;
 	
 	// find a string to match, be consistent with addString:forCompletionEntry:
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSRange searchRange = NSMakeRange(0, charRange.location);
 	// find the first separator preceding the current word being entered
     NSRange punctuationRange = [fullString rangeOfCharacterFromSet:[NSCharacterSet autocompletePunctuationCharacterSet]
@@ -651,7 +639,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 		// these are delimited by "and"
 		if (andRange.location != NSNotFound)
 			matchStart = NSMaxRange(andRange);
-    } else if([[typeMan invalidGroupFields] containsObject:entry] || [[typeMan singleValuedGroupFields] containsObject:entry]){
+    } else if([entry isInvalidGroupField] || [entry isSingleValuedField]){
 		// these are added as the whole string. Shouldn't there be more?
 	} else if (punctuationRange.location != NSNotFound) {
 		// should we delimited by these punctuations by default?

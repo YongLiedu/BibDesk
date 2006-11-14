@@ -601,7 +601,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if(returnCode == NSCancelButton || newGroupField == nil)
         return; // the user canceled
     
-	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField] || [newGroupField isEqualToString:@""]){
+	if([newGroupField isInvalidGroupField] || [newGroupField isEqualToString:@""]){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Invalid Field")
                                          defaultButton:nil
                                        alternateButton:nil
@@ -644,7 +644,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
-                                              excluding:[[[typeMan invalidGroupFields] allObjects] arrayByAddingObjectsFromArray:groupFields]];
+                                              excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:",@"")
                                                                                               fieldsArray:colNames];

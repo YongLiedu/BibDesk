@@ -112,8 +112,8 @@ static BibTypeManager *sharedInstance = nil;
     booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
     [self reloadSpecialFields];
     
-    singleValuedGroupFields = [[NSMutableSet alloc] initWithCapacity:10];
-    invalidGroupFields = [[NSMutableSet alloc] initWithCapacity:10];
+    singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+    invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
     [self reloadGroupFields];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -154,8 +154,8 @@ static BibTypeManager *sharedInstance = nil;
     [ratingFieldsSet release];
     [triStateFieldsSet release];
     [booleanFieldsSet release];
-    [singleValuedGroupFields release];
-    [invalidGroupFields release];
+    [singleValuedGroupFieldsSet release];
+    [invalidGroupFieldsSet release];
 	[super dealloc];
 }
 
@@ -249,7 +249,7 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (void)reloadGroupFields{
-    [invalidGroupFields removeAllObjects];
+    [invalidGroupFieldsSet removeAllObjects];
     
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
@@ -259,14 +259,14 @@ static BibTypeManager *sharedInstance = nil;
 		BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil];
 	[invalidFields addObjectsFromArray:[pw stringArrayForKey:BDSKLocalFileFieldsKey]];
 	[invalidFields addObjectsFromArray:[pw stringArrayForKey:BDSKRemoteURLFieldsKey]];
-    [invalidGroupFields unionSet:invalidFields];
+    [invalidGroupFieldsSet unionSet:invalidFields];
     
-    [singleValuedGroupFields removeAllObjects];
+    [singleValuedGroupFieldsSet removeAllObjects];
     NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKPubTypeString, BDSKTypeString, BDSKCrossrefString, BDSKJournalString, BDSKYearString, BDSKMonthString, BDSKPublisherString, BDSKAddressString, nil];
 	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
 	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
 	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKTriStateFieldsKey]];  
-    [singleValuedGroupFields unionSet:singleValuedFields];
+    [singleValuedGroupFieldsSet unionSet:singleValuedFields];
 }
 
 - (void)customFieldsDidChange:(NSNotification *)notification {
@@ -419,12 +419,12 @@ static BibTypeManager *sharedInstance = nil;
     return [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey];
 }
 
-- (NSSet *)invalidGroupFields{
-	return invalidGroupFields;
+- (NSSet *)invalidGroupFieldsSet{
+	return invalidGroupFieldsSet;
 }
 
-- (NSSet *)singleValuedGroupFields{ 
-	return singleValuedGroupFields;
+- (NSSet *)singleValuedGroupFieldsSet{ 
+	return singleValuedGroupFieldsSet;
 }
 
 - (NSArray *)bibTypesForFileType:(NSString *)fileType{
@@ -506,20 +506,16 @@ static BibTypeManager *sharedInstance = nil;
     return [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
 }    
 
-- (BOOL)isRemoteURLField:(NSString *)field{
-    return [remoteURLFieldsSet containsObject:field];
+- (NSSet *)booleanFieldsSet{
+    return booleanFieldsSet;
 }
 
-- (BOOL)isLocalFileField:(NSString *)field{
-    BOOL rv;
-    @synchronized(self){
-        rv = [localFileFieldsSet containsObject:field];
-    }
-    return rv;
+- (NSSet *)triStateFieldsSet{
+    return triStateFieldsSet;
 }
 
-- (BOOL)isURLField:(NSString *)field{
-    return [allURLFieldsSet containsObject:field];
+- (NSSet *)ratingFieldsSet{
+    return ratingFieldsSet;
 }
 
 - (NSSet *)allURLFieldsSet{
@@ -535,27 +531,15 @@ static BibTypeManager *sharedInstance = nil;
     return set;
 }
 
+- (NSSet *)remoteURLFieldsSet{
+    return remoteURLFieldsSet;
+}
+
 - (NSSet *)noteFieldsSet{
     static NSSet *noteFieldsSet = nil;
     if(nil == noteFieldsSet)
         noteFieldsSet = [[NSSet alloc] initWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
     return noteFieldsSet;
-}
-
-- (BOOL)isRatingField:(NSString *)field{
-    return [ratingFieldsSet containsObject:field];
-}
-
-- (BOOL)isTriStateField:(NSString *)field{
-    return [triStateFieldsSet containsObject:field];
-}
-
-- (BOOL)isBooleanField:(NSString *)field{
-    return [booleanFieldsSet containsObject:field];
-}
-
-- (BOOL)isNoteField:(NSString *)field{
-    return [[self noteFieldsSet] containsObject:field];
 }
 
 - (NSSet *)personFieldsSet{
@@ -565,14 +549,21 @@ static BibTypeManager *sharedInstance = nil;
     return persons;
 }
 
+- (NSSet *)numericFieldsSet{
+    static NSSet *numericFields = nil;
+	if (numericFields == nil)
+		numericFields = [[NSSet alloc] initWithObjects:BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil];
+    return numericFields;
+}
+
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
-	if([self isLocalFileField:fieldName]){
+	if([localFileFieldsSet containsObject:fieldName]){
 		return invalidLocalUrlCharSet;
 	}
-	if([self isRemoteURLField:fieldName]){
+	if([remoteURLFieldsSet containsObject:fieldName]){
 		return invalidRemoteUrlCharSet;
 	}
 	return invalidGeneralCharSet;
@@ -582,17 +573,17 @@ static BibTypeManager *sharedInstance = nil;
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
-	if([self isLocalFileField:fieldName]){
+	if([localFileFieldsSet containsObject:fieldName]){
 		return strictInvalidLocalUrlCharSet;
 	}
-	if([self isRemoteURLField:fieldName]){
+	if([remoteURLFieldsSet containsObject:fieldName]){
 		return strictInvalidRemoteUrlCharSet;
 	}
 	return strictInvalidGeneralCharSet;
 }
 
 - (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if([self isLocalFileField:fieldName]){
+	if([localFileFieldsSet containsObject:fieldName]){
 		return veryStrictInvalidLocalUrlCharSet;
 	}
 	return [self strictInvalidCharactersForField:fieldName inFileType:type];
@@ -615,14 +606,16 @@ static BibTypeManager *sharedInstance = nil;
 
 @implementation NSString (BDSKTypeExtensions)
 
-- (BOOL)isBooleanField { return [[BibTypeManager sharedManager] isBooleanField:self]; }
-- (BOOL)isTriStateField { return [[BibTypeManager sharedManager] isTriStateField:self]; }
-- (BOOL)isRatingField { return [[BibTypeManager sharedManager] isRatingField:self]; }
-- (BOOL)isLocalFileField { return [[BibTypeManager sharedManager] isLocalFileField:self]; }
-- (BOOL)isRemoteURLField { return [[BibTypeManager sharedManager] isRemoteURLField:self]; }
+- (BOOL)isBooleanField { return [[[BibTypeManager sharedManager] booleanFieldsSet] containsObject:self]; }
+- (BOOL)isTriStateField { return [[[BibTypeManager sharedManager] triStateFieldsSet] containsObject:self]; }
+- (BOOL)isRatingField { return [[[BibTypeManager sharedManager] ratingFieldsSet] containsObject:self]; }
+- (BOOL)isLocalFileField { return [[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:self]; }
+- (BOOL)isRemoteURLField { return [[[BibTypeManager sharedManager] remoteURLFieldsSet] containsObject:self]; }
 - (BOOL)isPersonField { return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:self]; }
-- (BOOL)isSingleValuedField { return [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:self]; }
-- (BOOL)isURLField { return [[BibTypeManager sharedManager] isURLField:self]; }
-- (BOOL)isNoteField { return [[BibTypeManager sharedManager] isNoteField:self]; }
+- (BOOL)isURLField { return [[[BibTypeManager sharedManager] allURLFieldsSet] containsObject:self]; }
+- (BOOL)isNoteField { return [[[BibTypeManager sharedManager] noteFieldsSet] containsObject:self]; }
+- (BOOL)isNumericField { return [[[BibTypeManager sharedManager] numericFieldsSet] containsObject:self]; }
+- (BOOL)isSingleValuedField { return [[[BibTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self]; }
+- (BOOL)isInvalidGroupField { return [[[BibTypeManager sharedManager] invalidGroupFieldsSet] containsObject:self]; }
 
 @end

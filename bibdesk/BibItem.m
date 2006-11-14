@@ -1573,9 +1573,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	NSAttributedString *valueStr;
 	NSAttributedString *keyStr;
     
-    BibTypeManager *btm = [BibTypeManager sharedManager];
-
-	NSSet *reqKeys = [[NSSet alloc] initWithArray:[btm requiredFieldsForType:[self pubType]]];
+	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
 
     static NSDateFormatter *dateFormatter = nil;
     if(dateFormatter == nil) {
@@ -1605,7 +1603,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     BOOL notNote = NO;
     
     while(key = [e nextObject]){
-		notNote = ![btm isNoteField:key];
+		notNote = ![key isNoteField];
         stringValue = [self valueOfField:key inherit:notNote];
         
         if(![stringValue isEqualToString:@""] &&
@@ -1628,7 +1626,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
-			}else if([btm isURLField:key]){
+			}else if([key isURLField]){
                 // make this a clickable link if possible, showing an abbreviated path for file URLs
                 NSURL *theURL = [self URLForField:key];
 				if(theURL != nil){
