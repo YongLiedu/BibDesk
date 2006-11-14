@@ -572,10 +572,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     
-    // more efficient for the splitting and checking functions
-    // also adding complex strings can lead to a crash after the containing document closes
-    if([string isComplex]) string = [NSString stringWithString:string];
-    
 	if(BDIsEmptyString((CFStringRef)entry) || [entry isNumericField] || [entry isURLField] || [entry isPersonField])	
 		return;
 
@@ -589,13 +585,16 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         [autoCompletionDict setObject:completionSet forKey:entry];
         [completionSet release];
     }
+    
+    // more efficient for the splitting and checking functions
+    // also adding complex strings can lead to a crash after the containing document closes
+    if([string isComplex]) string = [NSString stringWithString:string];
 
     if([entry isInvalidGroupField] ||
 	   [entry isSingleValuedField]){ // add the whole string 
         [completionSet addObject:[string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]];
         return;
     }
-    
     
     NSCharacterSet *acSet = [NSCharacterSet autocompletePunctuationCharacterSet];
     if([string rangeOfCharacterFromSet:acSet].location != NSNotFound){
