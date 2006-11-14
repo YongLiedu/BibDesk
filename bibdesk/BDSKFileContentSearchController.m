@@ -45,6 +45,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "BDSKSearch.h"
+#import "BDSKSearchField.h"
 
 // Overrides attributedStringValue since we return an attributed string; normally, the cell uses the font of the attributed string, rather than the table's font, so font changes are ignored.  This means that italics and bold in titles will be lost until the search string changes again, but that's not a great loss.
 @interface BDSKFileContentTextWithIconCell : BDSKTextWithIconCell
@@ -70,7 +71,6 @@
     
     results = [[NSMutableArray alloc] initWithCapacity:10];
     
-    searchKey = [[NSString alloc] initWithString:@""];
     canceledSearch = NO;
         
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
@@ -92,7 +92,6 @@
     [searchContentView release];
     [results release];
     [search release];
-    [searchKey release];
     [super dealloc];
 }
 
@@ -177,7 +176,7 @@
     NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] URL];
     
     OBASSERT(fileURL);
-    OBASSERT(searchKey);
+    OBASSERT(searchField);
 
     if(![[NSFileManager defaultManager] fileExistsAtPath:[fileURL path] isDirectory:&isDir]){
         NSBeginAlertSheet(NSLocalizedString(@"File Does Not Exist", @""),
@@ -188,7 +187,7 @@
     } else if(isDir){
         // just open it with the Finder; we shouldn't have folders in our index, though
         [[NSWorkspace sharedWorkspace] openURL:fileURL];
-    } else if(![[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchKey]){
+    } else if(![[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:[searchField stringValue]]){
         NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""),
                           nil /*default button*/,
                           nil /*alternate button*/,
@@ -197,23 +196,20 @@
     }
 }
 
-- (void)setSearchField:(NSSearchField *)aSearchField
+- (void)setSearchField:(BDSKSearchField *)aSearchField
 {
     if (nil != searchField) {
         // disconnect the current searchfield
         [searchField setTarget:nil];
-        [searchField setAction:NULL];
         [searchField setDelegate:nil];  
     }
     
     searchField = aSearchField;
     
-    if (nil != aSearchField) {
-        searchField = aSearchField;
+    if (nil != searchField) {
         [searchField setTarget:self];
-        [searchField setAction:@selector(search:)];
         [searchField setDelegate:self];
-        [self search:nil];
+        [self search:searchField];
     }     
 }
 
@@ -226,10 +222,7 @@
 
 - (IBAction)search:(id)sender
 {
-    [searchKey autorelease];
-    searchKey = [[searchField stringValue] copy];
-
-    if ([NSString isEmptyString:searchKey] ) {
+    if ([NSString isEmptyString:[searchField stringValue]] || [[searchField searchKey] isEqualToString:BDSKFileContentLocalizedString] == NO) {
         // iTunes/Mail swap out their search view when clearing the searchfield, so we follow suit.  If the user clicks the cancel button, we want the searchfield to lose first responder status, but this doesn't happen by default (maybe depends on whether it sends immediately?  Xcode seems to work correctly).  Don't clear the array when restoring document state, since we may need the array controller's selected objects.
 
         // we get a search: action after the cancel/controlTextDidEndEditing: combination, so see if this was a cancel action
@@ -245,7 +238,7 @@
         [stopButton setEnabled:YES];
         // set before starting the search, or we can end up updating with it == YES
         canceledSearch = NO;
-        [search searchForString:searchKey withOptions:kSKSearchOptionDefault];
+        [search searchForString:[searchField stringValue] withOptions:kSKSearchOptionDefault];
     }
 }
 

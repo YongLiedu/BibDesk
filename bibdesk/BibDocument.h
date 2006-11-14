@@ -45,7 +45,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox, BDSKSearchField;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -134,9 +134,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	IBOutlet BDSKImagePopUpButton * actionMenuButton;
 	IBOutlet BDSKImagePopUpButton * groupActionMenuButton;
 		
-	IBOutlet NSSearchField *searchField;
-    
-    NSString *quickSearchKey;
+	IBOutlet BDSKSearchField *searchField;
 
 #pragma mark Custom Cite-String drawer variables
 

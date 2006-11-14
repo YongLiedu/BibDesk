@@ -366,7 +366,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [groupedPublications setArray:array];
     
-    [self searchFieldAction:searchField]; // redo the search to update the table
+    [self search:searchField]; // redo the search to update the table
 }
 
 - (void)selectGroups:(NSArray *)theGroups{

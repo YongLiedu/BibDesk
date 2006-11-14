@@ -73,6 +73,7 @@
 #import "BDSKColoredBox.h"
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
+#import "BDSKSearchField.h"
 
 
 @implementation BibDocument (Actions)
@@ -560,7 +561,7 @@
         
         NSString *searchString;
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-        if([quickSearchKey isEqualToString:BDSKKeywordsString] || [quickSearchKey isEqualToString:BDSKAllFieldsString])
+        if([[searchField searchKey] isEqualToString:BDSKKeywordsString] || [[searchField searchKey] isEqualToString:BDSKAllFieldsString])
             searchString = [searchField stringValue];
         else
             searchString = @"";

@@ -111,6 +111,7 @@
 #import "BDSKShellTask.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKColoredBox.h"
+#import "BDSKSearchField.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -157,16 +158,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         documentInfo = [[NSMutableDictionary alloc] initForCaseInsensitiveKeys];
     
         currentGroupField = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentGroupFieldKey] retain];
-
-        quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
-        
-        // @@ Changed from "All Fields" to localized "Any Field" in 1.2.2; prefs may still have the old key, so this is a temporary workaround for bug #1420837 as of 31 Jan 2006
-        if([quickSearchKey isEqualToString:@"All Fields"]){
-            [quickSearchKey release];
-            quickSearchKey = [BDSKAllFieldsString copy];
-        } else if(quickSearchKey == nil || [quickSearchKey isEqualToString:@"Added"] || [quickSearchKey isEqualToString:@"Created"] || [quickSearchKey isEqualToString:@"Modified"]){
-            quickSearchKey = [BDSKTitleString copy];
-        }
 		
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         
@@ -345,7 +336,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [groups release];
     [frontMatter release];
     [documentInfo release];
-    [quickSearchKey release];
     [customStringArray release];
     [toolbarItems release];
 	[statusBar release];
@@ -394,7 +384,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         OBPOSTCONDITION(fileURL != nil);
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
             [self selectLibraryGroup:nil];
-            [self setSelectedSearchFieldKey:BDSKAllFieldsString];
+            [searchField setSearchKey:BDSKAllFieldsString];
             [self setFilterField:searchString];
         }
     }
@@ -439,11 +429,17 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
-    [quickSearchKey autorelease];
-    quickSearchKey = [[xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:quickSearchKey] retain];
+    NSString *searchKey = [xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey]];
     [searchField setRecentSearches:[xattrDefaults objectForKey:BDSKRecentSearchesKey defaultObject:[NSArray array]]];
-	[[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
-	[self setSelectedSearchFieldKey:quickSearchKey];
+    // @@ Changed from "All Fields" to localized "Any Field" in 1.2.2; prefs may still have the old key, so this is a temporary workaround for bug #1420837 as of 31 Jan 2006
+    if([searchKey isEqualToString:@"All Fields"]){
+        [searchKey release];
+        searchKey = [BDSKAllFieldsString copy];
+    } else if(searchKey == nil || [searchKey isEqualToString:@"Added"] || [searchKey isEqualToString:@"Created"] || [searchKey isEqualToString:@"Modified"]){
+        [searchKey release];
+        searchKey = [BDSKTitleString copy];
+    }
+	[searchField setSearchKey:searchKey];
     [self setupToolbar];
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
@@ -663,7 +659,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         [dictionary setFloatValue:[groupSplitView fraction] forKey:BDSKGroupSplitViewFractionKey];
         [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
-        [dictionary setObject:quickSearchKey forKey:BDSKCurrentQuickSearchKey];
+        [dictionary setObject:[searchField searchKey] forKey:BDSKCurrentQuickSearchKey];
         [dictionary setObject:[searchField recentSearches] forKey:BDSKRecentSearchesKey];
         [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
         
@@ -1478,7 +1474,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // updating smart and category groups is done by the notification of setPublications:
         [self sortGroupsByKey:sortGroupsKey]; // resort
 		[tableView deselectAll:self]; // clear before resorting
-		[self searchFieldAction:searchField]; // redo the search
+		[self search:searchField]; // redo the search
         [self sortPubsByColumn:nil]; // resort
 		return YES;
 	}
@@ -2194,9 +2190,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
     } else if(![[searchField stringValue] isEqualToString:@""] && 
-       ([quickSearchKey isEqualToString:changedKey] || [quickSearchKey isEqualToString:BDSKAllFieldsString]) ){
+       ([[searchField searchKey] isEqualToString:changedKey] || [[searchField searchKey] isEqualToString:BDSKAllFieldsString]) ){
         // don't perform a search if the search field is empty
-		[self searchFieldAction:searchField];
+		[self search:searchField];
 	} else { 
         // groups and quicksearch won't update for us
         if([[lastSelectedColumnForSort identifier] isEqualToString:changedKey])

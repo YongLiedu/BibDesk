@@ -28,6 +28,7 @@
             SUPERCLASS = NSPopUpButtonCell; 
         }, 
         {CLASS = BDSKPreviewTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
+        {CLASS = BDSKSearchField; LANGUAGE = ObjC; SUPERCLASS = NSSearchField; }, 
         {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
         {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
         {
@@ -102,8 +103,8 @@
                 removeSelectedPubs = id; 
                 renameGroupAction = id; 
                 revealLinkedFile = id; 
+                search = id; 
                 searchByContent = id; 
-                searchFieldAction = id; 
                 searchFieldChangeKey = id; 
                 selectAllPublications = id; 
                 selectCrossrefParentAction = id; 
@@ -148,7 +149,7 @@
                 removeCustomCiteStringButton = NSButton; 
                 saveAccessoryView = NSView; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
-                searchField = NSSearchField; 
+                searchField = BDSKSearchField; 
                 splitView = BDSKSplitView; 
                 statusBar = BDSKStatusBar; 
                 tableView = BDSKMainTableView; 

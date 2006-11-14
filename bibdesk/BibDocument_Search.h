@@ -42,16 +42,6 @@ extern NSString *BDSKDocumentFormatForSearchingDates;
 
 @interface BibDocument (Search)
 
-/*!
-@method     searchFieldMenu
- @abstract   builds the quick search menu template for the NSSearchField
- @discussion this is only used in setupSearchField if not BDSK_USING_JAGUAR. 
- It is for the NSSearchField only, and it's only the template. 
- It shouldn't get called more than once, really.
- @result     An NSMenu for the NSSearchField to use as the template.
- */
-- (NSMenu *)searchFieldMenu;
-
 - (NSString*) filterField;
 
 - (void)setFilterField:(NSString*) filterterm;
@@ -62,30 +52,7 @@ extern NSString *BDSKDocumentFormatForSearchingDates;
      */
 - (IBAction)makeSearchFieldKey:(id)sender;
 
-    /*!
-    @method searchFieldChangeKey
-     @abstract Changed what we look for in quicksearch
-     @discussion This is called when we change what key to look for. It's the target of the nssearchfield.
-     @param sender the sender. 
-     
-     */
-
-- (IBAction)searchFieldChangeKey:(id)sender;
-
-- (void)setSelectedSearchFieldKey:(NSString *)newKey;
-
-
-    /*!
-    @method quickSearchAddField
-     @abstract adds a field to the quicksearchMenu.
-     @discussion 
-     
-     */
-- (IBAction)quickSearchAddField:(id)sender;
-
-- (IBAction)quickSearchRemoveField:(id)sender;
-
-- (IBAction)searchFieldAction:(id)sender;
+- (IBAction)search:(id)sender;
 
     /*!
     @method     hidePublicationsWithoutSubstring:inField:

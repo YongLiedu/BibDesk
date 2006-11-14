@@ -42,6 +42,7 @@
 #import "OAToolbarItem_BDSKExtensions.h"
 #import "BDSKImagePopUpButton.h"
 #import "BibDocument_Actions.h"
+#import "BDSKSearchField.h"
 
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
 #define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)
@@ -156,7 +157,7 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item setView:searchField];
     [item setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
     [item setMaxSize:TOOLBAR_SEARCHFIELD_MAX_SIZE];
-    [item setAction:@selector(searchFieldAction:)];
+    [item setAction:@selector(search:)];
     [item setMenuFormRepresentation:menuItem];
     [toolbarItems setObject:item forKey:BibDocumentToolbarSearchItemIdentifier];
     [item release];

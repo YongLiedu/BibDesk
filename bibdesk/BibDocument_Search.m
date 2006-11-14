@@ -50,14 +50,13 @@
 #import "BDSKZoomablePDFView.h"
 #import "BDSKPreviewer.h"
 #import "BDSKOverlay.h"
+#import "BDSKSearchField.h"
 
-static NSString *BDSKFileContentLocalizedString = nil;
 NSString *BDSKDocumentFormatForSearchingDates = nil;
 
 @implementation BibDocument (Search)
 
 + (void)didLoad{
-    BDSKFileContentLocalizedString = [NSLocalizedString(@"File Content", @"") copy];
     BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
 }
 
@@ -71,183 +70,22 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	[documentWindow makeFirstResponder:searchField];
 }
 
-- (NSMenu *)searchFieldMenu{
-	NSMenu *cellMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Search Menu"] autorelease];
-	NSMenuItem *anItem;
-	
-	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Recent Searches", @"Recent Searches menu item") action:NULL keyEquivalent:@""];
-	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
-	
-    anItem = [cellMenu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
-	[anItem setTag:NSSearchFieldRecentsMenuItemTag];
-    
-	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Clear Recent Searches", @"Clear menu item") action:NULL keyEquivalent:@""];
-	[anItem setTag:NSSearchFieldClearRecentsMenuItemTag];
-    
-    // this tag conditionally inserts a separator if there are recent searches (is it safe to set a tag on the separator item?)
-    anItem = [NSMenuItem separatorItem];
-	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
-	[cellMenu addItem:anItem];
-    
-	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Types", @"Searchfield menu separator title") action:NULL keyEquivalent:@""];
-    [cellMenu addItemWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-    
-    // add a separator if we have this option; it and "Any Field" are special (and "File Content" looks out of place between "Any Field" and "Author")
-    [cellMenu addItemWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-    [cellMenu addItem:[NSMenuItem separatorItem]];
-        
-	NSMutableArray *quickSearchKeys = [[NSMutableArray alloc] initWithObjects:BDSKAuthorString, BDSKDateString, BDSKTitleString, nil];
-    [quickSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKQuickSearchKeys]];
-    [quickSearchKeys sortUsingSelector:@selector(compare:)];
-    
-    NSString *aKey = nil;
-    NSEnumerator *quickSearchKeyE = [quickSearchKeys objectEnumerator];
-	
-    while(aKey = [quickSearchKeyE nextObject]){
-		[cellMenu addItemWithTitle:aKey action:@selector(searchFieldChangeKey:) keyEquivalent:@""]; 
-    }
-    [quickSearchKeys release];
-	
-	[cellMenu addItem:[NSMenuItem separatorItem]];
-	
-	[cellMenu addItemWithTitle:[NSLocalizedString(@"Add Field", @"Add Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchAddField:) keyEquivalent:@""];
-	[cellMenu addItemWithTitle:[NSLocalizedString(@"Remove Field", @"Remove Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
-    
-	return cellMenu;
-}
-
--(NSString*) filterField {
+- (NSString *)filterField {
 	return [searchField stringValue];
 }
 
-- (void)setFilterField:(NSString*) filterterm {
+- (void)setFilterField:(NSString *)filterterm {
     NSParameterAssert(filterterm != nil);
     
-    NSResponder * oldFirstResponder = [documentWindow firstResponder];
-    [documentWindow makeFirstResponder:searchField];
-    
-    [searchField setObjectValue:filterterm];
-    [self searchFieldAction:searchField];
-    
-    [documentWindow makeFirstResponder:oldFirstResponder];
+    [searchField setStringValue:filterterm];
+    [self search:searchField];
 }
 
-- (IBAction)searchFieldChangeKey:(id)sender{
-    [self setSelectedSearchFieldKey:[sender title]];
-}
-
-- (void)setSelectedSearchFieldKey:(NSString *)newKey{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newKey
-                                                      forKey:BDSKCurrentQuickSearchKey];
-	
-	NSSearchFieldCell *searchCell = [searchField cell];
-	[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),newKey]];
-
-	NSMenu *templateMenu = [searchCell searchMenuTemplate];
-	if([quickSearchKey isEqualToString:newKey] == NO){
-		// find current key's menuitem and set it to NSOffState
-		NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
-		[oldItem setState:NSOffState];
-		if ([searchField target] != self && [quickSearchKey isEqualToString:BDSKFileContentLocalizedString])
-			[fileSearchController restoreDocumentState];
-		[quickSearchKey release];
-		quickSearchKey = [newKey copy];
-	}
-	
-	// set new key's menuitem to NSOnState
-	NSMenuItem *newItem = [templateMenu itemWithTitle:quickSearchKey];
-	[newItem setState:NSOnState];
-    
-    // @@ weird...this is required or else the checkmark doesn't show up
-	[searchCell setSearchMenuTemplate:templateMenu];
-
-	if([quickSearchKey isEqualToString:BDSKFileContentLocalizedString])
-		[self searchByContent:searchField];
- 
-	[self hidePublicationsWithoutSubstring:[searchField stringValue] //newQueryString
-								   inField:quickSearchKey];
-		
-}
-
-- (void)addSearchFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-	NSString *newSearchKey = [addFieldController field];
-    if(returnCode == NSCancelButton || [NSString isEmptyString:newSearchKey])
-        return;
-    
-    newSearchKey = [newSearchKey fieldName];
-    NSMutableArray *newSearchKeys = [NSMutableArray arrayWithCapacity:10];
-    [newSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-    [newSearchKeys addObject:newSearchKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newSearchKeys
-                                                      forKey:BDSKQuickSearchKeys];
-    
-    // this will sort the menu items for us
-    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
-    [self setSelectedSearchFieldKey:newSearchKey];
-}
-
-- (IBAction)quickSearchAddField:(id)sender{
-    // first we fill the popup
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil]
-                                                excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-    
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
-                                                                                              fieldsArray:searchKeys];
-	[addFieldController beginSheetModalForWindow:documentWindow
-                                   modalDelegate:self
-                                  didEndSelector:@selector(addSearchFieldSheetDidEnd:returnCode:contextInfo:)
-                                     contextInfo:NULL];
-    [addFieldController release];
-}
-
-- (void)removeSearchFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
-    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-
-	NSString *oldSearchKey = [removeFieldController field];
-    if(returnCode == NSCancelButton || oldSearchKey == nil || [searchKeys count] == 0)
-        return;
-    
-    [searchKeys removeObject:oldSearchKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
-                                                      forKey:BDSKQuickSearchKeys];
-
-    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
-    if([quickSearchKey isEqualToString:oldSearchKey])
-        [self setSelectedSearchFieldKey:BDSKAllFieldsString];
-}
-
-- (IBAction)quickSearchRemoveField:(id)sender{
-    NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
-    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-    [searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-
-    NSString *prompt = NSLocalizedString(@"Search field to remove:",@"");
-	if ([searchKeys count]) {
-		[searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	} else {
-		prompt = NSLocalizedString(@"No search fields to remove",@"");
-	}
-    
-    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
-                                                                                                       fieldsArray:searchKeys];
-	[removeFieldController beginSheetModalForWindow:documentWindow
-                                      modalDelegate:self
-                                     didEndSelector:@selector(removeSearchFieldSheetDidEnd:returnCode:contextInfo:)
-                                        contextInfo:NULL];
-    [removeFieldController release];
-}
-
-- (IBAction)searchFieldAction:(id)sender{
-
-    if(sender != nil){
-        if([quickSearchKey isEqualToString:BDSKFileContentLocalizedString]){
-            [self searchByContent:sender];
-        } else {
-            [self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
-        }
-    }
+- (IBAction)search:(id)sender{
+    if([[searchField searchKey] isEqualToString:BDSKFileContentLocalizedString])
+        [self searchByContent:sender];
+    else
+        [self hidePublicationsWithoutSubstring:[searchField stringValue] inField:[searchField searchKey]];
 }
 
 #pragma mark -
@@ -341,7 +179,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     // Normal search if the fileSearchController is not present and the searchstring is empty, since the searchfield target has apparently already been reset (I think).  Fixes bug #1341802.
     OBASSERT(searchField != nil && [searchField target] != nil);
     if([searchField target] == self && [NSString isEmptyString:[searchField stringValue]]){
-        [self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
+        [self hidePublicationsWithoutSubstring:[searchField stringValue] inField:[searchField searchKey]];
         return;
     }
     
@@ -403,7 +241,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
         // reconnect the searchfield
         [searchField setTarget:self];
         [searchField setDelegate:self];
-        [searchField setAction:@selector(searchFieldAction:)];
         
         NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
         
