@@ -113,7 +113,7 @@ NSString *BDSKFileContentLocalizedString = nil;
     // reset the template, since we can't modify the actual menu directly
 	[searchCell setSearchMenuTemplate:templateMenu];
     
-    [NSApp sendAction:[self action] to:[self target] from:self];
+    [self sendAction:[self action] to:[self target]];
 }
 
 // assert some assumptions that are made at various places

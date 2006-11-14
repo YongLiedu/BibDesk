@@ -78,7 +78,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     NSParameterAssert(filterterm != nil);
     
     [searchField setStringValue:filterterm];
-    [self search:searchField];
+    [searchField sendAction:[searchField action] to:[searchField target]];
 }
 
 - (IBAction)search:(id)sender{
