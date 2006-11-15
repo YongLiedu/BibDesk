@@ -430,16 +430,15 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
     NSString *searchKey = [xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey]];
-    [searchField setRecentSearches:[xattrDefaults objectForKey:BDSKRecentSearchesKey defaultObject:[NSArray array]]];
     // @@ Changed from "All Fields" to localized "Any Field" in 1.2.2; prefs may still have the old key, so this is a temporary workaround for bug #1420837 as of 31 Jan 2006
-    if([searchKey isEqualToString:@"All Fields"]){
-        [searchKey release];
+    if([searchKey isEqualToString:@"All Fields"])
         searchKey = [BDSKAllFieldsString copy];
-    } else if(searchKey == nil || [searchKey isEqualToString:@"Added"] || [searchKey isEqualToString:@"Created"] || [searchKey isEqualToString:@"Modified"]){
-        [searchKey release];
-        searchKey = [BDSKTitleString copy];
-    }
+    else if([searchKey isEqualToString:@"Added"] || [searchKey isEqualToString:@"Created"])
+        searchKey = BDSKDateAddedString;
+    else if([searchKey isEqualToString:@"Modified"])
+        searchKey = BDSKDateModifiedString;
 	[searchField setSearchKey:searchKey];
+    [searchField setRecentSearches:[xattrDefaults objectForKey:BDSKRecentSearchesKey defaultObject:[NSArray array]]];
     [self setupToolbar];
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
