@@ -1305,6 +1305,76 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
 }
 
+- (id)displayValueOfField:(NSString *)field{
+    static NSDateFormatter *shortDateFormatter = nil;
+    if(shortDateFormatter == nil) {
+        shortDateFormatter = [[NSDateFormatter alloc] init];
+        [shortDateFormatter setDateStyle:NSDateFormatterShortStyle];
+        [shortDateFormatter setTimeStyle:NSDateFormatterNoStyle];
+    }
+    
+    if([field isEqualToString:BDSKCiteKeyString]){
+        return [self citeKey];
+    }else if([field isEqualToString:BDSKItemNumberString]){
+        return [self fileOrder];
+    }else if([field isEqualToString: BDSKTitleString] ){
+        return [self title];
+    }else if([field isEqualToString: BDSKContainerString] ){
+        return [self container];
+    }else if([field isEqualToString: BDSKDateAddedString]){
+        return [shortDateFormatter stringFromDate:[self dateAdded]];
+    }else if([field isEqualToString: BDSKDateModifiedString]){
+        return [shortDateFormatter stringFromDate:[self dateModified]];
+    }else if([field isEqualToString: BDSKDateString] ){
+        NSString *value = [self valueOfField:BDSKDateString];
+        if([NSString isEmptyString:value] == NO)
+            return value;
+        NSCalendarDate *date = [self date];
+        if(nil == date) 
+            return nil;
+        NSString *monthStr = [self valueOfField:BDSKMonthString];
+        if([NSString isEmptyString:monthStr])
+            return [date descriptionWithCalendarFormat:@"%Y"];
+        else
+            return [date descriptionWithCalendarFormat:@"%b %Y"];
+    }else if([field isEqualToString: BDSKFirstAuthorString] ){
+        return [[self authorAtIndex:0] displayName];
+    }else if([field isEqualToString: BDSKSecondAuthorString] ){
+        return [[self authorAtIndex:1] displayName]; 
+    }else if([field isEqualToString: BDSKThirdAuthorString] ){
+        return [[self authorAtIndex:2] displayName];
+    }else if([field isEqualToString:BDSKLastAuthorString] ){
+        return [[self lastAuthor] displayName];
+    }else if([field isEqualToString: BDSKFirstAuthorEditorString] ){
+        return [[self authorOrEditorAtIndex:0] displayName];
+    }else if([field isEqualToString: BDSKSecondAuthorEditorString] ){
+        return [[self authorOrEditorAtIndex:1] displayName]; 
+    }else if([field isEqualToString: BDSKThirdAuthorEditorString] ){
+        return [[self authorOrEditorAtIndex:2] displayName];
+    }else if([field isEqualToString:BDSKLastAuthorEditorString] ){
+        return [[self lastAuthorOrEditor] displayName];
+    } else if([field isEqualToString:BDSKAuthorString]) {
+        return [self pubAuthorsForDisplay];
+    } else if([field isEqualToString:BDSKAuthorEditorString]){
+        return [self pubAuthorsOrEditorsForDisplay];
+    } else if([field isEqualToString:BDSKEditorString]) {
+        return [self peopleStringForDisplayFromField:BDSKEditorString];
+    }else if([field isURLField]){
+        return [self smallImageForURLField:field];
+    }else if([field isRatingField]){
+        return [NSNumber numberWithInt:[self ratingValueOfField:field]];
+    }else if([field isBooleanField]){
+        return [NSNumber numberWithBool:[self boolValueOfField:field]];
+    }else if([field isTriStateField]){
+        return [NSNumber numberWithInt:[self triStateValueOfField:field]];
+    }else if([field isEqualToString:BDSKPubTypeString]){
+        return [self pubType];
+    }else{
+        // the tableColumn isn't something we handle in a custom way.
+        return [self valueOfField:field];
+    }
+}
+
 #pragma mark Search support
 
 - (NSString *)calendarDateDescription{

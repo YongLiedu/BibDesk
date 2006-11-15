@@ -1108,7 +1108,7 @@
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     
-    CFIndex index = [tableView numberOfRows] - 1;
+    CFIndex index = [shownPublications count];
     id object1 = nil, object2 = nil;
     
     OBASSERT(sortKey);
@@ -1119,7 +1119,7 @@
     // Compare objects in the currently sorted table column using the isEqual: method to test adjacent cells in order to check for duplicates based on a specific sort key.  BibTool does this, but its effectiveness is obviously limited by the key used <http://lml.ls.fi.upm.es/manuales/bibtool/m_2_11_1.html>.
     while(index--){
         object1 = object2;
-        object2 = [self tableView:tableView objectValueForTableColumn:[tableView tableColumnWithIdentifier:sortKey] row:index];
+        object2 = [[shownPublications objectAtIndex:index] displayValueOfField:sortKey];
         if([object1 isEqual:object2]){
             [rowsToSelect addIndexesInRange:NSMakeRange(index, 2)];
             countOfItems++;

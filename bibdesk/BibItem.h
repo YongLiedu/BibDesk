@@ -514,6 +514,8 @@ enum {
 */
 - (void)setField:(NSString *)field toStringValue:(NSString *)value;
 
+- (id)displayValueOfField:(NSString *)field;
+
 /*!
     @method     setHasBeenEdited:
     @abstract   Must be set to YES if the BibItem has been edited externally.

@@ -81,10 +81,10 @@
 
 #pragma mark TableView data source
 
-- (int)numberOfRowsInTableView:(NSTableView *)tView{
-    if(tView == (NSTableView *)tableView){
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
+    if(tv == (NSTableView *)tableView){
         return [shownPublications count];
-    }else if(tView == groupTableView){
+    }else if(tv == groupTableView){
         return [groups count];
     }else{
 // should raise an exception or something
@@ -92,85 +92,11 @@
     }
 }
 
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    BibItem* pub = nil;
-    NSArray *auths = nil;
-
-    NSString *tcID = [tableColumn identifier];
-    
-    static NSDateFormatter *shortDateFormatter = nil;
-    if(shortDateFormatter == nil) {
-        shortDateFormatter = [[NSDateFormatter alloc] init];
-        [shortDateFormatter setDateStyle:NSDateFormatterShortStyle];
-        [shortDateFormatter setTimeStyle:NSDateFormatterNoStyle];
-    }
-    
-    if(row >= 0 && tView == tableView){ // sortedRow can be -1 if you delete the last pub and sortDescending is true
-        pub = [shownPublications objectAtIndex:row];
-        auths = [pub pubAuthors];
-        
-        if([tcID isEqualToString:BDSKCiteKeyString]){
-            return [pub citeKey];
-        }else if([tcID isEqualToString:BDSKItemNumberString]){
-            return [pub fileOrder];
-        }else if([tcID isEqualToString: BDSKTitleString] ){
-			return [pub title];
-		}else if([tcID isEqualToString: BDSKContainerString] ){
-			return [pub container];
-        }else if([tcID isEqualToString: BDSKDateAddedString]){
-            return [shortDateFormatter stringFromDate:[pub dateAdded]];
-        }else if([tcID isEqualToString: BDSKDateModifiedString]){
-			return [shortDateFormatter stringFromDate:[pub dateModified]];
-        }else if([tcID isEqualToString: BDSKDateString] ){
-			NSString *value = [pub valueOfField:BDSKDateString];
-			if([NSString isEmptyString:value] == NO)
-				return value;
-            NSCalendarDate *date = [pub date];
-            if(nil == date) 
-                return nil;
-			NSString *monthStr = [pub valueOfField:BDSKMonthString];
-            if([NSString isEmptyString:monthStr])
-                return [date descriptionWithCalendarFormat:@"%Y"];
-            else
-                return [date descriptionWithCalendarFormat:@"%b %Y"];
-        }else if([tcID isEqualToString: BDSKFirstAuthorString] ){
-			return [[pub authorAtIndex:0] displayName];
-        }else if([tcID isEqualToString: BDSKSecondAuthorString] ){
-			return [[pub authorAtIndex:1] displayName]; 
-        }else if([tcID isEqualToString: BDSKThirdAuthorString] ){
-			return [[pub authorAtIndex:2] displayName];
-        }else if([tcID isEqualToString:BDSKLastAuthorString] ){
-			return [[pub lastAuthor] displayName];
-        }else if([tcID isEqualToString: BDSKFirstAuthorEditorString] ){
-			return [[pub authorOrEditorAtIndex:0] displayName];
-        }else if([tcID isEqualToString: BDSKSecondAuthorEditorString] ){
-			return [[pub authorOrEditorAtIndex:1] displayName]; 
-        }else if([tcID isEqualToString: BDSKThirdAuthorEditorString] ){
-			return [[pub authorOrEditorAtIndex:2] displayName];
-        }else if([tcID isEqualToString:BDSKLastAuthorEditorString] ){
-			return [[pub lastAuthorOrEditor] displayName];
-		} else if([tcID isEqualToString:BDSKAuthorString]) {
-			return [pub pubAuthorsForDisplay];
-		} else if([tcID isEqualToString:BDSKAuthorEditorString]){
-			return [pub pubAuthorsOrEditorsForDisplay];
-        } else if([tcID isEqualToString:BDSKEditorString]) {
-			return [pub peopleStringForDisplayFromField:BDSKEditorString];
-        }else if([tcID isURLField]){
-            return [pub smallImageForURLField:tcID];
-		}else if([tcID isRatingField]){
-			return [NSNumber numberWithInt:[pub ratingValueOfField:tcID]];
-		}else if([tcID isBooleanField]){
-            return [NSNumber numberWithBool:[pub boolValueOfField:tcID]];
-		}else if([tcID isTriStateField]){
-			return [NSNumber numberWithInt:[pub triStateValueOfField:tcID]];
-		}else if([tcID isEqualToString:BDSKPubTypeString]){
-			return [pub pubType];
-        }else{
-            // the tableColumn isn't something we handle in a custom way.
-            return [pub valueOfField:tcID];
-        }
-
-    }else if(tView == groupTableView){
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    if(tv == tableView){ // sortedRow can be -1 if you delete the last pub and sortDescending is true
+        BibItem *pub = row == -1 ? nil : [shownPublications objectAtIndex:row];
+        return [pub displayValueOfField:[tableColumn identifier]];
+    }else if(tv == groupTableView){
 		return [groups objectAtIndex:row];
     }else return nil;
 }
@@ -1171,23 +1097,24 @@
         // to avoid calling it twice on -reloadData, but that will only work if -reloadData reloads
         // all rows instead of just visible rows.
         
-        NSTableColumn *column = [tableView tableColumnWithIdentifier:sortKey];
-        unsigned int row, numberOfRows = [tableView numberOfRows];
-        NSMutableArray *a = [NSMutableArray arrayWithCapacity:numberOfRows];
+        unsigned int i, count = [shownPublications count];
+        NSMutableArray *a = [NSMutableArray arrayWithCapacity:count];
 
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
-        if([sortKey isURLField] == NO && nil != column){
+        if([sortKey isURLField] == NO && nil != sortKey){
+            BibItem *pub;
             id value;
-            typedef id (*dataIMP)(id, SEL, id, id, unsigned int);
-            SEL selector = @selector(tableView:objectValueForTableColumn:row:);
-            dataIMP get_datasource_value = (dataIMP)[self methodForSelector:selector];
             
-            for (row = 0; row < numberOfRows; row++){
-                value = get_datasource_value(self, selector, tableView, column, row);
+            for (i = 0; i < count; i++){
+                pub = [shownPublications objectAtIndex:i];
+                value = [pub displayValueOfField:sortKey];
                 
                 // use @"" for nil values; ensure typeahead index matches shownPublications index
                 [a addObject:value ? [value description] : @""];
             }
+        }else{
+            for (i = 0; i < count; i++)
+                [a addObject:@""];
         }
         return a;
         
