@@ -112,6 +112,7 @@
 #import "NSError_BDSKExtensions.h"
 #import "BDSKColoredBox.h"
 #import "BDSKSearchField.h"
+#import "BDSKCustomCiteDrawerController.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -169,9 +170,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         [pboardHelper setDelegate:self];
         
         docState.isDocumentClosed = NO;
-        
-		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
-		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
         
         // need to set this for new documents
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
@@ -336,7 +334,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [groups release];
     [frontMatter release];
     [documentInfo release];
-    [customStringArray release];
+    [drawerController release];
     [toolbarItems release];
 	[statusBar release];
 	[splitView release];
@@ -527,12 +525,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
 
-    // Cite Drawer setup
-    // workaround for IB flakiness...
-    NSSize drawerSize = [customCiteDrawer contentSize];
-    [customCiteDrawer setContentSize:NSMakeSize(100.0, drawerSize.height)];
-	docState.showingCustomCiteDrawer = NO;
-	
 	// ImagePopUpButtons setup
 	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -616,7 +608,8 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     docState.isDocumentClosed = YES;
     
     [fileSearchController stopSearching];
-    [customCiteDrawer close];
+    if([drawerController isDrawerOpen])
+        [drawerController toggle:nil];
     [self saveSortOrder];
     [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL]];
     

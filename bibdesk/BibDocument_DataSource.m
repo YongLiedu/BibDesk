@@ -84,8 +84,6 @@
 - (int)numberOfRowsInTableView:(NSTableView *)tView{
     if(tView == (NSTableView *)tableView){
         return [shownPublications count];
-    }else if(tView == (NSTableView *)ccTableView){
-        return [customStringArray count];
     }else if(tView == groupTableView){
         return [groups count];
     }else{
@@ -172,18 +170,13 @@
             return [pub valueOfField:tcID];
         }
 
-    }else if(tView == (NSTableView *)ccTableView){
-        return [customStringArray objectAtIndex:row];
     }else if(tView == groupTableView){
 		return [groups objectAtIndex:row];
     }else return nil;
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    if(tv == (NSTableView *)ccTableView){
-		[customStringArray replaceObjectAtIndex:row withObject:object];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
-	}else if (tv == tableView){
+    if(tv == tableView){
 
 		NSString *tcID = [tableColumn identifier];
 		if([tcID isRatingField]){
@@ -259,9 +252,7 @@
 }
 
 - (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
-    if(tv == (NSTableView *)ccTableView){
-		return YES;
-	}else if(tv == groupTableView){
+    if(tv == groupTableView){
 		if ([[groups objectAtIndex:row] hasEditableName] == NO) 
 			return NO;
 		else if (NSLocationInRange(row, [groups rangeOfCategoryGroups]) &&
@@ -342,8 +333,6 @@
     if(tv == tableView){
         NSNotification *note = [NSNotification notificationWithName:BDSKTableSelectionChangedNotification object:self];
         [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
-    }else if(tv == (NSTableView *)ccTableView){
-		[removeCustomCiteStringButton setEnabled:([tv numberOfSelectedRows] > 0)];
 	}else if(tv == groupTableView){
         NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
         [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
@@ -544,25 +533,6 @@
             return NO;
         }
 			
-    } else if(tv == (NSTableView *)ccTableView){
-		// drag from the custom cite drawer table
-		// check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
-		if([tableView numberOfSelectedRows] == 0){
-            NSBeginAlertSheet(NSLocalizedString(@"Nothing selected in document", @""),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
-                              NSLocalizedString(@"You need to select an item in the document before dragging from the cite drawer.", @""));
-            return NO;
-        }
-
-        citeString = [customStringArray objectAtIndex:[rowIndexes firstIndex]];
-		// firstIndex is ok because we don't allow multiple selections in ccTV.
-
-        // if it's the ccTableView, then rows has the rows of the ccTV.
-        // we need to change rows to be the main TV's selected rows,
-        // so that the regular code still works
-        pubs = [self selectedPublications];
-        dragCopyType = 1; // only type that makes sense here
-        
-        docState.dragFromSharedGroups = [self hasExternalGroupsSelected];
     }else if(tv == tableView){
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
@@ -723,20 +693,22 @@
 }
 
 - (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation{
+    [self clearPromisedDraggedItems];
+}
+
+- (void)clearPromisedDraggedItems{
 	[pboardHelper clearPromisedTypesForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
 }
 
 - (NSDragOperation)tableView:(NSTableView *)tv draggingSourceOperationMaskForLocal:(BOOL)isLocal{
-	if (tv == tableView) {
-		return (isLocal)? NSDragOperationEvery : NSDragOperationCopy;
-	} else if (tv == ccTableView) {
-		return (isLocal)? NSDragOperationNone : NSDragOperationCopy;
-	} else {
-		return (isLocal)? NSDragOperationEvery : NSDragOperationCopy;
-	}
+    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 - (NSImage *)tableView:(NSTableView *)tv dragImageForRowsWithIndexes:(NSIndexSet *)dragRows{
+    return [self dragImageForPromisedItemsUsingCiteString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
+}
+
+- (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString{
     NSImage *image = nil;
     
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
@@ -785,11 +757,7 @@
 				break;
 			case BDSKCiteDragCopyType:
 				// Are we using a custom citeString (from the drawer?)
-				if (tv == ccTableView) { 
-					[s appendString:[self citeStringForPublications:[NSArray arrayWithObject:firstItem] citeString:[customStringArray objectAtIndex:[dragRows firstIndex]]]];
-				} else {
-					[s appendString:[self citeStringForPublications:[NSArray arrayWithObject:firstItem] citeString:[sud stringForKey:BDSKCiteStringKey]]];
-				}
+                [s appendString:[self citeStringForPublications:[NSArray arrayWithObject:firstItem] citeString:citeString]];
 				if (count > 1) 
 					[s appendString:[NSString horizontalEllipsisString]];
 				break;
@@ -873,18 +841,18 @@
     
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
-    id draggingSource = [info draggingSource];
+    BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
+    BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupTableView];
+    BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
     
-    if(tv == (NSTableView *)ccTableView){
-        return NSDragOperationNone;// can't drag into that tv.
-    }else if(tv == tableView){
+    if(tv == tableView){
         if([self hasExternalGroupsSelected] || type == nil) 
 			return NSDragOperationNone;
-		if (draggingSource == groupTableView && docState.dragFromSharedGroups && [self hasLibraryGroupSelected]) {
+		if (isDragFromGroupTable && docState.dragFromSharedGroups && [self hasLibraryGroupSelected]) {
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
-        if(draggingSource == tableView || draggingSource == groupTableView || draggingSource == ccTableView) {
+        if(isDragFromMainTable || isDragFromGroupTable || isDragFromDrawer) {
 			// can't copy onto same table
 			return NSDragOperationNone;
 		}
@@ -900,7 +868,7 @@
         else
             return NSDragOperationEvery;
     }else if(tv == groupTableView){
-		if ((draggingSource == groupTableView || draggingSource == tableView) && docState.dragFromSharedGroups) {
+		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromSharedGroups) {
             if (row != 0)
                 return NSDragOperationNone;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
@@ -908,12 +876,12 @@
         }
             
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if(draggingSource == ccTableView || draggingSource == groupTableView || row >= [tv numberOfRows] || [[groups objectAtIndex:row]  isValidDropTarget] == NO || type == nil || (row == 0 && draggingSource == tableView)) 
+        if(isDragFromDrawer || isDragFromGroupTable || row >= [tv numberOfRows] || [[groups objectAtIndex:row]  isValidDropTarget] == NO || type == nil || (row == 0 && isDragFromMainTable)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
         [tv setDropRow:row dropOperation:NSTableViewDropOn];
-        if(draggingSource == tableView){
+        if(isDragFromMainTable){
             if([type isEqualToString:BDSKBibItemPboardType])
                 return NSDragOperationLink;
             else
@@ -937,9 +905,7 @@
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     
-    if(tv == (NSTableView *)ccTableView){
-        return NO; // can't drag into that tv.
-    } else if(tv == tableView){
+    if(tv == tableView){
         if([self hasExternalGroupsSelected])
             return NO;
 		if(row != -1){
@@ -1011,17 +977,19 @@
         }
     } else if(tv == groupTableView){
         NSArray *pubs = nil;
-        id draggingSource = [info draggingSource];
+        BOOL isDragFromMainTable = [[info draggingSource] isEqual:tableView];
+        BOOL isDragFromGroupTable = [[info draggingSource] isEqual:groupTableView];
+        BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
         
         // retain is required to fix bug #1356183
         BDSKGroup *group = [[[groups objectAtIndex:row] retain] autorelease];
         BOOL shouldSelect = [[self selectedGroups] containsObject:group];
 		
-		if ((draggingSource == groupTableView || draggingSource == tableView) && docState.dragFromSharedGroups && row == 0) {
+		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
-        } else if(draggingSource == groupTableView || [group isValidDropTarget] == NO) {
+        } else if(isDragFromGroupTable || [group isValidDropTarget] == NO) {
             return NO;
-        } else if(draggingSource == tableView){
+        } else if(isDragFromMainTable){
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
@@ -1114,6 +1082,18 @@
 - (NSString *)promiseDragColumnIdentifier;
 {
     return promiseDragColumnIdentifier;
+}
+
+#pragma mark -
+
+- (BOOL)isDragFromSharedGroups;
+{
+    return docState.dragFromSharedGroups;
+}
+
+- (void)setDragFromSharedGroups:(BOOL)flag;
+{
+    docState.dragFromSharedGroups = flag;
 }
 
 #pragma mark TableView actions

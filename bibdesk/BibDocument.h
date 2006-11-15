@@ -44,7 +44,7 @@
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
-@class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController;
+@class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox, BDSKSearchField;
 
 enum {
@@ -137,12 +137,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	IBOutlet BDSKSearchField *searchField;
 
 #pragma mark Custom Cite-String drawer variables
-
-    IBOutlet NSDrawer* customCiteDrawer;
-    IBOutlet NSTableView* ccTableView;
-    IBOutlet NSButton *addCustomCiteStringButton;
-    IBOutlet NSButton *removeCustomCiteStringButton;
-    NSMutableArray* customStringArray;
+    
+    BDSKCustomCiteDrawerController *drawerController;
 
 #pragma mark Sorting variables
 
@@ -195,7 +191,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         float               lastGroupViewWidth;
         NSStringEncoding    documentStringEncoding;
         NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
-        BOOL                showingCustomCiteDrawer;
         BOOL                sortDescending;
         BOOL                sortGroupsDescending;
         BOOL                dragFromSharedGroups;

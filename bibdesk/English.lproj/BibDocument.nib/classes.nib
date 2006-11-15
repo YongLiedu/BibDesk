@@ -33,7 +33,6 @@
         {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
         {
             ACTIONS = {
-                addCustomCiteString = id; 
                 addGroupButtonAction = id; 
                 addGroupFieldAction = id; 
                 addScriptGroupAction = id; 
@@ -97,7 +96,6 @@
                 refreshSharedBrowsing = id; 
                 refreshSharing = id; 
                 refreshURLGroups = id; 
-                removeCustomCiteString = id; 
                 removeGroupFieldAction = id; 
                 removeSelectedGroups = id; 
                 removeSelectedPubs = id; 
@@ -128,10 +126,7 @@
                 actionMenu = NSMenu; 
                 actionMenuButton = BDSKImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
-                addCustomCiteStringButton = NSButton; 
-                ccTableView = NSTableView; 
                 currentPreviewView = NSView; 
-                customCiteDrawer = NSDrawer; 
                 documentWindow = NSWindow; 
                 exportAccessoryView = NSView; 
                 exportSelectionCheckButton = NSButton; 
@@ -146,7 +141,6 @@
                 groupTableView = BDSKGroupTableView; 
                 mainBox = BDSKColoredBox; 
                 previewTextView = NSTextView; 
-                removeCustomCiteStringButton = NSButton; 
                 saveAccessoryView = NSView; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
                 searchField = BDSKSearchField; 

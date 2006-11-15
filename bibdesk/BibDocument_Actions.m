@@ -74,6 +74,7 @@
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
 #import "BDSKSearchField.h"
+#import "BDSKCustomCiteDrawerController.h"
 
 
 @implementation BibDocument (Actions)
@@ -801,35 +802,13 @@
     [sender adjustSubviews];
 }
 
-#pragma mark Custom cite drawer stuff
+#pragma mark Custom cite drawer
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
-    [customCiteDrawer toggle:sender];
-	if(docState.showingCustomCiteDrawer){
-		docState.showingCustomCiteDrawer = NO;
-	}else{
-		docState.showingCustomCiteDrawer = YES;
-	}
-}
-
-- (IBAction)addCustomCiteString:(id)sender{
-    int row = [customStringArray count];
-	[customStringArray addObject:@"citeCommand"];
-    [ccTableView reloadData];
-	[ccTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	[ccTableView editColumn:0 row:row withEvent:nil select:YES];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
-}
-
-- (IBAction)removeCustomCiteString:(id)sender{
-    if([ccTableView numberOfSelectedRows] == 0)
-		return;
-	
-	if ([ccTableView editedRow] != -1)
-		[documentWindow makeFirstResponder:ccTableView];
-	[customStringArray removeObjectAtIndex:[ccTableView selectedRow]];
-	[ccTableView reloadData];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+    if(drawerController == nil)
+        drawerController = [[BDSKCustomCiteDrawerController alloc] initForDocument:self];
+    [drawerController toggle:sender];
+    return;
 }
 
 #pragma mark Sharing Actions

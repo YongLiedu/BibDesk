@@ -48,6 +48,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument_Actions.h"
 #import "BDSKGroupsArray.h"
+#import "BDSKCustomCiteDrawerController.h"
 
 @implementation BibDocument (Menus)
 
@@ -533,7 +534,7 @@
 
 - (BOOL) validateToggleToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
-	if(docState.showingCustomCiteDrawer){
+	if([drawerController isDrawerOpen]){
 		s = NSLocalizedString(@"Hide Custom \\cite Commands",@"");
 		[menuItem setTitle:s];
 	}else{

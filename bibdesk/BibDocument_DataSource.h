@@ -43,7 +43,11 @@
 
 - (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
 - (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
+- (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString;
+- (void)clearPromisedDraggedItems;
 - (NSString *)promiseDragColumnIdentifier;
 - (NSDictionary *)currentTableColumnWidthsAndIdentifiers;
+- (BOOL)isDragFromSharedGroups;
+- (void)setDragFromSharedGroups:(BOOL)flag;
 
 @end

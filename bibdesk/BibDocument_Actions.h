@@ -233,12 +233,9 @@
     
 */
 
-#pragma mark Custom cite drawer stuff
+#pragma mark Custom cite drawer
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
-
-- (IBAction)addCustomCiteString:(id)sender;
-- (IBAction)removeCustomCiteString:(id)sender;
 
 #pragma mark Sharing Actions
 
