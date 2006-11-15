@@ -103,7 +103,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	
 	[tableView deselectAll:nil];
     // @@ performance: this kills us on large files, since it gets called for every updateCategoryGroupsPreservingSelection (any add/del)
-	[self sortPubsByColumn:nil]; // resort
+	[self sortPubsByKey:nil]; // resort
 	[self updateUI];
 	if(pubsToSelect)
 		[self selectPublications:pubsToSelect];
@@ -196,7 +196,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     // this is what displaySelectedGroup normally ends up doing
     [shownPublications setArray:publications];
     [tableView reloadData];
-    [self sortPubsByColumn:nil];
+    [self sortPubsByKey:nil];
     
     if(fileSearchController == nil){
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];

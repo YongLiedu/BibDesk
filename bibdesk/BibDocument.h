@@ -142,7 +142,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 #pragma mark Sorting variables
 
-    NSTableColumn *lastSelectedColumnForSort;
+    NSString *sortKey;
+    NSString *previousSortKey;
     NSString *sortGroupsKey;
     
 #pragma mark Menu variables
@@ -366,12 +367,12 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)updateUI;
 
 /*!
-    @method     sortPubsByColumn:
-    @abstract   Sorts the publications table by the given table column.  Pass nil for the table column to re-sort the previously sorted column with the same order.
+    @method     sortPubsByKey:
+    @abstract   Sorts the publications table by the given key.  Pass nil for the table column to re-sort the previously sorted column with the same order.
     @discussion (comprehensive description)
-    @param      tableColumn (description)
+    @param      key (description)
 */
-- (void)sortPubsByColumn:(NSTableColumn *)tableColumn;
+- (void)sortPubsByKey:(NSString *)key;
 
 /*!
     @method     sortTableByDefaultColumn

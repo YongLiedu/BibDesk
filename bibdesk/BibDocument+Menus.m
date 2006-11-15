@@ -741,7 +741,7 @@
 }
 
 - (BOOL) validateSelectPossibleDuplicatesMenuItem:(NSMenuItem *)menuItem{
-    [menuItem setTitle:[NSLocalizedString(@"Select Duplicates by ", @"for selecting duplicate publications; requires a single trailing space") stringByAppendingString:[lastSelectedColumnForSort identifier]]];
+    [menuItem setTitle:[NSLocalizedString(@"Select Duplicates by ", @"for selecting duplicate publications; requires a single trailing space") stringByAppendingString:sortKey]];
     return ([self hasExternalGroupsSelected] == NO);
 }
 

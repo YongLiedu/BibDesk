@@ -343,7 +343,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [macroWC release];
     [infoWC release];
     [promiseDragColumnIdentifier release];
-    [lastSelectedColumnForSort release];
+    [sortKey release];
     [sortGroupsKey release];
     [sharedGroupSpinners release];
     [super dealloc];
@@ -647,7 +647,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         
         [dictionary setObject:[tableView tableColumnIdentifiers] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
-        [dictionary setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+        [dictionary setObject:sortKey forKey:BDSKDefaultSortedTableColumnKey];
         [dictionary setBoolValue:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
         [dictionary setBoolValue:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
@@ -1471,7 +1471,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self sortGroupsByKey:sortGroupsKey]; // resort
 		[tableView deselectAll:self]; // clear before resorting
 		[self search:searchField]; // redo the search
-        [self sortPubsByColumn:nil]; // resort
+        [self sortPubsByKey:nil]; // resort
 		return YES;
 	}
 	return NO;
@@ -2051,44 +2051,48 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark Sorting
 
-- (void)sortPubsByColumn:(NSTableColumn *)tableColumn{
+- (void)sortPubsByKey:(NSString *)key{
     
-    // use this for a subsort
-    NSString *lastSortedTableColumnIdentifier = [lastSelectedColumnForSort identifier];
-        
+    NSTableColumn *tableColumn = nil;
+    
     // cache the selection; this works for multiple publications
     NSArray *pubsToSelect = nil;
     if([tableView numberOfSelectedRows])
         pubsToSelect = [self selectedPublications];
     
     // a nil argument means resort the current column in the same order
-    if(tableColumn == nil){
-        if(lastSelectedColumnForSort == nil)
+    if(key == nil){
+        if(sortKey == nil)
             return;
-        tableColumn = lastSelectedColumnForSort; // use the previous one
+        key = sortKey;
         docState.sortDescending = !docState.sortDescending; // we'll reverse this again in the next step
     }
     
-    if (lastSelectedColumnForSort == tableColumn) {
+    tableColumn = [tableView tableColumnWithIdentifier:key];
+    
+    if ([sortKey isEqualToString:key]) {
         // User clicked same column, change sort order
         docState.sortDescending = !docState.sortDescending;
     } else {
         // User clicked new column, change old/new column headers,
         // save new sorting selector, and re-sort the array.
         docState.sortDescending = NO;
-        if (lastSelectedColumnForSort) {
-            [tableView setIndicatorImage: nil
-                           inTableColumn: lastSelectedColumnForSort];
-            [lastSelectedColumnForSort release];
+        if (sortKey)
+            [tableView setIndicatorImage:nil inTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
+        if([previousSortKey isEqualToString:sortKey] == NO){
+            [previousSortKey release];
+            previousSortKey = sortKey; // this is retained
+        }else{
+            [sortKey release];
         }
-        lastSelectedColumnForSort = [tableColumn retain];
-        [tableView setHighlightedTableColumn: tableColumn]; 
+        sortKey = [key retain];
+        [tableView setHighlightedTableColumn:tableColumn]; 
 	}
     
-    // should never be nil at this point
-    OBPRECONDITION(lastSortedTableColumnIdentifier);
+    if(previousSortKey == nil)
+        previousSortKey = [sortKey retain];
     
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:[tableColumn identifier] ascending:!docState.sortDescending], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:lastSortedTableColumnIdentifier ascending:!docState.sortDescending], nil];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.sortDescending], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
 
@@ -2119,22 +2123,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (void)sortPubsByDefaultColumn{
 
     NSDictionary *windowSetup = [self mainWindowSetupDictionaryFromExtendedAttributes];        
-    NSString *colName = [windowSetup objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey]];
-    
-    NSTableColumn *tc = [tableView tableColumnWithIdentifier:colName];
-    if(tc == nil)
-        return;
-    
-    lastSelectedColumnForSort = [tc retain];
+    sortKey = [[windowSetup objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
     docState.sortDescending = [windowSetup  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
-    [self sortPubsByColumn:nil];
-    [tableView setHighlightedTableColumn:tc];
+    [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
+    [self sortPubsByKey:nil];
 }
 
 - (void)saveSortOrder{ 
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    [pw setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+    [pw setObject:sortKey forKey:BDSKDefaultSortedTableColumnKey];
     [pw setBool:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
     [pw setBool:docState.sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];    
@@ -2191,8 +2189,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[self search:searchField];
 	} else { 
         // groups and quicksearch won't update for us
-        if([[lastSelectedColumnForSort identifier] isEqualToString:changedKey])
-            [self sortPubsByColumn:nil]; // resort if the changed value was in the currently sorted column
+        if([sortKey isEqualToString:changedKey])
+            [self sortPubsByKey:nil]; // resort if the changed value was in the currently sorted column
         [self updateUI];
         [self updatePreviews:nil];
     }
@@ -2251,7 +2249,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)handleIgnoredSortTermsChangedNotification:(NSNotification *)notification{
-    [self sortPubsByColumn:nil];
+    [self sortPubsByKey:nil];
 }
 
 - (void)handleNameDisplayChangedNotification:(NSNotification *)notification{

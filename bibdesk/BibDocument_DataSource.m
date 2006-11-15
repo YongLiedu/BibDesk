@@ -385,7 +385,7 @@
     if ([[NSApp currentEvent] type] == NSRightMouseDown) 
         return;
     if (tableView == tv){
-        [self sortPubsByColumn:tableColumn];
+        [self sortPubsByKey:[tableColumn identifier]];
 	}else if (groupTableView == tv){
         [self sortGroupsByKey:nil];
 	}
@@ -1153,11 +1153,10 @@
 
 // used for status bar
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
-    NSString *tcID = [lastSelectedColumnForSort identifier];
-    if(!searchString || !tcID)
+    if(searchString == nil || sortKey == nil)
         [self updateUI]; // resets the status line to its default value
     else
-        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @""), tcID, searchString]];
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @""), sortKey, searchString]];
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
@@ -1170,13 +1169,12 @@
         // to avoid calling it twice on -reloadData, but that will only work if -reloadData reloads
         // all rows instead of just visible rows.
         
-        NSString *field = [lastSelectedColumnForSort identifier];
-        NSTableColumn *column = [tableView tableColumnWithIdentifier:field];
+        NSTableColumn *column = [tableView tableColumnWithIdentifier:sortKey];
         unsigned int row, numberOfRows = [tableView numberOfRows];
         NSMutableArray *a = [NSMutableArray arrayWithCapacity:numberOfRows];
 
         // table datasource returns an NSImage for URL fields, so we'll ignore those columns
-        if([field isURLField] == NO && nil != column){
+        if([sortKey isURLField] == NO && nil != column){
             id value;
             typedef id (*dataIMP)(id, SEL, id, id, unsigned int);
             SEL selector = @selector(tableView:objectValueForTableColumn:row:);
