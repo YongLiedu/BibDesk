@@ -993,6 +993,8 @@
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
+        } else if(isDragFromDrawer){
+            return NO;
         } else {
             if([self addPublicationsFromPasteboard:pboard error:NULL] == NO)
                 return NO;
