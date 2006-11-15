@@ -161,4 +161,10 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 - (BOOL)isValidDropTarget { return NO; }
 
+- (BOOL)isEqual:(id)other { return other == self; }
+
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+}
+
 @end

@@ -87,6 +87,11 @@
     [super dealloc];
 }
 
+// name can change, but key doesn't change, and it's also required for equality
+- (unsigned int)hash {
+    return [key hash];
+}
+
 - (BOOL)isEqual:(id)other {
 	if ([super isEqual:other] == NO) 
 		return NO;
@@ -159,5 +164,11 @@
 - (BOOL)isEditable { return NO; }
 
 - (BOOL)isValidDropTarget { return NO; }
+
+- (BOOL)isEqual:(id)other { return self == other; }
+
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+}
 
 @end

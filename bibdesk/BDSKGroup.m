@@ -101,6 +101,10 @@ static unsigned currentUniqueID = 0;
     [super dealloc];
 }
 
+- (unsigned int)hash {
+    return [name hash];
+}
+
 - (BOOL)isEqual:(id)other {
 	if (self == other)
 		return YES;
@@ -214,6 +218,12 @@ static NSString *BDSKLibraryLocalizedString = nil;
 
 - (BOOL)containsItem:(BibItem *)item {
     return [[item owner] isDocument];
+}
+
+- (BOOL)isEqual:(id)other { return self == other; }
+
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 @end

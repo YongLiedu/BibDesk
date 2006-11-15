@@ -272,6 +272,12 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isValidDropTarget { return NO; }
 
+- (BOOL)isEqual:(id)other { return self == other; }
+
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+}
+
 @end
 
 #pragma mark -
