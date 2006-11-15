@@ -912,14 +912,12 @@
 		
 		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
-        } else if(isDragFromGroupTable || [group isValidDropTarget] == NO) {
+        } else if(isDragFromGroupTable || isDragFromDrawer || [group isValidDropTarget] == NO) {
             return NO;
         } else if(isDragFromMainTable){
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [pboardHelper promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
-        } else if(isDragFromDrawer){
-            return NO;
         } else {
             if([self addPublicationsFromPasteboard:pboard error:NULL] == NO)
                 return NO;
