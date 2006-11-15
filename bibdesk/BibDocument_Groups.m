@@ -1209,10 +1209,10 @@ The groupedPublications array is a subset of the publications array, developed b
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         if(docState.sortGroupsDescending)
             // doc bug: this is supposed to return a copy of the receiver, but sending -release results in a zombie error
-            nameSort = [countSort reversedSortDescriptor];
+            nameSort = [nameSort reversedSortDescriptor];
         sortDescriptors = [NSArray arrayWithObjects:countSort, nameSort, nil];
     } else {
-        if(docState.sortGroupsDescending)
+        if(docState.sortGroupsDescending == NO)
             countSort = [countSort reversedSortDescriptor];
         sortDescriptors = [NSArray arrayWithObjects:nameSort, countSort, nil];
     }
