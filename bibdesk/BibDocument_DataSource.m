@@ -93,9 +93,8 @@
 }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    if(tv == tableView){ // sortedRow can be -1 if you delete the last pub and sortDescending is true
-        BibItem *pub = row == -1 ? nil : [shownPublications objectAtIndex:row];
-        return [pub displayValueOfField:[tableColumn identifier]];
+    if(tv == tableView){
+        return [[shownPublications objectAtIndex:row] displayValueOfField:[tableColumn identifier]];
     }else if(tv == groupTableView){
 		return [groups objectAtIndex:row];
     }else return nil;
