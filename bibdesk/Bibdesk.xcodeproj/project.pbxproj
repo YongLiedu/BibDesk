@@ -299,6 +299,9 @@
 		CE7A31410B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */; };
 		CE7A3E2E0B0A18CC00D1B333 /* BDSKSearchField.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7A3E2C0B0A18CC00D1B333 /* BDSKSearchField.h */; };
 		CE7A3E2F0B0A18CC00D1B333 /* BDSKSearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A3E2D0B0A18CC00D1B333 /* BDSKSearchField.m */; };
+		CE7A4A8E0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */; };
+		CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */; };
+		CE7A4AA50B0B480100D1B333 /* BDSKCustomCiteDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7A4AA40B0B480100D1B333 /* BDSKCustomCiteDrawer.nib */; };
 		CE7E1BB50A0B8EE7009D04C3 /* GroupAction.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */; };
 		CE7E1BB60A0B8EE7009D04C3 /* GroupAdd.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1BB40A0B8EE7009D04C3 /* GroupAdd.tiff */; };
 		CE7E1C3A0A0B9E94009D04C3 /* GroupAction_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1C380A0B9E94009D04C3 /* GroupAction_Pressed.tiff */; };
@@ -1141,6 +1144,9 @@
 		CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKItemPasteboardHelper.h; sourceTree = "<group>"; };
 		CE7A3E2C0B0A18CC00D1B333 /* BDSKSearchField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchField.h; sourceTree = "<group>"; };
 		CE7A3E2D0B0A18CC00D1B333 /* BDSKSearchField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchField.m; sourceTree = "<group>"; };
+		CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCustomCiteDrawerController.h; sourceTree = "<group>"; };
+		CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCustomCiteDrawerController.m; sourceTree = "<group>"; };
+		CE7A4A900B0B476400D1B333 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKCustomCiteDrawer.nib; sourceTree = "<group>"; };
 		CE7E1BB30A0B8EE7009D04C3 /* GroupAction.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAction.tiff; path = Images/GroupAction.tiff; sourceTree = "<group>"; };
 		CE7E1BB40A0B8EE7009D04C3 /* GroupAdd.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAdd.tiff; path = Images/GroupAdd.tiff; sourceTree = "<group>"; };
 		CE7E1C380A0B9E94009D04C3 /* GroupAction_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAction_Pressed.tiff; path = Images/GroupAction_Pressed.tiff; sourceTree = "<group>"; };
@@ -1722,6 +1728,7 @@
 				CE2209A909363A05004D7D92 /* BDSKAlert.nib */,
 				3D866C3E0803223900FF1724 /* BDSKCharacterConversion.nib */,
 				CE38FB95091D954E00BCB69D /* BDSKCondition.nib */,
+				CE7A4AA40B0B480100D1B333 /* BDSKCustomCiteDrawer.nib */,
 				F9E43B1108AD918800A0354B /* BDSKErrorPanel.nib */,
 				F9252E2408F60D520045D563 /* BDSKFileContentSearch.nib */,
 				CE38FB92091D953900BCB69D /* BDSKFilter.nib */,
@@ -1915,6 +1922,7 @@
 				3D866C2708031CEC00FF1724 /* BDSKCharacterConversion.m */,
 				CE38FB85091D946A00BCB69D /* BDSKConditionController.m */,
 				F95ED68A0B07B87F00000BBF /* BDSKController.m */,
+				CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */,
 				CE56D6500A2DAB55003CE000 /* BDSKDocumentController.m */,
 				CE2391600A334890009F3A5B /* BDSKDocumentInfoWindowController.m */,
 				CE35DCE80A99B1A700029B66 /* BDSKErrorEditor.m */,
@@ -2202,6 +2210,7 @@
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				CEBA63D50A7CA0B400588BB7 /* BDSKCrossrefFormatter.h */,
+				CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */,
 				CE56D67B0A2DAB66003CE000 /* BDSKDocumentController.h */,
 				CE23915F0A334890009F3A5B /* BDSKDocumentInfoWindowController.h */,
 				CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */,
@@ -2713,6 +2722,7 @@
 				F95ED68B0B07B87F00000BBF /* BDSKController.h in Headers */,
 				CE7A31410B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h in Headers */,
 				CE7A3E2E0B0A18CC00D1B333 /* BDSKSearchField.h in Headers */,
+				CE7A4A8E0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3112,6 +3122,7 @@
 				CEB7CAC40B01F5DD002F8814 /* editprevious.tiff in Resources */,
 				CEEFE2B70B03FB0100668BB0 /* BDSKURLGroupSheet.nib in Resources */,
 				CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */,
+				CE7A4AA50B0B480100D1B333 /* BDSKCustomCiteDrawer.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3498,6 +3509,7 @@
 				F95ED68C0B07B87F00000BBF /* BDSKController.m in Sources */,
 				CE7A31400B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m in Sources */,
 				CE7A3E2F0B0A18CC00D1B333 /* BDSKSearchField.m in Sources */,
+				CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3757,6 +3769,14 @@
 				CE67E315092B569000410758 /* English */,
 			);
 			name = BibEditorDrawer.nib;
+			sourceTree = "<group>";
+		};
+		CE7A4AA40B0B480100D1B333 /* BDSKCustomCiteDrawer.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE7A4A900B0B476400D1B333 /* English */,
+			);
+			name = BDSKCustomCiteDrawer.nib;
 			sourceTree = "<group>";
 		};
 		CED65AC10906BE65003EED90 /* BibPref_ScriptHooks.nib */ = {
