@@ -379,15 +379,18 @@
 	} else {
 		if ((int)[progressIndicator style] == style)
 			return;
-		progressIndicator = [[NSProgressIndicator alloc] init];
-		[progressIndicator setAutoresizingMask:NSViewMinXMargin | NSViewMinYMargin | NSViewMaxYMargin];
+		if(progressIndicator == nil) {
+            progressIndicator = [[NSProgressIndicator alloc] init];
+        } else {
+            [progressIndicator retain];
+            [progressIndicator removeFromSuperview];
+		}
+        [progressIndicator setAutoresizingMask:NSViewMinXMargin | NSViewMinYMargin | NSViewMaxYMargin];
 		[progressIndicator setStyle:style];
 		[progressIndicator setControlSize:NSSmallControlSize];
 		[progressIndicator setIndeterminate:YES];
 		[progressIndicator setDisplayedWhenStopped:NO];
 		[progressIndicator sizeToFit];
-		[self addSubview:progressIndicator];
-		[progressIndicator release];
 		
 		NSRect rect, ignored;
 		NSSize size = [progressIndicator frame].size;
@@ -395,6 +398,9 @@
         NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
         rect = BDSKCenterRect(rect, size, [self isFlipped]);
 		[progressIndicator setFrame:rect];
+		
+        [self addSubview:progressIndicator];
+		[progressIndicator release];
 	}
 	[self rebuildToolTips];
 	[[self superview] setNeedsDisplayInRect:[self frame]];
