@@ -45,6 +45,7 @@
 - (NSArray *)arrayDroppingFirstObject;
 - (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
+- (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 
 @end
 

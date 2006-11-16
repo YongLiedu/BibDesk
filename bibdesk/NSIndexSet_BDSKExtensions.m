@@ -41,6 +41,18 @@
 
 @implementation NSIndexSet (BDSKExtensions)
 
++ (id)indexSetWithIndexesInArray:(NSArray *)indexArray;
+{
+    NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
+    NSEnumerator *numberEnum = [indexArray objectEnumerator];
+    NSNumber *number;
+    
+    while(number = [numberEnum nextObject])
+        [indexSet addIndex:[number intValue]];
+    
+    return indexSet;
+}
+
 - (BOOL)intersectsIndexSet:(NSIndexSet *)indexSet{
     if ([indexSet count] == 0)
         return NO;

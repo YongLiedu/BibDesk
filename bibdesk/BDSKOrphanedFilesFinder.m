@@ -50,6 +50,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKFile.h"
 #import "NSWindowController_BDSKExtensions.h"
+#import "NSIndexSet_BDSKExtensions.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -256,13 +257,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 // for 10.3 compatibility and OmniAppKit dataSource methods
 - (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
-	NSMutableIndexSet *rowIndexes = [NSMutableIndexSet indexSet];
-	NSEnumerator *rowEnum = [rows objectEnumerator];
-	NSNumber *row;
-	
-	while (row = [rowEnum nextObject]) 
-		[rowIndexes addIndex:[row intValue]];
-	
+	NSIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
 	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
 }
 

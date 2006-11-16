@@ -68,6 +68,7 @@
 #import "BDSKGroupsArray.h"
 #import "BDSKItemPasteboardHelper.h"
 #import "NSMenu_BDSKExtensions.h"
+#import "NSIndexSet_BDSKExtensions.h"
 
 #define MAX_DRAG_IMAGE_WIDTH 700.0
 
@@ -401,13 +402,7 @@
 
 // for 10.3 compatibility and OmniAppKit dataSource methods
 - (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
-	NSMutableIndexSet *rowIndexes = [NSMutableIndexSet indexSet];
-	NSEnumerator *rowEnum = [rows objectEnumerator];
-	NSNumber *row;
-	
-	while (row = [rowEnum nextObject]) 
-		[rowIndexes addIndex:[row intValue]];
-	
+	NSMutableIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
 	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
 }
 

@@ -43,6 +43,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPublicationsArray.h"
 #import "NSObject_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 
 @implementation BibDocument (Scripting)
 
@@ -113,14 +114,9 @@
 }
 
 - (void) setSelection: (NSArray *) newSelection {
-	NSEnumerator *itemEnum = [newSelection objectEnumerator];
 	// debugging revealed that we get an array of NSIndexSpecifiers and not of BibItem
     // the index is relative to all the publications the document (AS container), not the shownPublications
-	NSIndexSpecifier *item;
-	NSMutableArray *pubsToSelect = [NSMutableArray arrayWithCapacity:[newSelection count]];
-	
-	while (item = [itemEnum nextObject])
-		[pubsToSelect addObject:[publications objectAtIndex:[item index]]];
+	NSArray *pubsToSelect = [publications objectsAtIndexSpecifiers:newSelection];
 	[self selectPublications:pubsToSelect];
 }
 

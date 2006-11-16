@@ -41,6 +41,7 @@
 #import "BibDocument+Scripting.h"
 #import "BibItem.h"
 #import "BDSKPublicationsArray.h"
+#import "NSArray_BDSKExtensions.h"
 
 /* 
 ssp: 2004-07-11
@@ -68,14 +69,7 @@ ssp: 2004-07-11
 	//NSLog([doc description]);
 	if (doc == nil) return nil;
 	
-	// run through the array
-	NSEnumerator *e = [(NSArray*)param objectEnumerator];
-	NSArray *allPubs = [doc publications];
-    NSIndexSpecifier *i;
-	NSMutableArray *pubs = [NSMutableArray arrayWithCapacity:[allPubs count]];
-	
-	while (i = [e nextObject])
-		[pubs addObject:[allPubs objectAtIndex:[i index]]];
+	NSArray *pubs = [[doc publications] objectsAtIndexSpecifiers:(NSArray*)param];
 	
 	// make RTF and return it.
 	NSTextStorage * ts = [doc textStorageForPublications:pubs];

@@ -41,6 +41,7 @@
 #import "BDSKTemplate.h"
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKPublicationsArray.h"
+#import "NSArray_BDSKExtensions.h"
 
 
 @implementation BibDeskTemplatedTextCommand
@@ -92,14 +93,7 @@
 		if ([obj isKindOfClass:[BibItem class]]) {
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
-            NSEnumerator *e = [(NSArray *)obj objectEnumerator];
-            NSIndexSpecifier *i;
-            NSMutableArray *pubs = [NSMutableArray array];
-            
-            while (i = [e nextObject]) {
-                [pubs addObject:[publications objectAtIndex:[i index]]];
-            }
-            items = pubs;
+            items = [publications objectsAtIndexSpecifiers:(NSArray *)obj];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
@@ -175,14 +169,7 @@
 		if ([obj isKindOfClass:[BibItem class]]) {
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
-            NSEnumerator *e = [(NSArray *)obj objectEnumerator];
-            NSIndexSpecifier *i;
-            NSMutableArray *pubs = [NSMutableArray array];
-            
-            while (i = [e nextObject]) {
-                [pubs addObject:[publications objectAtIndex:[i index]]];
-            }
-            items = pubs;
+            items = [publications objectsAtIndexSpecifiers:(NSArray *)obj];
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];

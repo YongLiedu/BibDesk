@@ -51,6 +51,16 @@
     return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
 }
 
+- (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
+{
+    NSMutableArray *array = [NSMutableArray array];
+    NSEnumerator *isEnum = [indexes objectEnumerator];
+    NSIndexSpecifier *is;
+    while(is = [isEnum nextObject])
+        [array addObject:[self objectAtIndex:[is index]]];
+    return array;
+}
+
 /* theSelector should be either indexOfObject:inRange: or indexOfObjectIdenticalTo:inRange */
 static inline 
 NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *objectsToFind, SEL theSelector)
