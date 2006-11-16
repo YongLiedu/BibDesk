@@ -70,7 +70,6 @@ static unsigned currentUniqueID = 0;
         uniqueID = ++currentUniqueID;
         name = [aName copy];
         count = aCount;
-        progressIndicator = nil;
     }
     return self;
 }
@@ -89,7 +88,6 @@ static unsigned currentUniqueID = 0;
 - (void)encodeWithCoder:(NSCoder *)coder {
     [coder encodeObject:name forKey:@"name"];
     [coder encodeInt:count forKey:@"count"];
-    progressIndicator = nil;
 }
 
 // NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
@@ -100,9 +98,6 @@ static unsigned currentUniqueID = 0;
 
 - (void)dealloc {
     [name release];
-    [progressIndicator stopAnimation:nil];
-    [progressIndicator removeFromSuperview];
-    [progressIndicator release];
     [super dealloc];
 }
 
@@ -182,25 +177,6 @@ static unsigned currentUniqueID = 0;
 	return [NSNumber numberWithInt:count];
 }
 
-- (NSProgressIndicator *)progressIndicator {
-    if ([self isExternal]) {
-        if (nil == progressIndicator) {
-            progressIndicator = [[NSProgressIndicator alloc] init];
-            [progressIndicator setControlSize:NSSmallControlSize];
-            [progressIndicator setStyle:NSProgressIndicatorSpinningStyle];
-            
-            // since the spinner won't display when stopped, we don't have to remove it from the view until -dealloc
-            [progressIndicator setDisplayedWhenStopped:NO];
-            [progressIndicator sizeToFit];
-        }
-        if ([self isRetrieving])
-            [progressIndicator startAnimation:nil];
-        else
-            [progressIndicator stopAnimation:nil];
-    }
-    return progressIndicator;
-}
-        
 // comparisons
 
 - (NSComparisonResult)nameCompare:(BDSKGroup *)otherGroup {

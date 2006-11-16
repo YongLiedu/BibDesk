@@ -47,7 +47,6 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKTypeSelectHelper.h"
-#import "NSGeometry_BDSKExtensions.h"
 
 @implementation BDSKGroupTableView
 
@@ -153,26 +152,6 @@
 
 	[self tile];
     [self reloadData]; // otherwise the change isn't immediately visible
-}
-
-- (void)drawRow:(int)rowIndex clipRect:(NSRect)clipRect
-{
-    [super drawRow:rowIndex clipRect:clipRect];
-    NSProgressIndicator *spinner = [[self delegate] tableView:self progressIndicatorForRow:rowIndex];
-    if (nil != spinner) {
-        // !!! we generally assume this tableview only has a single column (for the popup)
-        int column = 0;
-        NSRect ignored, rect = [self frameOfCellAtColumn:column row:rowIndex];
-        NSSize size = [spinner frame].size;
-        NSDivideRect(rect, &ignored, &rect, 3.0f, NSMaxXEdge);
-        NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
-        rect = BDSKCenterRectVertically(rect, size.height, [self isFlipped]);
-        
-        [spinner setFrame:rect];
-        if([spinner isDescendantOf:self] == NO) {
-            [self addSubview:spinner];
-        }
-    }
 }
 
 - (void)drawHighlightOnRows:(NSIndexSet *)rows usingColor:(NSColor *)highlightColor

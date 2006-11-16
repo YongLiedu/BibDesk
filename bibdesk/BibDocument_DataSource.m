@@ -202,7 +202,7 @@
 	}
     return NO;
 }
-    
+
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
     if (row == -1) return;
     if (tv == tableView) {
@@ -211,6 +211,44 @@
                 [aCell setEnabled:YES];
             else
                 [aCell setEnabled:NO];
+        }
+    } else if (tv == groupTableView) {
+        BDSKGroup *group = [groups objectAtIndex:row];
+        if ([group isExternal] == NO) return;
+        
+        if (sharedGroupSpinners == nil) 
+            sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+        
+        NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
+        
+        if ([group isRetrieving]) {
+            if (spinner == nil) {
+                spinner = [[NSProgressIndicator alloc] init];
+                [spinner setControlSize:NSSmallControlSize];
+                [spinner setStyle:NSProgressIndicatorSpinningStyle];
+                [spinner setDisplayedWhenStopped:NO];
+                [spinner sizeToFit];
+                [sharedGroupSpinners setObject:spinner forKey:[group uniqueID]];
+                [spinner release];
+            }
+            
+            int column = [[tv tableColumns] indexOfObject:aTableColumn];
+            NSRect ignored, rect = [tv frameOfCellAtColumn:column row:row];
+            NSSize size = [spinner frame].size;
+            NSDivideRect(rect, &ignored, &rect, 3.0f, NSMaxXEdge);
+            NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
+            rect = BDSKCenterRectVertically(rect, size.height, [tv isFlipped]);
+            
+            [spinner setFrame:rect];
+            if([spinner isDescendantOf:tv] == NO) {
+                [tv addSubview:spinner];
+                [spinner startAnimation:nil];
+            }
+            
+        } else if (spinner != nil) {
+            [spinner stopAnimation:nil];
+            [spinner removeFromSuperview];
+            [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
         }
     }
 }

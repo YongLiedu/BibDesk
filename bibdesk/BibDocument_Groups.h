@@ -78,6 +78,7 @@
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
 - (void)handleURLGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification;
+- (void)handleWillRemoveExternalGroupNotification:(NSNotification *)notification;
 - (void)handleAddRemoveGroupNotification:(NSNotification *)notification;
 
 - (IBAction)sortGroupsByGroup:(id)sender;

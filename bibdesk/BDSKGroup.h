@@ -46,7 +46,6 @@
 	id name;
 	int count;
     unsigned uniqueID;
-    id progressIndicator;
 }
 
 /*!
@@ -219,14 +218,6 @@
 	@param item A BibItem to test for containment.
 */
 - (BOOL)containsItem:(BibItem *)item;
-
-/*!
-    @method     progressIndicator
-    @abstract   Returns a progress indicator if the group is external.  Starts and stops the indicator when accessed, depending on -[self isRetrieving], but can be manipulated manually.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSProgressIndicator *)progressIndicator;
 
 @end
 

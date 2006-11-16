@@ -273,6 +273,7 @@ extern NSString *BDSKSharedGroupsChangedNotification;
 extern NSString *BDSKSharedGroupUpdatedNotification;
 extern NSString *BDSKURLGroupUpdatedNotification;
 extern NSString *BDSKScriptGroupUpdatedNotification;
+extern NSString *BDSKWillRemoveExternalGroupNotification;
 extern NSString *BDSKAddRemoveGroupNotification;
 extern NSString *BDSKClientConnectionsChangedNotification;
 extern NSString *BDSKSharingNameChangedNotification;

@@ -263,6 +263,11 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
                  object:nil];
         
         [nc addObserver:self
+               selector:@selector(handleWillRemoveExternalGroupNotification:)
+                   name:BDSKWillRemoveExternalGroupNotification
+                 object:nil];
+        
+        [nc addObserver:self
                selector:@selector(handleAddRemoveGroupNotification:)
                    name:BDSKAddRemoveGroupNotification
                  object:nil];
@@ -340,6 +345,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [promiseDragColumnIdentifier release];
     [sortKey release];
     [sortGroupsKey release];
+    [sharedGroupSpinners release];
     [super dealloc];
 }
 
@@ -560,6 +566,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
+    sharedGroupSpinners = nil;
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
         // force an initial update of the tableview, if browsing is already in progress
@@ -2640,10 +2647,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
     return [self _tableViewSingleSelectionIndexes:tview];
-}
-
-- (NSProgressIndicator *)tableView:(BDSKGroupTableView *)tv progressIndicatorForRow:(int)row {
-    return [[groups objectAtIndex:row] progressIndicator];
 }
 
 #pragma mark DisplayName KVO

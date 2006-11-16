@@ -219,6 +219,21 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
+- (void)handleWillRemoveExternalGroupNotification:(NSNotification *)notification{
+    NSArray *groupsToRemove = [[notification userInfo] valueForKey:@"groups"];
+    NSEnumerator *groupEnum = [groupsToRemove objectEnumerator];
+    BDSKGroup *group;
+    NSProgressIndicator *spinner;
+    
+    while(group = [groupEnum nextObject]){
+        if(spinner = [sharedGroupSpinners objectForKey:[group uniqueID]]){
+            [spinner stopAnimation:nil];
+            [spinner removeFromSuperview];
+            [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+        }
+    }
+}
+
 - (void)handleAddRemoveGroupNotification:(NSNotification *)notification{
     [groupTableView reloadData];
 }
