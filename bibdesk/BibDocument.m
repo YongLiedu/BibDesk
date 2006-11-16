@@ -2135,6 +2135,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification{
+#warning FIXME: currentDocument does not work here
+    /* [NSDocumentController currentDocument] returns nil when the prefs window is foremost, so this doesn't update anything when the style pref changes */
     if([previewer isVisible])
         [self updatePreviews:nil];
     else if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
