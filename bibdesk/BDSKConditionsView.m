@@ -135,13 +135,9 @@
 }
 
 - (void)removeAllSubviews {
-    NSArray *subviews = [[[self subviews] copy] autorelease];
-    NSEnumerator *viewEnum = [subviews objectEnumerator];
-    NSView *view;
-    
-    while (view = [viewEnum nextObject]) {
-        [view removeFromSuperviewWithoutNeedingDisplay];
-    }
+    NSArray *subviews = [[self subviews] copy];
+    [subviews makeObjectsPerformSelector:@selector(removeFromSuperviewWithoutNeedingDisplay)];
+    [subviews release];
     [self updateSize];
     [self setNeedsDisplay:YES];
 }

@@ -458,11 +458,9 @@ NSString *BDSKComputerName() {
 
     // this is only useful if everyone else uses the mutex, though...
     @synchronized([NSDocumentController sharedDocumentController]){
-        NSEnumerator *docE = [[[[[NSDocumentController sharedDocumentController] documents] copy] autorelease] objectEnumerator];
-        id document = nil;
-        while(document = [docE nextObject]){
-            [document getCopyOfMacrosOnMainThread:macros];
-        }
+        NSArray *docs = [[[NSDocumentController sharedDocumentController] documents] copy];
+        [docs makeObjectsPerformSelector:@selector(getCopyOfMacrosOnMainThread:) withObject:macros];
+        [docs release];
     }
     return macros;
 }

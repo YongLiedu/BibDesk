@@ -39,6 +39,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTextViewFindController.h"
 #import <OmniAppKit/OAApplication.h>
+#import "NSObject_BDSKExtensions.h"
 
 @implementation NSTextView (BDSKExtensions)
 
@@ -96,13 +97,10 @@ static BDSKTextViewFindController *findController = nil;
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
 {
     NSParameterAssert(searchString != nil);
-    NSEnumerator *e = [[searchString allSearchComponents] objectEnumerator];
-    NSString *substring;
     NSTextStorage *textStorage = [self textStorage];
 
     [textStorage beginEditing];
-    while(substring = [e nextObject])
-        [self highlightOccurrencesOfString:substring];
+    [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:[searchString allSearchComponents]];
     [textStorage endEditing];
 }
 

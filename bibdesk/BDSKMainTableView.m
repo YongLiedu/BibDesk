@@ -47,6 +47,7 @@
 #import "BDSKRatingButtonCell.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKImagePopUpButtonCell.h"
+#import "NSObject_BDSKExtensions.h"
 
 
 @interface BDSKMainTableView (Private)
@@ -294,11 +295,7 @@
         highlightedColumn = nil;
 	
     [self removeAllTableColumns];
-    NSEnumerator *columnsE = [columns objectEnumerator];
-	
-    while(tc = [columnsE nextObject])
-		[self addTableColumn:tc];
-    
+    [self performSelector:@selector(addTableColumn:) withObjectsFromArray:columns];
     [self setHighlightedTableColumn:highlightedColumn]; 
     [self tableViewFontChanged:nil];
     [self updateColumnsMenu];

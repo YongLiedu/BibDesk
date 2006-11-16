@@ -41,6 +41,8 @@
 #import "BDSKTeXTask.h"
 #import "BDSKItemPasteboardHelper.h"
 #import "BDSKOwnerProtocol.h"
+#import "BDSKPublicationsArray.h"
+#import "NSObject_BDSKExtensions.h"
 
 @implementation BibDocument (Scripting)
 
@@ -85,13 +87,9 @@
 }
 
 - (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)index {
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
 	NSMutableSet *auths = [NSMutableSet set];
 	
-	while (pub = [pubEnum nextObject]) {
-		[auths addObjectsFromArray:[pub pubAuthors]];
-	}
+    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
 	
 	if (index < [auths count]) 
 		return [[auths allObjects] objectAtIndex:index];

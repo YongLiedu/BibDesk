@@ -103,6 +103,24 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
 
 @implementation NSMutableArray (BDSKExtensions)
 
+- (void)addNonDuplicateObjectsFromArray:(NSArray *)otherArray;
+{
+    NSEnumerator *objEnum = [otherArray objectEnumerator];
+    id object;
+    while(object = [objEnum nextObject]){
+        if([self containsObject:object] == NO)
+            [self addObject:object];
+    }
+}
+
+- (void)addObjectsByMakingObjectsFromArray:(NSArray *)otherArray performSelector:(SEL)selector;
+{
+    NSEnumerator *objEnum = [otherArray objectEnumerator];
+    id object;
+    while(object = [objEnum nextObject])
+        [self addObject:[object performSelector:selector]];
+}
+
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;
 {
     [self sortUsingSelector:comparator];

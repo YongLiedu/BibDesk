@@ -37,6 +37,7 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BibTeXParser.h"
 #import "BDSKMacroResolver.h"
+#import "NSArray_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -446,14 +447,7 @@ enum {
     if(returnCode == NSCancelButton)
         return;
     
-    NSEnumerator *fileEnum = [[openPanel filenames] objectEnumerator];
-    NSString *file;
-    
-    while(file = [fileEnum nextObject]){
-        if ([globalMacroFiles containsObject:file] == NO)
-            [globalMacroFiles addObject:file];
-    }
-    
+    [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
     [defaults autoSynchronize];

@@ -43,6 +43,7 @@
 #import "BDSKFormatParser.h"
 #import "BibTypeManager.h"
 #import "NSString_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSArray-OFExtensions.h>
 
@@ -147,14 +148,9 @@
 }
 
 - (NSString *)displayText {
-    NSEnumerator *authE = [pubAuthors objectEnumerator];
-    BibAuthor *auth;
-    
     NSMutableArray *authors = [NSMutableArray arrayWithCapacity:[pubAuthors count]];
     NSMutableString *string = [NSMutableString string];
-    
-    while (auth = [authE nextObject]) 
-        [authors addObject:[auth abbreviatedName]];
+    [authors addObjectsByMakingObjectsFromArray:pubAuthors performSelector:@selector(abbreviatedName)];
     
     [string appendStrings:[authors componentsJoinedByCommaAndAnd], @",\n", 
                           [pubFields objectForKey:BDSKTitleString], @",\n", 

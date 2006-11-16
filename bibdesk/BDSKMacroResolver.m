@@ -46,6 +46,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import <OmniFoundation/OFPreference.h>
+#import "NSObject_BDSKExtensions.h"
 
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
@@ -112,15 +113,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     // bibtex requires that macros whose definitions contain macros are ordered in the document after the macros on which they depend
     NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
     NSMutableArray *orderedMacros = [NSMutableArray arrayWithCapacity:[macros count]];
-    NSEnumerator *macroEnum = [macros objectEnumerator];
-    NSString *macro;
     
-    while (macro = [macroEnum nextObject])
-        [self addMacro:macro toArray:orderedMacros];
+    [self performSelector:@selector(addMacro:toArray:) withObjectsFromArray:macros withObject:orderedMacros];
     
     BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableString *macroString = [NSMutableString string];
-    macroEnum = [orderedMacros objectEnumerator];
+    NSEnumerator *macroEnum = [orderedMacros objectEnumerator];
+    NSString *macro;
     NSString *value;
     
     while (macro = [macroEnum nextObject]){

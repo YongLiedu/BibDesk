@@ -68,6 +68,8 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKUpdateChecker.h"
 #import "BDSKPublicationsArray.h"
+#import "NSArray_BDSKExtensions.h"
+#import "NSObject_BDSKExtensions.h"
 
 @implementation BibAppController
 
@@ -1020,13 +1022,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     NSSortDescriptor *setLengthSort = [[[NSSortDescriptor alloc] initWithKey:@"self.@count" ascending:YES selector:@selector(compare:)] autorelease];
     [arrayOfSets sortUsingDescriptors:[NSArray arrayWithObject:setLengthSort]];
 
-    NSEnumerator *e = [arrayOfSets objectEnumerator];
-    [itemsFound setSet:[e nextObject]]; // smallest set
-
-    NSSet *aSet = nil;
-    while(aSet = [e nextObject]){
-        [itemsFound intersectSet:aSet];
-    }
+    [itemsFound setSet:[arrayOfSets firstObject]]; // smallest set
+    [itemsFound performSelector:@selector(intersectSet:) withObjectsFromArray:arrayOfSets];
+    
     return itemsFound;
 }
 

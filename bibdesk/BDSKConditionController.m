@@ -205,13 +205,12 @@
     }
     
     NSRect rect = NSZeroRect;
-    NSEnumerator *viewEnum = [[[valueBox contentView] subviews] objectEnumerator];
+    NSArray *views = [[[valueBox contentView] subviews] copy];
+    [views makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [views release];
+    
+    NSEnumerator *viewEnum = [controls objectEnumerator];
     NSView *aView;
-    
-    while (aView = [viewEnum nextObject]) 
-        [aView removeFromSuperview];
-    
-    viewEnum = [controls objectEnumerator];
     while (aView = [viewEnum nextObject]) {
         aView = [aView superview];
         rect.size = [aView frame].size;

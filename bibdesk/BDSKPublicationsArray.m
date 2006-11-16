@@ -42,6 +42,7 @@
 #import "BibAuthor.h"
 #import <OmniFoundation/OFMultiValueDictionary.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
+#import "NSObject_BDSKExtensions.h"
 
 
 @interface BDSKPublicationsArray (Private)
@@ -69,10 +70,7 @@
     if (self = [super init]) {
         publications = [[NSMutableArray alloc] initWithObjects:objects count:count];
         itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
-        NSEnumerator *itemEnum = [publications objectEnumerator];
-        BibItem *item;
-        while(item = [itemEnum nextObject])
-            [self addToItemsForCiteKeys:item];
+        [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
     }
     return self;
 }

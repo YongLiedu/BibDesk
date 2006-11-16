@@ -39,6 +39,7 @@
 #import "BDSKTeXTask.h"
 #import "BibDocument.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSObject_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
 
 
@@ -234,15 +235,9 @@
 	while(name = [nameEnum nextObject]){
         NSPasteboard *pboard = [NSPasteboard pasteboardWithName:name];
         NSArray *types = [[self promisedTypesForPasteboard:pboard] copy]; // we need to copy as types can be removed
-        NSEnumerator *typeEnum = nil;
-        NSString *type;
-        
         if(types == nil) continue;
-        typeEnum = [types objectEnumerator];
+        [self performSelector:@selector(pasteboard:provideDataForType:) withObject:pboard withObjectsFromArray:types];
         [types release];
-        
-        while(type = [typeEnum nextObject])
-            [self pasteboard:pboard provideDataForType:type];
     }
 }
 

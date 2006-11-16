@@ -75,6 +75,7 @@
 #import "BDSKZoomablePDFView.h"
 #import "BDSKSearchField.h"
 #import "BDSKCustomCiteDrawerController.h"
+#import "NSObject_BDSKExtensions.h"
 
 
 @implementation BibDocument (Actions)
@@ -358,11 +359,7 @@
     if (returnCode == NSAlertDefaultReturn)
         return;
     
-    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-    BibItem *pub;
-    while (pub = [e nextObject]) {
-        [self editPub:pub];
-    }
+    [self performSelector:@selector(editPub:) withObjectsFromArray:[self selectedPublications]];
 }
 
 - (IBAction)editPubCmd:(id)sender{

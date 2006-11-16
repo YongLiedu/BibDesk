@@ -54,6 +54,9 @@
 
 @interface NSMutableArray (BDSKExtensions)
 
+- (void)addNonDuplicateObjectsFromArray:(NSArray *)otherArray;
+- (void)addObjectsByMakingObjectsFromArray:(NSArray *)otherArray performSelector:(SEL)selector;
+
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;
 - (void)insertObject:anObject inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
 - (void)insertObjects:(NSArray *)objects inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;

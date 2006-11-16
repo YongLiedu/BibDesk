@@ -655,14 +655,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (NSArray *)pubAuthorsAsStrings{
-    NSArray *pubAuthorArray = [self pubAuthors];
-    NSEnumerator *authE = [pubAuthorArray objectEnumerator];
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[pubAuthorArray count]];
-    BibAuthor *anAuthor;
-    
-    while(anAuthor = [authE nextObject])
-        [array addObject:[anAuthor normalizedName]];
-    return array;
+    return [[self pubAuthors] arrayByPerformingSelector:@selector(normalizedName)];
 }
 
 - (NSString *)pubAuthorsForDisplay{

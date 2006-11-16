@@ -41,6 +41,7 @@
 #import "BibPrefController.h"
 #import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
+#import "NSObject_BDSKExtensions.h"
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -704,8 +705,6 @@ static OSType finderSignatureBytes = 'MACS';
 {
     NSMutableData *result;
     WLDragMapHeaderStruct header;
-    NSEnumerator *enumerator = [entries objectEnumerator];
-    WLDragMapEntry *entry;
     
     // zero the structure
     memset(&header, 0, sizeof(WLDragMapHeaderStruct));
@@ -715,8 +714,7 @@ static OSType finderSignatureBytes = 'MACS';
     
     result = [NSMutableData dataWithBytes:&header length:sizeof(WLDragMapHeaderStruct)];
     
-    while (entry = [enumerator nextObject])
-        [result appendData:[entry entryData]];
+    [result performSelector:@selector(appendData:) withObjectsByMakingObjectsFromArray:entries performSelector:@selector(entryData)];
     
     return result;
 }

@@ -39,6 +39,7 @@
 #import "BDSKFilterController.h"
 #import "BDSKConditionController.h"
 #import "BDSKConditionsView.h"
+#import "NSArray_BDSKExtensions.h"
 
 
 @implementation BDSKFilterController
@@ -111,16 +112,12 @@
 
 - (IBAction)dismiss:(id)sender {
     if ([sender tag] == NSOKButton) {
-        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
-        NSEnumerator *cEnum = [conditionControllers objectEnumerator];
-        BDSKConditionController *controller = nil;
-        
         if (![[self window] makeFirstResponder:[self window]])
             [[self window] endEditingFor:nil];
         
-        while (controller = [cEnum nextObject]) {
-            [conditions addObject:[controller condition]];
-        }
+        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
+        
+        [conditions addObjectsByMakingObjectsFromArray:conditionControllers performSelector:@selector(condition)];
         [filter setConditions:conditions];
         [filter setConjunction:[self conjunction]];
         

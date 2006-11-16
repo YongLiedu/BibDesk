@@ -42,6 +42,7 @@
 #import <libkern/OSAtomic.h>
 #import "BibTypeManager.h"
 #import "BDSKThreadSafeMutableArray.h"
+#import "NSObject_BDSKExtensions.h"
 
 @interface BDSKSearchIndex (Private)
 
@@ -335,12 +336,10 @@ void *setupThreading(void *anObject)
 {
     OBASSERT(pthread_equal(notificationThread, pthread_self()));
 
-	NSEnumerator *pubEnum = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
-    id pub;
-    OBPRECONDITION(pubEnum);
+	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
+    OBPRECONDITION(searchIndexInfo);
             
-	while (pub = [pubEnum nextObject])
-		[self indexFilesForItem:pub];
+    [self performSelector:@selector(indexFilesForItem:) withObjectsFromArray:searchIndexInfo];
         
     [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
 }

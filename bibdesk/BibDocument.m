@@ -113,6 +113,7 @@
 #import "BDSKColoredBox.h"
 #import "BDSKSearchField.h"
 #import "BDSKCustomCiteDrawerController.h"
+#import "NSObject_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1138,16 +1139,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (NSData *)endNoteDataForPublications:(NSArray *)items{
-    NSEnumerator *e = [items objectEnumerator];
-	BibItem *pub = nil;
     NSMutableData *d = [NSMutableData data];
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-    [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n"];
-	while(pub = [e nextObject]){
-        [d appendUTF8DataFromString:[pub endNoteString]];
-    }
+    [d performSelector:@selector(appendUTF8DataFromString:) withObjectsByMakingObjectsFromArray:items performSelector:@selector(endNoteString)];
     [d appendUTF8DataFromString:@"</records>\n</xml>\n"];
     
     return d;

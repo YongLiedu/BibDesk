@@ -61,6 +61,7 @@
 #import "NSImage+Toolbox.h"
 #import "BibFiler.h"
 #import "BDSKStringParser.h"
+#import "NSArray_BDSKExtensions.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -723,13 +724,8 @@
 - (void)setupTypeUI{
 
     // setup the type popup:
-    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[item fileType]] objectEnumerator];
-    NSString *typeName = nil;
-    
     [itemTypeButton removeAllItems];
-    while(typeName = [typeNamesE nextObject]){
-        [itemTypeButton addItemWithTitle:typeName];
-    }
+    [itemTypeButton addItemsWithTitles:[[BibTypeManager sharedManager] bibTypesForFileType:[item fileType]]];
     
     NSString *type = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPubTypeStringKey];
     
@@ -750,21 +746,9 @@
     [fields addObjectsFromArray:[typeMan requiredFieldsForType:type]];
     [fields addObjectsFromArray:[typeMan optionalFieldsForType:type]];
 	
-	NSEnumerator *fieldEnum = [[typeMan userDefaultFieldsForType:type] objectEnumerator];
-	NSString *field = nil;
 	// the default fields can contain fields already contained in typeInfo
-	while (field = [fieldEnum nextObject]) {
-		if (![fields containsObject:field])
-			[fields addObject:field];
-	}
-	if(![fields containsObject:BDSKLocalUrlString])
-		[fields addObject:BDSKLocalUrlString];
-	if(![fields containsObject:BDSKUrlString])
-		[fields addObject:BDSKUrlString];
-	if(![fields containsObject:BDSKAbstractString])
-		[fields addObject:BDSKAbstractString];
-	if(![fields containsObject:BDSKAnnoteString])
-		[fields addObject:BDSKAnnoteString];
+    [fields addNonDuplicateObjectsFromArray:[typeMan userDefaultFieldsForType:type]];
+    [fields addNonDuplicateObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAbstractString, BDSKAnnoteString, nil]];
 }
 
 #pragma mark Sheet callbacks

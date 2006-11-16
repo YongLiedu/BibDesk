@@ -3524,13 +3524,8 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)setupTypePopUp{
-    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[publication fileType]] objectEnumerator];
-    NSString *typeName = nil;
-
     [bibTypeButton removeAllItems];
-    while(typeName = [typeNamesE nextObject]){
-        [bibTypeButton addItemWithTitle:typeName];
-    }
+    [bibTypeButton addItemsWithTitles:[[BibTypeManager sharedManager] bibTypesForFileType:[publication fileType]]];
 
     [bibTypeButton selectItemWithTitle:[publication pubType]];
 }

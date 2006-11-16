@@ -40,6 +40,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringNode.h"
+#import "NSObject_BDSKExtensions.h"
 
 @interface BDSKConverter (Private)
 - (void)setDetexifyAccents:(NSDictionary *)newAccents;
@@ -116,12 +117,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 	
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
     [workingSet addCharactersInRange:highCharRange];
-
-    NSEnumerator *e = [tmpTexifyDict keyEnumerator];
-    NSString *key;
-	while(key = [e nextObject]){
-		[workingSet addCharactersInString:key];
-	}
+    [workingSet performSelector:@selector(addCharactersInString:) withObjectsFromArray:[tmpTexifyDict allKeys]];
 	
     [self setFinalCharSet:workingSet];
     [workingSet release];
