@@ -491,6 +491,11 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 }
 
 - (BOOL)isCurrentDocument {
+    // if we are the only document, we consider ourselves current, even if we are not selected
+    // this way we can update the shared previewer even when no document is selected
+    NSArray *allDocs = [[NSDocumentController sharedDocumentController] documents];
+    if([allDocs count] == 1 && [allDocs containsObject:self])
+        return YES;
     return [[[NSDocumentController sharedDocumentController] currentDocument] isEqual:self];
 }
 
@@ -2135,8 +2140,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification{
-#warning FIXME: currentDocument does not work here
-    /* [NSDocumentController currentDocument] returns nil when the prefs window is foremost, so this doesn't update anything when the style pref changes */
     if([previewer isVisible])
         [self updatePreviews:nil];
     else if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
