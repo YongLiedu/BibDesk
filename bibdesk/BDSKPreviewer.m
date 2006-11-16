@@ -50,6 +50,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKAsynchronousDOServer.h"
+#import "BDSKDocumentController.h"
 
 static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 
@@ -136,6 +137,10 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
                                                  selector:@selector(handleApplicationWillTerminate:)
                                                      name:NSApplicationWillTerminateNotification
                                                    object:NSApp];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleMainDocumentDidChangeNotification:)
+                                                     name:BDSKDocumentControllerDidChangeMainDocumentNotification
+                                                   object:nil];
     }
         
     // empty document to avoid problem when zoom is set to auto
@@ -155,6 +160,13 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 - (NSString *)windowNibName
 {
     return @"Previewer";
+}
+
+- (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification
+{
+    OBASSERT([self isSharedPreviewer]);
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] && [self isWindowVisible])
+        [[[NSDocumentController sharedDocumentController] mainDocument] updatePreviewer:self];
 }
 
 - (void)updateRepresentedFilename

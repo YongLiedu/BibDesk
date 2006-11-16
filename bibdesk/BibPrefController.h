@@ -279,6 +279,7 @@ extern NSString *BDSKSharingNameChangedNotification;
 extern NSString *BDSKSharingPasswordChangedNotification;
 extern NSString *BDSKDocumentControllerAddDocumentNotification;
 extern NSString *BDSKDocumentControllerRemoveDocumentNotification;
+extern NSString *BDSKDocumentControllerDidChangeMainDocumentNotification;
 extern NSString *BDSKSearchIndexInfoChangedNotification;
 extern NSString *BDSKApplicationWillTerminateNotification;
 

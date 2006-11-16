@@ -42,8 +42,12 @@
 	
 	// stuff for the accessory view for open text encoding 
 	IBOutlet NSView *openTextEncodingAccessoryView;
-	IBOutlet NSPopUpButton *openTextEncodingPopupButton;    
+	IBOutlet NSPopUpButton *openTextEncodingPopupButton;
+    
+    id mainDocument;
 }
+
+- (id)mainDocument;
 
 /*!
     @method openDocumentUsingFilter:

@@ -300,6 +300,7 @@ NSString *BDSKClientConnectionsChangedNotification = @"BDSKClientConnectionsChan
 NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedNotification";
 NSString *BDSKDocumentControllerAddDocumentNotification = @"BDSKDocumentControllerAddDocumentNotification";
 NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentControllerRemoveDocumentNotification";
+NSString *BDSKDocumentControllerDidChangeMainDocumentNotification = @"BDSKDocumentControllerDidChangeMainDocumentNotification";
 NSString *BDSKSearchIndexInfoChangedNotification = @"BDSKSearchIndexInfoChangedNotification";
 NSString *BDSKApplicationWillTerminateNotification = @"BDSKApplicationWillTerminateNotification";
 

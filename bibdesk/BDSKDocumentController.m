@@ -59,15 +59,31 @@
     if(self = [super init]){
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
 		    [self setAutosavingDelay:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutosaveTimeIntervalKey]];
+        
+		[[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleWindowDidBecomeMainNotification:)
+                                                     name:NSWindowDidBecomeMainNotification
+                                                   object:nil];
     }
     return self;
 }
-
 
 - (void)awakeFromNib{
     [openUsingFilterAccessoryView retain];
 	[openTextEncodingPopupButton removeAllItems];
 	[openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
+}
+
+- (id)mainDocument{
+    return mainDocument;
+}
+
+- (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification{
+    id currentDocument = [self currentDocument];
+    if(currentDocument && [currentDocument isEqual:mainDocument] == NO){
+        mainDocument = currentDocument;
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerDidChangeMainDocumentNotification object:self];
+    }
 }
 
 - (void)addDocument:(id)aDocument{
@@ -79,6 +95,10 @@
     [aDocument retain];
     [super removeDocument:aDocument];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerRemoveDocumentNotification object:aDocument];
+    if([mainDocument isEqual:aDocument]){
+        mainDocument = nil;
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerDidChangeMainDocumentNotification object:aDocument];
+    }
     [aDocument release];
 }
 

@@ -114,6 +114,7 @@
 #import "BDSKSearchField.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
+#import "BDSKDocumentController.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -490,13 +491,8 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     return [super undoManager];
 }
 
-- (BOOL)isCurrentDocument {
-    // if we are the only document, we consider ourselves current, even if we are not selected
-    // this way we can update the shared previewer even when no document is selected
-    NSArray *allDocs = [[NSDocumentController sharedDocumentController] documents];
-    if([allDocs count] == 1 && [allDocs containsObject:self])
-        return YES;
-    return [[[NSDocumentController sharedDocumentController] currentDocument] isEqual:self];
+- (BOOL)isMainDocument {
+    return [[[NSDocumentController sharedDocumentController] mainDocument] isEqual:self];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -511,7 +507,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
        [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-       [self isCurrentDocument] &&
+       [self isMainDocument] &&
        [tableView selectedRow] != -1 )
         [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 	
@@ -2115,7 +2111,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                  object:[BibTypeManager sharedManager]];
         [nc addObserver:self
                selector:@selector(handleCustomFieldsDidChangeNotification:)
-                   name:BDSKCustomFieldsChangedNotification
+                   name:BDSKDocumentControllerDidChangeMainDocumentNotification
                  object:nil];
         [OFPreference addObserver:self
                          selector:@selector(handleIgnoredSortTermsChangedNotification:)
@@ -2144,7 +2140,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self updatePreviews:nil];
     else if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
             [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-            [self isCurrentDocument])
+            [self isMainDocument])
         [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
 }
 
@@ -2283,7 +2279,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
 	   [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
-       [self isCurrentDocument])
+       [self isMainDocument])
         [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
 }
 
