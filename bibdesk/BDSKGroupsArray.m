@@ -416,12 +416,17 @@
         [spinner setStyle:NSProgressIndicatorSpinningStyle];
         [spinner setDisplayedWhenStopped:NO];
         [spinner sizeToFit];
+        [spinner setUsesThreadedAnimation:YES];
         [spinners setObject:spinner forKey:[group uniqueID]];
-        [spinner startAnimation:nil];
         [spinner release];
-    }else if (spinner)
-        [spinner stopAnimation:nil];
-        
+    }
+    if(spinner){
+        if ([group isRetrieving])
+            [spinner startAnimation:nil];
+        else
+            [spinner stopAnimation:nil];
+    }
+    
     return spinner;
 }
 

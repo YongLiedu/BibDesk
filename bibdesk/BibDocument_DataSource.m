@@ -212,7 +212,7 @@
         BDSKGroup *group = [groups objectAtIndex:row];
         NSProgressIndicator *spinner = [groups spinnerForGroup:group];
         
-        if(spinner && [spinner isDescendantOf:tv] == NO) {
+        if (spinner) {
             int column = [[tv tableColumns] indexOfObject:aTableColumn];
             NSRect ignored, rect = [tv frameOfCellAtColumn:column row:row];
             NSSize size = [spinner frame].size;
@@ -221,7 +221,8 @@
             rect = BDSKCenterRectVertically(rect, size.height, [tv isFlipped]);
             
             [spinner setFrame:rect];
-            [tv addSubview:spinner];
+            if ([spinner isDescendantOf:tv] == NO)
+                [tv addSubview:spinner];
         }
     }
 }
