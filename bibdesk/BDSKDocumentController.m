@@ -96,7 +96,7 @@
     [super removeDocument:aDocument];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerRemoveDocumentNotification object:aDocument];
     if([mainDocument isEqual:aDocument]){
-        mainDocument = nil;
+        mainDocument = [[NSApp orderedDocuments] firstObject];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerDidChangeMainDocumentNotification object:aDocument];
     }
     [aDocument release];
