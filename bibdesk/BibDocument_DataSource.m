@@ -226,11 +226,6 @@
     }
 }
 
-- (void)tableViewColumnsDidChange:(NSNotification *)aNotification{
-    // @@ is this really necessary?
-    [self updateUI];
-}
-
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView{
     NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
     [defaultTableColumnWidths addEntriesFromDictionary:[[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey]];

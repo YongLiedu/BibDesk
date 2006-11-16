@@ -63,6 +63,5 @@
 - (BOOL)tableView:(NSTableView *)aTableView shouldTrackTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView mouseEnteredTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView mouseExitedTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
-- (void)tableViewColumnsDidChange:(NSNotification *)aNotification;
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
 @end

@@ -384,11 +384,6 @@
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:shownColumns
                                                       forKey:BDSKShownColsNamesKey];
     [self setupTableColumnsWithIdentifiers:shownColumns];
-    
-    NSNotification *notification = [NSNotification notificationWithName:BDSKTableViewColumnsDidChangeNotification object:self];
-    [[NSNotificationCenter defaultCenter] postNotification:notification];
-    if([[self delegate] respondsToSelector:@selector(tableViewColumnsDidChange:)])
-        [[self delegate] tableViewColumnsDidChange:notification];
 }
 
 - (void)addColumnSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -411,11 +406,6 @@
     
     // Actually redraw the view now with the new column.
     [self setupTableColumnsWithIdentifiers:shownColumns];
-    
-    NSNotification *notification = [NSNotification notificationWithName:BDSKTableViewColumnsDidChangeNotification object:self];
-    [[NSNotificationCenter defaultCenter] postNotification:notification];
-    if([[self delegate] respondsToSelector:@selector(tableViewColumnsDidChange:)])
-        [[self delegate] tableViewColumnsDidChange:notification];
 }
 
 - (IBAction)columnsMenuAddTableColumn:(id)sender{
