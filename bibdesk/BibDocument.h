@@ -375,18 +375,13 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)sortPubsByKey:(NSString *)key;
 
 /*!
-    @method     sortTableByDefaultColumn
-    @abstract   Sorts the pubs table by the last column saved to user defaults (saved when a doc window closes).
-    @discussion (comprehensive description)
-*/
-- (void)sortPubsByDefaultColumn;
-
-/*!
     @method     columnsMenu
     @abstract   Returnes the columns menu
     @discussion (comprehensive description)
 */
 - (NSMenu *)columnsMenu;
+
+- (void)registerForNotifications;
 
 /*!
     @method     handlePreviewDisplayChangedNotification:

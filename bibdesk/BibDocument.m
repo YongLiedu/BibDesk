@@ -173,146 +173,33 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         
         // need to set this for new documents
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
-
-		docState.sortDescending = NO;
-		sortGroupsKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSortGroupsKey] retain];
-		
-        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         
-		[nc addObserver:self
-               selector:@selector(handlePreviewDisplayChangedNotification:)
-	               name:BDSKPreviewDisplayChangedNotification
-                 object:nil];
-
-		[nc addObserver:self
-               selector:@selector(handleGroupFieldChangedNotification:)
-	               name:BDSKGroupFieldChangedNotification
-                 object:self];
-
-		[nc addObserver:self
-               selector:@selector(handleGroupFieldAddRemoveNotification:)
-	               name:BDSKGroupFieldAddRemoveNotification
-                 object:nil];
-
-		// register for selection changes notifications:
-		[nc addObserver:self
-               selector:@selector(handleTableSelectionChangedNotification:)
-	               name:BDSKTableSelectionChangedNotification
-                 object:self];
-
-		[nc addObserver:self
-               selector:@selector(handleGroupTableSelectionChangedNotification:)
-	               name:BDSKGroupTableSelectionChangedNotification
-                 object:self];
-
-		//  register to observe for item change notifications here.
-		[nc addObserver:self
-               selector:@selector(handleBibItemChangedNotification:)
-	               name:BDSKBibItemChangedNotification
-                 object:nil];
-
-		// register to observe for add/delete items.
-		[nc addObserver:self
-               selector:@selector(handleBibItemAddDelNotification:)
-	               name:BDSKDocSetPublicationsNotification
-                 object:self];
-
-		[nc addObserver:self
-               selector:@selector(handleBibItemAddDelNotification:)
-	               name:BDSKDocAddItemNotification
-                 object:self];
-
-		[nc addObserver:self
-               selector:@selector(handleBibItemAddDelNotification:)
-	               name:BDSKDocDelItemNotification
-                 object:self];
+        // these are set in windowControllerDidLoadNib: from the xattr defaults if available
+        sortKey = nil;
+        previousSortKey = nil;
+        sortGroupsKey = nil;
+        currentGroupField = nil;
+        docState.sortDescending = NO;
+        docState.sortGroupsDescending = NO;
         
-        [nc addObserver:self
-               selector:@selector(handleMacroChangedNotification:)
-                   name:BDSKMacroDefinitionChangedNotification
-                 object:nil];
-
-        [nc addObserver:self
-               selector:@selector(handleFilterChangedNotification:)
-                   name:BDSKFilterChangedNotification
-                 object:nil];
+        // these are created lazily when needed
+        fileSearchController = nil;
+        drawerController = nil;
+        macroWC = nil;
+        documentInfo = nil;
+        infoWC = nil;
+        previewer = nil;
+        sharedGroupSpinners = nil;
+        toolbarItems = nil;
+        docState.lastPreviewHeight = 0.0;
+        docState.lastGroupViewWidth = 0.0;
         
-        [nc addObserver:self
-               selector:@selector(handleStaticGroupChangedNotification:)
-                   name:BDSKStaticGroupChangedNotification
-                 object:nil];
+        // these are temporary state variables
+        promiseDragColumnIdentifier = nil;
+        docState.dragFromSharedGroups = NO;
+        docState.currentSaveOperationType = 0;
         
-		[nc addObserver:self
-               selector:@selector(handleSharedGroupUpdatedNotification:)
-	               name:BDSKSharedGroupUpdatedNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleSharedGroupsChangedNotification:)
-                   name:BDSKSharedGroupsChangedNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleURLGroupUpdatedNotification:)
-                   name:BDSKURLGroupUpdatedNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleScriptGroupUpdatedNotification:)
-                   name:BDSKScriptGroupUpdatedNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleWillRemoveExternalGroupNotification:)
-                   name:BDSKWillRemoveExternalGroupNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleAddRemoveGroupNotification:)
-                   name:BDSKAddRemoveGroupNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleFlagsChangedNotification:)
-                   name:OAFlagsChangedNotification
-                 object:nil];
-        
-        [nc addObserver:self
-               selector:@selector(handleApplicationWillTerminateNotification:)
-                   name:NSApplicationWillTerminateNotification
-                 object:nil];
-        
-        // observe these on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
-        [nc addObserver:self
-               selector:@selector(handleTypeInfoDidChangeNotification:)
-                   name:BDSKBibTypeInfoChangedNotification
-                 object:[BibTypeManager sharedManager]];
-        
-        [nc addObserver:self
-               selector:@selector(handleCustomFieldsDidChangeNotification:)
-                   name:BDSKCustomFieldsChangedNotification
-                 object:nil];
-        
-        [OFPreference addObserver:self
-                         selector:@selector(handleIgnoredSortTermsChangedNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
-        
-        [OFPreference addObserver:self
-                         selector:@selector(handleNameDisplayChangedNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayFirstNamesKey]];
-        
-        [OFPreference addObserver:self
-                         selector:@selector(handleNameDisplayChangedNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKShouldAbbreviateFirstNamesKey]];
-        
-        [OFPreference addObserver:self
-                         selector:@selector(handleNameDisplayChangedNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayLastNameFirstKey]];
-        
-        [OFPreference addObserver:self
-                         selector:@selector(handleTeXPreviewNeedsUpdateNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
-        
+        [self registerForNotifications];
     }
     return self;
 }
@@ -426,8 +313,9 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
     // get document-specific attributes (returns empty dictionary if there are none, so defaultValue works correctly)
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
-    NSString *searchKey = [xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey]];
+    NSString *searchKey = [xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:[pw objectForKey:BDSKCurrentQuickSearchKey]];
     // @@ Changed from "All Fields" to localized "Any Field" in 1.2.2; prefs may still have the old key, so this is a temporary workaround for bug #1420837 as of 31 Jan 2006
     if([searchKey isEqualToString:@"All Fields"])
         searchKey = [BDSKAllFieldsString copy];
@@ -441,7 +329,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
 	[statusBar retain]; // we need to retain, as we might remove it from the window
-	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowStatusBarKey]) {
+	if (![pw boolForKey:BDSKShowStatusBarKey]) {
 		[self toggleStatusBar:nil];
 	} else {
 		// make sure they are ordered correctly, mainly for the focus ring
@@ -512,13 +400,17 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
     // TableView setup
     [tableView removeAllTableColumns];
-    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKShownColsNamesKey]]];
-    [self sortPubsByDefaultColumn];
+    [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[pw objectForKey:BDSKShownColsNamesKey]]];
+    sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[pw objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
+    previousSortKey = [sortKey retain];
+    docState.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[pw boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
+    [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
+    [self sortPubsByKey:nil];
     
     [sortGroupsKey autorelease];
-    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:sortGroupsKey] retain];
-    docState.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSortGroupsDescendingKey]];
-    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[self currentGroupField]]];
+    sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:[pw objectForKey:BDSKSortGroupsKey]] retain];
+    docState.sortGroupsDescending = [xattrDefaults boolForKey:BDSKSortGroupsDescendingKey defaultValue:[pw boolForKey:BDSKSortGroupsDescendingKey]];
+    [self setCurrentGroupField:[xattrDefaults objectForKey:BDSKCurrentGroupFieldKey defaultObject:[pw objectForKey:BDSKCurrentGroupFieldKey]]];
     
     [tableView setDoubleAction:@selector(editPubOrOpenURLAction:)];
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
@@ -567,12 +459,12 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
     sharedGroupSpinners = nil;
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
+    if([pw boolForKey:BDSKShouldLookForSharedFilesKey]){
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
         // force an initial update of the tableview, if browsing is already in progress
         [self handleSharedGroupsChangedNotification:nil];
     }
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
+    if([pw boolForKey:BDSKShouldShareFilesKey])
         [[BDSKSharingServer defaultServer] enableSharing];
     
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
@@ -2120,15 +2012,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [tableView setDelegate:self];
 }
 
-- (void)sortPubsByDefaultColumn{
-
-    NSDictionary *windowSetup = [self mainWindowSetupDictionaryFromExtendedAttributes];        
-    sortKey = [[windowSetup objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
-    docState.sortDescending = [windowSetup  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
-    [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
-    [self sortPubsByKey:nil];
-}
-
 - (void)saveSortOrder{ 
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
@@ -2147,6 +2030,115 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 #pragma mark -
 #pragma mark Notification handlers
+
+- (void)registerForNotifications{
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        
+		[nc addObserver:self
+               selector:@selector(handlePreviewDisplayChangedNotification:)
+	               name:BDSKPreviewDisplayChangedNotification
+                 object:nil];
+		[nc addObserver:self
+               selector:@selector(handleGroupFieldChangedNotification:)
+	               name:BDSKGroupFieldChangedNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleGroupFieldAddRemoveNotification:)
+	               name:BDSKGroupFieldAddRemoveNotification
+                 object:nil];
+		[nc addObserver:self
+               selector:@selector(handleTableSelectionChangedNotification:)
+	               name:BDSKTableSelectionChangedNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleGroupTableSelectionChangedNotification:)
+	               name:BDSKGroupTableSelectionChangedNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemChangedNotification:)
+	               name:BDSKBibItemChangedNotification
+                 object:nil];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocSetPublicationsNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocAddItemNotification
+                 object:self];
+		[nc addObserver:self
+               selector:@selector(handleBibItemAddDelNotification:)
+	               name:BDSKDocDelItemNotification
+                 object:self];
+        [nc addObserver:self
+               selector:@selector(handleMacroChangedNotification:)
+                   name:BDSKMacroDefinitionChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleFilterChangedNotification:)
+                   name:BDSKFilterChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleStaticGroupChangedNotification:)
+                   name:BDSKStaticGroupChangedNotification
+                 object:nil];
+		[nc addObserver:self
+               selector:@selector(handleSharedGroupUpdatedNotification:)
+	               name:BDSKSharedGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleSharedGroupsChangedNotification:)
+                   name:BDSKSharedGroupsChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleURLGroupUpdatedNotification:)
+                   name:BDSKURLGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleScriptGroupUpdatedNotification:)
+                   name:BDSKScriptGroupUpdatedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleWillRemoveExternalGroupNotification:)
+                   name:BDSKWillRemoveExternalGroupNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleAddRemoveGroupNotification:)
+                   name:BDSKAddRemoveGroupNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleFlagsChangedNotification:)
+                   name:OAFlagsChangedNotification
+                 object:nil];
+        [nc addObserver:self
+               selector:@selector(handleApplicationWillTerminateNotification:)
+                   name:NSApplicationWillTerminateNotification
+                 object:nil];
+        // observe these two on behalf of our BibItems, or else all BibItems register for these notifications and -[BibItem dealloc] gets expensive when unregistering; this means that (shared) items without a document won't get these notifications
+        [nc addObserver:self
+               selector:@selector(handleTypeInfoDidChangeNotification:)
+                   name:BDSKBibTypeInfoChangedNotification
+                 object:[BibTypeManager sharedManager]];
+        [nc addObserver:self
+               selector:@selector(handleCustomFieldsDidChangeNotification:)
+                   name:BDSKCustomFieldsChangedNotification
+                 object:nil];
+        [OFPreference addObserver:self
+                         selector:@selector(handleIgnoredSortTermsChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
+        [OFPreference addObserver:self
+                         selector:@selector(handleNameDisplayChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayFirstNamesKey]];
+        [OFPreference addObserver:self
+                         selector:@selector(handleNameDisplayChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKShouldAbbreviateFirstNamesKey]];
+        [OFPreference addObserver:self
+                         selector:@selector(handleNameDisplayChangedNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayLastNameFirstKey]];
+        [OFPreference addObserver:self
+                         selector:@selector(handleTeXPreviewNeedsUpdateNotification:)
+                    forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];
+}
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
     // note: this is only supposed to handle the pretty-printed preview, /not/ the TeX preview
