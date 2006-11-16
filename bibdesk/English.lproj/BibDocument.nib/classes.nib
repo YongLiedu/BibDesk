@@ -125,7 +125,6 @@
                 URLMenu = NSMenu; 
                 actionMenu = NSMenu; 
                 actionMenuButton = BDSKImagePopUpButton; 
-                actionMenuFirstItem = NSMenuItem; 
                 currentPreviewView = NSView; 
                 documentWindow = NSWindow; 
                 exportAccessoryView = NSView; 

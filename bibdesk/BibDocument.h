@@ -152,7 +152,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	IBOutlet NSMenu * URLMenu;
 	IBOutlet NSMenu * groupMenu;
 	IBOutlet NSMenu * actionMenu;
-	IBOutlet NSMenuItem * actionMenuFirstItem;
 
 #pragma mark Accessory view variables
 
