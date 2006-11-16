@@ -277,7 +277,6 @@ NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotific
 NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChangedNotification";
 NSString *BDSKGroupFieldChangedNotification = @"GroupFieldChangedNotification";
 NSString *BDSKGroupFieldAddRemoveNotification = @"BDSKGroupFieldAddRemoveNotification";
-NSString *BDSKWillRemoveExternalGroupNotification = @"BDSKWillRemoveExternalGroupNotification";
 NSString *BDSKAddRemoveGroupNotification = @"BDSKAddRemoveGroupNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKNeedsToBeFiledChangedNotification = @"BibItem NeedsToBeFiled Flag Changed notification";

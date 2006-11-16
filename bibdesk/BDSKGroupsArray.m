@@ -46,6 +46,7 @@
 #import "BDSKCategoryGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BibAuthor.h"
+#import "NSObject_BDSKExtensions.h"
 
 
 @interface BDSKGroupsArray (Private)
@@ -69,6 +70,7 @@
         staticGroups = [[NSMutableArray alloc] init];
         tmpStaticGroups = nil;
         categoryGroups = nil;
+        spinners = nil;
     }
     return self;
 }
@@ -83,6 +85,7 @@
     [staticGroups release];
     [tmpStaticGroups release];
     [categoryGroups release];
+    [spinners release];
     [super dealloc];
 }
 
@@ -287,8 +290,14 @@
 
 - (void)setSharedGroups:(NSArray *)array{
     if(sharedGroups != array){
-       [sharedGroups release];
-       sharedGroups = [array mutableCopy]; 
+        NSEnumerator *groupEnum = [sharedGroups objectEnumerator];
+        id group;
+        while(group = [groupEnum nextObject])
+            if([array containsObjectIdenticalTo:group] == NO)
+                [self removeSpinnerForGroup:group];
+        
+        [sharedGroups release];
+        sharedGroups = [array mutableCopy]; 
     }
 }
 
@@ -303,9 +312,8 @@
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
-	
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:group], @"groups", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
+    
+    [self removeSpinnerForGroup:group];
     
 	[group setUndoManager:nil];
 	[urlGroups removeObjectIdenticalTo:group];
@@ -324,9 +332,8 @@
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
-	
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:group], @"groups", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
+    
+    [self removeSpinnerForGroup:group];
     
 	[group setUndoManager:nil];
 	[scriptGroups removeObjectIdenticalTo:group];
@@ -384,12 +391,8 @@
 
 // this should only be used just before reading from file, in particular revert, so we shouldn't make this undoable
 - (void)removeAllNonSharedGroups {
-    NSMutableArray *extGroups = [NSMutableArray arrayWithArray:urlGroups];
-    [extGroups addObjectsFromArray:scriptGroups];
-    if([extGroups count]) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:extGroups, @"groups", nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
-    }
+    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:urlGroups];
+    [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:scriptGroups];
     
     [lastImportGroup setPublications:[NSArray array]];
     [urlGroups removeAllObjects];
@@ -398,6 +401,37 @@
     [smartGroups removeAllObjects];
     [staticGroups removeAllObjects];
     [categoryGroups removeAllObjects];
+}
+
+#pragma mark Spinners
+
+- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
+    NSProgressIndicator *spinner = [spinners objectForKey:[group uniqueID]];
+    
+    if(spinner == nil && [group isRetrieving]){
+        if(spinners == nil)
+            spinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+        spinner = [[NSProgressIndicator alloc] init];
+        [spinner setControlSize:NSSmallControlSize];
+        [spinner setStyle:NSProgressIndicatorSpinningStyle];
+        [spinner setDisplayedWhenStopped:NO];
+        [spinner sizeToFit];
+        [spinners setObject:spinner forKey:[group uniqueID]];
+        [spinner startAnimation:nil];
+        [spinner release];
+    }else if (spinner)
+        [spinner stopAnimation:nil];
+        
+    return spinner;
+}
+
+- (void)removeSpinnerForGroup:(BDSKGroup *)group{
+    NSProgressIndicator *spinner = [spinners objectForKey:[group uniqueID]];
+    if(spinner){
+        [spinner stopAnimation:nil];
+        [spinner removeFromSuperview];
+        [spinners removeObjectForKey:[group uniqueID]];
+    }
 }
 
 #pragma mark Document

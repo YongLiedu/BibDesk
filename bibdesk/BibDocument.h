@@ -118,7 +118,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
-    NSMutableDictionary *sharedGroupSpinners;
 	NSString *currentGroupField;
     
 #pragma mark Preview variables

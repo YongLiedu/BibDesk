@@ -207,32 +207,12 @@
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
     if (row == -1) return;
     if (tv == tableView) {
-        if ([aCell isKindOfClass:[NSButtonCell class]]) {
-            if ([[[shownPublications objectAtIndex:row] owner] isEqual:self]) 
-                [aCell setEnabled:YES];
-            else
-                [aCell setEnabled:NO];
-        }
+        [aCell setEnabled:[self hasSharedGroupsSelected] == NO];
     } else if (tv == groupTableView) {
         BDSKGroup *group = [groups objectAtIndex:row];
-        if ([group isExternal] == NO) return;
+        NSProgressIndicator *spinner = [groups spinnerForGroup:group];
         
-        if (sharedGroupSpinners == nil) 
-            sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
-        
-        NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group uniqueID]];
-        
-        if ([group isRetrieving]) {
-            if (spinner == nil) {
-                spinner = [[NSProgressIndicator alloc] init];
-                [spinner setControlSize:NSSmallControlSize];
-                [spinner setStyle:NSProgressIndicatorSpinningStyle];
-                [spinner setDisplayedWhenStopped:NO];
-                [spinner sizeToFit];
-                [sharedGroupSpinners setObject:spinner forKey:[group uniqueID]];
-                [spinner release];
-            }
-            
+        if(spinner && [spinner isDescendantOf:tv] == NO) {
             int column = [[tv tableColumns] indexOfObject:aTableColumn];
             NSRect ignored, rect = [tv frameOfCellAtColumn:column row:row];
             NSSize size = [spinner frame].size;
@@ -241,15 +221,7 @@
             rect = BDSKCenterRectVertically(rect, size.height, [tv isFlipped]);
             
             [spinner setFrame:rect];
-            if([spinner isDescendantOf:tv] == NO) {
-                [tv addSubview:spinner];
-                [spinner startAnimation:nil];
-            }
-            
-        } else if (spinner != nil) {
-            [spinner stopAnimation:nil];
-            [spinner removeFromSuperview];
-            [sharedGroupSpinners removeObjectForKey:[group uniqueID]];
+            [tv addSubview:spinner];
         }
     }
 }

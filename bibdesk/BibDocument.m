@@ -190,7 +190,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         documentInfo = nil;
         infoWC = nil;
         previewer = nil;
-        sharedGroupSpinners = nil;
         toolbarItems = nil;
         docState.lastPreviewHeight = 0.0;
         docState.lastGroupViewWidth = 0.0;
@@ -233,7 +232,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [promiseDragColumnIdentifier release];
     [sortKey release];
     [sortGroupsKey release];
-    [sharedGroupSpinners release];
     [super dealloc];
 }
 
@@ -459,7 +457,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
-    sharedGroupSpinners = nil;
     if([pw boolForKey:BDSKShouldLookForSharedFilesKey]){
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
         // force an initial update of the tableview, if browsing is already in progress
@@ -2093,10 +2090,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [nc addObserver:self
                selector:@selector(handleScriptGroupUpdatedNotification:)
                    name:BDSKScriptGroupUpdatedNotification
-                 object:nil];
-        [nc addObserver:self
-               selector:@selector(handleWillRemoveExternalGroupNotification:)
-                   name:BDSKWillRemoveExternalGroupNotification
                  object:nil];
         [nc addObserver:self
                selector:@selector(handleAddRemoveGroupNotification:)

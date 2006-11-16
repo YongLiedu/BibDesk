@@ -51,6 +51,7 @@
     NSMutableArray *staticGroups;
     NSArray *tmpStaticGroups;
     NSMutableArray *categoryGroups;
+    NSMutableDictionary *spinners;
     BibDocument *document;
 }
 
@@ -99,6 +100,9 @@
 - (void)removeAllNonSharedGroups;
 
 - (void)sortUsingDescriptors:(NSArray *)sortDescriptors;
+
+- (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group;
+- (void)removeSpinnerForGroup:(BDSKGroup *)group;
 
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
