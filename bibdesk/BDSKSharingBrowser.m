@@ -146,8 +146,6 @@ static BDSKSharingBrowser *sharedBrowser = nil;
                 break;
         }
         if(group != nil){
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:group], @"groups", nil];
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
             [sharedGroups removeObject:group];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
         }
@@ -170,8 +168,6 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 - (void)disableSharedBrowsing;
 {
     if(sharedGroups != nil){
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:sharedGroups, @"groups", nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
         [sharedGroups release];
         sharedGroups = nil;
         [browser release];

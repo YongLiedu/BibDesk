@@ -45,6 +45,7 @@
 
 - (NSIndexSet *)indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
 - (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
+- (NSProgressIndicator *)tableView:(BDSKGroupTableView *)tv progressIndicatorForRow:(int)row;
 
 @end
 

@@ -303,9 +303,6 @@
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
-	
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:group], @"groups", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
     
 	[group setUndoManager:nil];
 	[urlGroups removeObjectIdenticalTo:group];
@@ -324,9 +321,6 @@
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
-	
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSArray arrayWithObject:group], @"groups", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
     
 	[group setUndoManager:nil];
 	[scriptGroups removeObjectIdenticalTo:group];
@@ -386,10 +380,6 @@
 - (void)removeAllNonSharedGroups {
     NSMutableArray *extGroups = [NSMutableArray arrayWithArray:urlGroups];
     [extGroups addObjectsFromArray:scriptGroups];
-    if([extGroups count]) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:extGroups, @"groups", nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveExternalGroupNotification object:self userInfo:userInfo];
-    }
     
     [lastImportGroup setPublications:[NSArray array]];
     [urlGroups removeAllObjects];
