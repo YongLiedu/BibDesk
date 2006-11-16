@@ -45,7 +45,6 @@
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
 	int count;
-    unsigned uniqueID;
 }
 
 /*!
@@ -65,15 +64,8 @@
 - (id)initLibraryGroup;
 
 /*!
-	@method uniqueID
-	@abstract Returns the name of the group.
-	@discussion -
-*/
-- (NSNumber *)uniqueID;
-
-/*!
 	@method name
-	@abstract Returns the unique ID of the group.
+	@abstract Returns the name of the group.
 	@discussion -
 */
 - (id)name;

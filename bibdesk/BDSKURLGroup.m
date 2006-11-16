@@ -106,10 +106,10 @@
     isRetrieving = NO;
 }
 
-- (BOOL)isEqual:(id)other {
-	if ([super isEqual:other])
-		return [[self URL] isEqual:[(BDSKURLGroup *)other URL]];
-	else return NO;
+- (BOOL)isEqual:(id)other { return self == other; }
+
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 // Logging

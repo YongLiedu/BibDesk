@@ -121,12 +121,10 @@
     [super dealloc];
 }
 
-- (BOOL)isEqual:(id)other {
-	if ([super isEqual:other])
-		return [[self scriptPath] isEqualToString:[(BDSKScriptGroup *)other scriptPath]] &&
-               [[self scriptArguments] isEqualToString:[(BDSKScriptGroup *)other scriptArguments]] &&
-               [self scriptType] == [(BDSKScriptGroup *)other scriptType];
-	else return NO;
+- (BOOL)isEqual:(id)other { return self == other; }
+
+- (unsigned int)hash {
+    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
 - (NSString *)description;

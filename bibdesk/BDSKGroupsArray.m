@@ -290,14 +290,9 @@
 
 - (void)setSharedGroups:(NSArray *)array{
     if(sharedGroups != array){
-        NSEnumerator *groupEnum = [sharedGroups objectEnumerator];
-        id group;
-        while(group = [groupEnum nextObject])
-            if([array containsObjectIdenticalTo:group] == NO)
-                [self removeSpinnerForGroup:group];
-        
-        [sharedGroups release];
-        sharedGroups = [array mutableCopy]; 
+        [sharedGroups removeObjectsInArray:array];
+        [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:sharedGroups];
+        [sharedGroups setArray:array]; 
     }
 }
 
@@ -406,7 +401,7 @@
 #pragma mark Spinners
 
 - (NSProgressIndicator *)spinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = [spinners objectForKey:[group uniqueID]];
+    NSProgressIndicator *spinner = [spinners objectForKey:group];
     
     if(spinner == nil && [group isRetrieving]){
         if(spinners == nil)
@@ -417,7 +412,7 @@
         [spinner setDisplayedWhenStopped:NO];
         [spinner sizeToFit];
         [spinner setUsesThreadedAnimation:YES];
-        [spinners setObject:spinner forKey:[group uniqueID]];
+        [spinners setObject:spinner forKey:group];
         [spinner release];
     }
     if(spinner){
@@ -431,11 +426,11 @@
 }
 
 - (void)removeSpinnerForGroup:(BDSKGroup *)group{
-    NSProgressIndicator *spinner = [spinners objectForKey:[group uniqueID]];
+    NSProgressIndicator *spinner = [spinners objectForKey:group];
     if(spinner){
         [spinner stopAnimation:nil];
         [spinner removeFromSuperview];
-        [spinners removeObjectForKey:[group uniqueID]];
+        [spinners removeObjectForKey:group];
     }
 }
 

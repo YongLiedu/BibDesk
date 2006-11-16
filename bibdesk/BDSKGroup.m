@@ -49,8 +49,6 @@
 
 @implementation BDSKGroup
 
-static unsigned currentUniqueID = 0;
-
 // super's designated initializer
 - (id)init {
 	self = [self initWithName:NSLocalizedString(@"Group", @"Group") count:0];
@@ -67,7 +65,6 @@ static unsigned currentUniqueID = 0;
 // designated initializer
 - (id)initWithName:(id)aName count:(int)aCount {
     if (self = [super init]) {
-        uniqueID = ++currentUniqueID;
         name = [aName copy];
         count = aCount;
     }
@@ -80,7 +77,6 @@ static unsigned currentUniqueID = 0;
     if (self = [super init]) {
         name = [[decoder decodeObjectForKey:@"name"] retain];
         count = [decoder decodeIntForKey:@"count"];
-        uniqueID = ++currentUniqueID;
     }
     return self;
 }
@@ -119,10 +115,6 @@ static unsigned currentUniqueID = 0;
 }
 
 // accessors
-
-- (NSNumber *)uniqueID {
-    return [NSNumber numberWithUnsignedInt:uniqueID];
-}
 
 - (id)name {
     return [[name retain] autorelease];
