@@ -301,13 +301,18 @@
 #pragma mark Data accessors
 
 - (NSString *)logFileString{
-    NSString *string = nil;
+    NSString *logstring = nil;
     if(0 == pthread_rwlock_tryrdlock(&dataFileLock)) {
         // @@ unclear if log files will always be written with ASCII encoding
-        string = [NSString stringWithContentsOfFile:logFilePath encoding:NSASCIIStringEncoding error:NULL];
+        logstring = [NSString stringWithContentsOfFile:logFilePath encoding:NSASCIIStringEncoding error:NULL];
         pthread_rwlock_unlock(&dataFileLock);
     }
-    return string;    
+    return [NSString stringWithFormat:@"%@\nFile: \"%@\"\n%@\n\n%@\n%@", 
+        @"---------- TeX log file ----------",
+        logFilePath,
+        logstring,
+        @"---------- BibDesk info ----------", 
+        [self description]];    
 }    
 
 // the .bbl file contains either a LaTeX style bilbiography or an Amsrefs ltb style bibliography
@@ -631,6 +636,9 @@
         isRunning = [currentTask isRunning];
     }
     [hardLimit release];
+    
+    if (0 != [currentTask terminationStatus])
+        success = NO;
     
     [currentTask release];
     currentTask = nil;
