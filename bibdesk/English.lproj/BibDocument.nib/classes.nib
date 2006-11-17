@@ -123,14 +123,12 @@
             CLASS = BibDocument; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                URLMenu = NSMenu; 
                 actionMenu = NSMenu; 
                 actionMenuButton = BDSKImagePopUpButton; 
                 currentPreviewView = NSView; 
                 documentWindow = NSWindow; 
                 exportAccessoryView = NSView; 
                 exportSelectionCheckButton = NSButton; 
-                fileMenu = NSMenu; 
                 groupActionButton = BDSKImagePopUpButton; 
                 groupActionMenuButton = BDSKImagePopUpButton; 
                 groupAddButton = NSButton; 

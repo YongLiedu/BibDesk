@@ -287,8 +287,8 @@
 }
 
 - (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column {
-	NSMenu *myMenu = nil;
-    NSMenuItem *theItem = nil;
+	NSMenu *menu = nil;
+    NSMenuItem *item = nil;
     
 	if (column == -1 || row == -1) 
 		return nil;
@@ -296,55 +296,60 @@
 	if(tv == tableView){
 		
 		NSString *tcId = [[[tableView tableColumns] objectAtIndex:column] identifier];
-        NSURL *theURL = nil;
+        NSURL *theURL;
         
-		if([tcId isLocalFileField]){
-			myMenu = [[fileMenu copyWithZone:[NSMenu menuZone]] autorelease];
-			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
-			[[myMenu itemAtIndex:1] setRepresentedObject:tcId];
-            if([tableView numberOfSelectedRows] == 1)
-                theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
-            if(nil != theURL){
-                theItem = [myMenu insertItemWithTitle:NSLocalizedString(@"Open With", @"Open with") 
+		if([tcId isURLField]){
+            menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+            if([tcId isLocalFileField]){
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"") action:@selector(openLinkedFile:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"") action:@selector(revealLinkedFile:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+            }else{
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open URL in Browser", @"") action:@selector(openRemoteURL:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
+            }
+            if([tableView numberOfSelectedRows] == 1 &&
+               (theURL = [[shownPublications objectAtIndex:row] URLForField:tcId])){
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Open with") 
                                     andSubmenuOfApplicationsForURL:theURL atIndex:1];
             }
-		}else if([tcId isRemoteURLField]){
-			myMenu = [[URLMenu copyWithZone:[NSMenu menuZone]] autorelease];
-			[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
-            if([tableView numberOfSelectedRows] == 1)
-                theURL = [[shownPublications objectAtIndex:row] URLForField:tcId];
-            if(nil != theURL){
-                theItem = [myMenu insertItemWithTitle:NSLocalizedString(@"Open With", @"Open with") 
-                                    andSubmenuOfApplicationsForURL:theURL atIndex:1];
-            }            
+            [menu addItem:[NSMenuItem separatorItem]];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Edit", @"Edit") action:@selector(editPubCmd:) keyEquivalent:@""];
+            [item setTarget:self];
+            item = [menu addItemWithTitle:[NSLocalizedString(@"Delete", @"Delete") stringByAppendingEllipsis] action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+            [item setTarget:self];
 		}else{
-			myMenu = [[actionMenu copyWithZone:[NSMenu menuZone]] autorelease];
+			menu = [actionMenu copyWithZone:[NSMenu menuZone]];
 		}
 		
 	}else if (tv == groupTableView){
-		myMenu = [[groupMenu copyWithZone:[NSMenu menuZone]] autorelease];
+		menu = [groupMenu copyWithZone:[NSMenu menuZone]];
 	}else{
 		return nil;
 	}
 	
 	// kick out every item we won't need:
-	int i = [myMenu numberOfItems];
+	int i = [menu numberOfItems];
     BOOL wasSeparator = YES;
 	
 	while (--i >= 0) {
-		theItem = (NSMenuItem*)[myMenu itemAtIndex:i];
-		if ([self validateMenuItem:theItem] == NO || ((wasSeparator || i == 0) && [theItem isSeparatorItem]))
-			[myMenu removeItem:theItem];
+		item = (NSMenuItem*)[menu itemAtIndex:i];
+		if ([self validateMenuItem:item] == NO || ((wasSeparator || i == 0) && [item isSeparatorItem]))
+			[menu removeItem:item];
         else
-            wasSeparator = [theItem isSeparatorItem];
+            wasSeparator = [item isSeparatorItem];
 	}
-	while([myMenu numberOfItems] > 0 && [(NSMenuItem*)[myMenu itemAtIndex:0] isSeparatorItem])	
-		[myMenu removeItemAtIndex:0];
+	while([menu numberOfItems] > 0 && [(NSMenuItem*)[menu itemAtIndex:0] isSeparatorItem])	
+		[menu removeItemAtIndex:0];
 	
-	if([myMenu numberOfItems] == 0)
+	if([menu numberOfItems] == 0)
 		return nil;
 	
-	return myMenu;
+	return [menu autorelease];
 }
 
 - (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv{
