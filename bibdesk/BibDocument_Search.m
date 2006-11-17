@@ -137,12 +137,18 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     
     NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
     BOOL isOr;
-    NSArray *searchComponents = [searchString searchComponentsForOrSearch:&isOr];
+    NSArray *searchComponents = [searchString searchComponents], *andSearchComponents;
     
-    int i, j, pubCount = [arrayToSearch count], count = [searchComponents count];
+    if([searchComponents count] == 0)
+        return arrayToSearch;
+    
+    int i, j, k, pubCount = [arrayToSearch count], orCount = [searchComponents count], andCount;
     BibItem *pub;
     BOOL match;
-
+    
+    // the searchComponents is an array of OR-ed conditions, each one being an array of AND-ed conditions
+    // e.g. ((a),(b,c)) is interpreted as (a || ( b && c) )
+    
     // cache the IMP for the BibItem search method, since we're potentially calling it several times per item
     typedef BOOL (*searchIMP)(id, SEL, id, unsigned int, id, BOOL);
     SEL matchSelector = @selector(matchesSubstring:withOptions:inField:removeDiacritics:);
@@ -151,15 +157,24 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     
     for(i = 0; i < pubCount; i++){
         pub = [arrayToSearch objectAtIndex:i];
-        match = !isOr;
-        for(j = 0; j < count; j++){
-            if(itemMatches(pub, matchSelector, [searchComponents objectAtIndex:j], searchMask, field, doLossySearch) == isOr){
-                match = isOr;
+        
+        for(j = 0; j < orCount; j++){
+            andSearchComponents = [searchComponents objectAtIndex:j];
+            andCount = [andSearchComponents count];
+            match = YES;
+            for(k = 0; k < andCount; k++){
+                if(itemMatches(pub, matchSelector, [andSearchComponents objectAtIndex:k], searchMask, field, doLossySearch) == NO){
+                    // doesn't match, this OR case will be ignored
+                    match = NO;
+                    break;
+                }
+            }
+            if(match){
+                // a full series of AND conditions for an OR condition matched, so we have match
+                [aSet addObject:pub];        
                 break;
             }
         }
-        if(match)
-            [aSet addObject:pub];
     }
     
     return [aSet allObjects];

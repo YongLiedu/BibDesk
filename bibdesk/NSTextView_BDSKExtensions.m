@@ -98,9 +98,13 @@ static BDSKTextViewFindController *findController = nil;
 {
     NSParameterAssert(searchString != nil);
     NSTextStorage *textStorage = [self textStorage];
+    NSMutableArray *allSearchComponents = [NSMutableArray array];
+    NSArray *searchComponents = [searchString searchComponents];
+    
+    [allSearchComponents performSelector:@selector(addObjectsFromArray:) withObjectsFromArray:searchComponents];
 
     [textStorage beginEditing];
-    [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:[searchString searchComponentsForOrSearch:NULL]];
+    [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allSearchComponents];
     [textStorage endEditing];
 }
 

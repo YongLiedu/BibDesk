@@ -381,7 +381,7 @@ An inline buffer is used for speed in accessing each character.
 
 #pragma mark Search string splitting
 
-- (NSArray *)searchComponentsForOrSearch:(BOOL *)isOr;
+- (NSArray *)searchComponents;
 
 #pragma mark Script arguments
 

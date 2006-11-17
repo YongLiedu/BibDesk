@@ -48,9 +48,6 @@
 #import "html2tex.h"
 #import "NSDictionary_BDSKExtensions.h"
 
-static AGRegex *tipRegex = nil;
-static AGRegex *andRegex = nil;
-static AGRegex *orRegex = nil;
 static NSString *yesString = nil;
 static NSString *noString = nil;
 static NSString *mixedString = nil;
@@ -59,13 +56,6 @@ static NSString *mixedString = nil;
 
 + (void)didLoad
 {
-    // match any words up to but not including '+' or '|' if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
-    tipRegex = [[AGRegex alloc] initWithPattern:@"(?(?=^.+(\\+|\\|))(^.+(?=\\+|\\|))|^.++)" options:AGRegexLazy];
-    // match the word following a '+'; we consider a word boundary to be + or |
-    andRegex = [[AGRegex alloc] initWithPattern:@"\\+[^+|]+"];
-    // match the first word following a '|'
-    orRegex = [[AGRegex alloc] initWithPattern:@"\\|[^+|]+"]; 
-    
     yesString = [NSLocalizedString(@"Yes", @"Yes") copy];
     noString = [NSLocalizedString(@"No", @"No") copy];
     mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
@@ -1020,36 +1010,29 @@ http://home.planet.nl/~faase009/GNU.txt
 #pragma mark -
 #pragma mark Search string splitting
 
-- (NSArray *)searchComponentsForOrSearch:(BOOL *)isOr;
+// splits a search string into nested arrays, split by '|' and '+', with '+' taking precedence over '|'
+// e.g. a|b+c will be split as ((a),(b,c))
+- (NSArray *)searchComponents;
 {
-    // get the tip of the search string first
-    NSString *tip = [[[tipRegex findInString:self] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    if(tip == nil)
-        return [NSArray array];
-    
-    NSArray *matchArray = [orRegex findAllInString:self];
-    BOOL or = [matchArray count] > 0;
-    
-    if(or == NO)
-        matchArray = [andRegex findAllInString:self];
-    
-    NSMutableArray *resultArray = [NSMutableArray arrayWithCapacity:[matchArray count] + 1];
-    
-    [resultArray addObject:tip];
-    
-    NSEnumerator *e = [matchArray objectEnumerator];
-    AGRegexMatch *m;
+    NSEnumerator *andEnum, *orEnum = [[self componentsSeparatedByString:@"|"] objectEnumerator];
     NSString *s;
+    NSMutableArray *andArray, *orArray = [NSMutableArray array];
     
-    while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
-        s = [[m group] stringByTrimmingCharactersInSet:[NSCharacterSet searchStringSeparatorCharacterSet]];
-        if([NSString isEmptyString:s] == NO)
-            [resultArray addObject:s];
+    while(s = [orEnum nextObject]){
+        s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if([NSString isEmptyString:s])
+            continue;
+        andEnum = [[s componentsSeparatedByString:@"+"] objectEnumerator];
+        andArray = [NSMutableArray array];
+        while(s = [andEnum nextObject]){
+            s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            if([NSString isEmptyString:s] == NO)
+               [andArray addObject:s];
+        }
+        if([andArray count] > 0)
+            [orArray addObject:andArray];
     }
-    
-    if(isOr)
-        *isOr = or;
-    return resultArray;
+    return orArray;
 }
 
 #pragma mark Script arguments
