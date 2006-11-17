@@ -104,16 +104,18 @@
 
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
     
-    if(! [aDocument isKindOfClass:[BibDocument class]]){
-        // we don't worry about string encodings for BibLibrary files.
-        return;
-    }
+    // may need to revisit this for new document classes
+    OBASSERT([aDocument isKindOfClass:[BibDocument class]]);
     
-    NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
-    
-    if(encoding == NSASCIIStringEncoding || encoding == [BDSKStringEncodingManager defaultEncoding]){
-        // NSLog(@"adding to recents list");
-        [super noteNewRecentDocument:aDocument]; // only add it to the list of recent documents if it can be opened without manually selecting an encoding
+    if ([aDocument respondsToSelector:@selector(documentStringEncoding)]) {
+        NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
+        
+        // only add it to the list of recent documents if it can be opened without manually selecting an encoding
+        if(encoding == NSASCIIStringEncoding || encoding == [BDSKStringEncodingManager defaultEncoding])
+            [super noteNewRecentDocument:aDocument]; 
+
+    } else {
+        [super noteNewRecentDocument:aDocument];
     }
 }
 
