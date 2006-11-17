@@ -511,31 +511,11 @@
 			break;
 		case BDSKPDFDragCopyType:
 			mainType = NSPDFPboardType;
-			if([pubs isEqualToArray:[self selectedPublications]]){
-                // reuse the PDF data from a previewer if available
-                data = [previewer PDFData];
-                if(data == nil && [self isMainDocument])
-                    data = [[BDSKPreviewer sharedPreviewer] PDFData];
-			}
 			break;
 		case BDSKRTFDragCopyType:
 			mainType = NSRTFPboardType;
-			if([pubs isEqualToArray:[self selectedPublications]]){
-                // reuse the RTF data from a previewer if available
-                data = [previewer RTFData];
-                if(data == nil && [self isMainDocument])
-                    data = [[BDSKPreviewer sharedPreviewer] RTFData];
-			}
 			break;
 		case BDSKLaTeXDragCopyType:
-			mainType = NSStringPboardType;
-			if([pubs isEqualToArray:[self selectedPublications]]){
-                // reuse the LaTeX string from a previewer if available
-                string = [previewer LaTeXString];
-                if(string == nil && [self isMainDocument])
-                    string = [[BDSKPreviewer sharedPreviewer] LaTeXString];
-			}
-			break;
 		case BDSKLTBDragCopyType:
 			mainType = NSStringPboardType;
 			break;
