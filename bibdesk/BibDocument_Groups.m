@@ -960,6 +960,14 @@ The groupedPublications array is a subset of the publications array, developed b
     [self refreshScriptGroups:sender];
 }
 
+- (IBAction)refreshSelectedGroups:(id)sender{
+    if([self hasSharedGroupsSelected])
+        [self refreshSharedBrowsing:sender];
+    else if([self hasURLGroupsSelected] || [self hasScriptGroupsSelected])
+        [[[self selectedGroups] firstObject] setPublications:nil];
+    else NSBeep();
+}
+
 #pragma mark Add or remove items
 
 - (NSArray *)mergeInPublications:(NSArray *)items{

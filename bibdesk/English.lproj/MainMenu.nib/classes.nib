@@ -131,6 +131,9 @@
                 openLinkedFile = id; 
                 openRemoteURL = id; 
                 refreshAllExternalGroups = id; 
+                refreshScriptGroups = id; 
+                refreshSharedBrowsing = id; 
+                refreshURLGroups = id; 
                 removeSelectedPubs = id; 
                 revealLinkedFile = id; 
                 saveAsBDSKDocument = id; 

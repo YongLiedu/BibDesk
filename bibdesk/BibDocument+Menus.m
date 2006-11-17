@@ -824,6 +824,30 @@
     return [[groups URLGroups] count] > 0;
 }
 
+- (BOOL)validateRefreshScriptGroupsMenuItem:(NSMenuItem *)menuItem {
+    return [[groups scriptGroups] count] > 0;
+}
+
+- (BOOL)validateRefreshSelectedGroupsMenuItem:(NSMenuItem *)menuItem {
+    if([self hasSharedGroupsSelected]){
+        [menuItem setTitle:NSLocalizedString(@"Refresh Shared Groups", @"Refresh Shared Groups")];
+        return YES;
+    }else if([self hasURLGroupsSelected]){
+        [menuItem setTitle:NSLocalizedString(@"Refresh External File Group", @"Refresh external file roup")];
+        return YES;
+    }else if([self hasScriptGroupsSelected]){
+        [menuItem setTitle:NSLocalizedString(@"Refresh Script Group", @"Refresh script group")];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)validateRefreshAllExternalGroupsMenuItem:(NSMenuItem *)menuItem {
+    return [[groups URLGroups] count] > 0 ||
+           [[groups scriptGroups] count] > 0 ||
+           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey];
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
@@ -979,6 +1003,18 @@
     }
     else if (act == @selector(refreshSharedBrowsing:)){
         return [self validateRefreshSharedBrowsingMenuItem:menuItem];
+    }
+    else if (act == @selector(refreshURLGroups:)){
+        return [self validateRefreshURLGroupsMenuItem:menuItem];
+    }
+    else if (act == @selector(refreshScriptGroups:)){
+        return [self validateRefreshScriptGroupsMenuItem:menuItem];
+    }
+    else if (act == @selector(refreshAllExternalGroups:)){
+        return [self validateRefreshAllExternalGroupsMenuItem:menuItem];
+    }
+    else if (act == @selector(refreshSelectedGroups:)){
+        return [self validateRefreshSelectedGroupsMenuItem:menuItem];
     }
     else {
 		return [super validateMenuItem:menuItem];

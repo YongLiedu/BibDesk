@@ -104,6 +104,7 @@
 - (IBAction)refreshURLGroups:(id)sender;
 - (IBAction)refreshScriptGroups:(id)sender;
 - (IBAction)refreshAllExternalGroups:(id)sender;
+- (IBAction)refreshSelectedGroups:(id)sender;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;

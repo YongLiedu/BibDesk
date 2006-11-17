@@ -93,6 +93,7 @@
                 quickSearchAddField = id; 
                 quickSearchRemoveField = id; 
                 refreshScriptGroups = id; 
+                refreshSelectedGroups = id; 
                 refreshSharedBrowsing = id; 
                 refreshSharing = id; 
                 refreshURLGroups = id; 
