@@ -39,6 +39,30 @@
 #import "BDSKScriptGroupSheetController.h"
 #import "BDSKScriptGroup.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
+
+static BOOL isAppleScriptAtPath(NSString *path)
+{
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.script")) ||
+                     UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
+}
+
+// will also return true for *.applescript files, which conform to public.script
+static BOOL isScriptAtPath(NSString *path)
+{
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.script"))) : NO;
+}
+
+static BOOL isShellScriptAtPath(NSString *path)
+{
+    path = [path stringByStandardizingPath];
+    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
+    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.shell-script"))) : NO;
+}
 
 @implementation BDSKScriptGroupSheetController
 
@@ -70,18 +94,56 @@
     return @"BDSKScriptGroupSheet";
 }
 
+- (BOOL)isValidScriptFileAtPath:(NSString *)thePath error:(NSString **)message
+{
+    NSParameterAssert(nil != message);
+    BOOL isValid;
+    BOOL isDir;
+    // path is bound to the text field and not validated, so we can get a tilde-path
+    thePath = [thePath stringByStandardizingPath];
+    if (NO == [[NSFileManager defaultManager] fileExistsAtPath:thePath isDirectory:&isDir]) {
+        // no file; this will never work...
+        isValid = NO;
+        *message = NSLocalizedString(@"The specified file does not exist.", @"");
+    } else if (isDir) {
+        // directories aren't scripts
+        isValid = NO;
+        *message = NSLocalizedString(@"The specified file is a directory, not a script file.", @"");
+    } else if (isShellScriptAtPath(path) && (NO == [[NSFileManager defaultManager] isExecutableFileAtPath:thePath])) {
+        // it's a shell script, but not executable
+        isValid = NO;
+        *message = NSLocalizedString(@"The shell script does not have execute permission set.", @"");
+    } else if (NO == isAppleScriptAtPath(thePath) && NO == isScriptAtPath(thePath)) {
+        // it's not even a script file
+        isValid = NO;
+        *message = NSLocalizedString(@"The system does not recognize this file as a script", @"");
+    } else if (NO == isAppleScriptAtPath(thePath) && BDSKAppleScriptType == type) {
+        // incorrect type
+        isValid = NO;
+        *message = NSLocalizedString(@"You selected a shell script, but the type is set to AppleScript.", @"");
+    } else if (NO == isShellScriptAtPath(path) && BDSKShellScriptType == type) {
+        // incorrect type
+        isValid = NO;
+        *message = NSLocalizedString(@"You selected an AppleScript, but the type is set to shell script.", @"");
+    } else {
+        isValid = YES;
+    }
+
+    return isValid;
+}
+
 - (IBAction)dismiss:(id)sender {
     if ([sender tag] == NSOKButton) {
         if (![[self window] makeFirstResponder:[self window]])
             [[self window] endEditingFor:nil];
         
-        BOOL isDir;
-        if ([sender tag] == NSOKButton && (NO == [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] || isDir || NO == [[NSFileManager defaultManager] isExecutableFileAtPath:path])) {
+        NSString *errorMessage;
+        if ([self isValidScriptFileAtPath:path error:&errorMessage] == NO) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Invalid Script Path")
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
-                                informativeTextWithFormat:NSLocalizedString(@"The path does not point to a valid script.", @"")];
+                                informativeTextWithFormat:errorMessage];
             [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
             return;
         }
@@ -106,11 +168,17 @@
     }
 }
 
+// open panel delegate method
+- (BOOL)panel:(id)sender shouldShowFilename:(NSString *)filename {
+    return (isAppleScriptAtPath(filename) || isScriptAtPath(filename));        
+}
+
 - (IBAction)chooseScriptPath:(id)sender {
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    [oPanel setDelegate:self];
     
     [oPanel beginSheetForDirectory:nil 
                               file:nil 
