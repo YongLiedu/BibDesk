@@ -1140,7 +1140,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSMutableData *d = [NSMutableData data];
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-
+    
+    [d appendUTF8DataFromString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n"];
     [d performSelector:@selector(appendUTF8DataFromString:) withObjectsByMakingObjectsFromArray:items performSelector:@selector(endNoteString)];
     [d appendUTF8DataFromString:@"</records>\n</xml>\n"];
     
