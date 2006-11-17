@@ -1891,6 +1891,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableString *s = [NSMutableString stringWithString:@"<record>"];
     NSString *value;
     
+    NSString *fileName = [[[self owner] fileURL] path];
+    
     int refTypeID;
     NSString *entryType = [self pubType];
     NSString *publisherField = BDSKPublisherString;
@@ -1949,6 +1951,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
     
     // begin writing record
+    
+    // see bug # 1594134; some EndNote versions seem to require the source-app tag
+    if(fileName)
+        [s appendFormat:@"<database name=\"%@\" path=\"%@\">%@</database>", [fileName lastPathComponent], fileName, [fileName lastPathComponent]];
+    [s appendFormat:@"<source-app name=\"BibDesk\" version=\"%@\">BibDesk</source-app>", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+    
+    // record number; or should we use itemIndex?
+    [s appendFormat:@"<rec-number>%@</rec-number>", [self fileOrder]];
     
     // ref-type
     [s appendFormat:@"<ref-type>%i</ref-type>", refTypeID];
