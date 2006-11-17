@@ -137,14 +137,15 @@
 - (void)startRunningScript;
 {
     BOOL isDir = NO;
+    NSString *standardizedPath = [scriptPath stringByStandardizingPath];
     
-    if([[NSFileManager defaultManager] fileExistsAtPath:scriptPath isDirectory:&isDir] == NO || isDir){
+    if([[NSFileManager defaultManager] fileExistsAtPath:standardizedPath isDirectory:&isDir] == NO || isDir){
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
         if (isDir)
             [error setValue:NSLocalizedString(@"Script path points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
         else
             [error setValue:NSLocalizedString(@"The script path points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
-        [error setValue:scriptPath forKey:NSFilePathErrorKey];
+        [error setValue:standardizedPath forKey:NSFilePathErrorKey];
         [self scriptDidFailWithError:error];
     } else if (scriptType == BDSKShellScriptType) {
         NSError *error = nil;
@@ -159,7 +160,7 @@
         if (error) {
             [self scriptDidFailWithError:error];
         } else {
-            [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forObject:self withObject:scriptPath withObject:argsArray];
+            [messageQueue queueSelector:@selector(runShellScriptAtPath:withArguments:) forObject:self withObject:standardizedPath withObject:argsArray];
             isRetrieving = YES;
         }
     } else if (scriptType == BDSKAppleScriptType) {
@@ -167,7 +168,7 @@
         NSString *outputString = nil;
         NSError *error = nil;
         NSDictionary *errorInfo = nil;
-        NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptPath] error:&errorInfo];
+        NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:standardizedPath] error:&errorInfo];
         if (errorInfo) {
             error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to Create AppleScript", @"")];
             [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
