@@ -1020,53 +1020,36 @@ http://home.planet.nl/~faase009/GNU.txt
 #pragma mark -
 #pragma mark Search string splitting
 
-- (NSArray *)allSearchComponents;
+- (NSArray *)searchComponentsForOrSearch:(BOOL *)isOr;
 {
-    NSMutableArray *array = [NSMutableArray arrayWithArray:[self andSearchComponents]];
-    [array addObjectsFromArray:[self orSearchComponents]];
-    return array;
-}
-
-- (NSArray *)andSearchComponents;
-{
-    NSArray *matchArray = [andRegex findAllInString:self]; // an array of AGRegexMatch objects
-    NSMutableArray *andArray = [[NSMutableArray alloc] initWithCapacity:[matchArray count]]; // an array of all the AND terms we're looking for
+    NSMutableArray *resultArray = nil;
     
-    // get the tip of the search string first (always an AND)
+    // get the tip of the search string first
     NSString *tip = [[[tipRegex findInString:self] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    if(!tip)
+    if(tip == nil)
         return [NSArray array];
     else
-        [andArray addObject:tip];
+        [resultArray addObject:tip];
+    
+    NSArray *matchArray = [orRegex findAllInString:self];
+    BOOL or = [matchArray count] > 0;
+    
+    if(or == NO)
+        matchArray = [andRegex findAllInString:self];
     
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
-    
     NSString *s;
     
     while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
         s = [[m group] stringByTrimmingCharactersInSet:[NSCharacterSet searchStringSeparatorCharacterSet]];
-        if(![NSString isEmptyString:s])
-            [andArray addObject:s];
-    }    
-    return [andArray autorelease];
-}
-
-- (NSArray *)orSearchComponents;
-{
-    NSArray *matchArray = [orRegex findAllInString:self];
-    NSEnumerator *e = [matchArray objectEnumerator];
-    AGRegexMatch *m;
-    NSString *s;
-    
-    NSMutableArray *orArray = [[NSMutableArray alloc] initWithCapacity:[matchArray count]]; // an array of all the OR terms we're looking for
-        
-    while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
-        s = [[m group] stringByTrimmingCharactersInSet:[NSCharacterSet searchStringSeparatorCharacterSet]];
-        if(![NSString isEmptyString:s])
-            [orArray addObject:s];
+        if([NSString isEmptyString:s] == NO)
+            [resultArray addObject:s];
     }
-    return [orArray autorelease];
+    
+    if(isOr)
+        *isOr = or;
+    return [resultArray autorelease];
 }
 
 #pragma mark Script arguments

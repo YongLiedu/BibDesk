@@ -154,7 +154,7 @@ enum {
 // no surprises from replacing unseen items!
 - (void)clearFrontDocumentQuickSearch{
     BibDocument *doc = [[NSDocumentController sharedDocumentController] currentDocument];
-    [doc setFilterField:@""];
+    [doc setSearchString:@""];
 }
 
 - (void)updateUI{

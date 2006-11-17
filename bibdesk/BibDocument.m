@@ -270,7 +270,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
             [self selectLibraryGroup:nil];
             [searchField setSearchKey:BDSKAllFieldsString];
-            [self setFilterField:searchString];
+            [self setSearchString:searchString];
         }
     }
     
@@ -2148,7 +2148,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
     // NB: this method gets called for setPublications: also, so checking for AddItemNotification might not do what you expect
 	if([[notification name] isEqualToString:BDSKDocDelItemNotification] == NO)
-		[self setFilterField:@""]; // clear the search when adding
+		[self setSearchString:@""]; // clear the search when adding
 
     // this handles the remaining UI updates necessary (tableView and previews)
 	[self updateCategoryGroupsPreservingSelection:YES];
@@ -2511,7 +2511,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (flag)
         [self selectLibraryGroup:nil];
     [tableView deselectAll:self];
-    [self setFilterField:@""];
+    [self setSearchString:@""];
 
     NSEnumerator *keyEnum = [citeKeys objectEnumerator];
     NSString *key;

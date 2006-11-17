@@ -1101,7 +1101,7 @@
 // select duplicates, then allow user to delete/copy/whatever
 - (IBAction)selectPossibleDuplicates:(id)sender{
     
-	[self setFilterField:@""]; // make sure we can see everything
+	[self setSearchString:@""]; // make sure we can see everything
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     
@@ -1137,7 +1137,7 @@
 // select duplicates, then allow user to delete/copy/whatever
 - (IBAction)selectDuplicates:(id)sender{
     
-	[self setFilterField:@""]; // make sure we can see everything
+	[self setSearchString:@""]; // make sure we can see everything
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     NSZone *zone = [self zone];

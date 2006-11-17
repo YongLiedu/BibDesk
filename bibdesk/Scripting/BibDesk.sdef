@@ -548,7 +548,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>
 			<property name="filter field" code="filt" type="text"
 			description="Only publications matching this property will be displayed">
-				<cocoa key="filterField"/>
+				<cocoa key="searchString"/>
 			</property>
 			<property name="selection" code="sele"
 				description="The selected publications.">

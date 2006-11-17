@@ -1009,9 +1009,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         
         while(aDoc = [docEnum nextObject]){ 
 	    // this is an array of objects matching this particular set of search constraints; add them to the set
-            [itemsFound addObjectsFromArray:[aDoc publicationsWithSubstring:[constraints objectForKey:constraintKey] 
-                                                                    inField:constraintKey 
-                                                                   forArray:[aDoc publications]]];
+            [itemsFound addObjectsFromArray:[aDoc publicationsMatchingSearchString:[constraints objectForKey:constraintKey] 
+                                                                           inField:constraintKey 
+                                                                         fromArray:[aDoc publications]]];
         }
         // we have one set per search term, so copy it to an array and we'll get the next set of matches
         [arrayOfSets addObject:[[itemsFound copy] autorelease]];

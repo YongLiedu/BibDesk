@@ -42,9 +42,9 @@ extern NSString *BDSKDocumentFormatForSearchingDates;
 
 @interface BibDocument (Search)
 
-- (NSString*) filterField;
+- (NSString *)searchString;
 
-- (void)setFilterField:(NSString*) filterterm;
+- (void)setSearchString:(NSString *)filterterm;
 
     /*!
     @method     makeSearchFieldKey:
@@ -55,24 +55,24 @@ extern NSString *BDSKDocumentFormatForSearchingDates;
 - (IBAction)search:(id)sender;
 
     /*!
-    @method     hidePublicationsWithoutSubstring:inField:
+    @method     filterPublicationsUsingSearchString:inField:
      @abstract Hides all pubs without substring in field.
      @discussion This manipulates the shownPublications array.
      */
 
-- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field;
+- (void)filterPublicationsUsingSearchString:(NSString *)searchString inField:(NSString *)field;
     /*!
-   @method     publicationsWithSubstring:inField:forArray:
+   @method     publicationsMatchingSearchString:inField:fromArray:
      @abstract   Returns an array of publications matching the search term in the given field and array of BibItems.
      @discussion This method does all of the work in searching through a publications array for BibItems with a given
      substring, in a particular field or all fields.  A Boolean-type search is possible, by using AND and OR
      keywords (all caps), although it appears to be flaky under some conditions.
-     @param      substring The string to search for.
+     @param      searchString The string to search for.
      @param      field The BibItem field to search in (e.g. Author).
      @param      arrayToSearch The array of BibItems to search in, typically the documents publications ivar.
      @result     Returns an array of BibItems which matched the given search terms.
      */
-- (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch;
+- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString inField:(NSString *)field fromArray:(NSArray *)arrayToSearch;
 
 #pragma mark Content search
 

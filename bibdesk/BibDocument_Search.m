@@ -68,13 +68,14 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
         [tb setDisplayMode:NSToolbarDisplayModeIconAndLabel];
     
 	[documentWindow makeFirstResponder:searchField];
+    [searchField selectText:sender];
 }
 
-- (NSString *)filterField {
+- (NSString *)searchString {
 	return [searchField stringValue];
 }
 
-- (void)setFilterField:(NSString *)filterterm {
+- (void)setSearchString:(NSString *)filterterm {
     NSParameterAssert(filterterm != nil);
     
     [searchField setStringValue:filterterm];
@@ -85,18 +86,18 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     if([[searchField searchKey] isEqualToString:BDSKFileContentLocalizedString])
         [self searchByContent:sender];
     else
-        [self hidePublicationsWithoutSubstring:[searchField stringValue] inField:[searchField searchKey]];
+        [self filterPublicationsUsingSearchString:[searchField stringValue] inField:[searchField searchKey]];
 }
 
 #pragma mark -
 
-- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
+- (void)filterPublicationsUsingSearchString:(NSString *)searchString inField:(NSString *)field{
 	NSArray *pubsToSelect = [self selectedPublications];
 
-    if([NSString isEmptyString:substring]){
+    if([NSString isEmptyString:searchString]){
         [shownPublications setArray:groupedPublications];
     }else{
-		[shownPublications setArray:[self publicationsWithSubstring:substring inField:field forArray:groupedPublications]];
+		[shownPublications setArray:[self publicationsMatchingSearchString:searchString inField:field fromArray:groupedPublications]];
 		if([shownPublications count] == 1)
 			pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
 	}
@@ -109,36 +110,36 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 		[self selectPublications:pubsToSelect];
 }
         
-- (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
-        
+- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString inField:(NSString *)field fromArray:(NSArray *)arrayToSearch{
+    
     unsigned searchMask = NSCaseInsensitiveSearch;
-    if([substring rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]].location != NSNotFound)
+    if([searchString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]].location != NSNotFound)
         searchMask = 0;
     BOOL doLossySearch = YES;
-    if(BDStringHasAccentedCharacters((CFStringRef)substring))
+    if(BDStringHasAccentedCharacters((CFStringRef)searchString))
         doLossySearch = NO;
-    
+        
     static NSSet *dateFields = nil;
     if(nil == dateFields)
         dateFields = [[NSSet alloc] initWithObjects:BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil];
     
     // if it's a date field, figure out a format string to use based on the given date component(s)
     // this date format string is then made available to the BibItem as a global variable
-    // don't convert substring->date->string, though, or it's no longer a substring and will only match exactly
+    // don't convert searchString->date->string, though, or it's no longer a substring and will only match exactly
     if([dateFields containsObject:field]){
         [BDSKDocumentFormatForSearchingDates release];
         BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
-        if(nil == [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates]){
+        if(nil == [NSCalendarDate dateWithString:searchString calendarFormat:BDSKDocumentFormatForSearchingDates]){
             [BDSKDocumentFormatForSearchingDates release];
             BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString] copy];
         }
     }
-        
-    NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
-    NSArray *andComponents = [substring andSearchComponents];
-    NSArray *orComponents = [substring orSearchComponents];
     
-    int i, j, pubCount = [arrayToSearch count], andCount = [andComponents count], orCount = [orComponents count];
+    NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
+    BOOL isOr;
+    NSArray *searchComponents = [searchString searchComponentsForOrSearch:&isOr];
+    
+    int i, j, pubCount = [arrayToSearch count], count = [searchComponents count];
     BibItem *pub;
     BOOL match;
 
@@ -150,19 +151,11 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     
     for(i = 0; i < pubCount; i++){
         pub = [arrayToSearch objectAtIndex:i];
-        match = YES;
-        for(j = 0; j < andCount; j++){
-            if(itemMatches(pub, matchSelector, [andComponents objectAtIndex:j], searchMask, field, doLossySearch) == NO){
-                match = NO;
+        match = !isOr;
+        for(j = 0; j < count; j++){
+            if(itemMatches(pub, matchSelector, [searchComponents objectAtIndex:j], searchMask, field, doLossySearch) == isOr){
+                match = isOr;
                 break;
-            }
-        }
-        if(orCount > 0 && match == NO){
-            for(j = 0; j < orCount; j++){
-                if(itemMatches(pub, matchSelector, [orComponents objectAtIndex:j], searchMask, field, doLossySearch) == YES){
-                    match = YES;
-                    break;
-                }
             }
         }
         if(match)
@@ -179,7 +172,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     // Normal search if the fileSearchController is not present and the searchstring is empty, since the searchfield target has apparently already been reset (I think).  Fixes bug #1341802.
     OBASSERT(searchField != nil && [searchField target] != nil);
     if([searchField target] == self && [NSString isEmptyString:[searchField stringValue]]){
-        [self hidePublicationsWithoutSubstring:[searchField stringValue] inField:[searchField searchKey]];
+        [self filterPublicationsUsingSearchString:[searchField stringValue] inField:[searchField searchKey]];
         return;
     }
     
@@ -320,11 +313,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 
 	switch ([sender tag]) {
 		case NSFindPanelActionShowFindPanel:
-            if ([[documentWindow toolbar] isVisible] == NO) 
-                [[documentWindow toolbar] setVisible:YES];
-            if ([[documentWindow toolbar] displayMode] == NSToolbarDisplayModeLabelOnly) 
-                [[documentWindow toolbar] setDisplayMode:NSToolbarDisplayModeDefault];
-            [searchField selectText:nil];
+            [self makeSearchFieldKey:sender];
             break;
 		case NSFindPanelActionSetFindString:
             selString = nil;
