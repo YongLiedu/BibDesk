@@ -141,32 +141,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeMIMETypes</key>
-			<array>
-				<string>application/x-Inst-for-Scientific-Info</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>Web of Science File</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.webofscience</string>
-			</array>
-			<key>NSDocumentClass</key>
-			<string>BibDocument</string>
-			<key>NSExportableAs</key>
-			<array>
-				<string>BibTeX Database</string>
-				<string>RIS/Medline File</string>
-			</array>
-			<key>NSExportableTypes</key>
-			<array>
-				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
-				<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
-			</array>
-		</dict>
-		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>ltb</string>
@@ -259,8 +233,6 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>BDSKApplication</string>
-    <key>OFControllerClass</key>
-    <string>BDSKController</string>
 	<key>NSServices</key>
 	<array>
 		<dict>
@@ -396,6 +368,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>OFControllerClass</key>
+	<string>BDSKController</string>
 	<key>OFRegistrations</key>
 	<dict>
 		<key>OAPreferenceController</key>

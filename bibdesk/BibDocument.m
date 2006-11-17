@@ -120,7 +120,6 @@
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
 NSString *BDSKRISDocumentType = @"RIS/Medline File";
 NSString *BDSKMinimalBibTeXDocumentType = @"Minimal BibTeX Database";
-NSString *BDSKWOSDocumentType = @"Web of Science File";
 NSString *BDSKLTBDocumentType = @"Amsrefs LTB";
 NSString *BDSKEndNoteDocumentType = @"EndNote XML";
 NSString *BDSKMODSDocumentType = @"MODS XML";

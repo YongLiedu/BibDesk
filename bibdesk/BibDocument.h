@@ -80,7 +80,6 @@ enum {
 extern NSString *BDSKBibTeXDocumentType;
 extern NSString *BDSKRISDocumentType;
 extern NSString *BDSKMinimalBibTeXDocumentType;
-extern NSString *BDSKWOSDocumentType;
 extern NSString *BDSKLTBDocumentType;
 extern NSString *BDSKEndNoteDocumentType;
 extern NSString *BDSKMODSDocumentType;
