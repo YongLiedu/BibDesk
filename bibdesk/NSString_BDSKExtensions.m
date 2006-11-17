@@ -1022,20 +1022,20 @@ http://home.planet.nl/~faase009/GNU.txt
 
 - (NSArray *)searchComponentsForOrSearch:(BOOL *)isOr;
 {
-    NSMutableArray *resultArray = nil;
-    
     // get the tip of the search string first
     NSString *tip = [[[tipRegex findInString:self] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     if(tip == nil)
         return [NSArray array];
-    else
-        [resultArray addObject:tip];
     
     NSArray *matchArray = [orRegex findAllInString:self];
     BOOL or = [matchArray count] > 0;
     
     if(or == NO)
         matchArray = [andRegex findAllInString:self];
+    
+    NSMutableArray *resultArray = [NSMutableArray arrayWithCapacity:[matchArray count] + 1];
+    
+    [resultArray addObject:tip];
     
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
@@ -1049,7 +1049,7 @@ http://home.planet.nl/~faase009/GNU.txt
     
     if(isOr)
         *isOr = or;
-    return [resultArray autorelease];
+    return resultArray;
 }
 
 #pragma mark Script arguments
