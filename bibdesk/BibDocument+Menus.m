@@ -830,7 +830,7 @@
 
 - (BOOL)validateRefreshSelectedGroupsMenuItem:(NSMenuItem *)menuItem {
     if([self hasSharedGroupsSelected]){
-        [menuItem setTitle:NSLocalizedString(@"Refresh Shared Groups", @"Refresh Shared Groups")];
+        [menuItem setTitle:NSLocalizedString(@"Refresh Shared Group", @"Refresh shared group")];
         return YES;
     }else if([self hasURLGroupsSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh External File Group", @"Refresh external file roup")];
@@ -838,8 +838,10 @@
     }else if([self hasScriptGroupsSelected]){
         [menuItem setTitle:NSLocalizedString(@"Refresh Script Group", @"Refresh script group")];
         return YES;
+    } else {
+        [menuItem setTitle:NSLocalizedString(@"Refresh External Group", @"Merge in external group")];
+        return NO;
     }
-    return NO;
 }
 
 - (BOOL)validateRefreshAllExternalGroupsMenuItem:(NSMenuItem *)menuItem {

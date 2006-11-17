@@ -961,9 +961,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)refreshSelectedGroups:(id)sender{
-    if([self hasSharedGroupsSelected])
-        [self refreshSharedBrowsing:sender];
-    else if([self hasURLGroupsSelected] || [self hasScriptGroupsSelected])
+    if([self hasExternalGroupsSelected])
         [[[self selectedGroups] firstObject] setPublications:nil];
     else NSBeep();
 }
