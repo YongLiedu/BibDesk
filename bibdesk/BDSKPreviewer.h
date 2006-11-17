@@ -82,7 +82,7 @@ typedef enum {
 - (void)setRTFScaleFactor:(float)scaleFactor;
 
 - (BOOL)isVisible;
-
+- (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification;
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 /*!

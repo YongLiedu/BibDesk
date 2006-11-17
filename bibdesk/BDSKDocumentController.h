@@ -94,4 +94,7 @@
 */
 - (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
 
+
+- (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
+
 @end
