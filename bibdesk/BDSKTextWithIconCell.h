@@ -61,8 +61,6 @@
 - (BOOL)drawsHighlight;
 - (void)setDrawsHighlight:(BOOL)flag;
 
-- (NSRect)textRectForFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-
 @end
 
 

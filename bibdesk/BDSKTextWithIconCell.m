@@ -194,10 +194,13 @@ textRect.origin.y += vOffset; \
     
     // Draw the image
     imageRect = BDSKCenterRect(imageRect, imageSize, [controlView isFlipped]);
+    [NSGraphicsContext saveGraphicsState];
+    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
     if ([controlView isFlipped])
         [[self icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
     else
         [[self icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+	[NSGraphicsContext restoreGraphicsState];
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)flag;
@@ -264,13 +267,6 @@ textRect.origin.y += vOffset; \
 - (void)setDrawsHighlight:(BOOL)flag;
 {
     _oaFlags.drawsHighlight = flag;
-}
-
-- (NSRect)textRectForFrame:(NSRect)aRect inView:(NSView *)controlView;
-{
-    _calculateDrawingRectsAndSizes;
-    
-    return textRect;
 }
 
 @end

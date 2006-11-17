@@ -151,12 +151,6 @@
     return [[resultsArrayController selectedObjects] valueForKey:@"string"];
 }
 
-- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
-    
-    if([aCell isKindOfClass:[OATextWithIconCell class]])
-        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-}
-
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note
 {
     // work around for bug where corner view doesn't get redrawn after scrollers hide

@@ -343,13 +343,6 @@ textRect.origin.y += floorf(vOffset); \
     _oaFlags.drawsHighlight = flag;
 }
 
-- (NSRect)textRectForFrame:(NSRect)aRect inView:(NSView *)controlView;
-{
-    _calculateDrawingRectsAndSizes;
-    
-    return textRect;
-}
-
 @end
 
 @implementation BDSKGroupCell (Private)
