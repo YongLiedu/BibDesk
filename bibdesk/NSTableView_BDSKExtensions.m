@@ -78,7 +78,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     originalDragImageForRowsWithIndexesTableColumnsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
 }
 
-- (BOOL)validateDelegatedMenuItem:(id<NSMenuItem>)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
+- (BOOL)validateDelegatedMenuItem:(NSMenuItem *)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
 	SEL action = [menuItem action];
 	
 	if ([_dataSource respondsToSelector:action]) {
@@ -106,7 +106,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 }
 
 // this is necessary as the NSTableView-OAExtensions defines these actions accordingly
-- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem{
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
 	SEL action = [menuItem action];
 	if (action == @selector(delete:)) {
 		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:deleteRows:)];

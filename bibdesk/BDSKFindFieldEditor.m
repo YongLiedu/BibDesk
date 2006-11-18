@@ -57,7 +57,7 @@
 		[super performFindPanelAction:sender];
 }
 
-- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem {
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
     id delegate = [[self window] delegate];
 	if ([menuItem action] == @selector(performFindPanelAction:) && [delegate respondsToSelector:@selector(performFindPanelAction:)] && [delegate respondsToSelector:@selector(validateMenuItem:)]) 
 		return [delegate validateMenuItem:menuItem];

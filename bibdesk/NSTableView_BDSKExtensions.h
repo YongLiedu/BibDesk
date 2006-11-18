@@ -41,7 +41,7 @@
 
 @interface NSTableView (BDSKExtensions)
 
-- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem;
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
 
 - (void)awakeFromNib;
 
