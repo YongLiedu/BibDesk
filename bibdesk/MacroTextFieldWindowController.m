@@ -161,16 +161,6 @@
 	if (contentView == nil)
 		contentView = control;
 	
-    [nc addObserver:self
-		   selector:@selector(controlTextDidChange:)
-			   name:NSControlTextDidChangeNotification
-			 object:control];
-	[nc addObserver:self
-		   selector:@selector(controlTextDidEndEditing:)
-			   name:NSControlTextDidEndEditingNotification
-			 object:control];
-    
-    // we're going away now, so we can unregister for the notifications we registered for earlier
 	[nc removeObserver:self name:NSControlTextDidChangeNotification object:control];
 	[nc removeObserver:self name:NSControlTextDidEndEditingNotification object:control];
 	[nc removeObserver:self name:NSViewFrameDidChangeNotification object:contentView];
