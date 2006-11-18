@@ -109,7 +109,46 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     return __BDIndexesOfObjectsUsingSelector(self, objects, @selector(indexOfObjectIdenticalTo:inRange:));
 }
 
+- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)sortDescriptors;
+{
+    NSMutableArray *array = [self mutableCopy];
+    [array mergeSortUsingDescriptors:sortDescriptors];
+    return [array autorelease];
+}
+
 @end
+
+#pragma mark -
+#pragma mark NSSortDescriptor subclass performance improvements
+
+@interface NSSortDescriptor (Mergesort)
+
+- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
+
+@end
+
+@implementation NSSortDescriptor (Mergesort)
+
+// The objects an NSSortDescriptor receives in compareObject:toObject: are not the objects that will be compared; you need to call valueForKeyPath: on them.
+// Unfortunately, this is really inefficient, and also precludes caching on the data end, since the sort descriptor would then call valueForKeyPath: again.
+// Hence, we add this method to compare the results of valueForKeyPath:, which expects the objects that will be passed to the comparator selector directly.
+// This gives subclasses an override point that still allows data-side caching of valueForKeyPath: for efficiency.
+- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
+{    
+    
+    typedef NSComparisonResult (*compareIMP)(id, SEL, id);    
+
+    SEL theSelector = [self selector];
+    BOOL isAscending = [self ascending];
+    compareIMP comparator = (compareIMP)[object1 methodForSelector:theSelector];
+    NSComparisonResult result = comparator(object1, theSelector, object2);
+    
+    return isAscending ? result : (result *= -1);
+}
+
+@end
+
+#pragma mark -
 
 @implementation NSMutableArray (BDSKExtensions)
 
@@ -193,43 +232,7 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
         [self insertObject:(id)CFArrayGetValueAtIndex((CFArrayRef)objects, idx) inArraySortedUsingDescriptors:sortDescriptors];
 }
 
-- (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
-{
-    [self setArray:[self sortedArrayUsingMergesortWithDescriptors:sortDescriptors]];
-}
-
-@end
-
-@interface NSSortDescriptor (Mergesort)
-
-- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
-
-@end
-
-#pragma mark -
-#pragma mark NSSortDescriptor subclass performance improvements
-
-
-@implementation NSSortDescriptor (Mergesort)
-
-/* The objects an NSSortDescriptor receives in compareObject:toObject: are not the objects that will be compared; you need to call valueForKeyPath: on them.  Unfortunately, this is really inefficient, and also precludes caching on the data end, since the sort descriptor would then call valueForKeyPath: again.  Hence, we add this method to compare the results of valueForKeyPath:, which expects the objects that will be passed to the comparator selector directly.  This gives subclasses an override point that still allows data-side caching of valueForKeyPath: for efficiency.
-*/
-- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
-{    
-    
-    typedef NSComparisonResult (*compareIMP)(id, SEL, id);    
-
-    SEL theSelector = [self selector];
-    BOOL isAscending = [self ascending];
-    compareIMP comparator = (compareIMP)[object1 methodForSelector:theSelector];
-    NSComparisonResult result = comparator(object1, theSelector, object2);
-    
-    return isAscending ? result : (result *= -1);
-}
-
-@end
-
-@implementation NSArray (Mergesort)
+#pragma mark Merge sort
 
 // statics used to call an Obj-C method from the BSD sort comparator
 static id __sort = nil;
@@ -318,7 +321,7 @@ static inline void __BDClearStatics()
         sortingLock = [[NSLock alloc] init];
 }
 
-- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)descriptors;
+- (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
 {
     [sortingLock lock];
     NSZone *zone = [self zone];
@@ -328,7 +331,7 @@ static inline void __BDClearStatics()
     BDSortCacheValue *cache = (BDSortCacheValue *)NSZoneMalloc(zone, count * size);
     BDSortCacheValue aValue;
     
-    unsigned int i, sortIdx = 0, numberOfDescriptors = [descriptors count];
+    unsigned int i, sortIdx = 0, numberOfDescriptors = [sortDescriptors count];
     
     // first "equal range" is considered to be the entire array
     NSRange *equalRanges = (NSRange *)NSZoneMalloc(zone, 1 * sizeof(NSRange));
@@ -340,7 +343,7 @@ static inline void __BDClearStatics()
         
         // we add the actual object to the cache, which is basically a trivial dictionary
         // mergesort/qsort will sort the array of structures for us, so sortValue and object stay matched up
-        aValue.object = [self objectAtIndex:i];
+        aValue.object = [[self objectAtIndex:i] retain];
         
         // this is handled later, per-key, so just initialize it
         aValue.sortValue = nil;
@@ -356,7 +359,7 @@ static inline void __BDClearStatics()
         unsigned rangeIdx;
         
         // setup the statics for this descriptor, so we can use the sort functions
-        __BDSetupStaticsForDescriptor([descriptors objectAtIndex:sortIdx]);
+        __BDSetupStaticsForDescriptor([sortDescriptors objectAtIndex:sortIdx]);
         
         NSString *keyPath = [__sort key];
         
@@ -395,15 +398,15 @@ static inline void __BDClearStatics()
     if(equalRanges) NSZoneFree(zone, equalRanges);
     
     // our array of structures is now sorted correctly, so we just loop through it and create an array with the contents
-    NSMutableArray *new = [[NSMutableArray alloc] initWithCapacity:count];
+    [self removeAllObjects];
     for(i = 0; i < count; i++){
         aValue = cache[i];
-        [new addObject:aValue.object];
+        [self addObject:aValue.object];
+        [aValue.object release];
     }
     
     NSZoneFree(zone, cache);
     [sortingLock unlock];
-    return [new autorelease];
 }
 
 @end

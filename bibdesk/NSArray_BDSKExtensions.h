@@ -47,10 +47,8 @@
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 - (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 
-@end
+- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)sortDescriptors;
 
-@interface NSArray (Mergesort)
-- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)descriptors;
 @end
 
 @interface NSMutableArray (BDSKExtensions)
@@ -61,6 +59,7 @@
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;
 - (void)insertObject:anObject inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
 - (void)insertObjects:(NSArray *)objects inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
+
 - (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
 
 @end
