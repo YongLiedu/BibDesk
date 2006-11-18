@@ -577,8 +577,8 @@ The quick search field lets you enter sub-strings that might be in
 author names, titles or dates, and the reference view will display
 only matching publications. There are several built-in options. For
 example, "All Fields" (search every entry except the pub type at once),
-Keywords (search the keywords entries) and Pub Type (search by pub
-type).
+Keywords (search the keywords entries) and BibTeX Type (search by 
+publication type).
 
 @image{gfx/quickSearchField}
 
@@ -599,8 +599,12 @@ citation key.)
 BibDesk's quick search field also supports a Boolean search, using
 @samp{+} for @samp{and} or @samp{|} for @samp{or} operators (no quotes), as
 Apple's Help Viewer does in Mac OS X 10.4 and greater.
-Please note that grouping is not supported at this
-time.  If you do not explicitly search for accented characters, the
+When both are used, @samp{+} has a higer priority than @samp{|}.
+For example searching for @samp{hydrology | clay + water} will return
+matches containing either @samp{hydrology,} or both @samp{clay} and @samp{water.}
+Custom grouping, overriding this priority, is not supported at this time.
+
+If you do not explicitly search for accented characters, the
 search feature will return results with accented characters, so it is
 slightly fuzzy; further, case is ignored unless you explicitly enter
 uppercase letters.  Sound confusing?  
@@ -704,7 +708,7 @@ items in your database.
 While the initial search will be somewhat slow as files are indexed, subsequent searches
 will be very fast (although the index will be rebuilt when you close and reopen the document).
 For information on supported search query features (wildcards, Boolean operators), see the
-@uref{http://developer.apple.com/documentation/UserExperience/Reference/SearchKit/SearchKitReference/chapter_1.2_section_6.html, SearchKit Reference}.
+@uref{http://developer.apple.com/documentation/UserExperience/Reference/SearchKit/index.html, SearchKit Reference}.
 
 @node Searching With Spotlight
 @section Searching With Spotlight
@@ -2877,6 +2881,10 @@ of the "Aid" field is set in the editor.
 <span class="aslangkeyword">end using terms from</span>
 @end html
 @ifnothtml
+@b{property} theFieldToSet : "Url"
+@b{property} theFormatString : "http://dx.doi.org/%f@{Aid@}"
+@b{property} theRequiredFields : @{"Aid"@}
+
 @b{using terms from} application "BibDesk"
     @b{on} perform BibDesk action with publications thePubs for script hook theScriptHook
         @b{tell} application "BibDesk"
@@ -2928,6 +2936,9 @@ It exports an RSS representation of the document in the same folder as the BibTe
 
 @example
 @html
+<span class="aslangkeyword">property</span> <span class="asvariable">theTemplateName</span> <span class="asoperator">:</span> <span class="asvalue">"Default RSS template"</span>
+<span class="aslangkeyword">property</span> <span class="asvariable">theFileExtension</span> <span class="asoperator">:</span> <span class="asvalue">".rss"</span>
+
 <span class="aslangkeyword">using terms from</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
     <span class="aslangkeyword">on</span> <span class="asappkeyword">perform BibDesk action with publications</span> <span class="asvariable">thePubs</span> <span class="asappkeyword">for script hook</span> <span class="asvariable">theScriptHook</span>
         <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
@@ -2947,7 +2958,7 @@ It exports an RSS representation of the document in the same folder as the BibTe
                     <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
                     <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
                 <span class="aslangkeyword">end if</span>
-                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvalue">".rss"</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFileExtension</span>
                 <span class="ascomment">-- create the RSS file if necessary</span>
                 <span class="aslangkeyword">if</span> <span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span> <span class="asappkeyword">exists</span> <span class="aslangkeyword">then</span>
                     <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
@@ -2957,13 +2968,16 @@ It exports an RSS representation of the document in the same folder as the BibTe
             <span class="aslangkeyword">end tell</span>
             <span class="ascomment">-- now export as RSS</span>
             <span class="aslangkeyword">tell</span> <span class="asvariable">theDocument</span>
-                <span class="asappkeyword">export using template</span> <span class="asvalue">"Default RSS template"</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
+                <span class="asappkeyword">export using template</span> <span class="asvariable">theTemplateName</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
             <span class="aslangkeyword">end tell</span>
         <span class="aslangkeyword">end tell</span>
     <span class="aslangkeyword">end</span> <span class="asappkeyword">perform BibDesk action with publications</span>
 <span class="aslangkeyword">end using terms from</span>
 @end html
 @ifnothtml
+@b{property} theTemplateName : "Default RSS template"
+@b{property} theFileExtension : ".rss"
+
 @b{using terms from} application "BibDesk"
     @b{on} perform BibDesk action with publications thePubs for script hook theScriptHook
         @b{tell} application "BibDesk"
@@ -2983,17 +2997,17 @@ It exports an RSS representation of the document in the same folder as the BibTe
                     @b{set} AppleScript's text item delimiters @b{to} "."
                     @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName as string
                 @b{end if}
-                @b{set} theFileName @b{to} theFileName & ".rss"
+                @b{set} theFileName @b{to} theFileName & theTemplateName
                 @i{-- create the RSS file if necessary}
                 @b{if} file theFileName @b{of} folder theFolder exists @b{then}
                     @b{set} theFile @b{to} (file theFileName @b{of} folder theFolder) @b{as} alias
                 @b{else} 
-                    @b{set} theFile @b{to} (make new file with properties {name:theFileName} at folder theFolder) @b{as} alias
+                    @b{set} theFile @b{to} (make new file with properties @{name:theFileName@} at folder theFolder) @b{as} alias
                 @b{end if} 
             @b{end tell} 
             @i{-- now export as RSS}
             @b{tell} theDocument
-                export using template "Default RSS template" to theFile
+                export using template theFileExtension to theFile
             @b{end tell} 
         @b{end tell}
     @b{end} perform BibDesk action with publications
