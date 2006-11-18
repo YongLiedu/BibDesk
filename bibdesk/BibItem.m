@@ -2155,8 +2155,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *type = [self pubType];
     [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:type]];
     [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:type]];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:type]];
-    [allFields addObjectsFromArray:[self allFieldNames]]; // duplicate fields will be dropped
+    [allFields addNonDuplicateObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:type]];
+    [allFields addNonDuplicateObjectsFromArray:[self allFieldNames]];
     return [[self fields] fieldsWithNames:allFields];
 }
 
