@@ -873,7 +873,7 @@ static int numberOfOpenEditors = 0;
 
 - (void)dummy:(id)obj{}
 
-- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     
     SEL theAction = [menuItem action];
     

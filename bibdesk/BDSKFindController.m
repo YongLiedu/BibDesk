@@ -534,7 +534,7 @@ enum {
     return valid;
 }
 
-- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if ([menuItem action] == @selector(toggleStatusBar:)) {
 		if ([statusBar isVisible]) {
 			[menuItem setTitle:NSLocalizedString(@"Hide Status Bar", @"Hide Status Bar")];

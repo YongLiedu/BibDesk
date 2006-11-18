@@ -96,7 +96,7 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 	}
 }
 
-- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if ([menuItem action] == @selector(performFindPanelAction:)) {
 		switch ([menuItem tag]) {
 			case NSFindPanelActionShowFindPanel:
