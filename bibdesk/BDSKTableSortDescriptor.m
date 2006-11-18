@@ -273,7 +273,7 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
     OBASSERT_NOT_REACHED("Inefficient code path; use -[NSArray sortedArrayUsingMergesortWithDescriptors:] instead");
     // get the values in bulk; since the same keypath is used for both objects, why compute it twice?
     __GetValuesUsingCache(self, object1, object2, &value1, &value2);
-    return [self compareEndObject:object1 toEndObject:object2];
+    return [self compareEndObject:value1 toEndObject:value2];
 }
 
 @end
