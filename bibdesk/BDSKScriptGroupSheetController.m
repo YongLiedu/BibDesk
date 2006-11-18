@@ -54,14 +54,22 @@ static BOOL isScriptAtPath(NSString *path)
 {
     path = [path stringByStandardizingPath];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.script"))) : NO;
+    BOOL conforms = theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.script"))) : NO;
+    return conforms || [[NSFileManager defaultManager] isExecutableFileAtPath:path];
 }
 
 static BOOL isShellScriptAtPath(NSString *path)
 {
     path = [path stringByStandardizingPath];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    return theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.shell-script"))) : NO;
+    BOOL conforms = theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.shell-script"))) : NO;
+    return conforms || [[NSFileManager defaultManager] isExecutableFileAtPath:path];
+}
+
+static BOOL isDirectoryAtPath(NSString *path)
+{
+    BOOL isDir;
+    return [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && isDir;
 }
 
 @implementation BDSKScriptGroupSheetController
@@ -170,13 +178,14 @@ static BOOL isShellScriptAtPath(NSString *path)
 
 // open panel delegate method
 - (BOOL)panel:(id)sender shouldShowFilename:(NSString *)filename {
-    return (isAppleScriptAtPath(filename) || isScriptAtPath(filename));        
+    return (isAppleScriptAtPath(filename) || isScriptAtPath(filename) || isDirectoryAtPath(filename));        
 }
 
 - (IBAction)chooseScriptPath:(id)sender {
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
+    [oPanel setCanChooseDirectories:NO];
     [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
     [oPanel setDelegate:self];
     
