@@ -1412,6 +1412,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             return [self boolValueOfField:field] == [substring booleanValue];
         } else if([field isTriStateField]){
             return [self triStateValueOfField:field] == [substring triStateValue];
+        } else if([field isRatingField]){
+            return [self ratingValueOfField:field] == [substring intValue];
         }
     }
 
