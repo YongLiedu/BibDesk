@@ -158,21 +158,24 @@
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"Booktitle.stringByRemovingTeXAndStopWords" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
         
-    }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:tcID] ||
-             [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID] ||
-             [tcID isURLField]){
+    }else if([tcID isBooleanField] || [tcID isTriStateField]){
         
-        // use the triStateCompare: for URL fields so the subsort is more useful (this turns the URL comparison into empty/non-empty)
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(triStateCompare:)];
         
-    }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey] containsObject:tcID]){
+    }else if([tcID isRatingField]){
         
-        // Use NSSortDescriptor instead of the BDSKTableSortDescriptor, so 0 values are handled correctly; if we ever store these as NSNumbers, the selector must be changed to compare:.
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(numericCompare:)];
         
+    }else if([tcID isURLField]){
+        
+        // compare fileExtension for URL fields so the subsort is more useful
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:[NSString stringWithFormat:@"%@.fileExtension", tcID] ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
+        
     }else{
+        
         // this assumes that all other columns must be NSString objects
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
+        
 	}
  
     OBASSERT(sortDescriptor);
