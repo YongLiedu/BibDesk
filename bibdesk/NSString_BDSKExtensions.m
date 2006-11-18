@@ -1019,9 +1019,6 @@ http://home.planet.nl/~faase009/GNU.txt
     NSMutableArray *andArray, *orArray = [NSMutableArray array];
     
     while(s = [orEnum nextObject]){
-        s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if([NSString isEmptyString:s])
-            continue;
         andEnum = [[s componentsSeparatedByString:@"+"] objectEnumerator];
         andArray = [NSMutableArray array];
         while(s = [andEnum nextObject]){
