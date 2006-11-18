@@ -57,6 +57,7 @@
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
+#import "NSArray_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKStringNode.h"
 #import "OFCharacterSet_BDSKExtensions.h"
