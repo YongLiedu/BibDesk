@@ -48,4 +48,9 @@
 + (void)strokeHorizontalOvalAroundRect:(NSRect)rect;
 + (NSBezierPath*)bezierPathWithHorizontalOvalAroundRect:(NSRect)rect;
 
++ (void)fillStarInRect:(NSRect)rect;
++ (void)fillInvertedStarInRect:(NSRect)rect;
++ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect;
++ (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect;
+
 @end

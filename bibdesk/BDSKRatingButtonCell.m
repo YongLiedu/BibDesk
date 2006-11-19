@@ -37,9 +37,10 @@
  */
 
 #import "BDSKRatingButtonCell.h"
+#import "NSBezierPath_BDSKExtensions.h"
 
 #define OUTER_SIZE			12
-#define MARKER_SIZE			8
+#define MARKER_SIZE			10
 #define PLACEHOLDER_SIZE	2
 #define BUTTON_TEXT_X_SEP	4
 #define BUTTON_TEXT_Y_SEP	2
@@ -332,7 +333,10 @@
 	[color set];
 	
 	while (i++ < rating) {
-		[[NSBezierPath bezierPathWithOvalInRect:rect] fill];
+		if([controlView isFlipped])
+            [NSBezierPath fillInvertedStarInRect:rect];
+        else
+            [NSBezierPath fillStarInRect:rect];
 		rect.origin.x += OUTER_SIZE;
 	}
 	
