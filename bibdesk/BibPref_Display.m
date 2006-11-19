@@ -71,6 +71,7 @@
     [previewTemplatePopup setEnabled:[defaults integerForKey:BDSKPreviewDisplayKey] == 3];
     
     int tag, tagMax = 2;
+    BOOL displayFirstName = [defaults boolForKey:BDSKShouldDisplayFirstNamesKey];
     OBPRECONDITION([authorNameMatrix numberOfColumns] == 1);
     OBPRECONDITION([authorNameMatrix numberOfRows] == tagMax + 1);
     for(tag = 0; tag <= tagMax; tag++){
@@ -92,8 +93,9 @@
         }
         OBPOSTCONDITION(prefKey);
         [cell setState:([defaults boolForKey:prefKey] ? NSOnState : NSOffState)];
+        if(tag > 0)
+            [cell setEnabled:displayFirstName];
     }
-    
 }    
 
 - (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification{
