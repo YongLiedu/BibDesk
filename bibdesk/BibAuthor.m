@@ -271,7 +271,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 
     NSString *theName = nil;
 
-    if(mask & BDSKAuthorDisplayFirstNameMask == NO)
+    if((mask & BDSKAuthorDisplayFirstNameMask) == NO)
         theName = fullLastName; // and then ignore the other options
     else if(mask & BDSKAuthorLastNameFirstMask)
         theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedNormalizedName] : normalizedName;
