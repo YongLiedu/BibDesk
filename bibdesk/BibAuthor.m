@@ -262,7 +262,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 #pragma mark String Representations
 
 - (NSString *)description{
-    return normalizedName;
+    return [self displayName];
 }
 
 - (NSString *)displayName{
