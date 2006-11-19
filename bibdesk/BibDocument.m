@@ -467,8 +467,8 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         [[BDSKSharingServer defaultServer] enableSharing];
     
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
+    [self updateSmartGroupsCountAndContent:NO];
     [self updateCategoryGroupsPreservingSelection:NO];
-    [self updateAllSmartGroups];
 }
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
@@ -2144,20 +2144,22 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if([[notification name] isEqualToString:BDSKDocDelItemNotification] == NO)
 		[self setSearchString:@""]; // clear the search when adding
 
+    // update smart group counts
+    [self updateSmartGroupsCountAndContent:NO];
     // this handles the remaining UI updates necessary (tableView and previews)
 	[self updateCategoryGroupsPreservingSelection:YES];
-    // update smart group counts
-    [self updateAllSmartGroups];
 }
 
 - (void)handlePrivateBibItemChanged:(NSString *)changedKey{
     // we can be called from a queue after the document was closed
     if (docState.isDocumentClosed)
         return;
-
-	[self updateAllSmartGroups];
     
-    if([[self currentGroupField] isEqualToString:changedKey]){
+    BOOL isCurrentGroupField = [[self currentGroupField] isEqualToString:changedKey];
+    
+	[self updateSmartGroupsCountAndContent:isCurrentGroupField == NO];
+    
+    if(isCurrentGroupField){
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
     } else if(![[searchField stringValue] isEqualToString:@""] && 

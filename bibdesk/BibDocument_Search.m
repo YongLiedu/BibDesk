@@ -77,9 +77,10 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 
 - (void)setSearchString:(NSString *)filterterm {
     NSParameterAssert(filterterm != nil);
-    
-    [searchField setStringValue:filterterm];
-    [searchField sendAction:[searchField action] to:[searchField target]];
+    if([[searchField stringValue] isEqualToString:filterterm] == NO){
+        [searchField setStringValue:filterterm];
+        [searchField sendAction:[searchField action] to:[searchField target]];
+    }
 }
 
 - (IBAction)search:(id)sender{
@@ -106,7 +107,7 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     // @@ performance: this kills us on large files, since it gets called for every updateCategoryGroupsPreservingSelection (any add/del)
 	[self sortPubsByKey:nil]; // resort
 	[self updateUI];
-	if(pubsToSelect)
+	if([pubsToSelect count])
 		[self selectPublications:pubsToSelect];
 }
         

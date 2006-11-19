@@ -56,11 +56,11 @@
 
 - (NSArray *)selectedGroups;
 - (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
+- (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate;
 - (void)displaySelectedGroups;
 - (void)selectGroup:(BDSKGroup *)aGroup;
 - (void)selectGroups:(NSArray *)theGroups;
 
-- (void)updateAllSmartGroups;
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group;
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray;
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName;

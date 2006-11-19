@@ -133,7 +133,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification{
-	[self updateAllSmartGroups];
+	[self updateSmartGroupsCountAndContent:YES];
 }
 
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification{
@@ -307,7 +307,36 @@ The groupedPublications array is a subset of the publications array, developed b
 	// reset ourself as delegate
     [groupTableView setDelegate:self];
 }
-	
+
+// force the smart groups to refilter their items, so the group content and count get redisplayed
+// if this becomes slow, we could make filters thread safe and update them in the background
+- (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate{
+
+	NSRange smartRange = [groups rangeOfSmartGroups];
+    unsigned int row = NSMaxRange(smartRange);
+	BOOL needsUpdate = NO;
+    
+    while(NSLocationInRange(--row, smartRange)){
+		[(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
+		if([groupTableView isRowSelected:row])
+			shouldUpdate = shouldUpdate;
+    }
+    
+    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
+        NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+        [self sortGroupsByKey:sortGroupsKey];
+        [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    }else{
+        [groupTableView reloadData];
+        if(needsUpdate == YES){
+            // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
+            NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
+            [self displaySelectedGroups];
+            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+        }
+    }
+}
+
 - (void)displaySelectedGroups{
     NSArray *selectedGroups = [self selectedGroups];
     NSArray *array;
@@ -365,35 +394,6 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)selectGroup:(BDSKGroup *)aGroup{
     [self selectGroups:[NSArray arrayWithObject:aGroup]];
-}
-
-// force the smart groups to refilter their items, so the group content and count get redisplayed
-// if this becomes slow, we could make filters thread safe and update them in the background
-- (void)updateAllSmartGroups{
-
-	NSRange smartRange = [groups rangeOfSmartGroups];
-    unsigned int row = NSMaxRange(smartRange);
-	BOOL shouldUpdate = NO;
-    
-    while(NSLocationInRange(--row, smartRange)){
-		[(BDSKSmartGroup *)[groups objectAtIndex:row] filterItems:publications];
-		if([groupTableView isRowSelected:row])
-			shouldUpdate = YES;
-    }
-    
-    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
-        NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-        [self sortGroupsByKey:sortGroupsKey];
-        [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-    }else{
-        [groupTableView reloadData];
-        if(shouldUpdate == YES){
-            // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
-            NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
-            [self displaySelectedGroups];
-            [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-        }
-    }
 }
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
