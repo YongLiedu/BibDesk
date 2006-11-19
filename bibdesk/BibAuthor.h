@@ -63,6 +63,7 @@ typedef struct _BibAuthorFlags {
     NSString *vonPart;
     NSString *lastName;
     NSString *jrPart;
+    NSString *fullLastName;
     NSString *normalizedName;
     NSString *sortableName;
     NSString *abbreviatedName;
@@ -106,6 +107,7 @@ typedef struct _BibAuthorFlags {
 */
 - (NSString *)displayName;
 - (NSString *)normalizedName;
+- (NSString *)fullLastName;
 - (NSString *)sortableName;
 - (NSString *)name;
 - (NSString *)firstName;

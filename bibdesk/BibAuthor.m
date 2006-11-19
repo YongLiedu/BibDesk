@@ -46,6 +46,7 @@
 
 - (void)splitName:(NSString *)newName;
 - (void)setNormalizedName:(NSString *)theName;
+- (void)setFullLastName:(NSString *)theName;
 - (void)setSortableName:(NSString *)theName;
 - (void)cacheNames;
 - (void)setVonPart:(NSString *)newVonPart;
@@ -274,7 +275,7 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
     NSString *theName = nil;
 
     if(displayFirst == NO){
-        theName = lastName; // and then ignore the other options
+        theName = fullLastName; // and then ignore the other options
     } else {
         if(displayLastFirst)
             theName = displayAbbreviated ? [self abbreviatedNormalizedName] : normalizedName;
@@ -289,6 +290,10 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 
 - (NSString *)normalizedName{
 	return normalizedName;
+}
+
+- (NSString *)fullLastName{
+    return fullLastName;
 }
 
 - (NSString *)sortableName{
@@ -534,6 +539,13 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     }
 }
 
+- (void)setFullLastName:(NSString *)theName{
+    if(fullLastName != theName){
+        [fullLastName release];
+        fullLastName = [theName copy];
+    }
+}
+
 // This follows the recommendations from Oren Patashnik's btxdoc.tex:
 /*To summarize, BibTeX allows three possible forms for the name: 
 "First von Last" 
@@ -586,6 +598,8 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
         [theName appendString:@", "];
         [theName appendString:jrPart];
     }
+    
+    [self setFullLastName:theName];
     
     if(flags.hasFirst){
         [theName appendString:@", "];
@@ -683,9 +697,6 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
     
     // use fixed-size mutable strings; allow for extra ". "
     CFMutableStringRef abbrevName = CFStringCreateMutable(alloc, nameLength + firstNameMaxLength);
-    
-    // last name should never exceed the length of the full name
-    CFMutableStringRef fullLastName = CFStringCreateMutable(alloc, nameLength);
     CFMutableStringRef abbrevFirstName = NULL;
     
     if(flags.hasFirst){
@@ -706,35 +717,18 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
         }
     }
     
-    // start creating the last name; fullLastName is now empty
-    if(flags.hasVon){
-        CFStringAppend(fullLastName, (CFStringRef)vonPart);
-        CFStringAppend(fullLastName, CFSTR(" "));
-    }
-    
-    if(flags.hasLast)
-        CFStringAppend(fullLastName, (CFStringRef)lastName);
-    
-    if(flags.hasJr){
-        CFStringAppend(fullLastName, CFSTR(", "));
-        CFStringAppend(fullLastName, (CFStringRef)jrPart);
-    }
-    
     // abbrevName is now empty; set it to the first name
     if(flags.hasFirst){
         CFStringAppend(abbrevName, abbrevFirstName);
         CFStringAppend(abbrevName, CFSTR(" "));
     }
     
-    CFStringAppend(abbrevName, fullLastName);
+    CFStringAppend(abbrevName, (CFStringRef)fullLastName);
     
     [self setAbbreviatedName:(NSString *)abbrevName];
     
     // now for the normalized abbreviated form; start with only the last name
-    CFStringReplaceAll(abbrevName, fullLastName);
-    
-    // all done with last name
-    CFRelease(fullLastName);
+    CFStringReplaceAll(abbrevName, (CFStringRef)fullLastName);
     
     if(flags.hasFirst){
         CFStringAppend(abbrevName, CFSTR(", "));

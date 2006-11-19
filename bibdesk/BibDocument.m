@@ -2237,6 +2237,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)handleNameDisplayChangedNotification:(NSNotification *)notification{
     [tableView reloadData];
+    if([currentGroupField isPersonField])
+        [groupTableView reloadData];
     [self handlePreviewDisplayChangedNotification:notification];
 }
 
