@@ -477,11 +477,10 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
 @implementation NSObject (BDSKTemplateParser)
 
 - (NSString *)stringDescription {
+    NSString *description = nil;
     if ([self respondsToSelector:@selector(stringValue)])
-        return [self performSelector:@selector(stringValue)];
-    if ([self respondsToSelector:@selector(string)])
-        return [self performSelector:@selector(string)];
-    return [self description];
+        description = [self performSelector:@selector(stringValue)];
+    return description ? description : [self description];
 }
 
 - (BOOL)isNotEmpty {
@@ -573,6 +572,10 @@ static inline NSString *sepConditionTagWithTag(NSString *tag){
 
 
 @implementation NSAttributedString (BDSKTemplateParser)
+
+- (NSString *)stringDescription {
+    return [self string];
+}
 
 - (BOOL)isNotEmpty
 {
