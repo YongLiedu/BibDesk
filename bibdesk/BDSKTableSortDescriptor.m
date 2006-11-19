@@ -169,7 +169,7 @@
     }else if([tcID isURLField]){
         
         // compare pathExtension for URL fields so the subsort is more useful
-        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:[NSString stringWithFormat:@"%@.pathExtension", tcID] ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(extensionCompare:)];
         
     }else{
         

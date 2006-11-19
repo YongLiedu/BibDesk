@@ -763,6 +763,17 @@ http://home.planet.nl/~faase009/GNU.txt
 	return [self localizedCaseInsensitiveNumericCompare:other];
 }    
 
+- (NSComparisonResult)extensionCompare:(NSString *)other{
+    NSString *myExtension = [self pathExtension];
+    NSString *otherExtension = [other pathExtension];
+    BOOL otherIsEmpty = [NSString isEmptyString:otherExtension];
+	if ([myExtension isEqualToString:@""])
+		return otherIsEmpty ? NSOrderedSame : NSOrderedDescending;
+    if (otherIsEmpty)
+		return NSOrderedAscending;
+	return [myExtension localizedCaseInsensitiveCompare:otherExtension];
+}    
+
 - (NSComparisonResult)triStateCompare:(NSString *)other{
     // we order increasingly as 0, -1, 1
     int myValue = [self triStateValue];

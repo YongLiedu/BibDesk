@@ -256,6 +256,8 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSComparisonResult)sortCompare:(NSString *)other;
 
+- (NSComparisonResult)extensionCompare:(NSString *)other;
+
 /*!
     @method     triStateCompare:
     @abstract   For sorting triState string values
