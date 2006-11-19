@@ -182,9 +182,7 @@ extern NSString *BDSKSharingRequiresPasswordKey;
 extern NSString *BDSKSharingNameKey;
 extern NSString *BDSKWarnOnCiteKeyChangeKey;
 
-extern NSString *BDSKShouldDisplayFirstNamesKey;
-extern NSString *BDSKShouldAbbreviateFirstNamesKey;
-extern NSString *BDSKShouldDisplayLastNameFirstKey;
+extern NSString *BDSKAuthorNameDisplayKey;
 
 extern NSString *BDSKUpdateCheckIntervalKey;
 extern NSString *BDSKUpdateCheckLastDateKey;

@@ -2119,13 +2119,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
         [OFPreference addObserver:self
                          selector:@selector(handleNameDisplayChangedNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayFirstNamesKey]];
-        [OFPreference addObserver:self
-                         selector:@selector(handleNameDisplayChangedNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKShouldAbbreviateFirstNamesKey]];
-        [OFPreference addObserver:self
-                         selector:@selector(handleNameDisplayChangedNotification:)
-                    forPreference:[OFPreference preferenceForKey:BDSKShouldDisplayLastNameFirstKey]];
+                    forPreference:[OFPreference preferenceForKey:BDSKAuthorNameDisplayKey]];
         [OFPreference addObserver:self
                          selector:@selector(handleTeXPreviewNeedsUpdateNotification:)
                     forPreference:[OFPreference preferenceForKey:BDSKBTStyleKey]];

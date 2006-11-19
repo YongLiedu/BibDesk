@@ -52,6 +52,12 @@ typedef struct _BibAuthorFlags {
     BOOL hasJr;
 } BibAuthorFlags;
 
+enum {
+    BDSKAuthorDisplayFirstNameMask = 1,
+    BDSKAuthorAbbreviateFirstNameMask = 2,
+    BDSKAuthorLastNameFirstMask = 4
+};
+
 /*!
     @class BibAuthor
     @abstract Modeling authors as objects that can have interesting relationships

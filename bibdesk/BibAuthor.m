@@ -267,21 +267,16 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 }
 
 - (NSString *)displayName{
-    OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL displayFirst = [prefs boolForKey:BDSKShouldDisplayFirstNamesKey];
-    BOOL displayAbbreviated = [prefs boolForKey:BDSKShouldAbbreviateFirstNamesKey];
-    BOOL displayLastFirst = [prefs boolForKey:BDSKShouldDisplayLastNameFirstKey];
+    int mask = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAuthorNameDisplayKey];
 
     NSString *theName = nil;
 
-    if(displayFirst == NO){
+    if(mask & BDSKAuthorDisplayFirstNameMask == NO)
         theName = fullLastName; // and then ignore the other options
-    } else {
-        if(displayLastFirst)
-            theName = displayAbbreviated ? [self abbreviatedNormalizedName] : normalizedName;
-        else
-            theName = displayAbbreviated ? [self abbreviatedName] : name;
-    }
+    else if(mask & BDSKAuthorLastNameFirstMask)
+        theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedNormalizedName] : normalizedName;
+    else
+        theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedName] : name;
     return theName;
 }
 

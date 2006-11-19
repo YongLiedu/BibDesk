@@ -630,12 +630,8 @@
 					<real>0.0</real>
 					<key>BDSKPreviewTemplateStyleKey</key>
 					<string>Default RSS template</string>
-					<key>BDSKShouldAbbreviateFirstNamesKey</key>
-					<true/>
-					<key>BDSKShouldDisplayFirstNamesKey</key>
-					<true/>
-					<key>BDSKShouldDisplayLastNameFirstKey</key>
-					<false/>
+					<key>BDSKAuthorNameDisplayKey</key>
+					<integer>3</integer>
 					<key>BDSKSortGroupsDescendingKey</key>
 					<false/>
 					<key>BDSKSortGroupsKey</key>

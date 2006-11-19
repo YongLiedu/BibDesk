@@ -199,8 +199,7 @@ NSString *BDSKTableHeaderImagesKey = @"BDSKTableHeaderImages";
 NSString *BDSKTableHeaderTitlesKey = @"BDSKTableHeaderTitles";
 NSString *BDSKCiteseerHostKey = @"BDSKCiteseerHostKey";
 
-NSString *BDSKShouldDisplayFirstNamesKey = @"BDSKShouldDisplayFirstNamesKey";
-NSString *BDSKShouldAbbreviateFirstNamesKey = @"BDSKShouldAbbreviateFirstNamesKey";
+NSString *BDSKAuthorNameDisplayKey = @"BDSKAuthorNameDisplayKey";
 NSString *BDSKShouldDisplayLastNameFirstKey = @"BDSKShouldDisplayLastNameFirstKey";
 NSString *BDSKShouldShareFilesKey = @"BDSKShouldShareFilesKey";
 NSString *BDSKShouldLookForSharedFilesKey = @"BDSKShouldLookForSharedFilesKey";

@@ -38,6 +38,7 @@
 
 #import "BibPref_Display.h"
 #import "BDSKTemplate.h"
+#import "BibAuthor.h"
 
 
 @implementation BibPref_Display
@@ -71,30 +72,15 @@
     [previewTemplatePopup setEnabled:[defaults integerForKey:BDSKPreviewDisplayKey] == 3];
     
     int tag, tagMax = 2;
-    BOOL displayFirstName = [defaults boolForKey:BDSKShouldDisplayFirstNamesKey];
+    int mask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
     OBPRECONDITION([authorNameMatrix numberOfColumns] == 1);
     OBPRECONDITION([authorNameMatrix numberOfRows] == tagMax + 1);
     for(tag = 0; tag <= tagMax; tag++){
         NSButtonCell *cell = [authorNameMatrix cellWithTag:tag];
         OBPOSTCONDITION(cell);
-        NSString *prefKey = nil;
-        switch(tag){
-            case 0:
-                prefKey = BDSKShouldDisplayFirstNamesKey;
-                break;
-            case 1:
-                prefKey = BDSKShouldAbbreviateFirstNamesKey;
-                break;
-            case 2:
-                prefKey = BDSKShouldDisplayLastNameFirstKey;
-                break;
-            default:
-                [NSException raise:NSInvalidArgumentException format:@"Unrecognized cell %@ with tag %d", cell, [cell tag]];
-        }
-        OBPOSTCONDITION(prefKey);
-        [cell setState:([defaults boolForKey:prefKey] ? NSOnState : NSOffState)];
-        if(tag > 0)
-            [cell setEnabled:displayFirstName];
+        [cell setState:(mask & (1 << tag) ? NSOnState : NSOffState)];
+        if(1 << tag != BDSKAuthorDisplayFirstNameMask)
+            [cell setEnabled:mask & BDSKAuthorDisplayFirstNameMask];
     }
 }    
 
@@ -210,22 +196,13 @@
 {
     OBPRECONDITION(sender == authorNameMatrix);
     NSButtonCell *clickedCell = [sender selectedCell];
-    NSString *prefKey = nil;
-    switch([clickedCell tag]){
-        case 0:
-            prefKey = BDSKShouldDisplayFirstNamesKey;
-            break;
-        case 1:
-            prefKey = BDSKShouldAbbreviateFirstNamesKey;
-            break;
-        case 2:
-            prefKey = BDSKShouldDisplayLastNameFirstKey;
-            break;
-        default:
-            [NSException raise:NSInvalidArgumentException format:@"Unrecognized cell %@ with tag %d", clickedCell, [clickedCell tag]];
-    }
-    OBPOSTCONDITION(prefKey);
-    [defaults setBool:([clickedCell state] == NSOnState) forKey:prefKey];
+    int cellMask = 1 << [clickedCell tag];
+    int prefMask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
+    if([clickedCell state] == NSOnState)
+        prefMask |= cellMask;
+    else
+        prefMask &= ~cellMask;
+    [defaults setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
     [self valuesHaveChanged];
 }
 
