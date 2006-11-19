@@ -213,6 +213,8 @@ static CFDictionaryRef selectorTable = NULL;
         
         owner = nil;
         
+        fileOrder = nil;
+        
         [self setFileType:inFileType];
         [self setPubTypeWithoutUndo:type];
         [self setDate: nil];
@@ -260,6 +262,7 @@ static CFDictionaryRef selectorTable = NULL;
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
             // set by the document, which we don't archive
             owner = nil;
+            fileOrder = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
@@ -303,6 +306,7 @@ static CFDictionaryRef selectorTable = NULL;
     [pubDate release];
     [dateAdded release];
     [dateModified release];
+    [fileOrder release];
     [super dealloc];
 }
 
@@ -504,7 +508,14 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 
 // accessors for fileorder
 - (NSNumber *)fileOrder{
-    return [[owner publications] orderOfItem:self];
+    return fileOrder;
+}
+
+- (void)setFileOrder:(NSNumber *)newOrder{
+    if(fileOrder != newOrder){
+        [fileOrder release];
+        fileOrder = [newOrder retain];
+    }
 }
 
 - (NSString *)fileType { 

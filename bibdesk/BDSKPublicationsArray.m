@@ -48,6 +48,7 @@
 @interface BDSKPublicationsArray (Private)
 - (void)addToItemsForCiteKeys:(BibItem *)item;
 - (void)removeFromItemsForCiteKeys:(BibItem *)item;
+- (void)updateFileOrder;
 @end
 
 
@@ -71,6 +72,7 @@
         publications = [[NSMutableArray alloc] initWithObjects:objects count:count];
         itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
         [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
+        [self updateFileOrder];
     }
     return self;
 }
@@ -106,12 +108,14 @@
 {
     [publications addObject:anObject];
     [self addToItemsForCiteKeys:anObject];
+    [anObject setFileOrder:[NSNumber numberWithInt:[publications count]]];
 }
 
 - (void)insertObject:(id)anObject atIndex:(unsigned)index;
 {
     [publications insertObject:anObject atIndex:index];
     [self addToItemsForCiteKeys:anObject];
+    [self updateFileOrder];
 }
 
 - (void)removeLastObject;
@@ -127,11 +131,14 @@
 {
     [self removeFromItemsForCiteKeys:[publications objectAtIndex:index]];
     [publications removeObjectAtIndex:index];
+    [self updateFileOrder];
 }
 
 - (void)replaceObjectAtIndex:(unsigned)index withObject:(id)anObject;
 {
-    [self removeFromItemsForCiteKeys:[publications objectAtIndex:index]];
+    BibItem *oldObject = [publications objectAtIndex:index];
+    [anObject setFileOrder:[oldObject fileOrder]];
+    [self removeFromItemsForCiteKeys:oldObject];
     [publications replaceObjectAtIndex:index withObject:anObject];
     [self addToItemsForCiteKeys:anObject];
 }
@@ -148,24 +155,7 @@
     return [publications objectEnumerator];
 }
 
-#pragma mark Item order
-
-- (NSNumber *)orderOfItem:(BibItem *)item;
-{
-    unsigned order = [publications indexOfObjectIdenticalTo:item];
-    return NSNotFound == order ? nil : [NSNumber numberWithInt:(order + 1)];
-}
-
 #pragma mark Items for cite keys
-
-- (void)addToItemsForCiteKeys:(BibItem *)item;
-{
-    [itemsForCiteKeys addObject:item forKey:[item citeKey]];
-}
-
-- (void)removeFromItemsForCiteKeys:(BibItem *)item{
-    [itemsForCiteKeys removeObject:item forKey:[item citeKey]];
-}
 
 - (void)changeCiteKey:(NSString *)oldKey toCiteKey:(NSString *)newKey forItem:(BibItem *)anItem;
 {
@@ -241,6 +231,26 @@
     }
     [auths release];
     return anAuthorPubs;
+}
+
+@end
+
+
+@implementation BDSKPublicationsArray (Private)
+
+- (void)addToItemsForCiteKeys:(BibItem *)item;
+{
+    [itemsForCiteKeys addObject:item forKey:[item citeKey]];
+}
+
+- (void)removeFromItemsForCiteKeys:(BibItem *)item{
+    [itemsForCiteKeys removeObject:item forKey:[item citeKey]];
+}
+
+- (void)updateFileOrder{
+    unsigned i, count = [publications count];
+    for(i = 0; i < count; i++)
+        [[publications objectAtIndex:i] setFileOrder:[NSNumber numberWithInt:i+1]];
 }
 
 @end

@@ -67,6 +67,7 @@ enum {
 	NSCalendarDate *dateAdded;
 	NSCalendarDate *dateModified;
 	NSMutableDictionary *groups;
+    NSNumber * fileOrder;
     BOOL hasBeenEdited;
 	BOOL needsToBeFiled;
 	id<BDSKOwner> owner;
@@ -126,6 +127,7 @@ enum {
 
 // accessors for fileorder
 - (NSNumber *)fileOrder;
+- (void)setFileOrder:(NSNumber *)newOrder;
 
 - (NSString *)fileType;
 - (void)setFileType:(NSString *)someFileType;
