@@ -582,31 +582,24 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 
 #pragma mark Publications acessors
 
-- (void)setPublications:(NSArray *)newPubs undoable:(BOOL)undo{
-    if(newPubs != publications){
-
-        // we don't want to undo when initially setting the publications array, or the document is dirty
-        // we do want to have undo otherwise though, e.g. for undoing -sortForCrossrefs:
-        if(undo){
-            NSUndoManager *undoManager = [self undoManager];
-            [[undoManager prepareWithInvocationTarget:self] setPublications:publications];
-        }
-        
-		// current publications (if any) will no longer have a document
-		[publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
-        
-		[publications setArray:newPubs];
-		[publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-		
-		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
-		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocSetPublicationsNotification
-															object:self
-														  userInfo:notifInfo];
-    }
+- (void)setPublicationsWithoutUndo:(NSArray *)newPubs{
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
+    [publications setArray:newPubs];
+    [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
 }    
 
 - (void)setPublications:(NSArray *)newPubs{
-    [self setPublications:newPubs undoable:YES];
+    if(newPubs != publications){
+        NSUndoManager *undoManager = [self undoManager];
+        [[undoManager prepareWithInvocationTarget:self] setPublications:publications];
+        
+        [self setPublicationsWithoutUndo:newPubs];
+        
+        NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocSetPublicationsNotification
+                                                            object:self
+                                                          userInfo:notifInfo];
+    }
 }
 
 - (BDSKPublicationsArray *) publications{
@@ -1354,7 +1347,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [[[self windowControllers] objectAtIndex:index] close];
     
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
-        // updating smart and category groups is done by the notification of setPublications:
+        [self setSearchString:@""];
+        [self updateSmartGroupsCountAndContent:NO];
+        [self updateCategoryGroupsPreservingSelection:YES];
         [self sortGroupsByKey:sortGroupsKey]; // resort
 		[tableView deselectAll:self]; // clear before resorting
 		[self search:searchField]; // redo the search
@@ -1454,7 +1449,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *error = nil;
 	newPubs = [BibTeXParser itemsFromData:data frontMatter:frontMatter filePath:[absoluteURL path] document:self error:&error];
 	if(outError) *outError = error;	
-    [self setPublications:newPubs undoable:NO];
+    [self setPublicationsWithoutUndo:newPubs];
 
     return error == nil;
 }
@@ -1476,7 +1471,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	newPubs = [BDSKStringParser itemsFromString:dataString ofType:type error:&error];
         
     if(outError) *outError = error;
-    [self setPublications:newPubs undoable:NO];
+    [self setPublicationsWithoutUndo:newPubs];
     
     if (type == BDSKRISStringType) // since we can't save pubmed files as pubmed files:
         [self updateChangeCount:NSChangeDone];
