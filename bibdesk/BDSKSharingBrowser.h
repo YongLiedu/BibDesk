@@ -53,6 +53,8 @@ extern NSString *BDSKComputerName();
 
 - (NSArray *)sharedGroups;
 
+- (BOOL)isBrowsing;
+
 - (void)enableSharedBrowsing;
 - (void)disableSharedBrowsing;
 - (void)restartSharedBrowsingIfNeeded;

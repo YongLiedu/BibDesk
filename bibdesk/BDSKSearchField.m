@@ -112,8 +112,6 @@ NSString *BDSKFileContentLocalizedString = nil;
     
     // reset the template, since we can't modify the actual menu directly
 	[searchCell setSearchMenuTemplate:templateMenu];
-    
-    [self sendAction:[self action] to:[self target]];
 }
 
 // assert some assumptions that are made at various places
@@ -186,6 +184,7 @@ NSString *BDSKFileContentLocalizedString = nil;
 
 - (void)searchFieldChangeKey:(id)sender{
     [self setSearchKey:[sender title]];
+    [self sendAction:[self action] to:[self target]];
 }
 
 - (void)addSearchFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -203,6 +202,7 @@ NSString *BDSKFileContentLocalizedString = nil;
     // this will sort the menu items for us
     [[self cell] setSearchMenuTemplate:[self searchFieldMenu]];
     [self setSearchKey:newSearchKey];
+    [self sendAction:[self action] to:[self target]];
 }
 
 - (void)quickSearchAddField:(id)sender{
@@ -232,8 +232,10 @@ NSString *BDSKFileContentLocalizedString = nil;
                                                       forKey:BDSKQuickSearchKeys];
 
     [[self cell] setSearchMenuTemplate:[self searchFieldMenu]];
-    if([searchKey isEqualToString:oldSearchKey])
+    if([searchKey isEqualToString:oldSearchKey]){
         [self setSearchKey:BDSKAllFieldsString];
+        [self sendAction:[self action] to:[self target]];
+    }
 }
 
 - (void)quickSearchRemoveField:(id)sender{

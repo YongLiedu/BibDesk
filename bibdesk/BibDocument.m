@@ -404,7 +404,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     previousSortKey = [sortKey retain];
     docState.sortDescending = [xattrDefaults  boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey defaultValue:[pw boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey]];
     [tableView setHighlightedTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
-    [self sortPubsByKey:nil];
     
     [sortGroupsKey autorelease];
     sortGroupsKey = [[xattrDefaults objectForKey:BDSKSortGroupsKey defaultObject:[pw objectForKey:BDSKSortGroupsKey]] retain];
@@ -458,9 +457,11 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
     if([pw boolForKey:BDSKShouldLookForSharedFilesKey]){
-        [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
-        // force an initial update of the tableview, if browsing is already in progress
-        [self handleSharedGroupsChangedNotification:nil];
+        if([[BDSKSharingBrowser sharedBrowser] isBrowsing])
+            // force an initial update of the tableview, if browsing is already in progress
+            [self handleSharedGroupsChangedNotification:nil];
+        else
+            [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
     }
     if([pw boolForKey:BDSKShouldShareFilesKey])
         [[BDSKSharingServer defaultServer] enableSharing];

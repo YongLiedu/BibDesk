@@ -152,9 +152,14 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     }
 }
 
+- (BOOL)isBrowsing;
+{
+    return sharedGroups != nil;
+}
+
 - (void)enableSharedBrowsing;
 {
-    if(sharedGroups == nil){
+    if([self isBrowsing] == NO){
         sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
         browser = [[NSNetServiceBrowser alloc] init];
         [browser setDelegate:self];
@@ -167,7 +172,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)disableSharedBrowsing;
 {
-    if(sharedGroups != nil){
+    if([self isBrowsing]){
         [sharedGroups release];
         sharedGroups = nil;
         [browser release];
