@@ -160,20 +160,26 @@
 {
     NSParameterAssert([fileURL isFileURL]);
     
-    fileURL = [fileURL fileURLByResolvingAliases];
-    FSRef fileRef;
+    NSURL *resolvedURL = [fileURL fileURLByResolvingAliases];
     OSStatus err = noErr;
     
-    if (FALSE == CFURLGetFSRef((CFURLRef)fileURL, &fileRef))
-        err = coreFoundationUnknownErr;
+    if (nil == resolvedURL)
+        err = fnfErr;
+    
+    FSRef fileRef;
+    
+    if (noErr == err && FALSE == CFURLGetFSRef((CFURLRef)resolvedURL, &fileRef))
+        err = coreFoundationUnknownErr; /* should never happen unless fileURLByResolvingAliases returned nil */
     
     // kLSItemContentType returns a CFStringRef, according to the header
     CFTypeRef theUTI = NULL;
     if (noErr == err)
         err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
     
-    if (noErr != err && NULL != error)
-        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:fileURL, NSURLErrorKey, NSLocalizedString(@"Unable to create UTI", @""), NSLocalizedDescriptionKey, nil]];
+    if (noErr != err && NULL != error) {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:fileURL, NSURLErrorKey, NSLocalizedString(@"Unable to create UTI", @""), NSLocalizedDescriptionKey, nil];
+        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:userInfo];
+    }
     
     return [(NSString *)theUTI autorelease];
 }
