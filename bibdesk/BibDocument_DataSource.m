@@ -207,7 +207,8 @@
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
     if (row == -1) return;
     if (tv == tableView) {
-        [aCell setEnabled:[self hasSharedGroupsSelected] == NO];
+        if([aCell isKindOfClass:[NSButtonCell class]])
+            [aCell setEnabled:[self hasExternalGroupsSelected] == NO];
     } else if (tv == groupTableView) {
         BDSKGroup *group = [groups objectAtIndex:row];
         NSProgressIndicator *spinner = [groups spinnerForGroup:group];
