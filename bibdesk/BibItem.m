@@ -1358,12 +1358,10 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
         return [[self authorOrEditorAtIndex:2] displayName];
     }else if([field isEqualToString:BDSKLastAuthorEditorString] ){
         return [[self lastAuthorOrEditor] displayName];
-    } else if([field isEqualToString:BDSKAuthorString]) {
-        return [self pubAuthorsForDisplay];
+    } else if([field isPersonField]) {
+        return [self peopleStringForDisplayFromField:field];
     } else if([field isEqualToString:BDSKAuthorEditorString]){
         return [self pubAuthorsOrEditorsForDisplay];
-    } else if([field isEqualToString:BDSKEditorString]) {
-        return [self peopleStringForDisplayFromField:BDSKEditorString];
     }else if([field isURLField]){
         return [self smallImageForURLField:field];
     }else if([field isRatingField]){
@@ -1698,8 +1696,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
-			}else if([key isEqualToString:BDSKAuthorString]){
-				if((stringValue = [self pubAuthorsForDisplay]))
+			}else if([key isPersonField]){
+				if((stringValue = [self peopleStringForDisplayFromField:key]))
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
