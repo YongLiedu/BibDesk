@@ -1112,11 +1112,12 @@
     
     NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
     CFIndex countOfItems = 0;
+    BOOL isURL = [sortKey isURLField];
     
     // Compare objects in the currently sorted table column using the isEqual: method to test adjacent cells in order to check for duplicates based on a specific sort key.  BibTool does this, but its effectiveness is obviously limited by the key used <http://lml.ls.fi.upm.es/manuales/bibtool/m_2_11_1.html>.
     while(index--){
         object1 = object2;
-        object2 = [[shownPublications objectAtIndex:index] displayValueOfField:sortKey];
+        object2 = isURL ? [[shownPublications objectAtIndex:index] valueOfField:sortKey] : [[shownPublications objectAtIndex:index] displayValueOfField:sortKey];
         if([object1 isEqual:object2]){
             [rowsToSelect addIndexesInRange:NSMakeRange(index, 2)];
             countOfItems++;
