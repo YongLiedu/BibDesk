@@ -191,7 +191,7 @@ static void applyAttributesToString(const void *value, void *context)
 
 - (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size{
     NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:self];
-    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithContainerSize:NSMakeSize(NSWidth(infoRect), 100.0)];
+    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithContainerSize:size];
     NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
     
     [layoutManager addTextContainer:textContainer];
