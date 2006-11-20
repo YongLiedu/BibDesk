@@ -1646,7 +1646,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableAttributedString* reqStr = [[NSMutableAttributedString alloc] init];
     NSMutableAttributedString* nonReqStr = [[NSMutableAttributedString alloc] init];
 	NSAttributedString *valueStr;
-	NSAttributedString *keyStr;
     
 	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
 

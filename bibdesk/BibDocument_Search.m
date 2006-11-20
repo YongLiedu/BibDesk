@@ -137,7 +137,6 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     }
     
     NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
-    BOOL isOr;
     NSArray *searchComponents = [searchString searchComponents], *andSearchComponents;
     
     if([searchComponents count] == 0)
