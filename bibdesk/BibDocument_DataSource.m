@@ -843,10 +843,7 @@
                 }
             }
             
-            BOOL result = [self addPublicationsFromPasteboard:pboard error:NULL];
-            
-            if (result) [self updateUI];
-            return result;
+            return [self addPublicationsFromPasteboard:pboard error:NULL];
         }
     } else if(tv == groupTableView){
         NSArray *pubs = nil;
@@ -1027,7 +1024,7 @@
 // used for status bar
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(searchString == nil || sortKey == nil)
-        [self updateUI]; // resets the status line to its default value
+        [self updateStatus]; // resets the status line to its default value
     else
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @""), sortKey, searchString]];
 }
@@ -1135,7 +1132,7 @@
 
 - (void)tableView:(NSTableView *)tv mouseExitedTableColumn:(NSTableColumn *)tableColumn row:(int)row;
 {
-    [self updateUI];
+    [self updateStatus];
 }
 
 @end

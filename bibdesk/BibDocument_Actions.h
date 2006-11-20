@@ -233,9 +233,13 @@
     
 */
 
-#pragma mark Custom cite drawer
+#pragma mark Showing related info windows
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
+
+- (IBAction)showDocumentInfoWindow:(id)sender;
+
+- (IBAction)showMacrosWindow:(id)sender;
 
 #pragma mark Sharing Actions
 

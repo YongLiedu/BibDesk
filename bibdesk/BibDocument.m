@@ -83,7 +83,6 @@
 #import "BDSKZoomableScrollView.h"
 
 #import "BDSKMacroResolver.h"
-#import "MacroWindowController.h"
 #import "BDSKErrorObjectController.h"
 #import "BDSKGroupTableView.h"
 #import "BDSKFileContentSearchController.h"
@@ -99,7 +98,6 @@
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
 #import "BDSKTemplate.h"
-#import "BDSKDocumentInfoWindowController.h"
 #import "BDSKGroupTableView.h"
 #import "BDSKFileContentSearchController.h"
 #import "BDSKTemplateParser.h"
@@ -580,6 +578,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     } 
 }
 
+#pragma mark -
 #pragma mark Publications acessors
 
 - (void)setPublicationsWithoutUndo:(NSArray *)newPubs{
@@ -728,49 +727,10 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     return string;
 }
 
-- (IBAction)showDocumentInfoWindow:(id)sender{
-    if (!infoWC) {
-        infoWC = [(BDSKDocumentInfoWindowController *)[BDSKDocumentInfoWindowController alloc] initWithDocument:self];
-    }
-    if ([[self windowControllers] containsObject:infoWC] == NO) {
-        [self addWindowController:infoWC];
-    }
-    [infoWC beginSheetModalForWindow:documentWindow];
-}
-
 #pragma mark Macro stuff
 
 - (BDSKMacroResolver *)macroResolver{
     return macroResolver;
-}
-
-- (IBAction)showMacrosWindow:(id)sender{
-    if ([self hasExternalGroupsSelected]) {
-        BDSKMacroResolver *resolver = [(id<BDSKOwner>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
-        MacroWindowController *controller = nil;
-        NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
-        NSWindowController *wc;
-        while(wc = [wcEnum nextObject]){
-            if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver)
-                break;
-        }
-        if(wc){
-            controller = (MacroWindowController *)wc;
-        }else{
-            controller = [[MacroWindowController alloc] initWithMacroResolver:resolver];
-            [self addWindowController:controller];
-            [controller release];
-        }
-        [controller showWindow:self];
-    } else {
-        if (!macroWC) {
-            macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
-        }
-        if ([[self windowControllers] containsObject:macroWC] == NO) {
-            [self addWindowController:macroWC];
-        }
-        [macroWC showWindow:self];
-    }
 }
 
 #pragma mark -
@@ -1931,6 +1891,23 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 #pragma mark -
+#pragma mark BDSKItemPasteboardHelper delegate
+
+- (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)helper{
+	[self setStatus:[NSLocalizedString(@"Generating data. Please wait", @"Generating data. Please wait...") stringByAppendingEllipsis]];
+	[statusBar startAnimation:nil];
+}
+
+- (void)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)helper{
+	[statusBar stopAnimation:nil];
+	[self updateStatus];
+}
+
+- (NSString *)pasteboardHelper:(BDSKItemPasteboardHelper *)pboardHelper bibTeXStringForItems:(NSArray *)items{
+    return [self previewBibTeXStringForPublications:items];
+}
+
+#pragma mark -
 #pragma mark Sorting
 
 - (void)sortPubsByKey:(NSString *)key{
@@ -1991,7 +1968,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                                    [NSImage imageNamed:@"NSAscendingSortIndicator"])
                    inTableColumn: tableColumn];
 
-    // have to reload so the rows get set up right, but a full updateUI flashes the preview, which is annoying (and the preview won't change if we're maintaining the selection)
+    // have to reload so the rows get set up right, but a full updateStatus flashes the preview, which is annoying (and the preview won't change if we're maintaining the selection)
     [tableView reloadData];
 
     // fix the selection
@@ -2012,10 +1989,66 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }  
 
 #pragma mark -
-#pragma mark Columns Menu
+#pragma mark Selection
 
-- (NSMenu *)columnsMenu{
-    return [tableView columnsMenu];
+- (int)numberOfSelectedPubs{
+    return [tableView numberOfSelectedRows];
+}
+
+- (NSArray *)selectedPublications{
+
+    if(nil == tableView || [tableView selectedRow] == -1)
+        return nil;
+    
+    return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
+}
+
+- (BOOL)selectItemsForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag {
+
+    // make sure we can see the publication, if it's still in the document
+    if (flag)
+        [self selectLibraryGroup:nil];
+    [tableView deselectAll:self];
+    [self setSearchString:@""];
+
+    NSEnumerator *keyEnum = [citeKeys objectEnumerator];
+    NSString *key;
+    NSMutableArray *itemsToSelect = [NSMutableArray array];
+    while (key = [keyEnum nextObject]) {
+        BibItem *anItem = [publications itemForCiteKey:key];
+        if (anItem)
+            [itemsToSelect addObject:anItem];
+    }
+    [self selectPublications:itemsToSelect];
+    return [itemsToSelect count];
+}
+
+- (BOOL)selectItemForPartialItem:(NSDictionary *)partialItem{
+        
+    NSString *itemKey = [partialItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
+    if(itemKey == nil)
+        itemKey = [partialItem objectForKey:BDSKCiteKeyString];
+    
+    BOOL matchFound = NO;
+
+    if(itemKey != nil)
+        matchFound = [self selectItemsForCiteKeys:[NSArray arrayWithObject:itemKey] selectLibrary:YES];
+    
+    return matchFound;
+}
+
+- (void)selectPublication:(BibItem *)bib{
+	[self selectPublications:[NSArray arrayWithObject:bib]];
+}
+
+- (void)selectPublications:(NSArray *)bibArray{
+    
+	NSIndexSet *indexes = [shownPublications indexesOfObjectsIdenticalTo:bibArray];
+    
+    if([indexes count]){
+        [tableView selectRowIndexes:indexes byExtendingSelection:NO];
+        [tableView scrollRowToCenter:[indexes firstIndex]];
+    }
 }
 
 #pragma mark -
@@ -2127,7 +2160,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (void)handleTeXPreviewNeedsUpdateNotification:(NSNotification *)notification{
     if([previewer isVisible])
-        [self updatePreviews:nil];
+        [self updatePreviews];
     else if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
             [[BDSKPreviewer sharedPreviewer] isWindowVisible] &&
             [self isMainDocument])
@@ -2165,8 +2198,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // groups and quicksearch won't update for us
         if([sortKey isEqualToString:changedKey])
             [self sortPubsByKey:nil]; // resort if the changed value was in the currently sorted column
-        [self updateUI];
-        [self updatePreviews:nil];
+        else
+            [tableView reloadData];
+        [self updateStatus];
+        [self updatePreviews];
     }
 }
 
@@ -2214,11 +2249,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		return; // only macro changes for ourselves or the global macros
 	
     [tableView reloadData];
-    [self updatePreviews:nil];
+    [self updatePreviews];
 }
 
 - (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
-    [self updatePreviews:nil];
+    [self updatePreviews];
     [groupTableView updateHighlights];
 }
 
@@ -2259,9 +2294,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
 }
 
-#pragma mark UI updating
+#pragma mark -
+#pragma mark Preview updating
 
-- (void)handlePrivateUpdatePreviews{
+- (void)doUpdatePreviews{
     // we can be called from a queue after the document was closed
     if (docState.isDocumentClosed)
         return;
@@ -2277,12 +2313,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self updatePreviewer:[BDSKPreviewer sharedPreviewer]];
 }
 
-- (void)updatePreviews:(NSNotification *)aNotification{
-    // Coalesce these notifications here, since something like select all -> generate cite keys will force a preview update for every
+- (void)updatePreviews{
+    // Coalesce these messages here, since something like select all -> generate cite keys will force a preview update for every
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
     if (docState.isDocumentClosed == NO)
-        [self queueSelectorOnce:@selector(handlePrivateUpdatePreviews)];
+        [self queueSelectorOnce:@selector(doUpdatePreviews)];
 }
 
 - (void)updatePreviewer:(BDSKPreviewer *)aPreviewer{
@@ -2450,7 +2486,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
 }
 
-- (void)updateUI{
+#pragma mark -
+#pragma mark Status bar
+
+- (void)setStatus:(NSString *)status {
+	[self setStatus:status immediate:YES];
+}
+
+- (void)setStatus:(NSString *)status immediate:(BOOL)now {
+	if(now)
+		[statusBar setStringValue:status];
+	else
+		[statusBar performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
+}
+
+- (void)updateStatus{
 	[tableView reloadData];
     
 	int shownPubsCount = [shownPublications count];
@@ -2466,115 +2516,28 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	[statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications")];
 	if ([self hasSharedGroupsSelected] == YES) {
         // we can only one shared group selected at a time
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"in shared group"), [[[self selectedGroups] lastObject] stringValue]];
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if ([self hasURLGroupsSelected] == YES) {
         // we can only one URL group selected at a time
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"in URL group"), [[[self selectedGroups] lastObject] stringValue]];
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if ([self hasScriptGroupsSelected] == YES) {
         // we can only one URL group selected at a time
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"in URL group"), [[[self selectedGroups] lastObject] stringValue]];
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if (groupPubsCount != totalPubsCount) {
 		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
-			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"group", @"group"), [[[self selectedGroups] lastObject] stringValue]] :
-			NSLocalizedString(@"multiple groups", @"multiple groups");
-        [statusStr appendFormat:@" %@ %@ (%@ %i)", NSLocalizedString(@"in", @"in"), groupStr, ofStr, totalPubsCount];
+			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
+			NSLocalizedString(@"in multiple groups", @"partial status message");
+        [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalPubsCount];
 	}
 	[self setStatus:statusStr];
     [statusStr release];
 }
 
 #pragma mark -
-#pragma mark Selection
+#pragma mark Columns Menu
 
-- (int)numberOfSelectedPubs{
-    return [tableView numberOfSelectedRows];
-}
-
-- (NSArray *)selectedPublications{
-
-    if(nil == tableView || [tableView selectedRow] == -1)
-        return nil;
-    
-    return [shownPublications objectsAtIndexes:[tableView selectedRowIndexes]];
-}
-
-- (BOOL)selectItemsForCiteKeys:(NSArray *)citeKeys selectLibrary:(BOOL)flag {
-
-    // make sure we can see the publication, if it's still in the document
-    if (flag)
-        [self selectLibraryGroup:nil];
-    [tableView deselectAll:self];
-    [self setSearchString:@""];
-
-    NSEnumerator *keyEnum = [citeKeys objectEnumerator];
-    NSString *key;
-    NSMutableArray *itemsToSelect = [NSMutableArray array];
-    while (key = [keyEnum nextObject]) {
-        BibItem *anItem = [publications itemForCiteKey:key];
-        if (anItem)
-            [itemsToSelect addObject:anItem];
-    }
-    [self selectPublications:itemsToSelect];
-    return [itemsToSelect count];
-}
-
-- (BOOL)selectItemForPartialItem:(NSDictionary *)partialItem{
-        
-    NSString *itemKey = [partialItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
-    if(itemKey == nil)
-        itemKey = [partialItem objectForKey:BDSKCiteKeyString];
-    
-    BOOL matchFound = NO;
-
-    if(itemKey != nil)
-        matchFound = [self selectItemsForCiteKeys:[NSArray arrayWithObject:itemKey] selectLibrary:YES];
-    
-    return matchFound;
-}
-
-- (void)selectPublication:(BibItem *)bib{
-	[self selectPublications:[NSArray arrayWithObject:bib]];
-}
-
-- (void)selectPublications:(NSArray *)bibArray{
-    
-	NSIndexSet *indexes = [shownPublications indexesOfObjectsIdenticalTo:bibArray];
-    
-    if([indexes count]){
-        [tableView selectRowIndexes:indexes byExtendingSelection:NO];
-        [tableView scrollRowToCenter:[indexes firstIndex]];
-    }
-}
-
-#pragma mark -
-#pragma mark Status bar
-
-- (void)setStatus:(NSString *)status {
-	[self setStatus:status immediate:YES];
-}
-
-- (void)setStatus:(NSString *)status immediate:(BOOL)now {
-	if(now)
-		[statusBar setStringValue:status];
-	else
-		[statusBar performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
-}
-
-#pragma mark -
-#pragma mark BDSKItemPasteboardHelper delegate
-
-- (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)helper{
-	[self setStatus:[NSLocalizedString(@"Generating data. Please wait", @"Generating data. Please wait...") stringByAppendingEllipsis]];
-	[statusBar startAnimation:nil];
-}
-
-- (void)pasteboardHelperDidEndGenerating:(BDSKItemPasteboardHelper *)helper{
-	[statusBar stopAnimation:nil];
-	[self updateUI];
-}
-
-- (NSString *)pasteboardHelper:(BDSKItemPasteboardHelper *)pboardHelper bibTeXStringForItems:(NSArray *)items{
-    return [self previewBibTeXStringForPublications:items];
+- (NSMenu *)columnsMenu{
+    return [tableView columnsMenu];
 }
 
 #pragma mark -

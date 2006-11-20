@@ -241,11 +241,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 /*!
     @method updatePreviews
-    @abstract updates views because pub selection changed
-    @discussion proxy for outline/tableview-selectiondidchange. - not the best name for this method, since it does more than update previews...
+    @abstract Updates the document and/or shared previewer if needed. 
+    @discussion The actual messages are queued and coalesced, so bulk actions will only update the previews once.
     
 */
-- (void)updatePreviews:(NSNotification *)aNotification;
+- (void)updatePreviews;
 
 /*!
     @method updatePreviewer:
@@ -334,13 +334,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSString *)documentInfoForKey:(NSString *)key;
 - (id)valueForUndefinedKey:(NSString *)key;
 - (NSString *)documentInfoString;
-- (IBAction)showDocumentInfoWindow:(id)sender;
 
 #pragma mark bibtex macro support
 
 - (BDSKMacroResolver *)macroResolver;
-
-- (IBAction)showMacrosWindow:(id)sender;
 
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification;
 
@@ -355,11 +352,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 // Private methods
 
 /*!
-    @method updateUI
-    @abstract Updates user interface elements
-    @discussion Mainly, tells tableview to reload data and calls tableviewselectiondidchange.
+    @method updateStatus
+    @abstract Updates the status message
+    @discussion -
 */
-- (void)updateUI;
+- (void)updateStatus;
 
 /*!
     @method     sortPubsByKey:

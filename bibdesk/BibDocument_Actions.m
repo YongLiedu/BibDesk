@@ -43,12 +43,15 @@
 #import "BibPrefController.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import "BibEditor.h"
-#import "BibPersonController.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKGroupsArray.h"
+
+#import "BibEditor.h"
+#import "BibPersonController.h"
+#import "BDSKDocumentInfoWindowController.h"
+#import "MacroWindowController.h"
 
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
@@ -76,6 +79,7 @@
 #import "BDSKSearchField.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
+#import "BDSKOwnerProtocol.h"
 
 
 @implementation BibDocument (Actions)
@@ -799,13 +803,52 @@
     [sender adjustSubviews];
 }
 
-#pragma mark Custom cite drawer
+#pragma mark Showing related info windows
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
     if(drawerController == nil)
         drawerController = [[BDSKCustomCiteDrawerController alloc] initForDocument:self];
     [drawerController toggle:sender];
     return;
+}
+
+- (IBAction)showDocumentInfoWindow:(id)sender{
+    if (!infoWC) {
+        infoWC = [(BDSKDocumentInfoWindowController *)[BDSKDocumentInfoWindowController alloc] initWithDocument:self];
+    }
+    if ([[self windowControllers] containsObject:infoWC] == NO) {
+        [self addWindowController:infoWC];
+    }
+    [infoWC beginSheetModalForWindow:documentWindow];
+}
+
+- (IBAction)showMacrosWindow:(id)sender{
+    if ([self hasExternalGroupsSelected]) {
+        BDSKMacroResolver *resolver = [(id<BDSKOwner>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
+        MacroWindowController *controller = nil;
+        NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
+        NSWindowController *wc;
+        while(wc = [wcEnum nextObject]){
+            if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver)
+                break;
+        }
+        if(wc){
+            controller = (MacroWindowController *)wc;
+        }else{
+            controller = [[MacroWindowController alloc] initWithMacroResolver:resolver];
+            [self addWindowController:controller];
+            [controller release];
+        }
+        [controller showWindow:self];
+    } else {
+        if (!macroWC) {
+            macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
+        }
+        if ([[self windowControllers] containsObject:macroWC] == NO) {
+            [self addWindowController:macroWC];
+        }
+        [macroWC showWindow:self];
+    }
 }
 
 #pragma mark Sharing Actions
@@ -1131,8 +1174,8 @@
         NSBeep();
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
-    // update status line after the updateUI notification, or else it gets overwritten
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural] immediate:NO];
+    // update status line after the updateStatus notification, or else it gets overwritten
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
 // select duplicates, then allow user to delete/copy/whatever
@@ -1179,8 +1222,7 @@
         NSBeep();
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
-    // update status line after the updateUI notification, or else it gets overwritten
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural] immediate:NO];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
 @end
