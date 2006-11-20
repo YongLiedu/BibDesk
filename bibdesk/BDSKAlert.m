@@ -38,6 +38,7 @@
 
 #import "BDSKAlert.h"
 #import "NSImage+Toolbox.h"
+#import "NSAttributedString_BDSKExtensions.h"
 
 
 @implementation BDSKAlert
@@ -227,20 +228,8 @@
     // see if we should resize the message text
     NSRect frame = [[self window] frame];
     NSRect infoRect = [informationField frame];
-    
-    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithAttributedString:[informationField attributedStringValue]] autorelease];
-    NSTextContainer *textContainer = [[[NSTextContainer alloc] initWithContainerSize:NSMakeSize(NSWidth(infoRect), 100.0)] autorelease];
-    NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
-    
-    [layoutManager addTextContainer:textContainer];
-    [textStorage addLayoutManager:layoutManager];
-    
-    // drawing in views uses a different typesetting behavior from the current one which leads to a mismatch in line height
-    // see http://www.cocoabuilder.com/archive/message/cocoa/2006/1/3/153669
-    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
-    [layoutManager glyphRangeForTextContainer:textContainer];
-    
-    float extraHeight = NSHeight([layoutManager usedRectForTextContainer:textContainer]) - NSHeight(infoRect);
+    NSRect textRect = [[informationField attributedStringValue] boundingRectForDrawingInViewWithSize:NSMakeSize(NSWidth(infoRect), 200.0)];
+    float extraHeight = NSHeight(textRect) - NSHeight(infoRect);
 
     if (extraHeight > 0) {
         frame.size.height += extraHeight;

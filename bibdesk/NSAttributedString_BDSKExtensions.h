@@ -45,6 +45,8 @@
 
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
 
+- (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size;
+
 @end
 
 @interface NSAttributedString (TeXComparison)
