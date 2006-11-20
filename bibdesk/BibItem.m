@@ -1657,10 +1657,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
     }
     
-    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[self citeKey]]
-                                               attributes:typeAttributes];
-    [reqStr appendAttributedString:valueStr];
-    [valueStr release];
+    [reqStr appendString:[self citeKey] attributes:typeAttributes];
+    [reqStr appendString:@"\n"];
 
     valueStr = [[NSAttributedString alloc] initWithTeXString:[self title]
                                                   attributes:titleAttributes
@@ -1668,10 +1666,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [reqStr appendAttributedString:valueStr];
     [valueStr release];
 
-    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" (%@)\n",[self pubType]]
-                                               attributes:typeAttributes];
-    [reqStr appendAttributedString:valueStr];
-    [valueStr release];
+    [reqStr appendString:[NSString stringWithFormat:@" (%@)\n",[self pubType]] attributes:typeAttributes];
 
     NSCalendarDate *date = nil;
     NSString *stringValue = nil;
@@ -1725,25 +1720,23 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                        
             // the valueStr will be an empty NSConcreteAttributedString if created with a nil argument, so we check for nil before creating it
 			if(valueStr){
-                keyStr = [[NSAttributedString alloc] initWithString:key attributes:keyAttributes];
 				
                 if([reqKeys containsObject:key]){
 					
-					[reqStr appendAttributedString:keyStr];
+					[reqStr appendString:key attributes:keyAttributes];
 					[reqStr appendString:@"\n"];
 					[reqStr appendAttributedString:valueStr];
 					[reqStr appendString:@"\n"];
 					
 				}else{
 					
-					[nonReqStr appendAttributedString:keyStr];
+					[nonReqStr appendString:key attributes:keyAttributes];
 					[nonReqStr appendString:@"\n"];
 					[nonReqStr appendAttributedString:valueStr];
 					[nonReqStr appendString:@"\n"];
 					
 				}
                 
-				[keyStr release];
 				[valueStr release];
 			}
         }
@@ -1751,8 +1744,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
     // now put them together
 	[reqStr appendAttributedString:nonReqStr];
-	[reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@" "
-                                                                  attributes:nil] autorelease]];
+	[reqStr appendString:@" "];
 	[nonReqStr release];
     [titleAttributes release];
     [typeAttributes release];

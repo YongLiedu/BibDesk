@@ -2372,8 +2372,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         bodyAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, nil];
         titleAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, [NSNumber numberWithBool:YES], NSUnderlineStyleAttributeName, nil];
     }
-    
-    NSMutableAttributedString *s;
   
     unsigned int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
     
@@ -2417,19 +2415,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             while(pub = [enumerator nextObject]){
                 // Write out the title
                 if(numberOfSelectedPubs > 1){
-                    s = [[NSMutableAttributedString alloc] initWithString:[pub displayTitle]
-                                                               attributes:titleAttributes];
-                    [s appendAttributedString:noAttrDoubleLineFeed];
-                    [textStorage appendAttributedString:s];
-                    [s release];
+                    [textStorage appendString:[pub displayTitle] attributes:titleAttributes];
+                    [textStorage appendAttributedString:noAttrDoubleLineFeed];
                 }
                 fieldValue = [pub valueOfField:BDSKAnnoteString inherit:NO];
                 if([fieldValue isEqualToString:@""])
                     fieldValue = NSLocalizedString(@"No notes.",@"");
-                s = [[NSMutableAttributedString alloc] initWithString:fieldValue
-                                                           attributes:bodyAttributes];
-                [textStorage appendAttributedString:s];
-                [s release];
+                [textStorage appendString:fieldValue attributes:bodyAttributes];
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
             break;
@@ -2437,19 +2429,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             while(pub = [enumerator nextObject]){
                 // Write out the title
                 if(numberOfSelectedPubs > 1){
-                    s = [[NSMutableAttributedString alloc] initWithString:[pub displayTitle]
-                                                               attributes:titleAttributes];
-                    [s appendAttributedString:noAttrDoubleLineFeed];
-                    [textStorage appendAttributedString:s];
-                    [s release];
+                    [textStorage appendString:[pub displayTitle] attributes:titleAttributes];
+                    [textStorage appendAttributedString:noAttrDoubleLineFeed];
                 }
                 fieldValue = [pub valueOfField:BDSKAbstractString inherit:NO];
                 if([fieldValue isEqualToString:@""])
                     fieldValue = NSLocalizedString(@"No abstract.",@"");
-                s = [[NSMutableAttributedString alloc] initWithString:fieldValue
-                                                           attributes:bodyAttributes];
-                [textStorage appendAttributedString:s];
-                [s release];
+                [textStorage appendString:fieldValue attributes:bodyAttributes];
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
             break;
