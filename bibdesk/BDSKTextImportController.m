@@ -212,7 +212,7 @@
 	NSDictionary *bm;
 	
 	[bookmarkPopUpButton removeAllItems];
-	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Bookmarks")];
+	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Menu item title for Bookmarks popup")];
 	while (bm = [bEnum nextObject]) {
 		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
 	}
@@ -285,7 +285,7 @@
     [[self undoManager] removeAllActions];
 	
 	int numItems = [itemsAdded count];
-	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
+	NSString *pubSingularPlural = (numItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d %@ added.", @"format string for pubs added. args: one int for number added, then one string for singular or plural of publication(s)."), numItems, pubSingularPlural]];
     
     [itemTypeButton selectItemWithTitle:[item pubType]];
@@ -334,7 +334,7 @@
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:type
                                                       forKey:BDSKPubTypeStringKey];
 
-	[[item undoManager] setActionName:NSLocalizedString(@"Change Type",@"")];
+	[[item undoManager] setActionName:NSLocalizedString(@"Change Type", @"Undo action name")];
     [itemTableView reloadData];
 }
 
@@ -347,7 +347,7 @@
 	NSDictionary *bm;
 	
 	[bookmarkPopUpButton removeAllItems];
-	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Bookmarks")];
+	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks", @"Menu item title for Bookmarks popup")];
 	while (bm = [bEnum nextObject]) {
 		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
 	}
@@ -413,7 +413,7 @@
     
     [fields addObject:newField];
     [item addField:newField];
-    [[item undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
+    [[item undoManager] setActionName:NSLocalizedString(@"Add Field", @"Undo action name")];
     [itemTableView reloadData];
     [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [itemTableView editColumn:2 row:row withEvent:nil select:YES];
@@ -424,7 +424,7 @@
     NSArray *currentFields = [item allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"Label for adding field")
                                                                                               fieldsArray:fieldNames];
 	[addFieldController beginSheetModalForWindow:[self window]
                                    modalDelegate:self
@@ -448,11 +448,11 @@
         [[self window] endEditingFor:nil];
 	
     [item setCiteKey:[item suggestedCiteKey]];
-    [[item undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
+    [[item undoManager] setActionName:NSLocalizedString(@"Generate Cite Key", @"Undo action name")];
 }
 
 - (IBAction)showCiteKeyWarning:(id)sender{
-    NSBeginAlertSheet(NSLocalizedString(@"Duplicate Cite Key", @""),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.",@""));
+    NSBeginAlertSheet(NSLocalizedString(@"Duplicate Cite Key", @"Message in alert dialog when duplicate citye key was found"),nil,nil,nil,[self window],nil,NULL,NULL,NULL,NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.", @"Informative text in alert dialog"));
 }
 
 - (void)consolidateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -465,7 +465,7 @@
     
 	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Move File",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
@@ -474,15 +474,15 @@
         [[self window] endEditingFor:nil];
 	
 	if ([item canSetLocalUrl] == NO){
-		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?",@"");
+		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set.  Do you want me to file the paper now using the available fields, or cancel autofile for this paper?", @"Informative text in alert");
 		NSString *otherButton = nil;
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
-			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?",@""),
-			otherButton = NSLocalizedString(@"Wait",@"Wait");
+			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to file the paper now using the available fields, cancel autofile for this paper, or wait until the necessary fields are set?", @"Informative text in alert dialog"),
+			otherButton = NSLocalizedString(@"Wait", @"Button title");
 		}
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning",@"Warning") 
-                                         defaultButton:NSLocalizedString(@"File Now",@"File without waiting")
-                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
+                                         defaultButton:NSLocalizedString(@"File Now", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                            otherButton:otherButton
                              informativeTextWithFormat:message];
         [alert beginSheetModalForWindow:[self window]
@@ -542,11 +542,11 @@
 		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
 	}
 	if (!download) {
-		NSBeginAlertSheet(NSLocalizedString(@"Invalid or unsupported URL",@""),
+		NSBeginAlertSheet(NSLocalizedString(@"Invalid or Unsupported URL", @"Message in alert dialog when unable to download file for Local-Url"),
 						  nil, nil, nil, 
 						  [self window], 
 						  nil, nil, nil, nil,
-						  NSLocalizedString(@"The URL to download is either invalid or unsupported.",@""));
+						  NSLocalizedString(@"The URL to download is either invalid or unsupported.", @"Informative text in alert dialog"));
 	}
 }
 
@@ -609,9 +609,9 @@
     unsigned int modifierFlags = [[notification object] modifierFlags];
     
     if (modifierFlags & NSAlternateKeyMask) {
-        [addButton setTitle:NSLocalizedString(@"Add & Copy", @"Add & Copy")];
+        [addButton setTitle:NSLocalizedString(@"Add & Copy", @"Button title")];
     } else {
-        [addButton setTitle:NSLocalizedString(@"Add", @"Add")];
+        [addButton setTitle:NSLocalizedString(@"Add", @"Button title")];
     }
 }
 
@@ -851,8 +851,8 @@
         
         if(url == nil){
             [sheet orderOut:nil];
-            NSBeginAlertSheet(NSLocalizedString(@"Error", @""), nil, nil, nil, [self window], nil, nil, nil, nil, 
-                              NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"") );
+            NSBeginAlertSheet(NSLocalizedString(@"Error", @"Message in alert dialog when error occurs"), nil, nil, nil, [self window], nil, nil, nil, nil, 
+                              NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"Informative text in alert dialog") );
         } else {        
             NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
             [[webView mainFrame] loadRequest:urlreq];
@@ -882,18 +882,18 @@
     if (isLoading != loading) {
         isLoading = loading;
         if (isLoading) {
-			NSString *message = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Loading page",@"Loading page"),0x2026];
+			NSString *message = [NSLocalizedString(@"Loading page", @"Tool tip message") stringByAppendingEllipsis];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:@""];
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
-			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@""];
 			[progressIndicator startAnimation:self];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:message];
 		} else {
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
-			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page",@"Reload page")];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@"r"];
 			[progressIndicator stopAnimation:self];
 			[progressIndicator setToolTip:@""];
@@ -920,11 +920,11 @@
     if (isDownloading != downloading) {
         isDownloading = downloading;
         if (isDownloading) {
-			NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received 0%%%C",@"Downloading file. Received 0%..."),0x2026];
+			NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), 0] stringByAppendingEllipsis];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:@""];
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
-			[stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download",@"Cancel download")];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@""];
             [progressIndicator startAnimation:self];
 			[progressIndicator setToolTip:message];
@@ -933,7 +933,7 @@
 			downloadFileName = nil;
         } else {
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
-			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page",@"Reload page")];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page", @"Tool tip message")];
 			[stopOrReloadButton setKeyEquivalent:@"r"];
             [progressIndicator stopAnimation:self];
 			[progressIndicator setToolTip:@""];
@@ -999,23 +999,23 @@
 	if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
 		return ![[[webView mainFrame] dataSource] isLoading];
 	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {
-		[menuItem setTitle:NSLocalizedString(@"Load Clipboard",@"Load Clipboard")];
+		[menuItem setTitle:NSLocalizedString(@"Load Clipboard", @"Menu item title")];
 		return YES;
 	} else if ([menuItem action] == @selector(importFromFileAction:)) {
-		[menuItem setTitle:[NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Load File",@"Load File"),0x2026]];
+		[menuItem setTitle:[NSLocalizedString(@"Load File", @"Menu item title") stringByAppendingEllipsis]];
 		return YES;
 	} else if ([menuItem action] == @selector(importFromWebAction:)) {
-		[menuItem setTitle:[NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Load Website",@"Load Website"),0x2026]];
+		[menuItem setTitle:[NSLocalizedString(@"Load Website", @"Menu item title") stringByAppendingEllipsis]];
 		return YES;
 	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
 		int row = [itemTableView selectedRow];
 		return (row != -1 && ![macroTextFieldWC isEditing] && ![[fields objectAtIndex:row] isEqualToString:BDSKCrossrefString]);
 	} else if ([menuItem action] == @selector(generateCiteKey:)) {
 		// need to set the title, as the document can change it in the main menu
-		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
+		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Menu item title")];
 		return YES;
 	} else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
-		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
+		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Menu item title")];
 		NSString *lurl = [item localUrlPath];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
@@ -1052,14 +1052,14 @@
 			[menuItem setRepresentedObject:linkURL];
 			[menuItems addObject:[menuItem autorelease]];
 			
-			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Link As Local File",@"Save link as local file"),0x2026]
+			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Link As Local File",@"Save link as local file") stringByAppendingEllipsis]
 											  action:@selector(downloadLinkedFileAsLocalUrl:)
 									   keyEquivalent:@""];
 			[menuItem setTarget:self];
 			[menuItem setRepresentedObject:linkURL];
 			[menuItems addObject:[menuItem autorelease]];
 			
-			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark Link",@"Bookmark linked page"),0x2026]
+			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark Link",@"Bookmark linked page") stringByAppendingEllipsis]
 											  action:@selector(bookmarkLink:)
 									   keyEquivalent:@""];
 			[menuItem setTarget:self];
@@ -1072,19 +1072,19 @@
 	if ([menuItems count] > 0) 
 		[menuItems addObject:[NSMenuItem separatorItem]];
 		
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page Location To Url Field",@"Copy page location to url field")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page Location To Url Field", @"Menu item title")
 									  action:@selector(copyLocationAsRemoteUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Page As Local File",@"Save page as local file"),0x2026]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save Page As Local File", @"Menu item title") stringByAppendingEllipsis]
 									  action:@selector(saveFileAsLocalUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark This Page",@"Bookmark this page"),0x2026]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Bookmark This Page", @"Menu item title") stringByAppendingEllipsis]
 									  action:@selector(bookmarkPage:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
@@ -1093,22 +1093,22 @@
 	// navigation items
 	[menuItems addObject:[NSMenuItem separatorItem]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back",@"Back")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back", @"Menu item title")
 									  action:@selector(goBack:)
 							   keyEquivalent:@"["];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward",@"Forward")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward", @"Menu item title")
 									  action:@selector(goForward:)
 							   keyEquivalent:@"]"];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload",@"Reload")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload", @"Menu item title")
 									  action:@selector(reload:)
 							   keyEquivalent:@"r"];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop",@"Stop")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop", @"Menu item title")
 									  action:@selector(stopLoading:)
 							   keyEquivalent:@""];
 	[menuItems addObject:[menuItem autorelease]];
@@ -1116,12 +1116,12 @@
 	// text size items
 	[menuItems addObject:[NSMenuItem separatorItem]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size",@"Increase Text Size")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size", @"Menu item title")
 									  action:@selector(makeTextLarger:)
 							   keyEquivalent:@""];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size",@"Increase Text Size")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size", @"Menu item title")
 									  action:@selector(makeTextSmaller:)
 							   keyEquivalent:@""];
 	[menuItems addObject:[menuItem autorelease]];
@@ -1165,10 +1165,10 @@
 	
     NSString *errorDescription = [error localizedDescription];
     if (!errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during page load.",@"An error occured during page load.");
+        errorDescription = NSLocalizedString(@"An error occured during page load.", @"Informative text in alert dialog");
     }
     
-    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed",@"Page Load Failed"), 
+    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load"), 
 					  nil, nil, nil, 
 					  [self window], 
 					  nil, nil, nil, nil, 
@@ -1184,10 +1184,10 @@
 	
     NSString *errorDescription = [error localizedDescription];
     if (!errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during page load.",@"An error occured during page load.");
+        errorDescription = NSLocalizedString(@"An error occured during page load.", @"Informative text in alert dialog");
     }
     
-    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed",@"Page Load Failed"), 
+    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed", @"Message in alert dialog when web page did not load"), 
 					  nil, nil, nil, 
 					  [self window], 
 					  nil, nil, nil, nil, 
@@ -1224,7 +1224,7 @@
     if (expectedContentLength > 0) {
         receivedContentLength += length;
         int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
-		NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%%C",@"Downloading file..."),percent,0x2026];
+		NSString *message = [[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%", @"Tool tip message"), percent] stringByAppendingEllipsis];
 		[progressIndicator setToolTip:message];
 		[statusLine setStringValue:message];
     }
@@ -1251,10 +1251,10 @@
         
     NSString *errorDescription = [error localizedDescription];
     if (!errorDescription) {
-        errorDescription = NSLocalizedString(@"An error occured during download.",@"An error occured during download.");
+        errorDescription = NSLocalizedString(@"An error occured during download.", @"Informative text in alert dialog");
     }
     
-    NSBeginAlertSheet(NSLocalizedString(@"Download Failed",@"Download Failed"), 
+    NSBeginAlertSheet(NSLocalizedString(@"Download Failed", @"Message in alert dialog when download failed"), 
 					  nil, nil, nil, 
 					  [self window], 
 					  nil, nil, nil, nil, 
@@ -1390,7 +1390,7 @@
 		[tableCellFormatter setEditAsComplexString:NO];
 	}else if([[aNotification object] isEqual:citeKeyField]){
         [item setCiteKey:[citeKeyField stringValue]];
-        [[item undoManager] setActionName:NSLocalizedString(@"Edit Cite Key",@"")];
+        [[item undoManager] setActionName:NSLocalizedString(@"Edit Cite Key", @"Undo action name")];
         [self setCiteKeyDuplicateWarning:[item isValidCiteKey:[item citeKey]] == NO];
     }
 }
@@ -1399,12 +1399,12 @@
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
     [item setField:fieldName toValue:value];
-	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyAutogenerateKey] &&
        [item canGenerateAndSetCiteKey]){
         [self generateCiteKey:nil];
         if ([item hasEmptyOrDefaultCiteKey] == NO)
-            [statusLine setStringValue:NSLocalizedString(@"Autogenerated Cite Key.", @"Autogenerated Cite Key.")];
+            [statusLine setStringValue:NSLocalizedString(@"Autogenerated Cite Key.", @"Status message")];
     }
     [itemTableView reloadData];
 }
@@ -1429,7 +1429,7 @@
 - (void)setCiteKeyDuplicateWarning:(BOOL)set{
 	if(set){
 		[citeKeyWarningButton setImage:[NSImage cautionIconImage]];
-		[citeKeyWarningButton setToolTip:NSLocalizedString(@"This cite-key is a duplicate",@"")];
+		[citeKeyWarningButton setToolTip:NSLocalizedString(@"This cite-key is a duplicate", @"Tool tip message")];
 	}else{
 		[citeKeyWarningButton setImage:nil];
 		[citeKeyWarningButton setToolTip:nil];
@@ -1571,7 +1571,7 @@
     if(!searchString)
         [statusLine setStringValue:[self isInTemporaryTypeSelectMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
     else
-        [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @""), [searchString fieldName]]];
+        [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @"Status message"), [searchString fieldName]]];
 }
 
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
@@ -1606,7 +1606,7 @@
     [[self window] makeFirstResponder:itemTableView];
     if ([itemTableView selectedRow] == -1 && [itemTableView numberOfRows] > 0)
         [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-    [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"")];
+    [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"Status message")];
 }
 
 - (void)endTemporaryTypeSelectModeAndSet:(BOOL)set edit:(BOOL)edit{
@@ -1739,11 +1739,11 @@
     
     if([metaTagDict count]){
         if([item hasBeenEdited]){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information",@"") 
-                                             defaultButton:NSLocalizedString(@"Yes", @"Yes")
-                                           alternateButton:NSLocalizedString(@"No", @"No")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
+                                             defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                           alternateButton:NSLocalizedString(@"No", @"Button title")
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"")];
+                                 informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window]
                               modalDelegate:self
                              didEndSelector:@selector(autoDiscoverFromFrameAlertDidEnd:returnCode:contextInfo:)
@@ -1824,11 +1824,11 @@
         return;
     
     if([item hasBeenEdited]){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information",@"") 
-                                         defaultButton:NSLocalizedString(@"Yes", @"Yes")
-                                       alternateButton:NSLocalizedString(@"No", @"No")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
+                                         defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                       alternateButton:NSLocalizedString(@"No", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from the text? This may overwrite fields that are already set.", @"")];
+                             informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from the text? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(autoDiscoverFromStringAlertDidEnd:returnCode:contextInfo:)
@@ -1969,13 +1969,13 @@
     
     for (i = 0; i < count; i++) {
         if ([[menu itemAtIndex:i] action] == @selector(paste:)) {
-            [menu insertItemWithTitle:NSLocalizedString(@"Paste as Plain Text", @"Paste as plain text") action:@selector(pasteAsPlainText:) keyEquivalent:@"" atIndex:i+1];
+            [menu insertItemWithTitle:NSLocalizedString(@"Paste as Plain Text", @"Menu item title") action:@selector(pasteAsPlainText:) keyEquivalent:@"" atIndex:i+1];
             break;
         }
     }
     
     [menu addItem:[NSMenuItem separatorItem]];
-    [menu addItemWithTitle:NSLocalizedString(@"Make Plain Text", @"Make plain text") action:@selector(makePlainText:) keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"Make Plain Text", @"Menu item title") action:@selector(makePlainText:) keyEquivalent:@""];
     
     return menu;
 }

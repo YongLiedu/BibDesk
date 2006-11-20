@@ -55,7 +55,7 @@ NSString *BDSKFileContentLocalizedString = nil;
 @implementation BDSKSearchField
 
 + (void)didLoad{
-    BDSKFileContentLocalizedString = [NSLocalizedString(@"File Content", @"") copy];
+    BDSKFileContentLocalizedString = [NSLocalizedString(@"File Content", @"Search menu item title") copy];
 }
 
 - (id)initWithFrame:(NSRect)frame {
@@ -96,7 +96,7 @@ NSString *BDSKFileContentLocalizedString = nil;
                                                       forKey:BDSKCurrentQuickSearchKey];
 	
 	NSSearchFieldCell *searchCell = [self cell];
-	[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""), newKey]];
+	[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@", @"Search placeholder string"), newKey]];
 
 	NSMenu *templateMenu = [searchCell searchMenuTemplate];
 	if([searchKey isEqualToString:newKey] == NO){
@@ -137,13 +137,13 @@ NSString *BDSKFileContentLocalizedString = nil;
 	NSMenu *cellMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Search Menu"] autorelease];
 	NSMenuItem *anItem;
 	
-	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Recent Searches", @"Recent Searches menu item") action:NULL keyEquivalent:@""];
+	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Recent Searches", @"Menu item title") action:NULL keyEquivalent:@""];
     [anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
 	
     anItem = [cellMenu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
 	[anItem setTag:NSSearchFieldRecentsMenuItemTag];
     
-	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Clear Recent Searches", @"Clear menu item") action:NULL keyEquivalent:@""];
+	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Clear Recent Searches", @"Menu item title") action:NULL keyEquivalent:@""];
 	[anItem setTag:NSSearchFieldClearRecentsMenuItemTag];
     
     // this tag conditionally inserts a separator if there are recent searches (is it safe to set a tag on the separator item?)
@@ -151,7 +151,7 @@ NSString *BDSKFileContentLocalizedString = nil;
 	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
 	[cellMenu addItem:anItem];
     
-	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Types", @"Searchfield menu separator title") action:NULL keyEquivalent:@""];
+	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Types", @"Menu item title") action:NULL keyEquivalent:@""];
     [cellMenu addItemWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
     
     // add a separator; "File Content" and "Any Field" are special (and "File Content" looks out of place between "Any Field" and "Author")
@@ -174,9 +174,9 @@ NSString *BDSKFileContentLocalizedString = nil;
 	
 	[cellMenu addItem:[NSMenuItem separatorItem]];
 	
-	[cellMenu addItemWithTitle:[NSLocalizedString(@"Add Field", @"Add Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchAddField:) keyEquivalent:@""];
+	[cellMenu addItemWithTitle:[NSLocalizedString(@"Add Field", @"Menu item title") stringByAppendingEllipsis] action:@selector(quickSearchAddField:) keyEquivalent:@""];
 	[anItem setTarget:self];
-	[cellMenu addItemWithTitle:[NSLocalizedString(@"Remove Field", @"Remove Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
+	[cellMenu addItemWithTitle:[NSLocalizedString(@"Remove Field", @"Menu item title") stringByAppendingEllipsis] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
 	[anItem setTarget:self];
     
 	return cellMenu;
@@ -210,7 +210,7 @@ NSString *BDSKFileContentLocalizedString = nil;
     NSArray *searchKeys = [[BibTypeManager sharedManager] allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil]
                                                                        excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:", @"Label for adding field")
                                                                                               fieldsArray:searchKeys];
 	[addFieldController beginSheetModalForWindow:[self window]
                                    modalDelegate:self
@@ -243,11 +243,11 @@ NSString *BDSKFileContentLocalizedString = nil;
     [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     [searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 
-    NSString *prompt = NSLocalizedString(@"Search field to remove:",@"");
+    NSString *prompt = NSLocalizedString(@"Search field to remove:", @"Label for removing field");
 	if ([searchKeys count]) {
 		[searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	} else {
-		prompt = NSLocalizedString(@"No search fields to remove",@"");
+		prompt = NSLocalizedString(@"No search fields to remove", @"Label when no field to remove");
 	}
     
     BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt

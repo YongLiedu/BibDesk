@@ -347,38 +347,38 @@ NSString *BDSKComputerName() {
     NSString *errorMessage = nil;
     switch(err){
         case NSNetServicesUnknownError:
-            errorMessage = NSLocalizedString(@"Unknown net services error", @"");
+            errorMessage = NSLocalizedString(@"Unknown net services error", @"Error description");
             break;
         case NSNetServicesCollisionError:
-            errorMessage = NSLocalizedString(@"Net services collision error", @"");
+            errorMessage = NSLocalizedString(@"Net services collision error", @"Error description");
             break;
         case NSNetServicesNotFoundError:
-            errorMessage = NSLocalizedString(@"Net services not found error", @"");
+            errorMessage = NSLocalizedString(@"Net services not found error", @"Error description");
             break;
         case NSNetServicesActivityInProgress:
-            errorMessage = NSLocalizedString(@"Net services reports activity in progress", @"");
+            errorMessage = NSLocalizedString(@"Net services reports activity in progress", @"Error description");
             break;
         case NSNetServicesBadArgumentError:
-            errorMessage = NSLocalizedString(@"Net services bad argument error", @"");
+            errorMessage = NSLocalizedString(@"Net services bad argument error", @"Error description");
             break;
         case NSNetServicesCancelledError:
-            errorMessage = NSLocalizedString(@"Cancelled net service", @"");
+            errorMessage = NSLocalizedString(@"Cancelled net service", @"Error description");
             break;
         case NSNetServicesInvalidError:
-            errorMessage = NSLocalizedString(@"Net services invalid error", @"");
+            errorMessage = NSLocalizedString(@"Net services invalid error", @"Error description");
             break;
         case NSNetServicesTimeoutError:
-            errorMessage = NSLocalizedString(@"Net services timeout error", @"");
+            errorMessage = NSLocalizedString(@"Net services timeout error", @"Error description");
             break;
         default:
-            errorMessage = NSLocalizedString(@"Unrecognized error code from net services", @"");
+            errorMessage = NSLocalizedString(@"Unrecognized error code from net services", @"Error description");
             break;
     }
     
     NSLog(@"-[%@ %@] reports \"%@\"", [self class], NSStringFromSelector(_cmd), errorMessage);
     
-    NSString *errorDescription = NSLocalizedString(@"Unable to Share This Document", @"");
-    NSString *recoverySuggestion = NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @"");
+    NSString *errorDescription = NSLocalizedString(@"Unable to Share This Document", @"Error description");
+    NSString *recoverySuggestion = NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @"Error informative text");
     NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:errorDescription, NSLocalizedDescriptionKey, errorMessage, NSLocalizedFailureReasonErrorKey, recoverySuggestion, NSLocalizedRecoverySuggestionErrorKey, nil]];
 
     [self disableSharing];

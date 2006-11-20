@@ -78,7 +78,7 @@ The command should have the form
 		if (![fC isKindOfClass:[NSNumber class]]) {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
-			[self setScriptErrorString:NSLocalizedString(@"The 'for completion' option needs to be specified as yes or no. E.g.: search for search_term for completion yes",@"The 'for completion' option needs to be specified as yes or no. E.g.: search for search_term for completion yes")];
+			[self setScriptErrorString:NSLocalizedString(@"The 'for completion' option needs to be specified as yes or no. E.g.: search for search_term for completion yes", @"Error description")];
 			return [NSArray array];
 		}
 		
@@ -114,7 +114,7 @@ The command should have the form
     } else {
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-		[self setScriptErrorString:NSLocalizedString(@"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".", @"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".")];
+		[self setScriptErrorString:NSLocalizedString(@"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".", @"Error description")];
 		return [NSArray array];
 	}
 

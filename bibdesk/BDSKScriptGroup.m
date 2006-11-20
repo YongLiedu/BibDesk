@@ -142,9 +142,9 @@
     if([[NSFileManager defaultManager] fileExistsAtPath:standardizedPath isDirectory:&isDir] == NO || isDir){
         NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
         if (isDir)
-            [error setValue:NSLocalizedString(@"Script path points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
+            [error setValue:NSLocalizedString(@"Script path points to a directory instead of a file", @"Error description") forKey:NSLocalizedDescriptionKey];
         else
-            [error setValue:NSLocalizedString(@"The script path points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
+            [error setValue:NSLocalizedString(@"The script path points to a file that does not exist", @"Error description") forKey:NSLocalizedDescriptionKey];
         [error setValue:standardizedPath forKey:NSFilePathErrorKey];
         [self scriptDidFailWithError:error];
     } else if (scriptType == BDSKShellScriptType) {
@@ -154,7 +154,7 @@
                 argsArray = [[scriptArguments shellScriptArgumentsArray] retain];
         }
         @catch (id exception) {
-            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Parsing Arguments", @"")];
+            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Parsing Arguments", @"Error description")];
             [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         if (error) {
@@ -170,7 +170,7 @@
         NSDictionary *errorInfo = nil;
         NSAppleScript *script = [[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:standardizedPath] error:&errorInfo];
         if (errorInfo) {
-            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to Create AppleScript", @"")];
+            error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Unable to Create AppleScript", @"Error description")];
             [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
         } else {
             @try{
@@ -187,11 +187,11 @@
                     errorInfo = nil;
                     outputString = [[script executeAndReturnError:&errorInfo] objCObjectValue];
                     if (errorInfo) {
-                        error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"")];
+                        error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"Error description")];
                         [error setValue:[errorInfo objectForKey:NSAppleScriptErrorMessage] forKey:NSLocalizedRecoverySuggestionErrorKey];
                     }
                 } else {
-                    error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"")];
+                    error = [NSError mutableLocalErrorWithCode:kBDSKAppleScriptError localizedDescription:NSLocalizedString(@"Error Executing AppleScript", @"Error description")];
                     [error setValue:[exception reason] forKey:NSLocalizedRecoverySuggestionErrorKey];
                 }
             }
@@ -199,7 +199,7 @@
         }
         if (error || nil == outputString || NO == [outputString isKindOfClass:[NSString class]]) {
             if (error == nil)
-                error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
+                error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"Error description")];
             [self scriptDidFailWithError:error];
         } else {
             [self scriptDidFinishWithResult:outputString];
@@ -225,7 +225,7 @@
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {
-        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return BibTeX", @"")];
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return BibTeX", @"Error description")];
     }
     if (pubs == nil || error) {
         failedDownload = YES;
@@ -477,14 +477,14 @@
             [stdoutData release];
             stdoutData = nil;
         } else {
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"")];
-            [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Failed to launch shell script %@", @""), path] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"Error description")];
+            [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Failed to launch shell script %@", @"Error description"), path] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
     }
     @catch(id exception){
         // if the pipe failed, we catch an exception here and ignore it
-        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"")];
-        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Exception %@ encountered while trying to run shell script %@", @""), [exception name], path] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Failed to Run Script", @"Error description")];
+        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Exception %@ encountered while trying to run shell script %@", @"Error description"), [exception name], path] forKey:NSLocalizedRecoverySuggestionErrorKey];
     }
     
     // reset signal handling to default behavior
@@ -498,7 +498,7 @@
     
     if (error || nil == outputString) {
         if(error == nil)
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"")];
+            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Script Did Not Return Anything", @"Error description")];
         [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFailWithError:) forObject:self withObject:error];
     } else {
         [[OFMessageQueue mainQueue] queueSelector:@selector(scriptDidFinishWithResult:) forObject:self withObject:outputString];

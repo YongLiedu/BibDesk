@@ -56,7 +56,7 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 }
 
 - (void)windowDidLoad {
-    [[self window] setTitle:NSLocalizedString(@"ReadMe", "ReadMe")];
+    [[self window] setTitle:NSLocalizedString(@"ReadMe", "Window title")];
     [textView setString:@""];
     [textView replaceCharactersInRange:[textView selectedRange]
                                withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ReadMe" ofType:@"rtf"]]];
@@ -78,12 +78,12 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 
 - (void)windowDidLoad {
     if(self == sharedRelNotesController){
-        [[self window] setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
+        [[self window] setTitle:NSLocalizedString(@"Release Notes", "Window title")];
         [textView setString:@""];
         [textView replaceCharactersInRange:[textView selectedRange]
                                    withRTF:[NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelNotes" ofType:@"rtf"]]];
     } else {
-        [[self window] setTitle:NSLocalizedString(@"Latest Release Notes", @"Latest Release Notes")];
+        [[self window] setTitle:NSLocalizedString(@"Latest Release Notes", @"Window title")];
         NSRect ignored, rect = [[textView enclosingScrollView] frame];
         NSDivideRect(rect, &ignored, &rect, 61.0, NSMinYEdge);
         [[textView enclosingScrollView] setFrame:rect];
@@ -115,7 +115,7 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 
 - (void)reportError:(id)sender {
     @try {
-        NSString *body = [NSString stringWithFormat:@"%@\n\n\t ***** ERROR LOG ***** \n\n%@", NSLocalizedString(@"Please tell us what you were doing at the time this error occurred.", @""), [textView string]];
+        NSString *body = [NSString stringWithFormat:@"%@\n\n\t ***** ERROR LOG ***** \n\n%@", NSLocalizedString(@"Please tell us what you were doing at the time this error occurred.", @"Message when error occurs"), [textView string]];
         
         OAInternetConfig *ic = [OAInternetConfig internetConfig];
         [ic launchMailTo:@"bibdesk-develop@lists.sourceforge.net"
@@ -132,12 +132,12 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 
 - (void)windowDidLoad {
     @try {
-        [[self window] setTitle:NSLocalizedString(@"Error Log", @"")];
+        [[self window] setTitle:NSLocalizedString(@"Error Log", @"Window title")];
         NSRect ignored, rect = [[textView enclosingScrollView] frame];
         NSDivideRect(rect, &ignored, &rect, 61.0, NSMinYEdge);
         [[textView enclosingScrollView] setFrame:rect];
         [downloadButton setHidden:NO];
-        [downloadButton setTitle:NSLocalizedString(@"Report Error", @"")];
+        [downloadButton setTitle:NSLocalizedString(@"Report Error", @"Button title")];
         [downloadButton setAction:@selector(reportError:)];
         [downloadButton setTarget:self];
         [downloadButton sizeToFit];
@@ -153,7 +153,7 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
         [[textView textStorage] addAttribute:NSFontAttributeName value:[NSFont userFixedPitchFontOfSize:10.0f] range:NSMakeRange(0, [[textView textStorage] length])];
         [self showWindow:nil];
         
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"An Error Occurred", @"") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:NSLocalizedString(@"The following diagnostic information may be useful to the application developer.  Please report this error.", @"")];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"An Error Occurred", @"Message in alert dialog when an error occurs") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:NSLocalizedString(@"The following diagnostic information may be useful to the application developer.  Please report this error.", @"Informative text in alert dialog when an error occurs")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     @catch(id exception){

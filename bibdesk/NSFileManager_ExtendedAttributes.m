@@ -113,7 +113,7 @@ static NSString *xattrError(int err, const char *path);
             [array addObject:string];
             [string release];
         } else {
-            if(error) *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, [NSNumber numberWithInt:NSUTF8StringEncoding], NSStringEncodingErrorKey, NSLocalizedString(@"unable to convert to a string", @""), NSLocalizedDescriptionKey, nil]]; 
+            if(error) *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, [NSNumber numberWithInt:NSUTF8StringEncoding], NSStringEncodingErrorKey, NSLocalizedString(@"unable to convert to a string", @"Error description"), NSLocalizedDescriptionKey, nil]]; 
             return nil;
         }
     }
@@ -353,52 +353,52 @@ static NSString *xattrError(int err, const char *myPath)
     switch (err)
     {
         case ENOTSUP:
-            errMsg = NSLocalizedString(@"File system does not support extended attributes or they are disabled.", @"");
+            errMsg = NSLocalizedString(@"File system does not support extended attributes or they are disabled.", @"Error description");
             break;
         case ERANGE:
-            errMsg = NSLocalizedString(@"Buffer too small for attribute names.", @"");
+            errMsg = NSLocalizedString(@"Buffer too small for attribute names.", @"Error description");
             break;
         case EPERM:
-            errMsg = NSLocalizedString(@"This file system object does not support extended attributes.", @"");
+            errMsg = NSLocalizedString(@"This file system object does not support extended attributes.", @"Error description");
             break;
         case ENOTDIR:
-            errMsg = NSLocalizedString(@"A component of the path is not a directory.", @"");
+            errMsg = NSLocalizedString(@"A component of the path is not a directory.", @"Error description");
             break;
         case ENAMETOOLONG:
-            errMsg = NSLocalizedString(@"File name too long.", @"");
+            errMsg = NSLocalizedString(@"File name too long.", @"Error description");
             break;
         case EACCES:
-            errMsg = NSLocalizedString(@"Search permission denied for this path.", @"");
+            errMsg = NSLocalizedString(@"Search permission denied for this path.", @"Error description");
             break;
         case ELOOP:
-            errMsg = NSLocalizedString(@"Too many symlinks encountered resolving path.", @"");
+            errMsg = NSLocalizedString(@"Too many symlinks encountered resolving path.", @"Error description");
             break;
         case EIO:
-            errMsg = NSLocalizedString(@"I/O error occurred.", @"");
+            errMsg = NSLocalizedString(@"I/O error occurred.", @"Error description");
             break;
         case EINVAL:
-            errMsg = NSLocalizedString(@"Options not recognized.", @"");
+            errMsg = NSLocalizedString(@"Options not recognized.", @"Error description");
             break;
         case EEXIST:
-            errMsg = NSLocalizedString(@"Options contained XATTR_CREATE but the named attribute exists.", @"");
+            errMsg = NSLocalizedString(@"Options contained XATTR_CREATE but the named attribute exists.", @"Error description");
             break;
         case ENOATTR:
-            errMsg = NSLocalizedString(@"The named attribute does not exist.", @"");
+            errMsg = NSLocalizedString(@"The named attribute does not exist.", @"Error description");
             break;
         case EROFS:
-            errMsg = NSLocalizedString(@"Read-only file system.  Unable to change attributes.", @"");
+            errMsg = NSLocalizedString(@"Read-only file system.  Unable to change attributes.", @"Error description");
             break;
         case EFAULT:
-            errMsg = NSLocalizedString(@"Path or name points to an invalid address.", @"");
+            errMsg = NSLocalizedString(@"Path or name points to an invalid address.", @"Error description");
             break;
         case E2BIG:
-            errMsg = NSLocalizedString(@"The data size of the extended attribute is too large.", @"");
+            errMsg = NSLocalizedString(@"The data size of the extended attribute is too large.", @"Error description");
             break;
         case ENOSPC:
-            errMsg = NSLocalizedString(@"No space left on file system.", @"");
+            errMsg = NSLocalizedString(@"No space left on file system.", @"Error description");
             break;
         default:
-            errMsg = NSLocalizedString(@"Unknown error occurred.", @"");
+            errMsg = NSLocalizedString(@"Unknown error occurred.", @"Error description");
             break;
     }
     return errMsg;

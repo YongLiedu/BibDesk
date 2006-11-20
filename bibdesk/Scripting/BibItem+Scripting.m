@@ -283,7 +283,7 @@ Extra wrapping of the created and modified date methods to
 	if([self hasBeenEdited]){
 		if (cmd) {
 			[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Cannot set BibTeX string after initialization.")]];
+			[cmd setScriptErrorString:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Error description")];
 		}
 		return;
 	}
@@ -295,7 +295,7 @@ Extra wrapping of the created and modified date methods to
 	if(error) {
 		if (cmd) {
 			[cmd setScriptErrorNumber:NSInternalScriptError];
-			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@with error %@. It may be malformed.",@""), btString, [error localizedDescription]]];
+			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), btString, [error localizedDescription]]];
 		}
 		return;
 	}

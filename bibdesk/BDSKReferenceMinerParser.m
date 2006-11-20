@@ -90,11 +90,11 @@
     }else if([itemString rangeOfString:@"Library of Congress,RM" options:0 range:NSMakeRange(0,22)].location != NSNotFound){
         // we're presently unable to parse LOC references
         if(outError)
-            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse Library of Congress references.", @""), nil);
+            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse Library of Congress references.", @"Error description"), nil);
         return [NSArray array];
     }else{
         if(outError)
-            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown Reference Miner format.", @""), nil);
+            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown Reference Miner format.", @"Error description"), nil);
         return [NSArray array];
     }
 }

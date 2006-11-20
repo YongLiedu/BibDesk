@@ -237,12 +237,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	formatString = [defaults stringForKey:BDSKCiteKeyFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set cite-key format is valid, so we can keep it 
-		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to last valid autogeneration format");
+		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}
 	
-	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format",@"") 
-										 defaultButton:NSLocalizedString(@"Keep Editing", @"Keep Editing") 
-									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format") 
+	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format", @"Message in alert dialog when entering invalid cite key format") 
+										 defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
+									   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
 										   otherButton:otherButton
 							 informativeTextWithFormat:@"%@", error];
 	int rv = [alert runSheetModalForWindow:formatSheet];
@@ -272,11 +272,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	NSString *msg = [sender toolTip];
 	
 	if ([NSString isEmptyString:msg]) {
-		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@"");
+		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.", @"Informative text in alert dialog");
 	}
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format",@"") 
-									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format", @"Message in alert dialog when entering invalid cite key format") 
+									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
 								   alternateButton:nil 
 									   otherButton:nil 
 						 informativeTextWithFormat:@"%@", msg];

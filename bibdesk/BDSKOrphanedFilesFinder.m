@@ -166,11 +166,11 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSString *papersFolderPath = [[self baseURL] path];
     
     if ([NSHomeDirectory() isEqualToString:papersFolderPath]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"")
-                                         defaultButton:NSLocalizedString(@"Find", @"Find")
-                                       alternateButton:NSLocalizedString(@"Don't Find", @"Don't Find")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"Message in alert dialog when trying to find orphaned files in Home folder")
+                                         defaultButton:NSLocalizedString(@"Find", @"Button title: find orphaned files")
+                                       alternateButton:NSLocalizedString(@"Don't Find", @"Button title: don't find orphaned files")
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphaned files in this folder could take a long time. Do you want to proceed?",@"")];
+                             informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphaned files in this folder could take a long time. Do you want to proceed?", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(findAlertDidEnd:returnCode:contextInfo:)
@@ -189,7 +189,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [arrayController setSearchString:[sender stringValue]];
     [arrayController rearrangeObjects];
     unsigned int count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
     [statusField setStringValue:message];
 }    
 
@@ -307,7 +307,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (void)refreshOrphanedFiles{
-    [self startAnimationWithStatusMessage:[NSLocalizedString(@"Looking for orphaned files", @"") stringByAppendingEllipsis]];
+    [self startAnimationWithStatusMessage:[NSLocalizedString(@"Looking for orphaned files", @"Status message") stringByAppendingEllipsis]];
     // do the actual work with a zero delay to let the UI update 
     [self performSelector:@selector(restartServer) withObject:nil afterDelay:0.0];
 }
@@ -332,23 +332,23 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         
     } else {
         NSBeep();
-        [self stopAnimationWithStatusMessage:NSLocalizedString(@"Unknown papers folder.", @"")];
+        [self stopAnimationWithStatusMessage:NSLocalizedString(@"Unknown papers folder.", @"Status message")];
     }
 }
 
 - (void)startAnimationWithStatusMessage:(NSString *)message{
     [progressIndicator startAnimation:nil];
-    [refreshButton setTitle:NSLocalizedString(@"Stop", @"Stop")];
+    [refreshButton setTitle:NSLocalizedString(@"Stop", @"Button title")];
     [refreshButton setAction:@selector(stopRefreshing:)];
-    [refreshButton setToolTip:NSLocalizedString(@"Stop looking for orphaned files", @"")];
+    [refreshButton setToolTip:NSLocalizedString(@"Stop looking for orphaned files", @"Tool tip message")];
     [statusField setStringValue:message];
 }
 
 - (void)stopAnimationWithStatusMessage:(NSString *)message{
     [progressIndicator stopAnimation:nil];
-    [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Refresh")];
+    [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Button title")];
     [refreshButton setAction:@selector(refreshOrphanedFiles:)];
-    [refreshButton setToolTip:NSLocalizedString(@"Refresh the list of orphaned files", @"")];
+    [refreshButton setToolTip:NSLocalizedString(@"Refresh the list of orphaned files", @"Tool tip message")];
     [statusField setStringValue:message];
 }
 
@@ -357,15 +357,15 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
     [mutableArray addObjectsFromArray:newFiles];
     unsigned int count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @""), count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
     [statusField setStringValue:[message stringByAppendingEllipsis]];
 }
 
 - (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
     unsigned int count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
     if ([server allFilesEnumerated] == NO)
-        message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Stopped"), message];
+        message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Partial status message"), message];
     [self stopAnimationWithStatusMessage:message];
 }
 

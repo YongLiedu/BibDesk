@@ -268,8 +268,8 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
         [tbItem setView:searchField];
         [searchField release];
         
-        [tbItem setLabel:NSLocalizedString(@"Search", @"")];
-        [tbItem setPaletteLabel:NSLocalizedString(@"Search", @"")];
+        [tbItem setLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
+        [tbItem setPaletteLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
         [tbItem setEnabled:YES];
         [tbItem autorelease];
     }        

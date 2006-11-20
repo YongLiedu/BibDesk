@@ -147,11 +147,11 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 - (IBAction)resetDefaultFiles:(id)sender;
 {
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset default template files to their original value?",@"") 
-									 defaultButton:NSLocalizedString(@"OK",@"OK") 
-								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset default template files to their original value?", @"Message in alert dialog when resetting default template files") 
+									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
+								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset Default Files will restore the original content of all the standard export and service template files.",@"")];
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset Default Files will restore the original content of all the standard export and service template files.", @"Informative text in alert dialog")];
 	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
@@ -224,9 +224,9 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     if (value == nil) {
         // set some placeholder message, this will show up in red
         if ([identifier isEqualToString:BDSKTemplateRoleString])
-            value = ([item isLeaf]) ? NSLocalizedString(@"Choose role",@"") : NSLocalizedString(@"Choose file type",@"");
+            value = ([item isLeaf]) ? NSLocalizedString(@"Choose role", @"Default text for template role") : NSLocalizedString(@"Choose file type", @"Default text for template type");
         else if ([identifier isEqualToString:BDSKTemplateNameString])
-            value = ([item isLeaf]) ? NSLocalizedString(@"Double-click to choose file",@"") : NSLocalizedString(@"Double-click to change name",@"");
+            value = ([item isLeaf]) ? NSLocalizedString(@"Double-click to choose file", @"Default text for template file") : NSLocalizedString(@"Double-click to change name", @"Default text fo template name");
     }
     return value;
 }
@@ -270,7 +270,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             NSOpenPanel *openPanel = [NSOpenPanel openPanel];
             [openPanel setCanChooseDirectories:YES];
             [openPanel setCanCreateDirectories:NO];
-            [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+            [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
             
             // start the panel in the same directory as the item's existing path, or fall back to app support
             NSString *dirPath = [[[item representedFileURL] path] stringByDeletingLastPathComponent];
@@ -478,9 +478,9 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         
         menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
         
-        item = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Open with") andSubmenuOfApplicationsForURL:theURL];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") andSubmenuOfApplicationsForURL:theURL];
         
-        item = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Reveal in Finder") action:@selector(revealInFinder:) keyEquivalent:@""];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder", @"Menu item title") action:@selector(revealInFinder:) keyEquivalent:@""];
         [item setTarget:self];
     }
     return menu;

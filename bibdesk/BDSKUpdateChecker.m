@@ -299,7 +299,7 @@
                                                              errorDescription:&err];
         if(nil == versionDictionary){
             if (error) {
-                *error = [NSError mutableLocalErrorWithCode:kBDSKPropertyListDeserializationFailed localizedDescription:NSLocalizedString(@"Unable to read the version number from the server", @"")];
+                *error = [NSError mutableLocalErrorWithCode:kBDSKPropertyListDeserializationFailed localizedDescription:NSLocalizedString(@"Unable to read the version number from the server", @"Error description")];
                 [*error setValue:err forKey:NSLocalizedRecoverySuggestionErrorKey];
                 // add the parsing error as underlying error, if the retrieval actually succeeded
                 [*error embedError:downloadError];
@@ -443,15 +443,15 @@
     if (kCFNetDiagnosticConnectionUp == status) {
         success = YES;
     } else {
-        if (nil == details) details = NSLocalizedString(@"Unknown network error", @"");
+        if (nil == details) details = NSLocalizedString(@"Unknown network error", @"Error description");
         
         // This error contains all the information needed for NSErrorRecoveryAttempting.  
         // Note that buttons in the alert will be ordered right-to-left {0, 1, 2} and correspond to objects in the NSLocalizedRecoveryOptionsErrorKey array.
         if (error) {
             *error = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:details];
             [*error setValue:self forKey:NSRecoveryAttempterErrorKey];
-            [*error setValue:NSLocalizedString(@"Would you like to ignore this problem or attempt to diagnose it?  You may also open the Console log to check for errors.", @"") forKey:NSLocalizedRecoverySuggestionErrorKey];
-            [*error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Ignore", @""), NSLocalizedString(@"Diagnose", @""), NSLocalizedString(@"Open Console", @""), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
+            [*error setValue:NSLocalizedString(@"Would you like to ignore this problem or attempt to diagnose it?  You may also open the Console log to check for errors.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
+            [*error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Ignore", @"Button title"), NSLocalizedString(@"Diagnose", @"Button title"), NSLocalizedString(@"Open Console", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
         }
         success = NO;
     }
@@ -538,7 +538,7 @@
     if (theData)
         attrString = [[[NSAttributedString alloc] initWithRTF:theData documentAttributes:NULL] autorelease];
     else
-        attrString = [[[NSAttributedString alloc] initWithString:NSLocalizedString(@"Download Failed", @"") attributeName:NSForegroundColorAttributeName attributeValue:[NSColor redColor]] autorelease];
+        attrString = [[[NSAttributedString alloc] initWithString:NSLocalizedString(@"Download Failed", @"Message when download failed") attributeName:NSForegroundColorAttributeName attributeValue:[NSColor redColor]] autorelease];
     
     if (nil == releaseNotesWindowController)
         releaseNotesWindowController = [[BDSKRelNotesController alloc] init];
@@ -553,14 +553,14 @@
     NSString *message = nil;
     
     if(altLatestVersion != nil)
-        message = NSLocalizedString(@"A new version of BibDesk is available (versions %@ and %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version");
+        message = NSLocalizedString(@"A new version of BibDesk is available (versions %@ and %@). Would you like to download the new version now?", @"Informative text in alert dialog");
     else
-        message = NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version");
+        message = NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"Informative text in alert dialog");
     
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"A New Version is Available", @"Alert when new version is available")
-                                     defaultButton:NSLocalizedString(@"Download", @"")
-                                   alternateButton:NSLocalizedString(@"View Release Notes", @"button title")
-                                       otherButton:NSLocalizedString(@"Ignore",@"Ignore")
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"A New Version is Available", @"Message in alert dialog when new version is available")
+                                     defaultButton:NSLocalizedString(@"Download", @"Button title")
+                                   alternateButton:NSLocalizedString(@"View Release Notes", @"Button title")
+                                       otherButton:NSLocalizedString(@"Ignore",@"Button title")
                          informativeTextWithFormat:message, latestVersion, altLatestVersion];
                                         
     button = [alert runModal];

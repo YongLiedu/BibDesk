@@ -411,7 +411,7 @@
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
                                               excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:",@"")
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:", @"Label for adding column")
                                                                                               fieldsArray:colNames];
 	[addFieldController beginSheetModalForWindow:[self window]
                                    modalDelegate:self
@@ -429,7 +429,7 @@
     if(columnsMenu == nil){
         columnsMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
         [columnsMenu addItem:[NSMenuItem separatorItem]];
-        item = [columnsMenu addItemWithTitle:[NSLocalizedString(@"Add Other", @"Add other...") stringByAppendingEllipsis]
+        item = [columnsMenu addItemWithTitle:[NSLocalizedString(@"Add Other", @"Menu title") stringByAppendingEllipsis]
                                       action:@selector(columnsMenuAddTableColumn:)
                                keyEquivalent:@""];
 		[item setTarget:self];

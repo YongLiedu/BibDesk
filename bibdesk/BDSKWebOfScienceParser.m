@@ -155,7 +155,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     // for now, we'll only support version 1.0
     NSRange startRange = [itemString rangeOfString:@"VR 1.0\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @""), nil);
+        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @"Error description"), nil);
         if(outError) *outError = error;
 		return returnArray;
     }

@@ -86,11 +86,11 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
     [image unlockFocus];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarNewItemIdentifier];
-    [item setLabel:NSLocalizedString(@"New",@"")];
-    [item setOptionKeyLabel:NSLocalizedString(@"New with Crossref",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"New Publication",@"")];
-    [item setToolTip:NSLocalizedString(@"Create new publication",@"")];
-    [item setOptionKeyToolTip:NSLocalizedString(@"Create new publication with crossref",@"")];
+    [item setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
+    [item setOptionKeyLabel:NSLocalizedString(@"New with Crossref", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"New Publication", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Create new publication", @"Tool tip message")];
+    [item setOptionKeyToolTip:NSLocalizedString(@"Create new publication with crossref", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageNamed: @"newdoc"]];
     [item setOptionKeyImage:image];
@@ -101,9 +101,9 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     
     // Delete
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarDeleteItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Delete",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Delete Publication",@"")];
-    [item setToolTip:NSLocalizedString(@"Delete selected publication(s)",@"")];
+    [item setLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Delete Publication", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Delete selected publication(s)", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon]];
     [item setAction:@selector(deleteSelectedPubs:)];
@@ -112,9 +112,9 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     
     // Edit
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarEditItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Edit",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Edit Publication",@"")];
-    [item setToolTip:NSLocalizedString(@"Edit selected publication(s)",@"")];
+    [item setLabel:NSLocalizedString(@"Edit", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Edit Publication", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Edit selected publication(s)", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageNamed: @"editdoc"]];
     [item setAction:@selector(editPubCmd:)];
@@ -123,9 +123,9 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     
     // Preview (nil targeted -> app delegate)
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarPreviewItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Preview",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Show/Hide Preview",@"")];
-    [item setToolTip:NSLocalizedString(@"Show/Hide preview panel",@"")];
+    [item setLabel:NSLocalizedString(@"Preview", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Show/Hide Preview", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Show/Hide preview panel", @"Tool tip message")];
     [item setTarget:nil];
     [item setImage:[NSImage imageNamed: @"preview"]];
     [item setAction:@selector(toggleShowingPreviewPanel:)];
@@ -134,9 +134,9 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     
     // Cite Drawer
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarCiteDrawerItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Cite Drawer",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Toggle Custom Citations Drawer",@"")];
-    [item setToolTip:NSLocalizedString(@"Toggle Custom Citations Drawer",@"")];
+    [item setLabel:NSLocalizedString(@"Cite Drawer", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Toggle Custom Citations Drawer", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Toggle custom citations drawer", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageNamed: @"drawerToolbarImage"]];
     [item setAction:@selector(toggleShowingCustomCiteDrawer:)];
@@ -144,16 +144,16 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item release];
 	
 	// Search
-	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Search",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Search", @"Toolbar item label") 
 										   action:@selector(performFindPanelAction:)
 									keyEquivalent:@""] autorelease];
 	[menuItem setTag:NSFindPanelActionShowFindPanel];
 	[menuItem setTarget:self];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarSearchItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"Search",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Search",@"")];
-    [item setToolTip:NSLocalizedString(@"Search using boolean '+' and '|', see Help for details",@"")];
+    [item setLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Search using boolean '+' and '|', see Help for details", @"Tool tip message")];
     [item setTarget:self];
     [item setView:searchField];
     [item setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
@@ -164,15 +164,15 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item release];
 	
 	// Action
-	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Action",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Action", @"Toolbar item label") 
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: actionMenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarActionItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"Action",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Publication Action",@"")];
-    [item setToolTip:NSLocalizedString(@"Action for selected publications",@"")];
+    [item setLabel:NSLocalizedString(@"Action", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Publication Action", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Action for selected publications", @"Tool tip message")];
     [item setTarget:self];
     [item setView:actionMenuButton];
     [item setMinSize:[actionMenuButton bounds].size];
@@ -182,15 +182,15 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item release];
 	
 	// Group Action
-	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Group Action",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Group Action", @"Toolbar item label") 
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: groupMenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibDocumentToolbarGroupActionItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"Group Action",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Group Action",@"")];
-    [item setToolTip:NSLocalizedString(@"Action for groups list",@"")];
+    [item setLabel:NSLocalizedString(@"Group Action", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Group Action", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Action for groups list", @"Tool tip message")];
     [item setTarget:self];
     [item setView:groupActionMenuButton];
     [item setMinSize:[groupActionMenuButton bounds].size];

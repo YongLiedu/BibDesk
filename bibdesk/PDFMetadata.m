@@ -102,13 +102,13 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
         
         fileURL = [fileURL fileURLByResolvingAliases];
         if(fileURL == nil){
-            errMsg = NSLocalizedString(@"File does not exist.", @"");
+            errMsg = NSLocalizedString(@"File does not exist.", @"Error description");
             @throw privateException;
         }
         
         document = [[PDFDocument alloc] initWithURL:fileURL];
         if(document == nil){
-            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"");
+            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"Error description");
             @throw privateException;
         }
         
@@ -119,7 +119,7 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
             metadata = [[[self alloc] init] autorelease];
             [metadata setDictionary:attributes];
         } else {
-            errMsg = NSLocalizedString(@"No PDF document attributes for file.", @"");
+            errMsg = NSLocalizedString(@"No PDF document attributes for file.", @"Error description");
             @throw privateException;
         }
         
@@ -197,13 +197,13 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
         
         fileURL = [fileURL fileURLByResolvingAliases];
         if(fileURL == nil){
-            errMsg = NSLocalizedString(@"File does not exist.", @"");
+            errMsg = NSLocalizedString(@"File does not exist.", @"Error description");
             @throw privateException;
         }
         
         PDFDocument *document = [[PDFDocument alloc] initWithURL:fileURL];
         if(document == nil){
-            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"");
+            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"Error description");
             @throw privateException;
         }
         
@@ -211,7 +211,7 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
         
         // -[PDFDocument writeToURL:] returns YES even if it fails rdar://problem/4475062
         if([[document dataRepresentation] writeToURL:fileURL options:NSAtomicWrite error:&error] == NO){
-            errMsg = NSLocalizedString(@"Unable to save PDF file.", @"");
+            errMsg = NSLocalizedString(@"Unable to save PDF file.", @"Error description");
             [document release];
             @throw privateException;
         }

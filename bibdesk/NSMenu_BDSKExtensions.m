@@ -115,7 +115,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     [submenu setDelegate:controller];
     
     // add the choose... item, the other items are inserted lazily by BDSKOpenWithMenuController
-    item = [submenu addItemWithTitle:[NSLocalizedString(@"Choose", @"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
+    item = [submenu addItemWithTitle:[NSLocalizedString(@"Choose", @"Menu item title") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
     [item setTarget:controller];
     representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
     [item setRepresentedObject:representedObject];
@@ -157,7 +157,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
         
         // mark the default app, if we have one
         if([defaultEditorURL isEqual:applicationURL])
-            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
+            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")];
         
         // BDSKOpenWithMenuController singleton implements openURLWithApplication:
         item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
@@ -218,7 +218,7 @@ static id sharedOpenWithController = nil;
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
     
     int rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
                                         file:nil 

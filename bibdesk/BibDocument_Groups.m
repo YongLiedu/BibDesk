@@ -521,7 +521,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSEnumerator *fieldEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
 	NSString *field;
 	
-    [menu addItemWithTitle:NSLocalizedString(@"No Field", @"No Field") action:NULL keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"No Field", @"Menu item title") action:NULL keyEquivalent:@""];
 	
 	while (field = [fieldEnum nextObject]) {
 		[menu addItemWithTitle:field action:NULL keyEquivalent:@""];
@@ -529,14 +529,14 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [menu addItem:[NSMenuItem separatorItem]];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field", @"") stringByAppendingEllipsis]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Add Field", @"Menu item title") stringByAppendingEllipsis]
 										  action:@selector(addGroupFieldAction:)
 								   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menu addItem:menuItem];
     [menuItem release];
 	
-	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field", @"") stringByAppendingEllipsis]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Remove Field", @"Menu item title") stringByAppendingEllipsis]
 										  action:@selector(removeGroupFieldAction:)
 								   keyEquivalent:@""];
 	[menuItem setTarget:self];
@@ -587,11 +587,11 @@ The groupedPublications array is a subset of the publications array, developed b
         return; // the user canceled
     
 	if([newGroupField isInvalidGroupField] || [newGroupField isEqualToString:@""]){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Invalid Field")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Field", @"Message in alert dialog when choosing an invalid group field")
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), newGroupField]];
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @"Informative text in alert dialog"), newGroupField]];
         [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:NULL contextInfo:NULL];
 		return;
 	}
@@ -631,7 +631,7 @@ The groupedPublications array is a subset of the publications array, developed b
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:",@"")
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:", @"Label for adding group field")
                                                                                               fieldsArray:colNames];
 	[addFieldController beginSheetModalForWindow:documentWindow
                                    modalDelegate:self
@@ -678,7 +678,7 @@ The groupedPublications array is a subset of the publications array, developed b
     else 
         [headerCell selectItemWithTitle:currentGroupField];
     
-    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:",@"")
+    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:", @"Label for removing group field")
                                                                                                        fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
 	[removeFieldController beginSheetModalForWindow:documentWindow
                                       modalDelegate:self
@@ -730,7 +730,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group",@"Add smart group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
@@ -745,7 +745,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView reloadData];
     [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
     [groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
-    [[self undoManager] setActionName:NSLocalizedString(@"Add Static Group",@"Add static group")];
+    [[self undoManager] setActionName:NSLocalizedString(@"Add Static Group", @"Undo action name")];
     // updating of the tables is done when finishing the edit of the name
 }
 
@@ -766,7 +766,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group",@"Add external file group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 }
@@ -788,7 +788,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add Script Group",@"Add script group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
 		// updating of the tables is done when finishing the edit of the name
 	}
 	
@@ -827,7 +827,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	if (count == 0) {
 		NSBeep();
 	} else {
-		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups",@"Remove groups")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups", @"Undo action name")];
         [groupTableView reloadData];
         [self displaySelectedGroups];
 	}
@@ -1005,7 +1005,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [groups setLastImportedPublications:newPubs];
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Merge Shared Publications",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Merge Shared Publications", @"Undo action name")];
     
     return newPubs;
 }
@@ -1015,7 +1015,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     if ([group isStatic]) {
         [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
-		[[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Add to group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Undo action name")];
         return YES;
     }
     
@@ -1035,13 +1035,13 @@ The groupedPublications array is a subset of the publications array, developed b
 		}else if(rv == BDSKOperationAsk){
 			NSString *otherButton = nil;
 			if([[self currentGroupField] isSingleValuedField] == NO)
-				otherButton = NSLocalizedString(@"Append", @"Append");
+				otherButton = NSLocalizedString(@"Append", @"Button title");
 			
-			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
-												 defaultButton:NSLocalizedString(@"Don't Change", @"Don't change")
-											   alternateButton:NSLocalizedString(@"Set", @"Set")
+			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+												 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
+											   alternateButton:NSLocalizedString(@"Set", @"Button title")
 												   otherButton:otherButton
-									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
+									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
 			rv = [alert runSheetModalForWindow:documentWindow];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
@@ -1052,7 +1052,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 	
 	if(count > 0)
-		[[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Add to group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Undo action name")];
     
     return YES;
 }
@@ -1075,7 +1075,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		
         if ([group isStatic]) {
             [(BDSKStaticGroup *)group removePublicationsInArray:pubs];
-            [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Remove from group")];
+            [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Undo action name")];
             count = [pubs count];
             continue;
         } else if ([group isCategory] && [[(BDSKCategoryGroup *)group key] isSingleValuedField]) {
@@ -1095,11 +1095,11 @@ The groupedPublications array is a subset of the publications array, developed b
 			if(rv == BDSKOperationSet || rv == BDSKOperationAppend){
 				tmpCount++;
 			}else if(rv == BDSKOperationAsk){
-				BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
-													 defaultButton:NSLocalizedString(@"Don't Change", @"Don't change")
+				BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+													 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
 												   alternateButton:nil
-													   otherButton:NSLocalizedString(@"Remove", @"Remove")
-										 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
+													   otherButton:NSLocalizedString(@"Remove", @"Button title")
+										 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
 				rv = [alert runSheetModalForWindow:documentWindow];
 				handleInherited = rv;
 				if(handleInherited != BDSKOperationIgnore){
@@ -1113,13 +1113,13 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 	
 	if(count > 0){
-		[[self undoManager] setActionName:NSLocalizedString(@"Remove from Group", @"Remove from group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Remove from Group", @"Undo action name")];
 		NSString * pubSingularPlural;
 		if (count == 1)
-			pubSingularPlural = NSLocalizedString(@"publication", @"publication");
+			pubSingularPlural = NSLocalizedString(@"publication", @"publication, in status message");
 		else
-			pubSingularPlural = NSLocalizedString(@"publications", @"publications");
-		[self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Removed %i %@ from %@",@"Removed [number] publications(s) from selected group(s)"), count, pubSingularPlural, groupName] immediate:NO];
+			pubSingularPlural = NSLocalizedString(@"publications", @"publications, in status message");
+		[self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Removed %i %@ from %@", @"Status message: Removed [number] publications(s) from selected group(s)"), count, pubSingularPlural, groupName] immediate:NO];
 	}
     
     return YES;
@@ -1143,11 +1143,11 @@ The groupedPublications array is a subset of the publications array, developed b
 		if(rv == BDSKOperationSet || rv == BDSKOperationAppend){
 			count++;
 		}else if(rv == BDSKOperationAsk){
-			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
-												 defaultButton:NSLocalizedString(@"Don't Change", @"Don't change")
+			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+												 defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
 											   alternateButton:nil
-												   otherButton:NSLocalizedString(@"Remove", @"Remove")
-									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
+												   otherButton:NSLocalizedString(@"Remove", @"Button title")
+									 informativeTextWithFormat:NSLocalizedString(@"One or more items have a value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
 			rv = [alert runSheetModalForWindow:documentWindow];
 			handleInherited = rv;
 			if(handleInherited != BDSKOperationIgnore){
@@ -1158,7 +1158,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 	
 	if(count > 0)
-		[[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Rename group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
     
     return YES;
 }

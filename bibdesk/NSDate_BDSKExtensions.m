@@ -142,16 +142,16 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     if(numbers == NULL){
         int index = 1;
         numbers = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 10, &OFCaseInsensitiveStringKeyDictionaryCallbacks, &OFIntegerDictionaryValueCallbacks);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"one",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"two",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"three",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"four",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"five",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"six",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"seven",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"eight",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"nine",@""), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"ten",@""), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"one",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"two",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"three",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"four",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"five",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"six",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"seven",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"eight",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"nine",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"ten",@"Number for parsing colloquial date"), (const void *)index++);
     }
     
     @try{
@@ -160,9 +160,9 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&countStr];
         
         // we could add an NSString method to look up numbers from a dictionary, say 
-        if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"a", @""), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+        if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"a", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
             count = 1;
-        else if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"an", @""), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+        else if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"an", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
             count = 1;
         else if(countStr != nil)
             if(CFDictionaryGetValueIfPresent(numbers, countStr, (const void **)&count) == FALSE)
@@ -186,11 +186,11 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         NSArray *yearMonthWeek = [[NSUserDefaults standardUserDefaults] objectForKey:NSYearMonthWeekDesignations];
         OBASSERT([yearMonthWeek count] == 3);
         
-        NSString *year = [yearMonthWeek count] ? [yearMonthWeek objectAtIndex:0] : NSLocalizedString(@"year", @"");
-        NSString *month = [yearMonthWeek count] > 1 ? [yearMonthWeek objectAtIndex:1] : NSLocalizedString(@"month", @"");
-        NSString *week = [yearMonthWeek count] > 2 ? [yearMonthWeek objectAtIndex:2] : NSLocalizedString(@"week", @"");
+        NSString *year = [yearMonthWeek count] ? [yearMonthWeek objectAtIndex:0] : NSLocalizedString(@"year", @"Word for parsing colloquial date");
+        NSString *month = [yearMonthWeek count] > 1 ? [yearMonthWeek objectAtIndex:1] : NSLocalizedString(@"month", @"Word for parsing colloquial date");
+        NSString *week = [yearMonthWeek count] > 2 ? [yearMonthWeek objectAtIndex:2] : NSLocalizedString(@"week", @"Word for parsing colloquial date");
         
-        if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"day", @"")])
+        if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"day", @"Word for parsing colloquial date")])
             interval = 24 * 3600;
         else if([intervalStr hasCaseInsensitivePrefix:week])
             interval = 7 * 24 * 3600;
@@ -198,11 +198,11 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
             interval = 30.5 * 24 * 3600;
         else if([intervalStr hasCaseInsensitivePrefix:year])
             interval = 12 * 30.5 * 24 * 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"fortnight", @"")])
+        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"fortnight", @"Word for parsing colloquial date")])
             interval = 2 * 7 * 24 * 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"hour", @"")])
+        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"hour", @"Word for parsing colloquial date")])
             interval = 3600;
-        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"minute", @"")])
+        else if([intervalStr hasCaseInsensitivePrefix:NSLocalizedString(@"minute", @"Word for parsing colloquial date")])
             interval = 3600;
         else
             @throw parseException;
@@ -225,10 +225,10 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         // -[self note] passing nil or NULL to a CFString function results in a crash
         // @@ Use a case-insensitive dictionary here also, with NSEarlierTimeDesignations; NSLaterTimeDesignations doesn't make sense in our context of relative dates (and the OS handles those fairly well anyway)
         if(signStr != nil){
-            if(CFStringCompare((CFStringRef)signStr, (CFStringRef)NSLocalizedString(@"from", @""), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
+            if(CFStringCompare((CFStringRef)signStr, (CFStringRef)NSLocalizedString(@"from", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
                 interval *= 1;
                 getBase = YES;
-            } else if(CFStringCompare((CFStringRef)signStr, (CFStringRef)NSLocalizedString(@"ago", @""), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
+            } else if(CFStringCompare((CFStringRef)signStr, (CFStringRef)NSLocalizedString(@"ago", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo){
                 interval *= -1; 
                 getBase = NO;
             } else
@@ -254,7 +254,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
                 NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:NSThisDayDesignations];
                 CFIndex count = [array count];
                 if(count < 2)
-                    array = [NSArray arrayWithObjects:NSLocalizedString(@"today", @""), NSLocalizedString(@"now", @""), nil];
+                    array = [NSArray arrayWithObjects:NSLocalizedString(@"today", @"Word for parsing colloquial date"), NSLocalizedString(@"now", @"Word for parsing colloquial date"), nil];
                 while(count--)
                     CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, count), (const void *)delta);
                 
@@ -263,7 +263,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
                 count = [array count];
                 delta = 1 * 24 * 3600;
                 if(count == 0)
-                    array = [NSArray arrayWithObject:NSLocalizedString(@"tomorrow", @"")];
+                    array = [NSArray arrayWithObject:NSLocalizedString(@"tomorrow", @"Word for parsing colloquial date")];
                 while(count--)
                     CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, count), (const void *)delta);
 
@@ -272,7 +272,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
                 count = [array count];
                 delta = -1 * 24 * 3600;
                 if(count == 0)
-                    array = [NSArray arrayWithObject:NSLocalizedString(@"yesterday", @"")];
+                    array = [NSArray arrayWithObject:NSLocalizedString(@"yesterday", @"Word for parsing colloquial date")];
                 while(count--)
                     CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, count), (const void *)delta);
             }

@@ -217,7 +217,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 - (id)init;
 {
     if(self = [super initWithDocument:nil]){
-        documentDisplayName = [NSLocalizedString(@"All", @"All") retain];
+        documentDisplayName = [NSLocalizedString(@"All", @"Popup menu item for error window") retain];
     }
     return self;
 }

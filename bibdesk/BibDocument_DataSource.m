@@ -118,7 +118,7 @@
 					[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithFormat:@"%i", newRating]]];
 					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:self];
 				}
-				[[pub undoManager] setActionName:NSLocalizedString(@"Change Rating",@"Change Rating")];
+				[[pub undoManager] setActionName:NSLocalizedString(@"Change Rating", @"Undo action name")];
 			}
 		}else if([tcID isBooleanField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
@@ -133,7 +133,7 @@
 					[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithBool:newStatus]]];
 					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:self];
 				}
-				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box",@"Change Check Box")];
+				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box", @"Undo action name")];
 			}
 		}else if([tcID isTriStateField]){
 			BibItem *pub = [shownPublications objectAtIndex:row];
@@ -148,7 +148,7 @@
 					[scriptHook setNewValues:[NSArray arrayWithObject:[NSString stringWithTriStateValue:newStatus]]];
 					[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:[NSArray arrayWithObject:pub] document:self];
 				}
-				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box",@"Change Check Box")];
+				[[pub undoManager] setActionName:NSLocalizedString(@"Change Check Box", @"Undo action name")];
 			}
 		}
 	}else if(tv == groupTableView){
@@ -158,7 +158,7 @@
 			return;
 		if([group hasEditableName]){
 			[(BDSKMutableGroup *)group setName:object];
-			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group",@"Rename group")];
+			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
 			if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
                 [self sortGroupsByKey:sortGroupsKey];
 		}else if([group isCategory]){
@@ -184,11 +184,11 @@
 		else if (NSLocationInRange(row, [groups rangeOfCategoryGroups]) &&
 				 [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey]) {
 			
-			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
-												 defaultButton:NSLocalizedString(@"OK", @"OK")
+			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+												 defaultButton:NSLocalizedString(@"OK", @"Button title")
 											   alternateButton:nil
-												   otherButton:NSLocalizedString(@"Cancel", @"Cancel")
-									 informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %i items. Do you want to proceed?", @""), currentGroupField, [groupedPublications count]];
+												   otherButton:NSLocalizedString(@"Cancel", @"Button title")
+									 informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %i items. Do you want to proceed?", @"Informative text in alert dialog"), currentGroupField, [groupedPublications count]];
 			[alert setHasCheckButton:YES];
 			[alert setCheckValue:NO];
 			int rv = [alert runSheetModalForWindow:documentWindow
@@ -302,26 +302,26 @@
 		if([tcId isURLField]){
             menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
             if([tcId isLocalFileField]){
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"") action:@selector(openLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open Linked File", @"Menu item title") action:@selector(openLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
-                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"") action:@selector(revealLinkedFile:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title") action:@selector(revealLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
             }else{
-                item = [menu addItemWithTitle:NSLocalizedString(@"Open URL in Browser", @"") action:@selector(openRemoteURL:) keyEquivalent:@""];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title") action:@selector(openRemoteURL:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
             }
             if([tableView numberOfSelectedRows] == 1 &&
                (theURL = [[shownPublications objectAtIndex:row] URLForField:tcId])){
-                item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Open with") 
+                item = [menu insertItemWithTitle:NSLocalizedString(@"Open With", @"Menu item title") 
                                     andSubmenuOfApplicationsForURL:theURL atIndex:1];
             }
             [menu addItem:[NSMenuItem separatorItem]];
-            item = [menu addItemWithTitle:NSLocalizedString(@"Edit", @"Edit") action:@selector(editPubCmd:) keyEquivalent:@""];
+            item = [menu addItemWithTitle:NSLocalizedString(@"Edit", @"Menu item title") action:@selector(editPubCmd:) keyEquivalent:@""];
             [item setTarget:self];
-            item = [menu addItemWithTitle:[NSLocalizedString(@"Delete", @"Delete") stringByAppendingEllipsis] action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
+            item = [menu addItemWithTitle:[NSLocalizedString(@"Delete", @"Menu item title") stringByAppendingEllipsis] action:@selector(deleteSelectedPubs:) keyEquivalent:@""];
             [item setTarget:self];
 		}else{
 			menu = [actionMenu copyWithZone:[NSMenu menuZone]];
@@ -422,8 +422,8 @@
             docState.dragFromSharedGroups = [groups hasExternalGroupsAtIndexes:rowIndexes];
 		}
 		if([pubs count] == 0){
-            NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @""),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
-                              NSLocalizedString(@"The groups you want to drag do not contain any items.", @""));
+            NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @"Message in alert dialog when dragging from empty groups"),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
+                              NSLocalizedString(@"The groups you want to drag do not contain any items.", @"Informative text in alert dialog"));
             return NO;
         }
 			
@@ -808,7 +808,7 @@
                 [pub autoFilePaper];
             
             [self selectPublication:pub];
-            [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+            [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
             return YES;
             
         }else{
@@ -1027,7 +1027,7 @@
     if(searchString == nil || sortKey == nil)
         [self updateStatus]; // resets the status line to its default value
     else
-        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @""), sortKey, searchString]];
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @"Status message:Finding item with [sorting field]: \"[search string]\""), sortKey, searchString]];
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.

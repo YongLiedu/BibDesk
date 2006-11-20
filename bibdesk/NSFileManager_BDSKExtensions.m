@@ -119,7 +119,7 @@ typedef struct WLDragMapEntryStruct
         NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleExecutableKey];
         
         if(appName == nil)
-            [NSException raise:NSObjectNotAvailableException format:NSLocalizedString(@"Unable to find CFBundleIdentifier for %@", @""), [NSApp description]];
+            [NSException raise:NSObjectNotAvailableException format:NSLocalizedString(@"Unable to find CFBundleIdentifier for %@", @"Exception message"), [NSApp description]];
         
         path = [[path stringByAppendingPathComponent:appName] copy];
         
@@ -310,12 +310,12 @@ typedef struct WLDragMapEntryStruct
     }
     
     if(NO == success && error != nil)
-        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"") forKey:NSLocalizedDescriptionKey]];
+        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"Error description") forKey:NSLocalizedDescriptionKey]];
     
     if(YES == success){
         success = (noErr == FSDeleteObject(&fileRef));
         if(NO == success && error != nil)
-            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"") forKey:NSLocalizedDescriptionKey]];
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
     }
     
     return success;
@@ -480,7 +480,7 @@ static OSType finderSignatureBytes = 'MACS';
         if(GetMacOSStatusCommentString != NULL && noErr != err)
             errorMessage = [NSString stringWithUTF8String:GetMacOSStatusCommentString(err)];
         if(nil == errorMessage)
-            errorMessage = NSLocalizedString(@"Unable to copy file.", @"");
+            errorMessage = NSLocalizedString(@"Unable to copy file.", @"Error description");
         *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObject:errorMessage forKey:NSLocalizedDescriptionKey]];
     }
     
@@ -512,7 +512,7 @@ static OSType finderSignatureBytes = 'MACS';
     }
 
     if(dirExists == NO && anError != nil){
-        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @""), NSLocalizedDescriptionKey, nil]];
+        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @"Error description"), NSLocalizedDescriptionKey, nil]];
     }
         
     return cachePath;

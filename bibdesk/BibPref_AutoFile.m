@@ -45,7 +45,7 @@
 
 #define MAX_PREVIEW_WIDTH	501.0
 #define MAX_FORMAT_WIDTH	288.0
-#define USE_DOCUMENT_FOLDER NSLocalizedString(@"Use Document Folder",@"")
+#define USE_DOCUMENT_FOLDER NSLocalizedString(@"Use Document Folder", @"Placeholder string for Papers Folder")
 
 @interface BDSKFolderPathFormatter : NSFormatter @end
 
@@ -151,7 +151,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	[openPanel setCanChooseDirectories:YES];
 	[openPanel setCanCreateDirectories:YES];
 	[openPanel setResolvesAliases:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     [openPanel beginSheetForDirectory:nil 
 								 file:nil
 								types:nil
@@ -201,7 +201,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 // presently just used to display the warning if the path for autofile was invalid
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil)
-        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
+        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @"Message in alert dialog when entering invalid entry"), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
     return NO;
 }
 
@@ -327,12 +327,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set local-url format is valid, so we can keep it 
-		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to last valid autogeneration format");
+		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
 	}
 	
-	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format",@"") 
-										 defaultButton:NSLocalizedString(@"Keep Editing", @"Keep Editing") 
-									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format") 
+	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format", @"Message in alert dialog when entering invalid Local-Url format") 
+										 defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
+									   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
 										   otherButton:otherButton
 							 informativeTextWithFormat:@"%@", error];
 	int rv = [alert runSheetModalForWindow:formatSheet];
@@ -362,11 +362,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	NSString *msg = [sender toolTip];
 	
 	if ([NSString isEmptyString:msg]) {
-		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@"");
+		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.", @"Informative text in alert dialog");
 	}
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format",@"") 
-									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format", @"Message in alert dialog when entering invalid Local-Url format") 
+									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
 								   alternateButton:nil 
 									   otherButton:nil 
 						 informativeTextWithFormat:@"%@", msg];
@@ -416,11 +416,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
     NS_ENDHANDLER
     if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
         if(error)
-            *error = [NSString stringWithFormat:NSLocalizedString(@"The directory \"%@\" does not exist.", @""), pathString];
+            *error = [NSString stringWithFormat:NSLocalizedString(@"The directory \"%@\" does not exist.", @"Error description"), pathString];
         return NO;
     } else if(isDir == NO){
         if(error)
-            *error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is not a directory.", @""), pathString];
+            *error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is not a directory.", @"Error description"), pathString];
         return NO;
     } else
 	    *obj = string;

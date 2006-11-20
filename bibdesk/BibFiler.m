@@ -89,9 +89,9 @@ static BibFiler *sharedFiler = nil;
 
 	if(![NSString isEmptyString:papersFolderPath] && !([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
 		// The directory isn't there or isn't a directory, so pop up an alert.
-		rv = NSRunAlertPanel(NSLocalizedString(@"Papers Folder doesn't exist",@""),
-							 NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.",@""),
-							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
+		rv = NSRunAlertPanel(NSLocalizedString(@"Papers Folder doesn't exist", @"Message in alert dialog when unable to find Papers Folder"),
+							 NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.", @"Informative text in alert dialog"),
+							 NSLocalizedString(@"OK", @"Button title"),NSLocalizedString(@"Go to Preferences", @"Button title"),nil);
 		if (rv == NSAlertAlternateReturn){
 				[[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
 				[[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
@@ -287,9 +287,9 @@ static BibFiler *sharedFiler = nil;
 - (void)showProblems{
     if (window == nil) {
         if([NSBundle loadNibNamed:@"AutoFile" owner:self] == NO){
-            NSRunCriticalAlertPanel(NSLocalizedString(@"Error loading AutoFile window module.",@""),
-                                    NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!",@""),
-                                    NSLocalizedString(@"OK",@"OK"),nil,nil);
+            NSRunCriticalAlertPanel(NSLocalizedString(@"Error loading AutoFile window module.", @"Message in alert dialog when unable to load window"),
+                                    NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!", @"Informative text in alert dialog"),
+                                    NSLocalizedString(@"OK", @"Button title"),nil,nil);
             return;
         }
 	}
@@ -330,11 +330,11 @@ static BibFiler *sharedFiler = nil;
     }
     
     if ([fileInfoDicts count] == 0) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Nothing Selected", @"")
-                                         defaultButton:NSLocalizedString(@"OK", @"OK")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Nothing Selected", @"Message in alert dialog when retrying to autofile without selection")
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
                                        alternateButton:nil
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Please select the items you want to auto file again or press Done.", @"")];
+                             informativeTextWithFormat:NSLocalizedString(@"Please select the items you want to auto file again or press Done.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:window
                           modalDelegate:nil
                          didEndSelector:NULL 
@@ -359,20 +359,20 @@ static BibFiler *sharedFiler = nil;
     
     for (i = 0; i < count; i++) {
         info = [self objectInErrorInfoDictsAtIndex:i];
-        [string appendStrings:NSLocalizedString(@"Publication key: ", @""),
+        [string appendStrings:NSLocalizedString(@"Publication key: ", @"Label for autofile dump"),
                               [[info objectForKey:@"paper"] citeKey], @"\n", 
-                              NSLocalizedString(@"Original path: ", @""),
+                              NSLocalizedString(@"Original path: ", @"Label for autofile dump"),
                               [info objectForKey:@"oldPath"], @"\n", 
-                              NSLocalizedString(@"New path: ", @""),
+                              NSLocalizedString(@"New path: ", @"Label for autofile dump"),
                               [info objectForKey:@"newPath"], @"\n", 
-                              NSLocalizedString(@"Status: ",@""),
+                              NSLocalizedString(@"Status: ",@"Label for autofile dump"),
                               [info objectForKey:@"status"], @"\n", 
-                              NSLocalizedString(@"Fix: ", @""),
-                              (([info objectForKey:@"fix"] == nil) ? NSLocalizedString(@"Cannot fix.", @"") : [info objectForKey:@"fix"]),
+                              NSLocalizedString(@"Fix: ", @"Label for autofile dump"),
+                              (([info objectForKey:@"fix"] == nil) ? NSLocalizedString(@"Cannot fix.", @"Cannot fix AutoFile error") : [info objectForKey:@"fix"]),
                               @"\n\n", nil];
     }
     
-    NSString *fileName = NSLocalizedString(@"BibDesk AutoFile Errors",@"Filename for dumped autofile errors.");
+    NSString *fileName = NSLocalizedString(@"BibDesk AutoFile Errors", @"Filename for dumped autofile errors.");
     NSString *path = [[NSFileManager defaultManager] desktopDirectory];
     if (path == nil)
         return;
@@ -424,7 +424,7 @@ static BibFiler *sharedFiler = nil;
 - (NSString *)tableView:(NSTableView *)tableView toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	NSString *tcid = [tableColumn identifier];
     if ([tcid isEqualToString:@"select"]) {
-        return NSLocalizedString(@"Select items to Try Again or to Force.", @"");
+        return NSLocalizedString(@"Select items to Try Again or to Force.", @"Tool tip message");
     }
     return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];
 }
@@ -503,7 +503,7 @@ static BibFiler *sharedFiler = nil;
                      stringByAppendingPathComponent:[newPath lastPathComponent]];
     NS_HANDLER
         NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
-        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
+        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"AutoFile error message");
         statusFlag =  BDSKCannotResolveAliasErrorMask;
     NS_ENDHANDLER
     
@@ -512,7 +512,7 @@ static BibFiler *sharedFiler = nil;
                   stringByAppendingPathComponent:[path lastPathComponent]];
     NS_HANDLER
         NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
-        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
+        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"AutoFile error message");
         statusFlag = BDSKCannotResolveAliasErrorMask;
     NS_ENDHANDLER
     
@@ -525,7 +525,7 @@ static BibFiler *sharedFiler = nil;
                     if(![self movePath:resolvedNewPath toPath:backupPath force:NO error:NULL] && 
                         [self fileExistsAtPath:resolvedNewPath] && 
                         ![self removeFileAtPath:resolvedNewPath handler:nil]){
-                        status = NSLocalizedString(@"Unable to remove existing file at target location.",@"");
+                        status = NSLocalizedString(@"Unable to remove existing file at target location.", @"AutoFile error message");
                         statusFlag = BDSKTargetFileExistsErrorMask | BDSKCannotRemoveFileErrorMask;
                         // cleanup: move back backup
                         if(![self movePath:backupPath toPath:resolvedNewPath handler:nil] && [self fileExistsAtPath:resolvedNewPath]){
@@ -534,10 +534,10 @@ static BibFiler *sharedFiler = nil;
                     }
                 }else{
                     if([self isDeletableFileAtPath:resolvedNewPath]){
-                        status = NSLocalizedString(@"File exists at target location.",@"");
-                        fix = NSLocalizedString(@"Overwrite existing file.",@"");
+                        status = NSLocalizedString(@"File exists at target location.", @"AutoFile error message");
+                        fix = NSLocalizedString(@"Overwrite existing file.", @"AutoFile fix");
                     }else{
-                        status = NSLocalizedString(@"Undeletable file exists at target location.",@"");
+                        status = NSLocalizedString(@"Undeletable file exists at target location.", @"AutoFile error message");
                     }
                     statusFlag = BDSKTargetFileExistsErrorMask;
                 }
@@ -545,18 +545,18 @@ static BibFiler *sharedFiler = nil;
                 if(force){
                     ignoreMove = YES;
                 }else{
-                    status = NSLocalizedString(@"Original file does not exist, file exists at target location.", @"");
-                    fix = NSLocalizedString(@"Use existing file at target location.", @"");
+                    status = NSLocalizedString(@"Original file does not exist, file exists at target location.", @"AutoFile error message");
+                    fix = NSLocalizedString(@"Use existing file at target location.", @"AutoFile fix");
                     statusFlag = BDSKSourceFileDoesNotExistErrorMask | BDSKTargetFileExistsErrorMask;
                 }
             }
         }else if(![self fileExistsAtPath:resolvedPath]){
-            status = NSLocalizedString(@"Original file does not exist.", @"");
+            status = NSLocalizedString(@"Original file does not exist.", @"AutoFile error message");
             statusFlag = BDSKSourceFileDoesNotExistErrorMask;
         }else if(![self isDeletableFileAtPath:resolvedPath]){
             if(force == NO){
-                status = NSLocalizedString(@"Unable to move read-only file.", @"");
-                fix = NSLocalizedString(@"Copy original file.", @"");
+                status = NSLocalizedString(@"Unable to move read-only file.", @"AutoFile error message");
+                fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
                 statusFlag = BDSKCannotMoveFileErrorMask;
             }
         }
@@ -568,17 +568,17 @@ static BibFiler *sharedFiler = nil;
                 [self createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
             NS_HANDLER
                 NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
-                status = NSLocalizedString(@"Unable to create parent directory.", @"");
+                status = NSLocalizedString(@"Unable to create parent directory.", @"AutoFile error message");
                 statusFlag = BDSKCannotCreateParentErrorMask;
             NS_ENDHANDLER
             if(statusFlag == BDSKNoError){
                 if([fileType isEqualToString:NSFileTypeDirectory] && force == NO && 
                    [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnMoveFolderKey]){
-                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"")
-                                                         defaultButton:NSLocalizedString(@"Move", @"")
-                                                       alternateButton:NSLocalizedString(@"Don't Move", @"") 
+                    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Really Move Folder?", @"Message in alert dialog when trying to auto file a folder")
+                                                         defaultButton:NSLocalizedString(@"Move", @"Button title")
+                                                       alternateButton:NSLocalizedString(@"Don't Move", @"Button title") 
                                                            otherButton:nil
-                                             informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @""), path, newPath];
+                                             informativeTextWithFormat:NSLocalizedString(@"AutoFile is about to move the folder \"%@\" to \"%@\". Do you want to move the folder?", @"Informative text in alert dialog"), path, newPath];
                     [alert setHasCheckButton:YES];
                     [alert setCheckValue:NO];
                     ignoreMove = (NSAlertAlternateReturn == [alert runModal]);
@@ -586,8 +586,8 @@ static BibFiler *sharedFiler = nil;
                         [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnMoveFolderKey];
                 }
                 if(ignoreMove){
-                    status = NSLocalizedString(@"Shouldn't move folder.", @"");
-                    fix = NSLocalizedString(@"Move anyway.", @"");
+                    status = NSLocalizedString(@"Shouldn't move folder.", @"AutoFile error message");
+                    fix = NSLocalizedString(@"Move anyway.", @"AutoFile fix");
                     statusFlag = BDSKCannotMoveFileErrorMask;
                 }else{
                     // unfortunately NSFileManager cannot reliably move symlinks...
@@ -597,13 +597,13 @@ static BibFiler *sharedFiler = nil;
                             pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
                         }
                         if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
-                            status = NSLocalizedString(@"Unable to move symbolic link.", @"");
+                            status = NSLocalizedString(@"Unable to move symbolic link.", @"AutoFile error message");
                             statusFlag = BDSKCannotMoveFileErrorMask;
                         }else{
                             if(![self removeFileAtPath:resolvedPath handler:self]){
                                 if (force == NO){
-                                    status = NSLocalizedString(@"Unable to remove original.", @"");
-                                    fix = NSLocalizedString(@"Copy original file.", @"");
+                                    status = NSLocalizedString(@"Unable to remove original.", @"AutoFile error message");
+                                    fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
                                     statusFlag = BDSKCannotRemoveFileErrorMask;
                                     //cleanup: remove new file
                                     [self removeFileAtPath:resolvedNewPath handler:nil];
@@ -613,8 +613,8 @@ static BibFiler *sharedFiler = nil;
                     }else if(![self movePath:resolvedPath toPath:resolvedNewPath handler:self]){
                         if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
                             if(force == NO){
-                                status = NSLocalizedString(@"Unable to remove original file.", @"");
-                                fix = NSLocalizedString(@"Copy original file.", @"");
+                                status = NSLocalizedString(@"Unable to remove original file.", @"AutoFile error message");
+                                fix = NSLocalizedString(@"Copy original file.", @"AutoFile fix");
                                 statusFlag = BDSKCannotRemoveFileErrorMask;
                                 // cleanup: move back
                                 if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
@@ -622,7 +622,7 @@ static BibFiler *sharedFiler = nil;
                                 }
                             }
                         }else{ // other error while moving file
-                            status = NSLocalizedString(@"Unable to move file.", @"");
+                            status = NSLocalizedString(@"Unable to move file.", @"AutoFile error message");
                             statusFlag = BDSKCannotMoveFileErrorMask;
                         }
                     }

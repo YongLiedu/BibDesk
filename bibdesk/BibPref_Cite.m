@@ -125,7 +125,7 @@
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil)
-        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
+        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @"Message in alert dialog when entering invalid entry"), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
     return NO;
 }
 
@@ -138,10 +138,10 @@
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
     if([string containsString:@"~"]){
         // some people apparently can't see the checkbox for adding a tilde (bug #1422451)
-        if(error) *error = NSLocalizedString(@"Use the checkbox below to prepend a tilde.", @"");
+        if(error) *error = NSLocalizedString(@"Use the checkbox below to prepend a tilde.", @"Error description");
         return NO;
     } else if([string isEqualToString:@""] || [string characterAtIndex:0] != 0x005C){ // backslash
-        if(error) *error = NSLocalizedString(@"The key must begin with a backslash.", @"");
+        if(error) *error = NSLocalizedString(@"The key must begin with a backslash.", @"Error description");
         return NO;
     }
     if(obj) *obj = string;

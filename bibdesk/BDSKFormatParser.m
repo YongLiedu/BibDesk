@@ -829,22 +829,22 @@
 		
 		// found %, so now there should be a specifier char
 		if (![scanner scanCharacter:&specifier]) {
-			errorMsg = NSLocalizedString(@"Empty specifier % at end of format.", @"");
+			errorMsg = NSLocalizedString(@"Empty specifier % at end of format.", @"Error description");
 			break;
 		}
 		
 		// see if it is a valid specifier
 		if (![validSpecifierChars characterIsMember:specifier]) {
-			errorMsg = [NSString stringWithFormat:NSLocalizedString(@"Invalid specifier %%%C in format.", @""), specifier];
+			errorMsg = [NSString stringWithFormat:NSLocalizedString(@"Invalid specifier %%%C in format.", @"Error description"), specifier];
 			break;
 		}
 		else if ([validEscapeSpecifierChars characterIsMember:specifier] && [invalidCharSet characterIsMember:specifier]) {
-			errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Invalid escape specifier %%%C in format.", @""), specifier];
+			errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Invalid escape specifier %%%C in format.", @"Error description"), specifier];
 			break;
 		}
 		else if ([validUniqueSpecifierChars characterIsMember:specifier]) {
 			if (foundUnique) { // a second 'unique' specifier was found
-				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Unique specifier %%%C can appear only once in format.", @""), specifier];
+				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Unique specifier %%%C can appear only once in format.", @"Error description"), specifier];
 				break;
 			}
 			foundUnique = YES;
@@ -858,7 +858,7 @@
 				 ![scanner scanString:@"{" intoString: NULL] ||
 				 ![scanner scanUpToString:@"}" intoString:&string] ||
 				 ![scanner scanString:@"}" intoString:NULL]) {
-				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @""), specifier];
+				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @"Error description"), specifier];
 				break;
 			}
 			string = [self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type]; // cite-key sanitization is strict, so we use that for fieldnames
@@ -878,7 +878,7 @@
 					if (![scanner scanUpToString:@"]" intoString:&string]) 
 						string = @"";
 					if (![scanner scanString:@"]" intoString:NULL]) {
-						errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Missing \"]\" after specifier %%%C.", @""), specifier];
+						errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Missing \"]\" after specifier %%%C.", @"Error description"), specifier];
 						break;
 					}
 					string = [self stringBySanitizingString:string forField:fieldName inFileType:type];

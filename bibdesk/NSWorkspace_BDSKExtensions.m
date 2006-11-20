@@ -177,7 +177,7 @@
         err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
     
     if (noErr != err && NULL != error) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:fileURL, NSURLErrorKey, NSLocalizedString(@"Unable to create UTI", @""), NSLocalizedDescriptionKey, nil];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:fileURL, NSURLErrorKey, NSLocalizedString(@"Unable to create UTI", @"Error description"), NSLocalizedDescriptionKey, nil];
         *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:userInfo];
     }
     

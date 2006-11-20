@@ -85,7 +85,7 @@
             group = [[BDSKURLGroup alloc] initWithURL:url];
         }else{
             [group setURL:url];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Edit external file group")];
+            [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
         }
 	}
     
@@ -103,7 +103,7 @@
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
-    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     
     [oPanel beginSheetForDirectory:nil 
                               file:nil 

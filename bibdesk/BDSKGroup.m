@@ -51,7 +51,7 @@
 
 // super's designated initializer
 - (id)init {
-	self = [self initWithName:NSLocalizedString(@"Group", @"Group") count:0];
+	self = [self initWithName:NSLocalizedString(@"Group", @"Default group name") count:0];
     return self;
 }
 
@@ -191,7 +191,7 @@ static NSString *BDSKLibraryLocalizedString = nil;
 
 + (void)initialize{
     OBINITIALIZE;
-    BDSKLibraryLocalizedString = [NSLocalizedString(@"Library", @"group name for library") copy];
+    BDSKLibraryLocalizedString = [NSLocalizedString(@"Library", @"Group name for library") copy];
 }
 
 - (id)init {

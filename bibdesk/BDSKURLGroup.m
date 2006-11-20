@@ -132,9 +132,9 @@
         } else {
             NSError *error = [NSError mutableLocalErrorWithCode:kBDSKFileNotFound localizedDescription:nil];
             if (isDir)
-                [error setValue:NSLocalizedString(@"URL points to a directory instead of a file", @"") forKey:NSLocalizedDescriptionKey];
+                [error setValue:NSLocalizedString(@"URL points to a directory instead of a file", @"Error description") forKey:NSLocalizedDescriptionKey];
             else
-                [error setValue:NSLocalizedString(@"The URL points to a file that does not exist", @"") forKey:NSLocalizedDescriptionKey];
+                [error setValue:NSLocalizedString(@"The URL points to a file that does not exist", @"Error description") forKey:NSLocalizedDescriptionKey];
             [error setValue:[URL path] forKey:NSFilePathErrorKey];
             [self download:nil didFailWithError:error];
         }

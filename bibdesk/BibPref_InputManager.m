@@ -109,7 +109,7 @@ static int tableIconSize = 24;
             [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         } else {
             // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
-            [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@""), bundleID] forKey:OATextWithIconCellStringKey];
+            [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@"Message when unable to find app for plugin"), bundleID] forKey:OATextWithIconCellStringKey];
             [dictionary setValue:[NSImage iconWithSize:NSMakeSize(tableIconSize, tableIconSize) forToolboxCode:kGenericApplicationIcon] forKey:OATextWithIconCellImageKey];
             [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         }
@@ -146,7 +146,7 @@ static int tableIconSize = 24;
 - (void)updateUI{
     BOOL isCurrent;
     if([[NSApp delegate] isInputManagerInstalledAndCurrent:&isCurrent])
-        [enableButton setTitle:isCurrent ? NSLocalizedString(@"Reinstall",@"Reinstall input manager") : NSLocalizedString(@"Update", @"Update input manager")];
+        [enableButton setTitle:isCurrent ? NSLocalizedString(@"Reinstall",@"Button title") : NSLocalizedString(@"Update", @"Button title")];
     
     // this is a hack to show the blue highlight for the tableview, since it keeps losing first responder status
     [[controlBox window] makeFirstResponder:tableView];
@@ -181,11 +181,11 @@ static int tableIconSize = 24;
     if(err == NO){
         [fm copyPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager"] toPath:inputManagerPath handler:nil];
     } else {
-        NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
+        NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Message in alert dialog when an error occurs")
 					   defaultButton:nil
 					 alternateButton:nil
 					     otherButton:nil
-			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.",@""), inputManagerPath];
+			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.", @"Informative text in alert dialog"), inputManagerPath];
 	[anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
@@ -197,7 +197,7 @@ static int tableIconSize = 24;
 
 - (IBAction)enableAutocompletion:(id)sender{
     
-    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @""), NSLocalizedString(@"Proceed",@""), NSLocalizedString(@"Cancel",@""), nil, [[self controlBox] window], self, @selector(enableCompletionSheetDidEnd:returnCode:contextInfo:), NULL, NULL, NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @""));
+    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Message in alert dialog"), NSLocalizedString(@"Proceed", @"Button title"), NSLocalizedString(@"Cancel", @"Button title"), nil, [[self controlBox] window], self, @selector(enableCompletionSheetDidEnd:returnCode:contextInfo:), NULL, NULL, NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @"Informative text in alert dialog"));
     
 }
 
@@ -206,7 +206,7 @@ static int tableIconSize = 24;
     NSOpenPanel *op = [NSOpenPanel openPanel];
     [op setCanChooseDirectories:NO];
     [op setAllowsMultipleSelection:NO];
-    [op setPrompt:NSLocalizedString(@"Add", @"")];
+    [op setPrompt:NSLocalizedString(@"Add", @"Prompt for dialog to add an app for plugin")];
     [op beginSheetForDirectory:nil
 			  file:nil
 			 types:[NSArray arrayWithObject:@"app"]
@@ -226,11 +226,11 @@ static int tableIconSize = 24;
                              type:&fileType];
         if(![fileType isEqualToString:NSApplicationFileType]){
             [sheet orderOut:nil];
-            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
+            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Message in alert dialog when an error occurs")
                                defaultButton:nil
                              alternateButton:nil
                              otherButton:nil
-                       informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.",@""), [[sheet filenames] objectAtIndex:0]];
+                       informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
             [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil
@@ -242,11 +242,11 @@ static int tableIconSize = 24;
         NSString *bundleID = [[NSBundle bundleWithPath:[[sheet filenames] objectAtIndex:0]] bundleIdentifier];
         if(bundleID == nil){
             [sheet orderOut:nil];
-            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"No Bundle Identifier!",@"No Bundle Identifier!")
+            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"No Bundle Identifier!",@"Message in alert dialog when no bundle identifier could be found for application to set for plugin")
                                defaultButton:nil
                              alternateButton:nil
                              otherButton:nil
-                       informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.",@""), [[sheet filenames] objectAtIndex:0]];
+                       informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
             [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil

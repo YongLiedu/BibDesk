@@ -193,7 +193,7 @@
     
     [(BDSKMacroResolver *)macroResolver addMacroDefinition:@"definition"
                                                        forMacro:newKey];
-    [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"add macro action name for undo")];
+    [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
 	
     [self refreshMacros];
     [tableView reloadData];
@@ -220,7 +220,7 @@
     while(row != NSNotFound){
         NSString *key = [shadowOfMacros objectAtIndex:row];
         [(BDSKMacroResolver *)macroResolver removeMacro:key];
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"delete macro action name for undo")];
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
 		row = [rowIndexes indexGreaterThanIndex:row];
     }
     [self refreshMacros];
@@ -340,11 +340,11 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Empty Macro") 
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Message in alert dialog when entering empty macro key") 
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"Informative text in alert dialog when entering empty macro key")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -354,11 +354,11 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Duplicate Macro") 
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Message in alert dialog when entering duplicate macro key") 
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"Informative text in alert dialog when entering duplicate macro key")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -369,18 +369,18 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition") 
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
 		
         [(BDSKMacroResolver *)macroResolver changeMacroKey:key to:object];
 		
-		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"change macro key action name for undo")];
+		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"Undo action name")];
 
     }else{
         // do nothing if there was no change.
@@ -391,18 +391,18 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
-                                             defaultButton:NSLocalizedString(@"OK", @"OK")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition") 
+                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
         
 		[(BDSKMacroResolver *)macroResolver setMacroDefinition:object forMacro:key];
 		
-		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
+		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
     }
 }
 
@@ -524,17 +524,17 @@
             [(BDSKMacroResolver *)macroResolver setMacroDefinition:macroString forMacro:macroKey];
 		else
             hadCircular = YES;
-        [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
+        [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
     }
     [self refreshMacros];
     [tableView reloadData];
     
     if(hadCircular){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Circular Macros") 
-                                         defaultButton:NSLocalizedString(@"OK", @"OK")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Message in alert dialog when entering macro with circular definition") 
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
                                        alternateButton:nil
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"")];
+                             informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return YES;

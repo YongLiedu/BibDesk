@@ -413,7 +413,7 @@ static NSImage *unlockedIcon = nil;
 {
     NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), [service name]]];
+    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
     [pwc close];
     [pwc release];
     return rv;
@@ -422,7 +422,7 @@ static NSImage *unlockedIcon = nil;
 - (int)runAuthenticationFailedAlert;
 {
     NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
-    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), [service name]], nil, nil, nil);
+    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed"), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @"Informative text in alert dialog"), [service name]], nil, nil, nil);
 }
 
 // this can be called from any thread

@@ -66,7 +66,7 @@
 	if ([[aFilter conditions] count] > 0)
 		aName = [[[aFilter conditions] objectAtIndex:0] value];
 	if ([NSString isEmptyString:aName])
-		aName = NSLocalizedString(@"Smart Group", @"Smart group");
+		aName = NSLocalizedString(@"Smart Group", @"Default name for smart group");
 	self = [self initWithName:aName count:0 filter:aFilter];
 	return self;
 }

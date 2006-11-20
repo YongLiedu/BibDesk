@@ -104,7 +104,7 @@
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
 {
-	NSBeginAlertSheet(NSLocalizedString(@"Invalid Path",@"Invalid binary path for TeX preview"), 
+	NSBeginAlertSheet(NSLocalizedString(@"Invalid Path",@"Message in alert dialog when binary path for TeX preview is invalid"), 
     nil, nil, nil, 
     [[self controlBox] window], 
     self, 
@@ -142,7 +142,7 @@
     url = [NSURL fileURLWithPath:path];
     
     if([[NSWorkspace sharedWorkspace] openURL:url] == NO && [[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:url] withAppBundleIdentifier:@"com.apple.textedit" options:0 additionalEventParamDescriptor:nil launchIdentifiers:NULL] == NO)
-        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[BDSKPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @""));
+        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file"), NSLocalizedString(@"Reveal", @"Button title"), NSLocalizedString(@"Cancel", @"Button title"), nil, [[BDSKPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @"Informative text in alert dialog"));
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -159,11 +159,11 @@
 }
 
 - (IBAction)resetTeXPreviewFile:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset TeX template to its original value?",@"") 
-									 defaultButton:NSLocalizedString(@"OK",@"OK") 
-								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset TeX template to its original value?", @"Message in alert dialog when resetting preview TeX template file") 
+									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
+								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.",@"")];
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.", @"Informative text in alert dialog")];
 	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 

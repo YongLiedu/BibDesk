@@ -66,7 +66,7 @@
     } else {
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"")];
+		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
 		return nil;
 	}
 	
@@ -116,7 +116,7 @@
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
-			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"")];
+			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
 			return nil;
 		}
 		

@@ -136,11 +136,11 @@
 }
 
 - (IBAction)resetTemplateFile:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset the default template file to its original value?",@"") 
-									 defaultButton:NSLocalizedString(@"OK",@"OK") 
-								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset the default template file to its original value?", @"Message in alert dialog when resetting bibtex template files") 
+									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
+								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.",@"")];
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.", @"Informative text in alert dialog")];
 	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(templateAlertDidEnd:returnCode:contextInfo:) 
@@ -163,11 +163,11 @@
 }
 
 - (IBAction)resetConversions:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset character conversions to their original value?",@"") 
-									 defaultButton:NSLocalizedString(@"OK",@"OK") 
-								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset character conversions to their original value?", @"Message in alert dialog when resetting custom character conversions") 
+									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
+								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
 									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.",@"")];
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.", @"Informative text in alert dialog")];
 	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(conversionsAlertDidEnd:returnCode:contextInfo:) 

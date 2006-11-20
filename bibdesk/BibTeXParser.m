@@ -255,7 +255,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                 } // end generate BibItem from ENTRY metatype.
             }else{
                 // wasn't ok, record it and deal with it later.
-                OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
+                OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description"), nil);
             }
             bt_free_ast(entry);
 
@@ -266,7 +266,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
         if([exception isEqual:BibTeXParserInternalException] == NO)
             @throw;
         else
-            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Encoding conversion failure", @""), NSStringEncodingErrorKey, [NSNumber numberWithInt:parserEncoding], nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Encoding conversion failure", @"Error description"), NSStringEncodingErrorKey, [NSNumber numberWithInt:parserEncoding], nil);
     }
     
     @finally {
@@ -539,7 +539,7 @@ __BDCreateArrayOfNamesByCheckingBraceDepth(CFArrayRef names)
         [errorObject setFileName:nil];
         [errorObject setLineNumber:-1];
         [errorObject setErrorClassName:NSLocalizedString(@"error", @"")];
-        [errorObject setErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @""), [(id)array description]]];
+        [errorObject setErrorMessage:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unbalanced braces in author names:", @"Error description"), [(id)array description]]];
         CFRelease(array);
         
         [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
@@ -583,7 +583,7 @@ static inline int numberOfValuesInField(AST *field)
 static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding){
     if(![s canBeConvertedToEncoding:parserEncoding]){
         NSString *type = NSLocalizedString(@"error", @"");
-        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert characters to encoding %@", @""), [NSString localizedNameOfStringEncoding:parserEncoding]];
+        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Unable to convert characters to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:parserEncoding]];
 
         BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
         [errorObject setFileName:filePath];
@@ -734,7 +734,7 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
         NSString *macroString = copyStringFromBTField(field, filePath, macroResolver, encoding); // handles TeXification
         if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
             NSString *type = NSLocalizedString(@"Error", @"");
-            NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
+            NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"Error description");
             
             BDSKErrorObject *errorObject = [[BDSKErrorObject alloc] init];
             [errorObject setFileName:filePath];
@@ -745,7 +745,7 @@ static void addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
             [errorObject report];
             [errorObject release];
             
-            OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
+            OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @"Error description"), nil);
         }else{
             [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
         }
@@ -849,14 +849,14 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
             for(; data[cidx] != '"' || data[cidx-1] == '\\'; cidx++);
         }else{ 
             // no brace and no quote => unknown problem
-            NSString *errorString = [NSString stringWithFormat:NSLocalizedString(@"Unexpected delimiter \"%@\" encountered at line %d.", @""), [[[NSString alloc] initWithBytes:&data[cidx-1] length:1 encoding:encoding] autorelease], field->line];
+            NSString *errorString = [NSString stringWithFormat:NSLocalizedString(@"Unexpected delimiter \"%@\" encountered at line %d.", @"Error description"), [[[NSString alloc] initWithBytes:&data[cidx-1] length:1 encoding:encoding] autorelease], field->line];
             OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, errorString, nil);
         }
         returnString = [[NSString alloc] initWithBytes:&data[field->down->offset] length:(cidx- (field->down->offset)) encoding:encoding];
         if (NO == checkStringForEncoding(returnString, field->line, filePath, encoding))
             @throw BibTeXParserInternalException;
     }else{
-        OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
+        OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description"), nil);
     }
     return returnString;
 }

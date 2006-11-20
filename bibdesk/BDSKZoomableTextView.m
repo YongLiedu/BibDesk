@@ -45,9 +45,9 @@
     NSMenu *menu = [super menuForEvent:event];
     
     [menu insertItem:[NSMenuItem separatorItem] atIndex:0];
-    [menu insertItemWithTitle:NSLocalizedString(@"Zoom Out", @"Zoom Out") action:@selector(zoomOut:) keyEquivalent:@"" atIndex:0];
-    [menu insertItemWithTitle:NSLocalizedString(@"Zoom In", @"Zoom In") action:@selector(zoomIn:) keyEquivalent:@"" atIndex:0];
-    [menu insertItemWithTitle:NSLocalizedString(@"Actual Size", @"Actual Size") action:@selector(zoomToActualSize:) keyEquivalent:@"" atIndex:0];
+    [menu insertItemWithTitle:NSLocalizedString(@"Zoom Out", @"Menu item title") action:@selector(zoomOut:) keyEquivalent:@"" atIndex:0];
+    [menu insertItemWithTitle:NSLocalizedString(@"Zoom In", @"Menu item title") action:@selector(zoomIn:) keyEquivalent:@"" atIndex:0];
+    [menu insertItemWithTitle:NSLocalizedString(@"Actual Size", @"Menu item title") action:@selector(zoomToActualSize:) keyEquivalent:@"" atIndex:0];
     
     return menu;
 }

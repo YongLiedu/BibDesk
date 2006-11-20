@@ -56,7 +56,7 @@
 	[informativeText release];
 	
 	if (defaultButtonTitle == nil) 
-		defaultButtonTitle = NSLocalizedString(@"OK", @"OK");
+		defaultButtonTitle = NSLocalizedString(@"OK", @"Button title");
 	[[alert addButtonWithTitle:defaultButtonTitle] setTag:NSAlertDefaultReturn];
 	if (otherButtonTitle != nil) 
 		[[alert addButtonWithTitle:otherButtonTitle] setTag:NSAlertOtherReturn];
@@ -173,9 +173,9 @@
     
 	if (numButtons == 0) {
 		[button setKeyEquivalent:@"\r"];
-	} else if ([aTitle isEqualToString:NSLocalizedString(@"Cancel", @"Cancel")]) {
+	} else if ([aTitle isEqualToString:NSLocalizedString(@"Cancel", @"Button title")]) {
 		[button setKeyEquivalent:@"\e"];
-	} else if ([aTitle isEqualToString:NSLocalizedString(@"Don't Save", @"Don't Save")]) {
+	} else if ([aTitle isEqualToString:NSLocalizedString(@"Don't Save", @"Button title")]) {
 		[button setKeyEquivalent:@"d"];
 		[button setKeyEquivalentModifierMask:NSCommandKeyMask];
 	}
@@ -214,14 +214,14 @@
 	
 	switch (alertStyle) {
 		case NSCriticalAlertStyle: 
-			title = NSLocalizedString(@"Critical", @"Critical");
+			title = NSLocalizedString(@"Critical", @"Alert dialog window title");
 			break;
 		case NSInformationalAlertStyle: 
-			title = NSLocalizedString(@"Information", @"Information");
+			title = NSLocalizedString(@"Information", @"Alert dialog window title");
 			break;
 		case NSWarningAlertStyle:
 		default:
-			title = NSLocalizedString(@"Alert", @"Alert");
+			title = NSLocalizedString(@"Alert", @"Alert dialog window title");
 	}
 	[[self window] setTitle: title];
 	
@@ -246,7 +246,7 @@
 	}
 	
 	if (numButtons == 0)
-		[self addButtonWithTitle:NSLocalizedString(@"OK", @"OK")];
+		[self addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
 	x = NSMinX([[buttons lastObject] frame]);
 	if (numButtons > 2 && x > 98.0) {
 		x = 98.0;

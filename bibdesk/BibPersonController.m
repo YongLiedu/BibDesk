@@ -201,7 +201,7 @@
 {
     id sender = [aNotification object];
     if(sender == nameTextField && [sender isEditable]) // this shouldn't be called for uneditable cells, but it is
-        NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @""),  NSLocalizedString(@"Yes", @"Yes"), NSLocalizedString(@"No", @"No"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[sender stringValue] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @""));
+        NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name"),  NSLocalizedString(@"Yes", @"Button title"), NSLocalizedString(@"No", @"Button title"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[sender stringValue] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"));
 }
 
 - (void)changeNameToString:(NSString *)newNameString{
@@ -258,7 +258,7 @@
     }
     CFRelease(people);
     
-	[undoManager setActionName:NSLocalizedString(@"Change Author Name", @"")];
+	[undoManager setActionName:NSLocalizedString(@"Change Author Name", @"Undo action name")];
     
     // needed to update our tableview with the new publications list after setting a new person
     [self handleBibItemChanged:nil];
@@ -310,7 +310,7 @@
 	if([newAuthor isEqual:[BibAuthor emptyAuthor]])
 		return NO;
 	
-    NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @""),  NSLocalizedString(@"Yes", @"Yes"), NSLocalizedString(@"No", @"No"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[newAuthor name] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @""));
+    NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name"),  NSLocalizedString(@"Yes", @"Button title"), NSLocalizedString(@"No", @"Button title"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[newAuthor name] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"));
     return YES;
 }
 

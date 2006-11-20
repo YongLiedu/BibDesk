@@ -325,9 +325,9 @@
                                                             withInputString:fileInputString];
         
         if ([NSString isEmptyString:filterOutput]){
-            NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter",@""),
-                            NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.",@""),
-                            NSLocalizedString(@"OK",@""),
+            NSRunAlertPanel(NSLocalizedString(@"Unable To Open With Filter", @"Message in alert dialog when unable to open a document with filter"),
+                            NSLocalizedString(@"Unable to read the file correctly. Please ensure that the shell command specified for filtering is correct by testing it in Terminal.app.", @"Informative text in alert dialog"),
+                            NSLocalizedString(@"OK", @"Button title"),
                             nil, nil, nil, nil);
         } else {
             doc = [self openUntitledBibTeXDocumentWithString:filterOutput encoding:NSUTF8StringEncoding error:&error];
@@ -353,7 +353,7 @@
     
     if(fullPath == nil){
         if(outError != nil) 
-            *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @""), NSLocalizedDescriptionKey, nil]];
+            *outError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @"Error description"), NSLocalizedDescriptionKey, nil]];
         return nil;
     }
         
@@ -410,17 +410,17 @@
 - (NSString *)displayNameForType:(NSString *)documentTypeName{
     NSString *displayName = nil;
     if([documentTypeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-        displayName = NSLocalizedString(@"Minimal BibTeX", @"Minimal BibTeX");
+        displayName = NSLocalizedString(@"Minimal BibTeX", @"Popup menu title for Minimal BibTeX");
     else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"html"]])
         displayName = @"HTML";
     else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"rss"]])
         displayName = @"RSS";
     else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]])
-        displayName = NSLocalizedString(@"Rich Text (RTF)", @"Rich Text (RTF)");
+        displayName = NSLocalizedString(@"Rich Text (RTF)", @"Popup menu title for Rich Text (RTF)");
     else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"rtfd"]])
-        displayName = NSLocalizedString(@"Rich Text with Graphics (RTFD)", @"Rich Text (RTFD)");
+        displayName = NSLocalizedString(@"Rich Text with Graphics (RTFD)", @"Popup menu title for Rich Text (RTFD)");
     else if([documentTypeName isEqualToString:[BDSKTemplate defaultStyleNameForFileType:@"doc"]])
-        displayName = NSLocalizedString(@"Word Format (Doc)", @"Word Format (Doc)");
+        displayName = NSLocalizedString(@"Word Format (Doc)", @"Popup menu title for Word Format (Doc)");
     else
         displayName = [super displayNameForType:documentTypeName];
     return displayName;

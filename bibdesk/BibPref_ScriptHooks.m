@@ -62,7 +62,7 @@
 	
 	NSString *directory = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
 	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
 	[openPanel setAllowsMultipleSelection:NO];
     [openPanel beginSheetForDirectory:directory 
 								 file:nil
@@ -148,7 +148,7 @@
 	NSString *path = [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path])
-		return NSLocalizedString(@"No script hook associated with this action. Doubleclick or use the \"+\" button to add one.", @"");
+		return NSLocalizedString(@"No script hook associated with this action. Doubleclick or use the \"+\" button to add one.", @"Tooltip message");
 	else
 		return [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 }

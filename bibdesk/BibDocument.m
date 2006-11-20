@@ -287,10 +287,10 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     // this is a sanity check; an encoding of zero is not valid, so is a signal we should ignore xattrs
     NSStringEncoding encodingFromFile = [xattrDefaults intForKey:BDSKDocumentStringEncodingKey defaultValue:0];
     if (encodingFromFile && encodingFromFile != [self documentStringEncoding]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Document was opened with incorrect encoding", @"")
-                                         defaultButton:NSLocalizedString(@"Close", @"")
-                                       alternateButton:NSLocalizedString(@"Ignore", @"") otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The document was opened with encoding %@, but it was previously saved with encoding %@.  You should close it without saving and reopen with the correct encoding.", @""), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Document was opened with incorrect encoding", @"Message in alert dialog when opening a document with different encoding")
+                                         defaultButton:NSLocalizedString(@"Close", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Ignore", @"Button title") otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The document was opened with encoding %@, but it was previously saved with encoding %@.  You should close it without saving and reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]];
         [alert setAlertStyle:NSCriticalAlertStyle];
         [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(encodingAlertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
     }    
@@ -471,11 +471,11 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
 	if (![self isDocumentEdited]) {
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning") 
-											 defaultButton:NSLocalizedString(@"Yes", @"Yes") 
-										   alternateButton:NSLocalizedString(@"No", @"No") 
+		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog") 
+											 defaultButton:NSLocalizedString(@"Yes", @"Button title") 
+										   alternateButton:NSLocalizedString(@"No", @"Button title") 
 											   otherButton:nil
-								 informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"") ];
+								 informativeTextWithFormat:NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @"Informative text in alert dialog") ];
 
 		int rv = [alert runSheetModalForWindow:documentWindow];
 		if (rv == NSAlertAlternateReturn)
@@ -907,12 +907,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if (theItem)
             [self selectPublication:theItem];
         
-        NSString *errTitle = NSAutosaveOperation == docState.currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"") : NSLocalizedString(@"Unable to save file", @"");
+        NSString *errTitle = NSAutosaveOperation == docState.currentSaveOperationType ? NSLocalizedString(@"Unable to autosave file", @"Error description") : NSLocalizedString(@"Unable to save file", @"Error description");
         
         // @@ do this in fileWrapperOfType:forPublications:error:?  should just use error localizedDescription
         NSString *errMsg = [nsError valueForKey:NSLocalizedRecoverySuggestionErrorKey];
         if (nil == errMsg)
-            errMsg = NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"");
+            errMsg = NSLocalizedString(@"The underlying cause of this error is unknown.  Please submit a bug report with the file attached.", @"Error informative text");
         
         nsError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:errTitle underlyingError:nsError];
         [nsError setValue:errMsg forKey:NSLocalizedRecoverySuggestionErrorKey];        
@@ -953,7 +953,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
         if(fileWrapper == nil){
             if (outError) 
-                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"")];
+                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
         }
     }else{
         NSError *error = nil;
@@ -1023,25 +1023,25 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             NSString *usedName = [NSString localizedNameOfStringEncoding:usedEncoding];
             NSString *UTF8Name = [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding];
             
-            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"") underlyingError:error];
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"Error description") underlyingError:error];
             
             // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
             if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @""), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @"Error informative text"), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
             } else if (NSUTF8StringEncoding != usedEncoding){
                 // could suggest disabling TeX conversion, but the error might be from something out of the range of what we try to convert, so combining TeXify && UTF-8 would work
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should save using an encoding such as %@.", @""), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should save using an encoding such as %@.", @"Error informative text"), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
             } else {
                 // if UTF-8 fails, you're hosed...
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Please report this error to BibDesk's developers.", @""), UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Please report this error to BibDesk's developers.", @"Error informative text"), UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
             }
                         
         } else if(kBDSKDocumentTeXifySaveError == [error code]) {
             NSError *underlyingError = [[error copy] autorelease];
             // TeXification error; this has a specific item
-            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"") underlyingError:underlyingError];
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"Error description") underlyingError:underlyingError];
             [error setValue:[underlyingError valueForKey:BDSKUnderlyingItemErrorKey] forKey:BDSKUnderlyingItemErrorKey];
-            [error setValue:[NSString stringWithFormat:@"%@  %@", [underlyingError localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"")] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            [error setValue:[NSString stringWithFormat:@"%@  %@", [underlyingError localizedDescription], NSLocalizedString(@"If you are unable to fix this item, you must disable character conversion in BibDesk's preferences and save your file in an encoding such as UTF-8.", @"Error informative text")] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         *outError = error;
     }
@@ -1190,7 +1190,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKEncodingConversionException]){
             // encoding conversion failed
             NSLog(@"Unable to save file with encoding %@", encodingName);
-            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), encodingName]];
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), encodingName]];
             [error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
             
         } else if([exception isKindOfClass:[NSException class]] && [[exception name] isEqual:BDSKTeXifyException]){
@@ -1220,7 +1220,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *RISString = [self RISStringForPublications:items];
     NSData *data = [RISString dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }
 	return data;
 }
@@ -1236,7 +1236,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSString *ltbString = [pboard stringForType:NSStringPboardType];
     [pboardHelper clearPromisedTypesForPasteboard:pboard];
 	if(ltbString == nil){
-        if (error) OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to run TeX processes for these publications", @""), nil);
+        if (error) OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to run TeX processes for these publications", @"Error description"), nil);
 		return nil;
     }
     
@@ -1246,7 +1246,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSData *data = [s dataUsingEncoding:encoding allowLossyConversion:NO];
     if (nil == data && error) {
-        OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @""), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        OFErrorWithInfo(error, "BDSKSaveError", NSLocalizedDescriptionKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
     }        
 	return data;
 }
@@ -1272,7 +1272,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // create some useful metadata, with an option to disable for the paranoid
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExportAttributesKey"]){
-        [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"") stringByAppendingString:[[self fileURL] lastPathComponent]], NSTitleDocumentAttribute, nil]];
+        [mutableAttributes addEntriesFromDictionary:[NSDictionary dictionaryWithObjectsAndKeys:NSFullUserName(), NSAuthorDocumentAttribute, [NSDate date], NSCreationTimeDocumentAttribute, [NSLocalizedString(@"BibDesk export of ", @"Error description") stringByAppendingString:[[self fileURL] lastPathComponent]], NSTitleDocumentAttribute, nil]];
     }
     
     if (format & BDSKRTFTemplateFormat) {
@@ -1349,7 +1349,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		// sniff the string to see what format we got
 		NSString *string = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
 		if(string == nil){
-            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This document does not appear to be a text file.", @""), nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This document does not appear to be a text file.", @"Error informative text"), nil);
             if(outError) *outError = error;
             
             // bypass the partial data warning, since we have no data
@@ -1359,13 +1359,13 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(type == BDSKBibTeXStringType){
             success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
 		}else if (type == BDSKNoKeyBibTeXStringType){
-            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @""), nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This file appears to contain invalid BibTeX because of missing cite keys. Try to open using temporary cite keys to fix this.", @"Error informative text"), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
             return NO;
 		}else if (type == BDSKUnknownStringType){
-            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @""), nil);
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable To Open Document", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"This text file does not contain a recognized data type.", @"Error informative text"), nil);
             if (outError) *outError = error;
             
             // bypass the partial data warning; we have no data in this case
@@ -1380,11 +1380,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(success == NO){
         int rv;
         // run a modal dialog asking if we want to use partial data or give up
-        rv = NSRunCriticalAlertPanel([error localizedDescription] ? [error localizedDescription] : NSLocalizedString(@"Error reading file!",@""),
-                                     [NSString stringWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.",@""), [error localizedDescription]],
-                                     NSLocalizedString(@"Give Up",@""),
-                                     NSLocalizedString(@"Edit File", @""),
-                                     NSLocalizedString(@"Keep Going",@""));
+        rv = NSRunCriticalAlertPanel([error localizedDescription] ? [error localizedDescription] : NSLocalizedString(@"Error reading file!", @"Message in alert dialog when unable to read file"),
+                                     [NSString stringWithFormat:NSLocalizedString(@"There was a problem reading the file.  Do you want to give up, edit the file to correct the errors, or keep going with everything that could be analyzed?\n\nIf you choose \"Keep Going\" and then save the file, you will probably lose data.", @"Informative text in alert dialog"), [error localizedDescription]],
+                                     NSLocalizedString(@"Give Up", @"Button title"),
+                                     NSLocalizedString(@"Edit File", @"Button title"),
+                                     NSLocalizedString(@"Keep Going", @"Button title"));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
             [[BDSKErrorObjectController sharedErrorObjectController] documentFailedLoad:self shouldEdit:NO]; // this hands the errors to a new error editor and sets that as the documentForErrors
@@ -1423,7 +1423,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSArray *newPubs = nil;
     
     if(dataString == nil && outError){
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Interpret", @""), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"need a single NSString format specifier"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
+        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Interpret", @"Error description"), NSLocalizedRecoverySuggestionErrorKey, [NSString stringWithFormat:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:encoding]], NSStringEncodingErrorKey, [NSNumber numberWithInt:encoding], nil);
         *outError = error;
         return NO;
     }
@@ -1475,12 +1475,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(isNew)
         [self selectPublications:tmpKeyItems];
     
-    NSString *infoFormat = isNew ? NSLocalizedString(@"This document was opened using the temporary cite key \"%@\" for the selected publications.  In order to use your file with BibTeX, you must generate valid cite keys for all of these items.  Do you want me to do this now?", @"")
-                            : NSLocalizedString(@"New items are added using the temporary cite key \"%@\".  In order to use your file with BibTeX, you must generate valid cite keys for these items.  Do you want me to do this now?", @"");
+    NSString *infoFormat = isNew ? NSLocalizedString(@"This document was opened using the temporary cite key \"%@\" for the selected publications.  In order to use your file with BibTeX, you must generate valid cite keys for all of these items.  Do you want me to do this now?", @"Informative text in alert dialog")
+                            : NSLocalizedString(@"New items are added using the temporary cite key \"%@\".  In order to use your file with BibTeX, you must generate valid cite keys for these items.  Do you want me to do this now?", @"Informative text in alert dialog");
     
-    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys") 
-                                     defaultButton:NSLocalizedString(@"Generate", @"generate cite keys") 
-                                   alternateButton:NSLocalizedString(@"Don't Generate", @"don't generate cite keys") 
+    NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Temporary Cite Keys", @"Message in alert dialog when opening a file with temporary cite keys") 
+                                     defaultButton:NSLocalizedString(@"Generate", @"Button title") 
+                                   alternateButton:NSLocalizedString(@"Don't Generate", @"Button title") 
                                        otherButton:nil
                          informativeTextWithFormat:infoFormat, tmpKey];
 
@@ -1696,7 +1696,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             newPubs = [self newPublicationForURL:pbURL error:&error];
 	}else{
         // errors are key, value
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"BibDesk couldn't find any files or bibliography information in the data it received."), nil);
+        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"Error description"), nil);
 	}
 	
     if (newPubs == nil || error != nil){
@@ -1723,7 +1723,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[self editPubCmd:nil]; // this will ask the user when there are many pubs
 	}
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
     
     // set up the smart group that shows the latest import
     // @@ do this for items added via the editor?  doesn't seem as useful
@@ -1768,11 +1768,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	if(parseError != nil) {
 
 		// run a modal dialog asking if we want to use partial data or give up
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error reading file!",@"")
-                                         defaultButton:NSLocalizedString(@"Cancel",@"")
-                                       alternateButton:NSLocalizedString(@"Edit data", @"")
-                                           otherButton:NSLocalizedString(@"Keep going",@"")
-                             informativeTextWithFormat:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could analyse?\n(It's likely that choosing \"Keep Going\" will lose some data.)",@"")];
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error Reading String", @"Message in alert dialog when failing to parse dropped or copied string")
+                                         defaultButton:NSLocalizedString(@"Cancel", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Edit data", @"Button title")
+                                           otherButton:NSLocalizedString(@"Keep going", @"Button title")
+                             informativeTextWithFormat:NSLocalizedString(@"There was a problem inserting the data. Do you want to ignore this data, open a window containing the data to edit it and remove the errors, or keep going and use everything that BibDesk could analyse?\n(It's likely that choosing \"Keep Going\" will lose some data.)", @"Informative text in alert dialog")];
 		int rv = [alert runModal];
         
 		if(rv == NSAlertDefaultReturn){
@@ -1789,12 +1789,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
         // return an error when we inserted temporary keys, let the caller decide what to do with it
         // don't override a parseError though, as that is probably more relevant
-        OFErrorWithInfo(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Temporary Cite Keys", @"Temporary Cite Keys"), @"temporaryCiteKey", @"FixMe", nil);
+        OFErrorWithInfo(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Temporary Cite Keys", @"Error description"), @"temporaryCiteKey", @"FixMe", nil);
     }
 
     // we reach this for unsupported data types (BDSKUnknownStringType)
 	if ([newPubs count] == 0 && parseError == nil)
-        OFErrorWithInfo(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"BibDesk couldn't find bibliography data in this text.", @"Error message when pasting unknown text in."), nil);
+        OFErrorWithInfo(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"BibDesk couldn't find bibliography data in this text.", @"Error description"), nil);
 
 	if(outError) *outError = parseError;
     return newPubs;
@@ -1879,7 +1879,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSArray *)newPublicationForURL:(NSURL *)url error:(NSError **)error {
     if(url == nil){
-        OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find expected URL on the pasteboard", @"BibDesk couldn't find any URL in the data it received."), nil);
+        OFErrorWithInfo(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find expected URL on the pasteboard", @"Error description"), nil);
         return nil;
     }
     
@@ -1894,7 +1894,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark BDSKItemPasteboardHelper delegate
 
 - (void)pasteboardHelperWillBeginGenerating:(BDSKItemPasteboardHelper *)helper{
-	[self setStatus:[NSLocalizedString(@"Generating data. Please wait", @"Generating data. Please wait...") stringByAppendingEllipsis]];
+	[self setStatus:[NSLocalizedString(@"Generating data. Please wait", @"Status message when generating drag/paste data") stringByAppendingEllipsis]];
 	[statusBar startAnimation:nil];
 }
 
@@ -2274,11 +2274,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if (modifierFlags & NSAlternateKeyMask) {
         [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
         [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAddSmart_Pressed"]];
-        [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"")];
+        [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"Tool tip message")];
     } else {
         [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
         [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAdd_Pressed"]];
-        [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"")];
+        [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"Tool tip message")];
     }
 }
 
@@ -2420,7 +2420,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 }
                 fieldValue = [pub valueOfField:BDSKAnnoteString inherit:NO];
                 if([fieldValue isEqualToString:@""])
-                    fieldValue = NSLocalizedString(@"No notes.",@"");
+                    fieldValue = NSLocalizedString(@"No notes.", @"Preview message when notes are empty");
                 [textStorage appendString:fieldValue attributes:bodyAttributes];
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
@@ -2434,7 +2434,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 }
                 fieldValue = [pub valueOfField:BDSKAbstractString inherit:NO];
                 if([fieldValue isEqualToString:@""])
-                    fieldValue = NSLocalizedString(@"No abstract.",@"");
+                    fieldValue = NSLocalizedString(@"No abstract.", @"Preview message when abstract is empty");
                 [textStorage appendString:fieldValue attributes:bodyAttributes];
                 [textStorage appendAttributedString:noAttrDoubleLineFeed];
             }
@@ -2491,23 +2491,23 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	int groupPubsCount = [groupedPublications count];
 	int totalPubsCount = [publications count];
 	NSMutableString *statusStr = [[NSMutableString alloc] init];
-	NSString *ofStr = NSLocalizedString(@"of", @"of");
+	NSString *ofStr = NSLocalizedString(@"of", @"partial status message: [number] of [number] publications");
 
 	if (shownPubsCount != groupPubsCount) { 
 		[statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
 	}
-	[statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications")];
+	[statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message")];
 	// we can have only a single external group selected at a time
     if ([self hasSharedGroupsSelected] == YES) {
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if ([self hasURLGroupsSelected] == YES) {
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if ([self hasScriptGroupsSelected] == YES) {
-        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if (groupPubsCount != totalPubsCount) {
 		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
-			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
-			NSLocalizedString(@"in multiple groups", @"partial status message");
+			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"in group", @"Partial status message"), [[[self selectedGroups] lastObject] stringValue]] :
+			NSLocalizedString(@"in multiple groups", @"Partial status message");
         [statusStr appendFormat:@" %@ (%@ %i)", groupStr, ofStr, totalPubsCount];
 	}
 	[self setStatus:statusStr];

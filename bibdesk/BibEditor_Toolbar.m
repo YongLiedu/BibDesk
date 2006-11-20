@@ -76,16 +76,16 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     // Add template toolbar items
     
     // View File
-	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View File",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View File", @"Toolbar item label") 
 											                action:NULL
                                                      keyEquivalent:@""] autorelease];
 	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
     [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarViewLocalItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"View File",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"View File",@"")];
-    [item setToolTip:NSLocalizedString(@"View File",@"")];
+    [item setLabel:NSLocalizedString(@"View File", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"View File", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"View file", @"Tool tip message")];
     [item setTarget:self];
     [item setView:viewLocalButton];
     [item setMinSize:[viewLocalButton bounds].size];
@@ -95,16 +95,16 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     [item release];
     
     // View Remote
-	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View Remote",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View Remote", @"Toolbar item label") 
 											                action:NULL
                                                      keyEquivalent:@""] autorelease];
 	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
     [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarViewRemoteItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"View Remote",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"View Remote URL",@"")];
-    [item setToolTip:NSLocalizedString(@"View in Web Browser",@"")];
+    [item setLabel:NSLocalizedString(@"View Remote", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"View Remote URL", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"View in web browser", @"Tool tip message")];
     [item setTarget:self];
     [item setView:viewRemoteButton];
     [item setMinSize:[viewRemoteButton bounds].size];
@@ -114,16 +114,16 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     [item release];
     
     // View in Drawer
-	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View in Drawer",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"View in Drawer", @"Toolbar item label") 
 											                action:NULL
                                                      keyEquivalent:@""] autorelease];
 	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
     [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarSnoopDrawerItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"View in Drawer",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"View in Drawer",@"")];
-    [item setToolTip:NSLocalizedString(@"View File in Drawer",@"")];
+    [item setLabel:NSLocalizedString(@"View in Drawer", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"View in Drawer", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"View file in drawer", @"Tool tip message")];
     [item setTarget:self];
     [item setView:documentSnoopButton];
     [item setMinSize:[documentSnoopButton bounds].size];
@@ -133,15 +133,15 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     [item release];
 	
 	// Action
-	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Action",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Action", @"Toolbar item label") 
                                                                      action:NULL 
                                                               keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu:actionMenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarActionItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"Action",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Action",@"")];
-    [item setToolTip:NSLocalizedString(@"Action for publication",@"")];
+    [item setLabel:NSLocalizedString(@"Action", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Action", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Action for publication", @"Tool tip message")];
     [item setTarget:self];
     [item setView:actionMenuButton];
     [item setMinSize:[actionMenuButton bounds].size];
@@ -151,16 +151,16 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     [item release];
     
     // Authors
-	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Authors",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Authors", @"Toolbar item label") 
 											                action:NULL
                                                      keyEquivalent:@""] autorelease];
 	submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
     [menuItem setSubmenu:submenu];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarAuthorTableItemIdentifier];
     [item setDelegate:self];
-    [item setLabel:NSLocalizedString(@"Authors",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Authors",@"")];
-    [item setToolTip:NSLocalizedString(@"Authors",@"")];
+    [item setLabel:NSLocalizedString(@"Authors", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Authors", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Authors table", @"Tool tip message")];
     [item setTarget:self];
     [item setView:authorScrollView];
     [item setMinSize:[authorScrollView bounds].size];
@@ -171,9 +171,9 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     
     // Delete
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarDeleteItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Delete",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Delete Publication",@"")];
-    [item setToolTip:NSLocalizedString(@"Delete selected publication",@"")];
+    [item setLabel:NSLocalizedString(@"Delete", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Delete Publication", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Delete selected publication", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon]];
     [item setAction:@selector(deletePub:)];
@@ -187,9 +187,9 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     [[NSImage imageWithLargeIconForToolboxCode:kAliasBadgeIcon] compositeToPoint:NSMakePoint(8,-10) operation:NSCompositeSourceOver];
     [image unlockFocus];
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarAddWithCrossrefItemIdentifier];
-    [item setLabel:NSLocalizedString(@"New",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"New with Crossref",@"")];
-    [item setToolTip:NSLocalizedString(@"New Publication with Crossref",@"")];
+    [item setLabel:NSLocalizedString(@"New", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"New with Crossref", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"New publication with crossref", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:image];
     [item setAction:@selector(createNewPubUsingCrossrefAction:)];
@@ -198,9 +198,9 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     
     // Previous
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarEditPreviousItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Previous",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Edit Previous Item",@"")];
-    [item setToolTip:NSLocalizedString(@"Edit previous publication",@"")];
+    [item setLabel:NSLocalizedString(@"Previous", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Edit Previous Item", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Edit previous publication", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageNamed: @"editprevious"]];
     [item setAction:@selector(editNextPub:)];
@@ -209,9 +209,9 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     
     // Next
     item = [[OAToolbarItem alloc] initWithItemIdentifier:BibEditorToolbarEditNextItemIdentifier];
-    [item setLabel:NSLocalizedString(@"Next",@"")];
-    [item setPaletteLabel:NSLocalizedString(@"Edit Next Item",@"")];
-    [item setToolTip:NSLocalizedString(@"Edit next publication",@"")];
+    [item setLabel:NSLocalizedString(@"Next", @"Toolbar item label")];
+    [item setPaletteLabel:NSLocalizedString(@"Edit Next Item", @"Toolbar item label")];
+    [item setToolTip:NSLocalizedString(@"Edit next publication", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageNamed: @"editnext"]];
     [item setAction:@selector(editNextPub:)];

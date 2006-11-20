@@ -98,11 +98,11 @@
 
 - (void)updateUI {
 	if ([conditionControllers count] == 1) {
-		[messageStartTextField setStringValue:NSLocalizedString(@"Match the following condition:", @"")];
+		[messageStartTextField setStringValue:NSLocalizedString(@"Match the following condition:", @"Label for smart group editor")];
 		[conjunctionPopUp setHidden:YES];
 		[messageEndTextField setHidden:YES];
 	} else {
-		[messageStartTextField setStringValue:NSLocalizedString(@"Match", @"")];
+		[messageStartTextField setStringValue:NSLocalizedString(@"Match", @"Beginning of label for smart group editor")];
 		[conjunctionPopUp setHidden:NO];
 		[messageEndTextField setHidden:NO];
         [[messageStartTextField superview] setNeedsDisplayInRect:[messageStartTextField frame]];
@@ -121,7 +121,7 @@
         [filter setConditions:conditions];
         [filter setConjunction:[self conjunction]];
         
-        [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Edit smart group")];
+        [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
 	}
     
     [super dismiss:sender];

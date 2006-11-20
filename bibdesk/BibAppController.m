@@ -148,10 +148,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
 			[self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 		}else{
-			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @""), 
+			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format"), 
 											 @"%@",
-											 NSLocalizedString(@"Go to Preferences", @"Go to preferences"), 
-											 NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format"), 
+											 NSLocalizedString(@"Go to Preferences", @"Button title"), 
+											 NSLocalizedString(@"Revert to Default", @"Button title"), 
 											 nil, error, nil);
 			if (button == NSAlertAlternateReturn){
 				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
@@ -170,10 +170,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
 			[self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 		}else{
-			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @""), 
+			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @"Message in alert dialog when detecting invalid Local-Url format"), 
 											 @"%@",
-											 NSLocalizedString(@"Go to Preferences", @"Go to preferences"), 
-											 NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format"), 
+											 NSLocalizedString(@"Go to Preferences", @"Button title"), 
+											 NSLocalizedString(@"Revert to Default", @"Button title"), 
 											 nil, error, nil);
 			if (button == NSAlertAlternateReturn){
 				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
@@ -760,11 +760,11 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 }
 
 - (void)showInputManagerUpdateAlert{
-    NSAlert *anAlert = [NSAlert alertWithMessageText:@"Autocomplete Plugin Needs Update"
-                                       defaultButton:[NSLocalizedString(@"Open", @"Open") stringByAppendingString:[NSString horizontalEllipsisString]]
-                                     alternateButton:NSLocalizedString(@"Cancel", @"Cancel")
+    NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autocomplete Plugin Needs Update", @"Message in alert dialog when plugin version")
+                                       defaultButton:[NSLocalizedString(@"Open", @"Button title") stringByAppendingString:[NSString horizontalEllipsisString]]
+                                     alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                          otherButton:nil
-                           informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?",@"")];
+                           informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?", @"Informative text in alert dialog")];
     int rv = [anAlert runModal];
     if(rv == NSAlertDefaultReturn){
         [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
@@ -870,13 +870,13 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
     pboardString = [pboard stringForType:NSStringPboardType];
     if (!pboardString) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
 
@@ -884,7 +884,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
     if(searchConstraints == nil){
         *error = NSLocalizedString(@"Error: invalid search constraints.",
-                                   @"search constraints not valid.");
+                                   @"Error description for Service");
         return;
     }        
 
@@ -913,13 +913,13 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
     pboardString = [pboard stringForType:NSStringPboardType];
     if (!pboardString) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
 
@@ -927,7 +927,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
     if(searchConstraints == nil){
         *error = NSLocalizedString(@"Error: invalid search constraints.",
-                                   @"search constraints not valid.");
+                                   @"Error description for Service");
         return;
     }        
 
@@ -956,13 +956,13 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
     pboardString = [pboard stringForType:NSStringPboardType];
     if (!pboardString) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
 
@@ -970,7 +970,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
     if(searchConstraints == nil){
         *error = NSLocalizedString(@"Error: invalid search constraints.",
-                                   @"search constraints not valid.");
+                                   @"Error description for Service");
         return;
     }        
 
@@ -1040,7 +1040,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     NSArray *types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
@@ -1062,7 +1062,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     NSArray *types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
-                                   @"pboard couldn't give string.");
+                                   @"Error description for Service");
         return;
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
@@ -1091,7 +1091,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         [doc showWindows];
     } else {
         if(error)
-            *error = nsError == nil ? NSLocalizedString(@"Unable to interpret text as bibliography data.", @"") : [nsError localizedDescription];
+            *error = nsError == nil ? NSLocalizedString(@"Unable to interpret text as bibliography data.", @"Error description") : [nsError localizedDescription];
         [[NSDocumentController sharedDocumentController] presentError:nsError];
     }
 }
@@ -1146,7 +1146,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         
         NSString *cachePath = [fileManager spotlightCacheFolderPathByCreating:&error];
         if(cachePath == nil){
-            OFErrorWithInfo(&error, NSCocoaErrorDomain, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create the cache folder for Spotlight metadata.", @""), nil);
+            OFErrorWithInfo(&error, NSCocoaErrorDomain, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create the cache folder for Spotlight metadata.", @"Error description"), nil);
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache at path \"%@\"", cachePath] userInfo:nil];
         }
         
@@ -1156,7 +1156,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         // After this point, there should be no underlying NSError, so we'll create one from scratch
         
         if([fileManager objectExistsAtFileURL:documentURL] == NO){
-            error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @""), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
+            error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to find the file associated with this item.", @"Error description"), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache for document at path \"%@\"", docPath] userInfo:nil];
         }
         
@@ -1166,7 +1166,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         
         BDAlias *alias = [[BDAlias alloc] initWithURL:documentURL];
         if(alias == nil){
-            error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to create an alias for this document.", @""), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
+            error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to create an alias for this document.", @"Error description"), NSLocalizedDescriptionKey, docPath, NSFilePathErrorKey, nil]];
             @throw [NSException exceptionWithName:NSObjectNotAvailableException reason:[NSString stringWithFormat:@"Unable to get an alias for file %@", docPath] userInfo:nil];
         }
         
@@ -1190,7 +1190,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             
             // Save the plist; we can get an error if these are not plist objects, or the file couldn't be written.  The first case is a programmer error, and the second should have been caught much earlier in this code.
             if(nil == path || [metadata writeToFile:path atomically:YES] == NO){
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:NSLocalizedString(@"Unable to save metadata cache file for item with cite key \"%@\".", @""), citeKey], NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil]];
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:NSLocalizedString(@"Unable to save metadata cache file for item with cite key \"%@\".", @"Error description"), citeKey], NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil]];
                 @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", [anItem description]] userInfo:nil];
             }                
             [metadata removeAllObjects];

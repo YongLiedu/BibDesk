@@ -271,14 +271,14 @@ enum {
         NSString *error = nil;
         
         if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
-            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" does not exist.", @""), object];
+            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" does not exist.", @"Informative text in alert dialog"), object];
         } else if (isDir == YES) {
-            error = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a file.", @""), object];
+            error = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a file.", @"Informative text in alert dialog"), object];
         } else if ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame) {
-            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @""), object];
+            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @"Informative text in alert dialog"), object];
         }
         if (error) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Macro File", @"")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Macro File", @"Message in alert dialog when adding an invalid global macros file")
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
@@ -432,7 +432,7 @@ enum {
     [openPanel setAllowsMultipleSelection:YES];
     [openPanel setResolvesAliases:NO];
     [openPanel setCanChooseDirectories:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
 
     [openPanel beginSheetForDirectory:@"/usr" 
                                  file:nil 

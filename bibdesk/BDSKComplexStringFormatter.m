@@ -145,7 +145,7 @@
             [self setParsedString:string];
             if([string isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO)
                 // not really a complex string exception, but we'll handle it the same way
-                @throw [NSException exceptionWithName:BDSKComplexStringException reason:NSLocalizedString(@"Unbalanced braces", @"") userInfo:nil];
+                @throw [NSException exceptionWithName:BDSKComplexStringException reason:NSLocalizedString(@"Unbalanced braces", @"Exception description") userInfo:nil];
         }
 
     }

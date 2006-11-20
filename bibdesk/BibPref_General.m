@@ -82,9 +82,9 @@
     
     // an annoying dialog to be seen by annoying users...
     if (BDSKCheckForUpdatesNever == interval || BDSKCheckForUpdatesMonthly == interval) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Are you sure this is wise?", @"") 
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Are you sure this is wise?", @"Message in alert dialog when setting long auto-update interval") 
                                          defaultButton:nil alternateButton:nil otherButton:nil 
-                             informativeTextWithFormat:NSLocalizedString(@"Some BibDesk users complain of too-frequent updates.  However, updates generally fix bugs that affect the integrity of your data.  If you value your data, a daily or weekly interval is a better choice.", @"")];
+                             informativeTextWithFormat:NSLocalizedString(@"Some BibDesk users complain of too-frequent updates.  However, updates generally fix bugs that affect the integrity of your data.  If you value your data, a daily or weekly interval is a better choice.", @"Informative text in alert dialog")];
         [alert beginSheetModalForWindow:[controlBox window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
@@ -104,7 +104,7 @@
 
 -(IBAction) chooseAutoOpenFile:(id) sender {
     NSOpenPanel * openPanel = [NSOpenPanel openPanel];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
     [openPanel beginSheetForDirectory:nil 
@@ -177,7 +177,7 @@
     NSString *currentStyle = [defaults stringForKey:BDSKEmailTemplateKey];
     NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat]];
     [emailTemplatePopup removeAllItems];
-    [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Default BibTeX Format")];
+    [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Popup menu title for email format")];
     [emailTemplatePopup addItemsWithTitles:styles];
     if ([NSString isEmptyString:currentStyle]) {
         [emailTemplatePopup selectItemAtIndex:0];

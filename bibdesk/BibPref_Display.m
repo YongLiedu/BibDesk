@@ -56,7 +56,7 @@
     
     [self handleTemplatePrefsChangedNotification:nil];
     
-    [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"All"), @"1", @"5", @"10", @"20", nil]];
+    [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
     [self updateUI];
 }
 
@@ -65,7 +65,7 @@
 	
     int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
 	if (maxNumber == 0)
-		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"All")];
+		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"Display all items in preview")];
 	else 
 		[previewMaxNumberComboBox setIntValue:maxNumber];
     

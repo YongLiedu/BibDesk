@@ -91,7 +91,7 @@
     // add the publication; addToGroup:handleInherited: depends on the pub having a document
     [self addPublication:newBI];
 
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
 	
     NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
@@ -108,11 +108,11 @@
             if(op == BDSKOperationSet || op == BDSKOperationAppend){
                 count++;
             }else if(op == BDSKOperationAsk){
-                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
-                                                     defaultButton:NSLocalizedString(@"Don't Change", @"Don't change")
+                BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"Message in alert dialog when trying to edit inherited value")
+                                                     defaultButton:NSLocalizedString(@"Don't Change", @"Button title")
                                                    alternateButton:nil // "Set" would end up choosing an arbitrary one
-                                                       otherButton:NSLocalizedString(@"Append", @"Append")
-                                         informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"")];
+                                                       otherButton:NSLocalizedString(@"Append", @"Button title")
+                                         informativeTextWithFormat:NSLocalizedString(@"The new item has a group value that was inherited from an item linked to by the Crossref field. This operation would break the inheritance for this value. What do you want me to do with inherited values?", @"Informative text in alert dialog")];
                 handleInherited = [alert runSheetModalForWindow:documentWindow];
                 if(handleInherited != BDSKOperationIgnore){
                     [newBI addToGroup:group handleInherited:handleInherited];
@@ -125,11 +125,11 @@
     }
 	
 	if (isSingleValued && [groups numberOfCategoryGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 1) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"alert title")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Cannot Add to All Groups", @"Message in alert dialog when trying to add to multiple single-valued field groups")
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"The new item can only be added to one of the selected \"%@\" groups", @""), [self currentGroupField]];
+                             informativeTextWithFormat:NSLocalizedString(@"The new item can only be added to one of the selected \"%@\" groups", @"Informative text in alert dialog"), [self currentGroupField]];
         [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     
@@ -198,11 +198,11 @@
         // the items may not belong to the groups that you're trying to remove them from, but we'll warn as if they were
         if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRemovalFromGroupKey]) {
             NSString *groupName = ([selectedGroups count] > 1 ? NSLocalizedString(@"multiple groups", @"multiple groups") : [NSString stringWithFormat:NSLocalizedString(@"group \"%@\"", @"group \"Name\""), [[selectedGroups firstObject] stringValue]]);
-            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
-                                                 defaultButton:NSLocalizedString(@"Yes", @"Yes")
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+                                                 defaultButton:NSLocalizedString(@"Yes", @"Button title")
                                                alternateButton:nil
-                                                   otherButton:NSLocalizedString(@"No", @"No")
-                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @""), [tableView numberOfSelectedRows], ([tableView numberOfSelectedRows] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item",@"")), groupName];
+                                                   otherButton:NSLocalizedString(@"No", @"Button title")
+                                     informativeTextWithFormat:NSLocalizedString(@"You are about to remove %i %@ from %@.  Do you want to proceed?", @"Informative text in alert dialog: You are about to remove [number] item(s) from [group \"Name\"]."), [tableView numberOfSelectedRows], ([tableView numberOfSelectedRows] > 1 ? NSLocalizedString(@"items", @"") : NSLocalizedString(@"item", @"")), groupName];
             [alert setHasCheckButton:YES];
             [alert setCheckValue:NO];
             [alert beginSheetModalForWindow:documentWindow
@@ -237,14 +237,14 @@
 	int numSelectedPubs = [self numberOfSelectedPubs];
 	NSString * pubSingularPlural;
 	if (numSelectedPubs == 1) {
-		pubSingularPlural = NSLocalizedString(@"publication", @"publication");
+		pubSingularPlural = NSLocalizedString(@"publication", @"publication, in status message");
 	} else {
-		pubSingularPlural = NSLocalizedString(@"publications", @"publications");
+		pubSingularPlural = NSLocalizedString(@"publications", @"publications, in status message");
 	}
 	
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Deleted %i %@",@"Deleted %i %@ [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural] immediate:NO];
 	
-	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Delete Publication(s)"),pubSingularPlural]];
+	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Delete %@", @"Undo action name: Delete Publication(s)"),pubSingularPlural]];
 }
 
 - (IBAction)deleteSelectedPubs:(id)sender{
@@ -255,11 +255,11 @@
     }
 	
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnDeleteKey]) {
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
-											 defaultButton:NSLocalizedString(@"OK", @"OK")
+		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
+											 defaultButton:NSLocalizedString(@"OK", @"Button title")
 										   alternateButton:nil
-											   otherButton:NSLocalizedString(@"Cancel", @"Cancel")
-								 informativeTextWithFormat:NSLocalizedString(@"You are about to delete %i items. Do you want to proceed?", @""), numSelectedPubs];
+											   otherButton:NSLocalizedString(@"Cancel", @"Button title")
+								 informativeTextWithFormat:NSLocalizedString(@"You are about to delete %i items. Do you want to proceed?", @"Informative text in alert dialog"), numSelectedPubs];
 		[alert setHasCheckButton:YES];
 		[alert setCheckValue:NO];
         [alert beginSheetModalForWindow:documentWindow
@@ -370,11 +370,11 @@
     int n = [self numberOfSelectedPubs];
     if (n > 6) {
         // Do we really want a gazillion of editor windows?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
-                                         defaultButton:NSLocalizedString(@"No", @"No")
-                                      alternateButton:NSLocalizedString(@"Yes", @"Yes")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Message in alert dialog when trying to open a lot of publication editors")
+                                         defaultButton:NSLocalizedString(@"No", @"Button title")
+                                      alternateButton:NSLocalizedString(@"Yes", @"Button title")
                                           otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(editPubAlertDidEnd:returnCode:contextInfo:) 
@@ -490,11 +490,11 @@
         if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
             lyxPipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
             if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Unable to Find LyX Pipe")
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Message in alert dialog when LyX pipe cannot be found")
                                                  defaultButton:nil
                                                alternateButton:nil
                                                    otherButton:nil
-                                    informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"")];
+                                    informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"Informative text in alert dialog")];
                 [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
                 return;
             }
@@ -583,11 +583,11 @@
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)")
-                                         defaultButton:NSLocalizedString(@"No", @"No")
-                                       alternateButton:NSLocalizedString(@"Open", @"Open")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Message in alert dialog when opening a lot of linked files")
+                                         defaultButton:NSLocalizedString(@"No", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Open", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(openLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -622,11 +622,11 @@
     
     if (n > 6) {
 		// Do we really want a gazillion of Finder windows?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reveal Linked Files", @"Reveal Linked Files (multiple reveal warning)")
-                                         defaultButton:NSLocalizedString(@"No", @"No")
-                                       alternateButton:NSLocalizedString(@"Reveal", @"multiple reveal warning Reveal button")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reveal Linked Files", @"Message in alert dialog when trying to reveal a lot of linked files")
+                                         defaultButton:NSLocalizedString(@"No", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Reveal", @"Button title")
                                            otherButton:nil
-                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"mulitple reveal linked files question"), n]];
+                             informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(revealLinkedFileAlertDidEnd:returnCode:contextInfo:) 
@@ -661,11 +661,11 @@
     
     if (n > 6) {
 		// Do we really want a gazillion of browser windows?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)")
-                                         defaultButton:NSLocalizedString(@"No", @"No")
-                                      alternateButton:NSLocalizedString(@"Open", @"Open")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Message in alert dialog when trying to open a lot of remote URLs")
+                                         defaultButton:NSLocalizedString(@"No", @"Button title")
+                                      alternateButton:NSLocalizedString(@"Open", @"Button title")
                                           otherButton:nil
-                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n]];
+                            informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"Informative text in alert dialog"), n]];
         [alert beginSheetModalForWindow:documentWindow
                           modalDelegate:self
                          didEndSelector:@selector(openRemoteURLAlertDidEnd:returnCode:contextInfo:) 
@@ -915,7 +915,7 @@
 
     [[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
 	
-	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files", @"Undo action name")];
 }
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
@@ -923,11 +923,11 @@
         NSBeep();
         return;
     }
-    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files",@"")
-                                         defaultButton:NSLocalizedString(@"Move Complete Only",@"Move Complete Only")
-                                       alternateButton:NSLocalizedString(@"Cancel",@"Cancel")
-                                           otherButton:NSLocalizedString(@"Move All",@"Move All")
-                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@"")];
+    BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Consolidate Linked Files", @"Message in alert dialog when consolidating files")
+                                         defaultButton:NSLocalizedString(@"Move Complete Only", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                           otherButton:NSLocalizedString(@"Move All", @"Button title")
+                             informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?", @"Informative text in alert dialog")];
     // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BibFiler 
     // as that will use a sheet as well, see bug # 1526145
 	[alert beginSheetModalForWindow:documentWindow
@@ -982,11 +982,11 @@
         NSString *newKey = [aPub suggestedCiteKey];
         NSString *crossref = [aPub valueOfField:BDSKCrossrefString inherit:NO];
         if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key",@"Could not generate cite key") 
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key",@"Message in alert dialog when failing to generate cite key") 
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @""), [aPub citeKey]];
+                                 informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @"Informative text in alert dialog"), [aPub citeKey]];
             [alert beginSheetModalForWindow:documentWindow
                               modalDelegate:nil
                              didEndSelector:NULL
@@ -1014,7 +1014,7 @@
         [[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:arrayOfPubs document:self];
     }
     
-    [[self undoManager] setActionName:(numberOfSelectedPubs > 1 ? NSLocalizedString(@"Generate Cite Keys",@"") : NSLocalizedString(@"Generate Cite Key",@""))];
+    [[self undoManager] setActionName:(numberOfSelectedPubs > 1 ? NSLocalizedString(@"Generate Cite Keys", @"Undo action name") : NSLocalizedString(@"Generate Cite Key", @"Undo action name"))];
 }    
 
 - (void)generateCiteKeyAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -1032,11 +1032,11 @@
         [self hasExternalGroupsSelected] == YES) return;
     
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnCiteKeyChangeKey]){
-        NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"") : NSLocalizedString(@"Really Generate Cite Key?", @"");
-        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @""), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"");
+        NSString *alertTitle = numberOfSelectedPubs > 1 ? NSLocalizedString(@"Really Generate Cite Keys?", @"Message in alert dialog when generating cite keys") : NSLocalizedString(@"Really Generate Cite Key?", @"Message in alert dialog when generating cite keys");
+        NSString *message = numberOfSelectedPubs > 1 ? [NSString stringWithFormat:NSLocalizedString(@"This action will generate cite keys for %d publications.  This action is undoable.", @"Informative text in alert dialog"), numberOfSelectedPubs] : NSLocalizedString(@"This action will generate a cite key for the selected publication.  This action is undoable.", @"Informative text in alert dialog");
         BDSKAlert *alert = [BDSKAlert alertWithMessageText:alertTitle
-                                             defaultButton:NSLocalizedString(@"Generate", @"")
-                                           alternateButton:NSLocalizedString(@"Cancel", @"") 
+                                             defaultButton:NSLocalizedString(@"Generate", @"Button title")
+                                           alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
                                                otherButton:nil
                                  informativeTextWithFormat:message];
         [alert setHasCheckButton:YES];
@@ -1078,14 +1078,14 @@
 	if (moved) {
 		[self sortPubsByKey:nil];
 		[self selectPublications:selectedPubs];
-		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"")];
+		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"Status message")];
 	}
 }
 
 - (IBAction)sortForCrossrefs:(id)sender{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
-	[undoManager setActionName:NSLocalizedString(@"Sort Publications",@"")];
+	[undoManager setActionName:NSLocalizedString(@"Sort Publications", @"Undo action name")];
 	
 	[self performSortForCrossrefs];
 }
@@ -1121,18 +1121,18 @@
 		if([parentTypes containsObject:[aPub pubType]])
 			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
 	}
-	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles",@"") : NSLocalizedString(@"Duplicate Title",@""))];
+	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles", @"Undo action name") : NSLocalizedString(@"Duplicate Title", @"Undo action name"))];
 }
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
 	if ([self numberOfSelectedPubs] == 0 ||
         [self hasExternalGroupsSelected] == YES) return;
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
-                                     defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
-                                   alternateButton:NSLocalizedString(@"Overwrite", @"Overwrite")
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"Message in alert dialog when duplicating Title to Booktitle")
+                                     defaultButton:NSLocalizedString(@"Don't Overwrite", @"Button title: overwrite Booktitle")
+                                   alternateButton:NSLocalizedString(@"Overwrite", @"Button title: don't overwrite Booktitle")
                                        otherButton:nil
-                         informativeTextWithFormat:NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @"")];
+                         informativeTextWithFormat:NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @"Informative text in alert dialog")];
 	[alert beginSheetModalForWindow:documentWindow
                       modalDelegate:self
                      didEndSelector:@selector(dublicateTitleToBooktitleAlertDidEnd:returnCode:contextInfo:) 
@@ -1173,9 +1173,9 @@
     }else
         NSBeep();
     
-	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
+	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
     // update status line after the updateStatus notification, or else it gets overwritten
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
 // select duplicates, then allow user to delete/copy/whatever
@@ -1221,8 +1221,8 @@
     else
         NSBeep();
     
-	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications");
-    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"[number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
+	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
 @end

@@ -205,7 +205,7 @@
 		color = [color blendedColorWithFraction:0.4 ofColor:[NSColor controlBackgroundColor]];
 	[expandedValueTextField setTextColor:color];
 	[expandedValueTextField setStringValue:expandedValue];
-	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"")];
+	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"Tool tip message")];
 }
 
 - (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message {
@@ -275,7 +275,7 @@
 	OBASSERT([formatter isKindOfClass:[BDSKComplexStringFormatter class]]);
 	NSString *error = [formatter parseError];
 	if (error)
-		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Invalid raw bibtex string error message"),error]];
+		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Tool tip message"),error]];
 	else
 		[self setExpandedValue:[formatter parsedString]];
 }

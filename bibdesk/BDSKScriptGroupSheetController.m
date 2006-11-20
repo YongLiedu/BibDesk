@@ -112,27 +112,27 @@ static BOOL isDirectoryAtPath(NSString *path)
     if (NO == [[NSFileManager defaultManager] fileExistsAtPath:thePath isDirectory:&isDir]) {
         // no file; this will never work...
         isValid = NO;
-        *message = NSLocalizedString(@"The specified file does not exist.", @"");
+        *message = NSLocalizedString(@"The specified file does not exist.", @"Error description");
     } else if (isDir) {
         // directories aren't scripts
         isValid = NO;
-        *message = NSLocalizedString(@"The specified file is a directory, not a script file.", @"");
+        *message = NSLocalizedString(@"The specified file is a directory, not a script file.", @"Error description");
     } else if (isShellScriptAtPath(path) && (NO == [[NSFileManager defaultManager] isExecutableFileAtPath:thePath])) {
         // it's a shell script, but not executable
         isValid = NO;
-        *message = NSLocalizedString(@"The shell script does not have execute permission set.", @"");
+        *message = NSLocalizedString(@"The shell script does not have execute permission set.", @"Error description");
     } else if (NO == isAppleScriptAtPath(thePath) && NO == isScriptAtPath(thePath)) {
         // it's not even a script file
         isValid = NO;
-        *message = NSLocalizedString(@"The system does not recognize this file as a script", @"");
+        *message = NSLocalizedString(@"The system does not recognize this file as a script", @"Error description");
     } else if (NO == isAppleScriptAtPath(thePath) && BDSKAppleScriptType == type) {
         // incorrect type
         isValid = NO;
-        *message = NSLocalizedString(@"You selected a shell script, but the type is set to AppleScript.", @"");
+        *message = NSLocalizedString(@"You selected a shell script, but the type is set to AppleScript.", @"Error description");
     } else if (NO == isShellScriptAtPath(path) && BDSKShellScriptType == type) {
         // incorrect type
         isValid = NO;
-        *message = NSLocalizedString(@"You selected an AppleScript, but the type is set to shell script.", @"");
+        *message = NSLocalizedString(@"You selected an AppleScript, but the type is set to shell script.", @"Error description");
     } else {
         isValid = YES;
     }
@@ -147,7 +147,7 @@ static BOOL isDirectoryAtPath(NSString *path)
         
         NSString *errorMessage;
         if ([self isValidScriptFileAtPath:path error:&errorMessage] == NO) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Invalid Script Path")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Message in alert dialog when path for script group is invalid")
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
@@ -162,7 +162,7 @@ static BOOL isDirectoryAtPath(NSString *path)
             [group setScriptPath:path];
             [group setScriptArguments:arguments];
             [group setScriptType:type];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Edit script group")];
+            [[group undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
         }
 	}
     
@@ -186,7 +186,7 @@ static BOOL isDirectoryAtPath(NSString *path)
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
     [oPanel setCanChooseDirectories:NO];
-    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
+    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
     [oPanel setDelegate:self];
     
     [oPanel beginSheetForDirectory:nil 

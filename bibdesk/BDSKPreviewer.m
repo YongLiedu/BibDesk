@@ -239,15 +239,15 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 	[progressOverlay orderFront:sender];
 	[(BibDocument *)[[NSDocumentController sharedDocumentController] currentDocument] updatePreviewer:self];
     if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey])
-        NSBeginAlertSheet(NSLocalizedString(@"Previewing is Disabled.", @"TeX preview is disabled"),
-                          NSLocalizedString(@"Yes", @""),
-                          NSLocalizedString(@"No", @""),
+        NSBeginAlertSheet(NSLocalizedString(@"Previewing is Disabled.", @"Message in alert dialog when showing preview with TeX preview disabled"),
+                          NSLocalizedString(@"Yes", @"Button title"),
+                          NSLocalizedString(@"No", @"Button title"),
                           nil,
                           [self window],
                           self,
                           @selector(shouldShowTeXPreferences:returnCode:contextInfo:),
                           NULL, NULL,
-                          NSLocalizedString(@"TeX previewing must be enabled in BibDesk's preferences in order to use this feature.  Would you like to open the preference pane now?", @"") );
+                          NSLocalizedString(@"TeX previewing must be enabled in BibDesk's preferences in order to use this feature.  Would you like to open the preference pane now?", @"Informative text in alert dialog") );
 }
 
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -324,17 +324,17 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 		if(rtfData != nil)
 			attrString = [[NSAttributedString alloc] initWithRTF:rtfData documentAttributes:NULL];
 		else
-			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****", @"");
+			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****", @"Preview message");
 		
 		pdfData = [self PDFData];
         if(pdfData == nil){
 			// show the TeX log file in the view
 			NSMutableString *errorString = [[NSMutableString alloc] initWithCapacity:200];
-			[errorString appendString:NSLocalizedString(@"TeX preview generation failed.  Please review the log below to determine the cause.", @"")];
+			[errorString appendString:NSLocalizedString(@"TeX preview generation failed.  Please review the log below to determine the cause.", @"Preview message")];
 			[errorString appendString:@"\n\n"];
             NSString *logString = [[server texTask] logFileString];
             if (nil == logString)
-                logString = NSLocalizedString(@"Unable to read log file from TeX run.", @"");
+                logString = NSLocalizedString(@"Unable to read log file from TeX run.", @"Preview message");
 			[errorString appendString:logString];
 			pdfData = [self PDFDataWithString:errorString color:[NSColor redColor]];
 			[errorString release];
@@ -342,7 +342,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
         
 	}else if(state == BDSKEmptyPreviewState){
 		
-		message = NSLocalizedString(@"No items are selected.", @"No items are selected.");
+		message = NSLocalizedString(@"No items are selected.", @"Preview message");
 		
 		if (emptyMessagePDFData == nil)
 			emptyMessagePDFData = [[self PDFDataWithString:message color:[NSColor grayColor]] retain];
@@ -350,7 +350,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
 		
 	}else if(state == BDSKWaitingPreviewState){
 		
-		message = [NSLocalizedString(@"Generating preview", @"Generating preview...") stringByAppendingEllipsis];
+		message = [NSLocalizedString(@"Generating preview", @"Preview message") stringByAppendingEllipsis];
 		
 		if (generatingMessagePDFData == nil)
 			generatingMessagePDFData = [[self PDFDataWithString:message color:[NSColor grayColor]] retain];

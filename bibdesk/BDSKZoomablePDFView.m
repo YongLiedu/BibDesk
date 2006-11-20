@@ -221,22 +221,22 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)saveDocumentAs:(id)sender;
 {
     NSString *name = [[[self document] documentURL] lastPathComponent];
-    [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ? name : NSLocalizedString(@"Untitled.pdf", @"")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ? name : NSLocalizedString(@"Untitled.pdf", @"Default file name for saved PDF")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent;
 {
     NSMenu *menu = [super menuForEvent:theEvent];
     [menu addItem:[NSMenuItem separatorItem]];
-    NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Document as PDF", @"") action:@selector(copyAsPDF:) keyEquivalent:@""];
+    NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Document as PDF", @"Menu item title") action:@selector(copyAsPDF:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
     
-    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page as PDF", @"") action:@selector(copyPDFPage:) keyEquivalent:@""];
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page as PDF", @"Menu item title") action:@selector(copyPDFPage:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
 
-    NSString *title = (nil == [self currentSelection]) ? NSLocalizedString(@"Copy All Text", @"") : NSLocalizedString(@"Copy Selected Text", @"");
+    NSString *title = (nil == [self currentSelection]) ? NSLocalizedString(@"Copy All Text", @"Menu item title") : NSLocalizedString(@"Copy Selected Text", @"Menu item title");
     
     item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:title action:@selector(copyAsText:) keyEquivalent:@""];
     [menu addItem:item];
@@ -244,7 +244,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     
     [menu addItem:[NSMenuItem separatorItem]];
     
-    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save PDF As", @"") stringByAppendingEllipsis] action:@selector(saveDocumentAs:) keyEquivalent:@""];
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSLocalizedString(@"Save PDF As", @"Menu item title") stringByAppendingEllipsis] action:@selector(saveDocumentAs:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
 

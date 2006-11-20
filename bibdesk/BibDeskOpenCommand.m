@@ -91,7 +91,7 @@ It can be used with
 		else {
 			// give up
 			[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-			[self setScriptErrorString:NSLocalizedString(@"Error message for AppleScript open command when a direct parameter is passed that we can't handle.", @"The 'open' command was used on an object that BibDesk cannot open. BibDesk is able to open (windows for) authors and publications.")];
+			[self setScriptErrorString:NSLocalizedString(@"The 'open' command was used on an object that BibDesk cannot open. BibDesk is able to open (windows for) authors and publications.", @"Error description")];
 			return nil;
 		}
 	} // while

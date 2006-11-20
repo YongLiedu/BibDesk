@@ -118,7 +118,7 @@
     
     [self loadFile:self];
     
-    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
+    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
     
     OBASSERT(fileName);
     [[self window] setRepresentedFilename:fileName];
@@ -189,7 +189,7 @@
         [self willChangeValueForKey:@"displayName"];
         [self didChangeValueForKey:@"displayName"];
         
-        NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
+        NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
         [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
     }
 }
@@ -228,7 +228,7 @@
     if ([dfm fileExistsAtPath:fileName]) {
         NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];;
         if(!fileStr)
-            fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"")];
+            fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"Message when unable to determine encoding for error editor")];
         [textView setString:fileStr];
         [fileStr release];
     }

@@ -352,7 +352,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             
 			lineNumber = [errObj lineNumber];
 			if(lineNumber == -1)
-				[s appendString:NSLocalizedString(@"Unknown line number",@"unknown line number for error")];
+				[s appendString:NSLocalizedString(@"Unknown line number", @"Error message for error window")];
 			else
 				[s appendFormat:@"%i", lineNumber];
             [s appendString:@"\t\t"];

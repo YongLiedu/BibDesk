@@ -77,7 +77,7 @@
         return YES;
     } else {
         if (obj) *obj = nil;
-        if (error) *error = [NSString stringWithFormat:NSLocalizedString(@"File \"%@\" does not exist or is not executable.", @""), [[self class] pathByRemovingArgumentsFromCommand:string]];
+        if (error) *error = [NSString stringWithFormat:NSLocalizedString(@"File \"%@\" does not exist or is not executable.", @"Error description"), [[self class] pathByRemovingArgumentsFromCommand:string]];
         return NO;
     }
 }

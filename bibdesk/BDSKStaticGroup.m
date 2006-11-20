@@ -52,7 +52,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 + (void)initialize{
     OBINITIALIZE;
-    BDSKLastImportLocalizedString = [NSLocalizedString(@"Last Import", @"group name for last import") copy];
+    BDSKLastImportLocalizedString = [NSLocalizedString(@"Last Import", @"Group name for last import") copy];
 }
 
 - (id)initWithLastImport:(NSArray *)array {
