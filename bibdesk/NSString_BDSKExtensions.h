@@ -267,6 +267,15 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSComparisonResult)triStateCompare:(NSString *)other;
 
+/*!
+    @method     UTICompare:
+    @abstract   Compares the UTI of two files on disk case-insensitively.  
+    @discussion The receiver and/or argument may be an absolute or relative path, or string representation of a URL.  If a file does not exist or is a relative path, the UTI from its path extension is used.  Aliases are resolved in this comparison, so it may be slow.
+    @param      other (description)
+    @result     (description)
+*/
+- (NSComparisonResult)UTICompare:(NSString *)other;
+
 #pragma mark -
 
 /*!

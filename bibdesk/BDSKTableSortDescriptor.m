@@ -166,10 +166,15 @@
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(numericCompare:)];
         
-    }else if([tcID isURLField]){
+    }else if([tcID isRemoteURLField]){
         
         // compare pathExtension for URL fields so the subsort is more useful
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(extensionCompare:)];
+
+    }else if([tcID isLocalFileField]){
+        
+        // compare UTI for file fields so the subsort is more useful
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:)];
         
     }else{
         

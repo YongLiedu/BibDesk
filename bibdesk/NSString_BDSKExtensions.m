@@ -47,6 +47,7 @@
 #import "NSScanner_BDSKExtensions.h"
 #import "html2tex.h"
 #import "NSDictionary_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;
@@ -785,6 +786,57 @@ http://home.planet.nl/~faase009/GNU.txt
     else 
         return NSOrderedDescending;
 }    
+
+static BOOL canCreateFileURL(NSString *aString, BOOL *isURLString)
+{
+    // default return values
+    BOOL canCreate = NO;
+    *isURLString = NO;
+
+    if ([aString hasPrefix:@"file://"]) {
+        *isURLString = YES;
+        canCreate = YES;
+    } else if ([aString length]) {
+        unichar ch = [aString characterAtIndex:0];
+        if ('/' == ch || '~' == ch)
+            canCreate = YES;
+    }
+    return canCreate;
+}
+
+static NSString *UTIForPath(NSString *aPath)
+{
+    BOOL isURLString;
+    NSString *theUTI = nil;
+    // !!! We return nil when a file doesn't exist if it's a properly resolvable path/URL, but we have no way of checking existence with a relative path.  Returning nil is preferable, since then nonexistent files will be sorted to the top or bottom and they're easy to find.
+    if (canCreateFileURL(aPath, &isURLString)) {
+        NSURL *fileURL = (isURLString ? [[NSURL alloc] initWithString:aPath] : [[NSURL alloc] initFileURLWithPath:[aPath stringByStandardizingPath]]);
+        
+        // UTI will be nil for a file that doesn't exist, yet had an absolute/resolvable path
+        if (fileURL) {
+            theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:fileURL error:NULL];
+            [fileURL release];
+        }
+        
+    } else {
+        
+        // fall back to extension; this is probably a relative path, so we'll assume it exists
+        NSString *extension = [aPath pathExtension];
+        if ([extension isEqualToString:@""] == NO)
+            theUTI = [[NSWorkspace sharedWorkspace] UTIForPathExtension:extension];
+    }
+    return theUTI;
+}
+
+- (NSComparisonResult)UTICompare:(NSString *)other{
+    NSString *otherUTI = UTIForPath(other);
+    NSString *selfUTI = UTIForPath(self);
+    if (nil == selfUTI)
+        return (nil == otherUTI ? NSOrderedSame : NSOrderedDescending);
+    if (nil == otherUTI)
+        return NSOrderedAscending;
+    return [selfUTI caseInsensitiveCompare:otherUTI];
+}
 
 #pragma mark -
 
