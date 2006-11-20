@@ -2501,12 +2501,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (void)updateStatus{
-	[tableView reloadData];
-    
 	int shownPubsCount = [shownPublications count];
 	int groupPubsCount = [groupedPublications count];
 	int totalPubsCount = [publications count];
-    // show the singular form correctly
 	NSMutableString *statusStr = [[NSMutableString alloc] init];
 	NSString *ofStr = NSLocalizedString(@"of", @"of");
 
@@ -2514,14 +2511,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
 	}
 	[statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications")];
-	if ([self hasSharedGroupsSelected] == YES) {
-        // we can only one shared group selected at a time
+	// we can have only a single external group selected at a time
+    if ([self hasSharedGroupsSelected] == YES) {
         [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if ([self hasURLGroupsSelected] == YES) {
-        // we can only one URL group selected at a time
         [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in external file group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if ([self hasScriptGroupsSelected] == YES) {
-        // we can only one URL group selected at a time
         [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in script group", @"partial status message"), [[[self selectedGroups] lastObject] stringValue]];
 	} else if (groupPubsCount != totalPubsCount) {
 		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
