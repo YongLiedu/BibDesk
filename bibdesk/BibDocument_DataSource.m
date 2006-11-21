@@ -879,7 +879,6 @@
             // reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group)
             if(shouldSelect) 
                 [self selectGroup:group];
-            [groupTableView reloadData];
         }
         
         return YES;

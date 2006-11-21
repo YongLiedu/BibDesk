@@ -144,7 +144,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
-    [groupTableView reloadData];
+    [groupTableView setNeedsDisplay:YES];
     if ([[self selectedGroups] containsObject:group])
         [self displaySelectedGroups];
 }
@@ -332,7 +332,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [self sortGroupsByKey:sortGroupsKey];
         [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
     }else{
-        [groupTableView reloadData];
+        [groupTableView setNeedsDisplay:YES];
         if(needsUpdate == YES){
             // fix for bug #1362191: after changing a checkbox that removed an item from a smart group, the table scrolled to the top
             NSPoint scrollPoint = [[tableView enclosingScrollView] scrollPositionAsPercentage];
@@ -732,7 +732,6 @@ The groupedPublications array is a subset of the publications array, developed b
 		[groups addSmartGroup:group];
 		[group release];
 		
-		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group", @"Undo action name")];
@@ -747,7 +746,6 @@ The groupedPublications array is a subset of the publications array, developed b
     [groups addStaticGroup:group];
     [group release];
     
-    [groupTableView reloadData];
     [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
     [groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
     [[self undoManager] setActionName:NSLocalizedString(@"Add Static Group", @"Undo action name")];
@@ -770,7 +768,6 @@ The groupedPublications array is a subset of the publications array, developed b
 		[groups addURLGroup:group];
         [group publications];
         
-		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add External File Group", @"Undo action name")];
@@ -794,7 +791,6 @@ The groupedPublications array is a subset of the publications array, developed b
 		[groups addScriptGroup:group];
         [group publications];
         
-		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
 		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add Script Group", @"Undo action name")];
@@ -837,7 +833,6 @@ The groupedPublications array is a subset of the publications array, developed b
 		NSBeep();
 	} else {
 		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups", @"Undo action name")];
-        [groupTableView reloadData];
         [self displaySelectedGroups];
 	}
 }
