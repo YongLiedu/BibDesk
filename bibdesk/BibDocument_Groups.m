@@ -156,7 +156,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         [self sortGroupsByKey:sortGroupsKey];
     }else{
-        [groupTableView reloadData];
+        [groupTableView setNeedsDisplay:YES];
         if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
@@ -197,7 +197,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         [self sortGroupsByKey:sortGroupsKey];
     }else{
-        [groupTableView reloadData];
+        [groupTableView setNeedsDisplay:YES];
         if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
@@ -213,7 +213,7 @@ The groupedPublications array is a subset of the publications array, developed b
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         [self sortGroupsByKey:sortGroupsKey];
     }else{
-        [groupTableView reloadData];
+        [groupTableView setNeedsDisplay:YES];
         if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
@@ -766,7 +766,9 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
         unsigned int insertIndex = NSMaxRange([groups rangeOfURLGroups]);
-		[groups addURLGroup:[sheetController group]];
+        BDSKURLGroup *group = [sheetController group];
+		[groups addURLGroup:group];
+        [group publications];
         
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
@@ -788,7 +790,9 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo{
 	if(returnCode == NSOKButton){
         unsigned int insertIndex = NSMaxRange([groups rangeOfScriptGroups]);
-		[groups addScriptGroup:[sheetController group]];
+        BDSKScriptGroup *group = [sheetController group];
+		[groups addScriptGroup:group];
+        [group publications];
         
 		[groupTableView reloadData];
 		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
