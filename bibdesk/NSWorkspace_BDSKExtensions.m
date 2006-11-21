@@ -156,11 +156,11 @@
     return (err == noErr);
 }
 
-- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
+- (NSString *)UTIForURL:(NSURL *)fileURL resolveAliases:(BOOL)resolve error:(NSError **)error;
 {
     NSParameterAssert([fileURL isFileURL]);
     
-    NSURL *resolvedURL = [fileURL fileURLByResolvingAliases];
+    NSURL *resolvedURL = resolve ? [fileURL fileURLByResolvingAliases] : fileURL;
     OSStatus err = noErr;
     
     if (nil == resolvedURL)
@@ -184,12 +184,19 @@
     return [(NSString *)theUTI autorelease];
 }
 
+- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
+{
+    return [self UTIForURL:fileURL resolveAliases:YES error:error];
+}
+
 - (NSString *)UTIForURL:(NSURL *)fileURL;
 {
     NSError *error;
     NSString *theUTI = [self UTIForURL:fileURL error:&error];
+#if defined (OMNI_ASSERTIONS_ON)
     if (nil == theUTI)
         NSLog(@"%@", error);
+#endif
     return theUTI;
 }
 

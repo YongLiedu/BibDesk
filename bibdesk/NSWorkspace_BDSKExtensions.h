@@ -60,6 +60,7 @@
 */
 - (NSString *)UTIForURL:(NSURL *)fileURL;
 - (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
+- (NSString *)UTIForURL:(NSURL *)fileURL resolveAliases:(BOOL)resolve error:(NSError **)error;
 
 /*!
     @method     UTIForPathExtension:
