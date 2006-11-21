@@ -49,27 +49,21 @@ static BOOL isAppleScriptAtPath(NSString *path)
                      UTTypeConformsTo((CFStringRef)theUTI, CFSTR("com.apple.applescript.text"))) : NO;
 }
 
-// will also return true for *.applescript files, which conform to public.script
-static BOOL isScriptAtPath(NSString *path)
+static BOOL isFolderAtPath(NSString *path)
 {
     path = [path stringByStandardizingPath];
     NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    BOOL conforms = theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.script"))) : NO;
-    return conforms || [[NSFileManager defaultManager] isExecutableFileAtPath:path];
+    return theUTI ? UTTypeEqual((CFStringRef)theUTI, kUTTypeFolder) : NO;
 }
 
-static BOOL isShellScriptAtPath(NSString *path)
+static BOOL isExecutableFileAtPath(NSString *path)
 {
     path = [path stringByStandardizingPath];
-    NSString *theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:[NSURL fileURLWithPath:path]];
-    BOOL conforms = theUTI ? (UTTypeConformsTo((CFStringRef)theUTI, CFSTR("public.shell-script"))) : NO;
-    return conforms || [[NSFileManager defaultManager] isExecutableFileAtPath:path];
-}
-
-static BOOL isDirectoryAtPath(NSString *path)
-{
+    BOOL isExecutable = [[NSFileManager defaultManager] isExecutableFileAtPath:path];
+    // exclude packages and directories, which are not executable data
     BOOL isDir;
-    return [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && isDir;
+    [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir];
+    return (isExecutable && NO == isDir);
 }
 
 @implementation BDSKScriptGroupSheetController
@@ -117,22 +111,10 @@ static BOOL isDirectoryAtPath(NSString *path)
         // directories aren't scripts
         isValid = NO;
         *message = NSLocalizedString(@"The specified file is a directory, not a script file.", @"Error description");
-    } else if (isShellScriptAtPath(path) && (NO == [[NSFileManager defaultManager] isExecutableFileAtPath:thePath])) {
-        // it's a shell script, but not executable
+    } else if (isExecutableFileAtPath(thePath) == NO) {
+        // it's not executable
         isValid = NO;
-        *message = NSLocalizedString(@"The shell script does not have execute permission set.", @"Error description");
-    } else if (NO == isAppleScriptAtPath(thePath) && NO == isScriptAtPath(thePath)) {
-        // it's not even a script file
-        isValid = NO;
-        *message = NSLocalizedString(@"The system does not recognize this file as a script", @"Error description");
-    } else if (NO == isAppleScriptAtPath(thePath) && BDSKAppleScriptType == type) {
-        // incorrect type
-        isValid = NO;
-        *message = NSLocalizedString(@"You selected a shell script, but the type is set to AppleScript.", @"Error description");
-    } else if (NO == isShellScriptAtPath(path) && BDSKShellScriptType == type) {
-        // incorrect type
-        isValid = NO;
-        *message = NSLocalizedString(@"You selected an AppleScript, but the type is set to shell script.", @"Error description");
+        *message = NSLocalizedString(@"The file does not have execute permission set.", @"Error description");
     } else {
         isValid = YES;
     }
@@ -146,7 +128,23 @@ static BOOL isDirectoryAtPath(NSString *path)
             [[self window] endEditingFor:nil];
         
         NSString *errorMessage;
-        if ([self isValidScriptFileAtPath:path error:&errorMessage] == NO) {
+        if ([self isValidScriptFileAtPath:path error:&errorMessage]) {
+            
+            if (isAppleScriptAtPath([path stringByStandardizingPath]))
+                type = BDSKAppleScriptType;
+            else
+                type = BDSKShellScriptType;
+            
+            if(group == nil){
+                group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
+            }else{
+                [group setScriptPath:path];
+                [group setScriptArguments:arguments];
+                [group setScriptType:type];
+                [[group undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
+            }
+            
+        } else {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Message in alert dialog when path for script group is invalid")
                                              defaultButton:nil
                                            alternateButton:nil
@@ -154,15 +152,6 @@ static BOOL isDirectoryAtPath(NSString *path)
                                 informativeTextWithFormat:errorMessage];
             [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
             return;
-        }
-        
-        if(group == nil){
-            group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
-        }else{
-            [group setScriptPath:path];
-            [group setScriptArguments:arguments];
-            [group setScriptType:type];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
         }
 	}
     
@@ -178,7 +167,7 @@ static BOOL isDirectoryAtPath(NSString *path)
 
 // open panel delegate method
 - (BOOL)panel:(id)sender shouldShowFilename:(NSString *)filename {
-    return (isAppleScriptAtPath(filename) || isScriptAtPath(filename) || isDirectoryAtPath(filename));        
+    return (isAppleScriptAtPath(filename) || isExecutableFileAtPath(filename) || isFolderAtPath(filename));        
 }
 
 - (IBAction)chooseScriptPath:(id)sender {
@@ -223,15 +212,6 @@ static BOOL isDirectoryAtPath(NSString *path)
         [arguments release];
         arguments = [newArguments retain];
     }
-}
-
-- (int)type{
-    return type;
-}
-
-- (void)setType:(int)newType{
-    [[[self undoManager] prepareWithInvocationTarget:self] setType:type];
-    type = newType;
 }
 
 #pragma mark Undo support

@@ -58,8 +58,6 @@
 - (void)setPath:(NSString *)newPath;
 - (NSString *)arguments;
 - (void)setArguments:(NSString *)newArguments;
-- (int)type;
-- (void)setType:(int)newType;
 
 - (IBAction)chooseScriptPath:(id)sender;
 
