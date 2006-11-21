@@ -290,6 +290,8 @@
 
 - (void)setSharedGroups:(NSArray *)array{
     if(sharedGroups != array){
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+        
         [sharedGroups removeObjectsInArray:array];
         [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:sharedGroups];
         [sharedGroups setArray:array]; 
@@ -306,6 +308,8 @@
 }
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
     
     [self removeSpinnerForGroup:group];
@@ -326,6 +330,8 @@
 }
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
     
     [self removeSpinnerForGroup:group];
@@ -349,6 +355,8 @@
 }
 
 - (void)removeSmartGroup:(BDSKSmartGroup *)group {
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    
 	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
 	
 	[group setUndoManager:nil];
@@ -368,6 +376,8 @@
 }
 
 - (void)removeStaticGroup:(BDSKStaticGroup *)group {
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
 	
 	[group setUndoManager:nil];
@@ -379,8 +389,10 @@
  
 - (void)setCategoryGroups:(NSArray *)array{
     if(categoryGroups != array){
-       [categoryGroups release];
-       categoryGroups = [array mutableCopy]; 
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+        
+        [categoryGroups release];
+        categoryGroups = [array mutableCopy]; 
     }
 }
 

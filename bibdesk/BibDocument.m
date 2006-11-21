@@ -2126,6 +2126,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                    name:BDSKAddRemoveGroupNotification
                  object:nil];
         [nc addObserver:self
+               selector:@selector(handleWillRemoveGroupNotification:)
+                   name:BDSKWillRemoveGroupNotification
+                 object:nil];
+        [nc addObserver:self
                selector:@selector(handleFlagsChangedNotification:)
                    name:OAFlagsChangedNotification
                  object:nil];

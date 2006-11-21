@@ -223,6 +223,11 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView reloadData];
 }
 
+- (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{log_method();
+    if([groupTableView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)
+        [documentWindow endEditingFor:groupTableView];
+}
+
 #pragma mark UI updating
 
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
