@@ -62,11 +62,6 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
 
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(unsigned int)aMask;
 {
-    // don't print exceptions while debugging
-#if OMNI_FORCE_ASSERTIONS
-    return NO;
-#endif
-    
     if (([sender exceptionHandlingMask] & aMask) == 0 || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExceptionHandlingKey"])
         return NO;
         
@@ -84,9 +79,14 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
         return YES; // huh?
     
     handlingException = YES;
+#if OMNI_FORCE_ASSERTIONS
+    // log so it's easy to spot in the console, but don't display the exception viewer window
+    NSLog(@"%@", [NSString stringWithFormat:@"**** Exception:\n%@\n\n **** Stack Trace:\n%@\n ****", exception, [exception stackTrace]]);
+#else
     @synchronized([BDSKExceptionViewer sharedViewer]) {
-        [[BDSKExceptionViewer sharedViewer] displayString:[exception stackTrace]];
+        [[BDSKExceptionViewer sharedViewer] displayString:[NSString stringWithFormat:@"Exception:\n%@\n\nStack Trace:\n%@", exception, [exception stackTrace]]];
     }
+#endif
     handlingException = NO;
     
     return NO; // we already did
