@@ -57,8 +57,8 @@ static NSString *mixedString = nil;
 
 + (void)didLoad
 {
-    yesString = [NSLocalizedString(@"Yes", @"Yes") copy];
-    noString = [NSLocalizedString(@"No", @"No") copy];
+    yesString = [NSLocalizedString(@"Yes", @"") copy];
+    noString = [NSLocalizedString(@"No", @"") copy];
     mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
     
 }

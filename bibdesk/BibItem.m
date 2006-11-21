@@ -829,11 +829,11 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	if ([[self pubType] isEqualToString:BDSKInbookString]) {
 		NSString *chapter = [self valueOfField:BDSKChapterString];
 		if (![NSString isEmptyString:chapter]) {
-			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter %@)", @"[Title of inbook] (chapter [Chapter])"), title, chapter];
+			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter %@)", @"Inbook item title format: [Title of inbook] (chapter [Chapter])"), title, chapter];
 		} else {
             NSString *pages = [self valueOfField:BDSKPagesString];
             if (![NSString isEmptyString:pages]) {
-                title = [NSString stringWithFormat:NSLocalizedString(@"%@ (pp %@)", @"[Title of inbook] (pp [Pages])"), title, pages];
+                title = [NSString stringWithFormat:NSLocalizedString(@"%@ (pp %@)", @"Inbook item title format: [Title of inbook] (pp [Pages])"), title, pages];
             }
         }
 	}
@@ -849,7 +849,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	
 	if ([NSString isEmptyString:title]) {
 		if (emptyTitle == nil)
-			emptyTitle = [NSLocalizedString(@"Empty Title", @"Empty Title") retain];
+			emptyTitle = [NSLocalizedString(@"Empty Title", @"Publication display title for empty title") retain];
 		title = emptyTitle;
 	}
     OBPOSTCONDITION([NSString isEmptyString:title] == NO);
@@ -1171,7 +1171,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 	}
 	
 	NSString *msg = [NSString stringWithFormat:@"%@ %@",
-		NSLocalizedString(@"Add data for field:", @""), key];
+		NSLocalizedString(@"Add data for field:", @"Default value for new field"), key];
 	[self setField:key toValue:msg];
 	
 	if (date != nil) {
