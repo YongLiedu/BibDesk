@@ -111,7 +111,7 @@ static BOOL isExecutableFileAtPath(NSString *path)
         // directories aren't scripts
         isValid = NO;
         *message = NSLocalizedString(@"The specified file is a directory, not a script file.", @"Error description");
-    } else if (isExecutableFileAtPath(thePath) == NO) {
+    } else if (isExecutableFileAtPath(thePath) == NO && isAppleScriptAtPath(thePath) == NO) {
         // it's not executable
         isValid = NO;
         *message = NSLocalizedString(@"The file does not have execute permission set.", @"Error description");
