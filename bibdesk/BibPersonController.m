@@ -103,7 +103,7 @@
     if(isEditable == NO)
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(handleGroupWillBeRemoved:)
-                                                         name:BDSKAddRemoveGroupNotification
+                                                         name:BDSKDidAddRemoveGroupNotification
                                                        object:nil];
 
 	[self updateUI];

@@ -219,13 +219,13 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
-- (void)handleAddRemoveGroupNotification:(NSNotification *)notification{
-    [groupTableView reloadData];
-}
-
-- (void)handleWillRemoveGroupsNotification:(NSNotification *)notification{log_method();
+- (void)handleWillAddRemoveGroupNotification:(NSNotification *)notification{
     if([groupTableView editedRow] != -1 && [documentWindow makeFirstResponder:nil] == NO)
         [documentWindow endEditingFor:groupTableView];
+}
+
+- (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification{
+    [groupTableView reloadData];
 }
 
 #pragma mark UI updating

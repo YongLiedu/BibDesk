@@ -290,7 +290,7 @@
 
 - (void)setSharedGroups:(NSArray *)array{
     if(sharedGroups != array){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
         
         [sharedGroups removeObjectsInArray:array];
         [self performSelector:@selector(removeSpinnerForGroup:) withObjectsFromArray:sharedGroups];
@@ -304,11 +304,11 @@
 	[urlGroups addObject:group];
 	[group setUndoManager:[self undoManager]];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeURLGroup:(BDSKURLGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addURLGroup:group];
     
@@ -317,7 +317,7 @@
 	[group setUndoManager:nil];
 	[urlGroups removeObjectIdenticalTo:group];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)addScriptGroup:(BDSKScriptGroup *)group {
@@ -326,11 +326,11 @@
 	[scriptGroups addObject:group];
 	[group setUndoManager:[self undoManager]];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeScriptGroup:(BDSKScriptGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addScriptGroup:group];
     
@@ -339,7 +339,7 @@
 	[group setUndoManager:nil];
 	[scriptGroups removeObjectIdenticalTo:group];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
@@ -351,18 +351,18 @@
 	[smartGroups addObject:group];
 	[group setUndoManager:[self undoManager]];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeSmartGroup:(BDSKSmartGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
 	
 	[group setUndoManager:nil];
 	[smartGroups removeObjectIdenticalTo:group];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)addStaticGroup:(BDSKStaticGroup *)group {
@@ -372,11 +372,11 @@
     [self updateStaticGroupsIfNeeded];
     [staticGroups addObject:group];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
 
 - (void)removeStaticGroup:(BDSKStaticGroup *)group {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
     
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
 	
@@ -384,12 +384,12 @@
     [self updateStaticGroupsIfNeeded];
     [staticGroups removeObjectIdenticalTo:group];
     
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAddRemoveGroupNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDidAddRemoveGroupNotification object:self];
 }
  
 - (void)setCategoryGroups:(NSArray *)array{
     if(categoryGroups != array){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillRemoveGroupNotification object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWillAddRemoveGroupNotification object:self];
         
         [categoryGroups release];
         categoryGroups = [array mutableCopy]; 

@@ -3554,7 +3554,7 @@ static int numberOfOpenEditors = 0;
     if(isEditable == NO)
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(groupWillBeRemoved:)
-                                                     name:BDSKAddRemoveGroupNotification
+                                                     name:BDSKDidAddRemoveGroupNotification
                                                    object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(finalizeChanges:)

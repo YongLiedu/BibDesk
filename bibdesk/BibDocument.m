@@ -2122,12 +2122,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                    name:BDSKScriptGroupUpdatedNotification
                  object:nil];
         [nc addObserver:self
-               selector:@selector(handleAddRemoveGroupNotification:)
-                   name:BDSKAddRemoveGroupNotification
+               selector:@selector(handleWillAddRemoveGroupNotification:)
+                   name:BDSKWillAddRemoveGroupNotification
                  object:nil];
         [nc addObserver:self
-               selector:@selector(handleWillRemoveGroupNotification:)
-                   name:BDSKWillRemoveGroupNotification
+               selector:@selector(handleDidAddRemoveGroupNotification:)
+                   name:BDSKDidAddRemoveGroupNotification
                  object:nil];
         [nc addObserver:self
                selector:@selector(handleFlagsChangedNotification:)
