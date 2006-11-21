@@ -150,6 +150,29 @@
     [publications getObjects:aBuffer range:aRange];
 }
 
+- (void)removeAllObjects{
+    [itemsForCiteKeys removeAllObjects];
+    [publications removeAllObjects];
+}
+
+- (void)addObjectsFromArray:(NSArray *)otherArray{
+    [publications addObjectsFromArray:otherArray];
+    [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
+    [self updateFileOrder];
+}
+
+- (void)insertObjects:(NSArray *)objects atIndexes:(NSIndexSet *)indexes{
+    [publications insertObjects:objects atIndexes:indexes];
+    [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:[publications objectsAtIndexes:indexes]];
+    [self updateFileOrder];
+}
+
+- (void)removeObjectsAtIndexes:(NSIndexSet *)indexes{
+    [self performSelector:@selector(removeFromItemsForCiteKeys:) withObjectsFromArray:[publications objectsAtIndexes:indexes]];
+    [publications removeObjectsAtIndexes:indexes];
+    [self updateFileOrder];
+}
+
 - (NSEnumerator *)objectEnumerator;
 {
     return [publications objectEnumerator];
