@@ -72,20 +72,26 @@
         if (![[self window] makeFirstResponder:[self window]])
             [[self window] endEditingFor:nil];
         
-        NSURL *url = nil;
-        if ([urlString rangeOfString:@"://"].location == NSNotFound) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
-                url = [NSURL fileURLWithPath:urlString];
-            else
-                url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
-        } else
-            url = [NSURL URLWithString:urlString];
-        
-        if(group == nil){
-            group = [[BDSKURLGroup alloc] initWithURL:url];
-        }else{
-            [group setURL:url];
-            [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
+        if ([NSString isEmptyString:urlString] == NO) {
+            NSURL *url = nil;
+            if ([urlString rangeOfString:@"://"].location == NSNotFound) {
+                if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
+                    url = [NSURL fileURLWithPath:urlString];
+                else
+                    url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
+            } else
+                url = [NSURL URLWithString:urlString];
+            
+            if(group == nil){
+                group = [[BDSKURLGroup alloc] initWithURL:url];
+            }else{
+                [group setURL:url];
+                [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
+            }
+        } else {
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to create a group with an empty string", @"alert title") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
+            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+            return;
         }
 	}
     
