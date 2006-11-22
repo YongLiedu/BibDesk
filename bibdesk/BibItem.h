@@ -819,11 +819,10 @@ enum {
     @abstract   attempts to return a path to the local file linked through the field, relative to the base parameter
     @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.
     @param      field the field name linking the local file.
-    @param      base a path to serve as the base for resolving the relative path.
 	@param      inherit Boolean, if set follows the Crossref to find inherited date.
     @result     a complete path with no tildes, or nil if an error occurred.
 */
-- (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit;
+- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit;
 
 /*!
     @method     smallImageForURLField:
@@ -845,7 +844,7 @@ enum {
 
 // NSURL equivalents of the localFilePath... methods
 - (NSURL *)localFileURLForField:(NSString *)field;
-- (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit;
+- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit;
 
 /*!
     @method suggestedLocalUrl

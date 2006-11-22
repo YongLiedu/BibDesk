@@ -104,7 +104,7 @@
     if ([field isEqualToString:BDSKCiteKeyString]) {
         suggestion = [pub citeKey];
     } else if (isLocalFile) {
-        suggestion = [pub localFilePathForField:field relativeTo:[[[[pub owner] fileURL] path] stringByDeletingLastPathComponent] inherit:NO];
+        suggestion = [pub localFilePathForField:field inherit:NO];
         if ([suggestion hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
             suggestion = [suggestion substringFromIndex:[papersFolderPath length]];
         else

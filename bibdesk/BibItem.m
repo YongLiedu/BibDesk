@@ -2275,22 +2275,22 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)localUrlPathInheriting:(BOOL)inherit{
-	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[[owner fileURL] path] stringByDeletingLastPathComponent] inherit:inherit];
+	return [self localFilePathForField:BDSKLocalUrlString inherit:inherit];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field{
-	return [self localFilePathForField:field relativeTo:[[[owner fileURL] path] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFilePathForField:field inherit:YES];
 }
 
-- (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
-    return [[self localFileURLForField:field relativeTo:base inherit:inherit] path];
+- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit{
+    return [[self localFileURLForField:field inherit:inherit] path];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
-	return [self localFileURLForField:field relativeTo:[[[owner fileURL] path] stringByDeletingLastPathComponent] inherit:YES];
+	return [self localFileURLForField:field inherit:YES];
 }
 
-- (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
+- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit{
     NSURL *localURL = nil;
     NSURL *resolvedURL = nil;
     NSString *localURLFieldValue = [self valueOfField:field inherit:inherit];
@@ -2307,9 +2307,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         // check to see if it's a relative path
         UniChar ch = [localURLFieldValue characterAtIndex:0];
         if(ch != '/' && ch != '~'){
-            
-			// It's a relative path using the base parameter we were passed.
-            localURLFieldValue = [([NSString isEmptyString:base] ? NSHomeDirectory() : base) stringByAppendingPathComponent:localURLFieldValue];
+            NSURL *docPath = [[owner fileURL] path];
+            NSString *basePath = [NSString isEmptyString:docPath] ? NSHomeDirectory() : [docPath stringByDeletingLastPathComponent];
+			// It's a relative path from the containing document's path
+            localURLFieldValue = [basePath stringByAppendingPathComponent:localURLFieldValue];
             
         }
 
