@@ -48,25 +48,6 @@ static IMP originalMouseDown;
     originalMouseDown = OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
 }
 
-- (NSMenu *)menuForEvent:(NSEvent *)theEvent {
-	NSTableView *tableView = [self tableView];
-	id delegate = [tableView delegate];
-	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	int column = [self columnAtPoint:location];
-	NSTableColumn *tableColumn = nil;
-    
-	if ([tableView respondsToSelector:@selector(menuForTableHeaderColumn:)]) {
-        if (column != -1)
-            tableColumn = [[tableView tableColumns] objectAtIndex:column];
-		return [tableView menuForTableHeaderColumn:tableColumn];
-	} else if ([delegate respondsToSelector:@selector(tableView:menuForTableHeaderColumn:)]) {
-        if (column != -1)
-            tableColumn = [[tableView tableColumns] objectAtIndex:column];
-		return [delegate tableView:tableView menuForTableHeaderColumn:tableColumn];
-	}
-	return nil;
-}
-
 - (void)replacementMouseDown:(NSEvent *)theEvent{
     // mouseDown in the table header has peculiar behavior for a double-click if you use -[NSTableView setDoubleAction:] on the
     // tableview itself.  The header sends a double-click action to the tableview row/cell that's selected.  

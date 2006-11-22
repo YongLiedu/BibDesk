@@ -47,7 +47,6 @@
     // datasource methods to support this are over in BibDocument_DataSource
     BDSKTypeSelectHelper *typeSelectHelper;
     NSMutableArray *trackingRects;
-    NSMenu *columnsMenu;
 }
 
 - (BDSKTypeSelectHelper *)typeSelectHelper;

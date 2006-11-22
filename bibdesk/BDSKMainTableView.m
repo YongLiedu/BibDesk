@@ -48,6 +48,8 @@
 #import "BDSKImagePopUpButton.h"
 #import "BDSKImagePopUpButtonCell.h"
 #import "NSObject_BDSKExtensions.h"
+#import <OmniAppKit/NSMenu-OAExtensions.h>
+#import <OmniAppKit/NSTableView-OAColumnConfigurationExtensions.h>
 
 
 @interface BDSKMainTableView (Private)
@@ -74,8 +76,7 @@
         [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
         [[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
         [[cornerViewButton cell] setUsesItemFromMenu:NO];
-        [[cornerViewButton cell] setRefreshesMenu:NO];
-        [cornerViewButton setMenu:[self columnsMenu]];
+        [cornerViewButton setRefreshesMenu:NO];
     }
     
     typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
@@ -88,7 +89,6 @@
     [typeSelectHelper setDataSource:nil];
     [typeSelectHelper release];
     [trackingRects release];
-    [columnsMenu release];
     [super dealloc];
 }
 
@@ -302,13 +302,13 @@
 }
 
 - (NSMenu *)columnsMenu{
-    if(columnsMenu == nil)
+    NSMenu *menu = [[[self headerView] menu] copy];
+    if(menu == nil){
         [self updateColumnsMenu];
-    return columnsMenu;
-}
-
-- (NSMenu *)menuForTableHeaderColumn:(NSTableColumn *)tc{
-	return [self columnsMenu];
+        menu = [[[self headerView] menu] copy];
+    }
+    [menu removeItem:[menu itemWithAction:@selector(autosizeColumn:)]];
+    return [menu autorelease];
 }
 
 @end
@@ -425,28 +425,43 @@
     NSEnumerator *shownColNamesE = [shownColumns reverseObjectEnumerator];
 	NSString *colName;
 	NSMenuItem *item = nil;
+    NSMenu *menu = [[self headerView] menu];
     
-    if(columnsMenu == nil){
-        columnsMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-        [columnsMenu addItem:[NSMenuItem separatorItem]];
-        item = [columnsMenu addItemWithTitle:[NSLocalizedString(@"Add Other", @"Menu title") stringByAppendingEllipsis]
-                                      action:@selector(columnsMenuAddTableColumn:)
-                               keyEquivalent:@""];
+    if(menu == nil){
+        menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+        [menu addItem:[NSMenuItem separatorItem]];
+        item = [menu addItemWithTitle:[NSLocalizedString(@"Add Other", @"Menu title") stringByAppendingEllipsis]
+                               action:@selector(columnsMenuAddTableColumn:)
+                        keyEquivalent:@""];
 		[item setTarget:self];
+        [menu addItem:[NSMenuItem separatorItem]];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Autosize Column", @"Menu title")
+                               action:@selector(autosizeColumn:)
+                        keyEquivalent:@""];
+		[item setTarget:self];
+        item = [menu addItemWithTitle:NSLocalizedString(@"Autosize All Columns", @"Menu title")
+                               action:@selector(autosizeAllColumns:)
+                        keyEquivalent:@""];
+		[item setTarget:self];
+        [[self headerView] setMenu:menu];
+        [menu release];
     }
 	
-    while([[columnsMenu itemAtIndex:0] isSeparatorItem] == NO)
-        [columnsMenu removeItemAtIndex:0];
+    while([[menu itemAtIndex:0] isSeparatorItem] == NO)
+        [menu removeItemAtIndex:0];
     
 	// next add all the shown columns in the order they are shown
 	while(colName = [shownColNamesE nextObject]){
-        item = [columnsMenu insertItemWithTitle:colName 
-                                         action:@selector(columnsMenuSelectTableColumn:)
-                                  keyEquivalent:@""
-                                        atIndex:0];
+        item = [menu insertItemWithTitle:colName 
+                                  action:@selector(columnsMenuSelectTableColumn:)
+                           keyEquivalent:@""
+                                 atIndex:0];
 		[item setTarget:self];
 		[item setState:NSOnState];
 	}
+    
+	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]] && menu != nil)
+        [(BDSKImagePopUpButton *)[self cornerView] setMenu:[self columnsMenu]];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
@@ -457,6 +472,17 @@
         return YES;
 	else
         return [super validateMenuItem:menuItem];
+}
+
+- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
+    if([view isEqual:[self cornerView]])
+        return [self columnsMenu];
+    return nil;
+}
+
+// override private method from OmniAppKit/NSTableView-OAColumnConfigurationExtensions
+- (BOOL)_allowsAutoresizing{
+    return YES;
 }
 
 @end
