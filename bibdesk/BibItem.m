@@ -2307,7 +2307,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         // check to see if it's a relative path
         UniChar ch = [localURLFieldValue characterAtIndex:0];
         if(ch != '/' && ch != '~'){
-            NSURL *docPath = [[owner fileURL] path];
+            NSString *docPath = [[owner fileURL] path];
             NSString *basePath = [NSString isEmptyString:docPath] ? NSHomeDirectory() : [docPath stringByDeletingLastPathComponent];
 			// It's a relative path from the containing document's path
             localURLFieldValue = [basePath stringByAppendingPathComponent:localURLFieldValue];
