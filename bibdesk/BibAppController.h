@@ -39,6 +39,10 @@
 @class OFMessageQueu, BibDocument;
 @protocol BDSKOwner;
 
+@protocol BDSKCompletionServer
+- (NSArray *)completionsForString:(NSString *)searchString;
+@end
+
 /*!
     @class BibAppController
     @abstract The application delegate.
@@ -48,7 +52,7 @@
 */
 
 
-@interface BibAppController : NSObject {
+@interface BibAppController : NSObject <BDSKCompletionServer> {
 	
     // global auto-completion dictionary:
     NSMutableDictionary *autoCompletionDict;

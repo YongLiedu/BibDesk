@@ -303,7 +303,8 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     
     // register server for cite key completion
     completionConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
-    [completionConnection setRootObject:self];
+    NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKCompletionServer)];
+    [completionConnection setRootObject:checker];
     
     if ([completionConnection registerName:SERVER_NAME] == NO)
         NSLog(@"failed to register completion connection %@", completionConnection);    
