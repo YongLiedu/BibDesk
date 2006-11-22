@@ -478,12 +478,6 @@
         return [super validateMenuItem:menuItem];
 }
 
-- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
-    if([view isEqual:[self cornerView]])
-        return [self columnsMenu];
-    return nil;
-}
-
 // override private method from OmniAppKit/NSTableView-OAColumnConfigurationExtensions
 - (BOOL)_allowsAutoresizing{
     return YES;
