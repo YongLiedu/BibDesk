@@ -203,7 +203,7 @@ NSString *BibEditorToolbarEditNextItemIdentifier = @"BibEditorToolbarEditNextIte
     [item setToolTip:NSLocalizedString(@"Edit previous publication", @"Tool tip message")];
     [item setTarget:self];
     [item setImage:[NSImage imageNamed: @"editprevious"]];
-    [item setAction:@selector(editNextPub:)];
+    [item setAction:@selector(editPreviousPub:)];
     [toolbarItems setObject:item forKey:BibEditorToolbarEditPreviousItemIdentifier];
     [item release];
     
