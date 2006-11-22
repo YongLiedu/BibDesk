@@ -70,6 +70,9 @@
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
+#import "BibDeskSearchForCommand.h"
+
+#define SERVER_NAME @"BDSKCompletionServer"
 
 @implementation BibAppController
 
@@ -230,7 +233,6 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     [super dealloc];
 }
 
-
 - (void)awakeFromNib{   
     // Add a Scripts menu; searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
     if([BDSKScriptMenu disabled] == NO){
@@ -297,7 +299,14 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [self copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
     [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];    
+    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];   
+    
+    // register server for cite key completion
+    completionConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
+    [completionConnection setRootObject:self];
+    
+    if ([completionConnection registerName:SERVER_NAME] == NO)
+        NSLog(@"failed to register completion connection %@", completionConnection);    
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
@@ -326,6 +335,13 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     }
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKLastOpenFileNamesKey];
     [[BDSKSharingServer defaultServer] disableSharing];
+    
+    [completionConnection registerName:nil];
+    [[completionConnection receivePort] invalidate];
+    [[completionConnection sendPort] invalidate];
+    [completionConnection invalidate];
+    [completionConnection release];
+    
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
@@ -735,6 +751,33 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     }
 
     return matches;
+}
+
+#pragma mark DO completion
+
+- (bycopy NSArray *)completionStringsForString:(NSString *)searchString;
+{
+	NSMutableArray *results = [NSMutableArray array];
+
+    NSEnumerator *myEnum = [[NSApp orderedDocuments] objectEnumerator];
+    BibDocument *document = nil;
+
+    // for empty search string, return all items
+    if ([NSString isEmptyString:searchString]) {
+
+        while (document = [myEnum nextObject])
+            [results addObjectsFromArray:[[document publications] arrayByPerformingSelector:@selector(objectForCompletion)]];
+        
+    } else {
+    
+        while (document = [myEnum nextObject]) {
+            [results addObjectsFromArray:[[document findMatchesFor:searchString] arrayByPerformingSelector:@selector(objectForCompletion)]];
+        }
+    }
+    
+    // sort alphabetically
+    [results sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	return results;
 }
 
 #pragma mark Version checking

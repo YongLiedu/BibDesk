@@ -64,6 +64,7 @@
     NSLock *metadataCacheLock;
     volatile BOOL canWriteMetadata;
     OFMessageQueue *metadataMessageQueue;
+    NSConnection *completionConnection;
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
