@@ -797,7 +797,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     if(NSSaveToOperation == docState.currentSaveOperationType){
         [exportSelectionCheckButton setState:NSOffState];
-        [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0];
+        [exportSelectionCheckButton setEnabled:[self numberOfSelectedPubs] > 0 || [self hasLibraryGroupSelected] == NO];
     }
     [accessoryView setNeedsDisplay:YES];
     
@@ -894,7 +894,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSArray *items = publications;
     
     if(docState.currentSaveOperationType == NSSaveToOperation && [exportSelectionCheckButton state] == NSOnState)
-        items = [self selectedPublications];
+        items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
     NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
     success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:YES updateFilenames:NO];
