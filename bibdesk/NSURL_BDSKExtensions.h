@@ -40,7 +40,6 @@
 
 @interface NSURL (BDSKExtensions)
 
-+ (NSURL *)fileURLWithString:(NSString *)string basePath:(NSString *)basePath;
 - (NSURL *)fileURLByResolvingAliases;
 - (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
 - (NSURL *)URLByDeletingLastPathComponent;
