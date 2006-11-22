@@ -63,6 +63,10 @@
 
 @end
 
+@interface NSTableView (OAColumnConfigurationExtensionsThatShouldBeDeclared)
+- (void)autosizeColumn:(id)sender;
+- (void)autosizeAllColumns:(id)sender;
+@end
 
 @implementation BDSKMainTableView
 
