@@ -2182,6 +2182,21 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	[self updateCategoryGroupsPreservingSelection:YES];
 }
 
+- (BOOL)sortKeyDependsOnKey:(NSString *)key{
+    if([sortKey isEqualToString:BDSKTitleString])
+        return [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKChapterString] || [key isEqualToString:BDSKPagesString] || [key isEqualToString:BDSKPubTypeString];
+    else if([sortKey isEqualToString:BDSKContainerString])
+        return [key isEqualToString:BDSKContainerString] || [key isEqualToString:BDSKJournalString] || [key isEqualToString:BDSKBooktitleString] || [key isEqualToString:BDSKVolumeString] || [key isEqualToString:BDSKSeriesString] || [key isEqualToString:BDSKPubTypeString];
+    else if([sortKey isEqualToString:BDSKDateString])
+        return [key isEqualToString:BDSKDateString] || [key isEqualToString:BDSKYearString] || [key isEqualToString:BDSKMonthString];
+    else if([sortKey isEqualToString:BDSKFirstAuthorString] || [sortKey isEqualToString:BDSKSecondAuthorString] || [sortKey isEqualToString:BDSKThirdAuthorString] || [sortKey isEqualToString:BDSKLastAuthorString])
+        return [key isEqualToString:BDSKAuthorString];
+    else if([sortKey isEqualToString:BDSKFirstAuthorEditorString] || [sortKey isEqualToString:BDSKSecondAuthorEditorString] || [sortKey isEqualToString:BDSKThirdAuthorEditorString] || [sortKey isEqualToString:BDSKLastAuthorEditorString])
+        return [key isEqualToString:BDSKAuthorString] || [key isEqualToString:BDSKEditorString];
+    else
+        return [sortKey isEqualToString:key];
+}
+
 - (void)handlePrivateBibItemChanged:(NSString *)changedKey{
     // we can be called from a queue after the document was closed
     if (docState.isDocumentClosed)
@@ -2200,7 +2215,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		[self search:searchField];
 	} else { 
         // groups and quicksearch won't update for us
-        if([sortKey isEqualToString:changedKey])
+        if([self sortKeyDependsOnKey:changedKey])
             [self sortPubsByKey:nil]; // resort if the changed value was in the currently sorted column
         else
             [tableView reloadData];
