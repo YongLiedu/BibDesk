@@ -755,28 +755,28 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
 #pragma mark DO completion
 
-- (bycopy NSArray *)completionStringsForString:(NSString *)searchString;
+- (NSArray *)completionsForString:(NSString *)searchString;
 {
 	NSMutableArray *results = [NSMutableArray array];
 
     NSEnumerator *myEnum = [[NSApp orderedDocuments] objectEnumerator];
     BibDocument *document = nil;
-
-    // for empty search string, return all items
-    if ([NSString isEmptyString:searchString]) {
-
-        while (document = [myEnum nextObject])
-            [results addObjectsFromArray:[[document publications] arrayByPerformingSelector:@selector(objectForCompletion)]];
-        
-    } else {
+    BibItem *anItem;
     
-        while (document = [myEnum nextObject]) {
-            [results addObjectsFromArray:[[document findMatchesFor:searchString] arrayByPerformingSelector:@selector(objectForCompletion)]];
+    // for empty search string, return all items
+
+    while (document = [myEnum nextObject]) {
+        NSArray *pubs = [NSString isEmptyString:searchString] ? [document publications] : [document findMatchesFor:searchString];
+        NSEnumerator *publicationEnumerator = [pubs objectEnumerator];
+        while (anItem = [publicationEnumerator nextObject]) {
+            [results addObject:[NSDictionary dictionaryWithObjectsAndKeys:[anItem citeKey], @"citeKey", [anItem title], @"title", nil]];
         }
     }
     
-    // sort alphabetically
-    [results sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    // sort alphabetically by title
+    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"title" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
+    [results mergeSortUsingDescriptors:[NSArray arrayWithObject:sort]];
+
 	return results;
 }
 
