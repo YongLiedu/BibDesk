@@ -72,15 +72,8 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BibDeskSearchForCommand.h"
+#import "BDSKCompletionServerProtocol.h"
 
-// For external autocompletion server
-#define SERVER_NAME @"BDSKCompletionServer"
-@protocol BDSKCompletionServer
-// search for the given string in all documents, or pass nil to return all items
-- (NSArray *)completionsForString:(NSString *)searchString;
-// list of URLs for the currently open documents
-- (NSArray *)orderedDocumentURLs;
-@end
 
 @implementation BibAppController
 
@@ -314,7 +307,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKCompletionServer)];
     [completionConnection setRootObject:checker];
     
-    if ([completionConnection registerName:SERVER_NAME] == NO)
+    if ([completionConnection registerName:BIBDESK_SERVER_NAME] == NO)
         NSLog(@"failed to register completion connection %@", completionConnection);    
 }
 

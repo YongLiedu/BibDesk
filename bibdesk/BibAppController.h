@@ -37,7 +37,7 @@
 #import <Cocoa/Cocoa.h>
 
 @class BibDocument;
-@protocol BDSKOwner;
+@protocol BDSKOwner, BDSKCompletionServer;
 
 /*!
     @class BibAppController
@@ -48,7 +48,7 @@
 */
 
 
-@interface BibAppController : NSObject {
+@interface BibAppController : NSObject <BDSKCompletionServer> {
 	
     // global auto-completion dictionary:
     NSMutableDictionary *autoCompletionDict;
