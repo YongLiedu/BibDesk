@@ -222,12 +222,9 @@ enum {
 */
 - (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
 
-/*!
-    @method     lastAuthor
-    @abstract   Returns the last author in the array of authors.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
+- (BibAuthor *)firstAuthor;
+- (BibAuthor *)secondAuthor;
+- (BibAuthor *)thirdAuthor;
 - (BibAuthor *)lastAuthor;
 
 /*!
@@ -336,6 +333,11 @@ enum {
     
 */
 - (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
+
+- (BibAuthor *)firstAuthorOrEditor;
+- (BibAuthor *)secondAuthorOrEditor;
+- (BibAuthor *)thirdAuthorOrEditor;
+- (BibAuthor *)lastAuthorOrEditor;
 
 /*!
     @method crossrefParent

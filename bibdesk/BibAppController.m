@@ -39,6 +39,7 @@
 #import <Carbon/Carbon.h>
 #import "BibPrefController.h"
 #import "BibItem.h"
+#import "BibAuthor.h"
 #import "BDSKPreviewer.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibTypeManager.h"
@@ -788,8 +789,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
                 [dict setObject:value forKey:@"lastName"];
             
             // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
-            value = [NSNumber numberWithInt:[[anItem valueOfField:BDSKYearString] intValue]];
-            if (value)
+            value = [anItem valueOfField:BDSKYearString];
+            if([NSString isEmptyString:value] == NO &&
+               (value = [NSNumber numberWithInt:[value intValue]]))
                 [dict setObject:value forKey:@"year"];
             
             [results addObject:dict];
