@@ -128,7 +128,7 @@ The command should have the form
 		id  resultObject;
 		while (i < n) {
 			result = [results objectAtIndex:i];
-			resultObject = [result objectForCompletion];
+			resultObject = [result stringForCompletion];
 			[results replaceObjectAtIndex:i withObject:resultObject];
 			i++;
 		}
@@ -213,7 +213,7 @@ There could be other extensions, like matching for every word with conjunction o
 
 // returns a string displayed by the autocomplete plugin
 
-- (id) objectForCompletion {
+- (NSString *) stringForCompletion {
 	// concatenate author surnames first
     NSArray *pubAuthors = [self pubAuthors];
 	NSEnumerator *authEnum = [pubAuthors objectEnumerator];

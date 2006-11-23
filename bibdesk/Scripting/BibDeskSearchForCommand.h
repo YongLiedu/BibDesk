@@ -56,5 +56,5 @@
 
 @interface BibItem (Finding)
 - (BOOL) matchesString:(NSString*) searchterm;
-- (id) objectForCompletion;
+- (NSString *) stringForCompletion;
 @end

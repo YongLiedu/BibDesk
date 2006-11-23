@@ -1507,6 +1507,28 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return info;
 }
 
+// return a KVC-compliant object; may not be a dictionary in future
+- (id)completionObject{
+    
+    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:4];
+    [dict setObject:[self citeKey] forKey:@"citeKey"];
+    [dict setObject:[self title] forKey:@"title"];
+    [dict setObject:[NSNumber numberWithInt:[self numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
+    
+    // now some optional keys that may be useful, but aren't guaranteed
+    id value = [[self firstAuthorOrEditor] lastName];
+    if (value)
+        [dict setObject:value forKey:@"lastName"];
+    
+    // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
+    value = [self valueOfField:BDSKYearString];
+    if([NSString isEmptyString:value] == NO &&
+        (value = [NSNumber numberWithInt:[value intValue]]))
+    [dict setObject:value forKey:@"year"];
+    
+    return dict;
+}    
+
 #pragma mark -
 #pragma mark BibTeX strings
 

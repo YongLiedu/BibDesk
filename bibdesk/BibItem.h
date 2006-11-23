@@ -40,6 +40,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
+#import "BDSKFormatParser.h"
 
 enum {
     BDSKNoCrossrefError,
@@ -657,6 +658,7 @@ enum {
 
 - (NSDictionary *)searchIndexInfo;
 - (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;
+- (id)completionObject;
 
 /*!
     @method bibTeXString

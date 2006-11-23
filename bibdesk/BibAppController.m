@@ -76,7 +76,10 @@
 // For external autocompletion server
 #define SERVER_NAME @"BDSKCompletionServer"
 @protocol BDSKCompletionServer
+// search for the given string in all documents, or pass nil to return all items
 - (NSArray *)completionsForString:(NSString *)searchString;
+// list of URLs for the currently open documents
+- (NSArray *)orderedDocumentURLs;
 @end
 
 @implementation BibAppController
@@ -767,38 +770,27 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 
     NSEnumerator *myEnum = [[NSApp orderedDocuments] objectEnumerator];
     BibDocument *document = nil;
-    BibItem *anItem;
     
     // for empty search string, return all items
 
     while (document = [myEnum nextObject]) {
         
         NSArray *pubs = [NSString isEmptyString:searchString] ? [document publications] : [document findMatchesFor:searchString];
-        NSEnumerator *publicationEnumerator = [pubs objectEnumerator];
-        
-        while (anItem = [publicationEnumerator nextObject]) {
-            
-            NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:4];
-            [dict setObject:[anItem citeKey] forKey:@"citeKey"];
-            [dict setObject:[anItem title] forKey:@"title"];
-            [dict setObject:[NSNumber numberWithInt:[anItem numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
-            
-            // now some optional keys that may be useful, but aren't guaranteed
-            id value = [[anItem firstAuthorOrEditor] lastName];
-            if (value)
-                [dict setObject:value forKey:@"lastName"];
-            
-            // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
-            value = [anItem valueOfField:BDSKYearString];
-            if([NSString isEmptyString:value] == NO &&
-               (value = [NSNumber numberWithInt:[value intValue]]))
-                [dict setObject:value forKey:@"year"];
-            
-            [results addObject:dict];
-            [dict release];
-        }
+        [results addObjectsFromArray:[pubs arrayByPerformingSelector:@selector(completionObject)]];
     }
 	return results;
+}
+
+- (NSArray *)orderedDocumentURLs;
+{
+    NSMutableArray *theURLs = [NSMutableArray array];
+    NSEnumerator *docE = [[NSApp orderedDocuments] objectEnumerator];
+    id aDoc;
+    while (aDoc = [docE nextObject]) {
+        if ([aDoc fileURL])
+            [theURLs addObject:[aDoc fileURL]];
+    }
+    return theURLs;
 }
 
 #pragma mark Version checking
