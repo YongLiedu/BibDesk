@@ -72,7 +72,11 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BibDeskSearchForCommand.h"
 
+// For external autocompletion server
 #define SERVER_NAME @"BDSKCompletionServer"
+@protocol BDSKCompletionServer
+- (NSArray *)completionsForString:(NSString *)searchString;
+@end
 
 @implementation BibAppController
 
@@ -767,17 +771,31 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     // for empty search string, return all items
 
     while (document = [myEnum nextObject]) {
+        
         NSArray *pubs = [NSString isEmptyString:searchString] ? [document publications] : [document findMatchesFor:searchString];
         NSEnumerator *publicationEnumerator = [pubs objectEnumerator];
+        
         while (anItem = [publicationEnumerator nextObject]) {
-            [results addObject:[NSDictionary dictionaryWithObjectsAndKeys:[anItem citeKey], @"citeKey", [anItem title], @"title", nil]];
+            
+            NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:4];
+            [dict setObject:[anItem citeKey] forKey:@"citeKey"];
+            [dict setObject:[anItem title] forKey:@"title"];
+            [dict setObject:[NSNumber numberWithInt:[anItem numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
+            
+            // now some optional keys that may be useful, but aren't guaranteed
+            id value = [[anItem firstAuthorOrEditor] lastName];
+            if (value)
+                [dict setObject:value forKey:@"lastName"];
+            
+            // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
+            value = [NSNumber numberWithInt:[[anItem valueOfField:BDSKYearString] intValue]];
+            if (value)
+                [dict setObject:value forKey:@"year"];
+            
+            [results addObject:dict];
+            [dict release];
         }
     }
-    
-    // sort alphabetically by title
-    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"title" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
-    [results mergeSortUsingDescriptors:[NSArray arrayWithObject:sort]];
-
 	return results;
 }
 

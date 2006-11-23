@@ -36,12 +36,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class OFMessageQueu, BibDocument;
+@class BibDocument;
 @protocol BDSKOwner;
-
-@protocol BDSKCompletionServer
-- (NSArray *)completionsForString:(NSString *)searchString;
-@end
 
 /*!
     @class BibAppController
@@ -52,7 +48,7 @@
 */
 
 
-@interface BibAppController : NSObject <BDSKCompletionServer> {
+@interface BibAppController : NSObject {
 	
     // global auto-completion dictionary:
     NSMutableDictionary *autoCompletionDict;
