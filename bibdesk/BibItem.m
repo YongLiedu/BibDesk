@@ -1512,7 +1512,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:4];
     [dict setObject:[self citeKey] forKey:@"citeKey"];
-    [dict setObject:[self title] forKey:@"title"];
+    // displayTitle removes TeX
+    [dict setObject:[self displayTitle] forKey:@"title"];
     [dict setObject:[NSNumber numberWithInt:[self numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
     
     // now some optional keys that may be useful, but aren't guaranteed
