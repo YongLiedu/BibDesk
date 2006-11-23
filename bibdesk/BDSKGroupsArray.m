@@ -47,7 +47,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BibAuthor.h"
 #import "NSObject_BDSKExtensions.h"
-
+#import "BDSKFilter.h"
 
 @interface BDSKGroupsArray (Private)
 

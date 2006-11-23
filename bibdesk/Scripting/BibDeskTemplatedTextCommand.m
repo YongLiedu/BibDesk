@@ -42,7 +42,7 @@
 #import "BDSKTemplateObjectProxy.h"
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
-
+#import "BibItem.h"
 
 @implementation BibDeskTemplatedTextCommand
 

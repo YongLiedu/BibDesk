@@ -38,7 +38,7 @@
 
 #import "BDSKTextViewCompletionController.h"
 
-@class BDSKTextViewCompletionWindow;
+@interface BDSKTextViewCompletionWindow : NSWindow @end
 
 static id sharedController = nil;
 
@@ -430,7 +430,7 @@ static int BDSKCompletionMinHeight = 20;
 
 @end
 
-@interface BDSKTextViewCompletionWindow : NSWindow @end
+#pragma mark NSWindow subclass
 
 @implementation BDSKTextViewCompletionWindow
     
