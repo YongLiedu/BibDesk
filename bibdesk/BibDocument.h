@@ -205,7 +205,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
  */
 - (id)init;
 
-- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL;
+- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forSave:(BOOL)isSave;
 - (NSDictionary *)mainWindowSetupDictionaryFromExtendedAttributes;
 - (BOOL)isMainDocument;
 

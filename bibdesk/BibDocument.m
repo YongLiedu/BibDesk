@@ -498,7 +498,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     if([drawerController isDrawerOpen])
         [drawerController toggle:nil];
     [self saveSortOrder];
-    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL]];
+    [self saveWindowSetupInExtendedAttributesAtURL:[self fileURL] forSave:NO];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
@@ -524,7 +524,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     return dict;
 }
 
-- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL {
+- (void)saveWindowSetupInExtendedAttributesAtURL:(NSURL *)anURL forSave:(BOOL)isSave{
     
     NSString *path = [anURL path];
     if (path && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableDocumentExtendedAttributes"] == NO) {
@@ -544,7 +544,10 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
         [dictionary setObject:[searchField searchKey] forKey:BDSKCurrentQuickSearchKey];
         [dictionary setObject:[searchField recentSearches] forKey:BDSKRecentSearchesKey];
-        [dictionary setObject:[NSNumber numberWithInt:[self documentStringEncoding]] forKey:BDSKDocumentStringEncodingKey];
+        
+        // if this isn't a save operation, the encoding in xattr is already correct, while our encoding might be different from the actual file encoding, if the user might ignored an encoding warning without saving
+        if(isSave)
+            [dictionary setIntValue:[self documentStringEncoding] forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
@@ -841,7 +844,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         
         // save our window setup if we export to BibTeX or RIS
         if([[self class] isNativeType:typeName] || [typeName isEqualToString:BDSKMinimalBibTeXDocumentType])
-            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL];
+            [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forSave:YES];
         
     }else if(saveOperation == NSSaveOperation || saveOperation == NSSaveAsOperation){
         [[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKSaveDocumentScriptHookName 
@@ -868,7 +871,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
         [infoDict release];
         
         // save window setup to extended attributes, so it is set also if we use saveAs
-        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL];
+        [self saveWindowSetupInExtendedAttributesAtURL:absoluteURL forSave:YES];
     }
     
     return YES;
