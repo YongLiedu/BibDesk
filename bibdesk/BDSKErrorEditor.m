@@ -222,8 +222,7 @@
     NSFileManager *dfm = [NSFileManager defaultManager];
     if (!fileName) return;
     
-    // let's see if the document has an encoding (hopefully the user guessed correctly); if not, fall back to the default C string encoding
-    NSStringEncoding encoding = (document != nil ? [document documentStringEncoding] : [NSString defaultCStringEncoding]);
+    NSStringEncoding encoding = [manager documentStringEncoding];
         
     if ([dfm fileExistsAtPath:fileName]) {
         NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];;

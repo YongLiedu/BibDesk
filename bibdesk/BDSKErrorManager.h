@@ -46,6 +46,7 @@
     NSMutableArray *editors;
     BDSKErrorEditor *mainEditor;
     NSString *documentDisplayName;
+    NSStringEncoding documentStringEncoding;
     int uniqueNumber;
 }
 
@@ -65,6 +66,7 @@
 - (NSString *)documentDisplayName;
 - (void)setDocumentDisplayName:(NSString *)newName;
 - (NSString *)displayName;
+- (NSStringEncoding)documentStringEncoding;
 
 - (void)updateDisplayName;
 
