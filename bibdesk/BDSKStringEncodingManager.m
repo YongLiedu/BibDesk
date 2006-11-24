@@ -118,10 +118,6 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     name = [NSString localizedNameOfStringEncoding:nsEncoding];
     [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
     
-    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_JP);
-    name = [NSString localizedNameOfStringEncoding:nsEncoding];
-    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
-  
     nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_CN);
     name = [NSString localizedNameOfStringEncoding:nsEncoding];
     [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
