@@ -162,7 +162,7 @@
 }
 
 - (NSArray *)smartGroups{
-    return sharedGroups;
+    return smartGroups;
 }
 
 - (NSArray *)staticGroups{
