@@ -59,6 +59,12 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     return [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self defaultEncoding]];
 }
 
+// encodings which btparse cannot handle, we might add more encodings when we find out
++ (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
+{
+    return encoding == NSShiftJISStringEncoding || encoding == NSUnicodeStringEncoding;
+}
+
 -(id)init{
     if(sharedEncodingManager != nil){
         [sharedEncodingManager release];

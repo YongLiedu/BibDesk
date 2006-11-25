@@ -54,6 +54,7 @@
 #import "BDSKMacroResolver.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKGroupsArray.h"
+#import "BDSKStringEncodingManager.h"
 
 static NSString *BibTeXParserInternalException = @"BibTeXParserInternalException";
 static NSLock *parserLock = nil;
@@ -776,6 +777,8 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     Boolean isScriptGroup = FALSE;
     Boolean firstValue = TRUE;
     
+    NSStringEncoding groupsEncoding = [BDSKStringEncodingManager isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
+    
     while(field = bt_next_value(entry, field, NULL, &text)){
         if(text){
             if(firstValue == TRUE){
@@ -791,7 +794,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
             }
             
             // encoding will be UTF-8 for the plist, so make sure we use it for each line
-            tmpStr = copyCheckedString(text, field->line, filePath, ((isSmartGroup || isStaticGroup || isURLGroup || isScriptGroup)? NSUTF8StringEncoding : encoding));
+            tmpStr = copyCheckedString(text, field->line, filePath, ((isSmartGroup || isStaticGroup || isURLGroup || isScriptGroup)? groupsEncoding : encoding));
             
             if(tmpStr) 
                 [commentStr appendString:tmpStr];

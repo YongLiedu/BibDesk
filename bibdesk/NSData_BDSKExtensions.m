@@ -76,4 +76,15 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     }
 }
 
+- (void)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding{
+    if(fromEncoding == toEncoding){
+        [self appendData:data];
+    }else{
+        NSString *string = [[NSString alloc] initWithData:data encoding:fromEncoding];
+        if(nil == string)
+            [NSException raise:BDSKEncodingConversionException format:@"Unable to convert data to string with encoding %@", [NSString localizedNameOfStringEncoding:fromEncoding]];
+        [self appendDataFromString:string useEncoding:toEncoding];
+    }
+}
+
 @end

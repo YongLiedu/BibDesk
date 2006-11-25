@@ -1112,6 +1112,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
     BOOL shouldAppendFrontMatter = YES;
     NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
+    
+    NSStringEncoding groupsEncoding = [BDSKStringEncodingManager isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
 
     @try{
     
@@ -1162,22 +1164,22 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // The data from groups is always UTF-8, and we shouldn't convert it; the comment key strings should be representable in any encoding
         if([[groups staticGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" useEncoding:encoding];
-            [outputData appendData:[groups serializedStaticGroupsData]];
+            [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         if([[groups smartGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" useEncoding:encoding];
-            [outputData appendData:[groups serializedSmartGroupsData]];
+            [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         if([[groups URLGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" useEncoding:encoding];
-            [outputData appendData:[groups serializedURLGroupsData]];
+            [outputData appendStringData:[groups serializedURLGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         if([[groups scriptGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" useEncoding:encoding];
-            [outputData appendData:[groups serializedScriptGroupsData]];
+            [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         [outputData appendDataFromString:@"\n" useEncoding:encoding];
@@ -1403,15 +1405,33 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 }
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
-    NSMutableArray *newPubs;
-
+    NSString *filePath = [absoluteURL path];
+    BOOL useTmpEncoding = [BDSKStringEncodingManager isUnparseableEncoding:encoding];
+    
     [self setDocumentStringEncoding:encoding];
-
+    
+    if(useTmpEncoding){
+        NSString *string = [[NSString alloc] initWithData:data encoding:encoding];
+        if([string canBeConvertedToEncoding:NSUTF8StringEncoding]){
+            data = [string dataUsingEncoding:NSUTF8StringEncoding];
+            filePath = [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
+            [data writeToFile:filePath atomically:YES];
+            [string release];
+            [self setDocumentStringEncoding:NSUTF8StringEncoding];
+        }else{
+            useTmpEncoding = NO;
+            NSLog(@"Unable to convert data from encoding %@ to UTF-8", [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]);
+        }
+    }
+    
     NSError *error = nil;
-	newPubs = [BibTeXParser itemsFromData:data frontMatter:frontMatter filePath:[absoluteURL path] document:self error:&error];
+	NSArray *newPubs = [BibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath document:self error:&error];
 	if(outError) *outError = error;	
     [self setPublicationsWithoutUndo:newPubs];
-
+    
+    if(useTmpEncoding)
+        [self setDocumentStringEncoding:encoding];
+    
     return error == nil;
 }
 
