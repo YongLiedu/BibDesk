@@ -76,6 +76,10 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     }
 }
 
+- (void)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding{
+    [self appendStringData:data convertedFromEncoding:NSUTF8StringEncoding toEncoding:encoding];
+}
+
 - (void)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding{
     if(fromEncoding == toEncoding){
         [self appendData:data];

@@ -59,6 +59,13 @@ extern NSString *BDSKEncodingConversionException;
 - (void)appendDataFromString:(NSString *)string useEncoding:(NSStringEncoding)encoding;
 
 /*!
+    @method     appendStringData:convertedFromUTF8ToEncoding
+    @abstract   Appends the string data to the receiver after converting it from UTF-8 encoding to the specified encoding.
+    @discussion (comprehensive description)
+*/
+- (void)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding;
+
+/*!
     @method     appendStringData:convertedFromEncoding:toEncoding:
     @abstract   Appends the string data to the receiver after converting it using the specified encodings.  Raises BDSKEncodingConversionException exception if the conversion did not occur losslessly.
     @discussion (comprehensive description)

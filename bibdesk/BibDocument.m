@@ -1161,25 +1161,25 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             [outputData appendDataFromString:[pub bibTeXStringDroppingInternal:drop] useEncoding:encoding];
         }
         
-        // The data from groups is always UTF-8, and we shouldn't convert it; the comment key strings should be representable in any encoding
+        // The data from groups is always UTF-8, and we shouldn't convert it unless we have an unparseable encoding; the comment key strings should be representable in any encoding
         if([[groups staticGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
+            [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         if([[groups smartGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
+            [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         if([[groups URLGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedURLGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
+            [outputData appendStringData:[groups serializedURLGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         if([[groups scriptGroups] count] > 0){
             [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromEncoding:NSUTF8StringEncoding toEncoding:groupsEncoding];
+            [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
             [outputData appendDataFromString:@"}}" useEncoding:encoding];
         }
         [outputData appendDataFromString:@"\n" useEncoding:encoding];
@@ -1420,7 +1420,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             [self setDocumentStringEncoding:NSUTF8StringEncoding];
         }else{
             useTmpEncoding = NO;
-            NSLog(@"Unable to convert data from encoding %@ to UTF-8", [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]);
+            NSLog(@"Unable to convert data from encoding %@ to UTF-8", [NSString localizedNameOfStringEncoding:[self documentStringEncoding]]);
         }
     }
     
