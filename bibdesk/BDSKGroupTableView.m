@@ -206,7 +206,29 @@
 
 -(void)_drawDropHighlightOnRow:(int)rowIndex
 {
-    [self drawHighlightOnRows:[NSIndexSet indexSetWithIndex:rowIndex] usingColor:[NSColor alternateSelectedControlColor]];
+    if(rowIndex > 0){
+        [self drawHighlightOnRows:[NSIndexSet indexSetWithIndex:rowIndex] usingColor:[NSColor alternateSelectedControlColor]];
+    }else{
+        NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+        float lineWidth = 1.0;
+        
+        [self lockFocus];
+        [NSGraphicsContext saveGraphicsState];
+        
+        // use a dark stroke with a light center fill
+        [[highlightColor colorWithAlphaComponent:0.2] setFill];
+        [[highlightColor colorWithAlphaComponent:0.8] setStroke];
+        
+        NSRect drawRect = NSInsetRect([self visibleRect], 0.5f * lineWidth, 0.5f * lineWidth);
+        NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
+        
+        [path setLineWidth:lineWidth];
+        [path fill];
+        [path stroke];
+        
+        [NSGraphicsContext restoreGraphicsState];
+        [self unlockFocus];
+    }
 }
 
 // public method for updating the highlights (as when another table's selection changes)

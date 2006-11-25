@@ -42,6 +42,7 @@
 #import "NSImage+Toolbox.h"
 #import "BDSKGroupCell.h"
 #import "BDSKGroup.h"
+#import "BDSKStaticGroup.h"
 #import "BDSKScriptHookManager.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
@@ -748,13 +749,16 @@
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
-            
-        // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if(isDragFromDrawer || isDragFromGroupTable || row >= [tv numberOfRows] || [[groups objectAtIndex:row]  isValidDropTarget] == NO || type == nil || (row == 0 && isDragFromMainTable)) 
+        
+        if(op == NSTableViewDropAbove){
+            // here we actually target the whole table, as we don't insert in a specific location
+            row = -1;
+            [tv setDropRow:row dropOperation:NSTableViewDropOn];
+        }
+        
+        if(isDragFromDrawer || isDragFromGroupTable || type == nil || (row >= 0 && [[groups objectAtIndex:row]  isValidDropTarget] == NO) || (row == 0 && isDragFromMainTable))
             return NSDragOperationNone;
         
-        // here we actually target a specific row
-        [tv setDropRow:row dropOperation:NSTableViewDropOn];
         if(isDragFromMainTable){
             if([type isEqualToString:BDSKBibItemPboardType])
                 return NSDragOperationLink;
@@ -853,12 +857,12 @@
         BOOL isDragFromDrawer = [[info draggingSource] isEqual:[drawerController tableView]];
         
         // retain is required to fix bug #1356183
-        BDSKGroup *group = [[[groups objectAtIndex:row] retain] autorelease];
-        BOOL shouldSelect = [[self selectedGroups] containsObject:group];
+        BDSKGroup *group = row == -1 ? nil : [[[groups objectAtIndex:row] retain] autorelease];
+        BOOL shouldSelect = row == -1 || [[self selectedGroups] containsObject:group];
 		
 		if ((isDragFromGroupTable || isDragFromMainTable) && docState.dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
-        } else if(isDragFromGroupTable || isDragFromDrawer || [group isValidDropTarget] == NO) {
+        } else if(isDragFromGroupTable || isDragFromDrawer || (row >= 0 && [group isValidDropTarget] == NO)) {
             return NO;
         } else if(isDragFromMainTable){
             // we already have these publications, so we just want to add them to the group, not the document
@@ -873,12 +877,35 @@
 
         OBPRECONDITION([pubs count]);
         
+        if(row == -1){
+            // add a new static groups with the added items, use a common author name or keyword if available
+            NSEnumerator *pubEnum = [pubs objectEnumerator];
+            BibItem *pub = [pubEnum nextObject];
+            NSMutableSet *auths = BDSKCreateFuzzyAuthorCompareMutableSet();
+            NSMutableSet *keywords = [[NSMutableSet alloc] initWithSet:[pub groupsForField:BDSKKeywordsString]];
+            [auths setSet:[pub allPeople]];
+            while(pub = [pubEnum nextObject]){
+                [auths intersectSet:[pub allPeople]];
+                [keywords intersectSet:[pub groupsForField:BDSKKeywordsString]];
+            }
+            group = [[BDSKStaticGroup alloc] init];
+            if([auths count])
+                [(BDSKStaticGroup *)group setName:[[auths anyObject] displayName]];
+            else if([keywords count])
+                [(BDSKStaticGroup *)group setName:[keywords anyObject]];
+            [auths release];
+            [keywords release];
+            [groups addStaticGroup:(BDSKStaticGroup *)group];
+            [group release];
+        }
+        
         // add to the group we're dropping on, /not/ the currently selected group; no need to add to all pubs group, though
         if(group != nil && row != 0){
             [self addPublications:pubs toGroup:group];
             // reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group)
+            // don't use row, because we might have added the Last Import group
             if(shouldSelect) 
-                [self selectGroup:group];
+                [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[groups indexOfObjectIdenticalTo:group]] byExtendingSelection:NO];
         }
         
         return YES;
