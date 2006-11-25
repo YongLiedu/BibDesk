@@ -189,7 +189,7 @@
 
 // NSPasteboard delegate method for the owner
 - (void)pasteboardChangedOwner:(NSPasteboard *)pboard {
-	[self clearPromisedTypesForPasteboard:pboard];
+	[self removePromisedTypesForPasteboard:pboard];
 }
 
 #pragma mark Promised items and types
@@ -219,13 +219,18 @@
 	NSMutableArray *types = [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"types"];
 	[types removeObject:type];
 	if([types count] == 0)
-		[self clearPromisedTypesForPasteboard:pboard];
+		[self removePromisedTypesForPasteboard:pboard];
 }
 
-- (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard {
+- (void)removePromisedTypesForPasteboard:(NSPasteboard *)pboard {
 	[promisedPboardTypes removeObjectForKey:[pboard name]];
     if([promisedPboardTypes count] == 0 && promisedPboardTypes != nil && delegate == nil)   
         [self absolveResponsibility];
+}
+
+- (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard {
+	[pboard performSelector:@selector(setData:forType:) withObject:nil withObjectsFromArray:[self promisedTypesForPasteboard:pboard]];
+    [self removePromisedTypesForPasteboard:pboard];
 }
 
 - (void)provideAllPromisedTypes {

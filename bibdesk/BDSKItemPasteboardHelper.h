@@ -59,6 +59,7 @@
 - (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard;
 - (NSString *)promisedBibTeXStringForPasteboard:(NSPasteboard *)pboard;
 - (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard;
+- (void)removePromisedTypesForPasteboard:(NSPasteboard *)pboard;
 - (void)clearPromisedTypesForPasteboard:(NSPasteboard *)pboard;
 - (void)provideAllPromisedTypes;
 - (void)absolveResponsibility;
