@@ -179,12 +179,7 @@
     
     while(rowIndex != NSNotFound){
         
-        drawRect = [self rectOfRow:rowIndex];
-        drawRect.size.width -= 2.0f * lineWidth;
-        drawRect.origin.x += lineWidth;
-        
-        drawRect.size.height -= heightOffset;
-        drawRect.origin.y += 0.5f * heightOffset;
+        drawRect = NSInsetRect([self rectOfRow:rowIndex], lineWidth, 0.5f * heightOffset);
         
         path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
         [path setLineWidth:lineWidth];
@@ -206,11 +201,11 @@
 
 -(void)_drawDropHighlightOnRow:(int)rowIndex
 {
+    NSColor *highlightColor = [NSColor alternateSelectedControlColor];
     if(rowIndex > 0){
-        [self drawHighlightOnRows:[NSIndexSet indexSetWithIndex:rowIndex] usingColor:[NSColor alternateSelectedControlColor]];
+        [self drawHighlightOnRows:[NSIndexSet indexSetWithIndex:rowIndex] usingColor:highlightColor];
     }else{
-        NSColor *highlightColor = [NSColor alternateSelectedControlColor];
-        float lineWidth = 1.0;
+        float lineWidth = 2.0;
         
         [self lockFocus];
         [NSGraphicsContext saveGraphicsState];
