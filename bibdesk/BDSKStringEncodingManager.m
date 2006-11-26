@@ -38,9 +38,88 @@
 
 #import "BDSKStringEncodingManager.h"
 
-static BDSKStringEncodingManager *sharedEncodingManager = nil;
+
+
+// EncodingPopUpButton is a subclass of NSPopUpButton which provides the ability to automatically recompute its contents on changes to the encodings list. This allows sprinkling these around the app any have them automatically update themselves.  EncodingPopUpButtonCell is the corresponding cell. It would normally not be needed, but we really want to know when the cell's selectedItem is changed, as we want to prevent the last item ("Customize...") from being selected.
+@interface BDSKEncodingPopUpButtonCell : NSPopUpButtonCell
+@end
+
+@implementation BDSKEncodingPopUpButtonCell
+
+// Do not allow selecting the "Customize" item and the separator before it. (Note that the customize item can be chosen and an action will be sent, but the selection doesn't change to it.)
+- (void)selectItemAtIndex:(int)index {
+    if (index + 2 <= [self numberOfItems]) [super selectItemAtIndex:index];
+}
+
+@end
+
+
+@implementation BDSKEncodingPopUpButton
+
++ (Class)cellClass{
+    return [BDSKEncodingPopUpButtonCell class];
+}
+
+- (id)initWithFrame:(NSRect)frameRect {
+	if (self = [super initWithFrame:frameRect]) {
+            [self setAutoenablesItems:NO];
+            
+            defaultEncoding = [BDSKStringEncodingManager defaultEncoding];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(encodingsListChanged:) name:@"BDSKEncodingsListChangedNotification" object:nil];
+	}
+	return self;
+}
+
+- (id)initWithCoder:(NSCoder *)coder{
+	if (self = [super initWithCoder:coder]) {
+		if ([[self cell] isKindOfClass:[BDSKEncodingPopUpButtonCell class]] == NO) {
+            BDSKEncodingPopUpButtonCell *newCell = [[BDSKEncodingPopUpButtonCell alloc] init];
+            [newCell setAction:[[self cell] action]];
+            [newCell setTarget:[[self cell] target]];
+            [newCell setControlSize:[[self cell] controlSize]];
+            [newCell setFont:[[self cell] font]];
+            [self setCell:newCell];
+            [newCell release];
+
+            [self setAutoenablesItems:NO];
+            
+            defaultEncoding = [BDSKStringEncodingManager defaultEncoding];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleEncodingsListChanged:) name:@"BDSKEncodingsListChangedNotification" object:nil];
+        }
+    }
+    return self;
+}
+
+- (NSStringEncoding)encoding {
+    return [[self selectedItem] tag];
+}
+
+- (void)setEncoding:(NSStringEncoding)encoding {
+    defaultEncoding = encoding;
+    [[BDSKStringEncodingManager sharedEncodingManager] setupPopUp:self selectedEncoding:defaultEncoding];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
+}
+
+// Update contents based on encodings list customization
+- (void)handleEncodingsListChanged:(NSNotification *)notification {
+    int tag = [[self selectedItem] tag];
+    if (tag != 0 && (unsigned)tag != 0) defaultEncoding = tag;
+    [[BDSKStringEncodingManager sharedEncodingManager] setupPopUp:self selectedEncoding:defaultEncoding];
+}
+
+@end
+
+#pragma mark -
 
 @implementation BDSKStringEncodingManager
+
+static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 + (BDSKStringEncodingManager *)sharedEncodingManager{
     if(!sharedEncodingManager){
@@ -54,119 +133,252 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     return [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
 }
 
-+ (NSString *)defaultEncodingDisplayName;
-{
-    return [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self defaultEncoding]];
-}
-
-// encodings which btparse cannot handle, we might add more encodings when we find out
-+ (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
-{
-    return encoding == NSShiftJISStringEncoding || encoding == NSUnicodeStringEncoding;
-}
-
 -(id)init{
     if(sharedEncodingManager != nil){
-        [sharedEncodingManager release];
-    } else if(self = [super init]){
-        encodingsDict = [[self availableEncodings] retain];
-    }
+        [self release];
+        self = sharedEncodingManager;
+    } else 
+        self = [super init];
     return self;
 }
 
 - (void)dealloc{
-    [encodingsDict release];
-    [super dealloc];
+    if(self != sharedEncodingManager)
+        [super dealloc];
 }
 
-// returns nil if no match can be found (NSNonLossyASCIIStringEncoding has no match)
-// the names are correct, but terse.
-- (NSString *)IANACharSetNameForEncoding:(NSStringEncoding)encoding{
-    CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
-    
-    if(cfEncoding == kCFStringEncodingInvalidId)
-        return nil;
+#pragma mark -
 
-    return (NSString *)CFStringConvertEncodingToIANACharSetName(cfEncoding); 
+// Sort using the equivalent Mac encoding as the major key. Secondary key is the actual encoding value, which works well enough. We treat Unicode encodings as special case, putting them at top of the list.
+static int encodingCompare(const void *firstPtr, const void *secondPtr) {
+    CFStringEncoding first = *(CFStringEncoding *)firstPtr;
+    CFStringEncoding second = *(CFStringEncoding *)secondPtr;
+    CFStringEncoding macEncodingForFirst = CFStringGetMostCompatibleMacStringEncoding(first);
+    CFStringEncoding macEncodingForSecond = CFStringGetMostCompatibleMacStringEncoding(second);
+    if (first == second) return 0;	// Should really never happen
+    if (macEncodingForFirst == kCFStringEncodingUnicode || macEncodingForSecond == kCFStringEncodingUnicode) {
+        if (macEncodingForSecond == macEncodingForFirst) return (first > second) ? 1 : -1;	// Both Unicode; compare second order
+        return (macEncodingForFirst == kCFStringEncodingUnicode) ? -1 : 1;	// First is Unicode
+    }
+    if ((macEncodingForFirst > macEncodingForSecond) || ((macEncodingForFirst == macEncodingForSecond) && (first > second))) return 1;
+    return -1;
 }
 
-- (NSDictionary *)availableEncodings{
-    
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-    
-    [dictionary setObject:[NSNumber numberWithInt:NSASCIIStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSASCIIStringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSNEXTSTEPStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSNEXTSTEPStringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSJapaneseEUCStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSJapaneseEUCStringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSUTF8StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSUTF8StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSISOLatin1StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSISOLatin1StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSNonLossyASCIIStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSNonLossyASCIIStringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSISOLatin2StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSISOLatin2StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1251StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSWindowsCP1251StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1252StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSWindowsCP1252StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1253StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSWindowsCP1253StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1254StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSWindowsCP1254StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1250StringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSWindowsCP1250StringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSMacOSRomanStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSMacOSRomanStringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSShiftJISStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSShiftJISStringEncoding]];
-    [dictionary setObject:[NSNumber numberWithInt:NSISO2022JPStringEncoding] forKey:[NSString localizedNameOfStringEncoding:NSISO2022JPStringEncoding]];
-    
-    // see CFStringEncodingExt.h for less commonly used encodings
-    UInt32 nsEncoding = 0;
-    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingISOLatin9);
-    NSString *name = [NSString localizedNameOfStringEncoding:nsEncoding];
-    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
-    
-    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_2312_80);
-    name = [NSString localizedNameOfStringEncoding:nsEncoding];
-    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
-
-    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGBK_95);
-    name = [NSString localizedNameOfStringEncoding:nsEncoding];
-    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
-    
-    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_CN);
-    name = [NSString localizedNameOfStringEncoding:nsEncoding];
-    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
-    
-    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_TW);
-    name = [NSString localizedNameOfStringEncoding:nsEncoding];
-    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
-    
-    nsEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_KR);
-    name = [NSString localizedNameOfStringEncoding:nsEncoding];
-    [dictionary setObject:[NSNumber numberWithInt:nsEncoding] forKey:name];
-    
-    return dictionary;
+// Return a sorted list of all available string encodings.
++ (NSArray *)allAvailableStringEncodings {
+    static NSMutableArray *allEncodings = nil;
+    if (allEncodings == nil) {	// Build list of encodings, sorted, and including only those with human readable names
+        const CFStringEncoding *cfEncodings = CFStringGetListOfAvailableEncodings();
+        CFStringEncoding *tmp;
+        int cnt, num = 0;
+        while (cfEncodings[num] != kCFStringEncodingInvalidId) num++;	// Count
+        tmp = malloc(sizeof(CFStringEncoding) * num);
+        memcpy(tmp, cfEncodings, sizeof(CFStringEncoding) * num);	// Copy the list
+        qsort(tmp, num, sizeof(CFStringEncoding), encodingCompare);	// Sort it
+        allEncodings = [[NSMutableArray alloc] init];			// Now put it in an NSArray
+        for (cnt = 0; cnt < num; cnt++) {
+            NSStringEncoding nsEncoding = CFStringConvertEncodingToNSStringEncoding(tmp[cnt]);
+            if (nsEncoding && [NSString localizedNameOfStringEncoding:nsEncoding]) [allEncodings addObject:[NSNumber numberWithUnsignedInt:nsEncoding]];
+        }
+        free(tmp);
+    }
+    return allEncodings;
 }
 
-- (NSArray *)availableEncodingDisplayedNames{
-    return [[NSMutableArray arrayWithArray:[encodingsDict allKeys]] sortedArrayUsingSelector:@selector(compare:)];
+// encodings which btparse cannot handle, we might add more encodings when we find out
+- (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
+{
+    return encoding == NSUnicodeStringEncoding || encoding == NSShiftJISStringEncoding || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingShiftJIS);
 }
 
-- (NSNumber *)encodingNumberForDisplayedName:(NSString *)name{
-    return [encodingsDict objectForKey:name];
+// Called once (when the UI is first brought up) to properly setup the encodings list in the "Customize Encodings List" panel.
+- (void)setupEncodingsList {
+    NSArray *allEncodings = [[self class] allAvailableStringEncodings];
+    int cnt, numEncodings = [allEncodings count];
+
+    for (cnt = 0; cnt < numEncodings; cnt++) {
+        NSStringEncoding encoding = [[allEncodings objectAtIndex:cnt] unsignedIntValue];
+        NSString *encodingName = [NSString localizedNameOfStringEncoding:encoding];
+        NSCell *cell;
+        if (cnt >= [encodingMatrix numberOfRows]) [encodingMatrix addRow];
+        cell = [encodingMatrix cellAtRow:cnt column:0];
+        [cell setTitle:encodingName];
+        [cell setTag:encoding];
+    }
+    [encodingMatrix sizeToCells];
+    [self noteEncodingListChange:NO updateList:YES postNotification:NO];
 }
 
-- (NSStringEncoding)stringEncodingForDisplayedName:(NSString *)name{
-    return [[encodingsDict objectForKey:name] intValue];
-}
 
-- (NSString *)displayedNameForStringEncoding:(NSStringEncoding)encoding{
-    NSNumber *n = [NSNumber numberWithInt:encoding];
-    NSArray *allKeys = [encodingsDict allKeysForObject:n];
-    
-    if([allKeys count] == 0){
-        [NSException raise:NSStringFromClass([self class]) format:@"No matching encoding name was found for %@", n];
-        return nil;
+// This method initializes the provided popup with list of encodings; it also sets up the selected encoding as indicated and if includeDefaultItem is YES, includes an initial item for selecting "Automatic" choice.  These non-encoding items all have 0 as their tags. Otherwise the tags are set to the NSStringEncoding value for the encoding.
+- (void)setupPopUp:(BDSKEncodingPopUpButton *)popup selectedEncoding:(unsigned)selectedEncoding {
+    NSArray *encs = [self enabledEncodings];
+    unsigned cnt, numEncodings, itemToSelect = 0;
+        
+    // Put the encodings in the popup
+    [popup removeAllItems];
+
+    // Make sure the initial selected encoding appears in the list
+    if ((selectedEncoding != 0) && NO == [encs containsObject:[NSNumber numberWithUnsignedInt:selectedEncoding]]) encs = [encs arrayByAddingObject:[NSNumber numberWithUnsignedInt:selectedEncoding]];
+
+    numEncodings = [encs count];
+
+    // Fill with encodings
+    for (cnt = 0; cnt < numEncodings; cnt++) {
+        NSStringEncoding enc = [[encs objectAtIndex:cnt] unsignedIntValue];
+        [popup addItemWithTitle:[NSString localizedNameOfStringEncoding:enc]];
+        [[popup lastItem] setTag:enc];
+        [[popup lastItem] setEnabled:YES];
+        if (enc == selectedEncoding) itemToSelect = [popup numberOfItems] - 1;
     }
 
-    if([allKeys count] > 1){
-        [NSException raise:NSStringFromClass([self class]) format:@"More than one encoding name found for %@", n];
-        return nil;
+    // Add an optional separator and "customize" item at end
+    if ([popup numberOfItems] > 0) {
+        [[popup menu] addItem:[NSMenuItem separatorItem]];
+        [[popup lastItem] setTag:0];
     }
-    
-    return [allKeys objectAtIndex:0];
+    [popup addItemWithTitle:[NSLocalizedString(@"Customize Encodings List", @"Encoding popup entry for bringing up the Customize Encodings List panel") stringByAppendingEllipsis]];
+    [[popup lastItem] setAction:@selector(showPanel:)];
+    [[popup lastItem] setTarget:self];
+    [[popup lastItem] setTag:0];
+
+    [popup selectItemAtIndex:itemToSelect];
 }
-    
+
+
+// Returns the actual enabled list of encodings.
+- (NSArray *)enabledEncodings {
+    // see CFStringEncodingExt.h for CF encodings
+    static const int defaultStringEncodings[] = {
+        kCFStringEncodingUnicode, kCFStringEncodingUTF8, kCFStringEncodingMacRoman, kCFStringEncodingWindowsLatin1, kCFStringEncodingASCII, kCFStringEncodingMacJapanese, kCFStringEncodingShiftJIS, kCFStringEncodingMacChineseTrad, kCFStringEncodingMacKorean, kCFStringEncodingMacChineseSimp, kCFStringEncodingGB_18030_2000, -1
+    };
+    if (encodings == nil) {
+        NSMutableArray *encs = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKStringEncodingsKey] mutableCopy];
+        if ([encs count] == 0) {
+            NSStringEncoding defaultEncoding = [NSString defaultCStringEncoding];
+            NSStringEncoding encoding;
+            BOOL hasDefault = NO;
+            int cnt = 0;
+            if (encs == nil)
+                encs = [[NSMutableArray alloc] init];
+            while (defaultStringEncodings[cnt] != -1) {
+                if ((encoding = CFStringConvertEncodingToNSStringEncoding(defaultStringEncodings[cnt++])) != kCFStringEncodingInvalidId) {
+                    [encs addObject:[NSNumber numberWithUnsignedInt:encoding]];
+                    if (encoding == defaultEncoding) hasDefault = YES;
+                }
+            }
+            if (hasDefault == NO)
+                [encs addObject:[NSNumber numberWithUnsignedInt:defaultEncoding]];
+        }
+        encodings = encs;
+    }
+    return encodings;
+}
+
+// Should be called after any customization to the encodings list. Writes the new list out to defaults; updates the UI; also posts notification to get all encoding popups to update.
+- (void)noteEncodingListChange:(BOOL)writeDefault updateList:(BOOL)updateList postNotification:(BOOL)post {
+    if (writeDefault) [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:encodings forKey:BDSKStringEncodingsKey];
+
+    if (updateList) {
+        int cnt, numEncodings = [encodingMatrix numberOfRows];
+        for (cnt = 0; cnt < numEncodings; cnt++) {
+            NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
+            [cell setState:[encodings containsObject:[NSNumber numberWithUnsignedInt:[cell tag]]] ? NSOnState : NSOffState];
+        }
+    }
+
+    if (post) [[NSNotificationCenter defaultCenter] postNotificationName:BDSKEncodingsListChangedNotification object:nil];
+}
+
+#pragma mark Action methods
+
+- (IBAction)showPanel:(id)sender {
+    if (encodingMatrix == nil) {
+        if (NO == [NSBundle loadNibNamed:@"SelectEncodingsPanel" owner:self])  {
+            NSLog(@"Failed to load SelectEncodingsPanel.nib");
+            return;
+        }
+        [(NSPanel *)[encodingMatrix window] setWorksWhenModal:YES];	// This should work when open panel is up
+        [[encodingMatrix window] setLevel:NSModalPanelWindowLevel];	// Again, for the same reason
+        [self setupEncodingsList];					// Initialize the list (only need to do this once)
+    }
+    [[encodingMatrix window] makeKeyAndOrderFront:nil];
+}
+
+- (IBAction)encodingListChanged:(id)sender {
+    int cnt, numRows = [encodingMatrix numberOfRows];
+    NSMutableArray *encs = [[NSMutableArray alloc] init];
+
+    for (cnt = 0; cnt < numRows; cnt++) {
+        NSCell *cell = [encodingMatrix cellAtRow:cnt column:0];
+        if (((unsigned)[cell tag] != 0) && ([cell state] == NSOnState)) [encs addObject:[NSNumber numberWithUnsignedInt:[cell tag]]];
+    }
+
+    [encodings autorelease];
+    encodings = encs;
+
+    [self noteEncodingListChange:YES updateList:NO postNotification:YES];
+}
+
+- (IBAction)clearAll:(id)sender {
+    [encodings autorelease];
+    encodings = [[NSArray array] retain];				// Empty encodings list
+    [self noteEncodingListChange:YES updateList:YES postNotification:YES];
+}
+
+- (IBAction)selectAll:(id)sender {
+    [encodings autorelease];
+    encodings = [[[self class] allAvailableStringEncodings] retain];	// All encodings
+    [self noteEncodingListChange:YES updateList:YES postNotification:YES];
+}
+
+- (IBAction)revertToDefault:(id)sender {
+    [encodings autorelease];
+    encodings = nil;
+    [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKStringEncodingsKey] restoreDefaultValue];
+    (void)[self enabledEncodings];					// Regenerate default list
+    [self noteEncodingListChange:NO updateList:YES postNotification:YES];
+}
 
 @end
+
+/*
+        Based on: EncodingManager.m
+        Copyright (c) 2002-2005 by Apple Computer, Inc., all rights reserved.
+        Author: Ali Ozer
+        
+        Helper class providing additional functionality for character encodings.
+        This file also defines EncodingPopUpButtonCell and EncodingPopUpButton classes.
+*/
+/*
+ IMPORTANT:  This Apple software is supplied to you by Apple Computer, Inc. ("Apple") in
+ consideration of your agreement to the following terms, and your use, installation,
+ modification or redistribution of this Apple software constitutes acceptance of these
+ terms.  If you do not agree with these terms, please do not use, install, modify or
+ redistribute this Apple software.
+
+ In consideration of your agreement to abide by the following terms, and subject to these
+ terms, Apple grants you a personal, non-exclusive license, under Apple's copyrights in
+ this original Apple software (the "Apple Software"), to use, reproduce, modify and
+ redistribute the Apple Software, with or without modifications, in source and/or binary
+ forms; provided that if you redistribute the Apple Software in its entirety and without
+ modifications, you must retain this notice and the following text and disclaimers in all
+ such redistributions of the Apple Software.  Neither the name, trademarks, service marks
+ or logos of Apple Computer, Inc. may be used to endorse or promote products derived from
+ the Apple Software without specific prior written permission from Apple. Except as expressly
+ stated in this notice, no other rights or licenses, express or implied, are granted by Apple
+ herein, including but not limited to any patent rights that may be infringed by your
+ derivative works or by other works in which the Apple Software may be incorporated.
+
+ The Apple Software is provided by Apple on an "AS IS" basis.  APPLE MAKES NO WARRANTIES,
+ EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE IMPLIED WARRANTIES OF NON-INFRINGEMENT,
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS
+ USE AND OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
+
+ IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE,
+ REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE APPLE SOFTWARE, HOWEVER CAUSED AND
+ WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR
+ OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/

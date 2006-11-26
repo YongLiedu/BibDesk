@@ -37,6 +37,7 @@
  */
 
 #import "BibPref_Files.h"
+#import "BDSKStringEncodingManager.h"
 #import "BibAppController.h"
 #import "BDSKCharacterConversion.h"
 #import "BDSKConverter.h"
@@ -46,20 +47,8 @@
 
 @implementation BibPref_Files
 
-- (void)awakeFromNib{
-    [super awakeFromNib];
-    
-    encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
-    [encodingPopUp removeAllItems];
-    [encodingPopUp addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
-}
-
-- (void)dealloc{
-    [super dealloc];
-}
-
 - (void)updateUI{
-    [encodingPopUp selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKDefaultStringEncodingKey]]];
+    [encodingPopUp setEncoding:[defaults integerForKey:BDSKDefaultStringEncodingKey]];
     [showErrorsCheckButton setState: 
 		([defaults boolForKey:BDSKShowWarningsKey] == YES) ? NSOnState : NSOffState  ];	
     [shouldTeXifyCheckButton setState:([defaults boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == YES) ? NSOnState : NSOffState];
@@ -80,10 +69,7 @@
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
-    NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
-    
-    // NSLog(@"set encoding to %i for tag %i", [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue], [sender indexOfSelectedItem]);    
-    [defaults setInteger:encoding forKey:BDSKDefaultStringEncodingKey];
+    [defaults setInteger:[sender encoding] forKey:BDSKDefaultStringEncodingKey];
     [defaults autoSynchronize];
 }
 

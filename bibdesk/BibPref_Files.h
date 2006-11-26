@@ -38,13 +38,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
-#import "BDSKStringEncodingManager.h"
 
+@class BDSKEncodingPopUpButton;
 
 @interface BibPref_Files : OAPreferenceClient {
-    BDSKStringEncodingManager *encodingManager;
     IBOutlet NSButton *showErrorsCheckButton;
-    IBOutlet NSPopUpButton *encodingPopUp;
+    IBOutlet BDSKEncodingPopUpButton *encodingPopUp;
     IBOutlet NSButton *shouldTeXifyCheckButton;
     IBOutlet NSButton *saveAnnoteAndAbstractAtEndButton;
     IBOutlet NSButton *useNormalizedNamesButton;

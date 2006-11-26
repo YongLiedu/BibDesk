@@ -86,6 +86,7 @@ NSString *BDSKShouldUsePDFMetadata = @"BDSKShouldUsePDFMetadata";
 NSString *BDSKShouldWritePDFMetadata = @"BDSKShouldWritePDFMetadata";
 NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
 
+NSString *BDSKStringEncodingsKey = @"BDSKStringEncodingsKey";
 NSString *BDSKDefaultStringEncodingKey = @"Default string encoding for opening and saving";
 NSString *BDSKShouldTeXifyWhenSavingAndCopyingKey = @"TeXify characters when saving or copying BibTeX";
 NSString *BDSKTeXPreviewFileEncodingKey = @"Character encoding for TeX preview file";
@@ -303,6 +304,7 @@ NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentContr
 NSString *BDSKDocumentControllerDidChangeMainDocumentNotification = @"BDSKDocumentControllerDidChangeMainDocumentNotification";
 NSString *BDSKSearchIndexInfoChangedNotification = @"BDSKSearchIndexInfoChangedNotification";
 NSString *BDSKApplicationWillTerminateNotification = @"BDSKApplicationWillTerminateNotification";
+NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
 
 #pragma mark Exception name strings
 

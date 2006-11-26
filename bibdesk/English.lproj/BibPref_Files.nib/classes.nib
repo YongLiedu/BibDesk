@@ -1,6 +1,11 @@
 {
     IBClasses = (
         {
+            CLASS = BDSKEncodingPopUpButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButton; 
+        }, 
+        {
             ACTIONS = {
                 editTemplateFile = id; 
                 resetConversions = id; 
@@ -21,7 +26,7 @@
                 autosaveDocumentButton = NSButton; 
                 autosaveTimeField = NSTextField; 
                 autosaveTimeStepper = NSStepper; 
-                encodingPopUp = NSPopUpButton; 
+                encodingPopUp = BDSKEncodingPopUpButton; 
                 outputTemplateFileButton = NSButton; 
                 saveAnnoteAndAbstractAtEndButton = NSButton; 
                 shouldTeXifyCheckButton = NSButton; 

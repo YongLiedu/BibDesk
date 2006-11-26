@@ -35,10 +35,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OAPreferenceClient.h>
 #import "BibPrefController.h"
-#import "BibAppController.h"
-#import "BDSKStringEncodingManager.h"
+
+@class BDSKEncodingPopUpButton;
 
 @interface BibPref_TeX : OAPreferenceClient
 {
@@ -46,8 +45,7 @@
     IBOutlet NSTextField *texBinaryPathField;
     IBOutlet NSTextField *bibtexBinaryPathField;
     IBOutlet NSComboBox *bibTeXStyleField;
-    IBOutlet NSPopUpButton *encodingPopUpButton;
-    BDSKStringEncodingManager *encodingManager;
+    IBOutlet BDSKEncodingPopUpButton *encodingPopUpButton;
 }
 
 - (IBAction)changeUsesTeX:(id)sender;

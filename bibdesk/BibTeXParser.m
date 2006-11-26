@@ -777,7 +777,7 @@ static void appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     Boolean isScriptGroup = FALSE;
     Boolean firstValue = TRUE;
     
-    NSStringEncoding groupsEncoding = [BDSKStringEncodingManager isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
+    NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
     
     while(field = bt_next_value(entry, field, NULL, &text)){
         if(text){

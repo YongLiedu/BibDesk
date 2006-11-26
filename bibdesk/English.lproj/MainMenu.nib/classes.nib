@@ -6,11 +6,16 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 openTextEncodingAccessoryView = NSView; 
-                openTextEncodingPopupButton = NSPopUpButton; 
+                openTextEncodingPopupButton = BDSKEncodingPopUpButton; 
                 openUsingFilterAccessoryView = NSView; 
                 openUsingFilterComboBox = NSComboBox; 
             }; 
             SUPERCLASS = NSDocumentController; 
+        }, 
+        {
+            CLASS = BDSKEncodingPopUpButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButton; 
         }, 
         {
             ACTIONS = {

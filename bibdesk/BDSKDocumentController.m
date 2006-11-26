@@ -70,8 +70,6 @@
 
 - (void)awakeFromNib{
     [openUsingFilterAccessoryView retain];
-	[openTextEncodingPopupButton removeAllItems];
-	[openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
 }
 
 - (id)mainDocument{
@@ -142,12 +140,12 @@
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
-    [openTextEncodingPopupButton selectItemWithTitle:[BDSKStringEncodingManager defaultEncodingDisplayName]];
+    [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
     [oPanel setDirectory:[self currentDirectory]];
 		
     int result = [self runModalOpenPanel:oPanel forTypes:types];
     if(result == NSOKButton){
-        *encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+        *encoding = [openTextEncodingPopupButton encoding];
         return [oPanel URLs];
     }else 
         return nil;
@@ -183,7 +181,7 @@
     [oPanel setAllowsMultipleSelection:YES];
     [oPanel setDirectory:[self currentDirectory]];
 
-    [openTextEncodingPopupButton selectItemWithTitle:[BDSKStringEncodingManager defaultEncodingDisplayName]];
+    [openTextEncodingPopupButton setEncoding:[BDSKStringEncodingManager defaultEncoding]];
     [openTextEncodingAccessoryView setFrameOrigin:NSZeroPoint];
     [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
@@ -204,7 +202,7 @@
     
     if (result == NSOKButton) {
         NSString *shellCommand = [openUsingFilterComboBox stringValue];
-        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+        NSStringEncoding encoding = [openTextEncodingPopupButton encoding];
         NSEnumerator *fileEnum = [[oPanel URLs] objectEnumerator];
         NSURL *aURL;
         

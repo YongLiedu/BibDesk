@@ -13,6 +13,11 @@
             SUPERCLASS = NSView; 
         }, 
         {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
+        {
+            CLASS = BDSKEncodingPopUpButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButton; 
+        }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKGroupCell; LANGUAGE = ObjC; SUPERCLASS = OATextWithIconCell; }, 
         {
@@ -140,7 +145,7 @@
                 mainBox = BDSKColoredBox; 
                 previewTextView = NSTextView; 
                 saveAccessoryView = NSView; 
-                saveTextEncodingPopupButton = NSPopUpButton; 
+                saveTextEncodingPopupButton = BDSKEncodingPopUpButton; 
                 searchField = BDSKSearchField; 
                 splitView = BDSKSplitView; 
                 statusBar = BDSKStatusBar; 

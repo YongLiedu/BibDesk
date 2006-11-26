@@ -248,6 +248,7 @@
 		CE392F5D08D04083001CEAC8 /* BDSKRatingButton.h in Headers */ = {isa = PBXBuildFile; fileRef = CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */; };
 		CE392F5E08D04083001CEAC8 /* BDSKRatingButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */; };
 		CE3A0BD60B1634D500233208 /* BDSKCompletionServerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */; };
+		CE3A1A570B19C2F700233208 /* SelectEncodingsPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE3A1A560B19C2F700233208 /* SelectEncodingsPanel.nib */; };
 		CE3A32D60A345C2400984DC2 /* NSAttributedString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB772E90A34529D00B8A299 /* NSAttributedString_BDSKExtensions.m */; };
 		CE3A32D70A345C2600984DC2 /* NSAttributedString_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CEB772E80A34529D00B8A299 /* NSAttributedString_BDSKExtensions.h */; };
 		CE3B5E7C09CEDE470017D339 /* BDSKMacroResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */; };
@@ -1098,6 +1099,7 @@
 		CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRatingButton.h; sourceTree = "<group>"; };
 		CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRatingButton.m; sourceTree = "<group>"; };
 		CE3A0BD50B1634D500233208 /* BDSKCompletionServerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCompletionServerProtocol.h; sourceTree = "<group>"; };
+		CE3A1A4B0B19C2C800233208 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SelectEncodingsPanel.nib; sourceTree = "<group>"; };
 		CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMacroResolver.h; sourceTree = "<group>"; };
 		CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMacroResolver.m; sourceTree = "<group>"; };
 		CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButton.h; sourceTree = "<group>"; };
@@ -1768,6 +1770,7 @@
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 				F9022CE70758050E00C3F701 /* Previewer.nib */,
 				CEF7295B09CC890400802D48 /* RemoveFieldSheet.nib */,
+				CE3A1A560B19C2F700233208 /* SelectEncodingsPanel.nib */,
 				27AFAFA8080D1E5B0096F5D2 /* TextImport.nib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
@@ -3134,6 +3137,7 @@
 				CEEFE2B70B03FB0100668BB0 /* BDSKURLGroupSheet.nib in Resources */,
 				CEEFE2B30B03FAF500668BB0 /* BDSKScriptGroupSheet.nib in Resources */,
 				CE7A4AA50B0B480100D1B333 /* BDSKCustomCiteDrawer.nib in Resources */,
+				CE3A1A570B19C2F700233208 /* SelectEncodingsPanel.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3757,6 +3761,14 @@
 				CE38FB96091D954E00BCB69D /* English */,
 			);
 			name = BDSKCondition.nib;
+			sourceTree = "<group>";
+		};
+		CE3A1A560B19C2F700233208 /* SelectEncodingsPanel.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE3A1A4B0B19C2C800233208 /* English */,
+			);
+			name = SelectEncodingsPanel.nib;
 			sourceTree = "<group>";
 		};
 		CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */ = {

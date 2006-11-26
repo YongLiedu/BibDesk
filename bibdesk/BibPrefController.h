@@ -60,6 +60,7 @@ extern NSString *BDSKAllFieldsString;
 extern NSString *BDSKTeXBinPathKey;
 extern NSString *BDSKBibTeXBinPathKey;
 extern NSString *BDSKBTStyleKey;
+extern NSString *BDSKStringEncodingsKey;
 extern NSString *BDSKDefaultStringEncodingKey;
 extern NSString *BDSKShouldTeXifyWhenSavingAndCopyingKey;
 extern NSString *BDSKTeXPreviewFileEncodingKey;
@@ -281,6 +282,7 @@ extern NSString *BDSKDocumentControllerRemoveDocumentNotification;
 extern NSString *BDSKDocumentControllerDidChangeMainDocumentNotification;
 extern NSString *BDSKSearchIndexInfoChangedNotification;
 extern NSString *BDSKApplicationWillTerminateNotification;
+extern NSString *BDSKEncodingsListChangedNotification;
 
 #pragma mark Exception name strings
 extern NSString *BDSKComplexStringException;

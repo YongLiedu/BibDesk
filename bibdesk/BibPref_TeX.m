@@ -35,6 +35,8 @@
  */
 
 #import "BibPref_TeX.h"
+#import "BibAppController.h"
+#import "BDSKStringEncodingManager.h"
 #import "BDSKPreviewer.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
@@ -47,9 +49,6 @@
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-    encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
-    [encodingPopUpButton removeAllItems];
-    [encodingPopUpButton addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
     
     BDSKShellCommandFormatter *formatter = [[BDSKShellCommandFormatter alloc] init];
     [texBinaryPathField setFormatter:formatter];
@@ -65,7 +64,7 @@
     [texBinaryPathField setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
     [bibtexBinaryPathField setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
     [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
-    [encodingPopUpButton selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]]];
+    [encodingPopUpButton setEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]];
     [bibTeXStyleField setEnabled:[defaults boolForKey:BDSKUsesTeXKey]];
     
     if ([BDSKShellCommandFormatter isValidExecutableCommand:[defaults objectForKey:BDSKTeXBinPathKey]])
@@ -175,8 +174,7 @@
 }
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
-    NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
-    [defaults setInteger:encoding forKey:BDSKTeXPreviewFileEncodingKey];        
+    [defaults setInteger:[sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
     [defaults autoSynchronize];
 }
 

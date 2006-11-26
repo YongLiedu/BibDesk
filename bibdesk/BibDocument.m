@@ -446,10 +446,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     else
         [headerCell selectItemAtIndex:0];
     
-    // Accessor view setup
-    [saveTextEncodingPopupButton removeAllItems];
-    [saveTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
-    
     // array of BDSKSharedGroup objects and zeroconf support, doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
     if([pw boolForKey:BDSKShouldLookForSharedFilesKey]){
@@ -792,8 +788,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     [savePanel setAccessoryView:accessoryView];
     
     // set the popup to reflect the document's present string encoding
-    NSString *documentEncodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
-    [saveTextEncodingPopupButton selectItemWithTitle:documentEncodingName];
+    [saveTextEncodingPopupButton setEncoding:[self documentStringEncoding]];
     [saveTextEncodingPopupButton setEnabled:YES];
     
     if(NSSaveToOperation == docState.currentSaveOperationType){
@@ -824,7 +819,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     
     // Set the string encoding according to the popup.  NB: the popup has the incorrect encoding if it wasn't displayed, so don't reset encoding unless we're actually modifying this document.
     if (NSSaveAsOperation == saveOperation)
-        [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
+        [self setDocumentStringEncoding:[saveTextEncodingPopupButton encoding]];
     
     BOOL success = [super saveToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation error:outError];
     if(success == NO)
@@ -983,7 +978,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     // export operations need their own encoding
     if(NSSaveToOperation == docState.currentSaveOperationType)
-        encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
+        encoding = [saveTextEncodingPopupButton encoding];
         
     if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
@@ -1111,9 +1106,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *error = nil;
         
     BOOL shouldAppendFrontMatter = YES;
-    NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
+    NSString *encodingName = [NSString localizedNameOfStringEncoding:encoding];
     
-    NSStringEncoding groupsEncoding = [BDSKStringEncodingManager isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
+    NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
 
     @try{
     
@@ -1406,7 +1401,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     NSString *filePath = [absoluteURL path];
-    BOOL useTmpEncoding = [BDSKStringEncodingManager isUnparseableEncoding:encoding];
+    BOOL useTmpEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding];
     
     [self setDocumentStringEncoding:encoding];
     

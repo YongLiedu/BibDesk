@@ -35,6 +35,8 @@
  */
 
 
+@class BDSKEncodingPopUpButton;
+
 @interface BDSKDocumentController : NSDocumentController {
     // stuff for the accessory view for openUsingFilter
     IBOutlet NSView* openUsingFilterAccessoryView;
@@ -42,7 +44,7 @@
 	
 	// stuff for the accessory view for open text encoding 
 	IBOutlet NSView *openTextEncodingAccessoryView;
-	IBOutlet NSPopUpButton *openTextEncodingPopupButton;
+	IBOutlet BDSKEncodingPopUpButton *openTextEncodingPopupButton;
     
     id mainDocument;
 }

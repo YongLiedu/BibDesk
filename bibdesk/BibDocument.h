@@ -45,7 +45,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox, BDSKSearchField;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox, BDSKSearchField, BDSKEncodingPopUpButton;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -153,7 +153,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
     IBOutlet NSView *saveAccessoryView;
     IBOutlet NSView *exportAccessoryView;
-    IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
+    IBOutlet BDSKEncodingPopUpButton *saveTextEncodingPopupButton;
     IBOutlet NSButton *exportSelectionCheckButton;
     
 #pragma mark Publications and Groups variables
