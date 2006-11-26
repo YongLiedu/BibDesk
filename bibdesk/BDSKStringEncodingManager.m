@@ -66,7 +66,7 @@
             
             defaultEncoding = [BDSKStringEncodingManager defaultEncoding];
             
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(encodingsListChanged:) name:@"BDSKEncodingsListChangedNotification" object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleEncodingsListChanged:) name:BDSKEncodingsListChangedNotification object:nil];
 	}
 	return self;
 }
@@ -86,7 +86,7 @@
             
             defaultEncoding = [BDSKStringEncodingManager defaultEncoding];
             
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleEncodingsListChanged:) name:@"BDSKEncodingsListChangedNotification" object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleEncodingsListChanged:) name:BDSKEncodingsListChangedNotification object:nil];
         }
     }
     return self;
@@ -188,7 +188,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 // encodings which btparse cannot handle, we might add more encodings when we find out
 - (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
 {
-    return encoding == NSUnicodeStringEncoding || encoding == NSShiftJISStringEncoding || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingShiftJIS);
+    return encoding == NSUnicodeStringEncoding || encoding == NSShiftJISStringEncoding || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingShiftJIS) || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingMacJapanese);
 }
 
 // Called once (when the UI is first brought up) to properly setup the encodings list in the "Customize Encodings List" panel.
@@ -288,6 +288,12 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     }
 
     if (post) [[NSNotificationCenter defaultCenter] postNotificationName:BDSKEncodingsListChangedNotification object:nil];
+}
+
+// Because we want the encoding list to be modifiable even when a modal panel (such as the open panel) is up, we indicate that both the encodings list panel and the target work when modal. (See showPanel: below for the former...)
+// CMH: this method seems to be undocumented, it is only documented for NSWindow, not for targets or whatever
+- (BOOL)worksWhenModal{
+    return YES;
 }
 
 #pragma mark Action methods
