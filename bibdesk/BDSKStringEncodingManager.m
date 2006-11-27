@@ -188,7 +188,11 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 // encodings which btparse cannot handle, we might add more encodings when we find out
 - (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
 {
-    return encoding == NSUnicodeStringEncoding || encoding == NSShiftJISStringEncoding || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingShiftJIS) || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingMacJapanese) || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_JP);
+    CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
+    return cfEncoding == kCFStringEncodingUTF16 || cfEncoding == kCFStringEncodingUTF16BE || cfEncoding == kCFStringEncodingUTF16LE || 
+           cfEncoding == kCFStringEncodingUTF32 || cfEncoding == kCFStringEncodingUTF32BE || cfEncoding == kCFStringEncodingUTF32LE || 
+           cfEncoding == kCFStringEncodingDOSJapanese || cfEncoding == kCFStringEncodingShiftJIS || cfEncoding == kCFStringEncodingMacJapanese || cfEncoding == kCFStringEncodingEUC_JP || cfEncoding == kCFStringEncodingShiftJIS_X0213_00 || 
+           cfEncoding == kCFStringEncodingEBCDIC_CP037;
 }
 
 // Called once (when the UI is first brought up) to properly setup the encodings list in the "Customize Encodings List" panel.
