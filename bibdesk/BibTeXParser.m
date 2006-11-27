@@ -261,6 +261,11 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
             bt_free_ast(entry);
 
         } // while (scanning through file) 
+        
+        if(ok == 0 && error == nil){
+            // couldn't parse a single item, record it and deal with it later.
+            OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description"), nil);
+        }
     }
     
     @catch (id exception) {
