@@ -86,17 +86,21 @@
 
 - (void)addDocument:(id)aDocument{
     [super addDocument:aDocument];
+    if(mainDocument == nil){
+        mainDocument = [[NSApp orderedDocuments] firstObject];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerDidChangeMainDocumentNotification object:aDocument];
+    }
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerAddDocumentNotification object:aDocument];
 }
 
 - (void)removeDocument:(id)aDocument{
     [aDocument retain];
     [super removeDocument:aDocument];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerRemoveDocumentNotification object:aDocument];
     if([mainDocument isEqual:aDocument]){
         mainDocument = [[NSApp orderedDocuments] firstObject];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerDidChangeMainDocumentNotification object:aDocument];
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerRemoveDocumentNotification object:aDocument];
     [aDocument release];
 }
 
