@@ -64,15 +64,13 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
             [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
         [self appendBytes:cstringPtr length:bufLen];
     } else {
-        CFDataRef data = CFStringCreateExternalRepresentation(CFAllocatorGetDefault(), (CFStringRef)string, cfEncoding, 0);
+        NSData *data = [[string dataUsingEncoding:encoding] retain];
      
         // raise if the conversion wasn't possible, since we're not using a loss byte
-        if (NULL == data)
+        if (nil == data)
             [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
         
-        // safe to append/CFRelease since the NULL case won't reach this point
         [self appendData:(NSData *)data];
-        CFRelease(data);
     }
 }
 
@@ -88,6 +86,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         if(nil == string)
             [NSException raise:BDSKEncodingConversionException format:@"Unable to convert data to string with encoding %@", [NSString localizedNameOfStringEncoding:fromEncoding]];
         [self appendDataFromString:string useEncoding:toEncoding];
+        [string release];
     }
 }
 
