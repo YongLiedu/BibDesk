@@ -745,6 +745,10 @@
     return ([self hasExternalGroupsSelected] == NO);
 }
 
+- (BOOL) validateSelectIncompletePublicationsMenuItem:(NSMenuItem *)menuItem{
+    return ([self hasExternalGroupsSelected] == NO);
+}
+
 - (BOOL)validateFindPanelActionMenuItem:(NSMenuItem *)menuItem {
 	switch ([menuItem tag]) {
 		case NSFindPanelActionShowFindPanel:
@@ -978,6 +982,9 @@
     }
 	else if (act == @selector(selectPossibleDuplicates:)){
         return [self validateSelectPossibleDuplicatesMenuItem:menuItem];
+    }
+	else if (act == @selector(selectIncompletePublications:)){
+        return [self validateSelectIncompletePublicationsMenuItem:menuItem];
     }
 	else if (act == @selector(performFindPanelAction:)){
         return [self validateFindPanelActionMenuItem:menuItem];

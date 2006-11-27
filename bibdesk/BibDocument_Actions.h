@@ -270,9 +270,10 @@
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender;
 
-#pragma mark Duplicate searching
+#pragma mark Duplicate and Incomplete searching
 
 - (IBAction)selectPossibleDuplicates:(id)sender;
 - (IBAction)selectDuplicates:(id)sender;
+- (IBAction)selectIncompletePublications:(id)sender;
 
 @end

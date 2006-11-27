@@ -1139,7 +1139,7 @@
                         contextInfo:NULL];
 }
 
-#pragma mark Duplicate searching
+#pragma mark Duplicate and Incomplete searching
 
 // select duplicates, then allow user to delete/copy/whatever
 - (IBAction)selectPossibleDuplicates:(id)sender{
@@ -1223,6 +1223,40 @@
     
 	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
     [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i duplicate %@ found.", @"Status message: [number] duplicate publication(s) found"), countOfItems, pubSingularPlural]];
+}
+
+- (IBAction)selectIncompletePublications:(id)sender{
+	[self setSearchString:@""]; // make sure we can see everything
+    
+    [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
+    
+    CFIndex i, index = [shownPublications count], countOfItems = 0;
+    BibItem *pub;
+    NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
+    BibTypeManager *typeman = [BibTypeManager sharedManager];
+    NSArray *reqFields;
+    
+    while(index--){
+        pub = [shownPublications objectAtIndex:index];
+        reqFields = [typeman requiredFieldsForType:[pub pubType]];
+        i = [reqFields count];
+        while(i--){
+            if([NSString isEmptyString:[pub valueOfField:[reqFields objectAtIndex:i]]]){
+                [rowsToSelect addIndex:index];
+                countOfItems++;
+                break;
+            }
+        }
+    }
+    
+    if(countOfItems){
+        [tableView selectRowIndexes:rowsToSelect byExtendingSelection:NO];
+        [tableView scrollRowToCenter:[rowsToSelect firstIndex]];  // make sure at least one item is visible
+    }else
+        NSBeep();
+    
+	NSString *pubSingularPlural = (countOfItems == 1) ? NSLocalizedString(@"publication", @"publication, in status message") : NSLocalizedString(@"publications", @"publications, in status message");
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"%i incomplete %@ found.", @"Status message: [number] incomplete publication(s) found"), countOfItems, pubSingularPlural]];
 }
 
 @end

@@ -146,6 +146,7 @@
                 selectAllPublications = id; 
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
+                selectIncompletePublications = id; 
                 selectLibraryGroup = id; 
                 selectPossibleDuplicates = id; 
                 sendToLyX = id; 
