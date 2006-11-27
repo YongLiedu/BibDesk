@@ -188,7 +188,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 // encodings which btparse cannot handle, we might add more encodings when we find out
 - (BOOL)isUnparseableEncoding:(NSStringEncoding)encoding;
 {
-    return encoding == NSUnicodeStringEncoding || encoding == NSShiftJISStringEncoding || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingShiftJIS) || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingMacJapanese);
+    return encoding == NSUnicodeStringEncoding || encoding == NSShiftJISStringEncoding || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingShiftJIS) || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingMacJapanese) || encoding == CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingEUC_JP);
 }
 
 // Called once (when the UI is first brought up) to properly setup the encodings list in the "Customize Encodings List" panel.
@@ -250,7 +250,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
 - (NSArray *)enabledEncodings {
     // see CFStringEncodingExt.h for CF encodings
     static const int defaultStringEncodings[] = {
-        kCFStringEncodingUnicode, kCFStringEncodingUTF8, kCFStringEncodingMacRoman, kCFStringEncodingWindowsLatin1, kCFStringEncodingASCII, kCFStringEncodingMacJapanese, kCFStringEncodingShiftJIS, kCFStringEncodingMacChineseTrad, kCFStringEncodingMacKorean, kCFStringEncodingMacChineseSimp, kCFStringEncodingGB_18030_2000, -1
+        kCFStringEncodingUTF8, kCFStringEncodingMacRoman, kCFStringEncodingWindowsLatin1, kCFStringEncodingASCII, kCFStringEncodingMacJapanese, kCFStringEncodingShiftJIS, kCFStringEncodingMacChineseTrad, kCFStringEncodingMacKorean, kCFStringEncodingMacChineseSimp, kCFStringEncodingGB_18030_2000, -1
     };
     if (encodings == nil) {
         NSMutableArray *encs = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKStringEncodingsKey] mutableCopy];
