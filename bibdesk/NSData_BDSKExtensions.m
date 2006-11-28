@@ -52,6 +52,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 - (void)appendDataFromString:(NSString *)string useEncoding:(NSStringEncoding)encoding;
 {
     CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
+    CFDataRef data = nil;
     
     // try this first; generally locale-specific, but it's really fast if it works
     const char *cstringPtr = CFStringGetCStringPtr((CFStringRef)string, cfEncoding);
@@ -63,14 +64,15 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         if (convertedLength != length)
             [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
         [self appendBytes:cstringPtr length:bufLen];
-    } else {
-        NSData *data = [[string dataUsingEncoding:encoding] retain];
-     
-        // raise if the conversion wasn't possible, since we're not using a loss byte
-        if (nil == data)
-            [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
-        
+    } else if(data = CFStringCreateExternalRepresentation(CFAllocatorGetDefault(), (CFStringRef)string, cfEncoding, 0)){
         [self appendData:(NSData *)data];
+        CFRelease(data);
+    }else if([string canBeConvertedToEncoding:encoding]){
+        // sometimes CFStringCreateExternalRepresentationreturns NULL even though the string can be converted
+        [self appendData:[string dataUsingEncoding:encoding]];
+    }else{
+        // raise if the conversion wasn't possible, since we're not using a loss byte
+        [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
     }
 }
 
