@@ -38,7 +38,12 @@
 
 #import "BDSKStringEncodingManager.h"
 
+// this one isn't declared in CFStringEncodingExt.h or CFString.h
+enum {
+    kBDStringEncodingMacKeyboardSymbol = 0x29
+};
 
+#pragma mark -
 
 // EncodingPopUpButton is a subclass of NSPopUpButton which provides the ability to automatically recompute its contents on changes to the encodings list. This allows sprinkling these around the app any have them automatically update themselves.  EncodingPopUpButtonCell is the corresponding cell. It would normally not be needed, but we really want to know when the cell's selectedItem is changed, as we want to prevent the last item ("Customize...") from being selected.
 @interface BDSKEncodingPopUpButtonCell : NSPopUpButtonCell
@@ -53,6 +58,7 @@
 
 @end
 
+#pragma mark -
 
 @implementation BDSKEncodingPopUpButton
 
@@ -177,8 +183,10 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
         qsort(tmp, num, sizeof(CFStringEncoding), encodingCompare);	// Sort it
         allEncodings = [[NSMutableArray alloc] init];			// Now put it in an NSArray
         for (cnt = 0; cnt < num; cnt++) {
-            NSStringEncoding nsEncoding = CFStringConvertEncodingToNSStringEncoding(tmp[cnt]);
-            if (nsEncoding && [NSString localizedNameOfStringEncoding:nsEncoding]) [allEncodings addObject:[NSNumber numberWithUnsignedInt:nsEncoding]];
+            CFStringEncoding cfEncoding = tmp[cnt];
+            NSStringEncoding nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+            if (nsEncoding && [NSString localizedNameOfStringEncoding:nsEncoding] && cfEncoding != kCFStringEncodingMacSymbol && cfEncoding != kCFStringEncodingMacDingbats && cfEncoding != kBDStringEncodingMacKeyboardSymbol)
+                [allEncodings addObject:[NSNumber numberWithUnsignedInt:nsEncoding]];
         }
         free(tmp);
     }
@@ -191,7 +199,7 @@ static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
     return cfEncoding == kCFStringEncodingUTF16 || cfEncoding == kCFStringEncodingUTF16BE || cfEncoding == kCFStringEncodingUTF16LE || 
            cfEncoding == kCFStringEncodingUTF32 || cfEncoding == kCFStringEncodingUTF32BE || cfEncoding == kCFStringEncodingUTF32LE || 
-           cfEncoding == kCFStringEncodingDOSJapanese || cfEncoding == kCFStringEncodingShiftJIS || cfEncoding == kCFStringEncodingMacJapanese || cfEncoding == kCFStringEncodingEUC_JP || cfEncoding == kCFStringEncodingShiftJIS_X0213_00 || 
+           cfEncoding == kCFStringEncodingDOSJapanese || cfEncoding == kCFStringEncodingShiftJIS || cfEncoding == kCFStringEncodingMacJapanese || cfEncoding == kCFStringEncodingISO_2022_JP || cfEncoding == kCFStringEncodingShiftJIS_X0213_00 || 
            cfEncoding == kCFStringEncodingEBCDIC_CP037;
 }
 
