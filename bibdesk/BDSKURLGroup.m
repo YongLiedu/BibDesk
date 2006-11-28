@@ -176,7 +176,7 @@
         int type = [contentString contentStringType];
         if (type == BDSKBibTeXStringType) {
             NSMutableString *frontMatter = [NSMutableString string];
-            pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:self error:&error];
+            pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:self encoding:NSUTF8StringEncoding error:&error];
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
         }

@@ -1401,31 +1401,27 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (BOOL)readFromBibTeXData:(NSData *)data fromURL:(NSURL *)absoluteURL encoding:(NSStringEncoding)encoding error:(NSError **)outError {
     NSString *filePath = [absoluteURL path];
-    BOOL useTmpEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding];
+    NSStringEncoding parserEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? NSUTF8StringEncoding : encoding;
     
     [self setDocumentStringEncoding:encoding];
     
-    if(useTmpEncoding){
+    if(parserEncoding != encoding){
         NSString *string = [[NSString alloc] initWithData:data encoding:encoding];
         if([string canBeConvertedToEncoding:NSUTF8StringEncoding]){
             data = [string dataUsingEncoding:NSUTF8StringEncoding];
             filePath = [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
             [data writeToFile:filePath atomically:YES];
             [string release];
-            [self setDocumentStringEncoding:NSUTF8StringEncoding];
         }else{
-            useTmpEncoding = NO;
-            NSLog(@"Unable to convert data from encoding %@ to UTF-8", [NSString localizedNameOfStringEncoding:[self documentStringEncoding]]);
+            parserEncoding = encoding;
+            NSLog(@"Unable to convert data from encoding %@ to UTF-8", [NSString localizedNameOfStringEncoding:encoding]);
         }
     }
     
     NSError *error = nil;
-	NSArray *newPubs = [BibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath document:self error:&error];
+	NSArray *newPubs = [BibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath document:self encoding:parserEncoding error:&error];
 	if(outError) *outError = error;	
     [self setPublicationsWithoutUndo:newPubs];
-    
-    if(useTmpEncoding)
-        [self setDocumentStringEncoding:encoding];
     
     return error == nil;
 }
@@ -1771,11 +1767,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *parseError = nil;
     
     if(type == BDSKBibTeXStringType){
-        data = [string dataUsingEncoding:NSUTF8StringEncoding];
-        newPubs = [BibTeXParser itemsFromData:data document:self error:&parseError];
+        newPubs = [BibTeXParser itemsFromString:string document:self error:&parseError];
     }else if(type == BDSKNoKeyBibTeXStringType){
-        data = [[string stringWithPhoneyCiteKeys:@"FixMe"] dataUsingEncoding:NSUTF8StringEncoding];
-        newPubs = [BibTeXParser itemsFromData:data document:self error:&parseError];
+        newPubs = [BibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] document:self error:&parseError];
 	}else if (type != BDSKUnknownStringType){
         newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&parseError];
     }
@@ -1875,8 +1869,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             
             if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey]){
                 NSData *btData = [[NSFileManager defaultManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
-                if(btData)
-                    newBI = [[BibTeXParser itemsFromData:btData document:self error:&xerror] firstObject];
+                if(btData){
+                    NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
+                    newBI = [[BibTeXParser itemsFromString:btString document:self error:&xerror] firstObject];
+                    [btString release];
+                }
             }
             
             if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])

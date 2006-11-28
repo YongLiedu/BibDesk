@@ -47,31 +47,33 @@
 + (BOOL)canParseStringAfterFixingKeys:(NSString *)string;
 
 /*!
-    @method     itemsFromData:error:document:
-    @abstract   Convenience method that returns an array of BibItems from the input NSData; used by the pasteboard.  Uses libbtparse to parse the data.
+    @method     itemsFromString:error:document:encoding:error:
+    @abstract   Convenience method that returns an array of BibItems from the input string; used by the pasteboard.  Uses libbtparse to parse the data.
     @discussion (comprehensive description)
-    @param      inData (description)
+    @param      aString (description)
     @param      anOwner (description)
     @param      outError (description)
     @result     (description)
 */
-+ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKOwner>)anOwner error:(NSError **)outError;
++ (NSMutableArray *)itemsFromString:(NSString *)aString document:(id<BDSKOwner>)anOwner error:(NSError **)outError;
 
 /*!
-    @method     itemsFromData:error:frontMatter:filePath:document:
+    @method     itemsFromData:error:frontMatter:filePath:document:encoding:error:
     @abstract   Parsing method that returns an array of BibItems from data, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
     @param      inData (description)
     @param      frontMatter (description)
     @param      filePath (description)
     @param      anOwner (description)
-    @result     (description)
+    @param      parserEncoding (description)
     @param      outError (description)
+    @result     (description)
 */
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                       frontMatter:(NSMutableString *)frontMatter
                          filePath:(NSString *)filePath
 						 document:(id<BDSKOwner>)anOwner
+                         encoding:(NSStringEncoding)parserEncoding
                             error:(NSError **)outError;
 
 /*!

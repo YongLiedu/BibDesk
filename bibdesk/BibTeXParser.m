@@ -110,11 +110,12 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
 }
 
 /// libbtparse methods
-+ (NSMutableArray *)itemsFromData:(NSData *)inData document:(id<BDSKOwner>)anOwner error:(NSError **)outError{
-    return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString document:anOwner error:outError];
++ (NSMutableArray *)itemsFromString:(NSString *)aString document:(id<BDSKOwner>)anOwner error:(NSError **)outError{
+    NSData *inData = [aString dataUsingEncoding:NSUTF8StringEncoding];
+    return [self itemsFromData:inData frontMatter:nil filePath:BDSKParserPasteDragString document:anOwner encoding:NSUTF8StringEncoding error:outError];
 }
 
-+ (NSMutableArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner error:(NSError **)outError{
++ (NSMutableArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding error:(NSError **)outError{
     
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if ([inData length] == 0)
@@ -148,7 +149,6 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
     FILE *infile = NULL;
     BOOL isPasteOrDrag = [filePath isEqualToString:BDSKParserPasteDragString];
     
-    NSStringEncoding parserEncoding = (document == nil || isPasteOrDrag ? NSUTF8StringEncoding : [document documentStringEncoding]);
     
     NSError *error = nil;
     

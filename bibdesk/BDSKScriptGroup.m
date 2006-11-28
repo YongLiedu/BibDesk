@@ -215,13 +215,13 @@
 
     NSArray *pubs = nil;
     int type = [outputString contentStringType];
-    if (type == BDSKBibTeXStringType) {
+    if (type == BDSKNoKeyBibTeXStringType) {
         outputString = [outputString stringWithPhoneyCiteKeys:@"FixMe"];
         type = BDSKBibTeXStringType;
     }
     if (type == BDSKBibTeXStringType) {
         NSMutableString *frontMatter = [NSMutableString string];
-        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:@"" document:self error:&error];
+        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:@"" document:self encoding:NSUTF8StringEncoding error:&error];
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {

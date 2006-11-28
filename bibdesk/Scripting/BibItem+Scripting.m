@@ -276,7 +276,6 @@ Extra wrapping of the created and modified date methods to
  This may be a bit of a hack for a few reasons: (a) there seems to be no good way to initialise a BibItem from a BibString when it already exists and (b) I suspect this isn't the way you're supposed to do AS.
 */
 - (void) setBibTeXString:(NSString*) btString {
-    NSData *data = [btString dataUsingEncoding:NSUTF8StringEncoding];
 	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
 
 	// we do not allow setting the bibtex string after an edit, only at initialization
@@ -289,7 +288,7 @@ Extra wrapping of the created and modified date methods to
 	}
 
     NSError *error = nil;
-    NSArray *newPubs = [BibTeXParser itemsFromData:data document:[self owner] error:&error];
+    NSArray *newPubs = [BibTeXParser itemsFromString:btString document:[self owner] error:&error];
 	
 	// try to do some error handling for AppleScript
 	if(error) {
