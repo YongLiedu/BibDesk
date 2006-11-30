@@ -468,8 +468,14 @@
                             [filePaths addObject:path];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                            if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
-                                NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
+                            @try{
+                                if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
+                                    NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
+                            }
+                            @catch(id exception){
+                                // this could be a TeXify exception
+                                NSLog(@"%@ line %d: adding xattrs failed with exception %@", __FILENAMEASNSSTRING__, __LINE__, exception);
+                            }
                             // writing the standard PDF metadata alters the original file, so we'll make it a separate preference; this is also really slow
                             if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadata])
                                 [pub addPDFMetadataToFileForLocalURLField:dragColumnId];
