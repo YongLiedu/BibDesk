@@ -50,29 +50,33 @@ extern NSString *BDSKEncodingConversionException;
 - (void)appendUTF8DataFromString:(NSString *)string;
 
 /*!
-    @method     appendDataFromString:encoding:
+    @method     appendDataFromString:encoding:error:error
     @abstract   Appends the string to the receiver using the specified data representation.  Raises BDSKEncodingConversionException exception if the conversion did not occur losslessly.
     @discussion (comprehensive description)
     @param      string (description)
     @param      encoding (description)
+    @param      error (description)
 */
-- (void)appendDataFromString:(NSString *)string useEncoding:(NSStringEncoding)encoding;
+- (BOOL)appendDataFromString:(NSString *)string encoding:(NSStringEncoding)encoding error:(NSError **)error;
 
 /*!
-    @method     appendStringData:convertedFromUTF8ToEncoding
+    @method     appendStringData:convertedFromUTF8ToEncoding:error:error
     @abstract   Appends the string data to the receiver after converting it from UTF-8 encoding to the specified encoding.
     @discussion (comprehensive description)
+    @param      data (description)
+    @param      ecoding (description)
 */
-- (void)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding;
+- (BOOL)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding error:(NSError **)error;
 
 /*!
-    @method     appendStringData:convertedFromEncoding:toEncoding:
+    @method     appendStringData:convertedFromEncoding:toEncoding:error:error
     @abstract   Appends the string data to the receiver after converting it using the specified encodings.  Raises BDSKEncodingConversionException exception if the conversion did not occur losslessly.
     @discussion (comprehensive description)
     @param      data (description)
     @param      fromEncoding (description)
     @param      toEncoding (description)
+    @param      error (description)
 */
-- (void)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding;
+- (BOOL)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding error:(NSError **)error;
 
 @end

@@ -1016,21 +1016,24 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(kBDSKDocumentEncodingSaveError == [error code]){
             // encoding conversion failure (string to data)
             NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] intValue];
-            NSString *usedName = [NSString localizedNameOfStringEncoding:usedEncoding];
-            NSString *UTF8Name = [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding];
+            NSString *context = [error valueForKey:NSLocalizedRecoverySuggestionErrorKey];
+            NSMutableString *messageFormat = [NSMutableString stringWithString:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Unable to convert %@.", @"Error informative text")];
             
-            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"Error description") underlyingError:error];
+            [messageFormat appendString:@"  "];
             
             // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
             if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @"Error informative text"), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
+                [messageFormat appendString:NSLocalizedString(@"You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @"Error informative text")];
             } else if (NSUTF8StringEncoding != usedEncoding){
                 // could suggest disabling TeX conversion, but the error might be from something out of the range of what we try to convert, so combining TeXify && UTF-8 would work
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  You should save using an encoding such as %@.", @"Error informative text"), usedName, UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
+                [messageFormat appendString:NSLocalizedString(@"You should save using an encoding such as %@.", @"Error informative text")];
             } else {
                 // if UTF-8 fails, you're hosed...
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Please report this error to BibDesk's developers.", @"Error informative text"), UTF8Name] forKey:NSLocalizedRecoverySuggestionErrorKey];
+                [messageFormat appendString:NSLocalizedString(@"Please report this error to BibDesk's developers.", @"Error informative text")];
             }
+            
+            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"Error description") underlyingError:error];
+            [error setValue:[NSString stringWithFormat:messageFormat, [NSString localizedNameOfStringEncoding:usedEncoding], context, [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
                         
         } else if(kBDSKDocumentTeXifySaveError == [error code]) {
             NSError *underlyingError = [[error copy] autorelease];
@@ -1129,23 +1132,27 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 shouldAppendFrontMatter = NO;
             }
             
-            [outputData appendDataFromString:templateFile useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:templateFile encoding:encoding error:&error])
+                @throw NSLocalizedString(@"template string", @"string encoding error context");
         }
         
         NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding];
 
         // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
         if(shouldAppendFrontMatter){
-            [outputData appendDataFromString:frontMatter useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:frontMatter encoding:encoding error:&error])
+                @throw NSLocalizedString(@"file header", @"string encoding error context");
             [outputData appendData:doubleNewlineData];
         }
             
         if([documentInfo count]){
-            [outputData appendDataFromString:[self documentInfoString] useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:[self documentInfoString] encoding:encoding error:&error])
+                @throw NSLocalizedString(@"document info", @"string encoding error context");
         }
         
         // output the document's macros:
-        [outputData appendDataFromString:[[self macroResolver] bibTeXString] useEncoding:encoding];
+        if(NO == [outputData appendDataFromString:[[self macroResolver] bibTeXString] encoding:encoding error:&error])
+            @throw NSLocalizedString(@"macros", @"string encoding error context");
         
         // output the bibs
         
@@ -1153,31 +1160,36 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
         while(pub = [e nextObject]){
             [outputData appendData:doubleNewlineData];
-            [outputData appendDataFromString:[pub bibTeXStringDroppingInternal:drop] useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:[pub bibTeXStringDroppingInternal:drop] encoding:encoding error:&error])
+                @throw [NSString stringWithFormat:NSLocalizedString(@"item with cite key %@", @"string encoding error context"), [pub citeKey]];
         }
         
         // The data from groups is always UTF-8, and we shouldn't convert it unless we have an unparseable encoding; the comment key strings should be representable in any encoding
         if([[groups staticGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
-            [outputData appendDataFromString:@"}}" useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] ||
+               NO == [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
+               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
+                @throw NSLocalizedString(@"static groups", @"string encoding error context");
         }
         if([[groups smartGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
-            [outputData appendDataFromString:@"}}" useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] ||
+               NO == [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
+               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
+                @throw NSLocalizedString(@"smart groups", @"string encoding error context");
         }
         if([[groups URLGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedURLGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
-            [outputData appendDataFromString:@"}}" useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] ||
+               NO == [outputData appendStringData:[groups serializedURLGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
+               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
+                @throw NSLocalizedString(@"external file groups", @"string encoding error context");
         }
         if([[groups scriptGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" useEncoding:encoding];
-            [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromUTF8ToEncoding:groupsEncoding];
-            [outputData appendDataFromString:@"}}" useEncoding:encoding];
+            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] ||
+               NO == [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
+               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
+                @throw NSLocalizedString(@"script groups", @"string encoding error context");
         }
-        [outputData appendDataFromString:@"\n" useEncoding:encoding];
+        [outputData appendDataFromString:@"\n" encoding:encoding error:&error];
         
     }
     
@@ -1185,11 +1197,11 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         // We used to throw the exception back up, but that caused major grief with the NSErrors.  Since we had multiple call levels adding a local NSError, when we jumped to the handler in writeToURL:ofType:error:, it had an uninitialized error (since dataOfType:error: never returned).  This would occasionally cause a crash when saving or autosaving, since NSDocumentController would apparently try to use the error.  It's much safer just to catch and discard the exception here, then propagate the NSError back up and return nil.
         
-        if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKEncodingConversionException]){
+        if(kBDSKDocumentEncodingSaveError == [error code]){
+            OBASSERT([exception isKindOfClass:[NSString class]]);
             // encoding conversion failed
             NSLog(@"Unable to save file with encoding %@", encodingName);
-            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert the bibliography to encoding %@", @"Error description"), encodingName]];
-            [error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+            [error setValue:exception forKey:NSLocalizedRecoverySuggestionErrorKey];
             
         } else if([exception isKindOfClass:[NSException class]] && [[exception name] isEqual:BDSKTeXifyException]){
             // TeXification failed

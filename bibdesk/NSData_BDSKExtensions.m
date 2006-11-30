@@ -37,6 +37,7 @@
  */
 
 #import "NSData_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 
@@ -44,12 +45,12 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
 
 - (void)appendUTF8DataFromString:(NSString *)string;
 {
-    [self appendDataFromString:string useEncoding:NSUTF8StringEncoding];
+    [self appendDataFromString:string encoding:NSUTF8StringEncoding error:NULL];
 }
 
 // OmniFoundation implements an identical method (hence our different method signature); however, they raise an NSInvalidArgumentException, and I want something less generic.
 
-- (void)appendDataFromString:(NSString *)string useEncoding:(NSStringEncoding)encoding;
+- (BOOL)appendDataFromString:(NSString *)string encoding:(NSStringEncoding)encoding error:(NSError **)error;
 {
     CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
     CFDataRef data = nil;
@@ -61,8 +62,13 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         CFIndex length = CFStringGetLength((CFStringRef)string);
         CFIndex bufLen;
         CFIndex convertedLength = CFStringGetBytes((CFStringRef)string, CFRangeMake(0, length), cfEncoding, 0, FALSE, NULL, UINT_MAX, &bufLen);
-        if (convertedLength != length)
-            [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
+        if (convertedLength != length){
+            if(error != NULL){
+                *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
+                [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+            }
+            return NO;
+        }
         [self appendBytes:cstringPtr length:bufLen];
     } else if(data = CFStringCreateExternalRepresentation(CFAllocatorGetDefault(), (CFStringRef)string, cfEncoding, 0)){
         [self appendData:(NSData *)data];
@@ -72,24 +78,36 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         [self appendData:[string dataUsingEncoding:encoding]];
     }else{
         // raise if the conversion wasn't possible, since we're not using a loss byte
-        [NSException raise:BDSKEncodingConversionException format:@"Unable to convert string to encoding %@", [NSString localizedNameOfStringEncoding:encoding]];
+        if(error != NULL){
+            *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
+            [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
+        }
+        return NO;
     }
+    return YES;
 }
 
-- (void)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding{
-    [self appendStringData:data convertedFromEncoding:NSUTF8StringEncoding toEncoding:encoding];
+- (BOOL)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding error:(NSError **)error{
+    return [self appendStringData:data convertedFromEncoding:NSUTF8StringEncoding toEncoding:encoding error:error];
 }
 
-- (void)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding{
+- (BOOL)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding error:(NSError **)error{
+    BOOL success = YES;
     if(fromEncoding == toEncoding){
         [self appendData:data];
     }else{
         NSString *string = [[NSString alloc] initWithData:data encoding:fromEncoding];
-        if(nil == string)
-            [NSException raise:BDSKEncodingConversionException format:@"Unable to convert data to string with encoding %@", [NSString localizedNameOfStringEncoding:fromEncoding]];
-        [self appendDataFromString:string useEncoding:toEncoding];
+        if(nil == string){
+            if(error != NULL){
+                *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert data to string with encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:toEncoding]]];
+                [*error setValue:[NSNumber numberWithInt:toEncoding] forKey:NSStringEncodingErrorKey];
+            }
+            return NO;
+        }
+        success = [self appendDataFromString:string encoding:toEncoding error:error];
         [string release];
     }
+    return success;
 }
 
 @end
