@@ -1114,111 +1114,90 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSStringEncoding groupsEncoding = [[BDSKStringEncodingManager sharedEncodingManager] isUnparseableEncoding:encoding] ? encoding : NSUTF8StringEncoding;
 
-    @try{
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
+        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
+        
+        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+
+        [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
+        
+        // remove all whitespace so we can make a comparison; just collapsing isn't quite good enough, unfortunately
+        NSString *collapsedTemplate = [templateFile stringByRemovingWhitespace];
+        NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
+        if([NSString isEmptyString:collapsedFrontMatter]){
+            shouldAppendFrontMatter = NO;
+        }else if([collapsedTemplate containsString:collapsedFrontMatter]){
+            NSLog(@"*** WARNING! *** Found duplicate preamble %@.  Using template from preferences.", frontMatter);
+            shouldAppendFrontMatter = NO;
+        }
+        
+        if(NO == [outputData appendDataFromString:templateFile encoding:encoding error:&error])
+            [error setValue:NSLocalizedString(@"Unable to convert template string.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
     
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
-            NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
-            
-            [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+    NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding];
 
-            [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
-            
-            // remove all whitespace so we can make a comparison; just collapsing isn't quite good enough, unfortunately
-            NSString *collapsedTemplate = [templateFile stringByRemovingWhitespace];
-            NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
-            if([NSString isEmptyString:collapsedFrontMatter]){
-                shouldAppendFrontMatter = NO;
-            }else if([collapsedTemplate containsString:collapsedFrontMatter]){
-                NSLog(@"*** WARNING! *** Found duplicate preamble %@.  Using template from preferences.", frontMatter);
-                shouldAppendFrontMatter = NO;
-            }
-            
-            if(NO == [outputData appendDataFromString:templateFile encoding:encoding error:&error])
-                [error setValue:NSLocalizedString(@"Unable to convert template string.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
+    // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
+    if(error == nil && shouldAppendFrontMatter){
+        if(NO == [outputData appendDataFromString:frontMatter encoding:encoding error:&error])
+            [error setValue:NSLocalizedString(@"Unable to convert file header.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [outputData appendData:doubleNewlineData];
+    }
         
-        NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding];
+    if(error == nil && [documentInfo count]){
+        if(NO == [outputData appendDataFromString:[self documentInfoString] encoding:encoding error:&error])
+            [error setValue:NSLocalizedString(@"Unable to convert document info.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
+    
+    // output the document's macros:
+    if(error == nil)
+        tmpString = [[self macroResolver] bibTeXStringReturningError:&error];
+    if(error == nil && NO == [outputData appendDataFromString:tmpString encoding:encoding error:&error])
+        [error setValue:NSLocalizedString(@"Unable to convert macros.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    
+    // output the bibs
+    
+    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-        // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
-        if(error == nil && shouldAppendFrontMatter){
-            if(NO == [outputData appendDataFromString:frontMatter encoding:encoding error:&error])
-                [error setValue:NSLocalizedString(@"Unable to convert file header.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-            [outputData appendData:doubleNewlineData];
-        }
-            
-        if(error == nil && [documentInfo count]){
-            if(NO == [outputData appendDataFromString:[self documentInfoString] encoding:encoding error:&error])
-                [error setValue:NSLocalizedString(@"Unable to convert document info.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-        
-        // output the document's macros:
-        if(error == nil)
-            tmpString = [[self macroResolver] bibTeXStringReturningError:&error];
+    while(error == nil && (pub = [e nextObject])){
+        tmpString = [pub bibTeXStringDroppingInternal:drop error:&error];
+        [outputData appendData:doubleNewlineData];
         if(error == nil && NO == [outputData appendDataFromString:tmpString encoding:encoding error:&error])
-            [error setValue:NSLocalizedString(@"Unable to convert macros.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        
-        // output the bibs
-        
-        if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
-
-        while(error == nil && (pub = [e nextObject])){
-            tmpString = [pub bibTeXStringDroppingInternal:drop error:&error];
-            [outputData appendData:doubleNewlineData];
-            if(error == nil && NO == [outputData appendDataFromString:tmpString encoding:encoding error:&error])
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert item with cite key %@.", @"string encoding error context"), [pub citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-        
-        // The data from groups is always UTF-8, and we shouldn't convert it unless we have an unparseable encoding; the comment key strings should be representable in any encoding
-        if(error == nil && [[groups staticGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] &&
-            [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
-            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
-            if(error)
-                [error setValue:NSLocalizedString(@"Unable to convert static groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-        if(error == nil && [[groups smartGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] &&
-            [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
-            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
-            if(error)
-                [error setValue:NSLocalizedString(@"Unable to convert smart groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-        if(error == nil && [[groups URLGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] &&
-            [outputData appendStringData:[groups serializedURLGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
-            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
-            if(error)
-                [error setValue:NSLocalizedString(@"Unable to convert external file groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
-        if(error == nil && [[groups scriptGroups] count] > 0){
-            [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] &&
-            [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
-            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
-            if(error)
-                [error setValue:NSLocalizedString(@"Unable to convert script groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
-        }
+            [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert item with cite key %@.", @"string encoding error context"), [pub citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
+    
+    // The data from groups is always UTF-8, and we shouldn't convert it unless we have an unparseable encoding; the comment key strings should be representable in any encoding
+    if(error == nil && [[groups staticGroups] count] > 0){
+        [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] &&
+        [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+        [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+        if(error)
+            [error setValue:NSLocalizedString(@"Unable to convert static groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
+    if(error == nil && [[groups smartGroups] count] > 0){
+        [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] &&
+        [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+        [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+        if(error)
+            [error setValue:NSLocalizedString(@"Unable to convert smart groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
+    if(error == nil && [[groups URLGroups] count] > 0){
+        [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] &&
+        [outputData appendStringData:[groups serializedURLGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+        [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+        if(error)
+            [error setValue:NSLocalizedString(@"Unable to convert external file groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
+    if(error == nil && [[groups scriptGroups] count] > 0){
+        [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] &&
+        [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+        [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+        if(error)
+            [error setValue:NSLocalizedString(@"Unable to convert script groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
+    if(error == nil)
         [outputData appendDataFromString:@"\n" encoding:encoding error:&error];
         
-    }
-    
-    @catch(id exception){
-        
-        // We used to throw the exception back up, but that caused major grief with the NSErrors.  Since we had multiple call levels adding a local NSError, when we jumped to the handler in writeToURL:ofType:error:, it had an uninitialized error (since dataOfType:error: never returned).  This would occasionally cause a crash when saving or autosaving, since NSDocumentController would apparently try to use the error.  It's much safer just to catch and discard the exception here, then propagate the NSError back up and return nil.
-        
-        if(kBDSKDocumentEncodingSaveError == [error code]){
-            OBASSERT([exception isKindOfClass:[NSString class]]);
-            // encoding conversion failed
-            NSLog(@"Unable to save file with encoding %@", encodingName);
-            [error setValue:exception forKey:NSLocalizedRecoverySuggestionErrorKey];
-            
-        } else if(kBDSKDocumentTeXifySaveError != [error code]){
-            // some unknown exception
-            NSLog(@"Exception %@ in %@", exception, NSStringFromSelector(_cmd));
-            error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:[exception description]];
-        }
-        outputData = nil;
-    }
-	
     if (outError) *outError = error;
 
     return outputData;
