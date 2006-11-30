@@ -468,14 +468,8 @@
                             [filePaths addObject:path];
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
-                            @try{
-                                if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXStringReturningError:NULL] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
-                                    NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
-                            }
-                            @catch(id exception){
-                                // this could be a TeXify exception
-                                NSLog(@"%@ line %d: adding xattrs failed with exception %@", __FILENAMEASNSSTRING__, __LINE__, exception);
-                            }
+                            if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXStringReturningError:NULL] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
+                                NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                             // writing the standard PDF metadata alters the original file, so we'll make it a separate preference; this is also really slow
                             if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldWritePDFMetadata])
                                 [pub addPDFMetadataToFileForLocalURLField:dragColumnId];
@@ -619,6 +613,7 @@
         int index = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
 		NSMutableString *s = [NSMutableString string];
 		BibItem *firstItem = [promisedDraggedItems objectAtIndex:0];
+        NSString *bibString;
         
         dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
 		
@@ -629,7 +624,9 @@
 		switch (dragCopyType) {
 			case BDSKBibTeXDragCopyType:
 			case BDSKMinimalBibTeXDragCopyType:
-				[s appendString:[firstItem bibTeXStringDroppingInternal:YES error:NULL]];
+				bibString = [firstItem bibTeXStringDroppingInternal:YES error:NULL];
+                if(bibString)
+                    [s appendString:bibString];
 				if (count > 1) {
 					[s appendString:@"\n"];
 					[s appendString:[NSString horizontalEllipsisString]];

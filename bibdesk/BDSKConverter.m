@@ -143,13 +143,13 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		BDSKComplexString *cs = (BDSKComplexString *)s;
 		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
 		BDSKStringNode *node, *newNode;
-		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
+		NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[cs nodes] count]];
         NSString *string;
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING){
 				string = [self copyStringByTeXifyingString:[node value] error:&error];
-                if(error) break;
+                if(string == nil) break;
                 newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
                 [string release];
 			} else {
@@ -158,8 +158,16 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
             [nodes addObject:newNode];
 			[newNode release];
 		}
-        if(outError) *outError = error;
-		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
+        
+        if(error == nil){
+            string = [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
+        }else{
+            if(outError) *outError = error;
+            string = nil;
+        }
+            
+        [nodes release];
+		return string;
 	}
 	
     // we expect to find composed accented characters, as this is also what we use in the CharacterConversion plist
@@ -210,7 +218,11 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     
     [precomposedString release];
     
-    if(outError) *outError = error;
+    if(error != nil){
+        if(outError) *outError = error;
+        [convertedSoFar release];
+        convertedSoFar = nil;
+    }
     
     return convertedSoFar;
 }
