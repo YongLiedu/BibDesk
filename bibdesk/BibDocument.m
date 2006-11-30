@@ -1157,7 +1157,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // output the document's macros:
     if(isOK)
         tmpString = [[self macroResolver] bibTeXStringReturningError:&error];
-    isOK = (nil != tmpString) && (NO == [outputData appendDataFromString:tmpString encoding:encoding error:&error]);
+    isOK = (nil != tmpString) && [outputData appendDataFromString:tmpString encoding:encoding error:&error];
     if(NO == isOK)
         [error setValue:NSLocalizedString(@"Unable to convert macros.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
     
@@ -1168,9 +1168,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     while(isOK && (pub = [e nextObject])){
         [outputData appendData:doubleNewlineData];
         tmpString = [pub bibTeXStringDroppingInternal:drop error:&error];
-        isOK = (nil != tmpString) && (NO == [outputData appendDataFromString:tmpString encoding:encoding error:&error]);
-        if(NO == isOK)
+        isOK = (nil != tmpString) && [outputData appendDataFromString:tmpString encoding:encoding error:&error];
+        if(NO == isOK){
             [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert item with cite key %@.", @"string encoding error context"), [pub citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        }
     }
     
     // The data from groups is always UTF-8, and we shouldn't convert it unless we have an unparseable encoding; the comment key strings should be representable in any encoding
