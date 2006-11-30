@@ -265,9 +265,9 @@ static NSString *RISEndPageString = @"Ep";
 
 + (NSString *)stringByFixingInputString:(NSString *)inputString;
 {
-    // Scopus doesn't put the end tag RE on a separate line.
+    // Scopus doesn't put the end tag ER on a separate line.
     AGRegex *endTag = [AGRegex regexWithPattern:@"([^\r\n])ER  - $" options:AGRegexMultiline];
-    return [endTag replaceWithString:@"$1\r\nER  - " inString:self];
+    return [endTag replaceWithString:@"$1\r\nER  - " inString:inputString];
 }
 
 @end
