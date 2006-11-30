@@ -282,9 +282,9 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
         
-    // this is a sanity check; an encoding of zero is not valid, so is a signal we should ignore xattrs
-    NSStringEncoding encodingFromFile = [xattrDefaults intForKey:BDSKDocumentStringEncodingKey defaultValue:0];
-    if (encodingFromFile && encodingFromFile != [self documentStringEncoding]) {
+    // this is a sanity check; an encoding of 0xFFFFFFFF is not valid, so is a signal we should ignore xattrs
+    NSStringEncoding encodingFromFile = [xattrDefaults unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:0xFFFFFFFF];
+    if (encodingFromFile != 0xFFFFFFFF && encodingFromFile != [self documentStringEncoding]) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Document was opened with incorrect encoding", @"Message in alert dialog when opening a document with different encoding")
                                          defaultButton:NSLocalizedString(@"Close", @"Button title")
                                        alternateButton:NSLocalizedString(@"Ignore", @"Button title") otherButton:nil
@@ -543,7 +543,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         
         // if this isn't a save operation, the encoding in xattr is already correct, while our encoding might be different from the actual file encoding, if the user might ignored an encoding warning without saving
         if(isSave)
-            [dictionary setIntValue:[self documentStringEncoding] forKey:BDSKDocumentStringEncodingKey];
+            [dictionary setUnsignedIntValue:[self documentStringEncoding] forKey:BDSKDocumentStringEncodingKey];
         
         // encode groups so we can select them later with isEqual: (saving row indexes would not be as reliable)
         [dictionary setObject:([self hasExternalGroupsSelected] ? [NSData data] : [NSKeyedArchiver archivedDataWithRootObject:[self selectedGroups]]) forKey:BDSKSelectedGroupsKey];
