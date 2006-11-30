@@ -134,10 +134,6 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     [self setDetexifyAccents:[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY]];
 }
 
-- (NSString *)stringByTeXifyingString:(NSString *)s{
-    return [[self copyStringByTeXifyingString:s] autorelease];
-}
-
 - (NSString *)copyStringByTeXifyingString:(NSString *)s{
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
@@ -145,13 +141,17 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
 		BDSKStringNode *node, *newNode;
 		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
+        NSString *string;
 		
 		while(node = [nodeEnum nextObject]){
-			if([node type] == BSN_STRING)
-				newNode = [[BDSKStringNode alloc] initWithQuotedString:[self stringByTeXifyingString:[node value]]];
-			else 
+			if([node type] == BSN_STRING){
+				string = [self copyStringByTeXifyingString:[node value]];
+                newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
+                [string release];
+			} else {
 				newNode = [node copy];
-			[nodes addObject:newNode];
+			}
+            [nodes addObject:newNode];
 			[newNode release];
 		}
 		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
@@ -242,10 +242,6 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     return YES;
 }
 
-- (NSString *)stringByDeTeXifyingString:(NSString *)s{
-    return [[self copyStringByDeTeXifyingString:s] autorelease];
-}
-
 - (NSString *)copyStringByDeTeXifyingString:(NSString *)s{
 
     if([NSString isEmptyString:s]){
@@ -258,13 +254,17 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
 		BDSKStringNode *node, *newNode;
 		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
-		
+		NSString *string;
+        
 		while(node = [nodeEnum nextObject]){
-			if([node type] == BSN_STRING)
-				newNode = [[BDSKStringNode alloc] initWithQuotedString:[self stringByDeTeXifyingString:[node value]]];
-			else 
+			if([node type] == BSN_STRING){
+				string = [self copyStringByDeTeXifyingString:[node value]];
+				newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
+                [string release];
+			} else {
 				newNode = [node copy];
-			[nodes addObject:newNode];
+			}
+            [nodes addObject:newNode];
 			[newNode release];
 		}
 		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
@@ -454,12 +454,9 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 
 @implementation NSString (BDSKConverter)
 
-- (NSString *)stringByTeXifyingString { return [[BDSKConverter sharedConverter] stringByTeXifyingString:self]; }
-
-- (NSString *)stringByDeTeXifyingString { return [[BDSKConverter sharedConverter] stringByDeTeXifyingString:self]; }
-
-- (NSString *)initTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:aString]; }
-
-- (NSString *)initDeTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByDeTeXifyingString:aString]; }
+- (NSString *)copyTeXifiedString { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:self]; }
+- (NSString *)stringByTeXifyingString { return [[self copyTeXifiedString] autorelease]; }
+- (NSString *)copyDeTeXifiedString { return [[BDSKConverter sharedConverter] copyStringByDeTeXifyingString:self]; }
+- (NSString *)stringByDeTeXifyingString { return [[self copyDeTeXifiedString] autorelease]; }
 
 @end

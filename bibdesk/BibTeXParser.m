@@ -214,7 +214,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
                                 bt_free_ast(entry);
                                 @throw BibTeXParserInternalException;
                             }
-                            complexString = [[NSString alloc] initDeTeXifiedStringWithString:tmpStr];
+                            complexString = [tmpStr copyDeTeXifiedString];
                             [tmpStr release];
                         }else{
                             complexString = copyStringFromBTField(field, filePath, macroResolver, parserEncoding);
@@ -635,7 +635,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
         NSString *translatedString = nil;
         
         if (s) {
-            translatedString = [[NSString alloc] initDeTeXifiedStringWithString:s];
+            translatedString = [s copyDeTeXifiedString];
             [s release];
         }
         
@@ -669,7 +669,7 @@ static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacro
                         return nil;
                     }
                         
-                    NSString *translatedString = [[NSString alloc] initDeTeXifiedStringWithString:s];
+                    NSString *translatedString = [s copyDeTeXifiedString];
                     sNode = [[BDSKStringNode alloc] initWithQuotedString:translatedString];
                     [translatedString release];
 

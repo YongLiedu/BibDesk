@@ -79,23 +79,21 @@
 - (void)loadDict;
 
 /*!
- @method stringByTeXifyingString:
+ @method copyStringByTeXifyingString:
  @abstract UTF-8 -> TeX
  @discussion Uses a dictionary to find replacements for candidate special characters.  Raises an exception named BDSKTeXifyException if an error occurred.
  @param s the string to convert into ASCII TeX encoding
- @result the string converted into ASCI TeX encoding
+ @result the retained string converted into ASCI TeX encoding
 */
-- (NSString *)stringByTeXifyingString:(NSString *)s;
 - (NSString *)copyStringByTeXifyingString:(NSString *)s;
 
 /*!
- @method stringByDeTeXifyingString:
+ @method copyStringByDeTeXifyingString:
  @abstract TeX -> UTF-8
  @discussion Uses a dictionary to find replacements for strings like {\ ... }.
  @param s the string to convert from ASCII TeX encoding
- @result the string converted from ASCI TeX encoding
+ @result the retained string converted from ASCI TeX encoding
 */
-- (NSString *)stringByDeTeXifyingString:(NSString *)s;
 - (NSString *)copyStringByDeTeXifyingString:(NSString *)s;
 
 /*!
@@ -112,10 +110,9 @@
 
 @interface NSString (BDSKConverter)
 
+- (NSString *)copyTeXifiedString;
 - (NSString *)stringByTeXifyingString;
-- (NSString *)initTeXifiedStringWithString:(NSString *)aString;
-
+- (NSString *)copyDeTeXifiedString;
 - (NSString *)stringByDeTeXifyingString;
-- (NSString *)initDeTeXifiedStringWithString:(NSString *)aString;
 
 @end
