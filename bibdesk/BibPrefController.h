@@ -286,8 +286,6 @@ extern NSString *BDSKEncodingsListChangedNotification;
 
 #pragma mark Exception name strings
 extern NSString *BDSKComplexStringException;
-extern NSString *BDSKTeXifyException;
-extern NSString *BDSKStringEncodingException;
 extern NSString *BDSKUnimplementedException;
 
 #pragma mark Error name strings

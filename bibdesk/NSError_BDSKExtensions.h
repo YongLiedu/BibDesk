@@ -46,8 +46,8 @@
 enum {
     kBDSKUnknownError = coreFoundationUnknownErr, /* -4960 */
     kBDSKDocumentSaveError = 1,                   /* umbrella error type for document saving */
-    kBDSKDocumentEncodingSaveError = 2,           /* unable to convert to desired encoding   */
-    kBDSKDocumentTeXifySaveError = 3,             /* TeXification failed during saving       */
+    kBDSKStringEncodingError = 2,                 /* unable to convert to desired encoding   */
+    kBDSKTeXifyError = 3,                         /* TeXification failed                     */
     kBDSKPropertyListDeserializationFailed = 4,   /* NSPropertyListSerialization failed      */
     kBDSKNetworkConnectionFailed = 5,             /* Unable to connect to a network          */
     kBDSKFileNotFound = 6,                        /* File not found (should have URL/path)   */

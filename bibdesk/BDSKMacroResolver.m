@@ -122,25 +122,20 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     NSEnumerator *macroEnum = [orderedMacros objectEnumerator];
     NSString *macro;
     NSString *value;
+    NSError *texifyError = nil;
     
     while (macro = [macroEnum nextObject]){
 		value = [macroDefinitions objectForKey:macro];
 		if(shouldTeXify){
-			
-			@try{
-				value = [value stringByTeXifyingString];
-			}
-            @catch(id localException){
-				if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
-                    if(error != NULL){
-                        *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentTeXifySaveError localizedDescription:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the macro %@ can't be converted to TeX.", @"Error description"), [localException reason], macro]];
-                        [*error setValue:self forKey:BDSKUnderlyingItemErrorKey];
-                    }
-				} else 
-                    @throw localException;
-            }							
+            value = [value stringByTeXifyingStringReturningError:&texifyError];
+            if(texifyError) break;
 		}                
         [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];
+    }
+    // the error from the converter has a description of the unichar that couldn't convert; we add some useful context to it
+    if(error != NULL && texifyError != nil){
+        *error = [NSError mutableLocalErrorWithCode:kBDSKTeXifyError localizedDescription:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the macro %@ can't be converted to TeX.", @"Error description"), [texifyError localizedDescription], macro]];
+        [*error setValue:self forKey:BDSKUnderlyingItemErrorKey];
     }
 	return macroString;
 }

@@ -64,7 +64,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         CFIndex convertedLength = CFStringGetBytes((CFStringRef)string, CFRangeMake(0, length), cfEncoding, 0, FALSE, NULL, UINT_MAX, &bufLen);
         if (convertedLength != length){
             if(error != NULL){
-                *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
+                *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
                 [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
             }
             return NO;
@@ -79,7 +79,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
     }else{
         // raise if the conversion wasn't possible, since we're not using a loss byte
         if(error != NULL){
-            *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
+            *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert string to encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:encoding]]];
             [*error setValue:[NSNumber numberWithInt:encoding] forKey:NSStringEncodingErrorKey];
         }
         return NO;
@@ -99,7 +99,7 @@ NSString *BDSKEncodingConversionException = @"BDSKEncodingConversionException";
         NSString *string = [[NSString alloc] initWithData:data encoding:fromEncoding];
         if(nil == string){
             if(error != NULL){
-                *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentEncodingSaveError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert data to string with encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:toEncoding]]];
+                *error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert data to string with encoding %@", @"Error description"), [NSString localizedNameOfStringEncoding:toEncoding]]];
                 [*error setValue:[NSNumber numberWithInt:toEncoding] forKey:NSStringEncodingErrorKey];
             }
             return NO;

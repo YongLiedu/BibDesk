@@ -1013,7 +1013,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(nil == data && outError){
         // see if this was an encoding failure; if so, we can suggest how to fix it
         // NSLocalizedRecoverySuggestion is appropriate for display as error message in alert
-        if(kBDSKDocumentEncodingSaveError == [error code]){
+        if(kBDSKStringEncodingError == [error code]){
             // encoding conversion failure (string to data)
             NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] intValue];
             NSMutableString *message = [NSMutableString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:usedEncoding]];
@@ -1036,7 +1036,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"Error description") underlyingError:error];
             [error setValue:message forKey:NSLocalizedRecoverySuggestionErrorKey];
                         
-        } else if(kBDSKDocumentTeXifySaveError == [error code]) {
+        } else if(kBDSKTeXifyError == [error code]) {
             NSError *underlyingError = [[error copy] autorelease];
             // TeXification error; this has a specific item
             error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"Error description") underlyingError:underlyingError];
@@ -1515,7 +1515,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [s appendString:@"\n"];
         [s appendString:[pub bibTeXStringDroppingInternal:drop error:&error]];
         [s appendString:@"\n"];
-		if(error && kBDSKDocumentTeXifySaveError == [error code])
+		if(error && kBDSKTeXifyError == [error code])
             NSLog(@"Discarding exception raised for item \"%@\"", [pub citeKey]);
     }
 	

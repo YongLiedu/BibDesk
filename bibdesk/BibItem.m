@@ -1573,50 +1573,44 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:[self citeKey]];
     
     NSSet *personFields = [btm personFieldsSet];
+    NSError *texifyError = nil;
     
-    @try {
-        while(field = [e nextObject]){
-            if (drop && ![knownKeys containsObject:field])
-                continue;
-            
-            value = [pubFields objectForKey:field];
-            NSString *valString;
-            
-            if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
-                value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
-            }
-            
-            if(shouldTeXify && ![urlKeys containsObject:field]){
-                value = [value stringByTeXifyingString];
-            }                
-            
-            if(expand == YES)
-                valString = [value stringAsExpandedBibTeXString];
-            else
-                valString = [value stringAsBibTeXString];
-            
-            if(![value isEqualToString:@""]){
-                [s appendString:@",\n\t"];
-                [s appendString:field];
-                [s appendString:@" = "];
-                [s appendString:valString];
-            }
+    while(field = [e nextObject]){
+        if (drop && ![knownKeys containsObject:field])
+            continue;
+        
+        value = [pubFields objectForKey:field];
+        NSString *valString;
+        
+        if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
+            value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
+        }
+        
+        if(shouldTeXify && ![urlKeys containsObject:field]){
+            value = [value stringByTeXifyingStringReturningError:&texifyError];
+            if(texifyError) break;
+        }                
+        
+        if(expand == YES)
+            valString = [value stringAsExpandedBibTeXString];
+        else
+            valString = [value stringAsBibTeXString];
+        
+        if(![value isEqualToString:@""]){
+            [s appendString:@",\n\t"];
+            [s appendString:field];
+            [s appendString:@" = "];
+            [s appendString:valString];
         }
     }
-    @catch(id localException){
-        if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
-            // the exception from the converter has a description of the unichar that couldn't convert; we add some useful context to it, then rethrow
-            if(error != NULL){
-                *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentTeXifySaveError localizedDescription:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the %@ of %@ can't be converted to TeX.", @"Error description"), [localException reason], field, [self citeKey]]];
-                [*error setValue:self forKey:BDSKUnderlyingItemErrorKey];
-            }
-        } else @throw localException;
-    }
-    @finally{
-        // avoid leaking in case of an exception
-        [knownKeys release];
-    }
+    [knownKeys release];
     [s appendString:@"}"];
+    
+    // the error from the converter has a description of the unichar that couldn't convert; we add some useful context to it
+    if(error != NULL && texifyError != nil){
+        *error = [NSError mutableLocalErrorWithCode:kBDSKTeXifyError localizedDescription:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the %@ of %@ can't be converted to TeX.", @"Error description"), [texifyError localizedDescription], field, [self citeKey]]];
+        [*error setValue:self forKey:BDSKUnderlyingItemErrorKey];
+    }
     return s;
 }
 

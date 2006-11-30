@@ -309,8 +309,6 @@ NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotif
 #pragma mark Exception name strings
 
 NSString *BDSKComplexStringException = @"BDSKComplexStringException";
-NSString *BDSKTeXifyException = @"BDSKTeXifyException";
-NSString *BDSKStringEncodingException = @"BDSKStringEncodingException";
 NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
 
 #pragma mark Error name strings

@@ -41,6 +41,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringNode.h"
 #import "NSObject_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 @interface BDSKConverter (Private)
 - (void)setDetexifyAccents:(NSDictionary *)newAccents;
@@ -134,7 +135,9 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     [self setDetexifyAccents:[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY]];
 }
 
-- (NSString *)copyStringByTeXifyingString:(NSString *)s{
+- (NSString *)copyStringByTeXifyingString:(NSString *)s error:(NSError **)outError{
+    NSError *error = nil;
+    
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
 		BDSKComplexString *cs = (BDSKComplexString *)s;
@@ -145,7 +148,8 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING){
-				string = [self copyStringByTeXifyingString:[node value]];
+				string = [self copyStringByTeXifyingString:[node value] error:&error];
+                if(error) break;
                 newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
                 [string release];
 			} else {
@@ -154,6 +158,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
             [nodes addObject:newNode];
 			[newNode release];
 		}
+        if(outError) *outError = error;
 		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
@@ -172,7 +177,7 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)precomposedString, &inlineBuffer, CFRangeMake(0, numberOfCharacters));
     
-    for (index = 0; index < numberOfCharacters; index++) {
+    for (index = 0; (error == nil) && (index < numberOfCharacters); index++) {
             
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, index);
         
@@ -192,18 +197,21 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
                 // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
                 offset += [tmpConv length] - 1;
                 
-            // if tmpConv is non-nil and decomposition failed, throw an exception
+            // if tmpConv is non-nil and decomposition failed, return an error
             } else if(tmpConv != nil){
                 NSString *charString = [NSString unicodeNameOfCharacter:ch];
                 NSLog(@"unable to convert \"%@\" (unichar %@)", charString, [NSString hexStringForCharacter:ch]);
-                // raise exception after moving the scanner past the offending char
-                [NSException raise:BDSKTeXifyException format:@"%@", charString]; 
+                error = [NSError mutableLocalErrorWithCode:kBDSKTeXifyError localizedDescription:charString];
+                [error setValue:self forKey:BDSKUnderlyingItemErrorKey];
             }
             [tmpConv release];
         }
     }
     
     [precomposedString release];
+    
+    if(outError) *outError = error;
+    
     return convertedSoFar;
 }
 
@@ -454,8 +462,8 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 
 @implementation NSString (BDSKConverter)
 
-- (NSString *)copyTeXifiedString { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:self]; }
-- (NSString *)stringByTeXifyingString { return [[self copyTeXifiedString] autorelease]; }
+- (NSString *)copyTeXifiedStringReturningError:(NSError **)error { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:self error:error]; }
+- (NSString *)stringByTeXifyingStringReturningError:(NSError **)error { return [[self copyTeXifiedStringReturningError:error] autorelease]; }
 - (NSString *)copyDeTeXifiedString { return [[BDSKConverter sharedConverter] copyStringByDeTeXifyingString:self]; }
 - (NSString *)stringByDeTeXifyingString { return [[self copyDeTeXifiedString] autorelease]; }
 
