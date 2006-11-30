@@ -1020,6 +1020,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             
             [message appendString:@"  "];
             [message appendString:[error valueForKey:NSLocalizedRecoverySuggestionErrorKey]];
+            [message appendString:@"  "];
             
             // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
             if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
@@ -1200,7 +1201,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
     if (outError) *outError = error;
 
-    return outputData;
+    return error == nil ? outputData : nil;
         
 }
 
