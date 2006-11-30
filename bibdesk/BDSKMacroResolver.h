@@ -52,7 +52,7 @@
 
 - (id<BDSKOwner>)owner;
 - (NSUndoManager *)undoManager;
-- (NSString *)bibTeXString;
+- (NSString *)bibTeXStringReturningError:(NSError **)error;
 - (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey;
 
 // returns global definitions + local overrides

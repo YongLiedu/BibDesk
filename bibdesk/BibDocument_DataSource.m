@@ -469,7 +469,7 @@
                             NSError *xerror = nil;
                             // we can always write xattrs; this doesn't alter the original file's content in any way, but fails if you have a really long abstract/annote
                             @try{
-                                if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXString] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
+                                if([[NSFileManager defaultManager] setExtendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" toValue:[[pub bibTeXStringReturningError:NULL] dataUsingEncoding:NSUTF8StringEncoding] atPath:path options:nil error:&xerror] == NO)
                                     NSLog(@"%@ line %d: adding xattrs failed with error %@", __FILENAMEASNSSTRING__, __LINE__, xerror);
                             }
                             @catch(id exception){
@@ -629,7 +629,7 @@
 		switch (dragCopyType) {
 			case BDSKBibTeXDragCopyType:
 			case BDSKMinimalBibTeXDragCopyType:
-				[s appendString:[firstItem bibTeXStringDroppingInternal:YES]];
+				[s appendString:[firstItem bibTeXStringDroppingInternal:YES error:NULL]];
 				if (count > 1) {
 					[s appendString:@"\n"];
 					[s appendString:[NSString horizontalEllipsisString]];

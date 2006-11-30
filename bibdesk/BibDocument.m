@@ -1016,24 +1016,24 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(kBDSKDocumentEncodingSaveError == [error code]){
             // encoding conversion failure (string to data)
             NSStringEncoding usedEncoding = [[error valueForKey:NSStringEncodingErrorKey] intValue];
-            NSString *context = [error valueForKey:NSLocalizedRecoverySuggestionErrorKey];
-            NSMutableString *messageFormat = [NSMutableString stringWithString:NSLocalizedString(@"The document cannot be saved using %@ encoding.  Unable to convert %@.", @"Error informative text")];
+            NSMutableString *message = [NSMutableString stringWithFormat:NSLocalizedString(@"The document cannot be saved using %@ encoding.", @"Error informative text"), [NSString localizedNameOfStringEncoding:usedEncoding]];
             
-            [messageFormat appendString:@"  "];
+            [message appendString:@"  "];
+            [message appendString:[error valueForKey:NSLocalizedRecoverySuggestionErrorKey]];
             
             // see if TeX conversion is enabled; it will help for ASCII, and possibly other encodings, but not UTF-8
             if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == NO) {
-                [messageFormat appendString:NSLocalizedString(@"You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @"Error informative text")];
+                [message appendFormat:NSLocalizedString(@"You should enable accented character conversion in the Files preference pane or save using an encoding such as %@.", @"Error informative text"), [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding]];
             } else if (NSUTF8StringEncoding != usedEncoding){
                 // could suggest disabling TeX conversion, but the error might be from something out of the range of what we try to convert, so combining TeXify && UTF-8 would work
-                [messageFormat appendString:NSLocalizedString(@"You should save using an encoding such as %@.", @"Error informative text")];
+                [message appendFormat:NSLocalizedString(@"You should save using an encoding such as %@.", @"Error informative text"), [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding]];
             } else {
                 // if UTF-8 fails, you're hosed...
-                [messageFormat appendString:NSLocalizedString(@"Please report this error to BibDesk's developers.", @"Error informative text")];
+                [message appendString:NSLocalizedString(@"Please report this error to BibDesk's developers.", @"Error informative text")];
             }
             
             error = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to save document", @"Error description") underlyingError:error];
-            [error setValue:[NSString stringWithFormat:messageFormat, [NSString localizedNameOfStringEncoding:usedEncoding], context, [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+            [error setValue:message forKey:NSLocalizedRecoverySuggestionErrorKey];
                         
         } else if(kBDSKDocumentTeXifySaveError == [error code]) {
             NSError *underlyingError = [[error copy] autorelease];
@@ -1106,6 +1106,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
     NSMutableData *outputData = [NSMutableData dataWithCapacity:4096];
+    NSString *tmpString = nil;
     NSError *error = nil;
         
     BOOL shouldAppendFrontMatter = YES;
@@ -1133,61 +1134,68 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             }
             
             if(NO == [outputData appendDataFromString:templateFile encoding:encoding error:&error])
-                @throw NSLocalizedString(@"template string", @"string encoding error context");
+                [error setValue:NSLocalizedString(@"Unable to convert template string.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         
         NSData *doubleNewlineData = [@"\n\n" dataUsingEncoding:encoding];
 
         // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
-        if(shouldAppendFrontMatter){
+        if(error == nil && shouldAppendFrontMatter){
             if(NO == [outputData appendDataFromString:frontMatter encoding:encoding error:&error])
-                @throw NSLocalizedString(@"file header", @"string encoding error context");
+                [error setValue:NSLocalizedString(@"Unable to convert file header.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
             [outputData appendData:doubleNewlineData];
         }
             
-        if([documentInfo count]){
+        if(error == nil && [documentInfo count]){
             if(NO == [outputData appendDataFromString:[self documentInfoString] encoding:encoding error:&error])
-                @throw NSLocalizedString(@"document info", @"string encoding error context");
+                [error setValue:NSLocalizedString(@"Unable to convert document info.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         
         // output the document's macros:
-        if(NO == [outputData appendDataFromString:[[self macroResolver] bibTeXString] encoding:encoding error:&error])
-            @throw NSLocalizedString(@"macros", @"string encoding error context");
+        if(error == nil)
+            tmpString = [[self macroResolver] bibTeXStringReturningError:&error];
+        if(error == nil && NO == [outputData appendDataFromString:tmpString encoding:encoding error:&error])
+            [error setValue:NSLocalizedString(@"Unable to convert macros.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         
         // output the bibs
         
         if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
-        while(pub = [e nextObject]){
+        while(error == nil && (pub = [e nextObject])){
+            tmpString = [pub bibTeXStringDroppingInternal:drop error:&error];
             [outputData appendData:doubleNewlineData];
-            if(NO == [outputData appendDataFromString:[pub bibTeXStringDroppingInternal:drop] encoding:encoding error:&error])
-                @throw [NSString stringWithFormat:NSLocalizedString(@"item with cite key %@", @"string encoding error context"), [pub citeKey]];
+            if(error == nil && NO == [outputData appendDataFromString:tmpString encoding:encoding error:&error])
+                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert item with cite key %@.", @"string encoding error context"), [pub citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         
         // The data from groups is always UTF-8, and we shouldn't convert it unless we have an unparseable encoding; the comment key strings should be representable in any encoding
-        if([[groups staticGroups] count] > 0){
-            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] ||
-               NO == [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
-               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
-                @throw NSLocalizedString(@"static groups", @"string encoding error context");
+        if(error == nil && [[groups staticGroups] count] > 0){
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk Static Groups{\n" encoding:encoding error:&error] &&
+            [outputData appendStringData:[groups serializedStaticGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+            if(error)
+                [error setValue:NSLocalizedString(@"Unable to convert static groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
-        if([[groups smartGroups] count] > 0){
-            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] ||
-               NO == [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
-               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
-                @throw NSLocalizedString(@"smart groups", @"string encoding error context");
+        if(error == nil && [[groups smartGroups] count] > 0){
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk Smart Groups{\n" encoding:encoding error:&error] &&
+            [outputData appendStringData:[groups serializedSmartGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+            if(error)
+                [error setValue:NSLocalizedString(@"Unable to convert smart groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
-        if([[groups URLGroups] count] > 0){
-            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] ||
-               NO == [outputData appendStringData:[groups serializedURLGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
-               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
-                @throw NSLocalizedString(@"external file groups", @"string encoding error context");
+        if(error == nil && [[groups URLGroups] count] > 0){
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk URL Groups{\n" encoding:encoding error:&error] &&
+            [outputData appendStringData:[groups serializedURLGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+            if(error)
+                [error setValue:NSLocalizedString(@"Unable to convert external file groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
-        if([[groups scriptGroups] count] > 0){
-            if(NO == [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] ||
-               NO == [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] ||
-               NO == [outputData appendDataFromString:@"}}" encoding:encoding error:&error])
-                @throw NSLocalizedString(@"script groups", @"string encoding error context");
+        if(error == nil && [[groups scriptGroups] count] > 0){
+            [outputData appendDataFromString:@"\n\n@comment{BibDesk Script Groups{\n" encoding:encoding error:&error] &&
+            [outputData appendStringData:[groups serializedScriptGroupsData] convertedFromUTF8ToEncoding:groupsEncoding error:&error] &&
+            [outputData appendDataFromString:@"}}" encoding:encoding error:&error];
+            if(error)
+                [error setValue:NSLocalizedString(@"Unable to convert script groups.", @"string encoding error context") forKey:NSLocalizedRecoverySuggestionErrorKey];
         }
         [outputData appendDataFromString:@"\n" encoding:encoding error:&error];
         
@@ -1203,12 +1211,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             NSLog(@"Unable to save file with encoding %@", encodingName);
             [error setValue:exception forKey:NSLocalizedRecoverySuggestionErrorKey];
             
-        } else if([exception isKindOfClass:[NSException class]] && [[exception name] isEqual:BDSKTeXifyException]){
-            // TeXification failed
-            error = [NSError mutableLocalErrorWithCode:kBDSKDocumentTeXifySaveError localizedDescription:[exception reason]];
-            [error setValue:[[exception userInfo] valueForKey:@"item"] forKey:BDSKUnderlyingItemErrorKey];
-            
-        } else {
+        } else if(kBDSKDocumentTeXifySaveError != [error code]){
             // some unknown exception
             NSLog(@"Exception %@ in %@", exception, NSStringFromSelector(_cmd));
             error = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:[exception description]];
@@ -1525,18 +1528,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSMutableString *s = [NSMutableString string];
 	NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub;
+    NSError *error = nil;
 	
     while(pub = [e nextObject]){
-		NS_DURING
-			[s appendString:@"\n"];
-			[s appendString:[pub bibTeXStringDroppingInternal:drop]];
-			[s appendString:@"\n"];
-		NS_HANDLER
-			if([[localException name] isEqualToString:BDSKTeXifyException])
-				NSLog(@"Discarding exception raised for item \"%@\"", [pub citeKey]);
-			else
-				[localException raise];
-		NS_ENDHANDLER
+        error = nil;
+        [s appendString:@"\n"];
+        [s appendString:[pub bibTeXStringDroppingInternal:drop error:&error]];
+        [s appendString:@"\n"];
+		if(error && kBDSKDocumentTeXifySaveError == [error code])
+            NSLog(@"Discarding exception raised for item \"%@\"", [pub citeKey]);
     }
 	
 	return s;
@@ -1547,22 +1547,16 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
 
 	unsigned numberOfPubs = [items count];
-	
 	NSMutableString *bibString = [[NSMutableString alloc] initWithCapacity:(numberOfPubs * 100)];
+    NSError *error = nil;
 
 	// in case there are @preambles in it
 	[bibString appendString:frontMatter];
 	[bibString appendString:@"\n"];
 	
-    @try{
-        [bibString appendString:[[self macroResolver] bibTeXString]];
-    }
-    @catch(id exception){
-        if([exception isKindOfClass:[NSException class]] && [[exception name] isEqualToString:BDSKTeXifyException])
-            NSLog(@"Discarding exception %@", [exception reason]);
-        else
-            @throw;
-    }
+    [bibString appendString:[[self macroResolver] bibTeXStringReturningError:&error]];
+    if(error)
+        NSLog(@"Discarding error \"%@\"", [error description]);
 	
 	NSEnumerator *e = [items objectEnumerator];
 	BibItem *aPub = nil;
@@ -1570,7 +1564,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 	NSMutableArray *selItems = [[NSMutableArray alloc] initWithCapacity:numberOfPubs];
 	NSMutableSet *parentItems = [[NSMutableSet alloc] initWithCapacity:numberOfPubs];
 	NSMutableArray *selParentItems = [[NSMutableArray alloc] initWithCapacity:numberOfPubs];
-    	
+    
 	while(aPub = [e nextObject]){
 		[selItems addObject:aPub];
 
@@ -1584,42 +1578,27 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 			[parentItems removeObject:aPub];
 			[selParentItems addObject:aPub];
 		}else{
-            @try{
-				[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
-            }
-            @catch(id exception){
-                if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKTeXifyException])
-                    NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
-                else
-                    @throw;
-			}
+            error = nil;
+            [bibString appendString:[aPub bibTeXStringReturningError:&error]];
+            if(error)
+                NSLog(@"Discarding error \"%@\" for item \"%@\"", [error description], [aPub citeKey]);
 		}
 	}
 	
 	e = [selParentItems objectEnumerator];
 	while(aPub = [e nextObject]){
-        @try{
-			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
-        }
-        @catch(id exception){
-			if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKTeXifyException])
-				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
-			else
-				@throw;
-		}
+        error = nil;
+        [bibString appendString:[aPub bibTeXStringReturningError:&error]];
+        if(error)
+            NSLog(@"Discarding error \"%@\" for item \"%@\"", [error description], [aPub citeKey]);
 	}
 	
 	e = [parentItems objectEnumerator];        
 	while(aPub = [e nextObject]){
-        @try{
-			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
-        }
-        @catch(id exception){
-			if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKTeXifyException])
-				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
-			else
-				@throw;
-		}
+        error = nil;
+        [bibString appendString:[aPub bibTeXStringReturningError:&error]];
+        if(error)
+            NSLog(@"Discarding error \"%@\" for item \"%@\"", [aPub citeKey]);
 	}
 					
 	[selItems release];

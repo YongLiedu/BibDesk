@@ -58,6 +58,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKStringNode.h"
 #import "OFCharacterSet_BDSKExtensions.h"
@@ -1533,7 +1534,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #pragma mark -
 #pragma mark BibTeX strings
 
-- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop texify:(BOOL)shouldTeXify error:(NSError **)error{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSMutableSet *knownKeys = nil;
 	NSSet *urlKeys = nil;
@@ -1605,9 +1606,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     @catch(id localException){
         if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
             // the exception from the converter has a description of the unichar that couldn't convert; we add some useful context to it, then rethrow
-            NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the %@ of %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], field, [self citeKey]] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, @"item", field, @"field", nil]];
-            @throw exception;
-        } else @throw;
+            if(error != NULL){
+                *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentTeXifySaveError localizedDescription:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the %@ of %@ can't be converted to TeX.", @"Error description"), [localException reason], field, [self citeKey]]];
+                [*error setValue:self forKey:BDSKUnderlyingItemErrorKey];
+            }
+        } else @throw localException;
     }
     @finally{
         // avoid leaking in case of an exception
@@ -1617,25 +1620,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return s;
 }
 
-- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop error:(NSError **)error{
     BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-    return [self bibTeXStringByExpandingMacros:expand dropInternal:drop texify:shouldTeXify];
+    return [self bibTeXStringByExpandingMacros:NO dropInternal:drop texify:shouldTeXify error:error];
 }
 
-- (NSString *)bibTeXString{
-	return [self bibTeXStringByExpandingMacros:NO dropInternal:NO];
-}
-
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
-	return [self bibTeXStringByExpandingMacros:NO dropInternal:drop];
-}
-
-- (NSString *)bibTeXStringByExpandingMacros{
-    return [self bibTeXStringByExpandingMacros:YES dropInternal:NO];
-}
-
-- (NSString *)bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields{
-    return [self bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO];
+- (NSString *)bibTeXStringReturningError:(NSError **)error{
+	return [self bibTeXStringDroppingInternal:NO error:error];
 }
 
 #pragma mark Other text representations

@@ -47,6 +47,7 @@
 #import "BibDocument.h"
 #import <OmniFoundation/OFPreference.h>
 #import "NSObject_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
@@ -106,7 +107,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     return [owner undoManager];
 }
 
-- (NSString *)bibTeXString{
+- (NSString *)bibTeXStringReturningError:(NSError **)error{
     if (macroDefinitions == nil)
         return @"";
     
@@ -131,10 +132,12 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 			}
             @catch(id localException){
 				if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
-                    NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat:NSLocalizedString(@"Character \"%@\" in the macro %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], macro] userInfo:[NSDictionary dictionary]];
-                    @throw exception;
+                    if(error != NULL){
+                        *error = [NSError mutableLocalErrorWithCode:kBDSKDocumentTeXifySaveError localizedDescription:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the macro %@ can't be converted to TeX.", @"Error description"), [localException reason], macro]];
+                        [*error setValue:self forKey:BDSKUnderlyingItemErrorKey];
+                    }
 				} else 
-                    @throw;
+                    @throw localException;
             }							
 		}                
         [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];

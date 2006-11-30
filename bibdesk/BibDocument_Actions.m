@@ -454,7 +454,7 @@
         while (pub = [e nextObject]) {
             // use the detexified version without internal fields, since TeXification introduces things that 
             // AppleScript can't deal with (OAInternetConfig may end up using AS)
-            [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
+            [body appendString:[pub bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO error:NULL]];
             [body appendString:@"\n\n"];
         }
     }
