@@ -39,6 +39,7 @@
 #import "BDSKURLGroupSheetController.h"
 #import "BDSKURLGroup.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 @implementation BDSKURLGroupSheetController
 
@@ -51,6 +52,7 @@
     if (self = [super init]) {
         group = [aGroup retain];
         urlString = [[[group URL] absoluteString] retain];
+        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
         undoManager = nil;
     }
     return self;
@@ -60,6 +62,7 @@
     [urlString release];
     [group release];
     [undoManager release];
+    CFRelease(editors);
     [super dealloc];
 }
 
@@ -69,31 +72,28 @@
 
 - (IBAction)dismiss:(id)sender {
     if ([sender tag] == NSOKButton) {
-        if (![[self window] makeFirstResponder:[self window]])
-            [[self window] endEditingFor:nil];
         
-        if ([NSString isEmptyString:urlString] == NO) {
-            NSURL *url = nil;
-            if ([urlString rangeOfString:@"://"].location == NSNotFound) {
-                if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
-                    url = [NSURL fileURLWithPath:urlString];
-                else
-                    url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
-            } else
-                url = [NSURL URLWithString:urlString];
-            
-            if(group == nil){
-                group = [[BDSKURLGroup alloc] initWithURL:url];
-            }else{
-                [group setURL:url];
-                [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
-            }
-        } else {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to create a group with an empty string", @"alert title") defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-            [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        if ([self commitEditing] == NO) {
+            NSBeep();
             return;
         }
-	}
+        
+        NSURL *url = nil;
+        if ([urlString rangeOfString:@"://"].location == NSNotFound) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:urlString])
+                url = [NSURL fileURLWithPath:urlString];
+            else
+                url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", urlString]];
+        } else
+            url = [NSURL URLWithString:urlString];
+        
+        if(group == nil){
+            group = [[BDSKURLGroup alloc] initWithURL:url];
+        }else{
+            [group setURL:url];
+            [[group undoManager] setActionName:NSLocalizedString(@"Edit External File Group", @"Undo action name")];
+        }
+    }
     
     [super dismiss:sender];
 }
@@ -132,6 +132,39 @@
         [urlString release];
         urlString = [newUrlString copy];
     }
+}
+
+#pragma mark NSEditorRegistration
+
+- (void)objectDidBeginEditing:(id)editor {
+    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
+		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (index != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
+}
+
+- (BOOL)commitEditing {
+    CFIndex index = CFArrayGetCount(editors);
+    NSObject *editor;
+    
+	while (index--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+			return NO;
+    
+    if ([NSString isEmptyString:urlString] == NO) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty URL", @"Message in alert dialog when URL for external file group is invalid")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                            informativeTextWithFormat:NSLocalizedString(@"Unable to create a group with an empty string", @"Informative text in alert dialog when URL for external file group is invalid")];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
+        return NO;
+    }
+    return YES;
 }
 
 #pragma mark Undo support

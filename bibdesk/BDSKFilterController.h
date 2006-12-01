@@ -51,6 +51,7 @@
 	NSMutableArray *conditionControllers;
 	BDSKFilter *filter;
 	BDSKConjunction conjunction;
+    CFArrayRef editors;
     NSUndoManager *undoManager;
 }
 
@@ -65,6 +66,8 @@
 - (NSArray *)conditionControllers;
 - (BDSKConjunction)conjunction;
 - (void)setConjunction:(BDSKConjunction)newConjunction;
+
+- (BOOL)commitEditing;
 
 - (NSUndoManager *)undoManager;
 

@@ -73,6 +73,7 @@
 	BOOL overwrite;
 	int shouldMove;
 	NSString *replaceAllTooltip;
+    CFArrayRef editors;
 }
 
 /*!
@@ -91,7 +92,7 @@
 */
 - (void)updateUI;
 
-- (void)finalizeEdits;
+- (BOOL)commitEditing;
 
 /*!
     @method     regexIsValid:

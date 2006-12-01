@@ -232,6 +232,15 @@
     }
 }
 
+- (void)objectDidBeginEditing:(id)editor {
+    [filterController objectDidBeginEditing:editor];		
+}
+
+
+- (void)objectDidEndEditing:(id)editor {
+    [filterController objectDidEndEditing:editor];		
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     OBASSERT(object == condition);
     if(object == condition) {

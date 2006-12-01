@@ -59,6 +59,8 @@
 		filter = [aFilter retain];
 		conditionControllers = [[NSMutableArray alloc] initWithCapacity:[[filter conditions] count]];
 		conjunction = [filter conjunction];
+        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
+        undoManager = nil;
     }
     return self;
 }
@@ -72,6 +74,8 @@
     conditionControllers = nil;
     [undoManager release];
     undoManager = nil;
+    CFRelease(editors);
+    editors = nil;
     [super dealloc];
 }
 
@@ -111,9 +115,7 @@
 }
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton) {
-        if (![[self window] makeFirstResponder:[self window]])
-            [[self window] endEditingFor:nil];
+    if ([sender tag] == NSOKButton && [self commitEditing]) {
         
         NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
         
@@ -186,6 +188,30 @@
 - (void)setConjunction:(BDSKConjunction)newConjunction {
     [[[self undoManager] prepareWithInvocationTarget:self] setConjunction:conjunction];
 	conjunction = newConjunction;
+}
+
+#pragma mark NSEditorRegistration
+
+- (void)objectDidBeginEditing:(id)editor {
+    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
+		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (index != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
+}
+
+- (BOOL)commitEditing {
+    CFIndex index = CFArrayGetCount(editors);
+    NSObject *editor;
+    
+	while (index--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+			return NO;
+    
+    return YES;
 }
 
 #pragma mark Undo support

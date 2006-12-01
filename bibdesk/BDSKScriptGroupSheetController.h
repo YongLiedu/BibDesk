@@ -47,6 +47,7 @@
     NSString *path;
     NSString *arguments;
     int type;
+    CFArrayRef editors;
     NSUndoManager *undoManager;
 }
 
@@ -60,6 +61,8 @@
 - (void)setArguments:(NSString *)newArguments;
 
 - (IBAction)chooseScriptPath:(id)sender;
+
+- (BOOL)commitEditing;
 
 - (NSUndoManager *)undoManager;
 

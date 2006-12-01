@@ -79,6 +79,7 @@ static BOOL isExecutableFileAtPath(NSString *path)
         path = [[group scriptPath] retain];
         arguments = [[group scriptArguments] retain];
         type = [group scriptType];
+        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
         undoManager = nil;
     }
     return self;
@@ -89,6 +90,7 @@ static BOOL isExecutableFileAtPath(NSString *path)
     [arguments release];
     [group release];
     [undoManager release];
+    CFRelease(editors);
     [super dealloc];
 }
 
@@ -124,37 +126,25 @@ static BOOL isExecutableFileAtPath(NSString *path)
 
 - (IBAction)dismiss:(id)sender {
     if ([sender tag] == NSOKButton) {
-        if (![[self window] makeFirstResponder:[self window]])
-            [[self window] endEditingFor:nil];
         
-        NSString *errorMessage;
-        if ([self isValidScriptFileAtPath:path error:&errorMessage]) {
-            
-            if (isAppleScriptAtPath([path stringByStandardizingPath]))
-                type = BDSKAppleScriptType;
-            else
-                type = BDSKShellScriptType;
-            
-            if(group == nil){
-                group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
-            }else{
-                [group setScriptPath:path];
-                [group setScriptArguments:arguments];
-                [group setScriptType:type];
-                [[group undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
-            }
-            
-        } else {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Message in alert dialog when path for script group is invalid")
-                                             defaultButton:nil
-                                           alternateButton:nil
-                                               otherButton:nil
-                                informativeTextWithFormat:errorMessage];
-            [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
+        if ([self commitEditing] == NO)
             return;
+        
+        if (isAppleScriptAtPath([path stringByStandardizingPath]))
+            type = BDSKAppleScriptType;
+        else
+            type = BDSKShellScriptType;
+        
+        if(group == nil){
+            group = [[BDSKScriptGroup alloc] initWithScriptPath:path scriptArguments:arguments scriptType:type];
+        }else{
+            [group setScriptPath:path];
+            [group setScriptArguments:arguments];
+            [group setScriptType:type];
+            [[group undoManager] setActionName:NSLocalizedString(@"Edit Script Group", @"Undo action name")];
         }
-	}
-    
+        
+    }
     [super dismiss:sender];
 }
 
@@ -212,6 +202,41 @@ static BOOL isExecutableFileAtPath(NSString *path)
         [arguments release];
         arguments = [newArguments retain];
     }
+}
+
+#pragma mark NSEditorRegistration
+
+- (void)objectDidBeginEditing:(id)editor {log_method();
+    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
+		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (index != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
+}
+
+- (BOOL)commitEditing {
+    CFIndex index = CFArrayGetCount(editors);
+    NSObject *editor;
+    
+	while (index--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+			return NO;
+    
+    NSString *errorMessage;
+    if ([self isValidScriptFileAtPath:path error:&errorMessage] == NO) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Script Path", @"Message in alert dialog when path for script group is invalid")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                            informativeTextWithFormat:errorMessage];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:NULL contextInfo:NULL];
+        return NO;
+    }
+    
+    return YES;
 }
 
 #pragma mark Undo support

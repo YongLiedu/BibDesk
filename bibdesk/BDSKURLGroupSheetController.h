@@ -46,6 +46,7 @@
     BDSKURLGroup *group;
     NSString *urlString;
     NSUndoManager *undoManager;
+    CFArrayRef editors;
 }
 
 - (id)initWithGroup:(BDSKURLGroup *)aGroup;
@@ -56,6 +57,8 @@
 
 - (NSString *)urlString;
 - (void)setUrlString:(NSString *)newUrlString;
+
+- (BOOL)commitEditing;
 
 - (NSUndoManager *)undoManager;
 

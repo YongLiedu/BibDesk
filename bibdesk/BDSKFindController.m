@@ -84,7 +84,7 @@ enum {
 		
 		findHistory = [[NSMutableArray alloc] initWithCapacity:MAX_HISTORY_COUNT == NSNotFound ? 10 : MAX_HISTORY_COUNT];
 		replaceHistory = [[NSMutableArray alloc] initWithCapacity:MAX_HISTORY_COUNT == NSNotFound ? 10 : MAX_HISTORY_COUNT];
-		
+        
 		findString = [((availableType == nil)? @"" : [pboard stringForType:NSStringPboardType]) copy];
         replaceString = [@"" retain];
         searchType = FCTextualSearch;
@@ -102,6 +102,8 @@ enum {
 			shouldMove = NSOffState;
 		
 		replaceAllTooltip = [NSLocalizedString(@"Replace all matches.", @"Tool tip message") retain];
+		
+        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
     }
     return self;
 }
@@ -112,6 +114,7 @@ enum {
     [replaceString release];
 	[statusBar release];
 	[replaceAllTooltip release];
+    CFRelease(editors);
     [super dealloc];
 }
 
@@ -181,30 +184,6 @@ enum {
 
 - (void)windowDidBecomeKey:(NSNotification *)aNotification{
 	[self updateUI];
-}
-
-- (void)finalizeEdits{
-    NSResponder *firstResponder = [[self window] firstResponder];
-    
-	// need to finalize text field cells being edited
-	if([firstResponder isKindOfClass:[NSText class]] == NO)
-		return;
-		
-	NSText *fieldEditor = (NSText *)firstResponder;
-	NSRange selection = [fieldEditor selectedRange];
-	firstResponder = [fieldEditor delegate]; // the text field being edited
-	
-	// now make sure we submit the edit
-	if (![[self window] makeFirstResponder:[self window]]) {
-		[[self window] endEditingFor:nil];
-		return; // do we need to return here?
-	}
-	
-	if([[self window] makeFirstResponder:firstResponder]){
-		if([[fieldEditor string] length] < NSMaxRange(selection)) // check range for safety
-			selection = NSMakeRange([[fieldEditor string] length],0);
-		[fieldEditor setSelectedRange:selection];
-	}
 }
 
 #pragma mark Accessors
@@ -559,6 +538,30 @@ enum {
 	return YES;
 }
 
+#pragma mark NSEditorRegistration
+
+- (void)objectDidBeginEditing:(id)editor {
+    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
+		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
+}
+
+- (void)objectDidEndEditing:(id)editor {
+    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (index != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
+}
+
+- (BOOL)commitEditing {
+    CFIndex index = CFArrayGetCount(editors);
+    NSObject *editor;
+    
+	while (index--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+			return NO;
+    
+    return YES;
+}
+
 #pragma mark Action methods
 
 - (IBAction)openHelp:(id)sender{
@@ -657,11 +660,13 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items", @"Status message")];
         return;
+    }else if([self commitEditing] == NO){
+        NSBeep();
+		[statusBar setStringValue:NSLocalizedString(@"There were invalid values", @"Status message")];
+        return;
     }
     
     [self clearFrontDocumentQuickSearch];
-	
-	[self finalizeEdits];
    
     // this can change between clicks of the Find button, so we can't cache it
     NSArray *currItems = [self currentFoundItemsInDocument:theDocument];
@@ -719,6 +724,10 @@ enum {
         NSBeep();
 		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in shared items", @"Status message")];
         return;
+    }else if([self commitEditing] == NO){
+        NSBeep();
+		[statusBar setStringValue:NSLocalizedString(@"There were invalid values", @"Status message")];
+        return;
 	}
 	
 	[statusBar startAnimation:nil];
@@ -735,8 +744,6 @@ enum {
         // we're doing a find/replace in all the document pubs
         publications = shownPublications; // we're not changing it; the cast just shuts gcc up
     }
-
-    [self finalizeEdits];
     
 	[self findAndReplaceInItems:publications ofDocument:theDocument];
 	
