@@ -1745,7 +1745,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 - (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)outError {
     NSArray *newPubs = nil;
-    NSData *data = nil;
     NSError *parseError = nil;
     
     if(type == BDSKBibTeXStringType){

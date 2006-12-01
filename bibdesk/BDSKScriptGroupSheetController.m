@@ -219,7 +219,6 @@ static BOOL isExecutableFileAtPath(NSString *path)
 
 - (BOOL)commitEditing {
     CFIndex index = CFArrayGetCount(editors);
-    NSObject *editor;
     
 	while (index--)
 		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)

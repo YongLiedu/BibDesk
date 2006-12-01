@@ -149,7 +149,6 @@
 
 - (BOOL)commitEditing {
     CFIndex index = CFArrayGetCount(editors);
-    NSObject *editor;
     
 	while (index--)
 		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
