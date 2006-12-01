@@ -155,12 +155,29 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
 
 #pragma mark -
 
+// Improve grouping as for some encodings CFStringGetMostCompatibleMacStringEncoding returns kCFStringEncodingInvalidId 
+extern CFStringEncoding BDStringGetMostCompatibleMacStringEncoding(CFStringEncoding encoding) {
+    if(encoding == kCFStringEncodingISOLatin6 || encoding == kCFStringEncodingISOLatin8 || encoding == kCFStringEncodingNonLossyASCII || encoding == kCFStringEncodingEBCDIC_CP037)
+        return kCFStringEncodingMacRoman;
+    else if(encoding == kCFStringEncodingISOLatin10)
+        return kCFStringEncodingMacCentralEurRoman;
+    else if(encoding == kCFStringEncodingShiftJIS_X0213_00)
+        return kCFStringEncodingMacJapanese;
+    else if(encoding == kCFStringEncodingBig5_HKSCS_1999 || encoding == kCFStringEncodingBig5_E)
+        return kCFStringEncodingMacChineseTrad;
+    else if(encoding == kCFStringEncodingGB_18030_2000)
+        return kCFStringEncodingMacChineseSimp;
+    else if(encoding == kCFStringEncodingKOI8_U)
+        return kCFStringEncodingMacCyrillic;
+    return CFStringGetMostCompatibleMacStringEncoding(encoding);
+}
+
 // Sort using the equivalent Mac encoding as the major key. Secondary key is the actual encoding value, which works well enough. We treat Unicode encodings as special case, putting them at top of the list.
 static int encodingCompare(const void *firstPtr, const void *secondPtr) {
     CFStringEncoding first = *(CFStringEncoding *)firstPtr;
     CFStringEncoding second = *(CFStringEncoding *)secondPtr;
-    CFStringEncoding macEncodingForFirst = CFStringGetMostCompatibleMacStringEncoding(first);
-    CFStringEncoding macEncodingForSecond = CFStringGetMostCompatibleMacStringEncoding(second);
+    CFStringEncoding macEncodingForFirst = BDStringGetMostCompatibleMacStringEncoding(first);
+    CFStringEncoding macEncodingForSecond = BDStringGetMostCompatibleMacStringEncoding(second);
     if (first == second) return 0;	// Should really never happen
     if (macEncodingForFirst == kCFStringEncodingUnicode || macEncodingForSecond == kCFStringEncodingUnicode) {
         if (macEncodingForSecond == macEncodingForFirst) return (first > second) ? 1 : -1;	// Both Unicode; compare second order

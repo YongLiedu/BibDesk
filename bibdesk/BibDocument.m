@@ -282,9 +282,9 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
         
-    // this is a sanity check; an encoding of 0xFFFFFFFF is not valid, so is a signal we should ignore xattrs
-    NSStringEncoding encodingFromFile = [xattrDefaults unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:0xFFFFFFFF];
-    if (encodingFromFile != 0xFFFFFFFF && encodingFromFile != [self documentStringEncoding]) {
+    // this is a sanity check; an encoding of kCFStringEncodingInvalidId is not valid, so is a signal we should ignore xattrs
+    NSStringEncoding encodingFromFile = [xattrDefaults unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:kCFStringEncodingInvalidId];
+    if (encodingFromFile != kCFStringEncodingInvalidId && encodingFromFile != [self documentStringEncoding]) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Document was opened with incorrect encoding", @"Message in alert dialog when opening a document with different encoding")
                                          defaultButton:NSLocalizedString(@"Close", @"Button title")
                                        alternateButton:NSLocalizedString(@"Ignore", @"Button title") otherButton:nil
