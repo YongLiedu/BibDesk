@@ -1518,9 +1518,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [dict setObject:[NSNumber numberWithInt:[self numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
     
     // now some optional keys that may be useful, but aren't guaranteed
-    id value = [[self firstAuthorOrEditor] lastName];
+    id value = [[[self firstAuthorOrEditor] fullLastName] stringByRemovingTeX];
     if (value)
         [dict setObject:value forKey:@"lastName"];
+    
+    value = [[self firstAuthorOrEditor] sortableName];
+    if (value)
+        [dict setObject:value forKey:@"sortableName"];
     
     // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
     value = [self valueOfField:BDSKYearString];
