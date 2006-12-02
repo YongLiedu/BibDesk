@@ -198,7 +198,7 @@
 	NSString *tmpStr;
 	
     AGRegex *regex = [AGRegex regexWithPattern:@"(?<!\\A)^PMID- " options:AGRegexMultiline];
-    tmpStr = [regex replaceWithString:@"ER  - \r\nPMID- " inString:self];
+    tmpStr = [regex replaceWithString:@"ER  - \r\nPMID- " inString:inputString];
 	
     tmpStr = [tmpStr stringByAppendingString:@"ER  - \r\n"];
     OBPOSTCONDITION([tmpStr isEqualToString:fixedString]);
