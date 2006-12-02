@@ -1729,6 +1729,43 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     return YES;
 }
 
+- (BOOL)addPublicationsFromFile:(NSString *)fileName error:(NSError **)outError{
+    NSError *error = nil;
+    NSString *temporaryCiteKey = nil;
+    NSArray *newPubs = [self extractPublicationsFromFiles:[NSArray arrayWithObject:fileName] unparseableFiles:nil error:&error];
+    
+    if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
+        error = nil; // accept temporary cite keys, but show a warning later
+    
+    if([newPubs count] == 0){
+        if(outError) *outError = error;
+        return NO;
+    }
+    
+    [self selectLibraryGroup:nil];    
+	[self addPublications:newPubs];
+	[self selectPublications:newPubs];
+    
+    // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
+    NSCalendarDate *importDate = [NSCalendarDate date];
+    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+	
+	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+		[self editPubCmd:nil]; // this will ask the user when there are many pubs
+	}
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
+    
+    // set up the smart group that shows the latest import
+    // @@ do this for items added via the editor?  doesn't seem as useful
+    [groups setLastImportedPublications:newPubs];
+    
+    if(temporaryCiteKey != nil)
+        [self reportTemporaryCiteKeys:temporaryCiteKey forNewDocument:NO];
+    
+    return YES;
+}
+
 - (NSArray *)newPublicationsFromArchivedData:(NSData *)data{
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
     
@@ -1793,10 +1830,6 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 
 // sniff the contents of each file, returning them in an array of BibItems, while unparseable files are added to the mutable array passed as a parameter
 - (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles error:(NSError **)outError {
-    
-    NSParameterAssert(unparseableFiles != nil);
-    NSParameterAssert([unparseableFiles count] == 0);
-    
     NSEnumerator *e = [filenames objectEnumerator];
     NSString *fileName;
     NSString *contentString;

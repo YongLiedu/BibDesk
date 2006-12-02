@@ -771,13 +771,19 @@
     NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
     
     if (returnCode == NSOKButton) {
-        // show the main window
-        [super beginSheetModalForWindow:docWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
-        [self release];
-        
-        // then load the data from the file
-        [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
-        
+        NSString *fileName = [sheet filename];
+        // first try to parse the file
+        if([document addPublicationsFromFile:fileName error:NULL]){
+            // succeeded to parse the file, we return immediately
+            [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+        }else{
+            // show the main window
+            [super beginSheetModalForWindow:docWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
+            [self release];
+            
+            // then load the data from the file
+            [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+        }
     } else {
         // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
         [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
@@ -786,8 +792,7 @@
 	
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
-        NSString *fileName = [sheet filename];
-		NSURL *url = [NSURL fileURLWithPath:fileName];
+        NSURL *url = [[sheet URLs] lastObject];
 		NSTextStorage *text = [sourceTextView textStorage];
 		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
 
