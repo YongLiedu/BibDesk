@@ -182,6 +182,9 @@
             prevChar = *(scanner->scanLocation - 1);
             if(BDIsNewlineCharacter(prevChar))
                 [fixedString appendString:@"ER  - \r\n"];
+            // if we're operating on a text selection, it may not have a trailing newline
+            else if (scannerHasData(scanner) == NO)
+                [fixedString appendString:@"\r\nER  - \r\n"];
         }
         
         OBASSERT(scannedString);
