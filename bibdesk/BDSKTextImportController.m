@@ -74,7 +74,9 @@
 - (void)setupTypeUI;
 - (void)setType:(NSString *)type;
 
+- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
@@ -229,8 +231,8 @@
 	[NSApp beginSheet:urlSheet
 	   modalForWindow:docWindow
 		modalDelegate:self
-	   didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
-		  contextInfo:[[NSNumber alloc] initWithBool:YES]];
+	   didEndSelector:@selector(initialUrlSheetDidEnd:returnCode:contextInfo:)
+		  contextInfo:[docWindow retain]];
 }
 		
 - (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
@@ -238,7 +240,6 @@
 	NSParameterAssert([self window]); // make sure we loaded the nib
 	
 	// remember the arguments to pass in the callback later
-	theDocWindow = docWindow;
 	theModalDelegate = modalDelegate;
 	theDidEndSelector = didEndSelector;
 	theContextInfo = contextInfo;
@@ -254,8 +255,8 @@
 							 types:nil
 					modalForWindow:docWindow
 					 modalDelegate:self 
-					didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-					   contextInfo:[[NSNumber alloc] initWithBool:YES]];
+					didEndSelector:@selector(initialOpenPanelDidEnd:returnCode:contextInfo:) 
+					   contextInfo:[docWindow retain]];
 }
 
 #pragma mark Actions
@@ -766,30 +767,25 @@
     [super didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
 }
 
+- (void)initialOpenPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    // this is the initial file load, the main window is not yet there
+    NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
+    
+    if (returnCode == NSOKButton) {
+        // show the main window
+        [super beginSheetModalForWindow:docWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
+        [self release];
+        
+        // then load the data from the file
+        [self openPanelDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+        
+    } else {
+        // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
+        [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+    }
+}
+	
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-	// this variable is true when we called the open sheet initially before showing the main window 
-	BOOL initialFileLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
-	
-	if (initialFileLoad) {
-		// this is the initial web load, the main window is not yet there
-		
-		if (returnCode == NSOKButton) {
-			// show the main window
-			
-            [super beginSheetModalForWindow:theDocWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
-            theDocWindow = nil;
-			[self release];
-			
-		} else {
-			// the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-			
-			[self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
-            theDocWindow = nil;
-			return;
-		}
-	}
-	
-	// now do the things we need to do always
     if(returnCode == NSOKButton){
         NSString *fileName = [sheet filename];
 		NSURL *url = [NSURL fileURLWithPath:fileName];
@@ -813,30 +809,25 @@
     }        
 }
 
+- (void)initialUrlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    // this is the initial web load, the main window is not yet there
+    NSWindow *docWindow = [(NSWindow *)contextInfo autorelease];
+    
+    if (returnCode == NSOKButton) {
+        // show the main window
+        [super beginSheetModalForWindow:docWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
+        [self release];
+        
+        // then load the data from the file
+        [self urlSheetDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+        
+    } else {
+        // the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
+        [self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
+    }
+}
+
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-	// this variable is true when we called the URL sheet initially before showing the main window 
-	BOOL initialWebLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
-	
-	if (initialWebLoad) {
-		// this is the initial web load, the main window is not yet there
-		
-		if (returnCode == NSOKButton) {
-			// show the main window
-			
-            [super beginSheetModalForWindow:theDocWindow modalDelegate:theModalDelegate didEndSelector:theDidEndSelector contextInfo:theContextInfo];
-			theDocWindow = nil;
-            [self release];
-			
-		} else {
-			// the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
-			
-			[self didEndSheet:sheet returnCode:returnCode contextInfo:contextInfo];
-            theDocWindow = nil;
-			return;
-		}
-	}
-	
-	// now do the things we need to do always
     if(returnCode == NSOKButton){
 		// setup webview and load page
         
