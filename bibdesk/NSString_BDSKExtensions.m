@@ -48,6 +48,7 @@
 #import "html2tex.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKStringEncodingManager.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;
@@ -159,6 +160,8 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
             string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         if(nil == string && try && encoding != [NSString defaultCStringEncoding])
             string = [[NSString alloc] initWithData:data encoding:[NSString defaultCStringEncoding]];
+        if(nil == string && try && encoding != [BDSKStringEncodingManager defaultEncoding])
+            string = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
         if(nil == string && try && encoding != NSISOLatin1StringEncoding)
             string = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
 
