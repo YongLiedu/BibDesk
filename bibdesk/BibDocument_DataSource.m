@@ -155,17 +155,17 @@
 	}else if(tv == groupTableView){
 		BDSKGroup *group = [groups objectAtIndex:row];
 		// we need to check for this because for some reason setObjectValue:... is called when the row is selected in this tableView
-		if([NSString isEmptyString:object] || [[group stringValue] isEqualToString:object])
+		if(([object isKindOfClass:[NSString class]] && [NSString isEmptyString:object]) || [[group name] isEqual:object])
 			return;
-		if([group hasEditableName]){
+		if([group isCategory]){
+			NSArray *pubs = [groupedPublications copy];
+			[self movePublications:pubs fromGroup:group toGroupNamed:object];
+			[pubs release];
+		}else if([group hasEditableName]){
 			[(BDSKMutableGroup *)group setName:object];
 			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
 			if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
                 [self sortGroupsByKey:sortGroupsKey];
-		}else if([group isCategory]){
-			NSArray *pubs = [groupedPublications copy];
-			[self movePublications:pubs fromGroup:group toGroupNamed:object];
-			[pubs release];
 		}
 	}
 }
