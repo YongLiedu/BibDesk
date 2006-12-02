@@ -404,19 +404,20 @@
 
 @implementation BDSKGroupCellFormatter
 
+// this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
 - (NSString *)stringForObjectValue:(id)obj{
+    if([obj isKindOfClass:[BDSKGroup class]])
+        obj = [obj name];
     return [obj description];
 }
 
 - (NSString *)editingStringForObjectValue:(id)obj{
-    if([obj isKindOfClass:[NSString class]])
-        return obj;
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    id name = [(BDSKGroup *)obj name];
-    return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [name description];
+    if([obj isKindOfClass:[BDSKGroup class]])
+        obj = [obj name];
+    return [obj isKindOfClass:[BibAuthor class]] ? [obj originalName] : [obj description];
 }
 
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{log_method();
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
     *obj = string;
     return YES;
 }
