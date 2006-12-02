@@ -93,8 +93,6 @@
     int receivedContentLength;
     int expectedContentLength;
 	
-	NSWindow *theDocWindow;
-	
 	MacroTableViewWindowController *macroTextFieldWC;
     
     BOOL temporaryTypeSelectMode;

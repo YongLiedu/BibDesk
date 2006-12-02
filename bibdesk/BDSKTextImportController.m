@@ -220,7 +220,6 @@
 	}
 	
 	// remember the arguments to pass in the callback later
-	theDocWindow = docWindow;
 	theModalDelegate = modalDelegate;
 	theDidEndSelector = didEndSelector;
 	theContextInfo = contextInfo;
