@@ -181,22 +181,25 @@ static NSString *stringWithInteger(int count)
     return (NSString *)string;
 }
 
-// BDSKGroup and NSString respond to these messages (see global keys in this file)
-
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj {
-    OBASSERT(obj == nil || [obj respondsToSelector:@selector(stringValue)]);
-    OBASSERT(obj == nil || [obj respondsToSelector:@selector(count)]);
-    
-    if(obj != groupValue){
-        [groupValue release];
-        groupValue = [obj retain];
+    if([obj isKindOfClass:[BDSKGroup class]]){
+        if(obj != groupValue){
+            [groupValue release];
+            groupValue = [obj retain];
+            
+            NSString *stringValue = [groupValue stringValue];
+            // super's object value needs to be an NSString
+            [super setObjectValue:stringValue];
+            [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:stringValue];
+            [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
+        }
+    }else{
+        [super setObjectValue:obj];
         
-        NSString *stringValue = [groupValue stringValue];
-        // super's object value needs to be an NSString
-        [super setObjectValue:stringValue];
-        [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:stringValue];
-
-        [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
+        if([obj isKindOfClass:[NSString class]]){
+            [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:(NSString *)obj];
+            [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger(0)];
+        }
     }
 }
 

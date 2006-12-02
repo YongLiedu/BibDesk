@@ -259,16 +259,3 @@ static NSString *BDSKLibraryLocalizedString = nil;
 - (BOOL)hasEditableName { return YES; }
 
 @end
-
-
-#pragma mark NSString category for KVC
-
-@interface NSString (BDSKGroup) @end
-
-// this exists so we can use valueForKey: in the BDSKGroupCell
-@implementation NSString (BDSKGroup)
-- (NSString *)stringValue { return self; }
-// OmniFoundation implements numberValue for us
-- (int)count { return [[self numberValue] intValue]; }
-@end
-
