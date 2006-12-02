@@ -73,6 +73,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BibDeskSearchForCommand.h"
 #import "BDSKCompletionServerProtocol.h"
+#import "BDSKDocumentController.h"
 
 
 @implementation BibAppController
@@ -115,10 +116,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     SKLoadDefaultExtractorPlugIns();
 
     [NSDateFormatter setDefaultFormatterBehavior:NSDateFormatterBehavior10_4];
-    
-    // register services
-    [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
-        	
+            	
     // eliminate support for some redundant keys
     NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
     if(prefsShownColNamesArray){
@@ -272,9 +270,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 #pragma mark Application delegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
-    // register as a service provider for completecitation:
+    
+    // register services
     [NSApp setServicesProvider:self];
-    NSUpdateDynamicServices();
+    [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObject:NSStringPboardType] returnTypes:[NSArray arrayWithObject:NSStringPboardType]];
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey]])
@@ -1150,16 +1149,15 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 							  error:(NSString **)error{	
 	
 	// add to the frontmost bibliography
-	BibDocument * doc = [[NSDocumentController sharedDocumentController] currentDocument];
-    if (!doc) {
-		// if there are no open documents, give an error. 
-		// Or rather create a new document and add the entry there? Would anybody want that?
-		*error = NSLocalizedString(@"Error: No open document", @"BibDesk couldn't import the selected information because there is no open bibliography file to add it to. Please create or open a bibliography file and try again.");
-		return;
-	}
-	NSError *addError = nil;
-	if([doc addPublicationsFromPasteboard:pboard error:&addError] == NO || addError != nil)
+	BibDocument * doc = [[NSDocumentController sharedDocumentController] mainDocument];
+    if (nil == doc) {
+        // create a new document if we don't have one, or else this method appears to fail mysteriosly (since the error isn't displayed)
+        [self newDocumentFromSelection:pboard userData:userData error:error];
+	} else {
+        NSError *addError = nil;
+        if([doc addPublicationsFromPasteboard:pboard error:&addError] == NO || addError != nil)
         if(error) *error = [addError localizedDescription];
+    }
 }
 
 #pragma mark Spotlight support
