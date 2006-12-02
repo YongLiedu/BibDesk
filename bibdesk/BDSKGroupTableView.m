@@ -47,6 +47,12 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKTypeSelectHelper.h"
+#import "BibAuthor.h"
+
+@interface BDSKGroupCellFormatter : NSFormatter
+@end
+
+#pragma mark
 
 @implementation BDSKGroupTableView
 
@@ -72,6 +78,10 @@
 	
 	[self setHeaderView:customTableHeaderView];	
     [customTableHeaderView release];
+    
+    BDSKGroupCellFormatter *fomatter = [[BDSKGroupCellFormatter alloc] init];
+    [[column dataCell] setFormatter:fomatter];
+    [fomatter release];
     
     [super awakeFromNib]; // this updates the font
     
@@ -308,6 +318,8 @@
 
 @end
 
+#pragma mark -
+
 @implementation BDSKGroupTableHeaderView 
 
 - (id)initWithTableColumn:(NSTableColumn *)tableColumn
@@ -383,6 +395,25 @@
 	id headerCell = [[[[self tableView] tableColumns] objectAtIndex:0] headerCell];
 	OBASSERT([headerCell isKindOfClass:[NSPopUpButtonCell class]]);
 	return headerCell;
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKGroupCellFormatter
+
+- (NSString *)stringForObjectValue:(id)obj{
+    return [obj description];
+}
+
+- (NSString *)editingStringForObjectValue:(id)obj{
+    return [obj isKindOfClass:[BibAuthor class]] ? [obj originalName] : [self stringForObjectValue:obj];
+}
+
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    *obj = string;
+    return YES;
 }
 
 @end

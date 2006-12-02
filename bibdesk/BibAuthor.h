@@ -64,6 +64,7 @@ enum {
     @discussion none.
 */
 @interface BibAuthor : OFObject <NSCopying, NSCoding> {
+    NSString *originalName;
     NSString *name;
     NSString *firstName;
     NSString *vonPart;
@@ -115,6 +116,7 @@ enum {
 - (NSString *)normalizedName;
 - (NSString *)fullLastName;
 - (NSString *)sortableName;
+- (NSString *)originalName;
 - (NSString *)name;
 - (NSString *)firstName;
 - (NSString *)vonPart;

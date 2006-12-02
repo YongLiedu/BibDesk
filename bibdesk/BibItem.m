@@ -2620,7 +2620,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     first = NO;
 				else 
                     [string appendString:@" and "];
-				[string appendString:[auth name]];
+				[string appendString:[auth originalName]];
 			}
 		}
 		[self setField:field toValue:string];
@@ -2738,7 +2738,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			if([auth fuzzyEqual:groupName]){
 				[string appendString:newGroupName];
 			}else{
-				[string appendString:[auth name]];
+				[string appendString:[auth originalName]];
 			}
 		}
 		[self setField:field toValue:string];

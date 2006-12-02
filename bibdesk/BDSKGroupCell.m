@@ -189,7 +189,7 @@ static NSString *stringWithInteger(int count)
             
             NSString *stringValue = [groupValue stringValue];
             // super's object value needs to be an NSString
-            [super setObjectValue:stringValue];
+            [super setObjectValue:[groupValue name]];
             [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:stringValue];
             [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
         }
@@ -366,6 +366,5 @@ textRect.origin.y += floorf(vOffset); \
 
 	[font release];
 }
-
 
 @end

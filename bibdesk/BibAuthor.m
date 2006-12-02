@@ -111,6 +111,8 @@ static BibAuthor *emptyAuthorInstance = nil;
 
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
+        
+        originalName = [aName retain];
         // this does all the name parsing
 		[self splitName:aName];
 	}
@@ -293,6 +295,10 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 
 - (NSString *)sortableName{
     return sortableName;
+}
+
+- (NSString *)originalName{
+    return originalName;
 }
 
 - (NSString *)name{
