@@ -154,8 +154,8 @@
 		}
 	}else if(tv == groupTableView){
 		BDSKGroup *group = [groups objectAtIndex:row];
-		// we need to check for this because for some reason setObjectValue:... is called when the row is selected in this tableView
-		if(([object isKindOfClass:[NSString class]] && [NSString isEmptyString:object]) || [[group name] isEqual:object])
+        // object is always a string, see BDSKGroupCellFormatter
+		if([[group name] isEqual:object])
 			return;
 		if([group isCategory]){
 			NSArray *pubs = [groupedPublications copy];

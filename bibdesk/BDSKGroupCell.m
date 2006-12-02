@@ -182,24 +182,18 @@ static NSString *stringWithInteger(int count)
 }
 
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj {
+    // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
+    [super setObjectValue:obj];
+    
+    // after an edit, this will be called passing a string (see also BDSKGroupCellFormatter)
     if([obj isKindOfClass:[BDSKGroup class]]){
         if(obj != groupValue){
             [groupValue release];
             groupValue = [obj retain];
-            
-            NSString *stringValue = [groupValue stringValue];
-            // super's object value needs to be an NSString
-            [super setObjectValue:[groupValue name]];
-            [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:stringValue];
-            [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
         }
-    }else{
-        [super setObjectValue:obj];
-        
-        if([obj isKindOfClass:[NSString class]]){
-            [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:(NSString *)obj];
-            [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger(0)];
-        }
+        // these can be changed even if the group didn't change
+        [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:[groupValue stringValue]];
+        [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
     }
 }
 

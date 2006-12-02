@@ -47,6 +47,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKTypeSelectHelper.h"
+#import "BDSKGroup.h"
 #import "BibAuthor.h"
 
 @interface BDSKGroupCellFormatter : NSFormatter
@@ -408,10 +409,14 @@
 }
 
 - (NSString *)editingStringForObjectValue:(id)obj{
-    return [obj isKindOfClass:[BibAuthor class]] ? [obj originalName] : [self stringForObjectValue:obj];
+    if([obj isKindOfClass:[NSString class]])
+        return obj;
+    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    id name = [(BDSKGroup *)obj name];
+    return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [name description];
 }
 
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{log_method();
     *obj = string;
     return YES;
 }
