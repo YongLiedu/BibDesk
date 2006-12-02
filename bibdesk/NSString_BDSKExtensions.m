@@ -161,7 +161,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         if(nil == string && try && encoding != [NSString defaultCStringEncoding])
             string = [[NSString alloc] initWithData:data encoding:[NSString defaultCStringEncoding]];
         if(nil == string && try && encoding != [BDSKStringEncodingManager defaultEncoding])
-            string = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
+            string = [[NSString alloc] initWithData:data encoding:[BDSKStringEncodingManager defaultEncoding]];
         if(nil == string && try && encoding != NSISOLatin1StringEncoding)
             string = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
 
