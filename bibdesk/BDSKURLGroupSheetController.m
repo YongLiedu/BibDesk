@@ -154,7 +154,7 @@
 		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
 			return NO;
     
-    if ([NSString isEmptyString:urlString] == NO) {
+    if ([NSString isEmptyString:urlString]) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty URL", @"Message in alert dialog when URL for external file group is invalid")
                                          defaultButton:nil
                                        alternateButton:nil
