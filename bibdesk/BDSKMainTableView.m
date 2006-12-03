@@ -73,15 +73,18 @@
 - (void)awakeFromNib{
     [super awakeFromNib]; // this updates the font
     
-	if([[self cornerView] isKindOfClass:[BDSKImagePopUpButton class]]){
-        BDSKImagePopUpButton *cornerViewButton = (BDSKImagePopUpButton*)[self cornerView];
-        [cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
-        [cornerViewButton setShowsMenuWhenIconClicked:YES];
-        [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
-        [[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
-        [[cornerViewButton cell] setUsesItemFromMenu:NO];
-        [cornerViewButton setRefreshesMenu:NO];
-    }
+    NSRect cornerViewFrame = [[self cornerView] frame];
+    BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
+    [cornerViewButton setIconSize:cornerViewFrame.size];
+    [cornerViewButton setIconImage:[NSImage imageNamed:@"cornerColumns"]];
+    [cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
+    [cornerViewButton setShowsMenuWhenIconClicked:YES];
+    [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
+    [[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+    [[cornerViewButton cell] setUsesItemFromMenu:NO];
+    [cornerViewButton setRefreshesMenu:NO];
+    [self setCornerView:cornerViewButton];
+    [cornerViewButton release];
     
     typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
     [typeSelectHelper setDataSource:[self delegate]]; // which is the bibdocument
