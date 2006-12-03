@@ -39,8 +39,10 @@
 */
 
 #import <Cocoa/Cocoa.h>
-
-@protocol BDSKGroupTableDelegate, BDSKSearchContentView, BDSKTemplateParserDelegate, BDSKOwner;
+#import "BDSKGroupTableView.h"
+#import "BDSKFileContentSearchController.h"
+#import "BDSKTemplateParser.h"
+#import "BDSKOwnerProtocol.h"
 
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;

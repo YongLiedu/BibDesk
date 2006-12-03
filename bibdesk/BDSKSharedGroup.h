@@ -38,10 +38,9 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
-
+#import  "BDSKOwnerProtocol.h"
 
 @class BDSKSharedGroupServer, BDSKPublicationsArray, BDSKMacroResolver;
-@protocol BDSKOwner;
 
 @interface BDSKSharedGroup : BDSKGroup <BDSKOwner>
 {

@@ -39,9 +39,9 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
+#import "BDSKOwnerProtocol.h"
 
 @class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver;
-@protocol BDSKOwner;
 
 enum {
     BDSKShellScriptType,

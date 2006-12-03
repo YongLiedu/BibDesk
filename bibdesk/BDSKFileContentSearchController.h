@@ -41,6 +41,7 @@
 #import "BDSKSearchIndex.h"
 #import "BDSKEdgeView.h"
 #import "BDSKStatusBar.h"
+#import "BDSKSearch.h"
 
 @protocol BDSKSearchContentView <NSObject>
 // Single method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.  It is sent to the document in response to a search field action with an empty string as search string.
@@ -70,7 +71,6 @@
 - (void)restoreDocumentStateByRemovingSearchView:(NSView *)view;
 @end
 
-@protocol BDSKSearchDelegate;
 @class BDSKSearch, BDSKSearchField;
 
 @interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate>

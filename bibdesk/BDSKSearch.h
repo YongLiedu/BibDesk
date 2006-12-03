@@ -37,9 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKSearchIndex.h"
 
 @class BDSKSearchIndex, BDSKSearch, BDSKSearchPrivateIvars;
-@protocol BDSKSearchIndexDelegate;
 
 @protocol BDSKSearchDelegate <NSObject>
 - (void)search:(BDSKSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
