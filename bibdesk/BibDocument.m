@@ -1641,6 +1641,33 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark New publications from pasteboard
 
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey{
+    [self selectLibraryGroup:nil];    
+	[self addPublications:newPubs];
+	[self selectPublications:newPubs];
+	if (pubsToAutoFile != nil){
+        // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
+        [pubsToAutoFile makeObjectsPerformSelector:@selector(autoFilePaper)];
+    }
+    
+    // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
+    NSCalendarDate *importDate = [NSCalendarDate date];
+    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
+	
+	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+		[self editPubCmd:nil]; // this will ask the user when there are many pubs
+	}
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
+    
+    // set up the smart group that shows the latest import
+    // @@ do this for items added via the editor?  doesn't seem as useful
+    [groups setLastImportedPublications:newPubs];
+    
+    if(tmpCiteKey != nil)
+        [self reportTemporaryCiteKeys:tmpCiteKey forNewDocument:NO];
+}
+
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)outError{
 	// these are the types we support, the order here is important!
     NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
@@ -1698,33 +1725,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 		return NO;
     }
     
-	if ([newPubs count] == 0) 
-		return YES; // nothing to do
-	
-    [self selectLibraryGroup:nil];    
-	[self addPublications:newPubs];
-	[self selectPublications:newPubs];
-	if (newFilePubs != nil){
-        // tried checking [pb isEqual:[NSPasteboard pasteboardWithName:NSDragPboard]] before using delay, but pb is a CFPasteboardUnique
-        [newFilePubs makeObjectsPerformSelector:@selector(autoFilePaper)];
-    }
-    
-    // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
-    NSCalendarDate *importDate = [NSCalendarDate date];
-    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
-	
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
-		[self editPubCmd:nil]; // this will ask the user when there are many pubs
-	}
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
-    
-    // set up the smart group that shows the latest import
-    // @@ do this for items added via the editor?  doesn't seem as useful
-    [groups setLastImportedPublications:newPubs];
-    
-    if(temporaryCiteKey != nil)
-        [self reportTemporaryCiteKeys:temporaryCiteKey forNewDocument:NO];
+	if ([newPubs count] > 0) 
+		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey];
     
     return YES;
 }
@@ -1742,26 +1744,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         return NO;
     }
     
-    [self selectLibraryGroup:nil];    
-	[self addPublications:newPubs];
-	[self selectPublications:newPubs];
-    
-    // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
-    NSCalendarDate *importDate = [NSCalendarDate date];
-    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateAddedString withObject:[importDate description]];
-	
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
-		[self editPubCmd:nil]; // this will ask the user when there are many pubs
-	}
-	
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication", @"Undo action name")];
-    
-    // set up the smart group that shows the latest import
-    // @@ do this for items added via the editor?  doesn't seem as useful
-    [groups setLastImportedPublications:newPubs];
-    
-    if(temporaryCiteKey != nil)
-        [self reportTemporaryCiteKeys:temporaryCiteKey forNewDocument:NO];
+    [self addPublications:newPubs publicationsToAutoFile:nil temporaryCiteKey:temporaryCiteKey];
     
     return YES;
 }
