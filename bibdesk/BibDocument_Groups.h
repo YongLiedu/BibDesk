@@ -72,6 +72,7 @@
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification;
+- (void)handleGroupNameChangedNotification:(NSNotification *)notification;
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;

@@ -53,7 +53,6 @@ extern NSString *BDSKGroupCellCountKey;
         unsigned int settingUpFieldEditor:1;
     } _oaFlags;
     NSMutableDictionary *countAttributes;
-    BDSKGroup *groupValue;
     NSMutableAttributedString *label;
     NSMutableAttributedString *countString;
 }

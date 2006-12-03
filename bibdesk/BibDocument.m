@@ -2112,6 +2112,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                    name:BDSKFilterChangedNotification
                  object:nil];
         [nc addObserver:self
+               selector:@selector(handleGroupNameChangedNotification:)
+                   name:BDSKGroupNameChangedNotification
+                 object:nil];
+        [nc addObserver:self
                selector:@selector(handleStaticGroupChangedNotification:)
                    name:BDSKStaticGroupChangedNotification
                  object:nil];

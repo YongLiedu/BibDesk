@@ -632,7 +632,6 @@
             arguments = [[groupDict objectForKey:@"script arguments"] stringByUnescapingGroupPlistEntities];
             type = [[groupDict objectForKey:@"script type"] intValue];
             group = [[BDSKScriptGroup alloc] initWithName:name scriptPath:path scriptArguments:arguments scriptType:type];
-            [group setName:[groupDict objectForKey:@"group name"]];
             [group setUndoManager:[self undoManager]];
             [array addObject:group];
         }

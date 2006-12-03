@@ -142,6 +142,15 @@ The groupedPublications array is a subset of the publications array, developed b
     // could force selection of row 0 in the main table here, so we always display a preview, but that flashes the group table highlights annoyingly and may cause other selection problems
 }
 
+- (void)handleGroupNameChangedNotification:(NSNotification *)notification{
+    if([groups containsObjectIdenticalTo:[notification object]] == NO)
+        return;
+    if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
+        [self sortGroupsByKey:sortGroupsKey];
+    else
+        [groupTableView setNeedsDisplay:YES];
+}
+
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
     [groupTableView setNeedsDisplay:YES];

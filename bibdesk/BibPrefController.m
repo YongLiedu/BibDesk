@@ -289,6 +289,7 @@ NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Wind
 NSString *BDSKBibTypeInfoChangedNotification = @"TypeInfo Changed Notification";
 NSString *BDSKCustomFieldsChangedNotification = @"Custom Fields Changed Notification";
 NSString *BDSKFilterChangedNotification = @"Filter Changed Notification";
+NSString *BDSKGroupNameChangedNotification = @"BDSKGroupNameChangedNotification";
 NSString *BDSKStaticGroupChangedNotification = @"BDSKStaticGroupChangedNotification";
 NSString *BDSKSharedGroupsChangedNotification = @"BDSKSharedGroupsChangedNotification";
 NSString *BDSKSharedGroupUpdatedNotification = @"BDSKSharedGroupUpdatedNotification";

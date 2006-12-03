@@ -154,18 +154,18 @@
 		}
 	}else if(tv == groupTableView){
 		BDSKGroup *group = [groups objectAtIndex:row];
-        // object is always a string, see BDSKGroupCellFormatter
-		if([[group name] isEqual:object])
+        // object is always a group, see BDSKGroupCellFormatter
+        OBASSERT([object isKindOfClass:[BDSKGroup class]]);
+        id newName = [object name];
+		if([[group name] isEqual:newName])
 			return;
 		if([group isCategory]){
 			NSArray *pubs = [groupedPublications copy];
-			[self movePublications:pubs fromGroup:group toGroupNamed:object];
+			[self movePublications:pubs fromGroup:group toGroupNamed:newName];
 			[pubs release];
 		}else if([group hasEditableName]){
-			[(BDSKMutableGroup *)group setName:object];
+			[(BDSKMutableGroup *)group setName:newName];
 			[[self undoManager] setActionName:NSLocalizedString(@"Rename Group", @"Undo action name")];
-			if([sortGroupsKey isEqualToString:BDSKGroupCellStringKey])
-                [self sortGroupsByKey:sortGroupsKey];
 		}
 	}
 }

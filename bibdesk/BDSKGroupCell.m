@@ -126,7 +126,6 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 - (id)copyWithZone:(NSZone *)zone {
     BDSKGroupCell *copy = [super copyWithZone:zone];
 
-    copy->groupValue = [groupValue retain];
     copy->_oaFlags.drawsHighlight = _oaFlags.drawsHighlight;
     
     // count attributes are shared between this cell and all copies, but not with new instances
@@ -138,7 +137,6 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 }
 
 - (void)dealloc {
-    [groupValue release];
     [label release];
     [countString release];
     [countAttributes release];
@@ -183,18 +181,12 @@ static NSString *stringWithInteger(int count)
 
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj {
     // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
+    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    
     [super setObjectValue:obj];
     
-    // after an edit, this will be called passing a string (see also BDSKGroupCellFormatter)
-    if([obj isKindOfClass:[BDSKGroup class]]){
-        if(obj != groupValue){
-            [groupValue release];
-            groupValue = [obj retain];
-        }
-        // these can be changed even if the group didn't change
-        [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:[groupValue stringValue]];
-        [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
-    }
+    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:obj == nil ? @"" : [(BDSKGroup *)obj stringValue]];
+    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([(BDSKGroup *)obj count])];
 }
 
 #pragma mark Drawing
@@ -210,8 +202,8 @@ NSRect ignored, imageRect, textRect, countRect; \
 \
 NSSize imageSize = NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1); \
 NSSize countSize = NSZeroSize; \
-BOOL failedDownload = [groupValue failedDownload]; \
-BOOL isRetrieving = [groupValue isRetrieving]; \
+BOOL failedDownload = [[self objectValue] failedDownload]; \
+BOOL isRetrieving = [[self objectValue] isRetrieving]; \
 BOOL controlViewIsFlipped = [controlView isFlipped]; \
 \
 float countSep = 0.0; \
@@ -223,7 +215,7 @@ else if(isRetrieving) { \
     countSize = NSMakeSize(16, 16); \
     countSep = 1.0; \
 } \
-else if([groupValue count] > 0) { \
+else if([[self objectValue] count] > 0) { \
     countSize = [countString size]; \
     countSep = 0.5f * countSize.height - 0.5; \
 } \
@@ -305,9 +297,9 @@ textRect.origin.y += floorf(vOffset); \
     // Draw the image
     imageRect = BDSKCenterRect(imageRect, imageSize, controlViewIsFlipped);
 	if (controlViewIsFlipped)
-		[[groupValue icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
+		[[[self objectValue] icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
 	else
-		[[groupValue icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+		[[[self objectValue] icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     
 }
 

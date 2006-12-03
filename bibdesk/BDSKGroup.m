@@ -242,6 +242,7 @@ static NSString *BDSKLibraryLocalizedString = nil;
 		[(BDSKMutableGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
         [name release];
         name = [newName retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupNameChangedNotification object:self];
     }
 }
 

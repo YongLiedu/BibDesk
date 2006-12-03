@@ -267,6 +267,7 @@ extern NSString *BDSKMacroTextFieldWindowWillCloseNotification;
 extern NSString *BDSKBibTypeInfoChangedNotification;
 extern NSString *BDSKCustomFieldsChangedNotification;
 extern NSString *BDSKFilterChangedNotification;
+extern NSString *BDSKGroupNameChangedNotification;
 extern NSString *BDSKStaticGroupChangedNotification;
 extern NSString *BDSKSharedGroupsChangedNotification;
 extern NSString *BDSKSharedGroupUpdatedNotification;
