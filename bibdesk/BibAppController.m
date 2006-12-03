@@ -336,9 +336,6 @@ static void createTemporaryDirectory()
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
-    // this can be observed before the tmpPath is removed (e.g. for delayed pasteboard), as the NS version will come after this method finishes
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKApplicationWillTerminateNotification object:self];
-    	
     [metadataCacheLock lock];
     canWriteMetadata = NO;
     [metadataCacheLock unlock];

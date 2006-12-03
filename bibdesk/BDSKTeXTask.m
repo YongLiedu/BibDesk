@@ -128,14 +128,11 @@
         OFSimpleLockInit(&processingLock);
         pthread_rwlock_init(&dataFileLock, NULL);
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
-        
 	}
 	return self;
 }
 
 - (void)dealloc{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[workingDirPath release];
     [applicationSupportPath release];
     [texTemplatePath release];
@@ -192,13 +189,6 @@
         [taskFinishedInvocation setSelector:theSelector];
         [taskFinishedInvocation setArgument:&self atIndex:2];
     }        
-}
-
-- (void)applicationWillTerminate:(NSNotification *)aNotification{
-    // this is not effective if the user does a copy command that calls a TeX task, then quits the app before pasting, since the pasteboard asks for the data after NSApplicationWillTerminate
-    [self setDelegate:nil];
-    [self terminate];
-    [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
 }
 
 - (void)terminate{

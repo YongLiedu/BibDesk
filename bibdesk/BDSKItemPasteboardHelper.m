@@ -52,7 +52,7 @@
 		[texTask setDelegate:self];
         delegate = nil;
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:BDSKApplicationWillTerminateNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminateNotification:) name:NSApplicationWillTerminateNotification object:nil];
     }
     return self;
 }
