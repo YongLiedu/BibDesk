@@ -191,19 +191,20 @@ typedef struct WLDragMapEntryStruct
 }
 
 - (NSString *)uniqueFilePath:(NSString *)path createDirectory:(BOOL)create{
-	NSString *basePath = [path stringByDeletingPathExtension];
-    NSString *extension = [path pathExtension];
-	int i = 0;
-	
-	if(![extension isEqualToString:@""])
-		extension = [@"." stringByAppendingString:extension];
-	
-	while([self fileExistsAtPath:path])
-		path = [NSString stringWithFormat:@"%@-%i%@", basePath, ++i, extension];
-	
-	if(create)
-		[self createDirectoryAtPath:path attributes:nil];
-	
+    @synchronized(self){
+        NSString *basePath = [path stringByDeletingPathExtension];
+        NSString *extension = [path pathExtension];
+        int i = 0;
+        
+        if(![extension isEqualToString:@""])
+            extension = [@"." stringByAppendingString:extension];
+        
+        while([self fileExistsAtPath:path])
+            path = [NSString stringWithFormat:@"%@-%i%@", basePath, ++i, extension];
+        
+        if(create)
+            [self createDirectoryAtPath:path attributes:nil];
+    }
 	return path;
 }
 
