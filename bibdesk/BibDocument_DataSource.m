@@ -172,7 +172,7 @@
 
 #pragma mark TableView delegate
 
-- (void)disableWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)disableGroupRenameWarningAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if ([alert checkValue] == YES) {
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKWarnOnRenameGroupKey];
 	}
@@ -187,17 +187,17 @@
 			
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Message in alert dialog")
 												 defaultButton:NSLocalizedString(@"OK", @"Button title")
-											   alternateButton:nil
-												   otherButton:NSLocalizedString(@"Cancel", @"Button title")
+											   alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+												   otherButton:nil
 									 informativeTextWithFormat:NSLocalizedString(@"This action will change the %@ field in %i items. Do you want to proceed?", @"Informative text in alert dialog"), currentGroupField, [groupedPublications count]];
 			[alert setHasCheckButton:YES];
 			[alert setCheckValue:NO];
 			int rv = [alert runSheetModalForWindow:documentWindow
 									 modalDelegate:self 
-									didEndSelector:@selector(disableWarningAlertDidEnd:returnCode:contextInfo:) 
+									didEndSelector:@selector(disableGroupRenameWarningAlertDidEnd:returnCode:contextInfo:) 
 								didDismissSelector:NULL 
-									   contextInfo:BDSKWarnOnRenameGroupKey];
-			if (rv == NSAlertOtherReturn)
+									   contextInfo:NULL];
+			if (rv == NSAlertAlternateReturn)
 				return NO;
 		}
 		return YES;
