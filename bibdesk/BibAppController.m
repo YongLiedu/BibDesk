@@ -111,7 +111,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
 static NSString *temporaryBaseDirectory = nil;
 static void createTemporaryDirectory()
 {
-    NSAssert([NSThread inMainThread]);
+    OBASSERT([NSThread inMainThread]);
     // somewhere in /var/tmp, generally; contents moved to Trash on relaunch
     NSString *temporaryPath = NSTemporaryDirectory();
     
