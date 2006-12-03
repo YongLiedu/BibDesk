@@ -37,7 +37,7 @@
 #import <Cocoa/Cocoa.h>
 
 @class BibDocument;
-@protocol BDSKOwner, BDSKCompletionServer;
+@protocol BDSKOwner;
 
 /*!
     @class BibAppController
@@ -48,7 +48,7 @@
 */
 
 
-@interface BibAppController : NSObject <BDSKCompletionServer> {
+@interface BibAppController : NSObject {
 	
     // global auto-completion dictionary:
     NSMutableDictionary *autoCompletionDict;
@@ -68,7 +68,6 @@
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
-- (NSString *)temporaryBaseDirectoryCreating:(BOOL)create;
 - (NSString *)temporaryFilePath:(NSString *)fileName createDirectory:(BOOL)create;
 
 - (NSMenu *)groupSortMenu;
