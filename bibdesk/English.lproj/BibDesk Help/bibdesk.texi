@@ -841,7 +841,7 @@ to add references from an arbitrary text file, or the
 to add publactions from a website. 
 
 Examples of reference sources that this would be convenient for are
-emails, conference proceedings web sites, and the text from a list of
+emails, conference proceedings web sites, and the text from a list of
 citations at the end of a publication.
 
 When the sheet opens, it loads the data on the clipboard into the
@@ -880,7 +880,9 @@ You can make adding data faster by double-clicking the name of
 the field you want the selected text to fill and it will be added for
 you. You can also use the key shortcuts @cmd{&#0048} through @cmd{9} or 
 @optcmd{&#0048} through @optcmd{9} to copy the selected text over to the 
-corresponding field. Alternatively, you can type @cmd{=} to temporarily 
+corresponding field. If you hold down the Control key at the same time, 
+the selected text will be appended to the field value. 
+Alternatively, you can type @cmd{=} to temporarily 
 move to the table to select a field to fill. After that, start typing 
 the field name or use the arrow keys to find the field and hit the 
 Enter key to fill it and return to what you were doing. Use the 
