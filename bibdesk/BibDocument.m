@@ -2473,26 +2473,26 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             }
             break;
         case BDSKTemplatePreviewDisplay:
-            do{
-                NSString *style = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey];
-                BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
-                if (template == nil)
-                    template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
-                NSAttributedString *templateString;
-                
-                // make sure this is really one of the attributed string types...
-                if([template templateFormat] & BDSKRichTextTemplateFormat){
-                    templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
-                    [textStorage appendAttributedString:templateString];
-                } else if([template templateFormat] & BDSKTextTemplateFormat){
-                    // parse as plain text, so the HTML is interpreted properly by NSAttributedString
-                    NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
-                    // we generally assume UTF-8 encoding for all template-related files
-                    templateString = [[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
-                    [textStorage appendAttributedString:templateString];
-                    [templateString release];
-                }
-            }while(0);
+            {
+            NSString *style = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey];
+            BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
+            if (template == nil)
+                template = [BDSKTemplate templateForStyle:[BDSKTemplate defaultStyleNameForFileType:@"rtf"]];
+            NSAttributedString *templateString;
+            
+            // make sure this is really one of the attributed string types...
+            if([template templateFormat] & BDSKRichTextTemplateFormat){
+                templateString = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:NULL];
+                [textStorage appendAttributedString:templateString];
+            } else if([template templateFormat] & BDSKTextTemplateFormat){
+                // parse as plain text, so the HTML is interpreted properly by NSAttributedString
+                NSString *str = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:self publications:items];
+                // we generally assume UTF-8 encoding for all template-related files
+                templateString = [[NSAttributedString alloc] initWithHTML:[str dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+                [textStorage appendAttributedString:templateString];
+                [templateString release];
+            }
+            }
             break;
     }
     
