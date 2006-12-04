@@ -39,8 +39,25 @@
 
 #define BIBDESK_SERVER_NAME @"BDSKCompletionServer"
 
+/*
+ Keys for objects returned by completionsForString:
+ 
+  ** Value is guaranteed non-nil **
+ citeKey        Cite key of the item (NSString)
+ title          Title of the item as shown in BibDesk (NSString)
+ numberOfNames  Number of authors or editors, corresponding to lastName and sortableName (NSNumber)
+ 
+  ** Value may be nil **
+ lastName       Last name of the first author or editor, including von and Jr parts (NSString)
+ sortableName   Name used for sorting in BibDesk (NSString)
+ year           Publication year (NSNumber)
+ 
+ The primary usage of the items returned is for pretty-printing a list to be displayed.  The title and names in particular may be formatted differently from the actual BibTeX file's content.
+ 
+ */
+
 @protocol BDSKCompletionServer
-// Returns an array of dictionaries with keys "citeKey", "numberOfNames", and optionally "lastName" and "year". 
+// Returns an array of KVC-compliant objects
 - (NSArray *)completionsForString:(NSString *)searchString;
 // Returns a list of URLs of currently opened documents
 - (NSArray *)orderedDocumentURLs;
@@ -50,10 +67,22 @@
 static inline NSArray *BDSKCompletionsForString(NSString *searchString) {
     NSArray *completions = nil;
     NSConnection *connection = [NSConnection connectionWithRegisteredName:BIBDESK_SERVER_NAME host:nil];
-    id server = [connection rootProxy];
     
-    [server setProtocolForProxy:@protocol(BDSKCompletionServer)];
-    completions = [server completionsForString:searchString];
+    // if we don't set these explicitly, timeout never seems to take place
+    [connection setRequestTimeout:10.0f];
+    [connection setReplyTimeout:10.0f];
+
+    id server;
+    
+    @try {
+        server = [connection rootProxy];
+        [server setProtocolForProxy:@protocol(BDSKCompletionServer)];
+        completions = [server completionsForString:searchString];
+    }
+    @catch(id exception) {
+        NSLog(@"Discarding exception %@ caught when contacting BibDesk", exception);
+        completions = nil;
+    }
     [[connection receivePort] invalidate];
     [[connection sendPort] invalidate];
     [connection invalidate];

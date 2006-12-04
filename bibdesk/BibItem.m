@@ -1511,6 +1511,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 // return a KVC-compliant object; may not be a dictionary in future
 - (id)completionObject{
     
+    // !!! when adding more keys, update BDSKCompletionServerProtocol.h
+    
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:4];
     [dict setObject:[self citeKey] forKey:@"citeKey"];
     // displayTitle removes TeX
