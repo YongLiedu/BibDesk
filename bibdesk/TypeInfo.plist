@@ -18,8 +18,7 @@
         020 = {a = Isbn; }; 
         050 = {a = "Call-Number"; }; 
         082 = {a = "Dewey-Call-Number"; }; 
-        100 = {a = Author; }; 
-        245 = {a = Title; b = Title; }; 
+        245 = {a = Title; b = Title; c = Author; }; 
         250 = {a = Edition; }; 
         260 = {a = Address; b = Publisher; c = Year; }; 
         440 = {v = Volume; }; 
