@@ -13,18 +13,18 @@
         TI = Title; 
         VO = Volume; 
     }; 
-    BibTeXFieldNamesForMARCXMLSubFields = {
-        010 = {a = LibraryID; }; 
-        020 = {a = ISBN; }; 
-        050 = {a = CallNumber; }; 
-        082 = {a = DeweyCallNumber; }; 
+    BibTeXFieldNamesForMARCTags = {
+        010 = {a = "Library-Id"; }; 
+        020 = {a = Isbn; }; 
+        050 = {a = "Call-Number"; }; 
+        082 = {a = "Dewey-Call-Number"; }; 
         100 = {a = Author; }; 
         245 = {a = Title; }; 
         250 = {a = Edition; }; 
-        260 = {a = "Place-Published"; b = Publisher; c = "Publication-Date"; }; 
-        300 = {a = NumberOfPages; }; 
-        440 = {a = Series; }; 
-        490 = {a = Series; }; 
+        260 = {a = Address; b = Publisher; c = Year; }; 
+        440 = {v = Volume; }; 
+        490 = {a = Series; v = Volume; }; 
+        520 = {a = Abstract; }; 
         650 = {a = Genre; }; 
         700 = {a = Author; }; 
     }; 

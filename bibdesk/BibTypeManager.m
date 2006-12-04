@@ -131,6 +131,7 @@ static BibTypeManager *sharedInstance = nil;
 	[typesForFileTypeDict release];
 	[fieldNameForPubMedTagDict release];
 	[bibtexTypeForPubMedTypeDict release];
+	[fieldNamesForMARCTagDict release];
     [fieldNameForJSTORTagDict release];
     [fieldDescriptionForJSTORTagDict release];
     [fieldNameForWebOfScienceTagDict release];
@@ -183,6 +184,7 @@ static BibTypeManager *sharedInstance = nil;
         [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
         [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
         [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
+        [self setFieldNamesForMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY]];
         [self setMODSGenresForBibTeXTypeDict:[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY]];
         [self setFieldNameForJSTORTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY]];
         [self setFieldDescriptionForJSTORTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY]];
@@ -303,6 +305,13 @@ static BibTypeManager *sharedInstance = nil;
     if(fieldNameForPubMedTagDict != newNames){
         [fieldNameForPubMedTagDict release];
         fieldNameForPubMedTagDict = [newNames copy];
+    }
+}
+
+- (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames{
+    if(fieldNamesForMARCTagDict != newNames){
+        [fieldNamesForMARCTagDict release];
+        fieldNamesForMARCTagDict = [newNames copy];
     }
 }
 
@@ -437,6 +446,10 @@ static BibTypeManager *sharedInstance = nil;
 
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type{
     return [bibtexTypeForPubMedTypeDict objectForKey:type];
+}
+
+- (NSDictionary *)fieldNamesForMARCTag:(NSString *)tag{
+    return [fieldNamesForMARCTagDict objectForKey:tag];
 }
 
 - (NSString *)fieldNameForDublinCoreTerm:(NSString *)term{

@@ -44,6 +44,7 @@ enum {
 	BDSKNoKeyBibTeXStringType, 
 	BDSKPubMedStringType, 
 	BDSKRISStringType, 
+	BDSKMARCStringType, 
 	BDSKRefManStringType, 
 	BDSKJSTORStringType, 
 	BDSKWOSStringType

@@ -42,6 +42,7 @@
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
 #import "BDSKRISParser.h"
+#import "BDSKMARCParser.h"
 #import "BDSKReferenceMinerParser.h"
 #import "BDSKJSTORParser.h"
 #import "BDSKWebOfScienceParser.h"
@@ -60,6 +61,9 @@
             break;
 		case BDSKRISStringType:
             parserClass = [BDSKRISParser class];
+            break;
+		case BDSKMARCStringType:
+            parserClass = [BDSKMARCParser class];
             break;
 		case BDSKRefManStringType:
             parserClass = [BDSKReferenceMinerParser class];
@@ -97,6 +101,8 @@
 		return BDSKPubMedStringType;
 	if([BDSKRISParser canParseString:self])
 		return BDSKRISStringType;
+	if([BDSKMARCParser canParseString:self])
+		return BDSKMARCStringType;
 	if([BDSKJSTORParser canParseString:self])
 		return BDSKJSTORStringType;
 	if([BDSKWebOfScienceParser canParseString:self])

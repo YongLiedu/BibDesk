@@ -40,11 +40,13 @@
 #import <AGRegex/AGRegex.h>
 #import "PubMedparser.h"
 #import "BDSKRISParser.h"
+#import "BDSKMARCParser.h"
 
 
 @interface NSString (ReferenceMinerExtensions)
 - (NSString *)stringByFixingRefMinerPubMedTags;
 - (NSString *)stringByFixingRefMinerAmazonString;
+- (NSString *)stringByFixingRefMinerLoCString;
 @end
 
 
@@ -65,6 +67,10 @@
     else if([scanner scanString:@"PubMed,RM" intoString:NULL] &&
        [scanner scanInt:NULL] &&
        [scanner scanString:@",PMID- " intoString:NULL]) 
+        isRefMan = YES;
+    else if([scanner scanString:@"Library of Congress,RM" intoString:NULL] &&
+       [scanner scanInt:NULL] &&
+       [scanner scanString:@",LDR " intoString:NULL]) 
         isRefMan = YES;
     [scanner release];
     return isRefMan;
@@ -88,10 +94,9 @@
         itemString = [itemString stringByFixingRefMinerAmazonString]; 
         return [BDSKRISParser itemsFromString:itemString error:outError];
     }else if([itemString rangeOfString:@"Library of Congress,RM" options:0 range:NSMakeRange(0,22)].location != NSNotFound){
-        // we're presently unable to parse LOC references
-        if(outError)
-            OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse Library of Congress references.", @"Error description"), nil);
-        return [NSArray array];
+        // the only problem here is the stuff that Ref Miner prepends to the LDR; other than that, it's just MARC output
+        itemString = [itemString stringByFixingRefMinerLoCString]; 
+        return [BDSKMARCParser itemsFromString:itemString error:outError];
     }else{
         if(outError)
             OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown Reference Miner format.", @"Error description"), nil);
@@ -143,6 +148,14 @@
     tmpStr = [ends replaceWithString:@"ER  - \r\nTY  - " inString:tmpStr];
 	
     return [tmpStr stringByAppendingString:@"\r\nER  - "];	
+}
+
+- (NSString *)stringByFixingRefMinerLoCString;
+{    
+    // Reference Miner puts its own goo at the front of each entry, so we remove it.  From looking at
+    // the input string in gdb, we're getting something like "Library of Congress,RM122,LDR 01080pam  2200325 a 4500" as the first line.
+    AGRegex *startTags = [AGRegex regexWithPattern:@"^Library of Congress,RM[0-9]{3}," options:AGRegexMultiline];
+    return [startTags replaceWithString:@"" inString:self];
 }
 
 @end
