@@ -42,6 +42,12 @@
 #import "BibItem.h"
 #import "BibAppController.h"
 #import <OmniFoundation/NSScanner-OFExtensions.h>
+#import <OmniFoundation/NSString-OFExtensions.h>
+
+
+@interface NSString (BDSKMARCParserExtensions)
+- (NSString *)stringByRemovingPunctuationCharacters;
+@end
 
 
 @interface BDSKMARCParser (Private)
@@ -153,6 +159,8 @@ static void addStringToDictionary(NSMutableString *value, NSMutableDictionary *p
     NSString *key = nil;
     NSDictionary *fieldsForSubTags = [[BibTypeManager sharedManager] fieldNamesForMARCTag:tag];
     NSString *subValue = nil;
+    NSString *tmpValue = nil;
+    NSRange range;
 	
     NSScanner *scanner = [[NSScanner alloc] initWithString:value];
     
@@ -165,10 +173,57 @@ static void addStringToDictionary(NSMutableString *value, NSMutableDictionary *p
         if([scanner scanUpToString:@"$" intoString:&subValue] &&
            (key = [fieldsForSubTags objectForKey:subTag])){
             
-            if([pubDict objectForKey:key] == nil)
-                [pubDict setObject:[subValue stringByConvertingHTMLToTeX] forKey:key];
+            if([pubDict objectForKey:key] == nil){
+                // editors are added at the end of authors aftyer "edited by" or "[edited by]"
+                
+                subValue = [subValue stringByConvertingHTMLToTeX];
+                if([key isEqualToString:BDSKAuthorString]){
+                    subValue = [subValue stringByReplacingAllOccurrencesOfString:@" and, " withString:@" and "];
+                    subValue = [subValue stringByReplacingAllOccurrencesOfString:@", " withString:@" and "];
+                    range = [subValue rangeOfString:@"edited by"];
+                    if(range.location != NSNotFound){
+                        tmpValue = [subValue substringFromIndex:NSMaxRange(range)];
+                        tmpValue = [[tmpValue stringByRemovingString:@"]"] stringByRemovingSurroundingWhitespace];
+                        subValue = [subValue substringToIndex:range.location];
+                        subValue = [[subValue stringByRemovingString:@"["] stringByRemovingSurroundingWhitespace];
+                        if(tmpValue)
+                            [pubDict setObject:[tmpValue stringByRemovingPunctuationCharacters] forKey:BDSKEditorString];
+                    }
+                }else if([key isEqualToString:BDSKYearString]){
+                    // The year is often preceded by an extra "c"
+                    subValue = [subValue stringByRemovingString:@"c"];
+                }else if([key isEqualToString:BDSKTitleString]){
+                    // this should be the subtitle, 245 $c
+                    if(tmpValue = [pubDict objectForKey:key])
+                        subValue = [NSString stringWithFormat:@"%@: %@", tmpValue, subValue];
+                }else if([key isEqualToString:BDSKAnnoteString]){
+                    if(tmpValue = [pubDict objectForKey:key])
+                        subValue = [NSString stringWithFormat:@"%@. %@", tmpValue, subValue];
+                }
+                
+                [pubDict setObject:[subValue stringByRemovingPunctuationCharacters] forKey:key];
+            }
         }
     }
+}
+
+@end
+
+
+@implementation NSString (BDSKMARCParserExtensions)
+
+- (NSString *)stringByRemovingPunctuationCharacters{
+    static NSCharacterSet *punctuationCharacterSet = nil;
+    if(punctuationCharacterSet)
+        punctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
+    
+    unsigned length = [self length];
+    if(length == 0)
+        return self;
+    NSString *cleanedString = self;
+    if([punctuationCharacterSet characterIsMember:[self characterAtIndex:length - 1]])
+        cleanedString = [cleanedString substringToIndex:length - 1];
+    return [cleanedString stringByRemovingSurroundingWhitespace];
 }
 
 @end
