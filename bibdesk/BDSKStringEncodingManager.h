@@ -44,6 +44,7 @@
 }
 - (NSStringEncoding)encoding;
 - (void)setEncoding:(NSStringEncoding)encoding;
+- (void)handleEncodingsListChanged:(NSNotification *)notification;
 @end
 
 
