@@ -47,21 +47,10 @@ extern NSString *BDSKGroupCellCountKey;
 
 @interface BDSKGroupCell : NSTextFieldCell
 {
-    struct {
-        unsigned int drawsHighlight:1;
-        unsigned int imagePosition:3;
-        unsigned int settingUpFieldEditor:1;
-    } _oaFlags;
+    BOOL settingUpFieldEditor;
     NSMutableDictionary *countAttributes;
     NSMutableAttributedString *label;
     NSMutableAttributedString *countString;
 }
-
-// API
-- (NSCellImagePosition)imagePosition;
-- (void)setImagePosition:(NSCellImagePosition)aPosition;
-
-- (BOOL)drawsHighlight;
-- (void)setDrawsHighlight:(BOOL)flag;
 
 @end

@@ -81,11 +81,8 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 - (id)init {
     if (self = [super initTextCell:@""]) {
         
-        [self setImagePosition:NSImageLeft];
         [self setEditable:YES];
         [self setScrollable:YES];
-        
-		[self setDrawsHighlight:NO];
         
         label = [[NSMutableAttributedString alloc] initWithString:@""];
         countString = [[NSMutableAttributedString alloc] initWithString:@""];
@@ -101,10 +98,6 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 - (id)initWithCoder:(NSCoder *)coder {
 	if (self = [super initWithCoder:coder]) {
-		// we need to do these two because OATextWithIconCell does in subclass NSCoding, so super uses the one from NSTextFieldCell
-		_oaFlags.drawsHighlight = [coder decodeIntForKey:@"drawsHighlight"];
-		[self setImagePosition:NSImageLeft];
-        
         // recreates the dictionary
         countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
         [self recacheCountAttributes];
@@ -118,7 +111,6 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
 	[super encodeWithCoder:encoder];
-	[encoder encodeInt:_oaFlags.drawsHighlight forKey:@"drawsHighlight"];
 }
 
 // NSCopying
@@ -126,8 +118,6 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 - (id)copyWithZone:(NSZone *)zone {
     BDSKGroupCell *copy = [super copyWithZone:zone];
 
-    copy->_oaFlags.drawsHighlight = _oaFlags.drawsHighlight;
-    
     // count attributes are shared between this cell and all copies, but not with new instances
     copy->countAttributes = [countAttributes retain];
     copy->label = [label mutableCopy];
@@ -145,17 +135,14 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 {
-    if (!_oaFlags.drawsHighlight)
-        return nil;
-    else
-        return [super highlightColorWithFrame:cellFrame inView:controlView];
+    return nil;
 }
 
 - (NSColor *)textColor;
 {
-    if (_oaFlags.settingUpFieldEditor)
-        return [NSColor blackColor];
-    else if (!_oaFlags.drawsHighlight && _cFlags.highlighted)
+    if (settingUpFieldEditor)
+        return [NSColor textColor];
+    else if (_cFlags.highlighted)
         return [NSColor textBackgroundColor];
     else
         return [super textColor];
@@ -207,11 +194,7 @@ BOOL isRetrieving = [[self objectValue] isRetrieving]; \
 BOOL controlViewIsFlipped = [controlView isFlipped]; \
 \
 float countSep = 0.0; \
-if(failedDownload) { \
-    countSize = NSMakeSize(16, 16); \
-    countSep = 1.0; \
-} \
-else if(isRetrieving) { \
+if(failedDownload || isRetrieving) { \
     countSize = NSMakeSize(16, 16); \
     countSep = 1.0; \
 } \
@@ -307,29 +290,9 @@ textRect.origin.y += floorf(vOffset); \
 {
     _calculateDrawingRectsAndSizes;
     
-    _oaFlags.settingUpFieldEditor = YES;
+    settingUpFieldEditor = YES;
     [super selectWithFrame:textRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
-    _oaFlags.settingUpFieldEditor = NO;
-}
-
-- (NSCellImagePosition)imagePosition;
-{
-    return _oaFlags.imagePosition;
-}
-
-- (void)setImagePosition:(NSCellImagePosition)aPosition;
-{
-    _oaFlags.imagePosition = aPosition;
-}
-
-- (BOOL)drawsHighlight;
-{
-    return _oaFlags.drawsHighlight;
-}
-
-- (void)setDrawsHighlight:(BOOL)flag;
-{
-    _oaFlags.drawsHighlight = flag;
+    settingUpFieldEditor = NO;
 }
 
 @end
