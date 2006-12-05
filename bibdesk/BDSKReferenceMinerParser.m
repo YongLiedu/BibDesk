@@ -44,36 +44,20 @@
 
 
 @interface NSString (ReferenceMinerExtensions)
+- (BOOL)isRefMinerPubMedString;
+- (BOOL)isRefMinerLoCString;
+- (BOOL)isRefMinerAmazonString;
 - (NSString *)stringByFixingRefMinerPubMedTags;
-- (NSString *)stringByFixingRefMinerAmazonString;
 - (NSString *)stringByFixingRefMinerLoCString;
+- (NSString *)stringByFixingRefMinerAmazonString;
 @end
 
 
 @implementation BDSKReferenceMinerParser
 
 + (BOOL)canParseString:(NSString *)string{
-    NSScanner *scanner = [[NSScanner alloc] initWithString:string];
-    [scanner setCharactersToBeSkipped:nil];
-    BOOL isRefMan = NO;
-    
-    // skip leading whitespace
-    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
-    
-    if([scanner scanString:@"Amazon,RM" intoString:NULL] &&
-       [scanner scanInt:NULL] &&
-       [scanner scanString:@",ITEM- " intoString:NULL])
-        isRefMan = YES;
-    else if([scanner scanString:@"PubMed,RM" intoString:NULL] &&
-       [scanner scanInt:NULL] &&
-       [scanner scanString:@",PMID- " intoString:NULL]) 
-        isRefMan = YES;
-    else if([scanner scanString:@"Library of Congress,RM" intoString:NULL] &&
-       [scanner scanInt:NULL] &&
-       [scanner scanString:@",LDR " intoString:NULL]) 
-        isRefMan = YES;
-    [scanner release];
-    return isRefMan;
+    string = [string stringByNormalizingSpacesAndLineBreaks];
+    return [string isRefMinerPubMedString] || [string isRefMinerLoCString] || [string isRefMinerAmazonString];
 }
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
@@ -85,15 +69,15 @@
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
     
-    if([itemString rangeOfString:@"PubMed,RM" options:0 range:NSMakeRange(0, 9)].location != NSNotFound){
+    if([itemString isRefMinerPubMedString]){
         // the only problem here is the stuff that Ref Miner prepends to the PMID; other than that, it's just PubMed output
         itemString = [itemString stringByFixingRefMinerPubMedTags];
         return [PubMedParser itemsFromString:itemString error:outError];
-    }else if([itemString rangeOfString:@"Amazon,RM" options:0 range:NSMakeRange(0,9)].location != NSNotFound){
+    }else if([itemString isRefMinerAmazonString]){
         // run a crude hack for fixing the broken RIS that we get for Amazon entries from Reference Miner
         itemString = [itemString stringByFixingRefMinerAmazonString]; 
         return [BDSKRISParser itemsFromString:itemString error:outError];
-    }else if([itemString rangeOfString:@"Library of Congress,RM" options:0 range:NSMakeRange(0,22)].location != NSNotFound){
+    }else if([itemString isRefMinerLoCString]){
         // the only problem here is the stuff that Ref Miner prepends to the LDR; other than that, it's just MARC output
         itemString = [itemString stringByFixingRefMinerLoCString]; 
         return [BDSKMARCParser itemsFromString:itemString error:outError];
@@ -109,11 +93,37 @@
 
 @implementation NSString (ReferenceMinerExtensions)
 
+- (BOOL)isRefMinerPubMedString;
+{
+    AGRegex *pubmedRegex = [AGRegex regexWithPattern:@"^.+PMID- [0-9]+\n[A-Z]{3} - " options:AGRegexMultiline];
+    return nil != [pubmedRegex findInString:self];
+}
+
+- (BOOL)isRefMinerLoCString;
+{
+    AGRegex *locRegex = [AGRegex regexWithPattern:@"^.+LDR [a-z0-9 ]{24})\n{0,2}[0-9]{3} " options:AGRegexMultiline];
+    return nil != [locRegex findInString:self];
+}
+
+- (BOOL)isRefMinerAmazonString;
+{
+    AGRegex *amazonRegex = [AGRegex regexWithPattern:@"^Amazon,RM[0-9]{3}," options:AGRegexMultiline];
+    return nil != [amazonRegex findInString:self];
+}
+
 - (NSString *)stringByFixingRefMinerPubMedTags;
 {    
     // Reference Miner puts its own goo at the front of each entry, so we remove it.  From looking at
     // the input string in gdb, we're getting something like "PubMed,RM122,PMID- 15639629," as the first line.
-    AGRegex *startTags = [AGRegex regexWithPattern:@"^PubMed,RM[0-9]{3}," options:AGRegexMultiline];
+    AGRegex *startTags = [AGRegex regexWithPattern:@"^(.+)(PMID- [0-9]+\n[A-Z]{3} - )" options:AGRegexMultiline];
+    return [startTags replaceWithString:@"\2" inString:self];
+}
+
+- (NSString *)stringByFixingRefMinerLoCString;
+{    
+    // Reference Miner puts its own goo at the front of each entry, so we remove it.  From looking at
+    // the input string in gdb, we're getting something like "Library of Congress,RM122,LDR 01080pam  2200325 a 4500" as the first line.
+    AGRegex *startTags = [AGRegex regexWithPattern:@"^(.+)(LDR [a-z0-9 ]{24}\n{0,2}[0-9]{3} )" options:AGRegexMultiline];
     return [startTags replaceWithString:@"" inString:self];
 }
 
@@ -148,14 +158,6 @@
     tmpStr = [ends replaceWithString:@"ER  - \r\nTY  - " inString:tmpStr];
 	
     return [tmpStr stringByAppendingString:@"\r\nER  - "];	
-}
-
-- (NSString *)stringByFixingRefMinerLoCString;
-{    
-    // Reference Miner puts its own goo at the front of each entry, so we remove it.  From looking at
-    // the input string in gdb, we're getting something like "Library of Congress,RM122,LDR 01080pam  2200325 a 4500" as the first line.
-    AGRegex *startTags = [AGRegex regexWithPattern:@"^Library of Congress,RM[0-9]{3}," options:AGRegexMultiline];
-    return [startTags replaceWithString:@"" inString:self];
 }
 
 @end

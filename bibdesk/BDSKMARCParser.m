@@ -46,7 +46,7 @@
 
 
 @interface NSString (BDSKMARCParserExtensions)
-- (NSString *)stringByRemovingPunctuationCharacters;
+- (NSString *)stringByRemovingPunctuationCharactersAndBracketedText;
 @end
 
 
@@ -173,21 +173,22 @@ static void addStringToDictionary(NSMutableString *value, NSMutableDictionary *p
         if([scanner scanUpToString:@"$" intoString:&subValue] &&
            (key = [fieldsForSubTags objectForKey:subTag])){
             
-            if([pubDict objectForKey:key] == nil){
+            if([pubDict objectForKey:key] == nil || ([key isEqualToString:BDSKAuthorString] && [tag isEqualToString:@"245"])){
                 // editors are added at the end of authors aftyer "edited by" or "[edited by]"
                 
-                subValue = [subValue stringByConvertingHTMLToTeX];
-                if([key isEqualToString:BDSKAuthorString]){
+                if([key isEqualToString:BDSKAuthorString] && [tag isEqualToString:@"245"]){
                     subValue = [subValue stringByReplacingAllOccurrencesOfString:@" and, " withString:@" and "];
                     subValue = [subValue stringByReplacingAllOccurrencesOfString:@", " withString:@" and "];
-                    range = [subValue rangeOfString:@"edited by"];
+                    range = [subValue rangeOfString:@"[edited by]"];
+                    if(range.location == NSNotFound)
+                        range = [subValue rangeOfString:@"edited by"];
                     if(range.location != NSNotFound){
                         tmpValue = [subValue substringFromIndex:NSMaxRange(range)];
-                        tmpValue = [[tmpValue stringByRemovingString:@"]"] stringByRemovingSurroundingWhitespace];
+                        tmpValue = [tmpValue stringByRemovingSurroundingWhitespace];
                         subValue = [subValue substringToIndex:range.location];
-                        subValue = [[subValue stringByRemovingString:@"["] stringByRemovingSurroundingWhitespace];
+                        subValue = [subValue stringByRemovingSurroundingWhitespace];
                         if(tmpValue)
-                            [pubDict setObject:[tmpValue stringByRemovingPunctuationCharacters] forKey:BDSKEditorString];
+                            [pubDict setObject:[tmpValue stringByRemovingPunctuationCharactersAndBracketedText] forKey:BDSKEditorString];
                     }
                 }else if([key isEqualToString:BDSKYearString]){
                     // The year is often preceded by an extra "c"
@@ -201,7 +202,7 @@ static void addStringToDictionary(NSMutableString *value, NSMutableDictionary *p
                         subValue = [NSString stringWithFormat:@"%@. %@", tmpValue, subValue];
                 }
                 
-                [pubDict setObject:[subValue stringByRemovingPunctuationCharacters] forKey:key];
+                [pubDict setObject:[subValue stringByRemovingPunctuationCharactersAndBracketedText] forKey:key];
             }
         }
     }
@@ -212,18 +213,32 @@ static void addStringToDictionary(NSMutableString *value, NSMutableDictionary *p
 
 @implementation NSString (BDSKMARCParserExtensions)
 
-- (NSString *)stringByRemovingPunctuationCharacters{
+- (NSString *)stringByRemovingPunctuationCharactersAndBracketedText{
     static NSCharacterSet *punctuationCharacterSet = nil;
-    if(punctuationCharacterSet)
-        punctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
+    if(punctuationCharacterSet == nil)
+        punctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@".,:;/"] retain];
     
-    unsigned length = [self length];
+    NSString *string = self;
+    unsigned length = [string length];
+    NSRange range = [self rangeOfString:@"["];
+    unsigned start = range.location;
+    if(start != NSNotFound){
+        range = [self rangeOfString:@"]" options:0 range:NSMakeRange(start, length - start)];
+        if(range.location != NSNotFound){
+            NSMutableString *mutString = [string mutableCopy];
+            [mutString deleteCharactersInRange:NSMakeRange(start, NSMaxRange(range) - start)];
+            [mutString removeSurroundingWhitespace];
+            string = [mutString autorelease];
+            length = [string length];
+        }
+    }
+    
     if(length == 0)
-        return self;
-    NSString *cleanedString = self;
-    if([punctuationCharacterSet characterIsMember:[self characterAtIndex:length - 1]])
+        return string;
+    NSString *cleanedString = string;
+    if([punctuationCharacterSet characterIsMember:[string characterAtIndex:length - 1]])
         cleanedString = [cleanedString substringToIndex:length - 1];
-    return [cleanedString stringByRemovingSurroundingWhitespace];
+    return cleanedString;
 }
 
 @end
