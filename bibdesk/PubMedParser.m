@@ -163,7 +163,7 @@
     BOOL scannedPMID = NO;
     
     // this means we scanned some garbage before the PMID tag, or else this isn't a PubMed string...
-    OBPRECONDITION(scannedString == nil);
+    OBPRECONDITION([NSString isEmptyString:scannedString]);
     
     do {
         
