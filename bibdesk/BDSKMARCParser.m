@@ -49,6 +49,7 @@
 @interface NSString (BDSKMARCParserExtensions)
 - (BOOL)isMARCString;
 - (BOOL)isFormattedMARCString;
+- (BOOL)isMARCXMLString;
 - (NSString *)stringByFixingFormattedMARCStart;
 - (NSString *)stringByRemovingPunctuationCharactersAndBracketedText;
 @end
@@ -56,13 +57,23 @@
 
 @interface BDSKMARCParser (Private)
 static void addStringToDictionary(NSString *value, NSMutableDictionary *dict, NSString *tag, NSString *subFieldIndicator);
+static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag);
 @end
 
+@interface BDSKMARCXMLParser : NSXMLParser {
+    NSMutableArray *returnArray;
+    NSMutableDictionary *pubDict;
+    NSMutableString *currentValue;
+    NSString *tag;
+    NSString *subTag;
+}
+- (NSArray *)parsedItems;
+@end
 
 @implementation BDSKMARCParser
 
 + (BOOL)canParseString:(NSString *)string{
-	return [string isMARCString] || [string isFormattedMARCString];
+	return [string isMARCString] || [string isFormattedMARCString] || [string isMARCXMLString];
 }
 
 + (NSArray *)itemsFromFormattedMARCString:(NSString *)itemString error:(NSError **)outError{
@@ -238,11 +249,30 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *dict, NS
     return returnArray;
 }
 
++ (NSArray *)itemsFromMARCXMLString:(NSString *)itemString error:(NSError **)outError{
+    BDSKMARCXMLParser *xmlParser = [[BDSKMARCXMLParser alloc] initWithXMLString:itemString];
+    BOOL success = [xmlParser parse];
+    NSArray *returnArray = nil;
+    
+    if([xmlParser parse]){
+        returnArray = [xmlParser parsedItems];
+    }else{
+        returnArray = [NSArray array];
+        if(outError) *outError = [xmlParser parserError];
+    }
+    
+    [xmlParser release];
+    
+    return returnArray;
+}
+
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     if([itemString isMARCString]){
         return [self itemsFromMARCString:itemString error:outError];
     }else if([itemString isFormattedMARCString]){
         return [self itemsFromFormattedMARCString:itemString error:outError];
+    }else if([itemString isMARCXMLString]){
+        return [self itemsFromMARCXMLString:itemString error:outError];
     }else{
         if(outError)
             OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
@@ -255,17 +285,10 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *dict, NS
 
 @implementation BDSKMARCParser (Private)
 
-static NSString *titleTag = @"245";
-static NSString *subtitleSubTag = @"b";
-static NSString *authorSubTag = @"c";
-
 static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict, NSString *tag, NSString *subFieldIndicator){
 	NSString *subTag = nil;
-    NSString *key = nil;
     NSDictionary *fieldsForSubTags = [[BibTypeManager sharedManager] fieldNamesForMARCTag:tag];
     NSString *subValue = nil;
-    NSString *tmpValue = nil;
-    NSRange range;
 	
     NSScanner *scanner = [[NSScanner alloc] initWithString:value];
     
@@ -275,50 +298,67 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
         if(NO == [scanner scanString:subFieldIndicator intoString:NULL] || NO == [scanner scanStringOfLength:1 intoString:&subTag])
             break;
         
-        if([scanner scanUpToString:subFieldIndicator intoString:&subValue] &&
-           (key = [fieldsForSubTags objectForKey:subTag])){
-            
+        if([scanner scanUpToString:subFieldIndicator intoString:&subValue]){
             subValue = [subValue stringByRemovingSurroundingWhitespace];
-            
-            if([tag isEqualToString:titleTag]){
-                if([subTag isEqualToString:authorSubTag]){
-                    // this contains the rest of the cover text, usually authors and/or editors
-                    // it usually contains all authors, while 100 contains only the first author
-                    // editors are often added at the end of authors after "edited by" or "[edited by]"
-                    subValue = [subValue stringByReplacingAllOccurrencesOfString:@" and, " withString:@" and "];
-                    subValue = [subValue stringByReplacingAllOccurrencesOfString:@", " withString:@" and "];
-                    range = [subValue rangeOfString:@"[edited by]"];
-                    if(range.location == NSNotFound)
-                        range = [subValue rangeOfString:@"edited by"];
-                    if(range.location != NSNotFound){
-                        tmpValue = [subValue substringFromIndex:NSMaxRange(range)];
-                        tmpValue = [tmpValue stringByRemovingSurroundingWhitespace];
-                        subValue = [subValue substringToIndex:range.location];
-                        subValue = [subValue stringByRemovingSurroundingWhitespace];
-                        if(tmpValue)
-                            [pubDict setObject:[tmpValue stringByRemovingPunctuationCharactersAndBracketedText] forKey:BDSKEditorString];
-                    }
-                    [pubDict removeObjectForKey:BDSKAuthorString];
-                }else if([subTag isEqualToString:subtitleSubTag] && (tmpValue = [pubDict objectForKey:key])){
-                    // this is the subtitle, append it to the title if present
-                    
-                    subValue = [NSString stringWithFormat:@"%@: %@", tmpValue, subValue];
-                    [pubDict removeObjectForKey:key];
-                }
-            }else if([key isEqualToString:BDSKAnnoteString] && (tmpValue = [pubDict objectForKey:key])){
-                subValue = [NSString stringWithFormat:@"%@. %@", tmpValue, subValue];
-                [pubDict removeObjectForKey:key];
-            }else if([key isEqualToString:BDSKYearString]){
-                // This is used for stripping extraneous characters from BibTeX year fields
-                static AGRegex *findYearRegex = nil;
-                if(findYearRegex == nil)
-                    findYearRegex = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
-                subValue = [findYearRegex replaceWithString:@"$2" inString:subValue];
-            }
-            
-            [pubDict setObject:[subValue stringByRemovingPunctuationCharactersAndBracketedText] forKey:key];
+            addSubstringToDictionary(subValue, pubDict, tag, subTag);
         }
     }
+    
+    [scanner release];
+}
+
+static NSString *titleTag = @"245";
+static NSString *subtitleSubTag = @"b";
+static NSString *authorSubTag = @"c";
+
+static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag){
+    NSString *key = [[[BibTypeManager sharedManager] fieldNamesForMARCTag:tag] objectForKey:subTag];
+    NSString *tmpValue = nil;
+    
+    if(key == nil)
+        return;
+    
+    subValue = [subValue stringByRemovingSurroundingWhitespace];
+    
+    if([tag isEqualToString:titleTag]){
+        if([subTag isEqualToString:authorSubTag]){
+            // this contains the rest of the cover text, usually authors and/or editors
+            // it usually contains all authors, while 100 contains only the first author
+            // editors are often added at the end of authors after "edited by" or "[edited by]"
+            subValue = [subValue stringByReplacingAllOccurrencesOfString:@" and, " withString:@" and "];
+            subValue = [subValue stringByReplacingAllOccurrencesOfString:@", " withString:@" and "];
+            NSRange range = [subValue rangeOfString:@"[edited by]"];
+            if(range.location == NSNotFound)
+                range = [subValue rangeOfString:@"edited by"];
+            if(range.location != NSNotFound){
+                tmpValue = [subValue substringFromIndex:NSMaxRange(range)];
+                tmpValue = [tmpValue stringByRemovingSurroundingWhitespace];
+                subValue = [subValue substringToIndex:range.location];
+                subValue = [subValue stringByRemovingSurroundingWhitespace];
+                if(tmpValue)
+                    [pubDict setObject:[tmpValue stringByRemovingPunctuationCharactersAndBracketedText] forKey:BDSKEditorString];
+            }
+            [pubDict removeObjectForKey:BDSKAuthorString];
+        }else if([subTag isEqualToString:subtitleSubTag] && (tmpValue = [pubDict objectForKey:key])){
+            // this is the subtitle, append it to the title if present
+            
+            subValue = [NSString stringWithFormat:@"%@: %@", tmpValue, subValue];
+            [pubDict removeObjectForKey:key];
+        }
+    }else if([key isEqualToString:BDSKAnnoteString] && (tmpValue = [pubDict objectForKey:key])){
+        subValue = [NSString stringWithFormat:@"%@. %@", tmpValue, subValue];
+        [pubDict removeObjectForKey:key];
+    }else if([key isEqualToString:BDSKYearString]){
+        // This is used for stripping extraneous characters from BibTeX year fields
+        static AGRegex *findYearRegex = nil;
+        if(findYearRegex == nil)
+            findYearRegex = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
+        subValue = [findYearRegex replaceWithString:@"$2" inString:subValue];
+    }
+    
+    subValue = [[subValue stringByRemovingPunctuationCharactersAndBracketedText] copy];
+    [pubDict setObject:subValue forKey:key];
+    [subValue release];
 }
 
 @end
@@ -339,6 +379,12 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
 
 - (BOOL)isFormattedMARCString{
     AGRegex *regex = [AGRegex regexWithPattern:@"^LDR[ \t]+[0-9]{5}[a-z]{3}[ \\-a]{2}22[0-9]{5}[ \\-1-8uz][ \\-aiur]{2}4500\n[0-9]{3}[ \t]+" options:AGRegexMultiline];
+    
+    return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
+}
+
+- (BOOL)isMARCXMLString{
+    AGRegex *regex = [AGRegex regexWithPattern:@"^ *<collection[^>]*>\n *<record>\n *<leader>[0-9]{5}[a-z]{3}[ a]{2}22[0-9]{5}[ 1-8uz][ aiur]{2}4500</leader>\n<controlfield tag=\"00[0-9]\">"];
     
     return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
 }
@@ -382,3 +428,74 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
 }
 
 @end
+
+
+@implementation BDSKMARCXMLParser  
+
+- (id)initWithXMLString:(NSString *)aString{
+    NSData *data = [aString dataUsingEncoding:NSUTF8StringEncoding];
+    if(data == nil){
+        [[super init] release];
+        self = nil;
+    }else if(self = [super initWithData:data]){
+        returnArray = [[NSMutableArray alloc] initWithCapacity:10];
+        pubDict = [[NSMutableDictionary alloc] init];
+        currentValue = [[NSMutableString alloc] initWithCapacity:50];
+        tag = nil;
+        subTag = nil;
+        
+        [self setDelegate:self];
+        
+    }
+    return self;
+}
+
+- (void)dealloc{
+    [returnArray release];
+    [pubDict release];
+    [tag release];
+    [subTag release];
+    [currentValue release];
+    [super dealloc];
+}
+
+- (NSArray *)parsedItems{
+    return [[returnArray copy] autorelease];
+}
+
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName attributes:(NSDictionary *)attributeDict{
+    if([elementName isEqualToString:@"record"]){
+        [pubDict removeAllObjects];
+    }else if([elementName isEqualToString:@"datafield"]){
+        [tag release];
+        tag = [[attributeDict objectForKey:@"tag"] retain];
+    }else if([elementName isEqualToString:@"subfield"]){
+        [subTag release];
+        subTag = [[attributeDict objectForKey:@"code"] retain];
+        [currentValue setString:@""];
+    }
+}
+
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName{
+    if([elementName isEqualToString:@"record"]){
+        if([pubDict count] > 0){
+            BibItem *newBI = [[BibItem alloc] initWithType:BDSKBookString
+                                                  fileType:BDSKBibtexString
+                                                   citeKey:nil
+                                                 pubFields:pubDict
+                                                     isNew:YES];
+            [returnArray addObject:newBI];
+            [newBI release];
+        }
+    }else if([elementName isEqualToString:@"subfield"]){
+        if(tag && subTag && [currentValue length])
+            addSubstringToDictionary(currentValue, pubDict, tag, subTag);
+    }
+}
+
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string{
+    [currentValue appendString:string];
+}
+
+@end
+
