@@ -191,6 +191,8 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     unsigned recordTerminator = 0x1D, fieldTerminator = 0x1E, subFieldChar = 0x1F;
     NSString *subFieldIndicator = [NSString stringWithFormat:@"%C", subFieldChar];
+    
+#pragma unused (fieldTerminator)
 	
     NSArray *records = [itemString componentsSeparatedByString:[NSString stringWithFormat:@"%C", recordTerminator]];
     
