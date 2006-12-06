@@ -96,7 +96,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     BibItem *newBI = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
-    NSError *error = nil;
 	
     NSArray *sourceLines = [itemString sourceLinesBySplittingString];
     
@@ -189,9 +188,8 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 	
     BibItem *newBI = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
-    NSError *error = nil;
     
-    unsigned recordTerminator = 0x1D, fieldTerminator = 0x1E, subFieldChar = 0x1F;
+    unsigned recordTerminator = 0x1D, subFieldChar = 0x1F;
     NSString *subFieldIndicator = [NSString stringWithFormat:@"%C", subFieldChar];
 	
     NSArray *records = [itemString componentsSeparatedByString:[NSString stringWithFormat:@"%C", recordTerminator]];
@@ -254,7 +252,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     BOOL success = [xmlParser parse];
     NSArray *returnArray = nil;
     
-    if([xmlParser parse]){
+    if(success){
         returnArray = [xmlParser parsedItems];
     }else{
         returnArray = [NSArray array];
@@ -287,7 +285,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict, NSString *tag, NSString *subFieldIndicator){
 	NSString *subTag = nil;
-    NSDictionary *fieldsForSubTags = [[BibTypeManager sharedManager] fieldNamesForMARCTag:tag];
     NSString *subValue = nil;
 	
     NSScanner *scanner = [[NSScanner alloc] initWithString:value];
