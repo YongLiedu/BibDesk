@@ -329,7 +329,7 @@ static void addStringToDictionary(NSString *value, NSMutableDictionary *pubDict,
 - (BOOL)isMARCString{
     unsigned fieldTerminator = 0x1E, recordTerminator = 0x1D;
     NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z]{3}[ a]{2}22[0-9]{5}[ 1-8uz][ aiur]{2}4500([0-9]{12})+%C", fieldTerminator];
-    AGRegex *regex = [AGRegex regexWithPattern:pattern options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:pattern];
     
     if([regex findInString:self] == NO)
         return NO;
