@@ -82,7 +82,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 	
     itemString = [itemString stringByFixingFormattedMARCStart];
     
-    AGRegex *regex = [AGRegex regexWithPattern:@"^1(00|10|11|30)[ \t]*[0-9]{0,1}[ \t]+[^ \t[:alnum:]]a" options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^([ \t]*)1[01]{2}[ \t]*[0-9]{0,1}[ \t]+[^ \t[:alnum:]]a" options:AGRegexMultiline];
     AGRegexMatch *match = [regex findInString:itemString];
     
     if(match == nil){
@@ -91,6 +91,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
         return [NSArray array];
     }
     
+    unsigned tagStartIndex = [match rangeAtIndex:1].length;
     unsigned fieldStartIndex = [match range].length - 2;
     NSString *subFieldIndicator = [[match group] substringWithRange:NSMakeRange(fieldStartIndex, 1)];
     
@@ -113,10 +114,10 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     
     while(sourceLine = [sourceLineE nextObject]){
         
-        if([sourceLine length] < 3)
+        if([sourceLine length] < tagStartIndex + 3)
             continue;
         
-        tmpTag = [sourceLine substringToIndex:3];
+        tmpTag = [sourceLine substringWithRange:NSMakeRange(tagStartIndex, 3)];
         
         if([tmpTag hasPrefix:@" "]){
             // continuation of a value
@@ -377,19 +378,19 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 - (BOOL)isFormattedMARCString{
-    AGRegex *regex = [AGRegex regexWithPattern:@"^LDR[ \t]+[0-9]{5}[a-z]{3}[ \\-a]{2}22[0-9]{5}[ \\-1-8uz][ \\-aiur]{2}4500\n[0-9]{3}[ \t]+" options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a]{2}22[ \\-0-9]{5}[ \\-1-8uz][ \\-aiur]{2}4500\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
     
     return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (BOOL)isMARCXMLString{
-    AGRegex *regex = [AGRegex regexWithPattern:@"^ *<collection[^>]*>\n *<record>\n *<leader>[0-9]{5}[a-z]{3}[ a]{2}22[0-9]{5}[ 1-8uz][ aiur]{2}4500</leader>\n<controlfield tag=\"00[0-9]\">"];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^ *<collection[^>]*>\n *<record>\n *<leader>[ \\-0-9]{5}[a-z]{3}[ a]{2}22[ \\-0-9]{5}[ 1-8uz][ aiur]{2}4500</leader>\n<controlfield tag=\"00[0-9]\">"];
     
     return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (NSString *)stringByFixingFormattedMARCStart{
-    AGRegex *regex = [AGRegex regexWithPattern:@"^LDR[ \t]+[0-9]{5}[a-z]{3}[ \\-a]{2}22[0-9]{5}[ \\-1-8uz][ \\-aiur]{2}4500\n[0-9]{3}[ \t]+" options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[0-9]{5}[a-z]{3}[ \\-a]{2}22[0-9]{5}[ \\-1-8uz][ \\-aiur]{2}4500\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
     unsigned start = [[regex findInString:self] range].location;
     return start == 0 ? self : [self substringFromIndex:start];
 }
