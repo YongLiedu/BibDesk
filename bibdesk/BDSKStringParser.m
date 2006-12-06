@@ -65,7 +65,7 @@
 		case BDSKMARCStringType:
             parserClass = [BDSKMARCParser class];
             break;
-		case BDSKRefManStringType:
+		case BDSKReferenceMinerStringType:
             parserClass = [BDSKReferenceMinerParser class];
             break;
 		case BDSKJSTORStringType:
@@ -96,7 +96,7 @@
 	if([BibTeXParser canParseString:self])
 		return BDSKBibTeXStringType;
 	if([BDSKReferenceMinerParser canParseString:self])
-		return BDSKRefManStringType;
+		return BDSKReferenceMinerStringType;
 	if([PubMedParser canParseString:self])
 		return BDSKPubMedStringType;
 	if([BDSKRISParser canParseString:self])

@@ -1682,7 +1682,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     } else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
         NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
-		newPubs = [self newPublicationsForString:pbString type:BDSKRefManStringType error:&error];
+		newPubs = [self newPublicationsForString:pbString type:BDSKReferenceMinerStringType error:&error];
         if(temporaryCiteKey = [[error userInfo] valueForKey:@"temporaryCiteKey"])
             error = nil; // accept temporary cite keys, but show a warning later
     }else if([type isEqualToString:NSStringPboardType]){
