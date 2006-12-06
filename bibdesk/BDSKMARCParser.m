@@ -189,7 +189,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     BibItem *newBI = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
     
-    unsigned recordTerminator = 0x1D, subFieldChar = 0x1F;
+    unsigned recordTerminator = 0x1D, fieldTerminator = 0x1E, subFieldChar = 0x1F;
     NSString *subFieldIndicator = [NSString stringWithFormat:@"%C", subFieldChar];
 	
     NSArray *records = [itemString componentsSeparatedByString:[NSString stringWithFormat:@"%C", recordTerminator]];
