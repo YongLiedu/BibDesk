@@ -115,6 +115,9 @@ enum {
 // updates derived info from the dictionary
 - (void)updateMetadataForKey:(NSString *)key;
 
+// rearranges the field dictionary, keeping old keys if they have a value
+- (void)makeType;
+
 @end
 
 
@@ -480,90 +483,6 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 #pragma mark -
-
-#pragma mark Type info
-
-// used to be a #define; changed to function for clarity in debugging
-static inline void setEmptyStringIfObjectIsNilAndExcludeFromRemoval(NSString *key, NSMutableDictionary *dict, NSMutableSet *removalSet)
-{
-    if([dict objectForKey:key] == nil)
-        [dict setObject:@"" forKey:key];
-    [removalSet removeObject:key];
-}
-
-// CFSetApplierFunction callback
-static void removeItemsInSetFromDictionary(const void *value, void *context)
-{
-    CFDictionaryRemoveValue((CFMutableDictionaryRef)context, value);
-}
-
-// CFSet string equality callback
-static Boolean stringIsEqualToString(const void *value1, const void *value2) { return [(id)value1 isEqualToString:(id)value2]; }
-
-- (void)makeType{
-    NSString *fieldString;
-    NSString *theType = [self pubType];
-    
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
-    
-    // enumerating small arrays by index is generally faster than NSEnumerator, and -makeType is called many times at load
-    CFArrayRef requiredFields = (CFArrayRef)[typeManager requiredFieldsForType:theType];
-    CFArrayRef optionalFields = (CFArrayRef)[typeManager optionalFieldsForType:theType];
-    CFArrayRef userFields = (CFArrayRef)[typeManager userDefaultFieldsForType:theType];
-    
-    // current state of this item's pubFields
-    CFArrayRef allFields = (CFArrayRef)[self allFieldNames];
-    
-    CFIndex requiredCount = CFArrayGetCount(requiredFields);
-    CFIndex optionalCount = CFArrayGetCount(optionalFields);
-    CFIndex userCount = CFArrayGetCount(userFields);
-    CFIndex allFieldsCount = CFArrayGetCount(allFields);
-    
-    // have to retain keys removed from the dictionary, but we know they're strings
-    CFSetCallBacks callBacks = { 0, OFCFTypeRetain, OFCFTypeRelease, CFCopyDescription, stringIsEqualToString, CFHash };
-    
-    // fixed-size mutable set; this needn't be larger than allFieldsCount
-    NSMutableSet *emptyFieldsToRemove = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), allFieldsCount, &callBacks);
-    NSString *key;
-    
-    CFIndex idx;
-    
-    // for each field currently in this publication, check if it's value is an empty string; if so, add to the set of fields to be removed
-    for (idx = 0; idx < allFieldsCount; idx++) {
-        key = (id)CFArrayGetValueAtIndex(allFields, idx);
-        if ([[pubFields objectForKey:key] isEqualAsComplexString:@""])
-            [emptyFieldsToRemove addObject:key];
-    }        
-        
-    // see if we have a nil value for any required field; if so, give it an empty value and don't remove it at the end
-    for (idx = 0; idx < requiredCount; idx++) {
-        fieldString = (id)CFArrayGetValueAtIndex(requiredFields, idx);
-        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
-    }
-
-    // now check the BibTeX-defined optional fields
-    for (idx = 0; idx < optionalCount; idx++) {
-        fieldString = (id)CFArrayGetValueAtIndex(optionalFields, idx);
-        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
-    }
-
-    // now check all user-defined default fields
-    for (idx = 0; idx < userCount; idx++) {
-        fieldString = (id)CFArrayGetValueAtIndex(userFields, idx);
-        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
-    }
-    
-    // I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others as being non-nil:
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKLocalUrlString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKUrlString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAnnoteString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAbstractString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKRssDescriptionString, pubFields, emptyFieldsToRemove);
-
-    // now remove everything that's left in removeKeys from pubFields, since it's non-standard for this type
-    CFSetApplyFunction((CFMutableSetRef)emptyFieldsToRemove, removeItemsInSetFromDictionary, pubFields);
-    CFRelease(emptyFieldsToRemove);
-}
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
 	[self makeType];
@@ -3206,6 +3125,90 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                                                             object:(BibDocument *)owner
                                                           userInfo:[self searchIndexInfo]];
     }
+}
+
+#pragma mark Type info
+
+// used to be a #define; changed to function for clarity in debugging
+static inline void setEmptyStringIfObjectIsNilAndExcludeFromRemoval(NSString *key, NSMutableDictionary *dict, NSMutableSet *removalSet)
+{
+    if([dict objectForKey:key] == nil)
+        [dict setObject:@"" forKey:key];
+    [removalSet removeObject:key];
+}
+
+// CFSetApplierFunction callback
+static void removeItemsInSetFromDictionary(const void *value, void *context)
+{
+    CFDictionaryRemoveValue((CFMutableDictionaryRef)context, value);
+}
+
+// CFSet string equality callback
+static Boolean stringIsEqualToString(const void *value1, const void *value2) { return [(id)value1 isEqualToString:(id)value2]; }
+
+- (void)makeType{
+    NSString *fieldString;
+    NSString *theType = [self pubType];
+    
+    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    
+    // enumerating small arrays by index is generally faster than NSEnumerator, and -makeType is called many times at load
+    CFArrayRef requiredFields = (CFArrayRef)[typeManager requiredFieldsForType:theType];
+    CFArrayRef optionalFields = (CFArrayRef)[typeManager optionalFieldsForType:theType];
+    CFArrayRef userFields = (CFArrayRef)[typeManager userDefaultFieldsForType:theType];
+    
+    // current state of this item's pubFields
+    CFArrayRef allFields = (CFArrayRef)[self allFieldNames];
+    
+    CFIndex requiredCount = CFArrayGetCount(requiredFields);
+    CFIndex optionalCount = CFArrayGetCount(optionalFields);
+    CFIndex userCount = CFArrayGetCount(userFields);
+    CFIndex allFieldsCount = CFArrayGetCount(allFields);
+    
+    // have to retain keys removed from the dictionary, but we know they're strings
+    CFSetCallBacks callBacks = { 0, OFCFTypeRetain, OFCFTypeRelease, CFCopyDescription, stringIsEqualToString, CFHash };
+    
+    // fixed-size mutable set; this needn't be larger than allFieldsCount
+    NSMutableSet *emptyFieldsToRemove = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), allFieldsCount, &callBacks);
+    NSString *key;
+    
+    CFIndex idx;
+    
+    // for each field currently in this publication, check if it's value is an empty string; if so, add to the set of fields to be removed
+    for (idx = 0; idx < allFieldsCount; idx++) {
+        key = (id)CFArrayGetValueAtIndex(allFields, idx);
+        if ([[pubFields objectForKey:key] isEqualAsComplexString:@""])
+            [emptyFieldsToRemove addObject:key];
+    }        
+    
+    // see if we have a nil value for any required field; if so, give it an empty value and don't remove it at the end
+    for (idx = 0; idx < requiredCount; idx++) {
+        fieldString = (id)CFArrayGetValueAtIndex(requiredFields, idx);
+        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
+    }
+    
+    // now check the BibTeX-defined optional fields
+    for (idx = 0; idx < optionalCount; idx++) {
+        fieldString = (id)CFArrayGetValueAtIndex(optionalFields, idx);
+        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
+    }
+    
+    // now check all user-defined default fields
+    for (idx = 0; idx < userCount; idx++) {
+        fieldString = (id)CFArrayGetValueAtIndex(userFields, idx);
+        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
+    }
+    
+    // I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others as being non-nil:
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKLocalUrlString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKUrlString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAnnoteString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAbstractString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKRssDescriptionString, pubFields, emptyFieldsToRemove);
+    
+    // now remove everything that's left in removeKeys from pubFields, since it's non-standard for this type
+    CFSetApplyFunction((CFMutableSetRef)emptyFieldsToRemove, removeItemsInSetFromDictionary, pubFields);
+    CFRelease(emptyFieldsToRemove);
 }
 
 @end

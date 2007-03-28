@@ -2054,8 +2054,9 @@ enum{
 }
  
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
+    // ensure that the pub updates first, since it observes this notification also
+    [publication typeInfoDidChange:aNotification];
 	[self setupTypePopUp];
-	[publication makeType]; // make sure this is done now, and not later
 	[self setupForm];
 }
  

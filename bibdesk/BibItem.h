@@ -101,13 +101,6 @@ enum {
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
 
 /*!
-    @method makeType
-    @abstract Setup the type of a BibItem.
-    @discussion Rearranges the dictionary for the current type. Currently it keeps all the fields that have any text in them, so changing from one type to another with all fields filled in will give you the union of their entries.
-*/
-- (void)makeType;
-
-/*!
     @method dealloc
     @abstract deallocates the receiver and its data objects.
 */
