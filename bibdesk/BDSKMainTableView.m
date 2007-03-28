@@ -277,56 +277,62 @@
 		tc = [self tableColumnWithIdentifier:colName];
 		
 		if(tc == nil){
-			NSImage *image;
-			NSString *title;
-			
 			// it is a new column, so create it
 			tc = [[[NSTableColumn alloc] initWithIdentifier:colName] autorelease];
             [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
 			[tc setEditable:NO];
             [tc setMinWidth:16.0];
+        }
+        
+        // this may be called in response to a field type change, so the cell may also need to change, even if the column is already in the tableview
+        NSImage *image;
+        NSString *title;
 
-            if([colName isURLField]){
-                [tc setDataCell:imageCell];
-            }else if([colName isRatingField]){
-				BDSKRatingButtonCell *ratingCell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
-				[ratingCell setBordered:NO];
-				[ratingCell setAlignment:NSCenterTextAlignment];
-                [tc setDataCell:ratingCell];
-            }else if([colName isBooleanField]){
-				NSButtonCell *switchButtonCell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
-				[switchButtonCell setButtonType:NSSwitchButton];
-				[switchButtonCell setImagePosition:NSImageOnly];
-				[switchButtonCell setControlSize:NSSmallControlSize];
-                [switchButtonCell setAllowsMixedState:NO];
-                [tc setDataCell:switchButtonCell];
-			}else if([colName isTriStateField]){
-				NSButtonCell *switchButtonCell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
-				[switchButtonCell setButtonType:NSSwitchButton];
-				[switchButtonCell setImagePosition:NSImageOnly];
-				[switchButtonCell setControlSize:NSSmallControlSize];
-                [switchButtonCell setAllowsMixedState:YES];
-                [tc setDataCell:switchButtonCell];
-            }else if ([colName isEqualToString:BDSKImportOrderString]){
-				NSButtonCell *importButtonCell = [[[BDSKRoundRectButtonCell alloc] initTextCell:NSLocalizedString(@"Import", @"button title")] autorelease];
-				[importButtonCell setImagePosition:NSNoImage];
-				[importButtonCell setControlSize:NSSmallControlSize];
-				[importButtonCell setAction:@selector(importItem:)];
-				[importButtonCell setTarget:self];
-                [tc setDataCell:importButtonCell];
-                [tc setWidth:[importButtonCell cellSize].width];
-			}
-			if(image = [self headerImageForField:colName]){
-				[(NSCell *)[tc headerCell] setImage:image];
-			}else if(title = [self headerTitleForField:colName]){
-				[[tc headerCell] setStringValue:title];
-			}else{	
-				[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
-			}
-            
-            if([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
-                [tc setWidth:[tcWidth intValue]];
-		}
+        if([colName isURLField]){
+            [tc setDataCell:imageCell];
+        }else if([colName isRatingField]){
+            BDSKRatingButtonCell *ratingCell = [[[BDSKRatingButtonCell alloc] initWithMaxRating:5] autorelease];
+            [ratingCell setBordered:NO];
+            [ratingCell setAlignment:NSCenterTextAlignment];
+            [tc setDataCell:ratingCell];
+        }else if([colName isBooleanField]){
+            NSButtonCell *switchButtonCell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
+            [switchButtonCell setButtonType:NSSwitchButton];
+            [switchButtonCell setImagePosition:NSImageOnly];
+            [switchButtonCell setControlSize:NSSmallControlSize];
+            [switchButtonCell setAllowsMixedState:NO];
+            [tc setDataCell:switchButtonCell];
+        }else if([colName isTriStateField]){
+            NSButtonCell *switchButtonCell = [[[NSButtonCell alloc] initTextCell:@""] autorelease];
+            [switchButtonCell setButtonType:NSSwitchButton];
+            [switchButtonCell setImagePosition:NSImageOnly];
+            [switchButtonCell setControlSize:NSSmallControlSize];
+            [switchButtonCell setAllowsMixedState:YES];
+            [tc setDataCell:switchButtonCell];
+        }else if ([colName isEqualToString:BDSKImportOrderString]){
+            NSButtonCell *importButtonCell = [[[BDSKRoundRectButtonCell alloc] initTextCell:NSLocalizedString(@"Import", @"button title")] autorelease];
+            [importButtonCell setImagePosition:NSNoImage];
+            [importButtonCell setControlSize:NSSmallControlSize];
+            [importButtonCell setAction:@selector(importItem:)];
+            [importButtonCell setTarget:self];
+            [tc setDataCell:importButtonCell];
+            [tc setWidth:[importButtonCell cellSize].width];
+        }else {
+            // this is our default cell; need to explicitly set if changing column type from e.g. image->text
+            NSTextFieldCell *textFieldCell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
+            [textFieldCell setBordered:NO];
+            [tc setDataCell:textFieldCell];
+        }
+        if(image = [self headerImageForField:colName]){
+            [(NSCell *)[tc headerCell] setImage:image];
+        }else if(title = [self headerTitleForField:colName]){
+            [[tc headerCell] setStringValue:title];
+        }else{	
+            [[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
+        }
+        
+        if([colName isEqualToString:BDSKImportOrderString] == NO && (tcWidth = [defaultTableColumnWidths objectForKey:colName]))
+            [tc setWidth:[tcWidth intValue]];
 		
 		[columns addObject:tc];
 	}

@@ -2454,6 +2454,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{
     [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
+    [tableView setupTableColumnsWithIdentifiers:[tableView tableColumnIdentifiers]];
     // current group field may have changed its type (string->person)
     [self updateSmartGroupsCountAndContent:YES];
     [self updateCategoryGroupsPreservingSelection:YES];
