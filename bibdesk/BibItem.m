@@ -572,6 +572,10 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
 	[self makeType];
 	[groups removeAllObjects];
+    // these fields may change type, so our cached values should be discarded
+    [people release];
+    people = nil;
+    [cachedURLs removeAllObjects];
 }
 
 #pragma mark Document

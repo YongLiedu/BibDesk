@@ -2060,8 +2060,10 @@ enum{
 }
  
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
-	[publication makeType]; // make sure this is done now, and not later
+    // ensure that the pub updates first, since it observes this notification also
+    [publication customFieldsDidChange:aNotification];
 	[self setupForm];
+    [authorTableView reloadData];
 }
 
 - (void)macrosDidChange:(NSNotification *)notification{

@@ -283,11 +283,9 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     
     NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
-    if ([groupData length]) {
-        // !!! remove for release
-        @try{ [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]]; }
-        @catch(id exception){ NSLog(@"Ignoring exception while unarchiving saved group selection: \"%@\"", exception); }
-    }
+    if ([groupData length])
+        [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
+
     [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
@@ -452,7 +450,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     if([pw boolForKey:BDSKShouldShareFilesKey])
         [[BDSKSharingServer defaultServer] enableSharing];
     
-    // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
+    // The UI update from setPublications is too early when loading a new document
     [self updateSmartGroupsCountAndContent:NO];
     [self updateCategoryGroupsPreservingSelection:NO];
     
@@ -2240,7 +2238,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                  object:[BibTypeManager sharedManager]];
         [nc addObserver:self
                selector:@selector(handleCustomFieldsDidChangeNotification:)
-                   name:BDSKDocumentControllerDidChangeMainDocumentNotification
+                   name:BDSKCustomFieldsChangedNotification
                  object:nil];
         [OFPreference addObserver:self
                          selector:@selector(handleIgnoredSortTermsChangedNotification:)
@@ -2456,6 +2454,10 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (void)handleCustomFieldsDidChangeNotification:(NSNotification *)notification{
     [publications makeObjectsPerformSelector:@selector(customFieldsDidChange:) withObject:notification];
+    // current group field may have changed its type (string->person)
+    [self updateSmartGroupsCountAndContent:YES];
+    [self updateCategoryGroupsPreservingSelection:YES];
+    [self updatePreviews];
 }
 
 #pragma mark -
