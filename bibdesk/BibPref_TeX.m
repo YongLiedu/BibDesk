@@ -43,7 +43,7 @@
 #import "BDSKShellCommandFormatter.h"
 #import <OmniAppKit/OAPreferenceClientRecord.h>
 
-#define BDSK_TEX_DOWNLOAD_URL @"http://ii2.sourceforge.net/tex-index.html"
+#define BDSK_TEX_DOWNLOAD_URL @"http://tug.org/mactex/"
 
 static NSSet *standardStyles = nil;
 
