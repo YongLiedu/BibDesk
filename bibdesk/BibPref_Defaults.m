@@ -239,9 +239,7 @@ static NSSet *alwaysDisabledFields = nil;
 	[defaultFieldsTableView reloadData];
 	[self valuesHaveChanged];
 	
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKCustomFieldsChangedNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];
+    // !!! notification of these changes is posted by the type manager, which observes the pref keys; this ensures that the type manager gets notified first, so notification observers don't get stale data; as a consequence, if you add another custom field type, the type manager needs to observe it in -init
 }
 
 - (void)updateUI{	

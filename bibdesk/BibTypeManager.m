@@ -123,11 +123,12 @@ static BibTypeManager *sharedInstance = nil;
     singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
     invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
     [self reloadGroupFields];
-	
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(customFieldsDidChange:)
-												 name:BDSKCustomFieldsChangedNotification
-											   object:nil];
+    
+    // observe the pref changes for custom fields
+    NSEnumerator *prefKeyEnum = [[NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil] objectEnumerator];
+    NSString *prefKey;
+    while (prefKey = [prefKeyEnum nextObject])
+        [OFPreference addObserver:self selector:@selector(customFieldsDidChange:) forPreference:[OFPreference preferenceForKey:prefKey]];
     
 	return self;
 }
@@ -262,6 +263,7 @@ static BibTypeManager *sharedInstance = nil;
         [triStateFieldsSet removeAllObjects];
         [booleanFieldsSet removeAllObjects];
         [citationFieldsSet removeAllObjects];
+        [personFieldsSet removeAllObjects];
         
         [ratingFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey]];
         [triStateFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey]];
@@ -297,6 +299,10 @@ static BibTypeManager *sharedInstance = nil;
     [self reloadURLFields];
     [self reloadSpecialFields];
     [self reloadGroupFields];
+    
+    // coalesce notifications; this is received once each OFPreference value that's set in BibPref_Defaults, but observers of BDSKCustomFieldsChangedNotification should only receive it once
+    NSNotification *note = [NSNotification notificationWithName:BDSKCustomFieldsChangedNotification object:self];
+    [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostASAP coalesceMask:NSNotificationCoalescingOnName forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
 }
 
 #pragma mark Setters
