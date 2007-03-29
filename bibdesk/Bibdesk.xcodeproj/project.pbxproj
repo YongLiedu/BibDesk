@@ -695,6 +695,8 @@
 		F9A6772E07D2D57F00782ACD /* MultiplePageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6772C07D2D57F00782ACD /* MultiplePageView.m */; };
 		F9ABEC9F086E11B500741FC5 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
 		F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9ABEC9E086E11B500741FC5 /* BTParse.framework */; };
+		F9B3405D0BBC16720072C2B0 /* BibItem_PubMedLookup.h in Headers */ = {isa = PBXBuildFile; fileRef = F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */; };
+		F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */; };
 		F9B800940B41DFAF00A5A615 /* BDSKSearchGroupSheetController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9B800920B41DFAF00A5A615 /* BDSKSearchGroupSheetController.h */; };
 		F9B800950B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */; };
 		F9B801840B41E89500A5A615 /* yaz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9B801830B41E89500A5A615 /* yaz.framework */; };
@@ -1116,7 +1118,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1628,6 +1630,8 @@
 		F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniAppKit.xcodeproj; path = ../bibdesk_vendorsrc/OmniGroup/OmniAppKit/OmniAppKit.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F9ABEC9E086E11B500741FC5 /* BTParse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = BTParse/BTParse.xcodeproj; sourceTree = "<group>"; };
+		F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem_PubMedLookup.h; sourceTree = "<group>"; };
+		F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibItem_PubMedLookup.m; sourceTree = "<group>"; };
 		F9B800920B41DFAF00A5A615 /* BDSKSearchGroupSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupSheetController.h; sourceTree = "<group>"; };
 		F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupSheetController.m; sourceTree = "<group>"; };
 		F9B801830B41E89500A5A615 /* yaz.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = yaz.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1761,6 +1765,8 @@
 				CE38FA7E091D235700BCB69D /* Foundation Extensions */,
 				CE38FA7D091D210C00BCB69D /* AppKit Extensions */,
 				F918104307583A6E00CF822D /* Headers */,
+				F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */,
+				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -2967,6 +2973,7 @@
 				F9A5B10B0B8CEA9600C52257 /* BDSKCenterScaledImageCell.h in Headers */,
 				CEF71ADA0B91BBCB003A2771 /* BDSKNotesWindowController.h in Headers */,
 				CE4385E80BB81D0500A56987 /* BDSKSearchBookmarkController.h in Headers */,
+				F9B3405D0BBC16720072C2B0 /* BibItem_PubMedLookup.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3818,6 +3825,7 @@
 				CEF71ADB0B91BBCB003A2771 /* BDSKNotesWindowController.m in Sources */,
 				CE4A7EFA0BAED4EC004AD07D /* BibDeskBibliographyCommand.m in Sources */,
 				CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */,
+				F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4442,7 +4450,7 @@
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = "-Wfloat-equal";
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			name = Debug;
 		};
@@ -4531,7 +4539,7 @@
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			name = Test;
 		};

@@ -116,6 +116,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKDocumentController.h"
 #import "BibFiler.h"
+#import "BibItem_PubMedLookup.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -1939,6 +1940,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             
             if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
+            
+            NSString *lastPathComponent = [[fnStr lastPathComponent] stringByDeletingPathExtension];
+            if(newBI == nil && [lastPathComponent containsCharacterInSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet]] == NO)
+                newBI = [BibItem itemWithPMID:lastPathComponent];
             
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
