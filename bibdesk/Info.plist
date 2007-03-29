@@ -669,7 +669,7 @@
 					<key>Maximum Number of Items in Preview Pane</key>
 					<integer>0</integer>
 					<key>Preview Pane Displays What?</key>
-					<integer>1</integer>
+					<integer>0</integer>
 					<key>Terms ignored when sorting</key>
 					<array/>
 				</dict>
