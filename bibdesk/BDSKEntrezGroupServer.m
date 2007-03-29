@@ -56,7 +56,7 @@
 #import "BibAppController.h"
 #import <WebKit/WebKit.h>
 #import "BDSKServerInfo.h"
-
+#import "NSError_BDSKExtensions.h"
 
 @implementation BDSKEntrezGroupServer
 
@@ -122,10 +122,17 @@
 }
 
 - (void)retrievePublications {
-    isRetrieving = YES;
-    if ([[self searchTerm] isEqualToString:[group searchTerm]] == NO || needsReset)
-        [self resetSearch];
-    [self fetch];
+    if ([[self class] canConnect]) {
+        isRetrieving = YES;
+        if ([[self searchTerm] isEqualToString:[group searchTerm]] == NO || needsReset)
+            [self resetSearch];
+        [self fetch];
+    } else {
+        failedDownload = YES;
+        
+        NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
+        [NSApp presentError:presentableError];
+    }
 }
 
 - (BDSKServerInfo *)serverInfo { return serverInfo; }
@@ -230,9 +237,17 @@
             
             [document release];
             
-        } else if (nil != esearchResult) {
+        } else {
+            
+            // no document, or zero length data from the server
+            failedDownload = YES;
+            
+            NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"error when pubmed connection fails")];
+            
             // make sure error was actually initialized by NSXMLDocument
-            NSLog(@"unable to create an XML document: %@", error);
+            if (esearchResult)
+                [presentableError embedError:error];
+            [NSApp presentError:presentableError];
         }
         
         needsReset = NO;
