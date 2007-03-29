@@ -46,5 +46,6 @@
 + (NSCharacterSet *)upAndDownArrowCharacterSet;
 + (NSCharacterSet *)newlineCharacterSet;
 + (NSCharacterSet *)nonWhitespaceCharacterSet;
++ (NSCharacterSet *)nonDecimalDigitCharacterSet;
 
 @end

@@ -46,19 +46,21 @@ static NSCharacterSet *searchStringSeparatorCharacterSet = nil;
 static NSCharacterSet *upAndDownArrowCharacterSet = nil;
 static NSCharacterSet *newlineCharacterSet = nil;
 static NSCharacterSet *nonWhitespaceCharacterSet = nil;
+static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
 
 + (void)didLoad;
 {
-    curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}"] retain];
-    commaCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@","] retain];
-    searchStringSeparatorCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"+| "] retain];
-    
+    curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}"] copy];
+    commaCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@","] copy];
+    searchStringSeparatorCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"+| "] copy];
+    nonDecimalDigitCharacterSet = [[[NSCharacterSet decimalDigitCharacterSet] invertedSet] copy];
+        
     // up arrow and down arrow character set
     unichar upAndDownArrowCharacters[2];
     upAndDownArrowCharacters[0] = NSUpArrowFunctionKey;
     upAndDownArrowCharacters[1] = NSDownArrowFunctionKey;
     NSString *upAndDownArrowString = [NSString stringWithCharacters: upAndDownArrowCharacters  length: 2];
-    upAndDownArrowCharacterSet = [[NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString] retain];
+    upAndDownArrowCharacterSet = [[NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString] copy];
     
     // This will be a character set with all newline characters (including the weird Unicode ones)
     CFMutableCharacterSetRef newlineCFCharacterSet = NULL;
@@ -71,7 +73,7 @@ static NSCharacterSet *nonWhitespaceCharacterSet = nil;
     newlineCharacterSet = [(id)newlineCFCharacterSet copy];
     CFRelease(newlineCFCharacterSet);
     
-    nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
+    nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] copy];
 }
 
 + (NSCharacterSet *)curlyBraceCharacterSet;
@@ -102,6 +104,11 @@ static NSCharacterSet *nonWhitespaceCharacterSet = nil;
 + (NSCharacterSet *)nonWhitespaceCharacterSet;
 {
     return nonWhitespaceCharacterSet;
+}
+
++ (NSCharacterSet *)nonDecimalDigitCharacterSet;
+{
+    return nonDecimalDigitCharacterSet;
 }
 
 @end

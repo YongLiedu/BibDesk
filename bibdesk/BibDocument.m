@@ -1942,7 +1942,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
             
             NSString *lastPathComponent = [[fnStr lastPathComponent] stringByDeletingPathExtension];
-            if(newBI == nil && [lastPathComponent containsCharacterInSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet]] == NO)
+            if(newBI == nil && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
                 newBI = [BibItem itemWithPMID:lastPathComponent];
             
             if(newBI == nil)
