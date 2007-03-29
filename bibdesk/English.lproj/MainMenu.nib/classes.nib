@@ -151,6 +151,8 @@
                 refreshSharedBrowsing = id; 
                 refreshURLGroups = id; 
                 removeSelectedPubs = id; 
+                reportBug = id; 
+                requestFeature = id; 
                 revealLinkedFile = id; 
                 saveAsBDSKDocument = id; 
                 searchByContent = id; 

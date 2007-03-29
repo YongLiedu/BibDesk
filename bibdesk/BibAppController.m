@@ -611,6 +611,14 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     }
 }
 
+- (IBAction)reportBug:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497423"]];
+}
+
+- (IBAction)requestFeature:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://sourceforge.net/tracker/?group_id=61487&atid=497426"]];
+}
+
 #pragma mark Auto generation format stuff
 
 - (NSArray *)requiredFieldsForCiteKey{
