@@ -269,7 +269,7 @@ static void createTemporaryDirectory()
         [completionConnection setRootObject:checker];
         
         if ([completionConnection registerName:BIBDESK_SERVER_NAME] == NO)
-            NSLog(@"failed to register completion connection %@", completionConnection);  
+            NSLog(@"failed to register completion connection; another BibDesk process must be running", completionConnection);  
     }
     return self;
 }
