@@ -674,6 +674,21 @@ Boolean BDStringFindCharacter(CFStringRef string, UniChar character, CFRange sea
     return FALSE;
 }
 
+Boolean BDIsNewlineCharacter(UniChar c)
+{
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember((CFCharacterSetRef)[NSCharacterSet newlineCharacterSet], c) );
+}
+
+Boolean BDStringHasAccentedCharacters(CFStringRef string)
+{
+    CFMutableStringRef mutableString = CFStringCreateMutableCopy(CFGetAllocator(string), CFStringGetLength(string), string);
+    CFStringNormalize(mutableString, kCFStringNormalizationFormD);
+    Boolean success = CFStringFindCharacterFromSet(mutableString, CFCharacterSetGetPredefined(kCFCharacterSetNonBase), CFRangeMake(0, CFStringGetLength(mutableString)), 0, NULL);
+    CFRelease(mutableString);
+    return success;
+}
+
 #pragma mark Mutable Strings
 
 void BDDeleteTeXForSorting(CFMutableStringRef mutableString){ 
