@@ -39,79 +39,74 @@
 #import "CFString_BDSKExtensions.h"
 #import <OmniFoundation/OFPreference.h>
 
-// This object is a cache for our stop words, so we don't have to hit user defaults every time __BDDeleteArticlesForSorting() is called (which is fairly often).  Alternately, we could require users to quit/relaunch after changing the stop words in prefs, but that's not too nice.  Anyway, it's private to CFString functions.
+// This object is a cache for our stop words, so we don't have to hit user defaults every time __BDDeleteArticlesForSorting() is called (which is fairly often).
 
-@interface BDSKStopWordController : NSObject 
-{
+typedef struct __BDSKStopWordCache {
     CFArrayRef stopWords;
-}
+    CFIndex    numberOfWords;
+} _BDSKStopWordCache;
 
-+ (id)sharedController;
-- (CFArrayRef)stopWords;
-- (void)handleStopWordsChangedNotification:(NSNotification *)note;
+static _BDSKStopWordCache *stopWordCache = NULL;
 
-static inline CFArrayRef BDSKStopwordsFromController(BDSKStopWordController *controller);
-
-@end
-
-@implementation BDSKStopWordController
-
-static id sharedController = nil;
-
-+ (id)sharedController;
+static void 
+stopWordNotificationCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
-    if(sharedController == nil)
-        sharedController = [[self alloc] init];
-    return sharedController;
+    if (stopWordCache->stopWords)
+        CFRelease(stopWordCache->stopWords);
+    stopWordCache->stopWords = CFPreferencesCopyAppValue((CFStringRef)BDSKIgnoredSortTermsKey, kCFPreferencesCurrentApplication);
+    if (stopWordCache->stopWords)
+        stopWordCache->numberOfWords = CFArrayGetCount(stopWordCache->stopWords);
+    else
+        stopWordCache->numberOfWords = 0;
 }
 
-- (id)init;
+__attribute__((constructor))
+static void initializeStopwordCache(void)
 {
-    if(self = [super init]){
-        [OFPreference addObserver:self selector:@selector(handleStopWordsChangedNotification:) forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
-        stopWords = CFPreferencesCopyAppValue((CFStringRef)BDSKIgnoredSortTermsKey, kCFPreferencesCurrentApplication);
-    }
-    return self;
+    stopWordCache = NSZoneMalloc(NULL, sizeof(_BDSKStopWordCache));
+    stopWordCache->stopWords = NULL;
+    stopWordCache->numberOfWords = 0;
+    stopWordNotificationCallback(NULL, NULL, NULL, NULL, NULL);
+    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), stopWordCache, stopWordNotificationCallback, CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 
-- (CFArrayRef)stopWords;
+__attribute__((destructor))
+static void destroyStopwordCache(void)
 {
-    return stopWords;
+    CFNotificationCenterRemoveObserver(CFNotificationCenterGetLocalCenter(), stopWordCache, CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL);
+    if (stopWordCache->stopWords) CFRelease(stopWordCache->stopWords);
+    NSZoneFree(NULL, stopWordCache);
 }
 
-- (void)handleStopWordsChangedNotification:(NSNotification *)note;
-{
-    if(stopWords) CFRelease(stopWords);
-    stopWords = CFPreferencesCopyAppValue((CFStringRef)BDSKIgnoredSortTermsKey, kCFPreferencesCurrentApplication);
-}
-
-- (void)dealloc;
-{
-    [OFPreference removeObserver:self forPreference:nil];
-    if(stopWords) CFRelease(stopWords);
-    [super dealloc];
-}
-
-static inline CFArrayRef BDSKStopwordsFromController(BDSKStopWordController *controller)
-{
-    return controller->stopWords;
-}
-
-
-@end
+static inline CFArrayRef __BDSKGetStopwords(void) { return stopWordCache->stopWords; }
+static inline CFIndex __BDSKGetStopwordCount(void) { return stopWordCache->numberOfWords; }
 
 #pragma mark -
 
 #define STACK_BUFFER_SIZE 256
 
+static CFCharacterSetRef whitespaceCharacterSet = NULL;
+static CFCharacterSetRef whitespaceAndNewlineCharacterSet = NULL;
+
+__attribute__((constructor))
+static void initializeStaticCharacterSets(void)
+{
+    whitespaceCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
+    whitespaceAndNewlineCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
+}
+
 static inline
 BOOL __BDCharacterIsWhitespace(UniChar c)
 {
-    static CFCharacterSetRef csref = NULL;
-    if(csref == NULL)
-        csref = CFCharacterSetGetPredefined(kCFCharacterSetWhitespace);
     // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(csref, c) );
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceCharacterSet, c) );
+}
+
+static inline
+BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
+{
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceAndNewlineCharacterSet, c) );
 }
 
 static inline
@@ -185,16 +180,6 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
     retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
     if(buffer != stackBuffer) CFAllocatorDeallocate(allocator, buffer);
     return retStr;
-}
-
-static inline
-BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
-{
-    static CFCharacterSetRef csref = NULL;
-    if(csref == NULL)
-        csref = CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline);
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(csref, c) );
 }
 
 static inline
@@ -314,13 +299,14 @@ void __BDDeleteArticlesForSorting(CFMutableStringRef mutableString)
 {
     if(mutableString == nil)
         return;
+    
+    CFIndex count = __BDSKGetStopwordCount();
+    if(!count) return;
+    
     // remove certain terms for sorting, according to preferences
     // each one is typically an article, and we only look
     // for these at the beginning of a string   
-    CFArrayRef articlesToRemove = BDSKStopwordsFromController([BDSKStopWordController sharedController]);
-    
-    CFIndex count = CFArrayGetCount(articlesToRemove);
-    if(!count) return;
+    CFArrayRef articlesToRemove = __BDSKGetStopwords();    
     
     // get the max string length of any of the strings in the plist; we don't want to search any farther than necessary
     CFIndex maxRemoveLength = 0; 

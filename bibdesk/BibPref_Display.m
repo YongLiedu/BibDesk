@@ -156,6 +156,7 @@
     [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
     [defaults autoSynchronize];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (IBAction)addTerm:(id)sender
@@ -170,6 +171,7 @@
     [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
     [mutableArray release];
     [defaults autoSynchronize];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
@@ -190,6 +192,7 @@
     [mutableArray release];
     [tableView reloadData];
     [defaults autoSynchronize];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (IBAction)changeAuthorDisplay:(id)sender;
