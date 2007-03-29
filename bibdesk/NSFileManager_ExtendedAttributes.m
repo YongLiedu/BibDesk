@@ -411,10 +411,10 @@ static NSString *xattrError(int err, const char *myPath)
 
 #define MAX_XATTR_LENGTH 2048
 #define UNIQUE_VALUE [[NSProcessInfo processInfo] globallyUniqueString]
-#define UNIQUE_KEY @"net_sourceforge_skim_unique_key"
-#define WRAPPER_KEY @"net_sourceforge_skim_has_wrapper"
-#define FRAGMENTS_KEY @"net_sourceforge_skim_number_of_fragments"
-#define NOTES_NAME @"net_sourceforge_skim_notes"
+#define UNIQUE_KEY @"net_sourceforge_skim-app_unique_key"
+#define WRAPPER_KEY @"net_sourceforge_skim-app_has_wrapper"
+#define FRAGMENTS_KEY @"net_sourceforge_skim-app_number_of_fragments"
+#define NOTES_NAME @"net_sourceforge_skim-app_notes"
 
 - (BOOL)setSkimNotes:(NSArray *)notes inExtendedAttributesAtPath:(NSString *)path error:(NSError **)outError {
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:notes];
