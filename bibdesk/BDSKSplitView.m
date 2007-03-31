@@ -95,39 +95,21 @@
                                                                             toColor:[BDSKStatusBar upperColor]];
 }
 
-- (void)drawRect:(NSRect)rect {
-	
-	NSArray *subviews = [self subviews];
-	int i, count = [subviews count];
-	id view;
-	NSRect divRect;
-
-	// draw the dimples 
-	for (i = 0; i < (count-1); i++) {
-		view = [subviews objectAtIndex:i];
-		divRect = [view frame];
-		if ([self isVertical] == NO) {
-			divRect.origin.y = NSMaxY (divRect);
-			divRect.size.height = [self dividerThickness];
-		} else {
-			divRect.origin.x = NSMaxX (divRect);
-			divRect.size.width = [self dividerThickness];
-		}
-		if (NSIntersectsRect(rect, divRect)) {
-			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
-            if (drawEnd) {
-                NSRect endRect, ignored;
-                if ([self isVertical]) {
-                    NSDivideRect(divRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
-                    [self drawBlendedJoinEndAtBottomInRect:endRect];
-                } else {
-                    NSDivideRect(divRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
-                    [self drawBlendedJoinEndAtLeftInRect:endRect];
-                }
-            }
-			[self drawDividerInRect: divRect];
-		}
-	}
+- (void)drawDividerInRect:(NSRect)aRect {
+    // Draw gradient
+    [[NSBezierPath bezierPathWithRect:aRect] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
+    if (drawEnd) {
+        NSRect endRect, ignored;
+        if ([self isVertical]) {
+            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
+            [self drawBlendedJoinEndAtBottomInRect:endRect];
+        } else {
+            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
+            [self drawBlendedJoinEndAtLeftInRect:endRect];
+        }
+    }
+    // Draw dimple
+    [super drawDividerInRect:aRect];
 }
 
 - (float)dividerThickness {
