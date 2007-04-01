@@ -268,6 +268,7 @@
 		CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */; };
 		CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */; };
 		CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */; };
+		CE42A8EA0BC008EB0016FDC2 /* skimnotes in Resources */ = {isa = PBXBuildFile; fileRef = CE42A8E90BC008EB0016FDC2 /* skimnotes */; };
 		CE4385E80BB81D0500A56987 /* BDSKSearchBookmarkController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
@@ -1118,7 +1119,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1197,6 +1198,7 @@
 		CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButtonCell.h; sourceTree = "<group>"; };
 		CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButtonCell.m; sourceTree = "<group>"; };
 		CE42A2690A99BE2400C62D85 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKErrorEditWindow.nib; sourceTree = "<group>"; };
+		CE42A8E90BC008EB0016FDC2 /* skimnotes */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = skimnotes; sourceTree = "<group>"; };
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
 		CE43865D0BB8274600A56987 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchBookmarksWindow.nib; sourceTree = "<group>"; };
@@ -1765,8 +1767,6 @@
 				CE38FA7E091D235700BCB69D /* Foundation Extensions */,
 				CE38FA7D091D210C00BCB69D /* AppKit Extensions */,
 				F918104307583A6E00CF822D /* Headers */,
-				F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */,
-				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -1935,6 +1935,7 @@
 				CE2941040A7F8F2900A46D05 /* ReadMe.rtf */,
 				F9022D9E075807DC00C3F701 /* pdftotext */,
 				F9022D6E0758073E00C3F701 /* latex2rtf */,
+				CE42A8E90BC008EB0016FDC2 /* skimnotes */,
 				F9022D150758066000C3F701 /* CharacterConversion.plist */,
 				F9022D1B0758066000C3F701 /* TypeInfo.plist */,
 				CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */,
@@ -2162,6 +2163,7 @@
 				F9F5ECD00AE5E7C8007EBB31 /* BDSKURLGroup.m */,
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
 				F9022C6E075802E300C3F701 /* BibItem.m */,
+				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 				F925352808FDFAE40045D563 /* BDSKSearchResult.m */,
 				F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */,
 				F91F284709A661A700419960 /* PDFMetadata.m */,
@@ -2563,6 +2565,7 @@
 				F9022C69075802E300C3F701 /* BibFiler.h */,
 				F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */,
 				F9022C6D075802E300C3F701 /* BibItem.h */,
+				F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */,
 				F9E0BCB10895ACC9005E5FAA /* BibPref_Display.h */,
 				F963E4350A1D7B3600695DDC /* BibPref_Export.h */,
 				F92F4E4C0788DEFC001B8F82 /* BibPref_Files.h */,
@@ -3408,6 +3411,7 @@
 				F9BE68350B80F92900B2597C /* FileMatcherConfigSheet.nib in Resources */,
 				CEF71B080B91BFFF003A2771 /* NotesWindow.nib in Resources */,
 				CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */,
+				CE42A8EA0BC008EB0016FDC2 /* skimnotes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

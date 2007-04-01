@@ -37,7 +37,7 @@
  */
 
 #import "BDSKNotesWindowController.h"
-#import "NSFileManager_ExtendedAttributes.h"
+#import "BibAppController.h"
 
 
 @implementation BDSKNotesWindowController
@@ -76,10 +76,42 @@
 #pragma mark Actions
 
 - (IBAction)refresh:(id)sender {
-    NSError *error = nil;
-    NSArray *array = [[[NSFileManager defaultManager] skimNotesFromExtendedAttributesAtPath:[url path] error:&error] retain];
+    NSArray *array = nil;
     
-    if (array) {
+    NSString *path = [url path];
+    NSString *tmpPath = [[NSApp delegate] temporaryFilePath:nil createDirectory:NO];
+    NSString *binPath = [[NSBundle mainBundle] pathForResource:@"skimnotes" ofType:@""];
+    NSArray *arguments = [NSArray arrayWithObjects:@"get", path, tmpPath, nil];
+    
+    NSTask *task = [[NSTask alloc] init];
+    [task setCurrentDirectoryPath:NSTemporaryDirectory()];
+    [task setLaunchPath:binPath];
+    [task setArguments:arguments];
+    [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+    [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
+        
+    BOOL success = YES;
+    
+    @try {
+        [task launch];
+        [task waitUntilExit];
+        array = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+    }
+    @catch(id exception) {
+        if([task isRunning])
+            [task terminate];
+        NSLog(@"%@ %@ failed", [task description], [task launchPath]);
+        success = NO;
+    }
+    
+    if ([task terminationStatus] != 0)
+        success = NO;
+    
+    [task release];
+    task = nil;
+    [[NSFileManager defaultManager] removeFileAtPath:tmpPath handler:nil];
+    
+    if (success) {
         NSEnumerator *dictEnum = [array objectEnumerator];
         NSDictionary *dict;
         
@@ -96,6 +128,7 @@
         
         [outlineView reloadData];
     } else {
+        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:ENOATTR userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, NSLocalizedString(@"Unable to read Skim notes.", @"Error message"), NSLocalizedDescriptionKey, nil]];
         [NSApp presentError:error];
     }
 }

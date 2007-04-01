@@ -199,9 +199,3 @@
 - (BOOL)removeAllExtendedAttributesAtPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 
 @end
-
-
-@interface NSFileManager (BDSKSkimNotesExtensions)
-- (BOOL)setSkimNotes:(NSArray *)notes inExtendedAttributesAtPath:(NSString *)path error:(NSError **)outError;
-- (NSArray *)skimNotesFromExtendedAttributesAtPath:(NSString *)path error:(NSError **)outError;
-@end
