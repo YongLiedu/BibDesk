@@ -2832,9 +2832,9 @@ a custom Remote URL field called @samp{Citeseerurl}, and you want the header for
 corresponding column to a show an image which you have put at the location 
 @samp{/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png}. For Bibdesk to use this image, 
 quit BibDesk and enter the following command in Terminal (exclude the outer double quotes): 
-``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKTableHeaderImages 
-'@{Citeseerurl = "/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png"; @}'}''
-then hit return. You can add as many ``@code{Fieldname = "value";}'' pairs as you like 
+``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKTableHeaderImages -dict-add 
+Citeseerurl "/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png"}''
+then hit return. You can add as many field name/image path pairs as you like 
 inside the braces. 
 
 Similarly, you can also replace the default field name by a title of your own choice, 
