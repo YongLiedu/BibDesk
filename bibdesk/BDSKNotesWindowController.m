@@ -82,20 +82,20 @@
     NSString *tmpPath = [[NSApp delegate] temporaryFilePath:nil createDirectory:NO];
     NSString *binPath = [[NSBundle mainBundle] pathForResource:@"skimnotes" ofType:@""];
     NSArray *arguments = [NSArray arrayWithObjects:@"get", path, tmpPath, nil];
-    
     NSTask *task = [[NSTask alloc] init];
-    [task setCurrentDirectoryPath:NSTemporaryDirectory()];
+    
+    [task setCurrentDirectoryPath:[tmpPath stringByDeletingLastPathComponent]];
     [task setLaunchPath:binPath];
     [task setArguments:arguments];
     [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-        
+    
     BOOL success = YES;
     
     @try {
         [task launch];
         [task waitUntilExit];
-        array = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+        array = [NSKeyedUnarchiver unarchiveObjectWithFile:tmpPath];
     }
     @catch(id exception) {
         if([task isRunning])
