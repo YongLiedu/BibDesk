@@ -3179,15 +3179,23 @@ of the "Aid" field is set in the editor.
             <span class="aslangkeyword">repeat with</span> <span class="asvariable">aPub</span> <span class="aslangkeyword">in</span> <span class="asvariable">thePubs</span>
                 <span class="aslangkeyword">tell</span> <span class="asvariable">aPub</span>
                     <span class="ascomment">-- check that we can set the field</span>
-                    <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then return</span>
-                    <span class="aslangkeyword">repeat with</span> <span class="asvariable">aField</span> <span class="aslangkeyword">in</span> <span class="asvariable">theRequiredFields</span>
-                        <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">aField</span> <span class="aslangkeyword">is</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then return</span>
-                    <span class="aslangkeyword">end repeat</span>
-                    <span class="ascomment">-- generate a new value for the field</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">parse format</span> <span class="asvariable">theFormatString</span> <span class="asappkeyword">for</span> <span class="asvariable">theField</span>
-                    <span class="aslangkeyword">if</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
-                        <span class="aslangkeyword">set</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asvariable">newValue</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">yes</span>
+                    <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
+                        <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">no</span>
+                    <span class="aslangkeyword">else</span>
+                        <span class="aslangkeyword">repeat with</span> <span class="asvariable">aField</span> <span class="aslangkeyword">in</span> <span class="asvariable">theRequiredFields</span>
+                            <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">aField</span> <span class="aslangkeyword">is</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
+                                <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">no</span>
+                            <span class="aslangkeyword">end if</span>
+                        <span class="aslangkeyword">end repeat</span>
+                    <span class="aslangkeyword">end if</span>
+                    <span class="aslangkeyword">if</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">then</span>
+                        <span class="ascomment">-- generate a new value for the field</span>
+                        <span class="aslangkeyword">set</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span>
+                        <span class="aslangkeyword">set</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">parse format</span> <span class="asvariable">theFormatString</span> <span class="asappkeyword">for</span> <span class="asvariable">theField</span>
+                        <span class="aslangkeyword">if</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
+                            <span class="aslangkeyword">set</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asvariable">newValue</span>
+                        <span class="aslangkeyword">end if</span>
                     <span class="aslangkeyword">end if</span>
                 <span class="aslangkeyword">end tell</span>
             <span class="aslangkeyword">end repeat</span>
@@ -3212,15 +3220,23 @@ of the "Aid" field is set in the editor.
             @b{repeat with} aPub @b{in} thePubs
                 @b{tell} aPub
                     @i{-- check that we can set the field}
-                    @b{if} (value @b{of} field  theFieldToSet @b{is not} "") @b{then return}
-                    @b{repeat with} aField @b{in} theRequiredFields
-                        @b{if} (value @b{of} field  aField @b{is} "") @b{then return}
-                    @b{end repeat}
-                    @i{-- generate a new value for the field}
-                    @b{set} theField @b{to} field theFieldToSet
-                    @b{set} newValue @b{to} parse format theFormatString for theField
-                    @b{if} newValue @b{is not} "" @b{then}
-                        @b{set the} value @b{of} theField @b{to} newValue
+                    @b{set} shouldSet @b{to} yes
+                    @b{if} (value @b{of} field  theFieldToSet @b{is not} "") @b{then}
+                        @b{set} shouldSet @b{to} no
+                    @b{else}
+                        @b{repeat with} aField @b{in} theRequiredFields
+                            @b{if} (value @b{of} field aField @b{is} "") @b{then}
+                                @b{set} shouldSet @b{to} no
+                            @b{end if}
+                        @b{end repeat}
+                    @b{end if}
+                    @b{if} shouldSet @b{then}
+                        @i{-- generate a new value for the field}
+                        @b{set} theField @b{to} field theFieldToSet
+                        @b{set} newValue @b{to} parse format theFormatString for theField
+                        @b{if} newValue @b{is not} "" @b{then}
+                            @b{set the} value @b{of} theField @b{to} newValue
+                        @b{end if}
                     @b{end if}
                 @b{end tell}
             @b{end repeat}
