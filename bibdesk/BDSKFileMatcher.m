@@ -522,6 +522,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
                     [child setValue:[NSNumber numberWithFloat:thisScore] forKey:@"score"];
                     [node addChild:child];
                     [child release];
+                    CFRelease(urls[i]);
                 }
                 [matches addObject:node];
             }
