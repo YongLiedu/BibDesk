@@ -11,7 +11,6 @@
 #import "AMButtonBarCell.h"
 #import "NSBezierPath_AMAdditons.h"
 #import "NSColor_AMAdditions.h"
-#import "NSFont_AMFixes.h"
 #import "NSShadow_AMAdditions.h"
 #import </usr/include/math.h>
 
@@ -332,7 +331,6 @@ static float am_bezierPathFlatness = 0.2;
 	am_mouseDown = value;
 }
 
-
 - (void)calculateLayoutForFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
 	// bezier path for plate background
@@ -351,7 +349,7 @@ static float am_bezierPathFlatness = 0.2;
 	textInset = ceilf(radius-sqrt(radius*radius - h*h));
 	am_textRect = NSInsetRect(am_textRect, textInset+am_textGap, 0);
 	am_textRect.size.height = size.height;
-	float capHeight = [font fixed_capHeight];
+	float capHeight = [font capHeight];
 	float ascender = [font ascender];
 	float yOrigin = innerRect.origin.y;
 	float offset = ((innerRect.size.height-am_textRect.size.height) / 2.0);
@@ -363,27 +361,19 @@ static float am_bezierPathFlatness = 0.2;
 	innerRect.origin.x = 0;
 	innerRect.origin.y = 0;
 		
-	id returnValue;
-	returnValue = [NSBezierPath bezierPathWithPlateInRect:innerRect];
-	[self setControlPath:returnValue];
-	
-	[am_controlPath setCachesBezierPath:YES];
+	[self setControlPath:[NSBezierPath bezierPathWithPlateInRect:innerRect]];
 
 	// bezier path for pressed button (with gap for shadows)
 	innerRect.size.height--;
 	innerRect.origin.y++;
 
-	returnValue = [NSBezierPath bezierPathWithPlateInRect:innerRect];
-	[self setInnerControlPath:returnValue];
+	[self setInnerControlPath:[NSBezierPath bezierPathWithPlateInRect:innerRect]];
 
-	[am_innerControlPath setCachesBezierPath:YES];
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-	if ((am_lastFrameSize.width != cellFrame.size.width) || (am_lastFrameSize.height != cellFrame.size.height)) {
-		[self calculateLayoutForFrame:cellFrame inView:controlView];
-	}
+    [self calculateLayoutForFrame:cellFrame inView:controlView];
 	[self drawInteriorWithFrame:cellFrame inView:controlView];
 }
 

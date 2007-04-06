@@ -8,7 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class CTGradient;
 @class AMButtonBarItem;
 @class AMButtonBarCell;
 
@@ -24,7 +23,6 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 @interface AMButtonBar : NSView {
 	id delegate;
 	BOOL delegateRespondsToSelectionDidChange;
-	CTGradient *backgroundGradient;
 	NSColor *baselineSeparatorColor;
 	BOOL showsBaselineSeparator;
 	BOOL allowsMultipleSelection;
@@ -59,9 +57,6 @@ extern NSString *const AMButtonBarSelectionDidChangeNotification;
 
 - (BOOL)allowsMultipleSelection;
 - (void)setAllowsMultipleSelection:(BOOL)value;
-
-- (CTGradient *)backgroundGradient;
-- (void)setBackgroundGradient:(CTGradient *)value;
 
 - (NSColor *)baselineSeparatorColor;
 - (void)setBaselineSeparatorColor:(NSColor *)value;

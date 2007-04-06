@@ -9,9 +9,6 @@
 #import "AMButtonBar.h"
 #import "AMButtonBarItem.h"
 #import "AMButtonBarCell.h"
-#import "CTGradient.h"
-#import "CTGradient_AMButtonBar.h"
-
 
 float const AM_START_GAP_WIDTH = 8.0;
 float const AM_BUTTON_GAP_WIDTH = 2.0;
@@ -77,7 +74,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	[self am_commonInit];
 	delegate = [decoder decodeObjectForKey:@"AMBBDelegate"];
 	delegateRespondsToSelectionDidChange = [decoder decodeBoolForKey:@"AMBBDelegateRespondsToSelectionDidChange"];
-	[self setBackgroundGradient:[decoder decodeObjectForKey:@"AMBBBackgroundGradient"]];
 	[self setBaselineSeparatorColor:[decoder decodeObjectForKey:@"AMBBBaselineSeparatorColor"]];
 	showsBaselineSeparator = [decoder decodeBoolForKey:@"AMBBShowsBaselineSeparator"];
 	allowsMultipleSelection = [decoder decodeBoolForKey:@"AMBBAllowsMultipleSelection"];
@@ -90,8 +86,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)am_commonInit
 {
 	[self setItems:[[[NSMutableArray alloc] init] autorelease]];
-	[self setBackgroundGradient:[CTGradient grayButtonBarGradient]];
-		//[self setBackgroundGradient:[CTGradient blueButtonBarGradient]];
 	[self setBaselineSeparatorColor:[NSColor grayColor]];
 	[self setShowsBaselineSeparator:YES];
 	[self setButtonCell:[[[AMButtonBarCell alloc] init] autorelease]];
@@ -102,7 +96,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
 	[coder encodeConditionalObject:delegate forKey:@"AMBBDelegate"];
 	[coder encodeBool:delegateRespondsToSelectionDidChange forKey:@"AMBBDelegateRespondsToSelectionDidChange"];
-	[coder encodeObject:backgroundGradient forKey:@"AMBBBackgroundGradient"];
 	[coder encodeObject:baselineSeparatorColor forKey:@"AMBBBaselineSeparatorColor"];
 	[coder encodeBool:showsBaselineSeparator forKey:@"AMBBShowsBaselineSeparator"];
 	[coder encodeBool:allowsMultipleSelection forKey:@"AMBBAllowsMultipleSelection"];
@@ -113,7 +106,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 
 - (void)dealloc
 {
-	[backgroundGradient release];
 	[baselineSeparatorColor release];
 	[items release];
 	[buttonCell release];
@@ -146,20 +138,6 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 {
 	if (allowsMultipleSelection != value) {
 		allowsMultipleSelection = value;
-	}
-}
-
-- (CTGradient *)backgroundGradient
-{
-	return backgroundGradient;
-}
-
-- (void)setBackgroundGradient:(CTGradient *)value
-{
-	if (backgroundGradient != value) {
-		id old = backgroundGradient;
-		backgroundGradient = [value retain];
-		[old release];
 	}
 }
 
@@ -571,7 +549,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	if ([self isFlipped]) {
 		angle = -90;
 	}
-	[[self backgroundGradient] fillRect:gradientBounds angle:angle];
+
 	if ([self showsBaselineSeparator]) {
 		[[self baselineSeparatorColor] set];
 		NSFrameRect(baselineRect);
