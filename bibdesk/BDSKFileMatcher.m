@@ -51,6 +51,7 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSBezierPath_CoreImageExtensions.h"
 #import "CIImage_BDSKExtensions.h"
+#import "BDSKLevelIndicatorCell.h"
 
 static CFIndex MAX_SEARCHKIT_RESULTS = 10;
 static float LEAF_ROW_HEIGHT = 20.0;
@@ -59,12 +60,6 @@ static float GROUP_ROW_HEIGHT = 28.0;
 @interface BDSKCountOvalCell : NSTextFieldCell
 @end
 @interface BDSKBoldShadowFormatter : NSFormatter
-@end
-@interface BDSKLevelIndicatorCell : NSLevelIndicatorCell
-{
-    float maxHeight;
-}
-- (void)setMaxHeight:(float)h;
 @end
 
 @interface BDSKFileMatcher (Private)
@@ -674,54 +669,6 @@ static NSDictionary *attributes = nil;
 {
     *obj = string;
     return YES;
-}
-
-@end
-
-/* Subclass of NSLevelIndicatorCell.  The default relevancy cell draws bars the entire vertical height of the table row, which looks bad.  Using setControlSize: seems to have no effect.
-*/
-@interface NSLevelIndicatorCell (BDSKPrivateOverrideBecauseApplesSubclassingIsBroken)
-- (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-@end
-
-@implementation BDSKLevelIndicatorCell
-
-- (id)initWithLevelIndicatorStyle:(NSLevelIndicatorStyle)levelIndicatorStyle;
-{
-    self = [super initWithLevelIndicatorStyle:levelIndicatorStyle];
-    maxHeight = 0.8 * [self cellSize].height;
-    return self;
-}
-
-- (id)copyWithZone:(NSZone *)aZone
-{
-    id obj = [super copyWithZone:aZone];
-    [obj setMaxHeight:maxHeight];
-    return obj;
-}
-
-- (void)setMaxHeight:(float)h;
-{
-    maxHeight = h;
-}
-
-- (float)indicatorHeight { return maxHeight; }
-
-/*
- This method and -drawingRectForBounds: are never called as of 10.4.8 rdar://problem/4998206
- 
-- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-{
-    log_method();
-    NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
-    [super drawInteriorWithFrame:r inView:controlView];
-}
-*/
-
-- (void)_drawRelevancyWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-{
-    NSRect r = BDSKCenterRectVertically(cellFrame, [self indicatorHeight], [controlView isFlipped]);
-    [super _drawRelevancyWithFrame:r inView:controlView];
 }
 
 @end

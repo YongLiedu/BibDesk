@@ -45,7 +45,7 @@
 #import "BDSKTextWithIconCell.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "BDSKSearch.h"
-#import "BDSKSearchField.h"
+#import "BDSKLevelIndicatorCell.h"
 
 // Overrides attributedStringValue since we return an attributed string; normally, the cell uses the font of the attributed string, rather than the table's font, so font changes are ignored.  This means that italics and bold in titles will be lost until the search string changes again, but that's not a great loss.
 @interface BDSKFileContentTextWithIconCell : BDSKTextWithIconCell
@@ -100,10 +100,12 @@
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
     
-    NSLevelIndicatorCell *cell = [[tableView tableColumnWithIdentifier:@"score"] dataCell];
-    OBASSERT([cell isKindOfClass:[NSLevelIndicatorCell class]]);
-    [cell setLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle]; // the default one makes the tableview unusably slow
+    BDSKLevelIndicatorCell *cell = [[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle];
     [cell setEnabled:NO]; // this is required to make it non-editable
+    [cell setMaxHeight:17.0 * 0.7];
+    [cell setMaxValue:5.0];
+    [[tableView tableColumnWithIdentifier:@"score"] setDataCell:cell];
+    [cell release];
     
     // set up the image/text cell combination
     BDSKTextWithIconCell *textCell = [[BDSKFileContentTextWithIconCell alloc] init];
@@ -190,7 +192,7 @@
     }
 }
 
-- (void)setSearchField:(BDSKSearchField *)aSearchField
+- (void)setSearchField:(NSSearchField *)aSearchField
 {
     if (nil != searchField) {
         // disconnect the current searchfield
@@ -216,7 +218,7 @@
 
 - (IBAction)search:(id)sender
 {
-    if ([NSString isEmptyString:[searchField stringValue]] || [[searchField searchKey] isEqualToString:BDSKFileContentLocalizedString] == NO) {
+    if ([NSString isEmptyString:[searchField stringValue]]) {
         // iTunes/Mail swap out their search view when clearing the searchfield, so we follow suit.  If the user clicks the cancel button, we want the searchfield to lose first responder status, but this doesn't happen by default (maybe depends on whether it sends immediately?  Xcode seems to work correctly).  Don't clear the array when restoring document state, since we may need the array controller's selected objects.
 
         // we get a search: action after the cancel/controlTextDidEndEditing: combination, so see if this was a cancel action

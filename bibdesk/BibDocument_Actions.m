@@ -77,7 +77,6 @@
 #import "BDSKColoredBox.h"
 #import "BDSKStringParser.h"
 #import "BDSKZoomablePDFView.h"
-#import "BDSKSearchField.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
@@ -565,12 +564,12 @@
 		field = BDSKLocalUrlString;
     [self openLinkedFileForField:field];
 }
-/*
+
 - (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex
 {
     if ([link respondsToSelector:@selector(isFileURL)] && [link isFileURL]) {
         NSString *searchString;
-        if([[searchField searchKey] isEqualToString:BDSKKeywordsString] || [[searchField searchKey] isEqualToString:BDSKAllFieldsString])
+        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString])
             searchString = [searchField stringValue];
         else
             searchString = @"";
@@ -580,7 +579,7 @@
     // let the next responder handle it if it was a string or non-file URL
     return NO;
 }
-*/
+
 - (void)openLinkedFileAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     NSString *field = (NSString *)contextInfo;
     if (returnCode == NSAlertAlternateReturn) {
@@ -590,7 +589,7 @@
         
         NSString *searchString;
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-        if([[searchField searchKey] isEqualToString:BDSKKeywordsString] || [[searchField searchKey] isEqualToString:BDSKAllFieldsString])
+        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString])
             searchString = [searchField stringValue];
         else
             searchString = @"";

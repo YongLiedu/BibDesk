@@ -53,6 +53,7 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSBezierPath_CoreImageExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
+#import "BDSKLevelIndicatorCell.h" 
 
 @interface BDSKMainTableView (Private)
 
@@ -317,7 +318,14 @@
             [importButtonCell setTarget:self];
             [tc setDataCell:importButtonCell];
             [tc setWidth:[importButtonCell cellSize].width];
-        }else {
+        }else if ([colName isEqualToString:BDSKRelevanceString]) { 
+            BDSKLevelIndicatorCell *levelCell = [[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle];
+            [levelCell setMaxValue:(double)1.0];
+            [levelCell setEnabled:NO];
+            [levelCell setMaxHeight:(17.0 * 0.7)];
+            [tc setDataCell:levelCell];
+            [levelCell release];            
+        }else{
             // this is our default cell; need to explicitly set if changing column type from e.g. image->text
             NSTextFieldCell *textFieldCell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
             [textFieldCell setBordered:NO];

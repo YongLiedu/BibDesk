@@ -1218,6 +1218,7 @@ static NSString *UTIForPath(NSString *aPath)
 // e.g. a|b+c will be split as ((a),(b,c))
 - (NSArray *)searchComponents;
 {
+#warning fixme
     NSEnumerator *andEnum, *orEnum = [[self componentsSeparatedByString:@"|"] objectEnumerator];
     NSString *s;
     NSMutableArray *andArray, *orArray = [NSMutableArray array];

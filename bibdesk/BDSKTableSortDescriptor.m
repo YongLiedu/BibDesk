@@ -201,7 +201,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(triStateCompare:)];
         
-    }else if([tcID isRatingField]){
+    }else if([tcID isRatingField] || [tcID isEqualToString:BDSKRelevanceString]){
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(numericCompare:)];
         
@@ -215,7 +215,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
         // compare UTI for file fields so the subsort is more useful
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:)];
         
-    }else{
+    }else {
         
         // this assumes that all other columns must be NSString objects
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(localizedCaseInsensitiveNumericCompare:)];

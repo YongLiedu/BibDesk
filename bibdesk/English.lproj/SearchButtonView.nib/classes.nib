@@ -1,0 +1,20 @@
+{
+    IBClasses = (
+        {
+            CLASS = AMButtonBar; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; }; 
+            SUPERCLASS = NSView; 
+        }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            CLASS = BDSKSearchButtonController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {buttonBar = AMButtonBar; gradientView = BDSKGradientView; }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }
+    ); 
+    IBVersion = 1; 
+}

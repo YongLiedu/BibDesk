@@ -1,8 +1,8 @@
 //
-//  BDSKFileMatcher.h
+//  BDSKLevelIndicatorCell.h
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 02/09/07.
+//  Created by Adam Maxwell on 04/05/07.
 /*
  This software is Copyright (c) 2007
  Adam Maxwell. All rights reserved.
@@ -38,28 +38,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKFileMatcher : NSWindowController
+
+@interface BDSKLevelIndicatorCell : NSLevelIndicatorCell
 {
-    IBOutlet NSOutlineView *outlineView;
-    IBOutlet NSProgressIndicator *progressIndicator;
-    IBOutlet NSTextField *statusField;
-    IBOutlet NSButton *abortButton;
-    IBOutlet NSButton *configureButton;
-    
-    NSMutableArray *matches;
-    SKIndexRef searchIndex;
-    NSLock *indexingLock;
-    NSArray *currentPublications;
-    struct __matchFlags {
-        int32_t shouldAbortThread;
-    } _matchFlags;
-    
+    float maxHeight;
 }
-
-+ (id)sharedInstance;
-- (void)matchFiles:(NSArray *)absoluteURLs withPublications:(NSArray *)pubs;
-- (IBAction)openAction:(id)sender;
-- (IBAction)abort:(id)sender;
-- (IBAction)configure:(id)sender;
-
+- (void)setMaxHeight:(float)h;
 @end

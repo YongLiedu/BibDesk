@@ -42,7 +42,6 @@
 #import "OAToolbarItem_BDSKExtensions.h"
 #import "BDSKImagePopUpButton.h"
 #import "BibDocument_Actions.h"
-#import "BDSKSearchField.h"
 #import "BDSKCustomCiteDrawerController.h"
 
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)

@@ -154,7 +154,7 @@
                 saveTextEncodingPopupButton = BDSKEncodingPopUpButton; 
                 searchBookmarkField = NSTextField; 
                 searchBookmarkSheet = NSWindow; 
-                searchField = BDSKSearchField; 
+                searchField = NSSearchField; 
                 splitView = BDSKSplitView; 
                 statusBar = BDSKStatusBar; 
                 tableView = BDSKMainTableView; 

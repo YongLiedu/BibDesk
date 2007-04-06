@@ -50,19 +50,123 @@
 #import "BDSKZoomablePDFView.h"
 #import "BDSKPreviewer.h"
 #import "BDSKOverlay.h"
-#import "BDSKSearchField.h"
 #import "BibDocument_Groups.h"
 #import "BDSKMainTableView.h"
 #import "BDSKFindController.h"
 #import <OmniAppKit/OAFindControllerTargetProtocol.h>
 #import <OmniAppKit/NSText-OAExtensions.h>
+#import "NSSet_BDSKExtensions.h"
+#import "BDSKSearchButtonController.h"
+#import "BibAuthor.h"
 
 NSString *BDSKDocumentFormatForSearchingDates = nil;
 
+static CFTypeRef searchIndexDictionaryRetain(CFAllocatorRef alloc, const void *value) { return CFRetain(value); }
+static void searchIndexDictionaryRelease(CFAllocatorRef alloc, const void *value) { SKIndexClose((SKIndexRef)value); }
+static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
+{
+    CFStringRef cfDesc = CFCopyDescription(value);
+    CFStringRef desc = (CFStringRef)[[NSString alloc] initWithFormat:@"%@: type %d, %d documents", cfDesc, SKIndexGetIndexType((SKIndexRef)value), SKIndexGetDocumentCount((SKIndexRef)value)];
+    CFRelease(cfDesc);
+    return desc;
+}
+static Boolean searchIndexDictionaryEqual(const void *value1, const void *value2) { return CFEqual(value1, value2); }
+
+const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
+    0,
+    searchIndexDictionaryRetain,
+    searchIndexDictionaryRelease,
+    searchIndexDictionaryCopyDescription,
+    searchIndexDictionaryEqual
+};
+
 @implementation BibDocument (Search)
 
-+ (void)didLoad{
-    BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
+static void flushAllIndexes(const void *key, const void *value, void *context)
+{
+    SKIndexFlush((SKIndexRef)value);
+}
+
+static void appendNormalizedNames(const void *value, void *context)
+{
+    BibAuthor *person = (BibAuthor *)value;
+    NSMutableString *names = (NSMutableString *)context;
+    if ([names isEqualToString:@""] == NO)
+        [names appendString:@" "];
+    [names appendString:[person normalizedName]];
+}
+
+- (void)addPublicationsToSearchIndexes:(NSArray *)pubs{
+    
+    NSEnumerator *pubsEnum = [pubs objectEnumerator];
+    BibItem *pub;
+    NSMutableString *names = [[NSMutableString alloc] initWithCapacity:100];
+
+    while (pub = [pubsEnum nextObject]) {
+        SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
+        if (doc) {
+            NSString *searchText = [pub allFieldsString];
+            SKIndexRef skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKAllFieldsString);
+            if (searchText && skIndex)
+                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
+            
+            searchText = [pub title];
+            skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKTitleString);
+            if (searchText && skIndex)
+                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
+            
+            [names replaceCharactersInRange:NSMakeRange(0, [names length]) withString:@""];
+            CFSetApplyFunction((CFSetRef)[pub allPeople], appendNormalizedNames, names);
+            skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKPersonString);
+            if (skIndex)
+                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
+            
+            CFRelease(doc);
+        }
+        
+    }
+    
+    [names release];
+    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);
+}
+
+static void removeFromIndex(const void *key, const void *value, void *context)
+{
+    SKDocumentRef doc = (SKDocumentRef)context;
+    SKIndexRemoveDocument((SKIndexRef)value, doc);
+}
+
+- (void)removePublicationsFromSearchIndexes:(NSArray *)pubs{
+    NSEnumerator *pubsEnum = [pubs objectEnumerator];
+    BibItem *pub;
+    while (pub = [pubsEnum nextObject]) {
+        SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
+        if (doc) {
+            CFDictionaryApplyFunction(searchIndexes, removeFromIndex, doc);
+            CFRelease(doc);
+        }
+    }
+    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);
+}
+
+- (void)resetSearchIndexes{
+    
+    CFDictionaryRemoveAllValues(searchIndexes);
+    
+    CFMutableDataRef indexData;
+    SKIndexRef skIndex;
+    NSEnumerator *fieldEnum = [[NSSet setWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, nil] objectEnumerator];
+    NSString *fieldName;
+    while (fieldName = [fieldEnum nextObject]) {
+        indexData = CFDataCreateMutable(NULL, 0);
+        skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)fieldName, kSKIndexInverted, NULL);
+        CFDictionaryAddValue(searchIndexes, (CFStringRef)fieldName, skIndex);
+        CFRelease(indexData);
+        CFRelease(skIndex);
+    }
+    
+    // this will handle the index flush after adding all the pubs
+    [self addPublicationsToSearchIndexes:[self publications]];
 }
 
 - (IBAction)makeSearchFieldKey:(id)sender{
@@ -88,22 +192,119 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
     }
 }
 
+- (void)buttonBarSelectionDidChange:(NSNotification *)aNotification;
+{
+    NSString *field = [searchButtonController selectedItemIdentifier];
+    if([field isEqualToString:BDSKFileContentSearchString]) {
+        [self searchByContent:nil];
+    } else {
+        if ([[[fileSearchController searchContentView] window] isEqual:documentWindow])
+            [fileSearchController restoreDocumentState];
+        [self filterPublicationsUsingSearchString:[searchField stringValue] indexName:[searchButtonController selectedItemIdentifier]];
+    }
+}
+
+- (void)showSearchButtonView;
+{
+    if (nil == searchButtonController)
+        searchButtonController = [[BDSKSearchButtonController alloc] init];
+    
+    [searchButtonController setDelegate:self];
+    
+    NSView *searchButtonView = [searchButtonController view];
+    
+    if (documentWindow != [searchButtonView window]) {
+        NSRect searchFrame;
+        NSRect svFrame = [splitView frame];
+        searchFrame.size.height = 28.0;
+        searchFrame.size.width = NSWidth(svFrame);
+        searchFrame.origin.x = svFrame.origin.x;
+        svFrame.size.height -= NSHeight(searchFrame);
+        if ([mainBox isFlipped]) {
+            searchFrame.origin.y = svFrame.origin.y;
+            svFrame.origin.y += NSHeight(searchFrame);
+        } else {
+            searchFrame.origin.y = NSMaxY(svFrame);
+        }
+        
+        NSViewAnimation *animation;
+        NSRect startRect = searchFrame;
+        startRect.size.height = 0.0;
+        if ([[splitView superview] isFlipped])
+            startRect.origin.y -= NSHeight(searchFrame);
+        else
+            startRect.origin.y += NSHeight(searchFrame);
+        [searchButtonView setFrame:startRect];
+        
+        NSDictionary *splitViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, [NSValue valueWithRect:svFrame], NSViewAnimationEndFrameKey, nil];
+        NSDictionary *searchViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:searchButtonView, NSViewAnimationTargetKey, [NSValue valueWithRect:startRect], NSViewAnimationStartFrameKey, [NSValue valueWithRect:searchFrame], NSViewAnimationEndFrameKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
+
+        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:splitViewInfo, searchViewInfo, nil]] autorelease];
+        
+        [mainBox addSubview:searchButtonView];
+        
+        [animation setAnimationBlockingMode:NSAnimationNonblocking];
+        [animation setDuration:0.2];
+        [animation setAnimationCurve:NSAnimationEaseInOut];
+        [animation startAnimation];
+        
+        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+    }
+}
+
+- (void)hideSearchButtonView
+{
+    NSView *searchButtonView = [searchButtonController view];
+    if (documentWindow == [searchButtonView window]) {
+        
+        NSViewAnimation *animation;      
+        NSRect stopRect = [searchButtonView frame];
+        stopRect.size.height = 0.0;
+        if ([[searchButtonView superview] isFlipped])
+            stopRect.origin.y -= NSHeight([searchButtonView frame]);
+        else
+            stopRect.origin.y += NSHeight([searchButtonView frame]);
+        
+        NSDictionary *splitViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, [NSValue valueWithRect:[mainBox bounds]], NSViewAnimationEndFrameKey, nil];
+        NSDictionary *searchViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:searchButtonView, NSViewAnimationTargetKey, [NSValue valueWithRect:stopRect], NSViewAnimationEndFrameKey, NSViewAnimationEffectKey, NSViewAnimationFadeOutEffect, nil];
+        
+        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:splitViewInfo, searchViewInfo, nil]] autorelease];
+                
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        [animation setDuration:0.2];
+        [animation setAnimationCurve:NSAnimationEaseInOut];
+        [animation startAnimation];
+        
+        [searchButtonView removeFromSuperview];
+        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+    }
+    [searchButtonController setDelegate:nil];
+}
+
 - (IBAction)search:(id)sender{
-    if([[searchField searchKey] isEqualToString:BDSKFileContentLocalizedString])
-        [self searchByContent:sender];
-    else
-        [self filterPublicationsUsingSearchString:[searchField stringValue] inField:[searchField searchKey]];
+    if ([[sender stringValue] isEqualToString:@""])
+        [self hideSearchButtonView];
+    else [self showSearchButtonView];
+    
+    [self buttonBarSelectionDidChange:nil];
 }
 
 #pragma mark -
 
-- (void)filterPublicationsUsingSearchString:(NSString *)searchString inField:(NSString *)field{
+- (void)filterPublicationsUsingSearchString:(NSString *)searchString indexName:(NSString *)field{
 	NSArray *pubsToSelect = [self selectedPublications];
 
     if([NSString isEmptyString:searchString]){
+        [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
         [shownPublications setArray:groupedPublications];
+#warning sort order for relevance
     }else{
-		[shownPublications setArray:[self publicationsMatchingSearchString:searchString inField:field fromArray:groupedPublications]];
+        
+        if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil) {
+            [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
+        }
+        
+		[shownPublications setArray:[self publicationsMatchingSearchString:searchString indexName:field fromArray:groupedPublications]];
 		if([shownPublications count] == 1)
 			pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
 	}
@@ -115,87 +316,86 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
 	if([pubsToSelect count])
 		[self selectPublications:pubsToSelect];
 }
-        
-- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString inField:(NSString *)field fromArray:(NSArray *)arrayToSearch{
-    
-    unsigned searchMask = NSCaseInsensitiveSearch;
-    if([searchString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]].location != NSNotFound)
-        searchMask = 0;
-    BOOL doLossySearch = YES;
-    if(BDStringHasAccentedCharacters((CFStringRef)searchString))
-        doLossySearch = NO;
-        
-    static NSSet *dateFields = nil;
-    if(nil == dateFields)
-        dateFields = [[NSSet alloc] initWithObjects:BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, nil];
-    
-    // if it's a date field, figure out a format string to use based on the given date component(s)
-    // this date format string is then made available to the BibItem as a global variable
-    // don't convert searchString->date->string, though, or it's no longer a substring and will only match exactly
-    if([dateFields containsObject:field]){
-        [BDSKDocumentFormatForSearchingDates release];
-        BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
-        if(nil == [NSCalendarDate dateWithString:searchString calendarFormat:BDSKDocumentFormatForSearchingDates]){
-            [BDSKDocumentFormatForSearchingDates release];
-            BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString] copy];
-        }
-    }
-    
-    NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
-    NSArray *searchComponents = [searchString searchComponents], *andSearchComponents;
-    
-    if([searchComponents count] == 0)
-        return arrayToSearch;
-    
-    int i, j, k, pubCount = [arrayToSearch count], orCount = [searchComponents count], andCount;
-    BibItem *pub;
-    BOOL match;
-    
-    // the searchComponents is an array of OR-ed conditions, each one being an array of AND-ed conditions
-    // e.g. ((a),(b,c)) is interpreted as (a || ( b && c) )
-    
-    // cache the IMP for the BibItem search method, since we're potentially calling it several times per item
-    typedef BOOL (*searchIMP)(id, SEL, id, unsigned int, id, BOOL);
-    SEL matchSelector = @selector(matchesSubstring:withOptions:inField:removeDiacritics:);
-    searchIMP itemMatches = (searchIMP)[BibItem instanceMethodForSelector:matchSelector];
-    OBASSERT(NULL != itemMatches);
 
-    for(i = 0; i < pubCount; i++){
-        pub = [arrayToSearch objectAtIndex:i];
+// simplified search used by BibAppController's Service for legacy compatibility
+- (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field{
+    unsigned i, iMax = [publications count];
+    NSMutableArray *results = [NSMutableArray arrayWithCapacity:100];
+    for (i = 0; i < iMax; i++) {
+        BibItem *pub = [publications objectAtIndex:i];
+        if ([pub matchesSubstring:searchString withOptions:NSCaseInsensitiveSearch inField:field removeDiacritics:YES])
+            [results addObject:pub];
+    }
+    return results;
+}
+
+#define SEARCH_BUFFER_MAX 100
         
-        for(j = 0; j < orCount; j++){
-            andSearchComponents = [searchComponents objectAtIndex:j];
-            andCount = [andSearchComponents count];
-            match = YES;
-            for(k = 0; k < andCount; k++){
-                if(itemMatches(pub, matchSelector, [andSearchComponents objectAtIndex:k], searchMask, field, doLossySearch) == NO){
-                    // doesn't match, this OR case will be ignored
-                    match = NO;
-                    break;
-                }
-            }
-            if(match){
-                // a full series of AND conditions for an OR condition matched, so we have match
-                [aSet addObject:pub];        
-                break;
+- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field fromArray:(NSArray *)arrayToSearch{
+    
+    NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:[arrayToSearch count]];
+    
+    SKIndexRef skIndex = (void *)CFDictionaryGetValue(searchIndexes, (void *)field);
+    NSAssert1(NULL != skIndex, @"No index for field %@", field);
+    
+    // note that the add/remove methods flush the index, so we don't have to do it again
+    SKSearchRef search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
+    
+    SKDocumentID documents[SEARCH_BUFFER_MAX];
+    float scores[SEARCH_BUFFER_MAX];
+    CFIndex i, foundCount;
+    NSMutableSet *foundURLSet = [NSMutableSet set];
+    
+    Boolean foundAll;
+    BibItem *aPub;
+    float maxScore = 0.0f;
+    
+    do {
+        
+        foundAll = SKSearchFindMatches(search, SEARCH_BUFFER_MAX, documents, scores, 1.0, &foundCount);
+        
+        if (foundCount) {
+            CFURLRef documentURLs[SEARCH_BUFFER_MAX];
+            SKIndexCopyDocumentURLsForDocumentIDs(skIndex, foundCount, documents, documentURLs);
+            
+            for (i = 0; i < foundCount; i++) {
+                [foundURLSet addObject:(id)documentURLs[i]];
+                aPub = [publications itemForIdentifierURL:(NSURL *)documentURLs[i]];
+                CFRelease(documentURLs[i]);
+                [aPub setSearchScore:scores[i]];
+                maxScore = MAX(maxScore, scores[i]);
             }
         }
-    }
+                    
+    } while (foundCount && FALSE == foundAll);
+            
+    SKSearchCancel(search);
+    CFRelease(search);
     
-    return [aSet allObjects];
+    // we searched all publications, but we only want to keep the subset that's shown (if a group is selected)
+    NSMutableSet *identifierURLsToKeep = [NSMutableSet setWithArray:[arrayToSearch valueForKey:@"identifierURL"]];
+    [foundURLSet intersectSet:identifierURLsToKeep];
+    
+    NSEnumerator *keyEnum = [foundURLSet objectEnumerator];
+    NSURL *aURL;
+
+    // iterate and normalize search scores
+    while (aURL = [keyEnum nextObject]) {
+        aPub = [publications itemForIdentifierURL:aURL];
+        if (aPub) {
+            [toReturn addObject:aPub];
+            float score = [aPub searchScore];
+            [aPub setSearchScore:(score/maxScore)];
+        }
+    }
+
+    return toReturn;
 }
 
 #pragma mark File Content Search
 
 - (IBAction)searchByContent:(id)sender
 {
-    // Normal search if the fileSearchController is not present and the searchstring is empty, since the searchfield target has apparently already been reset (I think).  Fixes bug #1341802.
-    OBASSERT(searchField != nil && [searchField target] != nil);
-    if([searchField target] == self && [NSString isEmptyString:[searchField stringValue]]){
-        [self filterPublicationsUsingSearchString:[searchField stringValue] inField:[searchField searchKey]];
-        return;
-    }
-    
     // @@ File content search isn't really compatible with the group concept yet; this allows us to select publications when the content search is done, and also provides some feedback to the user that all pubs will be searched.  This is ridiculously complicated since we need to avoid calling searchByContent: in a loop.
     [tableView deselectAll:nil];
     [groupTableView updateHighlights];
@@ -250,10 +450,12 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
         
     } else {
         
+        [[fileSearchController searchContentView] removeFromSuperview];
+        
         // reconnect the searchfield
         [searchField setTarget:self];
         [searchField setDelegate:self];
-        
+                
         NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
         
         if([titlesToSelect count]){
@@ -276,6 +478,9 @@ NSString *BDSKDocumentFormatForSearchingDates = nil;
                 [documentWindow makeFirstResponder:(NSResponder *)tableView];
         }
         
+        // _restoreDocumentStateByRemovingSearchView may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list
+        if ([[searchField stringValue] isEqualToString:@""])
+            [self hideSearchButtonView];        
     }
 }
 

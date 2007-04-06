@@ -77,7 +77,13 @@ enum {
     BOOL spotlightMetadataChanged;
     NSMutableDictionary *cachedURLs;
     BOOL isImported;
+    float searchScore;
+    NSURL *identifierURL;
 }
+
+- (NSURL *)identifierURL;
+- (void)setSearchScore:(float)val;
+- (float)searchScore;
 
 /*!
      @method init

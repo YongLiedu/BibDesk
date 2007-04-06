@@ -102,6 +102,18 @@ static BDSKTextViewFindController *findController = nil;
     NSArray *searchComponents = [searchString searchComponents];
     
     [allSearchComponents performSelector:@selector(addObjectsFromArray:) withObjectsFromArray:searchComponents];
+    unsigned i, iMax = [allSearchComponents count];
+#warning fixme
+    static NSCharacterSet *trimSet = nil;
+    if (nil == trimSet)
+        trimSet = [[NSCharacterSet characterSetWithCharactersInString:@"*()"] copy];
+    
+    for (i = 0; i < iMax; i++) {
+        NSString *component = [allSearchComponents objectAtIndex:i];
+        [component retain];
+        [allSearchComponents replaceObjectAtIndex:i withObject:[component stringByTrimmingCharactersInSet:trimSet]];
+        [component release];
+    }
 
     [textStorage beginEditing];
     [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allSearchComponents];

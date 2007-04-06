@@ -316,8 +316,6 @@
 		CE77A7FE0923BEBA0019D901 /* NSTableView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */; };
 		CE7A31400B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */; };
 		CE7A31410B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */; };
-		CE7A3E2E0B0A18CC00D1B333 /* BDSKSearchField.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7A3E2C0B0A18CC00D1B333 /* BDSKSearchField.h */; };
-		CE7A3E2F0B0A18CC00D1B333 /* BDSKSearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A3E2D0B0A18CC00D1B333 /* BDSKSearchField.m */; };
 		CE7A4A8E0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */; };
 		CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */; };
 		CE7A4AA50B0B480100D1B333 /* BDSKCustomCiteDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7A4AA40B0B480100D1B333 /* BDSKCustomCiteDrawer.nib */; };
@@ -590,6 +588,22 @@
 		F920DB03075C2B69000C5FCA /* BibItem+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */; };
 		F9235019089A813E00EFEB06 /* NSDate_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */; };
 		F923501A089A813E00EFEB06 /* NSDate_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */; };
+		F92405020BC5856900672839 /* BDSKLevelIndicatorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F92405000BC5856900672839 /* BDSKLevelIndicatorCell.h */; };
+		F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */; };
+		F924FC010BC3FFFC00672839 /* AMButtonBar.h in Headers */ = {isa = PBXBuildFile; fileRef = F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */; };
+		F924FC020BC3FFFC00672839 /* AMButtonBar.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF00BC3FFFC00672839 /* AMButtonBar.m */; };
+		F924FC030BC3FFFC00672839 /* AMButtonBarCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */; };
+		F924FC040BC3FFFC00672839 /* AMButtonBarCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */; };
+		F924FC050BC3FFFC00672839 /* AMButtonBarItem.h in Headers */ = {isa = PBXBuildFile; fileRef = F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */; };
+		F924FC060BC3FFFC00672839 /* AMButtonBarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */; };
+		F924FC0B0BC3FFFC00672839 /* NSBezierPath_AMAdditons.h in Headers */ = {isa = PBXBuildFile; fileRef = F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */; };
+		F924FC0C0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */; };
+		F924FC0D0BC3FFFC00672839 /* NSColor_AMAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */; };
+		F924FC0E0BC3FFFC00672839 /* NSColor_AMAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */; };
+		F924FC110BC3FFFC00672839 /* NSShadow_AMAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */; };
+		F924FC120BC3FFFC00672839 /* NSShadow_AMAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */; };
+		F924FC300BC4322500672839 /* BDSKSearchButtonController.h in Headers */ = {isa = PBXBuildFile; fileRef = F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */; };
+		F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */ = {isa = PBXBuildFile; fileRef = F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */; };
 		F9252E2208F60D170045D563 /* BDSKFileContentSearchController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */; };
 		F9252E2308F60D170045D563 /* BDSKFileContentSearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */; };
 		F9252E2608F60D520045D563 /* BDSKFileContentSearch.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9252E2408F60D520045D563 /* BDSKFileContentSearch.nib */; };
@@ -598,6 +612,7 @@
 		F925352908FDFAE40045D563 /* BDSKSearchResult.h in Headers */ = {isa = PBXBuildFile; fileRef = F925352708FDFAE40045D563 /* BDSKSearchResult.h */; };
 		F925352A08FDFAE40045D563 /* BDSKSearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = F925352808FDFAE40045D563 /* BDSKSearchResult.m */; };
 		F9273968078E58A600609739 /* Bibdesk_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */; };
+		F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92B91BF0BC6B51B008D5BC3 /* SearchButtonView.nib */; };
 		F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92ECB6B09DEF86500A244D0 /* Security.framework */; };
 		F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92ECBEF09DF09C200A244D0 /* BDSKPasswordController.nib */; };
 		F92ECBF409DF09DA00A244D0 /* BDSKPasswordController.h in Headers */ = {isa = PBXBuildFile; fileRef = F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */; };
@@ -1119,7 +1134,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1244,8 +1259,6 @@
 		CE77A7FC0923BEBA0019D901 /* NSTableView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE7A313E0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKItemPasteboardHelper.m; sourceTree = "<group>"; };
 		CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKItemPasteboardHelper.h; sourceTree = "<group>"; };
-		CE7A3E2C0B0A18CC00D1B333 /* BDSKSearchField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchField.h; sourceTree = "<group>"; };
-		CE7A3E2D0B0A18CC00D1B333 /* BDSKSearchField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchField.m; sourceTree = "<group>"; };
 		CE7A4A8C0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCustomCiteDrawerController.h; sourceTree = "<group>"; };
 		CE7A4A8D0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCustomCiteDrawerController.m; sourceTree = "<group>"; };
 		CE7A4A900B0B476400D1B333 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKCustomCiteDrawer.nib; sourceTree = "<group>"; };
@@ -1525,6 +1538,23 @@
 		F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "BibItem+Scripting.h"; path = "Scripting/BibItem+Scripting.h"; sourceTree = "<group>"; };
 		F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDate_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDate_BDSKExtensions.m; sourceTree = "<group>"; };
+		F92405000BC5856900672839 /* BDSKLevelIndicatorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLevelIndicatorCell.h; sourceTree = "<group>"; };
+		F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLevelIndicatorCell.m; sourceTree = "<group>"; };
+		F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBar.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBar.h; sourceTree = "<absolute>"; };
+		F924FBF00BC3FFFC00672839 /* AMButtonBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBar.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBar.m; sourceTree = "<absolute>"; };
+		F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarCell.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarCell.h; sourceTree = "<absolute>"; };
+		F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarCell.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarCell.m; sourceTree = "<absolute>"; };
+		F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarItem.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarItem.h; sourceTree = "<absolute>"; };
+		F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarItem.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarItem.m; sourceTree = "<absolute>"; };
+		F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBezierPath_AMAdditons.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.h; sourceTree = "<absolute>"; };
+		F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBezierPath_AMAdditons.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.m; sourceTree = "<absolute>"; };
+		F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSColor_AMAdditions.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSColor_AMAdditions.h; sourceTree = "<absolute>"; };
+		F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSColor_AMAdditions.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSColor_AMAdditions.m; sourceTree = "<absolute>"; };
+		F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSShadow_AMAdditions.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.h; sourceTree = "<absolute>"; };
+		F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSShadow_AMAdditions.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.m; sourceTree = "<absolute>"; };
+		F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchButtonController.h; sourceTree = "<group>"; };
+		F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchButtonController.m; sourceTree = "<group>"; };
+		F924FC3A0BC4339600672839 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchButtonView.nib; sourceTree = "<group>"; };
 		F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileContentSearchController.h; sourceTree = "<group>"; };
 		F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileContentSearchController.m; sourceTree = "<group>"; };
 		F9252E2508F60D520045D563 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKFileContentSearch.nib; sourceTree = "<group>"; };
@@ -1926,6 +1956,7 @@
 				F9BE68330B80F92800B2597C /* FileMatcherConfigSheet.nib */,
 				CEF71B060B91BFFF003A2771 /* NotesWindow.nib */,
 				CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */,
+				F92B91BF0BC6B51B008D5BC3 /* SearchButtonView.nib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				3DA82938083ECE9300321864 /* Localizable.strings */,
@@ -1982,6 +2013,7 @@
 				F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */,
 				F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */,
 				F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */,
+				F924FC140BC4000B00672839 /* AMButtonBar */,
 			);
 			name = "Third Party Sources";
 			sourceTree = "<group>";
@@ -2014,6 +2046,7 @@
 				F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */,
 				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
 				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
+				F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlay.m */,
 				CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */,
 				F961FA9508C9429700332460 /* BDSKPrintableView.m */,
@@ -2022,7 +2055,6 @@
 				CEF7A6670915115B00BE9E02 /* BDSKScriptMenu.m */,
 				F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */,
 				F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */,
-				CE7A3E2D0B0A18CC00D1B333 /* BDSKSearchField.m */,
 				CEF7AC050915929E00BE9E02 /* BDSKSplitView.m */,
 				F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */,
 				CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */,
@@ -2106,6 +2138,7 @@
 				F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */,
 				F9022C58075802E300C3F701 /* BDSKPreviewer.m */,
 				CE95A57A0A88883300334DFA /* BDSKReadMeController.m */,
+				F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */,
 				CEEFDDFD0B03ED0200668BB0 /* BDSKScriptGroupSheetController.m */,
 				CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */,
 				CEBA3F460A73CCAF00588BB7 /* BDSKSheetController.m */,
@@ -2458,6 +2491,7 @@
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CE7A313F0B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
+				F92405000BC5856900672839 /* BDSKLevelIndicatorCell.h */,
 				F9201DFF0B72504C007E45BB /* BDSKMacro.h */,
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
@@ -2494,9 +2528,9 @@
 				F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */,
 				F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */,
 				F9A2245A0AE02C8E0046CA3D /* BDSKSearch.h */,
-				CE7A3E2C0B0A18CC00D1B333 /* BDSKSearchField.h */,
 				F94DB0F60B3E2FA1006F37A2 /* BDSKSearchGroup.h */,
 				CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */,
+				F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */,
 				CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */,
 				F925332108FC9FB80045D563 /* BDSKSearchIndex.h */,
 				F925352708FDFAE40045D563 /* BDSKSearchResult.h */,
@@ -2620,6 +2654,25 @@
 				F9022CA60758038000C3F701 /* PubMedParser.h */,
 			);
 			name = Headers;
+			sourceTree = "<group>";
+		};
+		F924FC140BC4000B00672839 /* AMButtonBar */ = {
+			isa = PBXGroup;
+			children = (
+				F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */,
+				F924FBF00BC3FFFC00672839 /* AMButtonBar.m */,
+				F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */,
+				F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */,
+				F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */,
+				F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */,
+				F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */,
+				F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */,
+				F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */,
+				F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */,
+				F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */,
+				F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */,
+			);
+			name = AMButtonBar;
 			sourceTree = "<group>";
 		};
 		F95CC10F087F54BF002C5694 /* Products */ = {
@@ -2947,7 +3000,6 @@
 				CEEFE6C30B0403E700668BB0 /* BDSKGroupsArray.h in Headers */,
 				F95ED68B0B07B87F00000BBF /* BDSKController.h in Headers */,
 				CE7A31410B08EA1F00D1B333 /* BDSKItemPasteboardHelper.h in Headers */,
-				CE7A3E2E0B0A18CC00D1B333 /* BDSKSearchField.h in Headers */,
 				CE7A4A8E0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.h in Headers */,
 				CE8C731E0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h in Headers */,
 				CE3A0BD60B1634D500233208 /* BDSKCompletionServerProtocol.h in Headers */,
@@ -2977,6 +3029,14 @@
 				CEF71ADA0B91BBCB003A2771 /* BDSKNotesWindowController.h in Headers */,
 				CE4385E80BB81D0500A56987 /* BDSKSearchBookmarkController.h in Headers */,
 				F9B3405D0BBC16720072C2B0 /* BibItem_PubMedLookup.h in Headers */,
+				F924FC010BC3FFFC00672839 /* AMButtonBar.h in Headers */,
+				F924FC030BC3FFFC00672839 /* AMButtonBarCell.h in Headers */,
+				F924FC050BC3FFFC00672839 /* AMButtonBarItem.h in Headers */,
+				F924FC0B0BC3FFFC00672839 /* NSBezierPath_AMAdditons.h in Headers */,
+				F924FC0D0BC3FFFC00672839 /* NSColor_AMAdditions.h in Headers */,
+				F924FC110BC3FFFC00672839 /* NSShadow_AMAdditions.h in Headers */,
+				F924FC300BC4322500672839 /* BDSKSearchButtonController.h in Headers */,
+				F92405020BC5856900672839 /* BDSKLevelIndicatorCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3412,6 +3472,7 @@
 				CEF71B080B91BFFF003A2771 /* NotesWindow.nib in Resources */,
 				CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */,
 				CE42A8EA0BC008EB0016FDC2 /* skimnotes in Resources */,
+				F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3801,7 +3862,6 @@
 				CEEFE6C20B0403E700668BB0 /* BDSKGroupsArray.m in Sources */,
 				F95ED68C0B07B87F00000BBF /* BDSKController.m in Sources */,
 				CE7A31400B08EA1F00D1B333 /* BDSKItemPasteboardHelper.m in Sources */,
-				CE7A3E2F0B0A18CC00D1B333 /* BDSKSearchField.m in Sources */,
 				CE7A4A8F0B0B475B00D1B333 /* BDSKCustomCiteDrawerController.m in Sources */,
 				CE8C731F0B0CA6C500E31E5A /* NSObject_BDSKExtensions.m in Sources */,
 				CE34A5740B249E0B00755730 /* BDSKMARCParser.m in Sources */,
@@ -3830,6 +3890,14 @@
 				CE4A7EFA0BAED4EC004AD07D /* BibDeskBibliographyCommand.m in Sources */,
 				CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */,
 				F9B3405E0BBC16720072C2B0 /* BibItem_PubMedLookup.m in Sources */,
+				F924FC020BC3FFFC00672839 /* AMButtonBar.m in Sources */,
+				F924FC040BC3FFFC00672839 /* AMButtonBarCell.m in Sources */,
+				F924FC060BC3FFFC00672839 /* AMButtonBarItem.m in Sources */,
+				F924FC0C0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m in Sources */,
+				F924FC0E0BC3FFFC00672839 /* NSColor_AMAdditions.m in Sources */,
+				F924FC120BC3FFFC00672839 /* NSShadow_AMAdditions.m in Sources */,
+				F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */,
+				F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4334,6 +4402,14 @@
 				F9252E2508F60D520045D563 /* English */,
 			);
 			name = BDSKFileContentSearch.nib;
+			sourceTree = "<group>";
+		};
+		F92B91BF0BC6B51B008D5BC3 /* SearchButtonView.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F924FC3A0BC4339600672839 /* English */,
+			);
+			name = SearchButtonView.nib;
 			sourceTree = "<group>";
 		};
 		F92ECBEF09DF09C200A244D0 /* BDSKPasswordController.nib */ = {

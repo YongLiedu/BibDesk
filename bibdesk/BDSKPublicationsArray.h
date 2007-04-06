@@ -43,6 +43,7 @@
 @interface BDSKPublicationsArray : NSMutableArray {
     NSMutableArray *publications;
     OFMultiValueDictionary *itemsForCiteKeys;
+    NSMutableDictionary *itemsForIdentifierURLs;
 }
 
 - (BibItem *)itemForCiteKey:(NSString *)key;
@@ -51,7 +52,7 @@
 - (void)changeCiteKey:(NSString *)oldKey toCiteKey:(NSString *)newKey forItem:(BibItem *)anItem;
 
 - (BOOL)citeKeyIsCrossreffed:(NSString *)key;
-
+- (id)itemForIdentifierURL:(NSURL *)aURL;
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
 
 @end

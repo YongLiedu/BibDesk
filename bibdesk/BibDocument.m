@@ -111,7 +111,6 @@
 #import "BDSKShellTask.h"
 #import "NSError_BDSKExtensions.h"
 #import "BDSKColoredBox.h"
-#import "BDSKSearchField.h"
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKDocumentController.h"
@@ -140,7 +139,6 @@ static NSString *BDSKSelectedPublicationsKey = @"BDSKSelectedPublicationsKey";
 static NSString *BDSKDocumentStringEncodingKey = @"BDSKDocumentStringEncodingKey";
 static NSString *BDSKDocumentScrollPercentageKey = @"BDSKDocumentScrollPercentageKey";
 static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
-static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
 
 @interface NSDocument (BDSKPrivateExtensions)
 // declare a private NSDocument method so we can override it
@@ -197,6 +195,10 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         docState.currentSaveOperationType = 0;
         
         [self registerForNotifications];
+        
+        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &BDSKSearchIndexDictionaryValueCallBacks);
+        [self resetSearchIndexes];
+        
     }
     return self;
 }
@@ -232,6 +234,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [sortGroupsKey release];
     [searchGroupViewController release];
     [webGroupViewController release];
+    CFRelease(searchIndexes);
     [super dealloc];
 }
 
@@ -275,7 +278,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         OBPOSTCONDITION(fileURL != nil);
         if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
             [self selectLibraryGroup:nil];
-            [searchField setSearchKey:BDSKAllFieldsString];
             [self setSearchString:searchString];
         }
     }
@@ -320,16 +322,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
-    NSString *searchKey = [xattrDefaults objectForKey:BDSKCurrentQuickSearchKey defaultObject:[pw objectForKey:BDSKCurrentQuickSearchKey]];
-    // @@ Changed from "All Fields" to localized "Any Field" in 1.2.2; prefs may still have the old key, so this is a temporary workaround for bug #1420837 as of 31 Jan 2006
-    if([searchKey isEqualToString:@"All Fields"])
-        searchKey = [BDSKAllFieldsString copy];
-    else if([searchKey isEqualToString:@"Added"] || [searchKey isEqualToString:@"Created"])
-        searchKey = BDSKDateAddedString;
-    else if([searchKey isEqualToString:@"Modified"])
-        searchKey = BDSKDateModifiedString;
-	[searchField setSearchKey:searchKey];
-    [searchField setRecentSearches:[xattrDefaults objectForKey:BDSKRecentSearchesKey defaultObject:[NSArray array]]];
     [self setupToolbar];
     
     // First remove the statusbar if we should, as it affects proper resizing of the window and splitViews
@@ -533,7 +525,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
             savedSortKey = sortKey;
         }
         
-        [dictionary setObject:[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] forKey:BDSKShownColsNamesKey];
+        [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
         [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
         [dictionary setObject:savedSortKey ? savedSortKey : BDSKTitleString forKey:BDSKDefaultSortedTableColumnKey];
         [dictionary setBoolValue:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
@@ -545,8 +537,6 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
         if (NO == [self hasWebGroupSelected])
             [dictionary setFloatValue:[splitView fraction] forKey:BDSKMainTableSplitViewFractionKey];
         [dictionary setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
-        [dictionary setObject:[searchField searchKey] forKey:BDSKCurrentQuickSearchKey];
-        [dictionary setObject:[searchField recentSearches] forKey:BDSKRecentSearchesKey];
         
         // if this isn't a save operation, the encoding in xattr is already correct, while our encoding might be different from the actual file encoding, if the user might ignored an encoding warning without saving
         if(isSave)
@@ -589,6 +579,8 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [publications setArray:newPubs];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+    
+    [self resetSearchIndexes];
 }    
 
 - (void)setPublications:(NSArray *)newPubs{
@@ -618,6 +610,8 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
 	
+    [self addPublicationsToSearchIndexes:pubs];
+
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
 														object:self
@@ -647,6 +641,7 @@ static NSString *BDSKRecentSearchesKey = @"BDSKRecentSearchesKey";
     
     [[groups lastImportGroup] removePublicationsInArray:pubs];
     [[groups staticGroups] makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
+    [self removePublicationsFromSearchIndexes:pubs];
     
 	[publications removeObjectsAtIndexes:indexes];
 	
@@ -2313,7 +2308,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         // this handles all UI updates if we call it, so don't bother with any others
         [self updateCategoryGroupsPreservingSelection:YES];
     } else if(![[searchField stringValue] isEqualToString:@""] && 
-       ([[searchField searchKey] isEqualToString:changedKey] || [[searchField searchKey] isEqualToString:BDSKAllFieldsString]) ){
+       ([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString] || [[searchButtonController selectedItemIdentifier] isEqualToString:changedKey]) ){
         // don't perform a search if the search field is empty
 		[self search:searchField];
 	} else { 
@@ -2375,6 +2370,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         if([NSString isEmptyString:oldKey])
             oldKey = nil;
     }
+    
+    // will overwrite previous values
+    [self addPublicationsToSearchIndexes:[NSArray arrayWithObject:pub]];
     
     // access type manager outside the enumerator, since it's @synchronized...
     BibTypeManager *typeManager = [BibTypeManager sharedManager];

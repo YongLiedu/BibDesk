@@ -66,7 +66,6 @@
 #import "BibField.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateParser.h"
-#import "BibDocument_Search.h"
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
 
@@ -182,6 +181,16 @@ const CFSetCallBacks BDSKBibItemEquivalenceCallBacks = {
     BibItemEquivalenceHash,
 };
 
+static NSURL *createUniqueURL(void)
+{
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    NSString *uuidStr = (id)CFUUIDCreateString(NULL, uuid);
+    NSURL *identifierURL = [[NSURL alloc] initWithString:[@"bdskidentifier://" stringByAppendingString:uuidStr]];
+    CFRelease(uuid);
+    [uuidStr release];
+    return identifierURL;
+}    
+
 /* Paragraph styles cached for efficiency. */
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
@@ -209,9 +218,6 @@ static CFDictionaryRef selectorTable = NULL;
     
     CFDictionaryAddValue(table, (CFStringRef)BDSKTitleString, NSSelectorFromString(@"title"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKAuthorString, NSSelectorFromString(@"bibTeXAuthorString"));
-    CFDictionaryAddValue(table, (CFStringRef)BDSKPubDateString, NSSelectorFromString(@"calendarDateDescription"));
-    CFDictionaryAddValue(table, (CFStringRef)BDSKDateModifiedString, NSSelectorFromString(@"calendarDateModifiedDescription"));
-    CFDictionaryAddValue(table, (CFStringRef)BDSKDateAddedString, NSSelectorFromString(@"calendarDateAddedDescription"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKAllFieldsString, NSSelectorFromString(@"allFieldsString"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKPubTypeString, NSSelectorFromString(@"pubType"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKCiteKeyString, NSSelectorFromString(@"citeKey"));
@@ -259,6 +265,7 @@ static CFDictionaryRef selectorTable = NULL;
         owner = nil;
         
         fileOrder = nil;
+        identifierURL = createUniqueURL();
         
         [self setFileType:inFileType];
         [self setPubTypeWithoutUndo:type];
@@ -359,6 +366,7 @@ static CFDictionaryRef selectorTable = NULL;
     [dateAdded release];
     [dateModified release];
     [fileOrder release];
+    [identifierURL release];
     [super dealloc];
 }
 
@@ -482,6 +490,9 @@ static CFDictionaryRef selectorTable = NULL;
             (unsigned int) self << (32 - 4));
 }
 
+- (void)setSearchScore:(float)val { searchScore = val; }
+- (float)searchScore { return searchScore; }
+
 #pragma mark -
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
@@ -534,6 +545,11 @@ static CFDictionaryRef selectorTable = NULL;
         [fileType release];
         fileType = [someFileType retain];
     }
+}
+
+// a per-session identifier that is used to track this item in SearchKit indexes
+- (NSURL *)identifierURL {
+    return identifierURL;
 }
 
 #pragma mark -
@@ -1260,6 +1276,8 @@ static CFDictionaryRef selectorTable = NULL;
 		return [self citeKey];
 	}else if([field isEqualToString:BDSKAllFieldsString]){
         return [self allFieldsString];
+    }else if([field isEqualToString:BDSKRelevanceString]){
+        return [NSString stringWithFormat:@"%f", [self searchScore]];
     }else{
 		return [self valueOfField:field inherit:inherit];
     }
@@ -1389,6 +1407,8 @@ static CFDictionaryRef selectorTable = NULL;
         return [self pubType];
     }else if([field isEqualToString:BDSKImportOrderString]){
         return nil;
+    }else if([field isEqualToString:BDSKRelevanceString]){
+        return [NSNumber numberWithFloat:[self searchScore]];
     }else{
         // the tableColumn isn't something we handle in a custom way.
         return [self valueOfField:field];
@@ -1396,19 +1416,6 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 #pragma mark Search support
-
-- (NSString *)calendarDateDescription{
-	return [[self date] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
-}
-
-// These accessors are wrappers used for searching.  Getting this right is tricky; the main tableview datasource uses NSShortDateFormatString, but the attributed preview uses NSDateFormatString.  Hence, we need to parse the date string on search input for comparison.
-- (NSString *)calendarDateModifiedDescription{
-    return [[self dateModified] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
-}
-
-- (NSString *)calendarDateAddedDescription{
-	return [[self dateAdded] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
-}
 
 static inline 
 Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, unsigned options, Boolean lossy)

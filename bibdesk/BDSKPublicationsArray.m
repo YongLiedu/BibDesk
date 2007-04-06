@@ -54,13 +54,15 @@
 
 @implementation BDSKPublicationsArray
 
-#pragma mark Init, dealloc and copy overrides
+#pragma mark Init, dealloc overrides
 
 - (id)init;
 {
     if (self = [super init]) {
-        publications = [[NSMutableArray alloc] init];
-        itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        NSZone *zone = [self zone];
+        publications = [[NSMutableArray allocWithZone:zone] init];
+        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
     }
     return self;
 }
@@ -69,8 +71,10 @@
 - (id)initWithObjects:(id *)objects count:(unsigned)count;
 {
     if (self = [super init]) {
-        publications = [[NSMutableArray alloc] initWithObjects:objects count:count];
-        itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        NSZone *zone = [self zone];
+        publications = [[NSMutableArray allocWithZone:zone] initWithObjects:objects count:count];
+        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] init];
         [self performSelector:@selector(addToItemsForCiteKeys:) withObjectsFromArray:publications];
         [self updateFileOrder];
     }
@@ -80,8 +84,10 @@
 - (id)initWithCapacity:(unsigned)numItems;
 {
     if (self = [super init]) {
-        publications = [[NSMutableArray alloc] initWithCapacity:numItems];
-        itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        NSZone *zone = [self zone];
+        publications = [[NSMutableArray allocWithZone:zone] initWithCapacity:numItems];
+        itemsForCiteKeys = [[OFMultiValueDictionary allocWithZone:zone] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
+        itemsForIdentifierURLs = [[NSMutableDictionary allocWithZone:zone] initWithCapacity:numItems];
     }
     return self;
 }
@@ -89,6 +95,7 @@
 - (void)dealloc{
     [publications release];
     [itemsForCiteKeys release];
+    [itemsForIdentifierURLs release];
     [super dealloc];
 }
 
@@ -153,6 +160,7 @@
 - (void)removeAllObjects{
     [itemsForCiteKeys removeAllObjects];
     [publications removeAllObjects];
+    [itemsForIdentifierURLs removeAllObjects];
 }
 
 - (void)addObjectsFromArray:(NSArray *)otherArray{
@@ -236,6 +244,11 @@
 	return NO;
 }
 
+- (id)itemForIdentifierURL:(NSURL *)aURL;
+{
+    return [itemsForIdentifierURLs objectForKey:aURL];   
+}
+
 #pragma mark Authors support
 
 - (NSArray *)itemsForAuthor:(BibAuthor *)anAuthor;
@@ -264,10 +277,12 @@
 - (void)addToItemsForCiteKeys:(BibItem *)item;
 {
     [itemsForCiteKeys addObject:item forKey:[item citeKey]];
+    [itemsForIdentifierURLs setObject:item forKey:[item identifierURL]];
 }
 
 - (void)removeFromItemsForCiteKeys:(BibItem *)item{
     [itemsForCiteKeys removeObject:item forKey:[item citeKey]];
+    [itemsForIdentifierURLs removeObjectForKey:[item identifierURL]];
 }
 
 - (void)updateFileOrder{

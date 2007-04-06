@@ -51,9 +51,6 @@ while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtN
 
 @interface OAPreferenceController (HelpLookup)
 
-// this category can be used to load localized strings for global access, since everything imports this header
-extern NSString *BDSKAllFieldsString;
-
 @end
 
 
@@ -305,3 +302,8 @@ extern const char *BDSKParserError;
 extern const char *BDSKNetworkError;
 
 extern NSString *BDSKParserPasteDragString;
+
+extern NSString *BDSKAllFieldsString;
+extern NSString *BDSKFileContentSearchString;
+extern NSString *BDSKRelevanceString;
+extern NSString *BDSKPersonString;

@@ -38,11 +38,15 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-extern NSString *BDSKDocumentFormatForSearchingDates;
+extern const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks;
 
 @protocol OAFindControllerTarget;
 
 @interface BibDocument (Search)
+
+- (void)resetSearchIndexes;
+- (void)removePublicationsFromSearchIndexes:(NSArray *)pubs;
+- (void)addPublicationsToSearchIndexes:(NSArray *)pubs;
 
 - (NSString *)searchString;
 
@@ -62,7 +66,9 @@ extern NSString *BDSKDocumentFormatForSearchingDates;
      @discussion This manipulates the shownPublications array.
      */
 
-- (void)filterPublicationsUsingSearchString:(NSString *)searchString inField:(NSString *)field;
+- (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field;
+
+- (void)filterPublicationsUsingSearchString:(NSString *)searchString indexName:(NSString *)field;
     /*!
    @method     publicationsMatchingSearchString:inField:fromArray:
      @abstract   Returns an array of publications matching the search term in the given field and array of BibItems.
@@ -74,7 +80,7 @@ extern NSString *BDSKDocumentFormatForSearchingDates;
      @param      arrayToSearch The array of BibItems to search in, typically the documents publications ivar.
      @result     Returns an array of BibItems which matched the given search terms.
      */
-- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString inField:(NSString *)field fromArray:(NSArray *)arrayToSearch;
+- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field fromArray:(NSArray *)arrayToSearch;
 
 #pragma mark Content search
 

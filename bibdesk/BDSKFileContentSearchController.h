@@ -71,7 +71,7 @@
 - (void)restoreDocumentStateByRemovingSearchView:(NSView *)view;
 @end
 
-@class BDSKSearch, BDSKSearchField;
+@class BDSKSearch;
 
 @interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate>
 {
@@ -89,7 +89,7 @@
     IBOutlet BDSKEdgeView *topBarView;
 	NSView *searchContentView;
     BOOL searchFieldDidEndEditing;
-    BDSKSearchField *searchField;
+    NSSearchField *searchField;
 }
 
 // Use this method to instantiate a search controller for use within a document window
@@ -99,7 +99,7 @@
 // This method returns the titles of all selected items (the text content of the rows)
 - (NSArray *)titlesOfSelectedItems;
 // Use this to connect a search field and initiate a search
-- (void)setSearchField:(BDSKSearchField *)aSearchField;
+- (void)setSearchField:(NSSearchField *)aSearchField;
 
 - (void)setResults:(NSArray *)newResults;
 

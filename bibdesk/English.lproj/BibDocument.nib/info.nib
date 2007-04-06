@@ -7,15 +7,15 @@
 	<key>IBEditorPositions</key>
 	<dict>
 		<key>433</key>
-		<string>786 107 264 370 0 0 1440 938 </string>
+		<string>893 152 264 370 0 0 1600 1178 </string>
 		<key>661</key>
-		<string>532 585 376 112 0 0 1440 938 </string>
+		<string>612 747 376 112 0 0 1600 1178 </string>
 		<key>702</key>
-		<string>552 587 336 108 0 0 1440 938 </string>
+		<string>632 749 336 108 0 0 1600 1178 </string>
 		<key>819</key>
-		<string>24 466 281 325 0 0 1440 938 </string>
+		<string>27 648 281 325 0 0 1600 1178 </string>
 		<key>923</key>
-		<string>532 570 376 142 0 0 1440 938 </string>
+		<string>612 732 376 142 0 0 1600 1178 </string>
 	</dict>
 	<key>IBFramework Version</key>
 	<string>446.1</string>

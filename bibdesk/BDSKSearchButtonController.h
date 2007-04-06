@@ -1,8 +1,8 @@
 //
-//  BDSKFileMatcher.h
+//  BDSKSearchButtonController.h
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 02/09/07.
+//  Created by Adam Maxwell on 04/04/07.
 /*
  This software is Copyright (c) 2007
  Adam Maxwell. All rights reserved.
@@ -37,29 +37,19 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "AMButtonBar.h"
 
-@interface BDSKFileMatcher : NSWindowController
-{
-    IBOutlet NSOutlineView *outlineView;
-    IBOutlet NSProgressIndicator *progressIndicator;
-    IBOutlet NSTextField *statusField;
-    IBOutlet NSButton *abortButton;
-    IBOutlet NSButton *configureButton;
-    
-    NSMutableArray *matches;
-    SKIndexRef searchIndex;
-    NSLock *indexingLock;
-    NSArray *currentPublications;
-    struct __matchFlags {
-        int32_t shouldAbortThread;
-    } _matchFlags;
-    
+@class BDSKGradientView;
+
+@interface BDSKSearchButtonController : NSWindowController {
+    IBOutlet AMButtonBar *buttonBar;
+    IBOutlet BDSKGradientView *gradientView;
 }
 
-+ (id)sharedInstance;
-- (void)matchFiles:(NSArray *)absoluteURLs withPublications:(NSArray *)pubs;
-- (IBAction)openAction:(id)sender;
-- (IBAction)abort:(id)sender;
-- (IBAction)configure:(id)sender;
+- (id)view;
+- (void)setDelegate:(id)obj;
+- (id)delegate;
+- (void)selectItemWithIdentifier:(NSString *)ident;
+- (NSString *)selectedItemIdentifier;
 
 @end
