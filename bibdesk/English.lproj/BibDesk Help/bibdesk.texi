@@ -2866,6 +2866,13 @@ get all of the necessary information from its parent reference.
 Since this alters your bibliography, the features is off by default, even though existing
 entries won't be overwritten.
 
+Similarly, a hidden preference exists to write certain fields as an empty string, and is specified
+in the Terminal (excluding outer double quotes) as 
+``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKFieldsToWriteIfEmpty '(Key)'}'',
+where the value in parentheses can be a comma separated, capitalized list of field names.  These
+must also be default fields in the Defaults preference pane.  This can be used to prevent an item
+from inheriting its parent value.
+
 @prefitem{Overwrite the Booktitle} Always overwrite the @samp{Booktitle} field when duplicating 
 the Title field, even if it is not empty.
 
