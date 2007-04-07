@@ -38,6 +38,8 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
+extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
+
 @protocol OAFindControllerTarget;
 
 @interface BibDocument (Search)

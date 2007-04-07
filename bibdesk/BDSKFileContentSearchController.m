@@ -46,6 +46,7 @@
 #import "NSAttributedString_BDSKExtensions.h"
 #import "BDSKSearch.h"
 #import "BDSKLevelIndicatorCell.h"
+#import "BibDocument_Search.h"
 
 // Overrides attributedStringValue since we return an attributed string; normally, the cell uses the font of the attributed string, rather than the table's font, so font changes are ignored.  This means that italics and bold in titles will be lost until the search string changes again, but that's not a great loss.
 @interface BDSKFileContentTextWithIconCell : BDSKTextWithIconCell
@@ -242,7 +243,7 @@
             [indexProgressBar setHidden:NO];
         }
         
-        [search searchForString:[searchField stringValue] withOptions:kSKSearchOptionDefault];
+        [search searchForString:BDSKSearchKitExpressionWithString([searchField stringValue])  withOptions:kSKSearchOptionDefault];
     }
 }
 

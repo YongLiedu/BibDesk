@@ -153,11 +153,6 @@ static void createTemporaryDirectory()
         prefsShownColNamesArray = fixLegacyTableColumnIdentifiers(prefsShownColNamesArray);
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesArray forKey:BDSKShownColsNamesKey];
     }
-    NSArray *searchKeys = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKQuickSearchKeys];
-    if(searchKeys){
-        searchKeys = fixLegacyTableColumnIdentifiers(searchKeys);
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys forKey:BDSKQuickSearchKeys];
-    }
     
     // @@ legacy pref key removed prior to release of 1.3.1 (stored path instead of alias)
     NSString *filePath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"Default Bib File"];

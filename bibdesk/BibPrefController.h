@@ -118,6 +118,7 @@ extern NSString *BDSKShouldUsePDFMetadata;
 extern NSString *BDSKShouldWritePDFMetadata;
 extern NSString *BDSKIntersectGroupsKey;
 extern NSString *BDSKSearchGroupBookmarksKey;
+extern NSString *BDSKSearchMenuTagKey;
 
 extern NSString *BDSKCiteKeyFormatKey;
 extern NSString *BDSKCiteKeyFormatPresetKey;
@@ -144,9 +145,6 @@ extern NSString *BDSKShowWarningsKey;
 extern NSString *BDSKWarnOnDeleteKey;
 extern NSString *BDSKWarnOnRenameGroupKey;
 extern NSString *BDSKWarnOnRemovalFromGroupKey;
-
-extern NSString *BDSKCurrentQuickSearchKey;
-extern NSString *BDSKQuickSearchKeys;
 
 extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;

@@ -63,6 +63,11 @@
 
 @implementation BibDocument (Search)
 
+- (IBAction)changeSearchType:(id)sender{
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
+    [self search:searchField];
+}
+
 - (IBAction)makeSearchFieldKey:(id)sender{
 
     NSToolbar *tb = [documentWindow toolbar];
@@ -227,9 +232,20 @@
     return results;
 }
 
+
+NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
+{
+    // surround with wildcards for substring search; should we check for any operators?
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == 0)
+        searchFieldString = [NSString stringWithFormat:@"*%@*", searchFieldString];
+    return searchFieldString;
+}
+
 #define SEARCH_BUFFER_MAX 100
         
 - (NSArray *)publicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field fromArray:(NSArray *)arrayToSearch{
+    
+    searchString = BDSKSearchKitExpressionWithString(searchString);
     
     NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:[arrayToSearch count]];
     

@@ -82,6 +82,7 @@ NSString *BDSKShouldUsePDFMetadata = @"BDSKShouldUsePDFMetadata";
 NSString *BDSKShouldWritePDFMetadata = @"BDSKShouldWritePDFMetadata";
 NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
 NSString *BDSKSearchGroupBookmarksKey = @"BDSKSearchGroupBookmarksKey";
+NSString *BDSKSearchMenuTagKey = @"BDSKSearchMenuTagKey";
 
 NSString *BDSKStringEncodingsKey = @"BDSKStringEncodingsKey";
 NSString *BDSKDefaultStringEncodingKey = @"Default string encoding for opening and saving";
@@ -156,9 +157,6 @@ NSString *BDSKShowWarningsKey = @"Show Warnings in Error Panel";
 NSString *BDSKWarnOnDeleteKey = @"BDSKWarnOnDelete";
 NSString *BDSKWarnOnRenameGroupKey = @"BDSKWarnOnRenameGroup";
 NSString *BDSKWarnOnRemovalFromGroupKey = @"BDSKWarnOnRemovalFromGroupKey";
-
-NSString *BDSKCurrentQuickSearchKey = @"Current Quick Search Key";
-NSString *BDSKQuickSearchKeys = @"Quick Search Keys";
 
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";

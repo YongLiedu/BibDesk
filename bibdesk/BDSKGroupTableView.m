@@ -81,9 +81,9 @@
 	[self setHeaderView:customTableHeaderView];	
     [customTableHeaderView release];
     
-    BDSKGroupCellFormatter *fomatter = [[BDSKGroupCellFormatter alloc] init];
-    [[column dataCell] setFormatter:fomatter];
-    [fomatter release];
+    BDSKGroupCellFormatter *formatter = [[BDSKGroupCellFormatter alloc] init];
+    [[column dataCell] setFormatter:formatter];
+    [formatter release];
     
     [super awakeFromNib]; // this updates the font
     
@@ -400,7 +400,7 @@
 // this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
 - (NSString *)stringForObjectValue:(id)obj{
     OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    return [[obj name] description];
+    return [obj respondsToSelector:@selector(name)] ? [[obj name] description] : [obj description];
 }
 
 - (NSString *)editingStringForObjectValue:(id)obj{

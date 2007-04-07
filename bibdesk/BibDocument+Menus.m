@@ -907,6 +907,14 @@
            [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey];
 }
 
+- (BOOL)validateChangeSearchTypeMenuItem:(NSMenuItem *)menuItem {
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == [menuItem tag])
+        [menuItem setState:NSOnState];
+    else
+        [menuItem setState:NSOffState];
+    return YES;
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
@@ -1086,6 +1094,9 @@
     }
     else if (act == @selector(refreshSelectedGroups:)){
         return [self validateRefreshSelectedGroupsMenuItem:menuItem];
+    }
+    else if (act == @selector(changeSearchType:)){
+        return [self validateChangeSearchTypeMenuItem:menuItem];
     }
     else {
 		return [super validateMenuItem:menuItem];

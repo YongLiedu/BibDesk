@@ -20,13 +20,18 @@
             SUPERCLASS = NSPopUpButton; 
         }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {CLASS = BDSKGroupCell; LANGUAGE = ObjC; SUPERCLASS = OATextWithIconCell; }, 
+        {CLASS = BDSKGroupCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             CLASS = BDSKGroupTableView; 
             LANGUAGE = ObjC; 
             SUPERCLASS = OAGradientTableView; 
         }, 
-        {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
+        {
+            CLASS = BDSKImagePopUpButton; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; }; 
+            SUPERCLASS = NSPopUpButton; 
+        }, 
         {CLASS = BDSKMainTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
             CLASS = BDSKPopUpButtonCell; 
@@ -36,7 +41,13 @@
         {CLASS = BDSKPreviewTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {CLASS = BDSKSearchField; LANGUAGE = ObjC; SUPERCLASS = NSSearchField; }, 
         {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
-        {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
+        {
+            ACTIONS = {startAnimation = id; stopAnimation = id; }; 
+            CLASS = BDSKStatusBar; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; textCell = id; }; 
+            SUPERCLASS = BDSKGradientView; 
+        }, 
         {
             ACTIONS = {
                 addGroupButtonAction = id; 
@@ -54,38 +65,20 @@
                 changeIntersectGroupsAction = id; 
                 changeMainTableFont = id; 
                 changePreviewDisplay = id; 
-                changeSearchGroupSearchTerm = id; 
-                clearQuickSearch = id; 
                 consolidateLinkedFiles = id; 
-                copy = id; 
                 copyAsAction = id; 
                 createNewPubUsingCrossrefAction = id; 
-                cut = id; 
                 deleteSelectedPubs = id; 
                 deselectAllPublications = id; 
                 dismissSearchBookmarkSheet = id; 
+                duplicate = id; 
                 duplicateTitleToBooktitle = id; 
                 editAction = id; 
                 editGroupAction = id; 
                 editNewGroupWithSelection = id; 
                 editPubCmd = id; 
+                editPubOrOpenURLAction = id; 
                 emailPubCmd = id; 
-                exportAsAction = id; 
-                exportAsAtom = id; 
-                exportAsEncodedBib = id; 
-                exportAsEncodedPublicBib = id; 
-                exportAsHTML = id; 
-                exportAsMODS = id; 
-                exportAsRIS = id; 
-                exportAsRSS = id; 
-                exportSelectionAsAction = id; 
-                exportSelectionAsAtom = id; 
-                exportSelectionAsEncodedBib = id; 
-                exportSelectionAsEncodedPublicBib = id; 
-                exportSelectionAsHTML = id; 
-                exportSelectionAsMODS = id; 
-                exportSelectionAsRIS = id; 
-                exportSelectionAsRSS = id; 
                 generateCiteKey = id; 
                 importFromFileAction = id; 
                 importFromPasteboardAction = id; 
@@ -94,16 +87,16 @@
                 mergeInExternalGroup = id; 
                 mergeInExternalPublications = id; 
                 newPub = id; 
-                nextSearchGroupSearch = id; 
+                newSearchGroupFromBookmark = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 
                 pageDownInPreview = id; 
                 pageUpInPreview = id; 
-                paste = id; 
+                performFindPanelAction = id; 
                 postItemToWeblog = id; 
-                quickSearchAddField = id; 
-                quickSearchRemoveField = id; 
+                refreshAllExternalGroups = id; 
                 refreshScriptGroups = id; 
+                refreshSearchGroups = id; 
                 refreshSelectedGroups = id; 
                 refreshSharedBrowsing = id; 
                 refreshSharing = id; 
@@ -115,19 +108,19 @@
                 revealLinkedFile = id; 
                 search = id; 
                 searchByContent = id; 
-                searchFieldChangeKey = id; 
                 selectAllPublications = id; 
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
+                selectIncompletePublications = id; 
                 selectLibraryGroup = id; 
                 selectPossibleDuplicates = id; 
                 sendToLyX = id; 
                 showDocumentInfoWindow = id; 
                 showMacrosWindow = id; 
+                showNotesForLinkedFile = id; 
                 sortForCrossrefs = id; 
                 sortGroupsByCount = id; 
                 sortGroupsByGroup = id; 
-                splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
                 toggleStatusBar = id; 
             }; 
@@ -162,7 +155,12 @@
             SUPERCLASS = NSDocument; 
         }, 
         {
-            ACTIONS = {"" = id; clearQuickSearch = id; selectCrossrefParentAction = id; }; 
+            ACTIONS = {
+                "" = id; 
+                changeSearchType = id; 
+                clearQuickSearch = id; 
+                selectCrossrefParentAction = id; 
+            }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 

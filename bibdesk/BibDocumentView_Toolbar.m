@@ -152,7 +152,6 @@ static NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolb
     [item setDelegate:self];
     [item setLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
     [item setPaletteLabel:NSLocalizedString(@"Search", @"Toolbar item label")];
-    [item setToolTip:NSLocalizedString(@"Search using boolean '+' and '|', see Help for details", @"Tool tip message")];
     [item setTarget:self];
     [item setView:searchField];
     [item setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
