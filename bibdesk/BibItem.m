@@ -70,6 +70,7 @@
 #import "NSData_BDSKExtensions.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
+static NSSet *fieldsToWriteIfEmpty = nil;
 
 enum {
     BDSKStringFieldCollection, 
@@ -229,6 +230,10 @@ static CFDictionaryRef selectorTable = NULL;
     CFDictionaryAddValue(table, CFSTR("Pub Type"), NSSelectorFromString(@"pubType"));
     selectorTable = CFDictionaryCreateCopy(CFAllocatorGetDefault(), table);
     CFRelease(table);
+    
+    NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKFieldsToWriteIfEmpty"];
+    if ([emptyFields count])
+        fieldsToWriteIfEmpty = [[NSSet alloc] initWithArray:emptyFields];
 }
 
 // for creating an empty item
@@ -1636,7 +1641,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             value = [value stringByTeXifyingString];
         }                
         
-        if(![value isEqualToString:@""]){
+        if(![value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
             [s appendString:@",\n\t"];
             [s appendString:field];
             [s appendString:@" = "];
@@ -1661,6 +1666,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	NSEnumerator *e;
     NSError *error= nil;
     BOOL isOK = YES;
+    
     
     BibTypeManager *btm = [BibTypeManager sharedManager];
     NSString *type = [self pubType];
@@ -1697,12 +1703,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     NSSet *personFields = [btm personFieldsSet];
     
+    NSData *lineSeparator = [@",\n\t" dataUsingEncoding:encoding];
+    NSData *fieldValueSeparator = [@" = " dataUsingEncoding:encoding];
+    
     while(isOK && (field = [e nextObject])){
         if (drop && ![knownKeys containsObject:field])
             continue;
         
         value = [pubFields objectForKey:field];
-        NSString *valString;
         
         if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
             value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
@@ -1711,14 +1719,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if(shouldTeXify && ![urlKeys containsObject:field]){
             value = [value stringByTeXifyingString];
         }                
-        
-        valString = [value stringAsBibTeXString];
-        
-        if(NO == [value isEqualToString:@""]){
-            isOK = [data appendDataFromString:@",\n\t" encoding:encoding error:&error] &&
-                   [data appendDataFromString:field encoding:encoding error:&error] &&
-                   [data appendDataFromString:@" = " encoding:encoding error:&error] &&
-                   [data appendDataFromString:valString encoding:encoding error:&error];
+                
+        if(NO == [value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
+            
+            [data appendData:lineSeparator];
+            isOK = [data appendDataFromString:field encoding:encoding error:&error];
+            [data appendData:fieldValueSeparator];
+            
+            if(isOK)
+                isOK = [data appendDataFromString:[value stringAsBibTeXString] encoding:encoding error:&error];
+            
             if(isOK == NO) {
                 error = [[error mutableCopy] autorelease];
                 [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert field \"%@\" of item with cite key \"%@\".", @"string encoding error context"), [field localizedFieldName], [self citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
