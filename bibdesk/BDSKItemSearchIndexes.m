@@ -74,6 +74,9 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
     self = [super init];
     if (self) {
         searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &BDSKSearchIndexDictionaryValueCallBacks);
+        
+        // ensure that we never hand out a NULL search index unless someone asks for a field that isn't indexed
+        [self resetWithPublications:nil];
     }
     return self;
 }

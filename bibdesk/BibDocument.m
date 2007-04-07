@@ -197,9 +197,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         
         [self registerForNotifications];
         
-        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
-        [searchIndexes resetWithPublications:nil];
-        
+        searchIndexes = [[BDSKItemSearchIndexes alloc] init];        
     }
     return self;
 }
