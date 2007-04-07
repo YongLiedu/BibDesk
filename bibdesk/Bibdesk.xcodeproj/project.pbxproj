@@ -1542,18 +1542,18 @@
 		F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDate_BDSKExtensions.m; sourceTree = "<group>"; };
 		F92405000BC5856900672839 /* BDSKLevelIndicatorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLevelIndicatorCell.h; sourceTree = "<group>"; };
 		F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLevelIndicatorCell.m; sourceTree = "<group>"; };
-		F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBar.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBar.h; sourceTree = "<absolute>"; };
-		F924FBF00BC3FFFC00672839 /* AMButtonBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBar.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBar.m; sourceTree = "<absolute>"; };
-		F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarCell.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarCell.h; sourceTree = "<absolute>"; };
-		F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarCell.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarCell.m; sourceTree = "<absolute>"; };
-		F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarItem.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarItem.h; sourceTree = "<absolute>"; };
-		F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarItem.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/AMButtonBarItem.m; sourceTree = "<absolute>"; };
-		F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBezierPath_AMAdditons.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.h; sourceTree = "<absolute>"; };
-		F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBezierPath_AMAdditons.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.m; sourceTree = "<absolute>"; };
-		F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSColor_AMAdditions.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSColor_AMAdditions.h; sourceTree = "<absolute>"; };
-		F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSColor_AMAdditions.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSColor_AMAdditions.m; sourceTree = "<absolute>"; };
-		F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSShadow_AMAdditions.h; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.h; sourceTree = "<absolute>"; };
-		F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSShadow_AMAdditions.m; path = /Volumes/Local/amaxwell/build/bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.m; sourceTree = "<absolute>"; };
+		F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AMButtonBar.h; path = /Users/hofman/Documents/Bibdesk/trunk/bibdesk_vendorsrc/harmless/AMButtonBar.h; sourceTree = "<absolute>"; };
+		F924FBF00BC3FFFC00672839 /* AMButtonBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBar.m; path = ../bibdesk_vendorsrc/harmless/AMButtonBar.m; sourceTree = SOURCE_ROOT; };
+		F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarCell.h; path = ../bibdesk_vendorsrc/harmless/AMButtonBarCell.h; sourceTree = SOURCE_ROOT; };
+		F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarCell.m; path = ../bibdesk_vendorsrc/harmless/AMButtonBarCell.m; sourceTree = SOURCE_ROOT; };
+		F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarItem.h; path = ../bibdesk_vendorsrc/harmless/AMButtonBarItem.h; sourceTree = SOURCE_ROOT; };
+		F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarItem.m; path = ../bibdesk_vendorsrc/harmless/AMButtonBarItem.m; sourceTree = SOURCE_ROOT; };
+		F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBezierPath_AMAdditons.h; path = ../bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.h; sourceTree = SOURCE_ROOT; };
+		F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBezierPath_AMAdditons.m; path = ../bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.m; sourceTree = SOURCE_ROOT; };
+		F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSColor_AMAdditions.h; path = ../bibdesk_vendorsrc/harmless/NSColor_AMAdditions.h; sourceTree = SOURCE_ROOT; };
+		F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSColor_AMAdditions.m; path = ../bibdesk_vendorsrc/harmless/NSColor_AMAdditions.m; sourceTree = SOURCE_ROOT; };
+		F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSShadow_AMAdditions.h; path = ../bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.h; sourceTree = SOURCE_ROOT; };
+		F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSShadow_AMAdditions.m; path = ../bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.m; sourceTree = SOURCE_ROOT; };
 		F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchButtonController.h; sourceTree = "<group>"; };
 		F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchButtonController.m; sourceTree = "<group>"; };
 		F924FC3A0BC4339600672839 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchButtonView.nib; sourceTree = "<group>"; };
@@ -3130,7 +3130,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -3169,7 +3168,6 @@
 				},
 			);
 			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8D1107260486CEB800E47090 /* BibDesk */,
 				3D8A5779082D3077008E818C /* BibDesk Help */,
