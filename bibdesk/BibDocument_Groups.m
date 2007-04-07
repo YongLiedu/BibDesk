@@ -232,6 +232,13 @@ The groupedPublications array is a subset of the publications array, developed b
             [documentWindow makeFirstResponder:tableView];
         [webGroupView removeFromSuperview];
         [webView removeFromSuperview];
+        NSRect splitViewFrame = [splitView frame];
+        
+        // resize based on the height of the view we remove, since the search button view may be present
+        splitViewFrame.size.height += NSHeight([webView frame]);
+        if ([[splitView superview] isFlipped])
+            splitViewFrame.origin.y -= NSHeight([webView frame]);
+
         [splitView setFrame:[mainBox bounds]];
         [mainBox setNeedsDisplay:YES];
     }
