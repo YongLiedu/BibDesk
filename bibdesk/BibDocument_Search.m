@@ -55,119 +55,13 @@
 #import "BDSKFindController.h"
 #import <OmniAppKit/OAFindControllerTargetProtocol.h>
 #import <OmniAppKit/NSText-OAExtensions.h>
-#import "NSSet_BDSKExtensions.h"
 #import "BDSKSearchButtonController.h"
-#import "BibAuthor.h"
-
-NSString *BDSKDocumentFormatForSearchingDates = nil;
-
-static CFTypeRef searchIndexDictionaryRetain(CFAllocatorRef alloc, const void *value) { return CFRetain(value); }
-static void searchIndexDictionaryRelease(CFAllocatorRef alloc, const void *value) { SKIndexClose((SKIndexRef)value); }
-static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
-{
-    CFStringRef cfDesc = CFCopyDescription(value);
-    CFStringRef desc = (CFStringRef)[[NSString alloc] initWithFormat:@"%@: type %d, %d documents", cfDesc, SKIndexGetIndexType((SKIndexRef)value), SKIndexGetDocumentCount((SKIndexRef)value)];
-    CFRelease(cfDesc);
-    return desc;
-}
-static Boolean searchIndexDictionaryEqual(const void *value1, const void *value2) { return CFEqual(value1, value2); }
-
-const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
-    0,
-    searchIndexDictionaryRetain,
-    searchIndexDictionaryRelease,
-    searchIndexDictionaryCopyDescription,
-    searchIndexDictionaryEqual
-};
+#import "BDSKItemSearchIndexes.h"
+#import "NSArray_BDSKExtensions.h"
+#import "BDSKGroup.h"
+#import "BDSKSharedGroup.h"
 
 @implementation BibDocument (Search)
-
-static void flushAllIndexes(const void *key, const void *value, void *context)
-{
-    SKIndexFlush((SKIndexRef)value);
-}
-
-static void appendNormalizedNames(const void *value, void *context)
-{
-    BibAuthor *person = (BibAuthor *)value;
-    NSMutableString *names = (NSMutableString *)context;
-    if ([names isEqualToString:@""] == NO)
-        [names appendString:@" "];
-    [names appendString:[person normalizedName]];
-}
-
-- (void)addPublicationsToSearchIndexes:(NSArray *)pubs{
-    
-    NSEnumerator *pubsEnum = [pubs objectEnumerator];
-    BibItem *pub;
-    NSMutableString *names = [[NSMutableString alloc] initWithCapacity:100];
-
-    while (pub = [pubsEnum nextObject]) {
-        SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
-        if (doc) {
-            NSString *searchText = [pub allFieldsString];
-            SKIndexRef skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKAllFieldsString);
-            if (searchText && skIndex)
-                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
-            
-            searchText = [pub title];
-            skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKTitleString);
-            if (searchText && skIndex)
-                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
-            
-            [names replaceCharactersInRange:NSMakeRange(0, [names length]) withString:@""];
-            CFSetApplyFunction((CFSetRef)[pub allPeople], appendNormalizedNames, names);
-            skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKPersonString);
-            if (skIndex)
-                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
-            
-            CFRelease(doc);
-        }
-        
-    }
-    
-    [names release];
-    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);
-}
-
-static void removeFromIndex(const void *key, const void *value, void *context)
-{
-    SKDocumentRef doc = (SKDocumentRef)context;
-    SKIndexRemoveDocument((SKIndexRef)value, doc);
-}
-
-- (void)removePublicationsFromSearchIndexes:(NSArray *)pubs{
-    NSEnumerator *pubsEnum = [pubs objectEnumerator];
-    BibItem *pub;
-    while (pub = [pubsEnum nextObject]) {
-        SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
-        if (doc) {
-            CFDictionaryApplyFunction(searchIndexes, removeFromIndex, doc);
-            CFRelease(doc);
-        }
-    }
-    CFDictionaryApplyFunction(searchIndexes, flushAllIndexes, NULL);
-}
-
-- (void)resetSearchIndexes{
-    
-    CFDictionaryRemoveAllValues(searchIndexes);
-    
-    CFMutableDataRef indexData;
-    SKIndexRef skIndex;
-    NSEnumerator *fieldEnum = [[NSSet setWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, nil] objectEnumerator];
-    NSString *fieldName;
-    while (fieldName = [fieldEnum nextObject]) {
-        indexData = CFDataCreateMutable(NULL, 0);
-        skIndex = SKIndexCreateWithMutableData(indexData, (CFStringRef)fieldName, kSKIndexInverted, NULL);
-        CFDictionaryAddValue(searchIndexes, (CFStringRef)fieldName, skIndex);
-        CFRelease(indexData);
-        CFRelease(skIndex);
-    }
-    
-    // this will handle the index flush after adding all the pubs
-    [self addPublicationsToSearchIndexes:[self publications]];
-}
 
 - (IBAction)makeSearchFieldKey:(id)sender{
 
@@ -265,7 +159,11 @@ static void removeFromIndex(const void *key, const void *value, void *context)
         else
             stopRect.origin.y += NSHeight([searchButtonView frame]);
         
-        NSDictionary *splitViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, [NSValue valueWithRect:[mainBox bounds]], NSViewAnimationEndFrameKey, nil];
+        // may have a search group view in place
+        NSRect finalSplitViewRect = [splitView frame];
+        finalSplitViewRect.size.height += NSHeight([searchButtonView frame]);
+        
+        NSDictionary *splitViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, [NSValue valueWithRect:finalSplitViewRect], NSViewAnimationEndFrameKey, nil];
         NSDictionary *searchViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:searchButtonView, NSViewAnimationTargetKey, [NSValue valueWithRect:stopRect], NSViewAnimationEndFrameKey, NSViewAnimationEffectKey, NSViewAnimationFadeOutEffect, nil];
         
         animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:splitViewInfo, searchViewInfo, nil]] autorelease];
@@ -335,7 +233,19 @@ static void removeFromIndex(const void *key, const void *value, void *context)
     
     NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:[arrayToSearch count]];
     
-    SKIndexRef skIndex = (void *)CFDictionaryGetValue(searchIndexes, (void *)field);
+    // we need the correct BDSKPublicationsArray for access to the identifierURLs
+    SKIndexRef skIndex = NULL;
+    BDSKPublicationsArray *pubArray = nil;
+
+    if ([self hasExternalGroupsSelected]) {
+        BDSKGroup *group = [[self selectedGroups] firstObject];
+        skIndex = [group searchIndexForField:field];
+        pubArray = [(BDSKSharedGroup *)group publications];
+    } else {
+        skIndex = [searchIndexes indexForField:field];
+        pubArray = [self publications];
+    }
+    
     NSAssert1(NULL != skIndex, @"No index for field %@", field);
     
     // note that the add/remove methods flush the index, so we don't have to do it again
@@ -360,7 +270,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
             
             for (i = 0; i < foundCount; i++) {
                 [foundURLSet addObject:(id)documentURLs[i]];
-                aPub = [publications itemForIdentifierURL:(NSURL *)documentURLs[i]];
+                aPub = [pubArray itemForIdentifierURL:(NSURL *)documentURLs[i]];
                 CFRelease(documentURLs[i]);
                 [aPub setSearchScore:scores[i]];
                 maxScore = MAX(maxScore, scores[i]);
@@ -381,7 +291,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
 
     // iterate and normalize search scores
     while (aURL = [keyEnum nextObject]) {
-        aPub = [publications itemForIdentifierURL:aURL];
+        aPub = [pubArray itemForIdentifierURL:aURL];
         if (aPub) {
             [toReturn addObject:aPub];
             float score = [aPub searchScore];

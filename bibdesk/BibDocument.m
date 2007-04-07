@@ -116,6 +116,7 @@
 #import "BDSKDocumentController.h"
 #import "BibFiler.h"
 #import "BibItem_PubMedLookup.h"
+#import "BDSKItemSearchIndexes.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -196,8 +197,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         
         [self registerForNotifications];
         
-        searchIndexes = CFDictionaryCreateMutable(NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &BDSKSearchIndexDictionaryValueCallBacks);
-        [self resetSearchIndexes];
+        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
+        [searchIndexes resetWithPublications:nil];
         
     }
     return self;
@@ -234,7 +235,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [sortGroupsKey release];
     [searchGroupViewController release];
     [webGroupViewController release];
-    CFRelease(searchIndexes);
+    [searchIndexes release];
     [super dealloc];
 }
 
@@ -580,7 +581,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [publications setArray:newPubs];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
     
-    [self resetSearchIndexes];
+    [searchIndexes resetWithPublications:newPubs];
 }    
 
 - (void)setPublications:(NSArray *)newPubs{
@@ -610,7 +611,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     
 	[pubs makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
 	
-    [self addPublicationsToSearchIndexes:pubs];
+    [searchIndexes addPublications:pubs];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pubs, @"pubs", [pubs arrayByPerformingSelector:@selector(searchIndexInfo)], @"searchIndexInfo", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
@@ -641,7 +642,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     
     [[groups lastImportGroup] removePublicationsInArray:pubs];
     [[groups staticGroups] makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
-    [self removePublicationsFromSearchIndexes:pubs];
+    [searchIndexes removePublications:pubs];
     
 	[publications removeObjectsAtIndexes:indexes];
 	
@@ -2372,7 +2373,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     }
     
     // will overwrite previous values
-    [self addPublicationsToSearchIndexes:[NSArray arrayWithObject:pub]];
+    [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
     
     // access type manager outside the enumerator, since it's @synchronized...
     BibTypeManager *typeManager = [BibTypeManager sharedManager];

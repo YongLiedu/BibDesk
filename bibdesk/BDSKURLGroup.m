@@ -49,6 +49,7 @@
 #import "NSImage+Toolbox.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
+#import "BDSKItemSearchIndexes.h"
 
 @implementation BDSKURLGroup
 
@@ -71,6 +72,7 @@
         isRetrieving = NO;
         failedDownload = NO;
         URLDownload = nil;
+        searchIndexes = [BDSKItemSearchIndexes new];
     }
     
     return self;
@@ -108,6 +110,7 @@
     [filePath release];
     [publications release];
     [macroResolver release];
+    [searchIndexes release];
     [super dealloc];
 }
 
@@ -130,6 +133,11 @@
 - (NSString *)description;
 {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tis downloading: %@\n\tname: %@\n\tURL: %@\n }", [self class], self, (isRetrieving ? @"yes" : @"no"), name, [self URL]];
+}
+
+- (SKIndexRef)searchIndexForField:(NSString *)field;
+{
+    return [searchIndexes indexForField:field];
 }
 
 #pragma mark Downloading
@@ -265,6 +273,7 @@
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        [searchIndexes resetWithPublications:publications];
         
         if (publications == nil)
             [macroResolver removeAllMacros];

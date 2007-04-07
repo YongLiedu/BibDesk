@@ -41,7 +41,7 @@
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 #import "BDSKOwnerProtocol.h"
 
-@class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver;
+@class OFMessageQueue, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
 enum {
     BDSKShellScriptType,
@@ -62,6 +62,7 @@ enum {
     NSMutableData *stdoutData;
     OFSimpleLockType processingLock;    
     OFSimpleLockType currentTaskLock;
+    BDSKItemSearchIndexes *searchIndexes;
 }
 
 - (id)initWithScriptPath:(NSString *)path scriptArguments:(NSString *)arguments scriptType:(int)type;

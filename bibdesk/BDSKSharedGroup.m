@@ -45,6 +45,7 @@
 #import <BDSKAsynchronousDOServer.h>
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
+#import "BDSKItemSearchIndexes.h"
 
 typedef struct _BDSKSharedGroupFlags {
     volatile int32_t isRetrieving __attribute__ ((aligned (4)));
@@ -163,7 +164,7 @@ static NSImage *unlockedIcon = nil;
         publications = nil;
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         needsUpdate = YES;
-        
+        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
         server = [[BDSKSharedGroupServer alloc] initWithGroup:self andService:aService];
     }
     
@@ -176,6 +177,7 @@ static NSImage *unlockedIcon = nil;
     [server release];
     [publications release];
     [macroResolver release];
+    [searchIndexes release];
     [super dealloc];
 }
 
@@ -220,7 +222,7 @@ static NSImage *unlockedIcon = nil;
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        
+        [searchIndexes resetWithPublications:publications];
         if (publications == nil)
             [macroResolver removeAllMacros];
     }
@@ -276,6 +278,11 @@ static NSImage *unlockedIcon = nil;
 
 - (unsigned int)hash {
     return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+}
+
+- (SKIndexRef)searchIndexForField:(NSString *)field;
+{
+    return [searchIndexes indexForField:field];
 }
 
 @end

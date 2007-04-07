@@ -38,15 +38,9 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-extern const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks;
-
 @protocol OAFindControllerTarget;
 
 @interface BibDocument (Search)
-
-- (void)resetSearchIndexes;
-- (void)removePublicationsFromSearchIndexes:(NSArray *)pubs;
-- (void)addPublicationsToSearchIndexes:(NSArray *)pubs;
 
 - (NSString *)searchString;
 

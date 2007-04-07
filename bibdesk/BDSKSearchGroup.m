@@ -19,7 +19,7 @@
  the documentation and/or other materials provided with the
  distribution.
  
- - Neither the name of Christiaan Hofman nor the names of any
+ - Neither the name of Adam Maxwell nor the names of any
  contributors may be used to endorse or promote products derived
  from this software without specific prior written permission.
  
@@ -45,6 +45,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKServerInfo.h"
 #import <OmniFoundation/NSArray-OFExtensions.h>
+#import "BDSKItemSearchIndexes.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
@@ -72,6 +73,7 @@ NSString *BDSKSearchGroupOAI = @"oai";
         history = nil;
         publications = nil;
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
+        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
         [self resetServerWithInfo:info];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
@@ -124,6 +126,7 @@ NSString *BDSKSearchGroupOAI = @"oai";
     [server release];
     [type release];
     [searchTerm release];
+    [searchIndexes release];
     [super dealloc];
 }
 
@@ -176,6 +179,11 @@ NSString *BDSKSearchGroupOAI = @"oai";
     return [publications containsObject:item];
 }
 
+- (SKIndexRef)searchIndexForField:(NSString *)field;
+{
+    return [searchIndexes indexForField:field];
+}
+
 #pragma mark BDSKOwner protocol
 
 - (BDSKPublicationsArray *)publications;
@@ -199,6 +207,7 @@ NSString *BDSKSearchGroupOAI = @"oai";
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        [searchIndexes resetWithPublications:publications];
         
         if (publications == nil)
             [macroResolver removeAllMacros];
@@ -219,6 +228,7 @@ NSString *BDSKSearchGroupOAI = @"oai";
         else 
             [publications addObjectsFromArray:newPublications];
         [newPublications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        [searchIndexes addPublications:newPublications];
     }
     
     [self setCount:[publications count]];

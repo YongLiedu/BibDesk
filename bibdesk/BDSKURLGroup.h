@@ -40,7 +40,7 @@
 #import "BDSKGroup.h"
 #import "BDSKOwnerProtocol.h"
 
-@class BDSKPublicationsArray, BDSKMacroResolver;
+@class BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
 @interface BDSKURLGroup : BDSKMutableGroup <BDSKOwner>
 {
@@ -51,6 +51,7 @@
     BOOL isRetrieving;
     BOOL failedDownload;
     NSURLDownload *URLDownload;
+    BDSKItemSearchIndexes *searchIndexes;
 }
 
 - (NSImage *)icon;

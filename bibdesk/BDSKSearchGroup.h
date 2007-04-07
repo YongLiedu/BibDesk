@@ -19,7 +19,7 @@
  the documentation and/or other materials provided with the
  distribution.
  
- - Neither the name of Christiaan Hofman nor the names of any
+ - Neither the name of Adam Maxwell nor the names of any
  contributors may be used to endorse or promote products derived
  from this software without specific prior written permission.
  
@@ -44,7 +44,7 @@ extern NSString *BDSKSearchGroupEntrez;
 extern NSString *BDSKSearchGroupZoom;
 extern NSString *BDSKSearchGroupOAI;
 
-@class BDSKSearchGroup, BDSKServerInfo;
+@class BDSKSearchGroup, BDSKServerInfo, BDSKItemSearchIndexes;
 
 @protocol BDSKSearchGroupServer <NSObject>
 - (id)initWithGroup:(BDSKSearchGroup *)aGroup serverInfo:(BDSKServerInfo *)info;
@@ -69,6 +69,7 @@ extern NSString *BDSKSearchGroupOAI;
     NSString *searchTerm; // passed in by caller
     NSArray *history;
     id<BDSKSearchGroupServer> server;
+    BDSKItemSearchIndexes *searchIndexes;
 }
 
 - (id)initWithName:(NSString *)aName;

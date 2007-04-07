@@ -324,6 +324,7 @@ static CFDictionaryRef selectorTable = NULL;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
+            identifierURL = createUniqueURL();
         }
     } else {       
         [[super init] release];

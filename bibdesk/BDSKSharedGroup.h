@@ -38,9 +38,9 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
-#import  "BDSKOwnerProtocol.h"
+#import "BDSKOwnerProtocol.h"
 
-@class BDSKSharedGroupServer, BDSKPublicationsArray, BDSKMacroResolver;
+@class BDSKSharedGroupServer, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
 @interface BDSKSharedGroup : BDSKGroup <BDSKOwner>
 {
@@ -48,6 +48,7 @@
     BDSKMacroResolver *macroResolver;
     BDSKSharedGroupServer *server;
     BOOL needsUpdate;
+    BDSKItemSearchIndexes *searchIndexes;
 }
 
 + (NSImage *)icon;

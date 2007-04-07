@@ -53,6 +53,7 @@
 #import "BibItem.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
+#import "BDSKItemSearchIndexes.h"
 
 #define APPLESCRIPT_HANDLER_NAME @"main"
 
@@ -94,7 +95,7 @@ static OFMessageQueue *messageQueue = nil;
         
         OFSimpleLockInit(&processingLock);
         OFSimpleLockInit(&currentTaskLock);
-        
+        searchIndexes = [BDSKItemSearchIndexes new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     }
     return self;
@@ -144,6 +145,7 @@ static OFMessageQueue *messageQueue = nil;
     [macroResolver release];
     [workingDirPath release];
     [stdoutData release];
+    [searchIndexes release];
     [super dealloc];
 }
 
@@ -156,6 +158,11 @@ static OFMessageQueue *messageQueue = nil;
 - (NSString *)description;
 {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\t\tname: %@\n\tscript path: %@\n }", [self class], self, name, scriptPath];
+}
+
+- (SKIndexRef)searchIndexForField:(NSString *)aField;
+{
+    return [searchIndexes indexForField:aField];
 }
 
 #pragma mark Running the script
@@ -298,7 +305,7 @@ static OFMessageQueue *messageQueue = nil;
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        
+        [searchIndexes resetWithPublications:publications];
         if (publications == nil)
             [macroResolver removeAllMacros];
     }

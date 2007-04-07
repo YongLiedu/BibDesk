@@ -41,6 +41,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "NSImage+Toolbox.h"
+#import "BDSKItemSearchIndexes.h"
 
 @implementation BDSKWebGroup
 - (id)initWithName:(NSString *)aName{
@@ -51,6 +52,7 @@
         publications = nil;
         macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         isRetrieving = NO;
+        searchIndexes = [BDSKItemSearchIndexes new];
     }
     return self;
 }
@@ -68,6 +70,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [publications release];
+    [searchIndexes release];
     [super dealloc];
 }
 
@@ -75,6 +78,10 @@
 
 - (unsigned int)hash {
     return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
+}
+
+- (SKIndexRef)searchIndexForField:(NSString *)aField {
+    return [searchIndexes indexForField:aField];
 }
 
 #pragma mark BDSKGroup overrides
@@ -124,7 +131,7 @@
         [publications release];
         publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
         [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        
+        [searchIndexes resetWithPublications:publications];
         if (publications == nil)
             [macroResolver removeAllMacros];
     }
@@ -144,6 +151,7 @@
         else 
             [publications addObjectsFromArray:newPublications];
         [newPublications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
+        [searchIndexes addPublications:newPublications];
     }
     
     [self setCount:[publications count]];

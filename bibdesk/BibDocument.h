@@ -49,6 +49,7 @@
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
 @class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
+@class BDSKItemSearchIndexes;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -205,7 +206,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
         BOOL                isDocumentClosed;
     } docState;
     
-    CFMutableDictionaryRef searchIndexes;
+    BDSKItemSearchIndexes *searchIndexes;
     BDSKSearchButtonController *searchButtonController;
     
 }
