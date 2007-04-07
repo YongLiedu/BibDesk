@@ -231,6 +231,7 @@ static CFDictionaryRef selectorTable = NULL;
     selectorTable = CFDictionaryCreateCopy(CFAllocatorGetDefault(), table);
     CFRelease(table);
     
+    // hidden pref as support for RFE #1690155 (partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will)
     NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKFieldsToWriteIfEmpty"];
     if ([emptyFields count])
         fieldsToWriteIfEmpty = [[NSSet alloc] initWithArray:emptyFields];
@@ -1179,7 +1180,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit{
     NSString* value = [pubFields objectForKey:key];
 	
-	if (inherit && BDIsEmptyString((CFStringRef)value)) {
+	if (inherit && BDIsEmptyString((CFStringRef)value) && [fieldsToWriteIfEmpty containsObject:key] == NO) {
 		BibItem *parent = [self crossrefParent];
 		if (parent) {
 			NSString *parentValue = [parent valueOfField:key inherit:NO];
