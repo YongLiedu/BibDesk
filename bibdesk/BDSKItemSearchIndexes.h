@@ -38,8 +38,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks;
-
 @interface BDSKItemSearchIndexes : NSObject {
     CFMutableDictionaryRef searchIndexes;
 
