@@ -213,6 +213,7 @@ static CFDictionaryRef selectorTable = NULL;
     [defaultStyle setFirstLineHeadIndent:50];
     [defaultStyle setTailIndent:-30];
     bodyParagraphStyle = [defaultStyle copy];
+    [defaultStyle release];
     
     // Create a table of field/SEL pairs used for searching
     CFMutableDictionaryRef table = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFCopyStringDictionaryKeyCallBacks, &OFNonOwnedPointerDictionaryValueCallbacks);

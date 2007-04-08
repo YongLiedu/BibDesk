@@ -70,6 +70,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
     [publications release];
+    [macroResolver release];
     [searchIndexes release];
     [super dealloc];
 }
