@@ -99,7 +99,27 @@
     } else {
         if ([[[fileSearchController searchContentView] window] isEqual:documentWindow])
             [fileSearchController restoreDocumentState];
-        [self filterPublicationsUsingSearchString:[searchField stringValue] indexName:[searchButtonController selectedItemIdentifier]];
+        
+        NSArray *pubsToSelect = [self selectedPublications];
+        NSString *searchString = [searchField stringValue];
+        
+        if([NSString isEmptyString:searchString]){
+            [shownPublications setArray:groupedPublications];
+#warning sort order for relevance
+            // sort order is unclear if it's sorted by relevance and then that column is removed; what do we do in other cases?
+        } else {
+            
+            [shownPublications setArray:[self publicationsMatchingSearchString:searchString indexName:field fromArray:groupedPublications]];
+            if([shownPublications count] == 1)
+                pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
+        }
+        
+        [tableView deselectAll:nil];
+        // @@ performance: this kills us on large files, since it gets called for every updateCategoryGroupsPreservingSelection (any add/del)
+        [self sortPubsByKey:nil]; // resort
+        [self updateStatus];
+        if([pubsToSelect count])
+            [self selectPublications:pubsToSelect];
     }
 }
 
@@ -147,6 +167,13 @@
         [animation setAnimationCurve:NSAnimationEaseInOut];
         [animation startAnimation];
         
+        [mainBox setNeedsDisplay:YES];
+        [documentWindow displayIfNeeded];
+        
+        if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil) {
+            [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
+        }        
+        
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
     }
 }
@@ -179,7 +206,11 @@
         [animation startAnimation];
         
         [searchButtonView removeFromSuperview];
+        [mainBox setNeedsDisplay:YES];
+        [documentWindow displayIfNeeded];
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+        
+        [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
     }
     [searchButtonController setDelegate:nil];
 }
@@ -193,32 +224,6 @@
 }
 
 #pragma mark -
-
-- (void)filterPublicationsUsingSearchString:(NSString *)searchString indexName:(NSString *)field{
-	NSArray *pubsToSelect = [self selectedPublications];
-
-    if([NSString isEmptyString:searchString]){
-        [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
-        [shownPublications setArray:groupedPublications];
-#warning sort order for relevance
-    }else{
-        
-        if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil) {
-            [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
-        }
-        
-		[shownPublications setArray:[self publicationsMatchingSearchString:searchString indexName:field fromArray:groupedPublications]];
-		if([shownPublications count] == 1)
-			pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
-	}
-	
-	[tableView deselectAll:nil];
-    // @@ performance: this kills us on large files, since it gets called for every updateCategoryGroupsPreservingSelection (any add/del)
-	[self sortPubsByKey:nil]; // resort
-	[self updateStatus];
-	if([pubsToSelect count])
-		[self selectPublications:pubsToSelect];
-}
 
 // simplified search used by BibAppController's Service for legacy compatibility
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field{

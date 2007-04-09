@@ -53,7 +53,8 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSBezierPath_CoreImageExtensions.h"
 #import "BDSKCenterScaledImageCell.h"
-#import "BDSKLevelIndicatorCell.h" 
+#import "BDSKLevelIndicatorCell.h"
+#import "BDSKImageFadeAnimation.h"
 
 @interface BDSKMainTableView (Private)
 
@@ -385,8 +386,46 @@
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[shownColumns arrayByRemovingObject:BDSKImportOrderString]
                                                       forKey:BDSKShownColsNamesKey];
     
-    // Actually redraw the view now with the new column.
+    NSView *cacheView = [self enclosingScrollView];
+    NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+    NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+    [initialImage addRepresentation:imageRep];
+    
+    // set the view up with the new columns; don't force a redraw, though
     [self setupTableColumnsWithIdentifiers:shownColumns];
+    
+    NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+    imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+    [finalImage addRepresentation:imageRep];
+    
+    // block until this is done, so we can handle drawing manually
+    BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:0.5 animationCurve:NSAnimationEaseInOut];
+    [animation setDelegate:self];
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
+    
+    [animation setTargetImage:finalImage];
+    [animation setStartingImage:initialImage];
+    [animation startAnimation];
+    
+    [finalImage release];
+    [initialImage release];
+    
+    [animation autorelease];
+}
+
+- (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
+    NSView *scrollView = [self enclosingScrollView];
+    NSGraphicsContext *ctxt = [NSGraphicsContext graphicsContextWithWindow:[scrollView window]];
+    [NSGraphicsContext setCurrentContext:ctxt];
+    [ctxt saveGraphicsState];
+    NSRect frameRect = [scrollView convertRect:[scrollView frame] toView:nil];
+    [ctxt setCompositingOperation:NSCompositeCopy];
+    // drawing the imagerep directly is smoother than drawing the NSImage
+    [(NSImageRep *)[[[anAnimation currentImage] representations] lastObject] drawAtPoint:frameRect.origin];
+    [ctxt flushGraphics];
+    [ctxt restoreGraphicsState];
 }
 
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier {
@@ -395,14 +434,39 @@
     // Check if an object already exists in the tableview.
     if ([shownColumns containsObject:identifier] == NO)
         return;
+    
+    NSView *cacheView = [self enclosingScrollView];
+    NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+    NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+    [initialImage addRepresentation:imageRep];
 
     // Store the new column in the preferences
     [shownColumns removeObject:identifier];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[shownColumns arrayByRemovingObject:BDSKImportOrderString]
                                                       forKey:BDSKShownColsNamesKey];
     
-    // Actually redraw the view now with the new column.
+    // set the view up with the new columns; don't force a redraw, though
     [self setupTableColumnsWithIdentifiers:shownColumns];
+    
+    NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+    imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+    [finalImage addRepresentation:imageRep];
+        
+    // block until this is done, so we can handle drawing manually
+    BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:0.5 animationCurve:NSAnimationEaseInOut];
+    [animation setDelegate:self];
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
+        
+    [animation setTargetImage:finalImage];
+    [animation setStartingImage:initialImage];
+    [animation startAnimation];
+    
+    [finalImage release];
+    [initialImage release];
+    
+    [animation autorelease];
 }
 
 @end
