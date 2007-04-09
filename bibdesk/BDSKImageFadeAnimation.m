@@ -97,6 +97,11 @@
     return currentImage;
 }
 
+- (CIImage *)currentCIImage;
+{
+    return [filter valueForKey:@"outputImage"];
+}
+
 - (NSImage *)currentImage;
 { 
     CIImage *image = [filter valueForKey:@"outputImage"];

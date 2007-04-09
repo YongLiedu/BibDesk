@@ -55,6 +55,7 @@
 #import "BDSKCenterScaledImageCell.h"
 #import "BDSKLevelIndicatorCell.h"
 #import "BDSKImageFadeAnimation.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface BDSKMainTableView (Private)
 
@@ -395,6 +396,7 @@
     // set the view up with the new columns; don't force a redraw, though
     [self setupTableColumnsWithIdentifiers:shownColumns];
     
+    // the added table column's content is not correct during the transition; -reloadData doesn't help
     NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
     imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
     [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
@@ -419,13 +421,12 @@
     NSView *scrollView = [self enclosingScrollView];
     NSGraphicsContext *ctxt = [NSGraphicsContext graphicsContextWithWindow:[scrollView window]];
     [NSGraphicsContext setCurrentContext:ctxt];
-    [ctxt saveGraphicsState];
+    
+    // we're drawing the scrollview as well as the tableview
     NSRect frameRect = [scrollView convertRect:[scrollView frame] toView:nil];
-    [ctxt setCompositingOperation:NSCompositeCopy];
-    // drawing the imagerep directly is smoother than drawing the NSImage
-    [(NSImageRep *)[[[anAnimation currentImage] representations] lastObject] drawAtPoint:frameRect.origin];
+    CIImage *ciImage = [anAnimation currentCIImage];
+    [[ctxt CIContext] drawImage:ciImage atPoint:*(CGPoint *)&(frameRect.origin) fromRect:[ciImage extent]];
     [ctxt flushGraphics];
-    [ctxt restoreGraphicsState];
 }
 
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier {

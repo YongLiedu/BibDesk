@@ -55,6 +55,7 @@
 - (NSImage *)finalImage;
 // returns the image at the current time value
 - (NSImage *)currentImage;
+- (CIImage *)currentCIImage;
 
 @end
 
