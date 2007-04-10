@@ -64,7 +64,12 @@
     [gradientView addSubview:buttonBar];
     [gradientView retain];
     
-    AMButtonBarItem *item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
+    AMButtonBarItem *item = [[AMButtonBarItem alloc] initWithIdentifier:@"SkimNotes"];
+    [item setTitle:NSLocalizedString(@"Skim Notes", @"Search button")];
+    [buttonBar insertItem:item atIndex:0];
+    [item release];
+    
+    item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
     [item setTitle:NSLocalizedString(@"File Content", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
     [item release];

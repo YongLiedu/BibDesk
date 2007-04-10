@@ -65,7 +65,7 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
 {
     static NSSet *indexedFields = nil;
     if (nil == indexedFields)
-        indexedFields = [[NSSet alloc] initWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, nil];
+        indexedFields = [[NSSet alloc] initWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, @"SkimNotes", nil];
     return indexedFields;
 }
 
@@ -126,6 +126,11 @@ static void appendNormalizedNames(const void *value, void *context)
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKPersonString);
             if (skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
+            
+            searchText = [pub skimNotesForLocalURL];
+            skIndex = (void *)CFDictionaryGetValue(searchIndexes, CFSTR("SkimNotes"));
+            if (searchText && skIndex)
+                SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
             
             CFRelease(doc);
         }

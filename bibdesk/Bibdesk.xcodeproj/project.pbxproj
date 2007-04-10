@@ -613,6 +613,9 @@
 		F925352A08FDFAE40045D563 /* BDSKSearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = F925352808FDFAE40045D563 /* BDSKSearchResult.m */; };
 		F9273968078E58A600609739 /* Bibdesk_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */; };
 		F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92B91BF0BC6B51B008D5BC3 /* SearchButtonView.nib */; };
+		F92BACCE0BCBFEE0008D5BC3 /* BDSKSkimReader.h in Headers */ = {isa = PBXBuildFile; fileRef = F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */; };
+		F92BACCF0BCBFEE0008D5BC3 /* BDSKSkimReader.m in Sources */ = {isa = PBXBuildFile; fileRef = F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */; };
+		F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */ = {isa = PBXBuildFile; fileRef = F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */; };
 		F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92ECB6B09DEF86500A244D0 /* Security.framework */; };
 		F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92ECBEF09DF09C200A244D0 /* BDSKPasswordController.nib */; };
 		F92ECBF409DF09DA00A244D0 /* BDSKPasswordController.h in Headers */ = {isa = PBXBuildFile; fileRef = F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */; };
@@ -815,6 +818,20 @@
 			proxyType = 2;
 			remoteGlobalIDString = 2467EEE8050859D30078EF04;
 			remoteInfo = RegexTest;
+		};
+		F92BACF10BCC00D2008D5BC3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DD76FA10486AA7600D96B5E /* SkimNotesAgent */;
+			remoteInfo = SkimNotesAgent;
+		};
+		F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DD76F960486AA7600D96B5E /* SkimNotesAgent */;
+			remoteInfo = SkimNotesAgent;
 		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1564,6 +1581,9 @@
 		F925332208FC9FB80045D563 /* BDSKSearchIndex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchIndex.m; sourceTree = "<group>"; };
 		F925352708FDFAE40045D563 /* BDSKSearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchResult.h; sourceTree = "<group>"; };
 		F925352808FDFAE40045D563 /* BDSKSearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchResult.m; sourceTree = "<group>"; };
+		F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSkimReader.h; sourceTree = "<group>"; };
+		F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSkimReader.m; sourceTree = "<group>"; };
+		F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SkimNotesAgent.xcodeproj; path = SkimNotesAgent/SkimNotesAgent.xcodeproj; sourceTree = "<group>"; };
 		F92ECB6B09DEF86500A244D0 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		F92ECBF009DF09C200A244D0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPasswordController.nib; sourceTree = "<group>"; };
 		F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPasswordController.h; sourceTree = "<group>"; };
@@ -2168,6 +2188,8 @@
 		CE38FA81091D242E00BCB69D /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */,
+				F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */,
 				4575382B0B70170D00C0E49B /* BDSKWebGroup.m */,
 				CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */,
 				2730077807CF20B500F2E485 /* BDSKComplexString.m */,
@@ -2681,6 +2703,14 @@
 			name = AMButtonBar;
 			sourceTree = "<group>";
 		};
+		F92BACEB0BCC00D2008D5BC3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F95CC10F087F54BF002C5694 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2713,6 +2743,7 @@
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
+				F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */,
 				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
 				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
 				F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */,
@@ -3044,6 +3075,7 @@
 				F924FC300BC4322500672839 /* BDSKSearchButtonController.h in Headers */,
 				F92405020BC5856900672839 /* BDSKLevelIndicatorCell.h in Headers */,
 				F9936CC50BC746C300A32DC4 /* BDSKItemSearchIndexes.h in Headers */,
+				F92BACCE0BCBFEE0008D5BC3 /* BDSKSkimReader.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3117,6 +3149,7 @@
 				F9EF0CE00B4EFC8500A1F282 /* PBXTargetDependency */,
 				F9EF0CDE0B4EFC8100A1F282 /* PBXTargetDependency */,
 				CE87D7E80BA964D50027BBDD /* PBXTargetDependency */,
+				F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */,
 			);
 			name = BibDesk;
 			productInstallPath = "$(HOME)/Applications";
@@ -3161,6 +3194,10 @@
 				{
 					ProductGroup = F9AA02F4092FA2CA0094A059 /* Products */;
 					ProjectRef = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+				},
+				{
+					ProductGroup = F92BACEB0BCC00D2008D5BC3 /* Products */;
+					ProjectRef = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 				},
 				{
 					ProductGroup = CEBC82090B4D0D2500CE0B2D /* Products */;
@@ -3209,6 +3246,13 @@
 			fileType = wrapper.application;
 			path = RegexTest.app;
 			remoteRef = F911CB4808972F7300ABDAC6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = SkimNotesAgent;
+			remoteRef = F92BACF10BCC00D2008D5BC3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F95CC113087F54BF002C5694 /* BibImporter.mdimporter */ = {
@@ -3330,6 +3374,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */,
 				F9022D9B0758073F00C3F701 /* latex2rtf in Resources */,
 				8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */,
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
@@ -3906,6 +3951,7 @@
 				F924FC310BC4322500672839 /* BDSKSearchButtonController.m in Sources */,
 				F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */,
 				F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */,
+				F92BACCF0BCBFEE0008D5BC3 /* BDSKSkimReader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3916,6 +3962,11 @@
 			isa = PBXTargetDependency;
 			target = 3D8A5779082D3077008E818C /* BibDesk Help */;
 			targetProxy = CE87D7E70BA964D50027BBDD /* PBXContainerItemProxy */;
+		};
+		F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SkimNotesAgent;
+			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
 		};
 		F98870D807580EA1001D4D49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

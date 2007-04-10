@@ -68,6 +68,7 @@
 #import "BDSKTemplateParser.h"
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
+#import "BDSKSkimReader.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -497,9 +498,6 @@ static CFDictionaryRef selectorTable = NULL;
     return( ((unsigned int) self >> 4) | 
             (unsigned int) self << (32 - 4));
 }
-
-- (void)setSearchScore:(float)val { searchScore = val; }
-- (float)searchScore { return searchScore; }
 
 #pragma mark -
 
@@ -1425,6 +1423,14 @@ static CFDictionaryRef selectorTable = NULL;
 
 #pragma mark Search support
 
+- (void)setSearchScore:(float)val { searchScore = val; }
+- (float)searchScore { return searchScore; }
+
+- (NSString *)skimNotesForLocalURL{
+    NSURL *theURL = [self URLForField:BDSKLocalUrlString];
+    return theURL ? [[BDSKSkimReader sharedReader] textNotesAtURL:theURL] : nil;
+}
+
 static inline 
 Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind, unsigned options, Boolean lossy)
 {    
@@ -1881,6 +1887,18 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 				[valueStr release];
 			}
         }
+    }
+    
+    // @@ temporary hack
+    NSURL *aURL = [self URLForField:BDSKLocalUrlString];
+    NSData *RTFData = nil;
+    if (aURL && (RTFData = [[BDSKSkimReader sharedReader] RTFNotesAtURL:aURL])) {
+        valueStr = [[NSAttributedString alloc] initWithRTF:RTFData documentAttributes:NULL];
+        [nonReqStr appendString:@"Skim notes" attributes:keyAttributes];
+        [nonReqStr appendString:@"\n"];
+        [nonReqStr appendAttributedString:valueStr];
+        [nonReqStr appendString:@"\n"];
+        [valueStr release];
     }
 
     // now put them together
