@@ -173,7 +173,7 @@ Ensure that views are always ordered vertically from top to bottom as
         NSRect startRect = searchFrame;
         
         // setting zero height causes a white box to be displayed during a blocking animation
-        startRect.size.height = 0.1;
+        startRect.size.height = 1.0;
         if ([mainBox isFlipped] == NO)
             startRect.origin.y += NSHeight(searchFrame);
         [searchButtonView setFrame:startRect];
