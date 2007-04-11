@@ -93,10 +93,7 @@
 
 - (void)selectItemWithIdentifier:(NSString *)ident { [buttonBar selectItemWithIdentifier:ident]; }
 
-- (id)view {
-    [self window];
-    return edgeView;
-}
+- (id)view { return edgeView; }
 
 - (void)setDelegate:(id)delegate { [buttonBar setDelegate:delegate]; }
 
