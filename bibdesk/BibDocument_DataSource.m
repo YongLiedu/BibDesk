@@ -270,7 +270,7 @@
 - (void)tableViewColumnDidMove:(NSNotification *)notification{
 	if([notification object] != tableView) return;
     
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString]
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
 }
 

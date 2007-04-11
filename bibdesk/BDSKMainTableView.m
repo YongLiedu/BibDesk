@@ -384,7 +384,7 @@
     
     // Store the new column in the preferences
     [shownColumns insertObject:identifier atIndex:index];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[shownColumns arrayByRemovingObject:BDSKImportOrderString]
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[shownColumns arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
     
     NSView *cacheView = [self enclosingScrollView];
@@ -444,7 +444,7 @@
 
     // Store the new column in the preferences
     [shownColumns removeObject:identifier];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[shownColumns arrayByRemovingObject:BDSKImportOrderString]
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[shownColumns arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
     
     // set the view up with the new columns; don't force a redraw, though
@@ -592,7 +592,7 @@
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
 	SEL action = [menuItem action];
 	if (action == @selector(columnsMenuSelectTableColumn:))
-		return ([[menuItem representedObject] isEqualToString:BDSKImportOrderString] == NO && [self numberOfColumns] > 1);
+		return ([[menuItem representedObject] isEqualToString:BDSKImportOrderString] == NO && [[menuItem representedObject] isEqualToString:BDSKRelevanceString] == NO && [self numberOfColumns] > 1);
 	else if (action == @selector(columnsMenuAddTableColumn:))
         return YES;
 	else

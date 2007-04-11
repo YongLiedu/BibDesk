@@ -149,9 +149,7 @@
         NSViewAnimation *animation;
         NSRect startRect = searchFrame;
         startRect.size.height = 0.0;
-        if ([[splitView superview] isFlipped])
-            startRect.origin.y -= NSHeight(searchFrame);
-        else
+        if ([[splitView superview] isFlipped] == NO)
             startRect.origin.y += NSHeight(searchFrame);
         [searchButtonView setFrame:startRect];
         

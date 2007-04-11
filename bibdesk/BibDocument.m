@@ -517,8 +517,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         NSMutableDictionary *dictionary = [[self mainWindowSetupDictionaryFromExtendedAttributes] mutableCopy];
         
         NSString *savedSortKey = nil;
-        if ([sortKey isEqualToString:BDSKImportOrderString]) {
-            if ([previousSortKey isEqualToString:BDSKImportOrderString] == NO) 
+        if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
+            if ([previousSortKey isEqualToString:BDSKImportOrderString] == NO && [previousSortKey isEqualToString:BDSKRelevanceString] == NO) 
                 savedSortKey = previousSortKey;
         } else {
             savedSortKey = sortKey;
@@ -2056,8 +2056,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSString *savedSortKey = nil;
-    if ([sortKey isEqualToString:BDSKImportOrderString]) {
-        if ([previousSortKey isEqualToString:BDSKImportOrderString] == NO) 
+    if ([sortKey isEqualToString:BDSKImportOrderString] || [sortKey isEqualToString:BDSKRelevanceString]) {
+        if ([previousSortKey isEqualToString:BDSKImportOrderString] == NO && [previousSortKey isEqualToString:BDSKRelevanceString] == NO) 
             savedSortKey = previousSortKey;
     } else {
         savedSortKey = sortKey;
