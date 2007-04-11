@@ -184,6 +184,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
 
 - (SKIndexRef)indexForField:(NSString *)field;
 {
+    NSParameterAssert(nil != field);
     return (SKIndexRef)CFDictionaryGetValue(searchIndexes, (CFStringRef)field);
 }
 

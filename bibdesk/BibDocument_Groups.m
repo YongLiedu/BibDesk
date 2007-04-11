@@ -145,17 +145,24 @@ The groupedPublications array is a subset of the publications array, developed b
 #pragma mark Search group view
 
 - (void)showSearchGroupView {
+    
+    if ([self isDisplayingFileContentSearch])
+        [fileSearchController restoreDocumentState];
+
     if (nil == searchGroupViewController)
         searchGroupViewController = [[BDSKSearchGroupViewController alloc] init];
     NSView *searchGroupView = [searchGroupViewController view];
 
-    if (documentWindow != [searchGroupView window]) {
+    if ([self isDisplayingSearchGroupView] == NO) {
         NSRect searchFrame = [searchGroupView frame];
         NSRect svFrame = [splitView frame];
         searchFrame.size.width = NSWidth(svFrame);
         searchFrame.origin.x = svFrame.origin.x;
         svFrame.size.height -= NSHeight(searchFrame);
+        NSView *searchButtonView = [searchButtonController view];
+
         if ([[splitView superview] isFlipped]) {
+            OBASSERT_NOT_REACHED("untested code path");
             searchFrame.origin.y = svFrame.origin.y;
             svFrame.origin.y += NSHeight(searchFrame);
         } else {
@@ -178,7 +185,9 @@ The groupedPublications array is a subset of the publications array, developed b
     NSView *searchGroupView = [searchGroupViewController view];
     if (documentWindow == [searchGroupView window]) {
         [searchGroupView removeFromSuperview];
-        [splitView setFrame:[mainBox bounds]];
+        NSRect newSplitViewFrame = [splitView frame];
+        newSplitViewFrame.size.height += NSHeight([searchGroupView frame]);
+        [splitView setFrame:newSplitViewFrame];
         [mainBox setNeedsDisplay:YES];
     }
     [searchGroupViewController setGroup:nil];

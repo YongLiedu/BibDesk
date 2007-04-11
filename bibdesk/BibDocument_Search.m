@@ -94,6 +94,12 @@
 - (void)buttonBarSelectionDidChange:(NSNotification *)aNotification;
 {
     NSString *field = [searchButtonController selectedItemIdentifier];
+    if (nil == field) {
+        OBASSERT_NOT_REACHED("the search button controller should always have a selected field");
+        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+        field = BDSKAllFieldsString;
+    }
+    
     if([field isEqualToString:BDSKFileContentSearchString]) {
         [self searchByContent:nil];
     } else {
@@ -123,6 +129,16 @@
     }
 }
 
+/* 
+
+Ensure that views are always ordered vertically from top to bottom as
+
+---- toolbar
+---- search button view
+---- search group view OR file content
+
+*/
+
 - (void)showSearchButtonView;
 {
     if (nil == searchButtonController)
@@ -132,7 +148,7 @@
     
     NSView *searchButtonView = [searchButtonController view];
     
-    if (documentWindow != [searchButtonView window]) {
+    if ([self isDisplayingSearchButtons] == NO) {
         NSRect searchFrame;
         NSRect svFrame = [splitView frame];
         searchFrame.size.height = 29.0;
@@ -140,10 +156,19 @@
         searchFrame.origin.x = svFrame.origin.x;
         svFrame.size.height -= NSHeight(searchFrame);
         if ([mainBox isFlipped]) {
+            OBASSERT_NOT_REACHED("untested code path");
             searchFrame.origin.y = svFrame.origin.y;
             svFrame.origin.y += NSHeight(searchFrame);
         } else {
             searchFrame.origin.y = NSMaxY(svFrame);
+        }
+        
+        // may have a search group view in place; it needs to be translated up by the height of the search button view
+        if ([self isDisplayingSearchGroupView]) {
+            NSRect searchGroupFrame = [[searchGroupViewController view] frame];
+            searchGroupFrame.origin.y -= NSHeight(searchFrame);
+            [[searchGroupViewController view] setFrame:searchGroupFrame];
+            searchFrame.origin.y = NSMaxY(searchGroupFrame);
         }
         
         NSViewAnimation *animation;
@@ -181,10 +206,14 @@
     }
 }
 
+- (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[[searchButtonController view] window]]; }
+- (BOOL)isDisplayingFileContentSearch { return [[[fileSearchController searchContentView] window] isEqual:documentWindow]; }
+- (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
+
 - (void)hideSearchButtonView
 {
     NSView *searchButtonView = [searchButtonController view];
-    if (documentWindow == [searchButtonView window]) {
+    if ([self isDisplayingSearchButtons]) {
         
         NSViewAnimation *animation;      
         NSRect stopRect = [searchButtonView frame];
@@ -192,7 +221,13 @@
         if ([[searchButtonView superview] isFlipped])
             stopRect.origin.y -= NSHeight([searchButtonView frame]);
         
-        // may have a search group view in place
+        // may have a search group view in place; it needs to be translated up by the height of the search button view
+        if ([self isDisplayingSearchGroupView]) {
+            NSRect searchGroupFrame = [[searchGroupViewController view] frame];
+            searchGroupFrame.origin.y += NSHeight([searchButtonView frame]);
+            [[searchGroupViewController view] setFrame:searchGroupFrame];
+        }
+        
         NSRect finalSplitViewRect = [splitView frame];
         finalSplitViewRect.size.height += NSHeight([searchButtonView frame]);
         
@@ -363,63 +398,16 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [fadeOutDict release];
     [fadeInDict release];
     
-    [animation setAnimationBlockingMode:NSAnimationNonblockingThreaded];
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
     [animation setDuration:0.75];
     [animation setAnimationCurve:NSAnimationEaseIn];
-    [animation setDelegate:self];
     [animation startAnimation];
-}
-
-- (void)finishAnimation
-{
-    if([splitView isHidden]){
-        
-        [[previewer progressOverlay] remove];
-        
-        [splitView removeFromSuperview];
-        // connect the searchfield to the controller and start the search
-        [fileSearchController setSearchField:searchField];
-        
-    } else {
-        
-        [[fileSearchController searchContentView] removeFromSuperview];
-        
-        // reconnect the searchfield
-        [searchField setTarget:self];
-        [searchField setDelegate:self];
-                
-        NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
-        
-        if([titlesToSelect count]){
-            
-            // clear current selection (just in case)
-            [tableView deselectAll:nil];
-            
-            // we match based on title, since that's all the index knows about the BibItem at present
-            NSMutableArray *pubsToSelect = [NSMutableArray array];
-            NSEnumerator *pubEnum = [shownPublications objectEnumerator];
-            BibItem *item;
-            while(item = [pubEnum nextObject])
-                if([titlesToSelect containsObject:[item displayTitle]]) 
-                    [pubsToSelect addObject:item];
-            [self selectPublications:pubsToSelect];
-            [tableView scrollRowToCenter:[tableView selectedRow]];
-            
-            // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
-            if ([[documentWindow firstResponder] isEqual:[searchField currentEditor]] == NO)
-                [documentWindow makeFirstResponder:(NSResponder *)tableView];
-        }
-        
-        // _restoreDocumentStateByRemovingSearchView may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list
-        if ([[searchField stringValue] isEqualToString:@""])
-            [self hideSearchButtonView];        
-    }
-}
-
-// use the delegate method so we don't remove the view too early, but this must be done on the main thread
-- (void)animationDidEnd:(NSAnimation*)animation
-{
-    [self performSelectorOnMainThread:@selector(finishAnimation) withObject:nil waitUntilDone:NO];
+    
+    [[previewer progressOverlay] remove];
+    
+    [splitView removeFromSuperview];
+    // connect the searchfield to the controller and start the search
+    [fileSearchController setSearchField:searchField];
 }
 
 // Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
@@ -441,11 +429,47 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [fadeOutDict release];
     [fadeInDict release];
     
-    [animation setAnimationBlockingMode:NSAnimationNonblockingThreaded];
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
     [animation setDuration:0.75];
     [animation setAnimationCurve:NSAnimationEaseIn];
     [animation setDelegate:self];
     [animation startAnimation];
+    
+    [[fileSearchController searchContentView] removeFromSuperview];
+    
+    // reconnect the searchfield
+    [searchField setTarget:self];
+    [searchField setDelegate:self];
+    
+    NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
+    
+    if([titlesToSelect count]){
+        
+        // clear current selection (just in case)
+        [tableView deselectAll:nil];
+        
+        // we match based on title, since that's all the index knows about the BibItem at present
+        NSMutableArray *pubsToSelect = [NSMutableArray array];
+        NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+        BibItem *item;
+        while(item = [pubEnum nextObject])
+            if([titlesToSelect containsObject:[item displayTitle]]) 
+                [pubsToSelect addObject:item];
+        [self selectPublications:pubsToSelect];
+        [tableView scrollRowToCenter:[tableView selectedRow]];
+        
+        // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
+        if ([[documentWindow firstResponder] isEqual:[searchField currentEditor]] == NO)
+            [documentWindow makeFirstResponder:(NSResponder *)tableView];
+    }
+    
+    [mainBox setNeedsDisplay:YES];
+    
+    // _restoreDocumentStateByRemovingSearchView may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list
+    if ([[searchField stringValue] isEqualToString:@""])
+        [self hideSearchButtonView];  
+    else
+        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
 }
 
 #pragma mark Find panel

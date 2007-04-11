@@ -57,6 +57,7 @@
 
 - (void)awakeFromNib
 {
+    NSParameterAssert(nil != edgeView);
     [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
     [buttonBar setShowsBaselineSeparator:NO];
