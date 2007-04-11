@@ -159,7 +159,6 @@ The groupedPublications array is a subset of the publications array, developed b
         searchFrame.size.width = NSWidth(svFrame);
         searchFrame.origin.x = svFrame.origin.x;
         svFrame.size.height -= NSHeight(searchFrame);
-        NSView *searchButtonView = [searchButtonController view];
 
         if ([[splitView superview] isFlipped]) {
             OBASSERT_NOT_REACHED("untested code path");

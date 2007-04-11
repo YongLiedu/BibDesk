@@ -111,8 +111,7 @@
         
         if([NSString isEmptyString:searchString]){
             [shownPublications setArray:groupedPublications];
-#warning sort order for relevance
-            // sort order is unclear if it's sorted by relevance and then that column is removed; what do we do in other cases?
+
         } else {
             
             [shownPublications setArray:[self publicationsMatchingSearchString:searchString indexName:field fromArray:groupedPublications]];
@@ -121,8 +120,7 @@
         }
         
         [tableView deselectAll:nil];
-        // @@ performance: this kills us on large files, since it gets called for every updateCategoryGroupsPreservingSelection (any add/del)
-        [self sortPubsByKey:nil]; // resort
+        [self sortPubsByKey:nil];
         [self updateStatus];
         if([pubsToSelect count])
             [self selectPublications:pubsToSelect];
