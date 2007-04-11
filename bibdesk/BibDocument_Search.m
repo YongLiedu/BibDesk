@@ -148,7 +148,9 @@
         
         NSViewAnimation *animation;
         NSRect startRect = searchFrame;
-        startRect.size.height = 0.0;
+        
+        // setting zero height causes a white box to be displayed during a blocking animation
+        startRect.size.height = 0.1;
         if ([mainBox isFlipped] == NO)
             startRect.origin.y += NSHeight(searchFrame);
         [searchButtonView setFrame:startRect];
@@ -159,7 +161,9 @@
         animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:splitViewInfo, searchViewInfo, nil]] autorelease];
         
         [mainBox addSubview:searchButtonView];
-        [searchButtonView setNeedsDisplay:YES];
+        
+        // in case it's hidden from a previous hideSearchButtonView
+        [searchButtonView setHidden:NO];
         
         [animation setAnimationBlockingMode:NSAnimationBlocking];
         [animation setDuration:0.2];
@@ -187,8 +191,6 @@
         stopRect.size.height = 0.0;
         if ([[searchButtonView superview] isFlipped])
             stopRect.origin.y -= NSHeight([searchButtonView frame]);
-        else
-            stopRect.origin.y += NSHeight([searchButtonView frame]);
         
         // may have a search group view in place
         NSRect finalSplitViewRect = [splitView frame];
@@ -197,7 +199,7 @@
         NSDictionary *splitViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, [NSValue valueWithRect:finalSplitViewRect], NSViewAnimationEndFrameKey, nil];
         NSDictionary *searchViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:searchButtonView, NSViewAnimationTargetKey, [NSValue valueWithRect:stopRect], NSViewAnimationEndFrameKey, NSViewAnimationEffectKey, NSViewAnimationFadeOutEffect, nil];
         
-        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:splitViewInfo, searchViewInfo, nil]] autorelease];
+        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:searchViewInfo, splitViewInfo, nil]] autorelease];
                 
         [animation setAnimationBlockingMode:NSAnimationBlocking];
         [animation setDuration:0.2];
