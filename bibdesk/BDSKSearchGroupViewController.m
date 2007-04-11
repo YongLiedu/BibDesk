@@ -54,7 +54,7 @@
 
 - (void)awakeFromNib {
     [view setMinSize:[view frame].size];
-    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
+    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
 }
 
 - (void)updateSearchView {

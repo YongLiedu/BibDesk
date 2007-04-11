@@ -78,7 +78,7 @@
 
 - (void)awakeFromNib {
     [view setMinSize:[view frame].size];
-    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
+    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     [webEdgeView setEdges:BDSKEveryEdgeMask];
     [backButton setImagePosition:NSImageOnly];
     [backButton setImage:[NSImage imageNamed:@"back_small"]];
