@@ -36,7 +36,9 @@
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:[[NSBundle mainBundle] pathForResource:@"SkimNotesAgent" ofType:nil]];
     [task setArguments:[NSArray arrayWithObject:AGENT_IDENTIFIER]];
-    [task setStandardOutput:[NSFileHandle fileHandleWithStandardOutput]];
+    
+    // task will print the identifier to standard output; we don't care about it, since we specified it
+    [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [task launch];
     [task release];
     
@@ -108,7 +110,7 @@
     NSData *RTF = [self RTFNotesAtURL:fileURL];
     return RTF ? [[[[NSAttributedString alloc] initWithRTF:RTF documentAttributes:NULL] autorelease] string] : nil;
     
-    // not functional yet; worth it?
+    // @@ fixme: not functional on the skim side; worth it? to add a text version of notes in EA?
     NSString *string = nil;
     if ([self connectAndCheckTypeOfFile:fileURL]) {
         @try {
