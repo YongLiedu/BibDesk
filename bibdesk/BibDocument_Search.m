@@ -94,7 +94,7 @@
 - (void)buttonBarSelectionDidChange:(NSNotification *)aNotification;
 {
     NSString *field = [searchButtonController selectedItemIdentifier];
-    if (nil == field) {
+    if (searchButtonController && nil == field) {
         OBASSERT_NOT_REACHED("the search button controller should always have a selected field");
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
         field = BDSKAllFieldsString;
