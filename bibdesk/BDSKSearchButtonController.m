@@ -57,7 +57,7 @@
 
 - (void)awakeFromNib
 {
-    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
+    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
     
     [buttonBar setShowsBaselineSeparator:NO];
     [buttonBar setAllowsMultipleSelection:NO];

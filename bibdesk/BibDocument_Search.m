@@ -135,7 +135,7 @@
     if (documentWindow != [searchButtonView window]) {
         NSRect searchFrame;
         NSRect svFrame = [splitView frame];
-        searchFrame.size.height = 28.0;
+        searchFrame.size.height = 29.0;
         searchFrame.size.width = NSWidth(svFrame);
         searchFrame.origin.x = svFrame.origin.x;
         svFrame.size.height -= NSHeight(searchFrame);
@@ -149,7 +149,7 @@
         NSViewAnimation *animation;
         NSRect startRect = searchFrame;
         startRect.size.height = 0.0;
-        if ([[splitView superview] isFlipped] == NO)
+        if ([mainBox isFlipped] == NO)
             startRect.origin.y += NSHeight(searchFrame);
         [searchButtonView setFrame:startRect];
         
@@ -159,8 +159,9 @@
         animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:splitViewInfo, searchViewInfo, nil]] autorelease];
         
         [mainBox addSubview:searchButtonView];
+        [searchButtonView setNeedsDisplay:YES];
         
-        [animation setAnimationBlockingMode:NSAnimationNonblocking];
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
         [animation setDuration:0.2];
         [animation setAnimationCurve:NSAnimationEaseInOut];
         [animation startAnimation];
