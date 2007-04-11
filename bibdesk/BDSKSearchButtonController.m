@@ -37,6 +37,7 @@
  */
 
 #import "BDSKSearchButtonController.h"
+#import "BDSKEdgeView.h"
 #import "BDSKGradientView.h"
 #import "AMButtonBarItem.h"
 
@@ -49,7 +50,6 @@
 }
 
 - (void)dealloc {
-    [gradientView release];
     [super dealloc];
 }
 
@@ -57,12 +57,10 @@
 
 - (void)awakeFromNib
 {
-    [buttonBar setFrame:[gradientView frame]];
+    [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
+    
     [buttonBar setShowsBaselineSeparator:NO];
     [buttonBar setAllowsMultipleSelection:NO];
-    
-    [gradientView addSubview:buttonBar];
-    [gradientView retain];
     
     AMButtonBarItem *item = [[AMButtonBarItem alloc] initWithIdentifier:@"SkimNotes"];
     [item setTitle:NSLocalizedString(@"Skim Notes", @"Search button")];
@@ -92,7 +90,7 @@
 
 - (NSString *)selectedItemIdentifier { return [buttonBar selectedItemIdentifier]; }
 - (void)selectItemWithIdentifier:(NSString *)ident { [buttonBar selectItemWithIdentifier:ident]; }
-- (id)view { return gradientView; }
+- (id)view { return edgeView; }
 - (void)setDelegate:(id)delegate { [buttonBar setDelegate:delegate]; }
 - (id)delegate { return [buttonBar delegate]; }
 

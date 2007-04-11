@@ -39,11 +39,12 @@
 #import <Cocoa/Cocoa.h>
 #import "AMButtonBar.h"
 
-@class BDSKGradientView;
+@class BDSKEdgeView, BDSKGradientView;
 
 @interface BDSKSearchButtonController : NSWindowController {
     IBOutlet AMButtonBar *buttonBar;
     IBOutlet BDSKGradientView *gradientView;
+    IBOutlet BDSKEdgeView *edgeView;
 }
 
 - (id)view;
