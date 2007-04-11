@@ -216,8 +216,12 @@ Ensure that views are always ordered vertically from top to bottom as
         NSViewAnimation *animation;      
         NSRect stopRect = [searchButtonView frame];
         stopRect.size.height = 0.0;
+        
+        // slide the search button view upward as its height is reduced during the animation
         if ([[searchButtonView superview] isFlipped])
             stopRect.origin.y -= NSHeight([searchButtonView frame]);
+        else
+            stopRect.origin.y += NSHeight([searchButtonView frame]);
         
         // may have a search group view in place; it needs to be translated up by the height of the search button view
         if ([self isDisplayingSearchGroupView]) {
