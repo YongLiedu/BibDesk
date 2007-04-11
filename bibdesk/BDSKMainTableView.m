@@ -422,11 +422,15 @@
     NSGraphicsContext *ctxt = [NSGraphicsContext graphicsContextWithWindow:[scrollView window]];
     [NSGraphicsContext setCurrentContext:ctxt];
     
+    [ctxt saveGraphicsState];
+    NSRectClip([scrollView convertRect:[scrollView visibleRect] toView:nil]);
+    
     // we're drawing the scrollview as well as the tableview
     NSRect frameRect = [scrollView convertRect:[scrollView frame] toView:nil];
     CIImage *ciImage = [anAnimation currentCIImage];
     [[ctxt CIContext] drawImage:ciImage atPoint:*(CGPoint *)&(frameRect.origin) fromRect:[ciImage extent]];
     [ctxt flushGraphics];
+    [ctxt restoreGraphicsState];
 }
 
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier {
