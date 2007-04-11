@@ -90,9 +90,16 @@
 }
 
 - (NSString *)selectedItemIdentifier { return [buttonBar selectedItemIdentifier]; }
+
 - (void)selectItemWithIdentifier:(NSString *)ident { [buttonBar selectItemWithIdentifier:ident]; }
-- (id)view { return edgeView; }
+
+- (id)view {
+    [self window];
+    return edgeView;
+}
+
 - (void)setDelegate:(id)delegate { [buttonBar setDelegate:delegate]; }
+
 - (id)delegate { return [buttonBar delegate]; }
 
 

@@ -147,13 +147,12 @@ Ensure that views are always ordered vertically from top to bottom as
     NSView *searchButtonView = [searchButtonController view];
     
     if ([self isDisplayingSearchButtons] == NO) {
-        NSRect searchFrame;
+        NSRect searchFrame = [searchButtonView frame];
         NSRect svFrame = [splitView frame];
-        searchFrame.size.height = 29.0;
         searchFrame.size.width = NSWidth(svFrame);
         searchFrame.origin.x = svFrame.origin.x;
-        svFrame.size.height -= NSHeight(searchFrame);
         searchFrame.origin.y = NSHeight([mainBox frame]) - NSHeight(searchFrame);
+        svFrame.size.height -= NSHeight(searchFrame);
         
         NSViewAnimation *animation;
         NSRect startRect = searchFrame;
@@ -176,9 +175,6 @@ Ensure that views are always ordered vertically from top to bottom as
         
         [searchButtonView setFrame:startRect];
         [mainBox addSubview:searchButtonView];
-        
-        // in case it's hidden from a previous hideSearchButtonView
-        [searchButtonView setHidden:NO];
         
         [animation setAnimationBlockingMode:NSAnimationBlocking];
         [animation setDuration:0.2];
@@ -210,7 +206,7 @@ Ensure that views are always ordered vertically from top to bottom as
         endRect.origin.y += NSHeight(endRect);
         
         NSRect finalSplitViewRect = [splitView frame];
-        finalSplitViewRect.size.height += NSHeight([searchButtonView frame]);
+        finalSplitViewRect.size.height += NSHeight(endRect);
         
         NSDictionary *searchGroupViewInfo = nil;
         
