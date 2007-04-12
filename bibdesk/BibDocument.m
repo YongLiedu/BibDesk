@@ -2529,7 +2529,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if(NSIsEmptyRect([previewTextView visibleRect]))
         return;
         
-    static NSAttributedString *noAttrDoubleLineFeed;
+    static NSAttributedString *noAttrDoubleLineFeed = nil;
     if(noAttrDoubleLineFeed == nil)
         noAttrDoubleLineFeed = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:nil];
     

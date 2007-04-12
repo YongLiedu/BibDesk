@@ -72,7 +72,7 @@
 
 @implementation BDSKMacroResolver
 
-static BDSKGlobalMacroResolver *defaultMacroResolver; 
+static BDSKGlobalMacroResolver *defaultMacroResolver = nil; 
 
 + (id)defaultMacroResolver{
     if(defaultMacroResolver == nil)
