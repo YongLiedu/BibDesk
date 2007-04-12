@@ -72,8 +72,8 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     // This avoids the overhead of calling objectAtIndex: or using an enumerator, since we can now just increment a pointer to traverse the contents of the array.
     CFArrayGetValues((CFArrayRef)nodes, (CFRange){0, iMax}, (const void **)stringNodes);
     
-    // Guess at size of (50 * (no. of nodes)); this is likely too high, but resizing is a sizeable performance hit.
-    CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
+    // Resizing can be a performance hit, but we can't safely use a fixed-size mutable string
+    CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), 0);
     CFStringRef nodeVal, expandedValue;
     
     // Increment a different pointer, in case we need to free stringNodes later
