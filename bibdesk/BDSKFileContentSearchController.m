@@ -122,9 +122,8 @@
                                                object:[[tableView enclosingScrollView] contentView]];    
 
     // Do custom view setup 
-    [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
-    [topBarView setEdgeColor:[NSColor windowFrameColor]];
-    [topBarView adjustSubviews];
+    [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [topBarView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
 
     // we might remove this, so keep a retained reference
     searchContentView = [[[self window] contentView] retain];

@@ -59,6 +59,7 @@
 {
     NSParameterAssert(nil != edgeView);
     [edgeView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
+    [edgeView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
     
     [buttonBar setShowsBaselineSeparator:NO];
     [buttonBar setAllowsMultipleSelection:NO];
