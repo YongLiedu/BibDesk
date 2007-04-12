@@ -200,27 +200,20 @@ Ensure that views are always ordered vertically from top to bottom as
 {
     NSView *searchButtonView = [searchButtonController view];
     if ([self isDisplayingSearchButtons]) {
+        NSRect startRect = [mainBox bounds];
+        NSRect endRect = startRect;
+        NSView *tmpView = [[[NSView alloc] initWithFrame:startRect] autorelease];
         
-        NSViewAnimation *animation;      
-        NSRect endRect = [searchButtonView frame];
-        endRect.origin.y += NSHeight(endRect);
+        [mainBox addSubview:tmpView];
+        [tmpView addSubview:splitView];
+        [tmpView addSubview:searchButtonView];
+        if ([self isDisplayingSearchGroupView])
+            [tmpView addSubview:[searchGroupViewController view]];
         
-        NSRect finalSplitViewRect = [splitView frame];
-        finalSplitViewRect.size.height += NSHeight(endRect);
+        endRect.size.height += NSHeight([searchButtonView frame]);
         
-        NSDictionary *searchGroupViewInfo = nil;
-        
-        // may have a search group view in place; it needs to be translated up by the height of the search button view
-        if ([self isDisplayingSearchGroupView]) {
-            NSRect searchGroupFrame = [[searchGroupViewController view] frame];
-            searchGroupFrame.origin.y += NSHeight(endRect);
-            searchGroupViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:[searchGroupViewController view], NSViewAnimationTargetKey, [NSValue valueWithRect:searchGroupFrame], NSViewAnimationEndFrameKey, nil];
-        }
-        
-        NSDictionary *splitViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, [NSValue valueWithRect:finalSplitViewRect], NSViewAnimationEndFrameKey, nil];
-        NSDictionary *searchViewInfo = [NSDictionary dictionaryWithObjectsAndKeys:searchButtonView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-        
-        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:searchViewInfo, splitViewInfo, searchGroupViewInfo, nil]] autorelease];
+        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:tmpView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
+        NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
                 
         [animation setAnimationBlockingMode:NSAnimationBlocking];
         [animation setDuration:0.2];
@@ -228,6 +221,11 @@ Ensure that views are always ordered vertically from top to bottom as
         [animation startAnimation];
         
         [searchButtonView removeFromSuperview];
+        [mainBox addSubview:splitView];
+        if ([self isDisplayingSearchGroupView])
+            [mainBox addSubview:[searchGroupViewController view]];
+        [tmpView removeFromSuperview];
+        
         [mainBox setNeedsDisplay:YES];
         [documentWindow displayIfNeeded];
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
