@@ -202,6 +202,16 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     return self;
 }
 
+- (void)invalidateSearchFieldCellTimer{
+    // AppKit bug workarounds:  NSSearchFieldCell's timer creates a retain cycle after typing in it, so we manually invalidate it when the document is deallocated to avoid leaking the cell and timer.  Further, if the insertion point is in the searchfield cell when the window closes, the field editor (and associated text system) and undo manager also leak, so we send -[documentWindow endEditingFor:nil] in windowWillClose:.
+    id timer = [[searchField cell] valueForKey:@"_partialStringTimer"];
+    if (timer && [timer respondsToSelector:@selector(invalidate)]) {
+        [timer invalidate];
+        [[searchField cell] setValue:nil forKey:@"_partialStringTimer"];
+    }
+    [searchField setCell:nil];
+}
+
 - (void)dealloc{
     [fileSearchController release];
     if ([self undoManager]) {
@@ -235,6 +245,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [webGroupViewController release];
     [searchIndexes release];
     [searchButtonController release];
+    [self invalidateSearchFieldCellTimer];
     [super dealloc];
 }
 
@@ -475,6 +486,10 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
+    
+    // see comment in invalidateSearchFieldCellTimer
+    [documentWindow endEditingFor:nil];
+    
     docState.isDocumentClosed = YES;
     
     [fileSearchController stopSearching];
