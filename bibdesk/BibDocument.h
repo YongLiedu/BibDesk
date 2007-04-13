@@ -454,6 +454,14 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)setStatus:(NSString *)status;
 - (void)setStatus:(NSString *)status immediate:(BOOL)now;
 
+- (BOOL)isDisplayingSearchButtons;
+- (BOOL)isDisplayingFileContentSearch;
+- (BOOL)isDisplayingSearchGroupView;
+- (BOOL)isDisplayingWebGroupView;
+
+- (void)insertControlView:(NSView *)controlView atTop:(BOOL)atTop;
+- (void)removeControlView:(NSView *)controlView;
+
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 

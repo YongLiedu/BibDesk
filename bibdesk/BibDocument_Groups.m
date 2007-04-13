@@ -151,28 +151,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
     if (nil == searchGroupViewController)
         searchGroupViewController = [[BDSKSearchGroupViewController alloc] init];
-    NSView *searchGroupView = [searchGroupViewController view];
-
-    if ([self isDisplayingSearchGroupView] == NO) {
-        NSRect searchFrame = [searchGroupView frame];
-        NSRect svFrame = [splitView frame];
-        searchFrame.size.width = NSWidth(svFrame);
-        searchFrame.origin.x = svFrame.origin.x;
-        svFrame.size.height -= NSHeight(searchFrame);
-
-        if ([[splitView superview] isFlipped]) {
-            OBASSERT_NOT_REACHED("untested code path");
-            searchFrame.origin.y = svFrame.origin.y;
-            svFrame.origin.y += NSHeight(searchFrame);
-        } else {
-            searchFrame.origin.y = NSMaxY(svFrame);
-        }
-        
-        [searchGroupView setFrame:searchFrame];
-        [splitView setFrame:svFrame];
-        [mainBox addSubview:searchGroupView];
-        [mainBox display];
-    }
+    [self insertControlView:[searchGroupViewController view] atTop:NO];
     
     BDSKSearchGroup *group = [[self selectedGroups] firstObject];
     OBASSERT([group isSearch]);
@@ -181,14 +160,7 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)hideSearchGroupView
 {
-    NSView *searchGroupView = [searchGroupViewController view];
-    if (documentWindow == [searchGroupView window]) {
-        [searchGroupView removeFromSuperview];
-        NSRect newSplitViewFrame = [splitView frame];
-        newSplitViewFrame.size.height += NSHeight([searchGroupView frame]);
-        [splitView setFrame:newSplitViewFrame];
-        [mainBox setNeedsDisplay:YES];
-    }
+    [self removeControlView:[searchGroupViewController view]];
     [searchGroupViewController setGroup:nil];
 }
 
@@ -202,31 +174,22 @@ The groupedPublications array is a subset of the publications array, developed b
     NSView *webGroupView = [webGroupViewController view];
     NSView *webView = [webGroupViewController webView];
     
-    if (documentWindow != [webGroupView window]) {
-        NSRect webGroupViewFrame = [webGroupView frame];
+    if ([self isDisplayingWebGroupView] == NO) {
+        [self insertControlView:webGroupView atTop:NO];
+        
         NSRect svFrame = [splitView frame];
         NSRect tmpFrame;
-        webGroupViewFrame.size.width = NSWidth(svFrame);
-        webGroupViewFrame.origin.x = svFrame.origin.x;
-        svFrame.size.height -= NSHeight(webGroupViewFrame);
-        if ([[splitView superview] isFlipped]) {
-            webGroupViewFrame.origin.y = svFrame.origin.y;
-            svFrame.origin.y += NSHeight(webGroupViewFrame);
-        } else {
-            webGroupViewFrame.origin.y = NSMaxY(svFrame);
-        }
         
         tmpFrame = svFrame;
         tmpFrame.size.height *= 0.6;
         [splitView setFrame:tmpFrame];
-        [webGroupView setFrame:webGroupViewFrame];
         tmpFrame = svFrame;
         tmpFrame.size.height *= 0.4;
         [webView setFrame:tmpFrame];
         [splitView addSubview:webView positioned:NSWindowBelow relativeTo:[tableView enclosingScrollView]];
         [splitView setFrame:svFrame];
         [mainBox addSubview:webGroupView];
-        [mainBox setNeedsDisplay:YES];
+        [splitView setNeedsDisplay:YES];
     }
 }
 
@@ -234,21 +197,14 @@ The groupedPublications array is a subset of the publications array, developed b
     NSView *webGroupView = [webGroupViewController view];
     NSView *webView = [webGroupViewController webView];
     
-    if (documentWindow == [webGroupView window]) {
+    if ([self isDisplayingWebGroupView]) {
         id firstResponder = [documentWindow firstResponder];
         if ([firstResponder respondsToSelector:@selector(isDescendantOf:)] && [firstResponder isDescendantOf:webGroupView])
             [documentWindow makeFirstResponder:tableView];
-        [webGroupView removeFromSuperview];
+        [self removeControlView:webGroupView];
         [webView removeFromSuperview];
-        NSRect splitViewFrame = [splitView frame];
-        
-        // resize based on the height of the view we remove, since the search button view may be present
-        splitViewFrame.size.height += NSHeight([webGroupView frame]);
-        if ([[splitView superview] isFlipped])
-            splitViewFrame.origin.y -= NSHeight([webGroupView frame]);
-
-        [splitView setFrame:splitViewFrame];
-        [mainBox setNeedsDisplay:YES];
+        [splitView adjustSubviews];
+        [splitView setNeedsDisplay:YES];
     }
     [webGroupViewController setGroup:nil]; // see above re: "necessary"?
 }

@@ -147,96 +147,20 @@ Ensure that views are always ordered vertically from top to bottom as
     NSView *searchButtonView = [searchButtonController view];
     
     if ([self isDisplayingSearchButtons] == NO) {
-        NSRect searchFrame = [searchButtonView frame];
-        NSRect endRect = [mainBox bounds];
-        NSRect startRect = endRect;
-        startRect.size.height += NSHeight(searchFrame);
-        NSView *tmpView = [[[NSView alloc] initWithFrame:startRect] autorelease];
-        
-        searchFrame.size.width = NSWidth(endRect);
-        searchFrame.origin.x = NSMinX(endRect);
-        searchFrame.origin.y = NSMaxY(endRect);
-        [searchButtonView setFrame:searchFrame];
-        
-        [mainBox addSubview:tmpView];
-        [tmpView addSubview:splitView];
-        [tmpView addSubview:searchButtonView];
-        if ([self isDisplayingSearchGroupView])
-            [tmpView addSubview:[searchGroupViewController view]];
-        else if ([self isDisplayingWebGroupView])
-            [tmpView addSubview:[webGroupViewController view]];
-        
-        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:tmpView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-        NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
-                
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
-        
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:0.2];
-        [animation setAnimationCurve:NSAnimationEaseInOut];
-        [animation startAnimation];
-        
-        [mainBox addSubview:splitView];
-        [mainBox addSubview:searchButtonView];
-        if ([self isDisplayingSearchGroupView])
-            [mainBox addSubview:[searchGroupViewController view]];
-        else if ([self isDisplayingWebGroupView])
-            [mainBox addSubview:[webGroupViewController view]];
-        [tmpView removeFromSuperview];
-        
-        [mainBox setNeedsDisplay:YES];
-        [documentWindow displayIfNeeded];
-        
+        [self insertControlView:searchButtonView atTop:YES];
         if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
             [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
         
     }
 }
 
-- (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[[searchButtonController view] window]]; }
-- (BOOL)isDisplayingFileContentSearch { return [[[fileSearchController searchContentView] window] isEqual:documentWindow]; }
-- (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
-- (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
-
 - (void)hideSearchButtonView
 {
     NSView *searchButtonView = [searchButtonController view];
     if ([self isDisplayingSearchButtons]) {
-        NSRect startRect = [mainBox bounds];
-        NSRect endRect = startRect;
-        NSView *tmpView = [[[NSView alloc] initWithFrame:startRect] autorelease];
-        
-        [mainBox addSubview:tmpView];
-        [tmpView addSubview:splitView];
-        [tmpView addSubview:searchButtonView];
-        if ([self isDisplayingSearchGroupView])
-            [tmpView addSubview:[searchGroupViewController view]];
-        else if ([self isDisplayingWebGroupView])
-            [tmpView addSubview:[webGroupViewController view]];
-        
-        endRect.size.height += NSHeight([searchButtonView frame]);
-        
         [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
-        
-        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:tmpView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-        NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
-                
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:0.2];
-        [animation setAnimationCurve:NSAnimationEaseInOut];
-        [animation startAnimation];
-        
-        [searchButtonView removeFromSuperview];
-        [mainBox addSubview:splitView];
-        if ([self isDisplayingSearchGroupView])
-            [mainBox addSubview:[searchGroupViewController view]];
-        else if ([self isDisplayingWebGroupView])
-            [mainBox addSubview:[webGroupViewController view]];
-        [tmpView removeFromSuperview];
-        
-        [mainBox setNeedsDisplay:YES];
-        [documentWindow displayIfNeeded];
-        
+        [self removeControlView:searchButtonView];
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
         
         if ([previousSortKey isEqualToString:BDSKRelevanceString]) {

@@ -58,9 +58,6 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
 
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field;
 - (NSArray *)publicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field fromArray:(NSArray *)arrayToSearch;
-- (BOOL)isDisplayingSearchButtons;
-- (BOOL)isDisplayingFileContentSearch;
-- (BOOL)isDisplayingSearchGroupView;
 
 #pragma mark Content search
 

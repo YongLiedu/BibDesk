@@ -2699,6 +2699,118 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 }
 
 #pragma mark -
+#pragma mark Control view animation
+
+- (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[[searchButtonController view] window]]; }
+- (BOOL)isDisplayingFileContentSearch { return [documentWindow isEqual:[[fileSearchController searchContentView] window]]; }
+- (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
+- (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
+
+- (void)insertControlView:(NSView *)controlView atTop:(BOOL)atTop {
+    if ([documentWindow isEqual:[controlView window]])
+        return;
+    
+    NSArray *views = [[[mainBox contentView] subviews] copy];
+    NSEnumerator *viewEnum;
+    NSView *view;
+    NSRect controlFrame = [controlView frame];
+    NSRect startRect, endRect = [splitView frame];
+    
+    if (atTop) {
+        viewEnum = [views objectEnumerator];
+        while (view = [viewEnum nextObject])
+            endRect = NSUnionRect(endRect, [view frame]);
+    }
+    startRect = endRect;
+    startRect.size.height += NSHeight(controlFrame);
+    controlFrame.size.width = NSWidth(endRect);
+    controlFrame.origin.x = NSMinX(endRect);
+    controlFrame.origin.y = NSMaxY(endRect);
+    [controlView setFrame:controlFrame];
+    
+    NSView *clipView = [[[NSView alloc] initWithFrame:endRect] autorelease];
+    NSView *resizeView = [[[NSView alloc] initWithFrame:startRect] autorelease];
+    
+    [mainBox addSubview:clipView];
+    [clipView addSubview:resizeView];
+    if (atTop) {
+        viewEnum = [views objectEnumerator];
+        while (view = [viewEnum nextObject])
+            [resizeView addSubview:view];
+    } else {
+        [resizeView addSubview:splitView];
+    }
+    [resizeView addSubview:controlView];
+    [views release];
+    
+    NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
+    NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
+    
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
+    [animation setDuration:0.2];
+    [animation setAnimationCurve:NSAnimationEaseInOut];
+    [animation startAnimation];
+    
+    views = [[resizeView subviews] copy];
+    viewEnum = [views objectEnumerator];
+    while (view = [viewEnum nextObject])
+        [mainBox addSubview:view];
+    [clipView removeFromSuperview];
+    
+    [views release];
+    
+    [mainBox setNeedsDisplay:YES];
+    [documentWindow displayIfNeeded];
+}
+
+- (void)removeControlView:(NSView *)controlView {
+    if ([documentWindow isEqual:[controlView window]] == NO)
+        return;
+    
+    NSArray *views = [[[mainBox contentView] subviews] copy];
+    NSEnumerator *viewEnum;
+    NSView *view;
+    NSRect controlFrame = [controlView frame];
+    NSRect endRect, startRect = NSUnionRect([splitView frame], controlFrame);
+    
+    endRect = startRect;
+    endRect.size.height += NSHeight(controlFrame);
+    
+    NSView *clipView = [[[NSView alloc] initWithFrame:startRect] autorelease];
+    NSView *resizeView = [[[NSView alloc] initWithFrame:startRect] autorelease];
+    
+    [mainBox addSubview:clipView];
+    [clipView addSubview:resizeView];
+    viewEnum = [views objectEnumerator];
+    while (view = [viewEnum nextObject]) {
+        if (NSContainsRect(startRect, [view frame]))
+            [resizeView addSubview:view];
+    }
+    [resizeView addSubview:controlView];
+    [views release];
+    
+    NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
+    NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
+    
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
+    [animation setDuration:0.2];
+    [animation setAnimationCurve:NSAnimationEaseInOut];
+    [animation startAnimation];
+    
+    [controlView removeFromSuperview];
+    views = [[resizeView subviews] copy];
+    viewEnum = [views objectEnumerator];
+    while (view = [viewEnum nextObject])
+        [mainBox addSubview:view];
+    [clipView removeFromSuperview];
+    
+    [views release];
+    
+    [mainBox setNeedsDisplay:YES];
+    [documentWindow displayIfNeeded];
+}
+
+#pragma mark -
 #pragma mark Columns Menu
 
 - (NSMenu *)columnsMenu{
