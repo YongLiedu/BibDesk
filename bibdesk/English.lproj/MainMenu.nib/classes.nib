@@ -124,7 +124,8 @@
                 duplicateTitleToBooktitle = id; 
                 editAction = id; 
                 editIgnoredSortPrefixes = id; 
-                editNewGroupWithSelection = id; 
+                editNewCategoryGroupWithSelection = id; 
+                editNewStaticGroupWithSelection = id; 
                 editPubCmd = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 emailPubCmd = id; 

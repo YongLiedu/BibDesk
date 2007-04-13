@@ -107,7 +107,8 @@
 - (IBAction)renameGroupAction:(id)sender;
 - (IBAction)selectLibraryGroup:(id)sender;
 - (IBAction)changeIntersectGroupsAction:(id)sender;
-- (IBAction)editNewGroupWithSelection:(id)sender;
+- (IBAction)editNewStaticGroupWithSelection:(id)sender;
+- (IBAction)editNewCategoryGroupWithSelection:(id)sender;
 - (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 - (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 - (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;

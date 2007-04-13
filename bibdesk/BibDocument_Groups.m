@@ -1157,7 +1157,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
-- (IBAction)editNewGroupWithSelection:(id)sender{
+- (IBAction)editNewStaticGroupWithSelection:(id)sender{
     NSArray *names = [[groups staticGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
@@ -1185,6 +1185,38 @@ The groupedPublications array is a subset of the publications array, developed b
         [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
         [groupTableView scrollRowToVisible:i];
         
+        [groupTableView editColumn:0 row:i withEvent:nil select:YES];
+    }
+}
+
+- (IBAction)editNewCategoryGroupWithSelection:(id)sender{
+    if ([currentGroupField isEqualToString:@""]) {
+        NSBeep();
+        return;
+    }
+    NSArray *names = [[groups categoryGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
+    NSArray *pubs = [self selectedPublications];
+    NSString *baseName = NSLocalizedString(@"Untitled", @"");
+    NSString *name = baseName;
+    BDSKCategoryGroup *group;
+    unsigned int i = 1;
+    
+    while ([names containsObject:name])
+        name = [NSString stringWithFormat:@"%@%d", baseName, i++];
+    group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField count:[pubs count]] autorelease];
+    
+    [self addPublications:pubs toGroup:group];
+    [groupTableView deselectAll:nil];
+    
+    i = [[groups categoryGroups] indexOfObject:group];
+    OBASSERT(i != NSNotFound);
+    
+    if(i != NSNotFound){
+        i += [groups rangeOfCategoryGroups].location;
+        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+        [groupTableView scrollRowToVisible:i];
+        
+        // don't show the warning sheet, since presumably the user wants to change the group name
         [groupTableView editColumn:0 row:i withEvent:nil select:YES];
     }
 }

@@ -798,14 +798,24 @@
 	}
 }
 
-- (BOOL)validateEditNewGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
+- (BOOL)validateEditNewStaticGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
     NSString *s;
     if ([self hasExternalGroupsSelected])
-        s = NSLocalizedString(@"New Group With Merged Selection", @"Menu item title");
+        s = NSLocalizedString(@"New Static Group With Merged Selection", @"Menu item title");
     else
-        s = NSLocalizedString(@"New Group With Selection", @"Menu item title");
+        s = NSLocalizedString(@"New Static Group With Selection", @"Menu item title");
     [menuItem setTitle:s];
     return ([self numberOfSelectedPubs] > 0);
+}
+
+- (BOOL)validateEditNewCategoryGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
+    NSString *s;
+    if ([self hasExternalGroupsSelected])
+        s = NSLocalizedString(@"New Field Group With Merged Selection", @"Menu item title");
+    else
+        s = NSLocalizedString(@"New Field Group With Selection", @"Menu item title");
+    [menuItem setTitle:s];
+    return ([self numberOfSelectedPubs] > 0 && [currentGroupField isEqualToString:@""] == NO);
 }
 
 - (BOOL)validateAddSearchBookmarkMenuItem:(NSMenuItem *)menuItem {
@@ -1053,8 +1063,11 @@
 	else if (act == @selector(performFindPanelAction:)){
         return [self validateFindPanelActionMenuItem:menuItem];
     }
-    else if (act == @selector(editNewGroupWithSelection:)){
-        return [self validateEditNewGroupWithSelectionMenuItem:menuItem];
+    else if (act == @selector(editNewCategoryGroupWithSelection:)){
+        return [self validateEditNewCategoryGroupWithSelectionMenuItem:menuItem];
+    }
+    else if (act == @selector(editNewStaticGroupWithSelection:)){
+        return [self validateEditNewStaticGroupWithSelectionMenuItem:menuItem];
     }
     else if (act == @selector(addSearchBookmark:)){
         return [self validateAddSearchBookmarkMenuItem:menuItem];
