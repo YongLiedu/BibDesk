@@ -229,6 +229,16 @@ Ensure that views are always ordered vertically from top to bottom as
         [documentWindow displayIfNeeded];
         
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+        
+        if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
+            [previousSortKey release];
+            previousSortKey = [BDSKTitleString retain];
+        }
+        if ([sortKey isEqualToString:BDSKRelevanceString]) {
+            NSString *newSortKey = [[previousSortKey retain] autorelease];
+            docState.sortDescending = NO;
+            [self sortPubsByKey:newSortKey];
+        }
     }
     [searchButtonController setDelegate:nil];
 }
