@@ -50,6 +50,7 @@
 }
 
 - (void)dealloc {
+    [fileContentItem release];
     [super dealloc];
 }
 
@@ -69,11 +70,6 @@
     [buttonBar insertItem:item atIndex:0];
     [item release];
     
-    item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
-    [item setTitle:NSLocalizedString(@"File Content", @"Search button")];
-    [buttonBar insertItem:item atIndex:0];
-    [item release];
-    
     item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKPersonString];
     [item setTitle:NSLocalizedString(@"Person", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
@@ -88,6 +84,9 @@
     [item setTitle:NSLocalizedString(@"Any Field", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
     [item release];
+    
+    fileContentItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
+    [fileContentItem setTitle:NSLocalizedString(@"File Content", @"Search button")];
 }
 
 - (NSString *)selectedItemIdentifier { return [buttonBar selectedItemIdentifier]; }
@@ -100,5 +99,20 @@
 
 - (id)delegate { return [buttonBar delegate]; }
 
+- (void)addFileContentItem {
+    if (hasFileContentItem == NO) {
+        [buttonBar insertItem:fileContentItem atIndex:[[buttonBar items] count]];
+        hasFileContentItem = YES;
+        [buttonBar setNeedsDisplay:YES];
+    }
+}
+
+- (void)removeFileContentItem {
+    if (hasFileContentItem) {
+        [buttonBar removeItem:fileContentItem];
+        hasFileContentItem = NO;
+        [buttonBar setNeedsDisplay:YES];
+    }
+}
 
 @end

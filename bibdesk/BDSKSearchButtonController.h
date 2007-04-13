@@ -45,6 +45,8 @@
     IBOutlet AMButtonBar *buttonBar;
     IBOutlet BDSKGradientView *gradientView;
     IBOutlet BDSKEdgeView *edgeView;
+    AMButtonBarItem *fileContentItem;
+    BOOL hasFileContentItem;
 }
 
 - (id)view;
@@ -52,5 +54,8 @@
 - (id)delegate;
 - (void)selectItemWithIdentifier:(NSString *)ident;
 - (NSString *)selectedItemIdentifier;
+
+- (void)addFileContentItem;
+- (void)removeFileContentItem;
 
 @end

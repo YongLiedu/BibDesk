@@ -76,6 +76,7 @@
 #import "BDSKServerInfo.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKSearchBookmarkController.h"
+#import "BDSKSearchButtonController.h"
 
 @implementation BibDocument (Groups)
 
@@ -228,6 +229,9 @@ The groupedPublications array is a subset of the publications array, developed b
     NSString *newSortKey = nil;
     
     if ([self hasExternalGroupsSelected]) {
+        if ([self isDisplayingSearchButtons])
+            [searchButtonController removeFileContentItem];
+        
         if ([self hasSearchGroupsSelected] == NO)
             [self hideSearchGroupView];            
             
@@ -248,6 +252,9 @@ The groupedPublications array is a subset of the publications array, developed b
         [tableView insertTableColumnWithIdentifier:BDSKImportOrderString atIndex:0];
 
     } else {
+        if ([self isDisplayingSearchButtons])
+            [searchButtonController addFileContentItem];
+        
         [tableView setAlternatingRowBackgroundColors:[NSColor controlAlternatingRowBackgroundColors]];
         [tableView removeTableColumnWithIdentifier:BDSKImportOrderString];
         if ([previousSortKey isEqualToString:BDSKImportOrderString]) {
