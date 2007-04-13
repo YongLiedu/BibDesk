@@ -243,11 +243,11 @@ The groupedPublications array is a subset of the publications array, developed b
         NSRect splitViewFrame = [splitView frame];
         
         // resize based on the height of the view we remove, since the search button view may be present
-        splitViewFrame.size.height += NSHeight([webView frame]);
+        splitViewFrame.size.height += NSHeight([webGroupView frame]);
         if ([[splitView superview] isFlipped])
-            splitViewFrame.origin.y -= NSHeight([webView frame]);
+            splitViewFrame.origin.y -= NSHeight([webGroupView frame]);
 
-        [splitView setFrame:[mainBox bounds]];
+        [splitView setFrame:splitViewFrame];
         [mainBox setNeedsDisplay:YES];
     }
     [webGroupViewController setGroup:nil]; // see above re: "necessary"?
