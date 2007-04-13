@@ -234,6 +234,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [searchGroupViewController release];
     [webGroupViewController release];
     [searchIndexes release];
+    [searchButtonController release];
     [super dealloc];
 }
 
