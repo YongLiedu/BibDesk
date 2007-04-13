@@ -163,6 +163,8 @@ Ensure that views are always ordered vertically from top to bottom as
         [tmpView addSubview:searchButtonView];
         if ([self isDisplayingSearchGroupView])
             [tmpView addSubview:[searchGroupViewController view]];
+        else if ([self isDisplayingWebGroupView])
+            [tmpView addSubview:[webGroupViewController view]];
         
         NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:tmpView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
         NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
@@ -178,6 +180,8 @@ Ensure that views are always ordered vertically from top to bottom as
         [mainBox addSubview:searchButtonView];
         if ([self isDisplayingSearchGroupView])
             [mainBox addSubview:[searchGroupViewController view]];
+        else if ([self isDisplayingWebGroupView])
+            [mainBox addSubview:[webGroupViewController view]];
         [tmpView removeFromSuperview];
         
         [mainBox setNeedsDisplay:YES];
@@ -192,6 +196,7 @@ Ensure that views are always ordered vertically from top to bottom as
 - (BOOL)isDisplayingSearchButtons { return [documentWindow isEqual:[[searchButtonController view] window]]; }
 - (BOOL)isDisplayingFileContentSearch { return [[[fileSearchController searchContentView] window] isEqual:documentWindow]; }
 - (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
+- (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
 
 - (void)hideSearchButtonView
 {
@@ -206,6 +211,8 @@ Ensure that views are always ordered vertically from top to bottom as
         [tmpView addSubview:searchButtonView];
         if ([self isDisplayingSearchGroupView])
             [tmpView addSubview:[searchGroupViewController view]];
+        else if ([self isDisplayingWebGroupView])
+            [tmpView addSubview:[webGroupViewController view]];
         
         endRect.size.height += NSHeight([searchButtonView frame]);
         
@@ -223,6 +230,8 @@ Ensure that views are always ordered vertically from top to bottom as
         [mainBox addSubview:splitView];
         if ([self isDisplayingSearchGroupView])
             [mainBox addSubview:[searchGroupViewController view]];
+        else if ([self isDisplayingWebGroupView])
+            [mainBox addSubview:[webGroupViewController view]];
         [tmpView removeFromSuperview];
         
         [mainBox setNeedsDisplay:YES];
