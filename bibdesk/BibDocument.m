@@ -2009,7 +2009,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     } else {
         // User clicked new column, change old/new column headers,
         // save new sorting selector, and re-sort the array.
-        docState.sortDescending = NO;
+        docState.sortDescending = [key isEqualToString:BDSKRelevanceString];
         if (sortKey)
             [tableView setIndicatorImage:nil inTableColumn:[tableView tableColumnWithIdentifier:sortKey]];
         if([previousSortKey isEqualToString:sortKey] == NO){
