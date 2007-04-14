@@ -964,8 +964,6 @@ enum{
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Notes For Linked File", @"Menu item title")];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldShowSkimNotesKey"] == NO)
-            return NO;
 		return (lurl == nil ? NO : YES);
 	}
     else if (theAction == @selector(saveFileAsLocalUrl:)) {

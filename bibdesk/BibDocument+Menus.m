@@ -449,7 +449,6 @@
 }	
 
 - (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-    BOOL enabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldShowSkimNotesKey"];
 	NSString * s;
 	NSString *field = [menuItem representedObject];
 	BibItem *selectedBI = nil;
@@ -469,7 +468,7 @@
 		[menuItem setTitle:s];
 		selectedBI = [[self selectedPublications] objectAtIndex:0];
 		lurl = [selectedBI localFilePathForField:field];
-		return enabled && (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+		return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
 	}
 	else {
 		s = NSLocalizedString(@"Show Notes For %i Linked Files", @"Menu item title");
@@ -477,8 +476,7 @@
 		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 		while(selectedBI = [e nextObject]){
 			lurl = [selectedBI localFilePathForField:field];
-			if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl])
-				return enabled;
+			return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
 		}
 		return NO;
 	}
