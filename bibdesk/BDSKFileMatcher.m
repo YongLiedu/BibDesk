@@ -491,12 +491,12 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
         
         CFIndex numFound;
         
-        Boolean foundAll;
+        Boolean moreToFind;
         float thisScore, maxScore = 0.0f;
         
         do {
             
-            foundAll = SKSearchFindMatches(search, MAX_SEARCHKIT_RESULTS, docID, scores, (CFTimeInterval)(MAX_SEARCHKIT_RESULTS/2.0), &numFound);
+            moreToFind = SKSearchFindMatches(search, MAX_SEARCHKIT_RESULTS, docID, scores, (CFTimeInterval)(MAX_SEARCHKIT_RESULTS/2.0), &numFound);
             
             if (numFound) {
                 
@@ -522,7 +522,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
                 [matches addObject:node];
             }
             
-        } while (numFound && FALSE == foundAll);
+        } while (numFound && moreToFind);
         
         SKSearchCancel(search);
         CFRelease(search);
