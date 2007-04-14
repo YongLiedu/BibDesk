@@ -236,13 +236,13 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     CFIndex i, foundCount;
     NSMutableSet *foundURLSet = [NSMutableSet set];
     
-    Boolean foundAll;
+    Boolean more;
     BibItem *aPub;
     float maxScore = 0.0f;
     
     do {
         
-        foundAll = SKSearchFindMatches(search, SEARCH_BUFFER_MAX, documents, scores, 1.0, &foundCount);
+        more = SKSearchFindMatches(search, SEARCH_BUFFER_MAX, documents, scores, 1.0, &foundCount);
         
         if (foundCount) {
             CFURLRef documentURLs[SEARCH_BUFFER_MAX];
@@ -257,7 +257,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
             }
         }
                     
-    } while (foundCount && FALSE == foundAll);
+    } while (foundCount && more);
             
     SKSearchCancel(search);
     CFRelease(search);
