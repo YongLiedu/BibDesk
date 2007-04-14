@@ -153,7 +153,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSURL *applicationURL;
     
     while(applicationURL = [appEnum nextObject]){
-        menuTitle = [applicationURL lastPathComponent];
+        menuTitle = [[applicationURL lastPathComponent] stringByDeletingPathExtension];
         
         // mark the default app, if we have one
         if([defaultEditorURL isEqual:applicationURL])
