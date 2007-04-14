@@ -179,9 +179,8 @@ NSString *BDSKSearchGroupOAI = @"oai";
     return [publications containsObject:item];
 }
 
-- (SKIndexRef)searchIndexForField:(NSString *)field;
-{
-    return [searchIndexes indexForField:field];
+- (BDSKItemSearchIndexes *)searchIndexes{
+    return searchIndexes;
 }
 
 #pragma mark BDSKOwner protocol

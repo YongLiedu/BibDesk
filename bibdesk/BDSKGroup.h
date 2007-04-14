@@ -223,8 +223,6 @@
 */
 - (BOOL)containsItem:(BibItem *)item;
 
-- (SKIndexRef)searchIndexForField:(NSString *)field;
-
 @end
 
 

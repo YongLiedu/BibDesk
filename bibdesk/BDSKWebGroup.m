@@ -81,8 +81,8 @@
     return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
-- (SKIndexRef)searchIndexForField:(NSString *)aField {
-    return [searchIndexes indexForField:aField];
+- (BDSKItemSearchIndexes *)searchIndexes{
+    return searchIndexes;
 }
 
 #pragma mark BDSKGroup overrides

@@ -135,9 +135,8 @@
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tis downloading: %@\n\tname: %@\n\tURL: %@\n }", [self class], self, (isRetrieving ? @"yes" : @"no"), name, [self URL]];
 }
 
-- (SKIndexRef)searchIndexForField:(NSString *)field;
-{
-    return [searchIndexes indexForField:field];
+- (BDSKItemSearchIndexes *)searchIndexes {
+    return searchIndexes;
 }
 
 #pragma mark Downloading

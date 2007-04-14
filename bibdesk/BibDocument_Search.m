@@ -60,6 +60,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKGroup.h"
 #import "BDSKSharedGroup.h"
+#import "BDSKOwnerProtocol.h"
 
 @implementation BibDocument (Search)
 
@@ -221,17 +222,9 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:[arrayToSearch count]];
     
     // we need the correct BDSKPublicationsArray for access to the identifierURLs
-    SKIndexRef skIndex = NULL;
-    BDSKPublicationsArray *pubArray = nil;
-
-    if ([self hasExternalGroupsSelected]) {
-        BDSKGroup *group = [[self selectedGroups] firstObject];
-        skIndex = [group searchIndexForField:field];
-        pubArray = [(BDSKSharedGroup *)group publications];
-    } else {
-        skIndex = [searchIndexes indexForField:field];
-        pubArray = [self publications];
-    }
+    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
+    SKIndexRef skIndex = [[owner searchIndexes] indexForField:field];
+    BDSKPublicationsArray *pubArray = [owner publications];
     
     NSAssert1(NULL != skIndex, @"No index for field %@", field);
     

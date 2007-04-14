@@ -198,8 +198,6 @@
 
 - (BOOL)containsItem:(BibItem *)item { return YES; }
 
-- (SKIndexRef)searchIndexForField:(NSString *)field { return NULL; }
-
 @end
 
 #pragma mark -

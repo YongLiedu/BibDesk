@@ -684,6 +684,12 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     return groups;
 }
 
+#pragma mark Searching
+
+- (BDSKItemSearchIndexes *)searchIndexes{
+    return searchIndexes;
+}
+
 #pragma mark -
 
 - (void)getCopyOfPublicationsOnMainThread:(NSMutableArray *)dstArray{

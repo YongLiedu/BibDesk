@@ -45,7 +45,6 @@
 
 + (NSSet *)indexedFields;
 
-- (void)resetWithPublications:(NSArray *)pubs;
 - (void)removePublications:(NSArray *)pubs;
 - (void)addPublications:(NSArray *)pubs;
 - (void)resetWithPublications:(NSArray *)pubs;

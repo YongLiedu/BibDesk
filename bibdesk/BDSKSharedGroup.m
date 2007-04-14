@@ -280,9 +280,8 @@ static NSImage *unlockedIcon = nil;
     return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
 }
 
-- (SKIndexRef)searchIndexForField:(NSString *)field;
-{
-    return [searchIndexes indexForField:field];
+- (BDSKItemSearchIndexes *)searchIndexes {
+    return searchIndexes;
 }
 
 @end

@@ -604,6 +604,8 @@
 
 - (BOOL)isDocument { return NO; }
 
+- (BDSKItemSearchIndexes *)searchIndexes { return nil; }
+
 @end
 
 

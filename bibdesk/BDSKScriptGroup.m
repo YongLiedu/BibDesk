@@ -160,9 +160,8 @@ static OFMessageQueue *messageQueue = nil;
     return [NSString stringWithFormat:@"<%@ %p>: {\n\t\tname: %@\n\tscript path: %@\n }", [self class], self, name, scriptPath];
 }
 
-- (SKIndexRef)searchIndexForField:(NSString *)aField;
-{
-    return [searchIndexes indexForField:aField];
+- (BDSKItemSearchIndexes *)searchIndexes{
+    return searchIndexes;
 }
 
 #pragma mark Running the script
