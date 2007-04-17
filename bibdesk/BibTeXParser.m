@@ -77,10 +77,10 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
 static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *frontMatter, NSString *filePath, BibDocument *document, NSStringEncoding encoding);
 
 // private function for preserving newlines in annote/abstract fields; does not lock the parser
-static NSString *copyStringFromNoteField(AST *field, const char *data, NSString *filePath, NSStringEncoding encoding, NSString **error);
+static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **error);
 
 // parses an individual entry and adds it's field/value pairs to the dictionary
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding);
 
 @end
 
@@ -179,6 +179,7 @@ error:(NSError **)outError{
     }    
 
     buf = (const char *) [inData bytes];
+    unsigned inputDataLength = [inData length];
 
     if([parserLock tryLock] == NO)
         [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
@@ -225,7 +226,7 @@ error:(NSError **)outError{
                 
                 // regular type (@article, @proceedings, etc.)
                 // don't skip the loop if this fails, since it'll have partial data in the dictionary
-                if (NO == addValuesFromEntryToDictionary(entry, dictionary, buf, macroResolver, filePath, parserEncoding))
+                if (NO == addValuesFromEntryToDictionary(entry, dictionary, buf, inputDataLength, macroResolver, filePath, parserEncoding))
                     hadProblems = YES;
                 
                 // get the entry type as a string
@@ -854,12 +855,12 @@ static BOOL appendCommentToFrontmatterOrAddGroups(AST *entry, NSMutableString *f
     return success;
 }
 
-static NSString *copyStringFromNoteField(AST *field, const char *data, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
+static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned inputDataLength, NSString *filePath, NSStringEncoding encoding, NSString **errorString)
 {
     NSString *returnString = nil;
-    long cidx = 0; // used to scan through buf for annotes.
+    unsigned long cidx = 0; // used to scan through buf for annotes.
     int braceDepth = 0;
-    
+    BOOL lengthOverrun = NO;
     if(field->down){
         cidx = field->down->offset;
         
@@ -867,23 +868,39 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
         if(data[cidx-1] == '{'){
             // scan up to the balanced brace
             for(braceDepth = 1; braceDepth > 0; cidx++){
+                if (cidx >= inputDataLength) {
+                    lengthOverrun = YES;
+                    break;
+                }
                 if(data[cidx] == '{' && data[cidx-1] != '\\') braceDepth++;
                 if(data[cidx] == '}' && data[cidx-1] != '\\') braceDepth--;
             }
             cidx--;     // just advanced cidx one past the end of the field.
         }else if(data[cidx-1] == '"'){
             // scan up to the next quote.
-            for(; data[cidx] != '"' || data[cidx-1] == '\\'; cidx++);
+            for(; (data[cidx] != '"' || data[cidx-1] == '\\'); cidx++) {
+                if (cidx >= inputDataLength) {
+                    lengthOverrun = YES;
+                    break;
+                }
+            }
+                    
         }else{ 
             // no brace and no quote => unknown problem
             if (errorString)
                 *errorString = [NSString stringWithFormat:NSLocalizedString(@"Unexpected delimiter \"%@\" encountered at line %d.", @"Error description"), [[[NSString alloc] initWithBytes:&data[cidx-1] length:1 encoding:encoding] autorelease], field->line];
         }
-        returnString = [[NSString alloc] initWithBytes:&data[field->down->offset] length:(cidx- (field->down->offset)) encoding:encoding];
-        if (NO == checkStringForEncoding(returnString, field->line, filePath, encoding) && errorString) {
-            *errorString = NSLocalizedString(@"Encoding conversion failure", @"Error description");
-            [returnString release];
+        if (lengthOverrun) {
+            if (errorString)
+                *errorString = [NSString stringWithFormat:@"Unbalanced braces in at line %d", field->line];
             returnString = nil;
+        } else {
+            returnString = [[NSString alloc] initWithBytes:&data[field->down->offset] length:(cidx- (field->down->offset)) encoding:encoding];
+            if (NO == checkStringForEncoding(returnString, field->line, filePath, encoding) && errorString) {
+                *errorString = NSLocalizedString(@"Encoding conversion failure", @"Error description");
+                [returnString release];
+                returnString = nil;
+            }
         }
     }else{
         if(errorString)
@@ -892,7 +909,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, NSString 
     return returnString;
 }
 
-static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
+static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dictionary, const char *buf, unsigned inputDataLength, BDSKMacroResolver *macroResolver, NSString *filePath, NSStringEncoding parserEncoding)
 {
     AST *field = NULL;
     NSString *fieldName, *fieldValue, *tmpStr;
@@ -911,7 +928,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
         // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
         if([fieldName isNoteField]){
             NSString *errorString;
-            tmpStr = copyStringFromNoteField(field, buf, filePath, parserEncoding, &errorString);
+            tmpStr = copyStringFromNoteField(field, buf, inputDataLength, filePath, parserEncoding, &errorString);
             
             // this can happen with badly formed annote/abstract fields, and leads to data loss
             if(nil == tmpStr){
