@@ -892,7 +892,7 @@ static NSString *copyStringFromNoteField(AST *field, const char *data, unsigned 
         }
         if (lengthOverrun) {
             if (errorString)
-                *errorString = [NSString stringWithFormat:@"Unbalanced braces in at line %d", field->line];
+                *errorString = [NSString stringWithFormat:@"Unbalanced delimiters at line %d (%s)", field->line, field->down->text];
             returnString = nil;
         } else {
             returnString = [[NSString alloc] initWithBytes:&data[field->down->offset] length:(cidx- (field->down->offset)) encoding:encoding];
@@ -933,8 +933,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
             // this can happen with badly formed annote/abstract fields, and leads to data loss
             if(nil == tmpStr){
                 hadProblems = YES;
-                NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Syntax error in \"%@\"", @"Error description"), tmpStr];
-                [BDSKErrorObject reportError:message forFile:filePath line:field->line];
+                [BDSKErrorObject reportError:errorString forFile:filePath line:field->line];
             } else {
                 
                 // this returns nil in case of a syntax error; it isn't an encoding failure
