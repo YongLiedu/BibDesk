@@ -54,6 +54,7 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 - (void)handleMouseDownForPointInWindow:(NSValue *)value;
 - (void)didClickItem:(AMButtonBarItem *)item;
 - (void)sendActionForItem:(AMButtonBarItem *)item;
+- (void)frameDidChange:(NSNotification *)aNotification;
 @end
 
 
