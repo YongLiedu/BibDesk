@@ -927,7 +927,9 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
         
         // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
         if([fieldName isNoteField]){
-            NSString *errorString;
+            
+            // this is guaranteed to point to a meaningful error if copyStringFromNoteField fails
+            NSString *errorString = nil;
             tmpStr = copyStringFromNoteField(field, buf, inputDataLength, filePath, parserEncoding, &errorString);
             
             // this can happen with badly formed annote/abstract fields, and leads to data loss
