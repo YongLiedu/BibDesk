@@ -53,7 +53,7 @@ extern NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString);
      @abstract   action to highlight the search field
      */
 - (IBAction)makeSearchFieldKey:(id)sender;
-
+- (IBAction)changeSearchType:(id)sender;
 - (IBAction)search:(id)sender;
 
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field;

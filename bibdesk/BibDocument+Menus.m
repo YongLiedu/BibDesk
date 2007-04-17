@@ -47,6 +47,7 @@
 #import "BDSKTemplate.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument_Actions.h"
+#import "BibDocument_Search.h"
 #import "BDSKGroupsArray.h"
 #import "BDSKCustomCiteDrawerController.h"
 
