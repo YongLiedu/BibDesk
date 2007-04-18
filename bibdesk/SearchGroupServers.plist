@@ -90,6 +90,18 @@
                 resultEncoding = "marc-8";
             };
         },
+        /* COPAC z39.50 connection */
+        /* Shows an alternate syntax and encoding specification. */
+        {
+            name = "COPAC";
+            database = "copac";
+            host = "z3950.copac.ac.uk";
+            port = "2100";
+            options = {
+                recordSyntax = "MARC XML";
+                resultEncoding = "utf-8";
+            };
+        },
         /* University of Basel z39.50 connection */
         /* Example of a UTF-8 server which accepts diacritics */
         /* in search strings.                                 */

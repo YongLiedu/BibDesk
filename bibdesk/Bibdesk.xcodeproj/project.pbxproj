@@ -730,6 +730,7 @@
 		F9BE68350B80F92900B2597C /* FileMatcherConfigSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = F9BE68330B80F92800B2597C /* FileMatcherConfigSheet.nib */; };
 		F9BE68380B80F94000B2597C /* BDSKFileMatchConfigController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */; };
 		F9BE68390B80F94000B2597C /* BDSKFileMatchConfigController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9BE68370B80F94000B2597C /* BDSKFileMatchConfigController.h */; };
+		F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */ = {isa = PBXBuildFile; fileRef = F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */; };
 		F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */; };
 		F9CEFCBB0A90090B00A0E54E /* BDSKOrphanedFileServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */; };
 		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
@@ -823,14 +824,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 8DD76FA10486AA7600D96B5E /* SkimNotesAgent */;
+			remoteGlobalIDString = 8DD76FA10486AA7600D96B5E;
 			remoteInfo = SkimNotesAgent;
 		};
 		F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DD76F960486AA7600D96B5E /* SkimNotesAgent */;
+			remoteGlobalIDString = 8DD76F960486AA7600D96B5E;
 			remoteInfo = SkimNotesAgent;
 		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
@@ -1700,6 +1701,7 @@
 		F9BE68340B80F92800B2597C /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/FileMatcherConfigSheet.nib; sourceTree = "<group>"; };
 		F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileMatchConfigController.m; sourceTree = "<group>"; };
 		F9BE68370B80F94000B2597C /* BDSKFileMatchConfigController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileMatchConfigController.h; sourceTree = "<group>"; };
+		F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = MODS2MARC21slim.xsl; sourceTree = "<group>"; };
 		F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ArrowImage.tiff; path = Images/ArrowImage.tiff; sourceTree = "<group>"; };
 		F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFileServer.h; sourceTree = "<group>"; };
 		F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFileServer.m; sourceTree = "<group>"; };
@@ -1924,6 +1926,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */,
 				CE97A3B90A28F19A00CF2DF3 /* Templates */,
 				F9022DDA0758089500C3F701 /* Images */,
 				3D8A54F6082D1F86008E818C /* BibDesk Help */,
@@ -3525,6 +3528,7 @@
 				CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */,
 				CE42A8EA0BC008EB0016FDC2 /* skimnotes in Resources */,
 				F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */,
+				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
