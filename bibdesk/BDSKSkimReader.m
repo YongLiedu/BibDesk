@@ -190,7 +190,14 @@
 {   
     NSData *data = nil;
     if ([self connectAndCheckTypeOfFile:fileURL]) {
-        data = [agent RTFNotesAtPath:[fileURL path]];
+        @try{
+            data = [agent RTFNotesAtPath:[fileURL path]];
+        }
+        @catch(id exception){
+            data = nil;
+            NSLog(@"-[BDSKSkimReader RTFNotesAtURL:] caught %@ while contacting skim agent; please report this", exception);
+            [self destroyConnection];
+        }
     }
     return data;
 }
@@ -203,7 +210,14 @@
     // @@ fixme: not functional on the skim side; worth it to add a text version of notes in EA?
     NSString *string = nil;
     if ([self connectAndCheckTypeOfFile:fileURL]) {
-        string = [agent textNotesAtPath:[fileURL path]];
+        @try{
+            string = [agent textNotesAtPath:[fileURL path]];
+        }
+        @catch(id exception){
+            string = nil;
+            NSLog(@"-[BDSKSkimReader textNotesAtURL:] caught %@ while contacting skim agent; please report this", exception);
+            [self destroyConnection];
+        }
     }
     return string;
 }
