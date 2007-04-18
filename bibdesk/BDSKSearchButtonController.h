@@ -46,7 +46,9 @@
     IBOutlet BDSKGradientView *gradientView;
     IBOutlet BDSKEdgeView *edgeView;
     AMButtonBarItem *fileContentItem;
+    AMButtonBarItem *skimNotesItem;
     BOOL hasFileContentItem;
+    BOOL hasSkimNotesItem;
 }
 
 - (id)view;
@@ -57,5 +59,7 @@
 
 - (void)addFileContentItem;
 - (void)removeFileContentItem;
+- (void)addSkimNotesItem;
+- (void)removeSkimNotesItem;
 
 @end

@@ -51,6 +51,7 @@
 
 - (void)dealloc {
     [fileContentItem release];
+    [skimNotesItem release];
     [super dealloc];
 }
 
@@ -65,12 +66,7 @@
     [buttonBar setShowsBaselineSeparator:NO];
     [buttonBar setAllowsMultipleSelection:NO];
     
-    AMButtonBarItem *item = [[AMButtonBarItem alloc] initWithIdentifier:@"SkimNotes"];
-    [item setTitle:NSLocalizedString(@"Skim Notes", @"Search button")];
-    [buttonBar insertItem:item atIndex:0];
-    [item release];
-    
-    item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKPersonString];
+    AMButtonBarItem *item = [[AMButtonBarItem alloc] initWithIdentifier:BDSKPersonString];
     [item setTitle:NSLocalizedString(@"Person", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
     [item release];
@@ -84,6 +80,9 @@
     [item setTitle:NSLocalizedString(@"Any Field", @"Search button")];
     [buttonBar insertItem:item atIndex:0];
     [item release];
+    
+    skimNotesItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
+    [skimNotesItem setTitle:NSLocalizedString(@"Skim Notes", @"Search button")];
     
     fileContentItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
     [fileContentItem setTitle:NSLocalizedString(@"File Content", @"Search button")];
@@ -111,6 +110,22 @@
     if (hasFileContentItem) {
         [buttonBar removeItem:fileContentItem];
         hasFileContentItem = NO;
+        [buttonBar setNeedsDisplay:YES];
+    }
+}
+
+- (void)addSkimNotesItem {
+    if (hasSkimNotesItem == NO) {
+        [buttonBar insertItem:skimNotesItem atIndex:[[buttonBar items] count]];
+        hasSkimNotesItem = YES;
+        [buttonBar setNeedsDisplay:YES];
+    }
+}
+
+- (void)removeSkimNotesItem {
+    if (hasSkimNotesItem) {
+        [buttonBar removeItem:skimNotesItem];
+        hasSkimNotesItem = NO;
         [buttonBar setNeedsDisplay:YES];
     }
 }
