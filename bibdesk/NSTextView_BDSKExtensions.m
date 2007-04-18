@@ -98,26 +98,37 @@ static BDSKTextViewFindController *findController = nil;
 {
     NSParameterAssert(searchString != nil);
     NSTextStorage *textStorage = [self textStorage];
-    NSMutableArray *allSearchComponents = [NSMutableArray array];
-    NSArray *searchComponents = [searchString searchComponents];
-    
-    [allSearchComponents performSelector:@selector(addObjectsFromArray:) withObjectsFromArray:searchComponents];
-    unsigned i, iMax = [allSearchComponents count];
-#warning fixme
-    static NSCharacterSet *trimSet = nil;
-    if (nil == trimSet)
-        trimSet = [[NSCharacterSet characterSetWithCharactersInString:@"*()"] copy];
-    
-    for (i = 0; i < iMax; i++) {
-        NSString *component = [allSearchComponents objectAtIndex:i];
-        [component retain];
-        [allSearchComponents replaceObjectAtIndex:i withObject:[component stringByTrimmingCharactersInSet:trimSet]];
-        [component release];
-    }
 
-    [textStorage beginEditing];
-    [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allSearchComponents];
-    [textStorage endEditing];
+    static NSCharacterSet *charactersToRemove = nil;
+    if (nil == charactersToRemove)
+        charactersToRemove = [[NSCharacterSet characterSetWithCharactersInString:@"\"!*()|&"] copy];
+    
+    NSMutableString *mutableString = [searchString mutableCopy];
+    
+    // @@ Presently limited; if we enable the phrase searching features, we'll need to be smarter about quotes.  This should be reliable enough for common usage without implementing a full SKSearch expression parser, though.
+    
+    // replace single-character operators with a single space
+    NSRange range = [mutableString rangeOfCharacterFromSet:charactersToRemove options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
+    while (range.length) {
+        [mutableString replaceCharactersInRange:range withString:@" "];
+        range = [mutableString rangeOfCharacterFromSet:charactersToRemove options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
+    }
+    
+    // case-sensitive replacement of text operators; we don't want to look for these
+    [mutableString replaceOccurrencesOfString:@" AND " withString:@" " options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
+    [mutableString replaceOccurrencesOfString:@" OR " withString:@" " options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
+    
+    // NOT strings won't appear, of course, but it's easier just to add the NOT components versus parsing it (NOT is likely not common, anyway)
+    [mutableString replaceOccurrencesOfString:@" NOT " withString:@" " options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
+    
+    NSArray *allComponents = [mutableString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet] trimWhitespace:YES];
+    [mutableString release];
+
+    if ([allComponents count]) {
+        [textStorage beginEditing];
+        [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allComponents];
+        [textStorage endEditing];
+    }
 }
 
 - (void)highlightOccurrencesOfString:(NSString *)substring;

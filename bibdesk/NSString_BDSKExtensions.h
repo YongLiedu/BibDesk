@@ -426,10 +426,6 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)csvString;
 - (NSString *)tsvString;
 
-#pragma mark Search string splitting
-
-- (NSArray *)searchComponents;
-
 #pragma mark Script arguments
 
 - (NSArray *)shellScriptArgumentsArray;

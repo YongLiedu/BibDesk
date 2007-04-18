@@ -1212,31 +1212,6 @@ static NSString *UTIForPath(NSString *aPath)
 }
 
 #pragma mark -
-#pragma mark Search string splitting
-
-// splits a search string into nested arrays, split by '|' and '+', with '+' taking precedence over '|'
-// e.g. a|b+c will be split as ((a),(b,c))
-- (NSArray *)searchComponents;
-{
-#warning fixme
-    NSEnumerator *andEnum, *orEnum = [[self componentsSeparatedByString:@"|"] objectEnumerator];
-    NSString *s;
-    NSMutableArray *andArray, *orArray = [NSMutableArray array];
-    
-    while(s = [orEnum nextObject]){
-        andEnum = [[s componentsSeparatedByString:@"+"] objectEnumerator];
-        andArray = [NSMutableArray array];
-        while(s = [andEnum nextObject]){
-            s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-            if([NSString isEmptyString:s] == NO)
-               [andArray addObject:s];
-        }
-        if([andArray count] > 0)
-            [orArray addObject:andArray];
-    }
-    return orArray;
-}
-
 #pragma mark Script arguments
 
 // parses a space separated list of shell script argments
