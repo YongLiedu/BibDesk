@@ -133,7 +133,7 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
         AGRegex *regex = [AGRegex regexWithPattern:[[searchTextForm cellAtIndex:0] stringValue]];
         if (regex == nil) {
             NSBeep();
-            [findTypePopUp selectItemWithTag:0];
+            [findTypePopUp selectItemAtIndex:[findTypePopUp indexOfItemWithTag:0]];
         }
     }
 }

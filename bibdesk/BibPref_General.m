@@ -53,7 +53,7 @@
     
     [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
     
-    [checkForUpdatesButton selectItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]];
+    [checkForUpdatesButton selectItemAtIndex:[checkForUpdatesButton indexOfItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]]];
 
     [warnOnDeleteButton setState:([defaults boolForKey:BDSKWarnOnDeleteKey] == YES) ? NSOnState : NSOffState];
 
