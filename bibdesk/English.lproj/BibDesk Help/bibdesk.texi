@@ -591,47 +591,60 @@ You will be offered the choice to do perform this action immediately.
 The quick search field lets you enter sub-strings that might be in
 author names, titles or dates, and the reference view will display
 only matching publications. There are several built-in options. For
-example, "All Fields" (search every entry except the pub type at once),
-Keywords (search the keywords entries) and BibTeX Type (search by 
-publication type).
+example, ``Any Fields'' (search every field except the pub type at once), and ``Person'',
+which searches Author, Editor, and any other field defined as a ``Person'' field in preferences.
 
 @image{gfx/quickSearchField}
 
-The quick search field is configurable by selecting @menutitle{Add Field@dots{}},
-which allows you to add any string you want to the menu. If a
-publication has that field, it will be searched. Adding the field
-"Cite Key" (with that exact capitalization) will allow you to search
-the citation key of publications. ("All Fields" also searches the
-citation key.)
+The quick search field is configurable using its menu (click on the triangle in the text box).
+The default behavior is to do a simple substring search, but advanced options for Apple's Search Kit
+technology are available as well.  These options are described below.
 
 @node Advanced Search Options
 @section Advanced Search Options
 
 @cindex boolean search
-@cindex accents in search
-@cindex braces in search
+@cindex diacritic accents in search
 
-BibDesk's quick search field also supports a Boolean search, using
-@samp{+} for @samp{and} or @samp{|} for @samp{or} operators (no quotes), as
-Apple's Help Viewer does in Mac OS X 10.4 and greater.
-When both are used, @samp{+} has a higer priority than @samp{|}.
-For example searching for @samp{hydrology | clay + water} will return
-matches containing either @samp{hydrology,} or both @samp{clay} and @samp{water.}
-Custom grouping, overriding this priority, is not supported at this time.
+For normal (non-similarity-based) queries, Search Kit discerns the type of query---Boolean, prefix, phrase, and so on---from the syntax of the query itself. Moreover, Search Kit supports multiple query types within a single search. For example, the following query includes Boolean, prefix, and suffix searching:
 
-If you do not explicitly search for accented characters, the
-search feature will return results with accented characters, so it is
-slightly fuzzy; further, case is ignored unless you explicitly enter
-uppercase letters.  Sound confusing?  
-For example, searching for @samp{Burger,} could return matches containing
-@samp{R. B@ue{}rger} and @samp{J. Burger,} but not @samp{Hamburger.}  Searching for
-@samp{B@ue{}rger} will only return items that match the case and accent exactly,
-such as @samp{R. B@ue{}rger.}
+@samp{appl* OR *ing}
 
-As mentioned elsewhere, braces are ignored when searching, so searching
-for @samp{BibDesk} will find @samp{@{B@}ib@{D@}esk} as well as @samp{BibDesk.}  Of course,
-this will not find @samp{bibdesk}, since uppercase letters were used in this
-example.
+This query will return documents containing words that begin with ``appl'' as well as documents that contain words that end with ``ing''.
+
+For similarity searches, specified with the kSKSearchOptionFindSimilar flag in the inSearchOptions parameter, SKSearchCreate ignores all query operators.
+
+The query operators that SKSearchCreate recognizes for non-similarity searching are:
+
+@multitable {searchKitOperators} {}
+@headitem Operator @tab Meaning
+@item AND 
+@tab Boolean AND
+@item & 
+@tab Boolean AND
+@item <space> 
+@tab Boolean AND by default when no other operator is present
+@item OR 
+@tab Boolean inclusive OR
+@item | 
+@tab Boolean inclusive OR
+@item NO 
+@tab Boolean NOT
+@item ! 
+@tab Boolean NOT
+@item * 
+@tab Wildcard for prefix or suffix; surround term with wildcard characters for substring search (default in BibDesk)
+@item (
+@tab Begin logical grouping
+@item )
+@tab End logical grouping
+@end multitable
+
+The operators AND, OR, and NOT are case sensitive.
+
+Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `à', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
+
+Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'.
 
 @node Find and Replace
 @c DO NOT LOCALIZE THE NEXT LINE
