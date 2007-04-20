@@ -53,7 +53,7 @@
 #import "CIImage_BDSKExtensions.h"
 #import "BDSKLevelIndicatorCell.h"
 
-static CFIndex MAX_SEARCHKIT_RESULTS = 10;
+#define MAX_SEARCHKIT_RESULTS 10
 static float LEAF_ROW_HEIGHT = 20.0;
 static float GROUP_ROW_HEIGHT = 28.0;
 
