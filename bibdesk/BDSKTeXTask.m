@@ -123,10 +123,10 @@
         // some users set BIBINPUTS in environment.plist, which will break our preview unless they added "." to the path (bug #1471984)
         const char *bibInputs = getenv("BIBINPUTS");
         if(bibInputs != NULL){
-            NSString *value = [NSString stringWithCString:bibInputs];
+            NSString *value = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:bibInputs length:strlen(bibInputs)];
             if([value rangeOfString:[texPath workingDirectory]].length == 0){
                 value = [NSString stringWithFormat:@"%@:%@", value, [texPath workingDirectory]];
-                setenv("BIBINPUTS", [value cString], 1);
+                setenv("BIBINPUTS", [value fileSystemRepresentation], 1);
             }
         }        
 		
@@ -243,9 +243,10 @@
         if(![pdfTeXBinPathDir isEqualToString:binDirPath]){
             [binDirPath release];
             binDirPath = [pdfTeXBinPathDir retain];
-            NSString *original_path = [NSString stringWithCString: getenv("PATH")];
+            const char *path_cstring = getenv("PATH");
+            NSString *original_path = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:path_cstring  length:strlen(path_cstring)];
             NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binDirPath];
-            setenv("PATH", [new_path cString], 1);
+            setenv("PATH", [new_path fileSystemRepresentation], 1);
         }
         
         if([self writeTeXFile:(flag == BDSKGenerateLTB)]){

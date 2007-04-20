@@ -378,7 +378,7 @@ static BibFiler *sharedFiler = nil;
         return;
     path = [[[NSFileManager defaultManager] uniqueFilePath:[path stringByAppendingPathComponent:fileName] createDirectory:NO] stringByAppendingPathExtension:@"txt"];
     
-    [string writeToFile:path atomically:YES];
+    [string writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
