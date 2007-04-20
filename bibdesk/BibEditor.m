@@ -3418,7 +3418,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	NSString *extension = [filename pathExtension];
    
 	NSSavePanel *sPanel = [NSSavePanel savePanel];
-    if (nil != [extension isEqualToString:@""]) 
+    if (NO == [extension isEqualToString:@""]) 
 		[sPanel setRequiredFileType:extension];
 	
     [sPanel beginSheetForDirectory:nil

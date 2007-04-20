@@ -127,7 +127,7 @@
         isEqual = OFISEQUAL([self database], [other database]);
     else if ([self isZoom])
         isEqual = OFISEQUAL([self host], [other host]) && 
-                  OFISEQUAL([self port], [other port]) && 
+                  OFISEQUAL([self port], [(BDSKServerInfo *)other port]) && 
                   OFISEQUAL([self database], [other database]) && 
                   OFISEQUAL([self password], [other password]) && 
                   OFISEQUAL([self username], [other username]) && 
