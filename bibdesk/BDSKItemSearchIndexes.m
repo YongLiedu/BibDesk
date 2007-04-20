@@ -41,7 +41,7 @@
 #import "BibItem.h"
 
 static CFTypeRef searchIndexDictionaryRetain(CFAllocatorRef alloc, const void *value) { return CFRetain(value); }
-static void searchIndexDictionaryRelease(CFAllocatorRef alloc, const void *value) { SKIndexClose((SKIndexRef)value); }
+static void searchIndexDictionaryRelease(CFAllocatorRef alloc, const void *value) { CFRelease((SKIndexRef)value); }
 static CFStringRef searchIndexDictionaryCopyDescription(const void *value)
 {
     CFStringRef cfDesc = CFCopyDescription(value);
@@ -154,7 +154,7 @@ static void removeFromIndex(const void *key, const void *value, void *context)
     while (pub = [pubsEnum nextObject]) {
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
         if (doc) {
-            CFDictionaryApplyFunction(searchIndexes, removeFromIndex, doc);
+            CFDictionaryApplyFunction(searchIndexes, removeFromIndex, (void *)doc);
             CFRelease(doc);
         }
     }

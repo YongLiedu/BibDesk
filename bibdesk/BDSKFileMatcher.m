@@ -108,7 +108,7 @@ static float GROUP_ROW_HEIGHT = 28.0;
     [matches release];
     [indexingLock release];
     if (searchIndex)
-        SKIndexClose(searchIndex);
+        CFRelease(searchIndex);
     [super dealloc];
 }
 
@@ -548,7 +548,7 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
 - (void)makeNewIndex;
 {
     if (searchIndex)
-        SKIndexClose(searchIndex);
+        CFRelease(searchIndex);
     CFMutableDataRef indexData = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
     
     CFMutableDictionaryRef opts = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
