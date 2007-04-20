@@ -115,13 +115,18 @@ static NSString *BDSKDCXMLString = @"DC XML";
 
 - (void)retrievePublications
 {
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
-    id server = [self serverOnServerThread];
-    if (server)
-        [server downloadWithSearchTerm:[group searchTerm]];
-    else
-        [self performSelector:_cmd withObject:nil afterDelay:0.1];
+    
+    if ([NSString isEmptyString:[group searchTerm]]) {
+        [self addPublicationsToGroup:nil];
+    } else {
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+        id server = [self serverOnServerThread];
+        if (server)
+            [server downloadWithSearchTerm:[group searchTerm]];
+        else
+            [self performSelector:_cmd withObject:nil afterDelay:0.1];
+    }
 }
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
@@ -173,6 +178,7 @@ static NSString *BDSKDCXMLString = @"DC XML";
 
 - (void)addPublicationsToGroup:(bycopy NSArray *)pubs;
 {
+    OBASSERT([NSThread inMainThread]);
     [group addPublications:pubs];
 }
 
@@ -237,16 +243,18 @@ static NSString *BDSKDCXMLString = @"DC XML";
         [self resetConnection];
     
     NSMutableArray *pubs = nil;
-    BDSKServerInfo *info = [self serverInfo];
     
-    if (searchTerm && [info removeDiacritics]) {
-        CFMutableStringRef mutableCopy = (CFMutableStringRef)[[searchTerm mutableCopy] autorelease];
-        CFStringNormalize(mutableCopy, kCFStringNormalizationFormD);
-        BDDeleteCharactersInCharacterSet(mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
-        searchTerm = (NSString *)mutableCopy;
-    }
-            
     if (NO == [NSString isEmptyString:searchTerm]){
+        
+        BDSKServerInfo *info = [self serverInfo];
+        
+        if ([info removeDiacritics]) {
+            CFMutableStringRef mutableCopy = (CFMutableStringRef)[[searchTerm mutableCopy] autorelease];
+            CFStringNormalize(mutableCopy, kCFStringNormalizationFormD);
+            BDDeleteCharactersInCharacterSet(mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
+            searchTerm = (NSString *)mutableCopy;
+        }
+                
         // the resultSet is cached for each searchTerm, so we have no overhead calling it for retrieving more results
         ZOOMQuery *query = [ZOOMQuery queryWithCCLString:searchTerm config:[[info options] objectForKey:@"queryConfig"]];
         
