@@ -245,7 +245,6 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [webGroupViewController release];
     [searchIndexes release];
     [searchButtonController release];
-    [self invalidateSearchFieldCellTimer];
     [super dealloc];
 }
 
@@ -489,7 +488,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     
     // see comment in invalidateSearchFieldCellTimer
     [documentWindow endEditingFor:nil];
-    
+    [self invalidateSearchFieldCellTimer];
+
     docState.isDocumentClosed = YES;
     
     [fileSearchController stopSearching];
