@@ -41,6 +41,7 @@
 
 @protocol SKAgentListenerProtocol
 
+- (bycopy NSData *)SkimNotesAtPath:(in bycopy NSString *)aFile;
 - (bycopy NSData *)RTFNotesAtPath:(in bycopy NSString *)aFile;
 - (bycopy NSString *)textNotesAtPath:(in bycopy NSString *)aFile;
 
@@ -184,6 +185,22 @@
     if (UTTypeConformsTo((CFStringRef)[[NSWorkspace sharedWorkspace] UTIForURL:fileURL], kUTTypePDF) == FALSE)
         return NO;
     return YES;
+}
+
+- (NSData *)SkimNotesAtURL:(NSURL *)fileURL;
+{   
+    NSData *data = nil;
+    if ([self connectAndCheckTypeOfFile:fileURL]) {
+        @try{
+            data = [agent SkimNotesAtPath:[fileURL path]];
+        }
+        @catch(id exception){
+            data = nil;
+            NSLog(@"-[BDSKSkimReader SkimNotesAtURL:] caught %@ while contacting skim agent; please report this", exception);
+            [self destroyConnection];
+        }
+    }
+    return data;
 }
 
 - (NSData *)RTFNotesAtURL:(NSURL *)fileURL;
