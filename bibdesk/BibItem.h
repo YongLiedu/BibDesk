@@ -81,10 +81,6 @@ enum {
     NSURL *identifierURL;
 }
 
-- (NSURL *)identifierURL;
-- (void)setSearchScore:(float)val;
-- (float)searchScore;
-
 /*!
      @method init
      @abstract Initializes an alloc'd BibItem to a default type, empty authors array and createdDate the current date. 
@@ -892,6 +888,11 @@ enum {
 
 - (BOOL)isImported;
 - (void)setImported:(BOOL)flag;
+
+- (NSURL *)identifierURL;
+- (void)setSearchScore:(float)val;
+- (float)searchScore;
+- (NSString *)skimNotesForLocalURL;
 
 @end
 
