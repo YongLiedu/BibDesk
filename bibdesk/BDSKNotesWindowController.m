@@ -38,6 +38,7 @@
 
 #import "BDSKNotesWindowController.h"
 #import "BibAppController.h"
+#import "BDSKSkimReader.h"
 
 
 @implementation BDSKNotesWindowController
@@ -76,61 +77,22 @@
 #pragma mark Actions
 
 - (IBAction)refresh:(id)sender {
-    NSArray *array = nil;
+    NSData *data = url ? [[BDSKSkimReader sharedReader] SkimNotesAtURL:url] : nil;
+    NSArray *array = data ? [NSKeyedUnarchiver unarchiveObjectWithData:data] : nil;
+    NSEnumerator *dictEnum = [array objectEnumerator];
+    NSDictionary *dict;
     
-    NSString *path = [url path];
-    NSString *tmpPath = [[NSApp delegate] temporaryFilePath:nil createDirectory:NO];
-    NSString *binPath = [[NSBundle mainBundle] pathForResource:@"skimnotes" ofType:@""];
-    NSArray *arguments = [NSArray arrayWithObjects:@"get", path, tmpPath, nil];
-    NSTask *task = [[NSTask alloc] init];
-    
-    [task setCurrentDirectoryPath:[tmpPath stringByDeletingLastPathComponent]];
-    [task setLaunchPath:binPath];
-    [task setArguments:arguments];
-    [task setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [task setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-    
-    BOOL success = YES;
-    
-    @try {
-        [task launch];
-        [task waitUntilExit];
-        array = [NSKeyedUnarchiver unarchiveObjectWithFile:tmpPath];
-    }
-    @catch(id exception) {
-        if([task isRunning])
-            [task terminate];
-        NSLog(@"%@ %@ failed", [task description], [task launchPath]);
-        success = NO;
-    }
-    
-    if ([task terminationStatus] != 0)
-        success = NO;
-    
-    [task release];
-    task = nil;
-    [[NSFileManager defaultManager] removeFileAtPath:tmpPath handler:nil];
-    
-    if (success) {
-        NSEnumerator *dictEnum = [array objectEnumerator];
-        NSDictionary *dict;
+    [notes removeAllObjects];
+    while (dict = [dictEnum nextObject]) {
+        NSMutableDictionary *note = [dict mutableCopy];
         
-        [notes removeAllObjects];
-        while (dict = [dictEnum nextObject]) {
-            NSMutableDictionary *note = [dict mutableCopy];
-            
-            if ([[dict valueForKey:@"type"] isEqualToString:@"Note"])
-                [note setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:85.0], @"rowHeight", [dict valueForKey:@"text"], @"contents", nil] forKey:@"child"];
-            
-            [notes addObject:note];
-            [note release];
-        }
+        if ([[dict valueForKey:@"type"] isEqualToString:@"Note"])
+            [note setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:85.0], @"rowHeight", [dict valueForKey:@"text"], @"contents", nil] forKey:@"child"];
         
-        [outlineView reloadData];
-    } else {
-        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:ENOATTR userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, NSLocalizedString(@"Unable to read Skim notes.", @"Error message"), NSLocalizedDescriptionKey, nil]];
-        [NSApp presentError:error];
+        [notes addObject:note];
+        [note release];
     }
+    [outlineView reloadData];
 }
 
 - (IBAction)openInSkim:(id)sender {
