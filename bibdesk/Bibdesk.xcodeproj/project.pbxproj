@@ -268,7 +268,6 @@
 		CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */; };
 		CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */; };
 		CE42A26A0A99BE2400C62D85 /* BDSKErrorEditWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE42A2680A99BE2400C62D85 /* BDSKErrorEditWindow.nib */; };
-		CE42A8EA0BC008EB0016FDC2 /* skimnotes in Resources */ = {isa = PBXBuildFile; fileRef = CE42A8E90BC008EB0016FDC2 /* skimnotes */; };
 		CE4385E80BB81D0500A56987 /* BDSKSearchBookmarkController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */; };
 		CE4385E90BB81D0500A56987 /* BDSKSearchBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */; };
 		CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */; };
@@ -1233,7 +1232,6 @@
 		CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButtonCell.h; sourceTree = "<group>"; };
 		CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButtonCell.m; sourceTree = "<group>"; };
 		CE42A2690A99BE2400C62D85 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKErrorEditWindow.nib; sourceTree = "<group>"; };
-		CE42A8E90BC008EB0016FDC2 /* skimnotes */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = skimnotes; sourceTree = "<group>"; };
 		CE4385E60BB81D0500A56987 /* BDSKSearchBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchBookmarkController.h; sourceTree = "<group>"; };
 		CE4385E70BB81D0500A56987 /* BDSKSearchBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchBookmarkController.m; sourceTree = "<group>"; };
 		CE43865D0BB8274600A56987 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchBookmarksWindow.nib; sourceTree = "<group>"; };
@@ -1993,7 +1991,6 @@
 				CE2941040A7F8F2900A46D05 /* ReadMe.rtf */,
 				F9022D9E075807DC00C3F701 /* pdftotext */,
 				F9022D6E0758073E00C3F701 /* latex2rtf */,
-				CE42A8E90BC008EB0016FDC2 /* skimnotes */,
 				F9022D150758066000C3F701 /* CharacterConversion.plist */,
 				F9022D1B0758066000C3F701 /* TypeInfo.plist */,
 				CE12A16F0B44AED100416D19 /* SearchGroupServers.plist */,
@@ -3166,7 +3163,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -3209,7 +3205,6 @@
 				},
 			);
 			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8D1107260486CEB800E47090 /* BibDesk */,
 				3D8A5779082D3077008E818C /* BibDesk Help */,
@@ -3528,7 +3523,6 @@
 				F9BE68350B80F92900B2597C /* FileMatcherConfigSheet.nib in Resources */,
 				CEF71B080B91BFFF003A2771 /* NotesWindow.nib in Resources */,
 				CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */,
-				CE42A8EA0BC008EB0016FDC2 /* skimnotes in Resources */,
 				F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */,
 				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
 			);
@@ -3654,7 +3648,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "rm -f /tmp/BibDesk.dmg\n/bin/cp ${SOURCE_ROOT}/BibDesk.dmg /tmp\n/usr/bin/hdiutil attach /tmp/BibDesk.dmg\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"Bibdesk\\\" to {204, 148}\" -e \"end tell\" && \\\nsleep 7; \\\n/usr/sbin/diskutil eject /Volumes/BibDesk\n/usr/bin/hdiutil convert /tmp/BibDesk.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/BibDesk.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/BibDesk.dmg\nexit 0";
+			shellScript = "rm -f /tmp/BibDesk.dmg\n/bin/cp ${SOURCE_ROOT}/BibDesk.dmg /tmp\n/usr/bin/hdiutil attach /tmp/BibDesk.dmg\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"Bibdesk\\\" to {204, 148}\" -e \"end tell\" && \\\nsleep 7; \\\n/usr/sbin/diskutil eject /Volumes/BibDesk\n/usr/bin/hdiutil resize -size `/usr/bin/hdiutil resize /tmp/BibDesk.dmg | cut -f -1 -d \" \" -`b /tmp/BibDesk.dmg\n/usr/bin/hdiutil convert /tmp/BibDesk.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/BibDesk.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/BibDesk.dmg\nexit 0";
 		};
 		F9E0B071083E450C000109C6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
