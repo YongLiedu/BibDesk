@@ -331,6 +331,7 @@
             // this is our default cell; need to explicitly set if changing column type from e.g. image->text
             NSTextFieldCell *textFieldCell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
             [textFieldCell setBordered:NO];
+            [textFieldCell setLineBreakingMode:NSLineBreakByTruncatingTail];
             [tc setDataCell:textFieldCell];
         }
         if(image = [self headerImageForField:colName]){
