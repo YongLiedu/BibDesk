@@ -396,7 +396,7 @@
     
     // set the view up with the new columns; don't force a redraw, though
     [self setupTableColumnsWithIdentifiers:shownColumns];
-    /*
+    
     // the added table column's content is not correct during the transition; -reloadData doesn't help
     NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
     imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
@@ -415,7 +415,7 @@
     [finalImage release];
     [initialImage release];
     
-    [animation autorelease];*/
+    [animation autorelease];
 }
 
 - (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
