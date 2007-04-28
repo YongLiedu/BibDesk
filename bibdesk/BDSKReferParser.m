@@ -217,7 +217,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
             if([sourceLine length] >= 4)
                 value = [[sourceLine substringWithRange:NSMakeRange(3, [sourceLine length] - 3)] stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
             else
-                [NSException raise:NSInternalInconsistencyException format:@"Unexpected short line"];
+                value = @"";
             
 			[mutableValue setString:value];                
 			
