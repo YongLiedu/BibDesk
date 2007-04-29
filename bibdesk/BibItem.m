@@ -2260,7 +2260,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableString *result = [[[NSMutableString alloc] initWithCapacity:([thePubFields count] * 10)] autorelease];
     
     [result appendString:[self citeKey]];
-    [result appendString:@" "];
+    [result appendString:@"|"];
     
     BibItem *parent = [self crossrefParent];
 
@@ -2272,7 +2272,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         while(key = [keyEnum nextObject]){
             [result appendString:[self valueOfField:key inherit:YES]];
-            [result appendString:@" "];
+            [result appendString:@"|"];
         }
                 
     } else {
@@ -2281,7 +2281,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         while(value = [pubFieldsE nextObject]){
             [result appendString:value];
-            [result appendString:@" "];
+            [result appendString:@"|"];
         }
     }       
     

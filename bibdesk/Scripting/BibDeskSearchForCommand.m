@@ -197,13 +197,18 @@ There could be other extensions, like matching for every word with conjunction o
 	BibAuthor *auth = nil;
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:20];	
 
-	while(auth = [authEnum nextObject])
+	while(auth = [authEnum nextObject]) {
 		[string appendString:[auth lastName]];
-	
+        [string appendString:@"|"];
+	}
+    
     // these are all guaranteed to be non-nil
     [string appendString:[self citeKey]];
+    [string appendString:@"|"];
     [string appendString:[self displayTitle]];
+    [string appendString:@"|"];
     [string appendString:[self keywords]];
+    [string appendString:@"|"];
 
 	Boolean result = CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL);
     [string release];
