@@ -68,6 +68,7 @@
     [[searchField cell] setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search %@", @"search group field placeholder"), name ? name : @""]];
     [searchField setFormatter:[group searchStringFormatter]];
     [searchField selectText:self];
+    textChanged = NO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSearchGroupUpdatedNotification:) name:BDSKSearchGroupUpdatedNotification object:group];
 }
 
