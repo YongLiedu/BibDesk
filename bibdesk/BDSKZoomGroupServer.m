@@ -281,8 +281,16 @@ static NSString *BDSKDCXMLString = @"DC XML";
             for (i = 0; i < iMax; i++) {
                 record = [[records objectAtIndex:i] rawString];
                 stringType = [self stringTypeForRecordString:record];
-                if (anItem = [[BDSKStringParser itemsFromString:record ofType:stringType error:NULL] lastObject])
-                    [pubs addObject:anItem];
+                anItem = [[BDSKStringParser itemsFromString:record ofType:stringType error:NULL] lastObject];
+                if (anItem == nil) {
+                    record = [[records objectAtIndex:i] renderedString];
+                    anItem = [[BibItem alloc] initWithType:BDSKBookString
+                                                  fileType:BDSKBibtexString
+                                                   citeKey:nil
+                                                 pubFields:[NSDictionary dictionaryWithObjectsAndKeys:record, BDSKAnnoteString, nil]
+                                                     isNew:YES];
+                }
+                [pubs addObject:anItem];
             }
         }
         

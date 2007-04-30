@@ -431,20 +431,20 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 - (BOOL)isMARCString{
     unsigned fieldTerminator = 0x1E;
-    NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z]{3}[ a]{2}22[0-9]{5}[ 1-8uz][ a-z][ r]4500([0-9]{12})+%C", fieldTerminator];
+    NSString *pattern = [NSString stringWithFormat:@"^[0-9]{5}[a-z]{3}[ a]{2}22[0-9]{5}[ 1-8uz][ a-z][ r]45[ 0]0([0-9]{12})+%C", fieldTerminator];
     AGRegex *regex = [AGRegex regexWithPattern:pattern];
     
     return nil != [regex findInString:self];
 }
 
 - (BOOL)isFormattedMARCString{
-    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a]{2}22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]4500\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a]{2}22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
     
     return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (BOOL)isMARCXMLString{
-    AGRegex *regex = [AGRegex regexWithPattern:@"<record( xmlns=\"[^<>\"]*\")?>\n *<leader>[ 0-9]{5}[a-z]{3}[ a]{2}22[ 0-9]{5}[ 1-8uz][ a-z][ r]4500</leader>\n *<controlfield tag=\"00[0-9]\">"];
+    AGRegex *regex = [AGRegex regexWithPattern:@"<record( xmlns=\"[^<>\"]*\")?>\n *<leader>[ 0-9]{5}[a-z]{3}[ a]{2}22[ 0-9]{5}[ 1-8uz][ a-z][ r]45[ 0]0</leader>\n *<controlfield tag=\"00[0-9]\">"];
     
     return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
 }
@@ -472,7 +472,7 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 }
 
 - (NSString *)stringByFixingFormattedMARCStart{
-    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[0-9]{5}[a-z]{3}[ \\-a]{2}22[0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]4500\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
+    AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[0-9]{5}[a-z]{3}[ \\-a]{2}22[0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
     unsigned start = [[regex findInString:self] range].location;
     return start == 0 ? self : [self substringFromIndex:start];
 }
