@@ -96,6 +96,7 @@
 - (IBAction)changeSearchTerm:(id)sender {
     [group setSearchTerm:[sender stringValue]];
     [group setHistory:[sender recentSearches]];
+    textChanged = NO;
 }
 
 - (IBAction)nextSearch:(id)sender {
@@ -114,8 +115,15 @@
     return YES;
 }
 
+- (void)controlTextDidChange:(NSNotification *)aNotification {
+    if ([group isRetrieving])
+        textChanged = YES;
+    else
+        [searchButton setEnabled:YES];
+}
+
 - (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification{
-    [searchButton setEnabled:[group isRetrieving] == NO];
+    [searchButton setEnabled:[group isRetrieving] == NO && ([group hasMoreResults] || textChanged)];
 }
 
 @end

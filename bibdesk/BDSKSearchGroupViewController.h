@@ -47,6 +47,7 @@
     IBOutlet NSButton *searchButton;
     
     BDSKSearchGroup *group;
+    BOOL textChanged;
 }
 
 - (NSView *)view;

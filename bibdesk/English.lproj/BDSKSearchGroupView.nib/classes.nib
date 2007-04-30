@@ -1,76 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>IBClasses</key>
-	<array>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKCollapsibleView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>BDSKContainerView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKContainerView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>contentView</key>
-				<string>id</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKGradientView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>NSView</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>BDSKEdgeView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>BDSKContainerView</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>changeSearchTerm</key>
-				<string>id</string>
-				<key>nextSearch</key>
-				<string>id</string>
-				<key>searchHelp</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>BDSKSearchGroupViewController</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>edgeView</key>
-				<string>BDSKEdgeView</string>
-				<key>searchButton</key>
-				<string>NSButton</string>
-				<key>searchField</key>
-				<string>NSSearchField</string>
-				<key>view</key>
-				<string>BDSKCollapsibleView</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSWindowController</string>
-		</dict>
-	</array>
-	<key>IBVersion</key>
-	<string>1</string>
-</dict>
-</plist>
+{
+    IBClasses = (
+        {
+            CLASS = BDSKCollapsibleView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = BDSKContainerView; 
+        }, 
+        {
+            CLASS = BDSKContainerView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {contentView = id; }; 
+            SUPERCLASS = NSView; 
+        }, 
+        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            ACTIONS = {changeSearchTerm = id; nextSearch = id; searchHelp = id; }; 
+            CLASS = BDSKSearchGroupViewController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                edgeView = BDSKEdgeView; 
+                searchButton = NSButton; 
+                searchField = NSSearchField; 
+                view = BDSKCollapsibleView; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }
+    ); 
+    IBVersion = 1; 
+}
