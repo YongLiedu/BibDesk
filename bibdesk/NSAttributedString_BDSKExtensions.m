@@ -80,6 +80,7 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
         
         startLoc = cmdRange.location;
         endLoc = NSNotFound;
+        searchRange = NSMakeRange(startLoc, NSMaxRange(range) - startLoc);
         
         // see if this is a font command
         NSFontTraitMask newTrait = [fontManager fontTraitMaskForTeXStyle:texStyle];
@@ -88,7 +89,7 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
         if (0 != newTrait) {
             
             // remember, we deleted our command, but not the brace
-            if([mutableString characterAtIndex:startLoc] == '{' && (endLoc = [mutableString indexOfRightBraceMatchingLeftBraceAtIndex:startLoc]) != NSNotFound){
+            if([mutableString characterAtIndex:startLoc] == '{' && (endLoc = [mutableString indexOfRightBraceMatchingLeftBraceInRange:searchRange]) != NSNotFound){
                 
                 // have to delete the braces as we go along, or else ranges will be hosed after deleting at the end
                 [mutableString deleteCharactersInRange:NSMakeRange(startLoc, 1)];

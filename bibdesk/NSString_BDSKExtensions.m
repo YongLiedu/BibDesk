@@ -264,11 +264,18 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return self;
 }
 
-- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned)startLoc
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc
+{
+    return [self indexOfRightBraceMatchingLeftBraceInRange:NSMakeRange(startLoc, [self length] - startLoc)];
+}
+
+- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
 {
     
     CFStringInlineBuffer inlineBuffer;
     CFIndex length = CFStringGetLength((CFStringRef)self);
+    CFIndex startLoc = range.location;
+    CFIndex endLoc = NSMaxRange(range);
     CFIndex cnt;
     BOOL matchFound = NO;
     
@@ -280,7 +287,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
         [NSException raise:NSInternalInconsistencyException format:@"character at index %i is not a brace", startLoc];
     
     // we don't consider escaped braces yet
-    for(cnt = startLoc; cnt < length; cnt++){
+    for(cnt = startLoc; cnt < endLoc; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
         if(ch == '\\')
             cnt++;

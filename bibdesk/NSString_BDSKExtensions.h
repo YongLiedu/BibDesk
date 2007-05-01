@@ -187,14 +187,16 @@
 - (NSString *)localizedFieldName;
 
 /*!
-@method     indexOfRightBraceMatchingLeftBraceAtIndex:
+@method     indexOfRightBraceMatchingLeftBraceInRange:
 @abstract   Counts curly braces from left-to-right, in order to find a match for a left brace <tt>{</tt>.
 @discussion Raises an exception if the character at <tt>startLoc</tt> is not a brace, and escaped braces are not (yet?) considered.
 An inline buffer is used for speed in accessing each character.
-@param      startLoc The index of the starting brace character.
+@param      range The range to search for matching braces, the first character should be the left brace.
 @result     The index of the matching brace character.
 */
-- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned)startLoc;
+- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
+
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc;
     
     /*!
     @method     isStringTeXQuotingBalancedWithBraces:connected:
