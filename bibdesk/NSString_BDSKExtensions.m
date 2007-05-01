@@ -274,7 +274,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     CFStringInitInlineBuffer((CFStringRef)self, &inlineBuffer, CFRangeMake(0, length));
     UniChar ch;
-    int rb = 0, lb = 0;
+    int nesting = 0;
     
     if(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, startLoc) != '{')
         [NSException raise:NSInternalInconsistencyException format:@"character at index %i is not a brace", startLoc];
@@ -282,11 +282,13 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     // we don't consider escaped braces yet
     for(cnt = startLoc; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(ch == '{')
-            rb++;
-        if(ch == '}')
-            lb++;
-        if(rb == lb){
+        if(ch == '\\')
+            cnt++;
+        else if(ch == '{')
+            nesting++;
+        else if(ch == '}')
+            nesting--;
+        if(nesting == 0){
             //NSLog(@"match found at index %i", cnt);
             matchFound = YES;
             break;
