@@ -76,7 +76,9 @@ static int recursionDepth = 0;
     [scriptItem setSubmenu:newMenu];
     [newMenu setDelegate:[BDSKScriptMenuController sharedInstance]];
     [newMenu release];
-    [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
+    int itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
+    if (itemIndex > 0)
+        [[NSApp mainMenu] insertItem:scriptItem atIndex:itemIndex];
     [scriptItem release];
 }    
 
