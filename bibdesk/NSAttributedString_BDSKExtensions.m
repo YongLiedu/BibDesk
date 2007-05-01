@@ -42,9 +42,9 @@
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "BDSKFontManager.h"
 
-static NSString *__rangeKey = @"__BDSKRange";
+static NSString *BDSKRangeKey = @"__BDSKRange";
 
-static NSArray *copyAttributeDictionariesAndFixString(NSMutableString *mutableString, NSDictionary *attributes)
+static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDictionaries, NSMutableString *mutableString, NSDictionary *attributes, NSRange *rangePtr)
 {
     OBASSERT(nil != mutableString);
     
@@ -59,13 +59,13 @@ static NSArray *copyAttributeDictionariesAndFixString(NSMutableString *mutableSt
     if (font == nil)
         font = [NSFont systemFontOfSize:0];
     
-    NSRange searchRange = NSMakeRange(0, [mutableString length]); // starting value; changes as we change the string
+    NSRange range = *rangePtr;
+    NSRange searchRange = range;
     NSRange cmdRange;
     NSRange styleRange;
     unsigned startLoc; // starting character index to apply tex attributes
     unsigned endLoc;   // ending index to apply tex attributes
     
-    NSMutableArray *attributeDictionaries = [[NSMutableArray alloc] init];
     CFAllocatorRef alloc = CFGetAllocator(mutableString);
     
     while( (cmdRange = [mutableString rangeOfTeXCommandInRange:searchRange]).location != NSNotFound){
@@ -76,7 +76,10 @@ static NSArray *copyAttributeDictionariesAndFixString(NSMutableString *mutableSt
         // delete the command, now that we know what it was
         [mutableString deleteCharactersInRange:cmdRange];
         
+        range.length -= cmdRange.length;
+        
         startLoc = cmdRange.location;
+        endLoc = NSNotFound;
         
         // see if this is a font command
         NSFontTraitMask newTrait = [fontManager fontTraitMaskForTeXStyle:texStyle];
@@ -93,30 +96,42 @@ static NSArray *copyAttributeDictionariesAndFixString(NSMutableString *mutableSt
                 // deleting the left brace just shifted everything to the left
                 [mutableString deleteCharactersInRange:NSMakeRange(endLoc - 1, 1)];
                 
+                range.length -= 2;
+                
+                // account for the braces, since we'll be removing them
+                styleRange = NSMakeRange(startLoc, endLoc - startLoc - 1);
+                
+                // recursively parse the part inside the braces, can change styleRange
+                BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attributes, &styleRange);
+                
+                range.length -= endLoc - startLoc - 1 - styleRange.length;
+                endLoc = NSMaxRange(styleRange);
+                
                 attrs = [attributes mutableCopy];
                 [attrs setObject:[fontManager convertFont:font toHaveTrait:newTrait]
                           forKey:NSFontAttributeName];
                 
-                // account for the braces, since we'll be removing them
-                styleRange = NSMakeRange(startLoc, (endLoc - startLoc - 1));
-                
-                [attrs setObject:[NSValue valueWithRange:styleRange] forKey:__rangeKey];
+                [attrs setObject:[NSValue valueWithRange:styleRange] forKey:BDSKRangeKey];
                 [attributeDictionaries addObject:attrs];
                 [attrs release];
             }
         }
+        
+        if (endLoc == NSNotFound)
+            endLoc = startLoc + 1;
+        
         // new range, since we've altered the string (we don't use endLoc because of possibly nested commands)
-        searchRange = NSMakeRange(startLoc, [mutableString length] - startLoc);
+        searchRange = NSMakeRange(endLoc, NSMaxRange(range) - endLoc);
     }
     
-    return attributeDictionaries;
+    *rangePtr = range;
 }
 
-static void applyAttributesToString(const void *value, void *context)
+static void BDSKApplyAttributesToString(const void *value, void *context)
 {
     NSDictionary *dict = (void *)value;
     NSMutableAttributedString *mas = context;
-    [mas addAttributes:dict range:[[dict objectForKey:__rangeKey] rangeValue]];    
+    [mas addAttributes:dict range:[[dict objectForKey:BDSKRangeKey] rangeValue]];    
 }
 
 
@@ -136,7 +151,9 @@ static void applyAttributesToString(const void *value, void *context)
     NSMutableString *mutableString = [string mutableCopy];
     
     // Parse the TeX commands and remove them from the string, manipulating the NSMutableString as much as possible, since -[NSMutableAttributedString mutableString] returns a proxy object that's more expensive.
-    NSArray *attributeDictionaries = copyAttributeDictionariesAndFixString(mutableString, attributes);
+    NSMutableArray *attributeDictionaries = [[NSMutableArray alloc] init];
+    NSRange range = NSMakeRange(0, [mutableString length]);
+    BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attributes, &range);
     
     unsigned numberOfDictionaries = [attributeDictionaries count];
     if (numberOfDictionaries > 0) {
@@ -148,7 +165,7 @@ static void applyAttributesToString(const void *value, void *context)
         mas = [[NSMutableAttributedString alloc] initWithString:mutableString attributes:attributes]; 
 
         // now apply the previously determined attributes and ranges to the attributed string
-        CFArrayApplyFunction((CFArrayRef)attributeDictionaries, CFRangeMake(0, numberOfDictionaries), applyAttributesToString, mas);
+        CFArrayApplyFunction((CFArrayRef)attributeDictionaries, CFRangeMake(0, numberOfDictionaries), BDSKApplyAttributesToString, mas);
         
         // not all of the braces were deleted when parsing the commands
         [[mas mutableString] deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
