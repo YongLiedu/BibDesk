@@ -101,15 +101,15 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
                 // account for the braces, since we'll be removing them
                 styleRange = NSMakeRange(startLoc, endLoc - startLoc - 1);
                 
-                // recursively parse the part inside the braces, can change styleRange
-                BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attributes, &styleRange);
-                
-                range.length -= endLoc - startLoc - 1 - styleRange.length;
-                endLoc = NSMaxRange(styleRange);
-                
                 attrs = [attributes mutableCopy];
                 [attrs setObject:[fontManager convertFont:font toHaveTrait:newTrait]
                           forKey:NSFontAttributeName];
+                
+                // recursively parse the part inside the braces, can change styleRange
+                BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attrs, &styleRange);
+                
+                range.length -= endLoc - startLoc - 1 - styleRange.length;
+                endLoc = NSMaxRange(styleRange);
                 
                 [attrs setObject:[NSValue valueWithRange:styleRange] forKey:BDSKRangeKey];
                 [attributeDictionaries addObject:attrs];
