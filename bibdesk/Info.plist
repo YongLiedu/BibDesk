@@ -422,9 +422,9 @@
 				<key>ordering</key>
 				<string>9</string>
 				<key>shortTitle</key>
-				<string>AutoFile</string>
+				<string>AutoFile [SHORT]</string>
 				<key>title</key>
-				<string>AutoFile</string>
+				<string>AutoFile [LONG]</string>
 			</dict>
 			<key>BibPref_Cite</key>
 			<dict>
@@ -471,9 +471,9 @@
 				<key>ordering</key>
 				<string>2</string>
 				<key>shortTitle</key>
-				<string>Citation</string>
+				<string>Citation [SHORT]</string>
 				<key>title</key>
-				<string>Citation Behavior</string>
+				<string>Citation [LONG]</string>
 			</dict>
 			<key>BibPref_CiteKey</key>
 			<dict>
@@ -505,9 +505,9 @@
 				<key>ordering</key>
 				<string>8</string>
 				<key>shortTitle</key>
-				<string>Cite Key</string>
+				<string>Cite Key [SHORT]</string>
 				<key>title</key>
-				<string>Cite Key Format</string>
+				<string>Cite Key [LONG]</string>
 			</dict>
 			<key>BibPref_Crossref</key>
 			<dict>
@@ -544,9 +544,9 @@
 				<key>ordering</key>
 				<string>7</string>
 				<key>shortTitle</key>
-				<string>Crossref</string>
+				<string>Crossref [SHORT]</string>
 				<key>title</key>
-				<string>Crossref</string>
+				<string>Crossref [LONG]</string>
 			</dict>
 			<key>BibPref_Defaults</key>
 			<dict>
@@ -614,9 +614,9 @@
 				<key>ordering</key>
 				<string>6</string>
 				<key>shortTitle</key>
-				<string>Defaults</string>
+				<string>Defaults [SHORT]</string>
 				<key>title</key>
-				<string>Defaults</string>
+				<string>Defaults [LONG]</string>
 			</dict>
 			<key>BibPref_Display</key>
 			<dict>
@@ -684,9 +684,9 @@
 				<key>ordering</key>
 				<string>1</string>
 				<key>shortTitle</key>
-				<string>Display</string>
+				<string>Display [SHORT]</string>
 				<key>title</key>
-				<string>Display</string>
+				<string>Display [LONG]</string>
 			</dict>
 			<key>BibPref_Export</key>
 			<dict>
@@ -716,9 +716,9 @@
 				<key>ordering</key>
 				<string>5</string>
 				<key>shortTitle</key>
-				<string>Templates</string>
+				<string>Templates [SHORT]</string>
 				<key>title</key>
-				<string>Template Files</string>
+				<string>Templates [LONG]</string>
 			</dict>
 			<key>BibPref_Files</key>
 			<dict>
@@ -762,9 +762,9 @@
 				<key>ordering</key>
 				<string>3</string>
 				<key>shortTitle</key>
-				<string>Files</string>
+				<string>Files [SHORT]</string>
 				<key>title</key>
-				<string>Opening and Saving</string>
+				<string>Files [LONG]</string>
 			</dict>
 			<key>BibPref_General</key>
 			<dict>
@@ -955,9 +955,9 @@
 				<key>ordering</key>
 				<string>0</string>
 				<key>shortTitle</key>
-				<string>General</string>
+				<string>General [SHORT]</string>
 				<key>title</key>
-				<string>General Application Behavior</string>
+				<string>General [LONG]</string>
 			</dict>
 			<key>BibPref_InputManager</key>
 			<dict>
@@ -981,9 +981,9 @@
 				<key>ordering</key>
 				<string>91</string>
 				<key>shortTitle</key>
-				<string>Completion</string>
+				<string>Completion [SHORT]</string>
 				<key>title</key>
-				<string>Autocompletion Plugin</string>
+				<string>Completion [LONG]</string>
 			</dict>
 			<key>BibPref_ScriptHooks</key>
 			<dict>
@@ -1007,9 +1007,9 @@
 				<key>ordering</key>
 				<string>92</string>
 				<key>shortTitle</key>
-				<string>Script Hooks</string>
+				<string>Script Hooks [SHORT]</string>
 				<key>title</key>
-				<string>Script Hooks</string>
+				<string>Script Hooks [LONG]</string>
 			</dict>
 			<key>BibPref_Sharing</key>
 			<dict>
@@ -1039,9 +1039,9 @@
 				<key>ordering</key>
 				<string>5</string>
 				<key>shortTitle</key>
-				<string>Sharing</string>
+				<string>Sharing [SHORT]</string>
 				<key>title</key>
-				<string>Sharing Files</string>
+				<string>Sharing [LONG]</string>
 			</dict>
 			<key>BibPref_TeX</key>
 			<dict>
@@ -1073,9 +1073,9 @@
 				<key>ordering</key>
 				<string>4</string>
 				<key>shortTitle</key>
-				<string>Preview</string>
+				<string>Preview [SHORT]</string>
 				<key>title</key>
-				<string>TeX - Typeset Preview</string>
+				<string>Preview [LONG]</string>
 			</dict>
 		</dict>
 	</dict>

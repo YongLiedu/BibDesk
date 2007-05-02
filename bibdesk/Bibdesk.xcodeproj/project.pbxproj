@@ -641,6 +641,7 @@
 		F9484D8E08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */; };
 		F9484D8F08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h in Headers */ = {isa = PBXBuildFile; fileRef = F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */; };
 		F9484D9008D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */; };
+		F94AA36B0BE8FD87007BCE2B /* Preferences.strings in Resources */ = {isa = PBXBuildFile; fileRef = F94AA3690BE8FD87007BCE2B /* Preferences.strings */; };
 		F94DB0F80B3E2FA1006F37A2 /* BDSKSearchGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = F94DB0F60B3E2FA1006F37A2 /* BDSKSearchGroup.h */; };
 		F94DB0F90B3E2FA1006F37A2 /* BDSKSearchGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */; };
 		F94DE74B09CB46FF00B5FD51 /* BDSKPersistentSearch.h in Headers */ = {isa = PBXBuildFile; fileRef = F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */; };
@@ -831,6 +832,13 @@
 			remoteGlobalIDString = 8DD76F960486AA7600D96B5E;
 			remoteInfo = SkimNotesAgent;
 		};
+		F94AA3990BE900BC007BCE2B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D5B49AC048680CD000E48DA /* BibDeskInputManager */;
+			remoteInfo = BibDeskInputManager;
+		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
@@ -935,13 +943,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = BTParse;
-		};
-		F9DE7866097F29D00033FBA8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
-			remoteInfo = BibDeskInputManager;
 		};
 		F9E0F88A085B9AFA00006A72 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1151,7 +1152,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1610,6 +1611,7 @@
 		F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFAppleScriptHandlerAdditionsCore.m; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.m; sourceTree = "<group>"; };
 		F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "KFASHandlerAdditions-TypeTranslation.h"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.h"; sourceTree = "<group>"; };
 		F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "KFASHandlerAdditions-TypeTranslation.m"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.m"; sourceTree = "<group>"; };
+		F94AA36A0BE8FD87007BCE2B /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/Preferences.strings; sourceTree = "<group>"; };
 		F94DB0F60B3E2FA1006F37A2 /* BDSKSearchGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroup.h; sourceTree = "<group>"; };
 		F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroup.m; sourceTree = "<group>"; };
 		F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPersistentSearch.h; sourceTree = "<group>"; };
@@ -1920,6 +1922,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F94AA3690BE8FD87007BCE2B /* Preferences.strings */,
 				F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */,
 				CE97A3B90A28F19A00CF2DF3 /* Templates */,
 				F9022DDA0758089500C3F701 /* Images */,
@@ -3133,7 +3136,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				F9DE7867097F29D00033FBA8 /* PBXTargetDependency */,
 				F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */,
 				F9EF0CDA0B4EFC7700A1F282 /* PBXTargetDependency */,
 				F9EF0CD80B4EFC6F00A1F282 /* PBXTargetDependency */,
@@ -3143,6 +3145,7 @@
 				F9EF0CDE0B4EFC8100A1F282 /* PBXTargetDependency */,
 				CE87D7E80BA964D50027BBDD /* PBXTargetDependency */,
 				F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */,
+				F94AA39A0BE900BC007BCE2B /* PBXTargetDependency */,
 			);
 			name = BibDesk;
 			productInstallPath = "$(HOME)/Applications";
@@ -3518,6 +3521,7 @@
 				CE43865E0BB8274600A56987 /* SearchBookmarksWindow.nib in Resources */,
 				F92B91C00BC6B51B008D5BC3 /* SearchButtonView.nib in Resources */,
 				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
+				F94AA36B0BE8FD87007BCE2B /* Preferences.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3960,15 +3964,15 @@
 			name = SkimNotesAgent;
 			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
 		};
+		F94AA39A0BE900BC007BCE2B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BibDeskInputManager;
+			targetProxy = F94AA3990BE900BC007BCE2B /* PBXContainerItemProxy */;
+		};
 		F98870D807580EA1001D4D49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
 			targetProxy = F98870D707580EA1001D4D49 /* PBXContainerItemProxy */;
-		};
-		F9DE7867097F29D00033FBA8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BibDeskInputManager;
-			targetProxy = F9DE7866097F29D00033FBA8 /* PBXContainerItemProxy */;
 		};
 		F9E0F88B085B9AFA00006A72 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4477,6 +4481,14 @@
 				F92F4E440788DEC5001B8F82 /* English */,
 			);
 			name = BibPref_Files.nib;
+			sourceTree = "<group>";
+		};
+		F94AA3690BE8FD87007BCE2B /* Preferences.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F94AA36A0BE8FD87007BCE2B /* English */,
+			);
+			name = Preferences.strings;
 			sourceTree = "<group>";
 		};
 		F95D3FA509DDF51D00D793A6 /* BibPref_Sharing.nib */ = {
