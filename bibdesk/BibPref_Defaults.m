@@ -40,6 +40,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "NSMenu_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -169,6 +170,7 @@ static NSSet *alwaysDisabledFields = nil;
     [fieldNameFormatter release];
     [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
     
+    NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
     NSEnumerator *dictEnum = [pdfViewers reverseObjectEnumerator];
     NSDictionary *dict;
@@ -179,8 +181,10 @@ static NSSet *alwaysDisabledFields = nil;
     for(i = 0; i < iMax; i++){
         NSDictionary *dict = [pdfViewers objectAtIndex:i];
         NSString *bundleID = [dict objectForKey:@"bundleID"];
+        NSString *appPath = [sws absolutePathForAppBundleWithIdentifier:bundleID];
         [pdfViewerPopup insertItemWithTitle:[dict objectForKey:@"name"] atIndex:i + 2];
         [[pdfViewerPopup itemAtIndex:i + 2] setRepresentedObject:bundleID];
+        [(NSMenuItem *)[pdfViewerPopup itemAtIndex:i + 2] setImageAndSize:[sws iconForFile:appPath]];
         if([pdfViewerID isEqualToString:bundleID])
             index = i + 2;
     }
@@ -489,9 +493,11 @@ static NSSet *alwaysDisabledFields = nil;
             }
         }
         if(i == iMax){
-            NSString *name = [[[[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID] lastPathComponent] stringByDeletingPathExtension];
+            NSString *appPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID];
+            NSString *name = [[appPath lastPathComponent] stringByDeletingPathExtension];
             [pdfViewerPopup insertItemWithTitle:name atIndex:2];
             [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:bundleID];
+            [(NSMenuItem *)[pdfViewerPopup itemAtIndex:2] setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:appPath]];
             [pdfViewerPopup selectItemAtIndex:2];
         }
     }else{

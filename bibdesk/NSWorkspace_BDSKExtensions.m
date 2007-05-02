@@ -272,15 +272,6 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
 }
 
-- (NSString *)displayNameForApplicationWithBundleIdentifier:(NSString *)bundleID {
-    CFURLRef appURL = NULL;
-    CFStringRef name = NULL;
-    OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
-    if(err == noErr)
-        err = LSCopyDisplayNameForURL(appURL, &name);
-    return [(NSString *)name autorelease];
-}
-
 - (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
 {
     NSParameterAssert(aURL);
