@@ -47,13 +47,12 @@
 {
     BOOL isEntrez = [aType isEqualToString:BDSKSearchGroupEntrez];
     BOOL isZoom = [aType isEqualToString:BDSKSearchGroupZoom];
-    BOOL isOAI = [aType isEqualToString:BDSKSearchGroupOAI];
     
     return [[[[self class] alloc] initWithType:aType 
                                           name:NSLocalizedString(@"New Server", @"")
-                                          host:isEntrez ? nil : isZoom ? @"host.domain.com" : @"http://an.oa.org/OAI-script"
+                                          host:isEntrez ? nil : @"host.domain.com"
                                           port:isZoom ? @"0" : nil 
-                                      database:isOAI ? nil : @"database" 
+                                      database:@"database" 
                                        options:isZoom ? [NSDictionary dictionary] : nil] autorelease];
 }
 
@@ -150,8 +149,6 @@
         [info setValue:[self password] forKey:@"password"];
         [info setValue:[self username] forKey:@"username"];
         [info setValue:[self options] forKey:@"options"];
-    } else if ([self isOAI]) {
-        [info setValue:[self host] forKey:@"host"];
     }
     return info;
 }
@@ -180,7 +177,6 @@
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
-- (BOOL)isOAI { return [[self type] isEqualToString:BDSKSearchGroupOAI]; }
 
 @end
 
@@ -268,11 +264,7 @@
 - (BOOL)validateHost:(id *)value error:(NSError **)error {
     NSString *string = *value;
     NSRange range = [string rangeOfString:@"://"];
-    if ([self isOAI]) {
-        if(range.location == NSNotFound){
-            string = [NSString stringWithFormat:@"http://%@", string];
-        }
-    } else if ([self isZoom]) {
+    if ([self isZoom]) {
         if(range.location != NSNotFound){
             // ZOOM gets confused when the host has a protocol
             string = [string substringFromIndex:NSMaxRange(range)];

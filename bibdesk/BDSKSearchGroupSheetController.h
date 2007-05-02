@@ -96,7 +96,6 @@
 - (void)setEditable:(BOOL)flag;
 - (BOOL)isEditable;
 - (BOOL)isEntrez;
-- (BOOL)isOai;
 - (BOOL)isZoom;
 
 - (void)setType:(NSString *)t;

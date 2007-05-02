@@ -39,7 +39,6 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKEntrezGroupServer.h"
 #import "BDSKZoomGroupServer.h"
-#import "BDSKOAIGroupServer.h"
 #import "BDSKMacroResolver.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKPublicationsArray.h"
@@ -49,7 +48,6 @@
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
-NSString *BDSKSearchGroupOAI = @"oai";
 
 @implementation BDSKSearchGroup
 
@@ -258,8 +256,6 @@ NSString *BDSKSearchGroupOAI = @"oai";
         server = [[BDSKEntrezGroupServer alloc] initWithGroup:self serverInfo:info];
     else if ([type isEqualToString:BDSKSearchGroupZoom])
         server = [[BDSKZoomGroupServer alloc] initWithGroup:self serverInfo:info];
-    else if ([type isEqualToString:BDSKSearchGroupOAI])
-        server = [[BDSKOAIGroupServer alloc] initWithGroup:self serverInfo:info];
     else
         OBASSERT_NOT_REACHED("unknown search group type");
 }

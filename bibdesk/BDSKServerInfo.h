@@ -71,7 +71,6 @@
 
 - (BOOL)isEntrez;
 - (BOOL)isZoom;
-- (BOOL)isOAI;
 
 @end
 

@@ -62,14 +62,13 @@ static BOOL isSearchFileAtPath(NSString *path)
 + (void)initialize {
     [self setKeys:[NSArray arrayWithObjects:@"type", nil] triggerChangeNotificationsForDependentKey:@"entrez"];
     [self setKeys:[NSArray arrayWithObjects:@"type", nil] triggerChangeNotificationsForDependentKey:@"zoom"];
-    [self setKeys:[NSArray arrayWithObjects:@"type", nil] triggerChangeNotificationsForDependentKey:@"oai"];
     
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
     NSString *path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:SERVERS_FILENAME];
     
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:path];
-    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:3];
-    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupOAI, nil] objectEnumerator];
+    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:2];
+    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, nil] objectEnumerator];
     NSString *type;
     
     while (type = [typeEnum nextObject]) {
@@ -87,7 +86,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     [searchGroupServerFiles release];
     searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
-        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupOAI, nil];
+        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, nil];
     
     NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
     BOOL isDir = NO;
@@ -123,7 +122,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 {
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:SERVERS_FILENAME]];
     NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:[serverDicts count]];
-    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupOAI, nil] objectEnumerator];
+    NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, nil] objectEnumerator];
     NSString *type;
     
     while (type = [typeEnum nextObject]) {
@@ -159,7 +158,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     [searchGroupServerFiles release];
     searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
-        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupOAI, nil];
+        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, nil];
 }
 
 + (void)saveServer:(BDSKServerInfo *)serverInfo;
@@ -336,7 +335,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 - (IBAction)selectServerType:(id)sender;
 {
     int t = [[sender selectedCell] tag];
-    [self setType:t == 0 ? BDSKSearchGroupEntrez : t == 1 ? BDSKSearchGroupZoom : BDSKSearchGroupOAI];
+    [self setType:t == 0 ? BDSKSearchGroupEntrez : BDSKSearchGroupZoom];
 }
 
 - (IBAction)selectPredefinedServer:(id)sender;
@@ -507,8 +506,6 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
 
-- (BOOL)isOai { return [[self type] isEqualToString:BDSKSearchGroupOAI]; }
-
 - (BDSKSearchGroup *)group { return group; }
 
 - (BDSKServerInfo *)serverInfo { return serverInfo; }
@@ -557,8 +554,6 @@ static BOOL isSearchFileAtPath(NSString *path)
         message = NSLocalizedString(@"Unable to create a search group with an empty server name or database", @"Informative text in alert dialog when search group is invalid");
     } else if ([self isZoom] && ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo host]] || [NSString isEmptyString:[serverInfo database]] || [[serverInfo port] intValue] == 0)) {
         message = NSLocalizedString(@"Unable to create a search group with an empty server name, address, database or port", @"Informative text in alert dialog when search group is invalid");
-    } else if ([self isOai] && ([NSString isEmptyString:[serverInfo name]] || [NSString isEmptyString:[serverInfo host]])) {
-        message = NSLocalizedString(@"Unable to create a search group with an empty server name or address", @"Informative text in alert dialog when search group is invalid");
     }
     if (message) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty value", @"Message in alert dialog when data for a search group is invalid")

@@ -363,8 +363,6 @@
 		CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEBB8D8709C8B0D90074C79E /* Font.tiff */; };
 		CEBC676E0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */; };
 		CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */; };
-		CEBC70220B4ABDF500CE0B2D /* BDSKOAIGroupServer.h in Headers */ = {isa = PBXBuildFile; fileRef = CEBC70200B4ABDF500CE0B2D /* BDSKOAIGroupServer.h */; };
-		CEBC70230B4ABDF500CE0B2D /* BDSKOAIGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEBC70210B4ABDF500CE0B2D /* BDSKOAIGroupServer.m */; };
 		CED65AB60906BCC6003EED90 /* BDSKScriptHook.h in Headers */ = {isa = PBXBuildFile; fileRef = CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */; };
 		CED65AB70906BCC6003EED90 /* BDSKScriptHook.m in Sources */ = {isa = PBXBuildFile; fileRef = CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */; };
 		CED65AB80906BCC6003EED90 /* BDSKScriptHookManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */; };
@@ -1330,8 +1328,6 @@
 		CEBB8D8709C8B0D90074C79E /* Font.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Font.tiff; path = Images/Font.tiff; sourceTree = "<group>"; };
 		CEBC676C0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupViewController.h; sourceTree = "<group>"; };
 		CEBC676D0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroupViewController.m; sourceTree = "<group>"; };
-		CEBC70200B4ABDF500CE0B2D /* BDSKOAIGroupServer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKOAIGroupServer.h; sourceTree = "<group>"; };
-		CEBC70210B4ABDF500CE0B2D /* BDSKOAIGroupServer.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKOAIGroupServer.m; sourceTree = "<group>"; };
 		CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHook.h; sourceTree = "<group>"; };
 		CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptHook.m; sourceTree = "<group>"; };
 		CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScriptHookManager.h; sourceTree = "<group>"; };
@@ -2201,7 +2197,6 @@
 				CE21D10909208B9D0075E607 /* BDSKGroup.m */,
 				CEEFE6C00B0403E700668BB0 /* BDSKGroupsArray.m */,
 				F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */,
-				CEBC70210B4ABDF500CE0B2D /* BDSKOAIGroupServer.m */,
 				F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */,
 				CE3448000A11302F0026A92A /* BDSKPreviewItem.m */,
 				CE565BBE0AEF848B002F0A24 /* BDSKPublicationsArray.m */,
@@ -2524,7 +2519,6 @@
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				CE34A5710B249E0B00755730 /* BDSKMARCParser.h */,
 				CEF71AD80B91BBCB003A2771 /* BDSKNotesWindowController.h */,
-				CEBC70200B4ABDF500CE0B2D /* BDSKOAIGroupServer.h */,
 				CE22E1CB0A8CCF9C002CEFB8 /* BDSKOrphanedFilesFinder.h */,
 				F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
@@ -3049,7 +3043,6 @@
 				CE9666450B46B70C003BAB9A /* BDSKServerInfo.h in Headers */,
 				CE966C700B47CF25003BAB9A /* BDSKDublinCoreXMLParser.h in Headers */,
 				CEBC676E0B4A845F00CE0B2D /* BDSKSearchGroupViewController.h in Headers */,
-				CEBC70220B4ABDF500CE0B2D /* BDSKOAIGroupServer.h in Headers */,
 				CEAB9F590B4FF20800673AC2 /* BDSKCitationFormatter.h in Headers */,
 				F940D1090B5568E400B5917A /* BDSKReferParser.h in Headers */,
 				CEEA4C6B0B57B0D400434059 /* BDSKBooleanValueTransformer.h in Headers */,
@@ -3924,7 +3917,6 @@
 				CE9666460B46B70C003BAB9A /* BDSKServerInfo.m in Sources */,
 				CE966C710B47CF25003BAB9A /* BDSKDublinCoreXMLParser.m in Sources */,
 				CEBC676F0B4A845F00CE0B2D /* BDSKSearchGroupViewController.m in Sources */,
-				CEBC70230B4ABDF500CE0B2D /* BDSKOAIGroupServer.m in Sources */,
 				CEAB9F5A0B4FF20800673AC2 /* BDSKCitationFormatter.m in Sources */,
 				F940D10A0B5568E400B5917A /* BDSKReferParser.m in Sources */,
 				CEEA4C6A0B57B0D400434059 /* BDSKBooleanValueTransformer.m in Sources */,
