@@ -48,6 +48,7 @@
     IBOutlet NSTableView* defaultFieldsTableView;
     IBOutlet NSButton *editGlobalMacroDefsButton;
     IBOutlet NSMenu *fieldTypeMenu;
+    IBOutlet NSPopUpButton *pdfViewerPopup;
     NSMutableArray *customFieldsArray;
     NSMutableSet *customFieldsSet;
     NSMutableArray *globalMacroFiles;
@@ -64,6 +65,7 @@
 - (IBAction)closeMacroFileWindow:(id)sender;
 - (IBAction)addGlobalMacroFile:(id)sender;
 - (IBAction)delGlobalMacroFiles:(id)sender;
+- (IBAction)changeDefaultPDFViewer:(id)sender;
 
 @end
 

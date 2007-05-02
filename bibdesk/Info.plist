@@ -556,6 +556,8 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKDefaultViewersKey</key>
+					<dict/>
 					<key>BDSKGlobalMacroDefinitionsKey</key>
 					<dict/>
 					<key>BDSKGlobalMacroFilesKey</key>

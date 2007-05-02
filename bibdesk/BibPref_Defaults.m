@@ -38,6 +38,8 @@
 #import "BibTeXParser.h"
 #import "BDSKMacroResolver.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSWorkspace_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -166,6 +168,30 @@ static NSSet *alwaysDisabledFields = nil;
     [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
     [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    
+    NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
+    NSEnumerator *dictEnum = [pdfViewers reverseObjectEnumerator];
+    NSDictionary *dict;
+    NSString *pdfViewerID = [[defaults dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
+    int i, iMax = [pdfViewers count];
+    int index = 0;
+    
+    for(i = 0; i < iMax; i++){
+        NSDictionary *dict = [pdfViewers objectAtIndex:i];
+        NSString *bundleID = [dict objectForKey:@"bundleID"];
+        [pdfViewerPopup insertItemWithTitle:[dict objectForKey:@"name"] atIndex:i + 2];
+        [[pdfViewerPopup itemAtIndex:i + 2] setRepresentedObject:bundleID];
+        if([pdfViewerID isEqualToString:bundleID])
+            index = i + 2;
+    }
+    if(index == 0 && [pdfViewerID length]){
+        NSString *name = [[[[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:pdfViewerID] lastPathComponent] stringByDeletingPathExtension];
+        [pdfViewerPopup insertItemWithTitle:name atIndex:2];
+        [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:pdfViewerID];
+        index = 2;
+    }
+    
+    [pdfViewerPopup selectItemAtIndex:index];
 }
 
 - (void)updatePrefs{
@@ -442,6 +468,68 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (IBAction)showTypeInfoEditor:(id)sender{
 	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self controlBox] window]];
+}
+
+#pragma mark default viewer
+
+- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void  *)contextInfo{
+    NSString *bundleID;
+    if (returnCode == NSOKButton)
+        bundleID = [[NSBundle bundleWithPath:[panel filename]] bundleIdentifier];
+    else
+        bundleID = [[defaults dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
+    
+    if([bundleID length]){
+        int i, iMax = [pdfViewerPopup numberOfItems] - 2;
+        
+        for(i = 2; i < iMax; i++){
+            if([[[pdfViewerPopup itemAtIndex:i] representedObject] isEqualToString:bundleID]){
+                [pdfViewerPopup selectItemAtIndex:i];
+                break;
+            }
+        }
+        if(i == iMax){
+            NSString *name = [[[[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID] lastPathComponent] stringByDeletingPathExtension];
+            [pdfViewerPopup insertItemWithTitle:name atIndex:2];
+            [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:bundleID];
+            [pdfViewerPopup selectItemAtIndex:2];
+        }
+    }else{
+        [pdfViewerPopup selectItemAtIndex:0];
+    }
+    NSMutableDictionary *defaultViewers = [[defaults dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
+    if ([bundleID length])
+        [defaultViewers setObject:bundleID forKey:@"pdf"];
+    else
+        [defaultViewers removeObjectForKey:@"pdf"];
+    [defaults setObject:defaultViewers forKey:BDSKDefaultViewersKey];
+    [defaultViewers release];
+}
+
+- (IBAction)changeDefaultPDFViewer:(id)sender{
+    if([sender indexOfSelectedItem] == [sender numberOfItems] - 1){
+        NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+        [openPanel setCanChooseDirectories:NO];
+        [openPanel setAllowsMultipleSelection:NO];
+        [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
+        
+        [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
+                                     file:nil 
+                                    types:[NSArray arrayWithObjects:@"app", nil]
+                           modalForWindow:[[self controlBox] window]
+                            modalDelegate:self
+                           didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
+                              contextInfo:NULL];
+    }else{
+        NSString *bundleID = [[sender selectedItem] representedObject];
+        NSMutableDictionary *defaultViewers = [[defaults dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
+        if ([bundleID length])
+            [defaultViewers setObject:bundleID forKey:@"pdf"];
+        else
+            [defaultViewers removeObjectForKey:@"pdf"];
+        [defaults setObject:defaultViewers forKey:BDSKDefaultViewersKey];
+        [defaultViewers release];
+    }
 }
 
 #pragma mark BST macro methods

@@ -99,9 +99,16 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     // Find the application that should open this file.  NB: we need to release this URL when we're done with it.
     CFURLRef appURL = NULL;
-	if(noErr == err)
-		err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
-		
+	if(noErr == err){
+        NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
+        NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
+        NSString *bundleID = [defaultViewers objectForKey:extension];
+		if ([bundleID length])
+            err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
+        if(appURL == NULL)
+            err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
+    }
+    
     // convert application location to FSSpec in case we need it
     FSRef appRef;
     CFURLGetFSRef(appURL, &appRef);
@@ -265,6 +272,15 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     return [(id)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL) autorelease];
 }
 
+- (NSString *)displayNameForApplicationWithBundleIdentifier:(NSString *)bundleID {
+    CFURLRef appURL = NULL;
+    CFStringRef name = NULL;
+    OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
+    if(err == noErr)
+        err = LSCopyDisplayNameForURL(appURL, &name);
+    return [(NSString *)name autorelease];
+}
+
 - (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
 {
     NSParameterAssert(aURL);
@@ -299,6 +315,40 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     }
     
     return [(id)defaultEditorURL autorelease];
+}
+
+- (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
+{
+    NSParameterAssert(extension);
+    
+    NSString *theUTI = [self UTIForPathExtension:extension];
+    
+    NSArray *bundleIDs = (NSArray *)LSCopyAllRoleHandlersForContentType((CFStringRef)theUTI, kLSRolesEditor | kLSRolesViewer);
+    
+    NSEnumerator *idEnum = [bundleIDs objectEnumerator];
+    NSString *bundleID;
+    NSMutableSet *set = [[NSMutableSet alloc] init];
+    NSMutableArray *applications = [NSMutableArray array];
+    
+    while(bundleID = [idEnum nextObject]){
+        if ([set containsObject:bundleID]) continue;
+        NSString *name = [[[self absolutePathForAppBundleWithIdentifier:bundleID] lastPathComponent] stringByDeletingPathExtension];
+        if (name == nil) continue;
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:bundleID, @"bundleID", name, @"name", nil];
+        [applications addObject:dict];
+        [dict release];
+        [set addObject:bundleID];
+    }
+    [set release];
+    if(bundleIDs)
+        CFRelease(bundleIDs);
+    
+    // sort by application name
+    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
+    [applications sortUsingDescriptors:[NSArray arrayWithObject:sort]];
+    [sort release];
+    
+    return applications;
 }
 
 - (NSImage *)iconForFileURL:(NSURL *)fileURL;

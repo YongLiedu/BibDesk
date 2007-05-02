@@ -82,6 +82,7 @@ extern NSString *BDSKBooleanFieldsKey;
 extern NSString *BDSKTriStateFieldsKey;
 extern NSString *BDSKCitationFieldsKey;
 extern NSString *BDSKPersonFieldsKey;
+extern NSString *BDSKDefaultViewersKey;
 extern NSString *BDSKOutputTemplateFileKey;
 extern NSString *BDSKMainTableViewFontNameKey;
 extern NSString *BDSKMainTableViewFontSizeKey;

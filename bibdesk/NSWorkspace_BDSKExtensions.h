@@ -71,8 +71,11 @@
 */
 - (NSString *)UTIForPathExtension:(NSString *)extension;
 
+- (NSString *)displayNameForApplicationWithBundleIdentifier:(NSString *)bundleID;
+
 - (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
 - (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
+- (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
 - (NSImage *)iconForFileURL:(NSURL *)fileURL;
 - (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
 
