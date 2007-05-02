@@ -3636,10 +3636,13 @@
 				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
 				"$(SRCROOT)/BibDesk Help/applehelp.init",
+				"$(SRCROOT)/French.lproj/BibDesk Help/version.texi",
+				"$(SRCROOT)/French.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
 			);
 			outputPaths = (
 				"$(SRCROOT)/English.lproj/BibDesk Help/BibDesk Help.html",
+				"$(SRCROOT)/French.lproj/BibDesk Help/BibDesk Help.html",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
