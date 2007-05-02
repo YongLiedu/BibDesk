@@ -399,13 +399,13 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
 {
     CFRange cmdStartRange;
-    CFIndex maxLen = CFStringGetLength((CFStringRef)self);    
+    CFIndex endLoc = NSMaxRange(searchRange);    
     
-    if(BDStringFindCharacter((CFStringRef)self, '\\', CFRangeMake(0, maxLen), &cmdStartRange) == FALSE)
+    if(BDStringFindCharacter((CFStringRef)self, '\\', *(CFRange*)&searchRange, &cmdStartRange) == FALSE)
         return NSMakeRange(NSNotFound, 0);
     
     CFRange lbraceRange;
-    CFRange cmdSearchRange = CFRangeMake(cmdStartRange.location, maxLen - cmdStartRange.location);
+    CFRange cmdSearchRange = CFRangeMake(cmdStartRange.location, endLoc - cmdStartRange.location);
     
     // find the nearest left brace, but return NSNotFound if there's a space between the command start and the left brace
     if(BDStringFindCharacter((CFStringRef)self, '{', cmdSearchRange, &lbraceRange) == FALSE ||
@@ -414,7 +414,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     
     // search for the next right brace matching our left brace
     CFRange rbraceRange;
-    Boolean foundRBrace = BDStringFindCharacter((CFStringRef)self, '}', CFRangeMake(lbraceRange.location, maxLen - lbraceRange.location), &rbraceRange);
+    Boolean foundRBrace = BDStringFindCharacter((CFStringRef)self, '}', CFRangeMake(lbraceRange.location, endLoc - lbraceRange.location), &rbraceRange);
     
     // check for an immediate right brace after the left brace, as in \LaTeX{}, since we
     // don't want to remove those, either
