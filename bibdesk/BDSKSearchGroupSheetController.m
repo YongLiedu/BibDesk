@@ -48,6 +48,7 @@
 #define SERVERS_DIRNAME @"SearchGroupServers"
 
 static NSDictionary *searchGroupServers = nil;
+static NSDictionary *searchGroupServerFiles = nil;
 
 @implementation BDSKSearchGroupSheetController
 
@@ -67,7 +68,7 @@ static BOOL isSearchFileAtPath(NSString *path)
     NSString *path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:SERVERS_FILENAME];
     
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:path];
-    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:[serverDicts count]];
+    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:3];
     NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupOAI, nil] objectEnumerator];
     NSString *type;
     
@@ -84,6 +85,10 @@ static BOOL isSearchFileAtPath(NSString *path)
         [newServerDicts setObject:infos forKey:type];
     }
     
+    [searchGroupServerFiles release];
+    searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
+        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupOAI, nil];
+    
     NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
     BOOL isDir = NO;
     if ([[NSFileManager defaultManager] fileExistsAtPath:serversPath isDirectory:&isDir] && isDir) {
@@ -93,7 +98,8 @@ static BOOL isSearchFileAtPath(NSString *path)
             if ([[[dirEnum fileAttributes] valueForKey:NSFileType] isEqualToString:NSFileTypeDirectory]) {
                 [dirEnum skipDescendents];
             } else if (isSearchFileAtPath([serversPath stringByAppendingPathComponent:file])) {
-                NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:[serversPath stringByAppendingPathComponent:file]];
+                NSString *path = [serversPath stringByAppendingPathComponent:file];
+                NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
                 BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:nil dictionary:dict];
                 if (info) {
                     NSMutableArray *servers = [newServerDicts objectForKey:[info type]];
@@ -102,6 +108,7 @@ static BOOL isSearchFileAtPath(NSString *path)
                         [servers replaceObjectAtIndex:index withObject:info];
                     else
                         [servers addObject:info];
+                    [[searchGroupServerFiles objectForKey:[info type]] setObject:path forKey:[info name]];
                     [info release];
                 }
             }
@@ -149,6 +156,10 @@ static BOOL isSearchFileAtPath(NSString *path)
     
     [searchGroupServers release];
     searchGroupServers = [newServerDicts copy];
+    
+    [searchGroupServerFiles release];
+    searchGroupServerFiles = [[NSDictionary alloc] initWithObjectsAndKeys:
+        [NSMutableDictionary dictionary], BDSKSearchGroupEntrez, [NSMutableDictionary dictionary], BDSKSearchGroupZoom, [NSMutableDictionary dictionary], BDSKSearchGroupOAI, nil];
 }
 
 + (void)saveServer:(BDSKServerInfo *)serverInfo;
@@ -173,21 +184,22 @@ static BOOL isSearchFileAtPath(NSString *path)
             return;
         }
         
-        NSString *path = [serversPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@.bdsksearch", [serverInfo name], [serverInfo type]]];
+        NSString *path = [[searchGroupServerFiles objectForKey:[serverInfo type]] objectForKey:[serverInfo name]];
+        if (path)
+            [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+        path = [serversPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@.bdsksearch", [serverInfo name], [serverInfo type]]];
         [data writeToFile:path atomically:YES];
+        [[searchGroupServerFiles objectForKey:[serverInfo type]] setObject:path forKey:[serverInfo name]];
     }
 }
 
 + (void)deleteServer:(BDSKServerInfo *)serverInfo;
 {
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
-    NSString *serversPath = [applicationSupportPath stringByAppendingPathComponent:SERVERS_DIRNAME];
-    NSString *path = [serversPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@.bdsksearch", [serverInfo name], [serverInfo type]]];
-    BOOL isDir = NO;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && isDir == NO) {
+    NSString *path = [[searchGroupServerFiles objectForKey:[serverInfo type]] objectForKey:[serverInfo name]];
+    if (path) {
         [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+        [[searchGroupServerFiles objectForKey:[serverInfo type]] removeObjectForKey:[serverInfo name]];
     }
-    
 }
 
 + (NSArray *)serversForType:(NSString *)type;
