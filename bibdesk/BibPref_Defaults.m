@@ -172,8 +172,6 @@ static NSSet *alwaysDisabledFields = nil;
     
     NSWorkspace *sws = [NSWorkspace sharedWorkspace];
     NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
-    NSEnumerator *dictEnum = [pdfViewers reverseObjectEnumerator];
-    NSDictionary *dict;
     NSString *pdfViewerID = [[defaults dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
     int i, iMax = [pdfViewers count];
     int index = 0;
