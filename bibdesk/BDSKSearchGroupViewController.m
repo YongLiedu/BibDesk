@@ -64,11 +64,10 @@
     NSString *name = [[group serverInfo] name];
     [searchField setStringValue:[group searchTerm] ? [group searchTerm] : @""];
     [searchField setRecentSearches:[group history]];
-    [searchButton setEnabled:[group isRetrieving] == NO && [group hasMoreResults]];
+    [searchButton setEnabled:[group isRetrieving] == NO];
     [[searchField cell] setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search %@", @"search group field placeholder"), name ? name : @""]];
     [searchField setFormatter:[group searchStringFormatter]];
     [searchField selectText:self];
-    textChanged = NO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSearchGroupUpdatedNotification:) name:BDSKSearchGroupUpdatedNotification object:group];
 }
 
@@ -97,7 +96,6 @@
 - (IBAction)changeSearchTerm:(id)sender {
     [group setSearchTerm:[sender stringValue]];
     [group setHistory:[sender recentSearches]];
-    textChanged = NO;
 }
 
 - (IBAction)nextSearch:(id)sender {
@@ -116,15 +114,8 @@
     return YES;
 }
 
-- (void)controlTextDidChange:(NSNotification *)aNotification {
-    if ([group isRetrieving])
-        textChanged = YES;
-    else
-        [searchButton setEnabled:YES];
-}
-
 - (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification{
-    [searchButton setEnabled:[group isRetrieving] == NO && ([group hasMoreResults] || textChanged)];
+    [searchButton setEnabled:[group isRetrieving] == NO];
 }
 
 @end
