@@ -22,11 +22,11 @@
      */
     
     /* copac has XML only */
-    /*
+    
     _hostname = [@"z3950.copac.ac.uk" copy];
     _port = 2100;
     _database = [@"copac" copy];
-     */
+     
     
     /* http://www.ub.unibas.ch/lib/aleph/z3950.htm */
     /* USMARC as MARC-8 */
@@ -43,17 +43,19 @@
     _database = [@"IDS_UTF" copy];    
      */
     
-    _hostname = [@"biblio.unizh.ch" copy];
-    _port = 9909;
-    _database = [@"ids_utf" copy];
-    _options = [[NSDictionary alloc] initWithObjectsAndKeys:@"z39", @"user", @"z39", @"password", nil];
+//    _hostname = [@"biblio.unizh.ch" copy];
+//    _port = 9909;
+//    _database = [@"ids_utf" copy];
+//    _options = [[NSDictionary alloc] initWithObjectsAndKeys:@"z39", @"user", @"z39", @"password", nil];
     
     [_addressField setStringValue:_hostname];
     [_dbaseField setStringValue:_database];
     [_portField setIntValue:_port];
     
-    [_userField setStringValue:[_options objectForKey:@"user"]];
-    [_passwordField setStringValue:[_options objectForKey:@"password"]];
+    if ([_options objectForKey:@"user"])
+        [_userField setStringValue:[_options objectForKey:@"user"]];
+    if ([_options objectForKey:@"password"])
+        [_passwordField setStringValue:[_options objectForKey:@"password"]];
     
     [ZOOMRecord setFallbackEncoding:NSISOLatin1StringEncoding];
     

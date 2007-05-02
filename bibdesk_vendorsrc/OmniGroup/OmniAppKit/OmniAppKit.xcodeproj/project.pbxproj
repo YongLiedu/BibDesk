@@ -596,7 +596,7 @@
 		4A9FDD380655955D0097A149 /* OAController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAController.m; sourceTree = "<group>"; };
 		4AA1E7F908AA764600E2FF6B /* OmniAppKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OmniAppKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1E81108AA764700E2FF6B /* OAUnitTests.otest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OAUnitTests.otest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4AA1E81E08AA764700E2FF6B /* OAMakeImageSizeIntegral */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = OAMakeImageSizeIntegral; sourceTree = BUILT_PRODUCTS_DIR; };
+		4AA1E81E08AA764700E2FF6B /* OAMakeImageSizeIntegral */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OAMakeImageSizeIntegral; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1E82C08AA764700E2FF6B /* OAPatternColorPicker.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OAPatternColorPicker.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1EBCD08AA772700E2FF6B /* Omni-Application-Coverage.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "Omni-Application-Coverage.xcconfig"; sourceTree = "<group>"; };
 		4AA1EBCE08AA772700E2FF6B /* Omni-Application-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "Omni-Application-Debug.xcconfig"; sourceTree = "<group>"; };
@@ -748,6 +748,13 @@
 		F5AC9DBB032D12E201B4A65D /* OAColorProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAColorProfile.h; sourceTree = "<group>"; };
 		F5AC9DBC032D12E201B4A65D /* OAColorProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAColorProfile.m; sourceTree = "<group>"; };
 		F5D4DA390222D61401B4A65D /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/OAScriptSheet.nib; sourceTree = "<group>"; };
+		F9C7D3A40BE926CD00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/OmniAppKit.strings; sourceTree = "<group>"; };
+		F9C7D3A70BE926E900D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = file; name = French; path = "French.lproj/Classic Crayons.clr"; sourceTree = "<group>"; };
+		F9C7D3AA0BE9270500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/OAFindPanel.nib; sourceTree = "<group>"; };
+		F9C7D3AB0BE9270500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/OAPatternColorPicker.nib; sourceTree = "<group>"; };
+		F9C7D3AC0BE9270500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/OAPreferences.nib; sourceTree = "<group>"; };
+		F9C7D3AD0BE9270500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/OAScriptSheet.nib; sourceTree = "<group>"; };
+		F9C7D3AF0BE9272C00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = French; path = French.lproj/CharsetCategories.plist; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2440,6 +2447,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				00E51F0BFE8AB2E911C9CC38 /* English */,
+				F9C7D3AA0BE9270500D65C7F /* French */,
 			);
 			name = OAFindPanel.nib;
 			sourceTree = "<group>";
@@ -2448,6 +2456,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				00E51F72FE8AB2E911C9CC38 /* English */,
+				F9C7D3AC0BE9270500D65C7F /* French */,
 			);
 			name = OAPreferences.nib;
 			sourceTree = "<group>";
@@ -2456,6 +2465,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				030CEE2BFFC3FFE7C697A14E /* English */,
+				F9C7D3A40BE926CD00D65C7F /* French */,
 			);
 			name = OmniAppKit.strings;
 			sourceTree = "<group>";
@@ -2464,6 +2474,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3457306505D011B00097A113 /* English */,
+				F9C7D3AB0BE9270500D65C7F /* French */,
 			);
 			name = OAPatternColorPicker.nib;
 			sourceTree = SOURCE_ROOT;
@@ -2472,6 +2483,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7F54986F041FDCAE0097A14E /* English */,
+				F9C7D3A70BE926E900D65C7F /* French */,
 			);
 			name = "Classic Crayons.clr";
 			sourceTree = "<group>";
@@ -2480,6 +2492,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				E2D7993506DD0F730097A11C /* CharsetCategories.plist */,
+				F9C7D3AF0BE9272C00D65C7F /* French */,
 			);
 			name = CharsetCategories.plist;
 			sourceTree = "<group>";
@@ -2488,6 +2501,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F5D4DA390222D61401B4A65D /* English */,
+				F9C7D3AD0BE9270500D65C7F /* French */,
 			);
 			name = OAScriptSheet.nib;
 			sourceTree = SOURCE_ROOT;

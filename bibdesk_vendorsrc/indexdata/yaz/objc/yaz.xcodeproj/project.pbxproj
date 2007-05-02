@@ -539,6 +539,7 @@
 		F9B8FE7B0B41BBD500A5A615 /* ZOOMQuery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZOOMQuery.m; sourceTree = "<group>"; };
 		F9B8FEE10B41CE8100A5A615 /* ZOOMObjC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZOOMObjC.h; sourceTree = "<group>"; };
 		F9BB53250B505F85006E9D11 /* Documentation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Documentation; sourceTree = "<group>"; };
+		F9C7D3C40BE9278C00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1235,6 +1236,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				089C1667FE841158C02AAC07 /* English */,
+				F9C7D3C40BE9278C00D65C7F /* French */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
