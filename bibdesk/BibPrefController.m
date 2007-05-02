@@ -328,3 +328,4 @@ NSString *BDSKAllFieldsString = @"AllFields";
 NSString *BDSKFileContentSearchString = @"FileContent";
 NSString *BDSKRelevanceString = @"Relevance";
 NSString *BDSKPersonString = @"Person";
+NSString *BDSKSkimNotesString = @"SkimNotes";

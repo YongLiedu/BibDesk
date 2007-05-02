@@ -63,9 +63,10 @@ const CFDictionaryValueCallBacks BDSKSearchIndexDictionaryValueCallBacks = {
 
 + (NSSet *)indexedFields;
 {
+    // file content is also indexed, but it's handled by a separate object (BDSKSearchIndex) and controller, since it's threaded
     static NSSet *indexedFields = nil;
     if (nil == indexedFields)
-        indexedFields = [[NSSet alloc] initWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, @"SkimNotes", nil];
+        indexedFields = [[NSSet alloc] initWithObjects:BDSKAllFieldsString, BDSKTitleString, BDSKPersonString, BDSKSkimNotesString, nil];
     return indexedFields;
 }
 
@@ -128,7 +129,7 @@ static void appendNormalizedNames(const void *value, void *context)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
             
             searchText = [pub skimNotesForLocalURL];
-            skIndex = (void *)CFDictionaryGetValue(searchIndexes, CFSTR("SkimNotes"));
+            skIndex = (void *)CFDictionaryGetValue(searchIndexes, (CFStringRef)BDSKSkimNotesString);
             if (searchText && skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
             

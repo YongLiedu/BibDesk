@@ -81,7 +81,7 @@
     [buttonBar insertItem:item atIndex:0];
     [item release];
     
-    skimNotesItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];
+    skimNotesItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKSkimNotesString];
     [skimNotesItem setTitle:NSLocalizedString(@"Skim Notes", @"Search button")];
     
     fileContentItem = [[AMButtonBarItem alloc] initWithIdentifier:BDSKFileContentSearchString];

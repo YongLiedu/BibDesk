@@ -306,3 +306,4 @@ extern NSString *BDSKAllFieldsString;
 extern NSString *BDSKFileContentSearchString;
 extern NSString *BDSKRelevanceString;
 extern NSString *BDSKPersonString;
+extern NSString *BDSKSkimNotesString;
