@@ -836,7 +836,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D5B49AC048680CD000E48DA /* BibDeskInputManager */;
+			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
 			remoteInfo = BibDeskInputManager;
 		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
@@ -1434,7 +1434,7 @@
 		F9022C8C0758034000C3F701 /* BibDocumentView_Toolbar.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibDocumentView_Toolbar.m; sourceTree = "<group>"; };
 		F9022C8F0758038000C3F701 /* BibPref_InputManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_InputManager.h; sourceTree = "<group>"; };
 		F9022C900758038000C3F701 /* BibPref_InputManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_InputManager.m; sourceTree = "<group>"; };
-		F9022C930758038000C3F701 /* BibPrefController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPrefController.h; sourceTree = "<group>"; };
+		F9022C930758038000C3F701 /* BibPrefController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = BibPrefController.h; sourceTree = "<group>"; };
 		F9022C940758038000C3F701 /* BibPrefController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPrefController.m; sourceTree = "<group>"; };
 		F9022C950758038000C3F701 /* BibTeXParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibTeXParser.h; sourceTree = "<group>"; };
 		F9022C960758038000C3F701 /* BibTeXParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibTeXParser.m; sourceTree = "<group>"; };
@@ -1698,6 +1698,69 @@
 		F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFileMatchConfigController.m; sourceTree = "<group>"; };
 		F9BE68370B80F94000B2597C /* BDSKFileMatchConfigController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFileMatchConfigController.h; sourceTree = "<group>"; };
 		F9BF481E0BD69F6F0071094F /* MODS2MARC21slim.xsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = MODS2MARC21slim.xsl; sourceTree = "<group>"; };
+		F9C7D3C50BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/AddFieldSheet.nib; sourceTree = "<group>"; };
+		F9C7D3C60BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/AutoFile.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3C70BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/AutoFileProgress.nib; sourceTree = "<group>"; };
+		F9C7D3C80BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKAlert.nib; sourceTree = "<group>"; };
+		F9C7D3C90BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKCharacterConversion.nib; sourceTree = "<group>"; };
+		F9C7D3CA0BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKCondition.nib; sourceTree = "<group>"; };
+		F9C7D3CB0BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKCustomCiteDrawer.nib; sourceTree = "<group>"; };
+		F9C7D3CC0BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKErrorEditWindow.nib; sourceTree = "<group>"; };
+		F9C7D3CD0BE927DF00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKErrorPanel.nib; sourceTree = "<group>"; };
+		F9C7D3CE0BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKFileContentSearch.nib; sourceTree = "<group>"; };
+		F9C7D3CF0BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKFilter.nib; sourceTree = "<group>"; };
+		F9C7D3D00BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKFindPanel.nib; sourceTree = "<group>"; };
+		F9C7D3D10BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKOrphanedFilesFinder.nib; sourceTree = "<group>"; };
+		F9C7D3D20BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKPasswordController.nib; sourceTree = "<group>"; };
+		F9C7D3D30BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKScriptGroupSheet.nib; sourceTree = "<group>"; };
+		F9C7D3D40BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKSearchGroupSheet.nib; sourceTree = "<group>"; };
+		F9C7D3D50BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKSearchGroupView.nib; sourceTree = "<group>"; };
+		F9C7D3D60BE927E000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKTextViewFindPanel.nib; sourceTree = "<group>"; };
+		F9C7D3D70BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKTypeInfoEditor.nib; sourceTree = "<group>"; };
+		F9C7D3D80BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKURLGroupSheet.nib; sourceTree = "<group>"; };
+		F9C7D3D90BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
+		F9C7D3DA0BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibDocument.nib; sourceTree = "<group>"; };
+		F9C7D3DB0BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibEditor.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3DC0BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
+		F9C7D3DD0BE927E100D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPersonView.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3DE0BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_AutoFile.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3DF0BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Cite.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3E00BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_CiteKey.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3E10BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Crossref.nib; sourceTree = "<group>"; };
+		F9C7D3E20BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Defaults.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3E30BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Display.nib; sourceTree = "<group>"; };
+		F9C7D3E40BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Export.nib; sourceTree = "<group>"; };
+		F9C7D3E50BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Files.nib; sourceTree = "<group>"; };
+		F9C7D3E60BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_General.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3E70BE927E200D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_InputManager.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3E80BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_ScriptHooks.nib; sourceTree = "<group>"; };
+		F9C7D3E90BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_Sharing.nib; sourceTree = "<group>"; };
+		F9C7D3EA0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BibPref_TeX.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3EB0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/ChangeFieldSheet.nib; sourceTree = "<group>"; };
+		F9C7D3EC0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/DocumentInfoWindow.nib; sourceTree = "<group>"; };
+		F9C7D3ED0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FileMatcher.nib; sourceTree = "<group>"; };
+		F9C7D3EE0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FileMatcherConfigSheet.nib; sourceTree = "<group>"; };
+		F9C7D3EF0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MacroTextFieldWindow.nib; sourceTree = "<group>"; };
+		F9C7D3F00BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MacroWindow.nib; sourceTree = "<group>"; };
+		F9C7D3F10BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MainMenu.nib; sourceTree = "<group>"; };
+		F9C7D3F20BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/NotesWindow.nib; sourceTree = "<group>"; };
+		F9C7D3F30BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Previewer.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3F40BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/ReadMe.nib; sourceTree = SOURCE_ROOT; };
+		F9C7D3F50BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/RemoveFieldSheet.nib; sourceTree = "<group>"; };
+		F9C7D3F60BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SearchBookmarksWindow.nib; sourceTree = "<group>"; };
+		F9C7D3F70BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SearchButtonView.nib; sourceTree = "<group>"; };
+		F9C7D3F80BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SelectEncodingsPanel.nib; sourceTree = "<group>"; };
+		F9C7D3F90BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SpotlightFileIconController.nib; sourceTree = "<group>"; };
+		F9C7D3FA0BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/TextImport.nib; sourceTree = "<group>"; };
+		F9C7D3FD0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/BibTeXKeys.strings; sourceTree = SOURCE_ROOT; };
+		F9C7D3FE0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F9C7D3FF0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F9C7D4000BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Preferences.strings; sourceTree = "<group>"; };
+		F9C7D4040BE9282000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = French; path = French.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
+		F9C7D4090BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/Credits.rtf; sourceTree = SOURCE_ROOT; };
+		F9C7D40A0BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/ReadMe.rtf; sourceTree = "<group>"; };
+		F9C7D40B0BE9285500D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = French; path = French.lproj/RelNotes.rtf; sourceTree = "<group>"; };
+		F9C7D4310BE93D7D00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = folder; name = French; path = "French.lproj/BibDesk Help"; sourceTree = "<group>"; };
 		F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ArrowImage.tiff; path = Images/ArrowImage.tiff; sourceTree = "<group>"; };
 		F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFileServer.h; sourceTree = "<group>"; };
 		F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFileServer.m; sourceTree = "<group>"; };
@@ -1874,8 +1937,8 @@
 			children = (
 				F9F0856808247BC800812F2A /* postprocess-nontitle.py */,
 				27E89E220805E9F500E4DA08 /* applehelp.init */,
-				3D8A552D082D25FB008E818C /* version.texi */,
-				3D8A5523082D1FF2008E818C /* bibdesk.texi */,
+				27E89E230805E9F500E4DA08 /* version.texi */,
+				27E89E240805E9F500E4DA08 /* bibdesk.texi */,
 			);
 			name = "Help Sources";
 			sourceTree = "<group>";
@@ -3580,7 +3643,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help;\ntexi2html=./texi2html\n\nINPUT='BibDesk Help/bibdesk.texi'\nDEST='BibDesk Help'\n\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\n\t/bin/rm \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help*.html; \\\n\t${texi2html} \"${LOC_DIR}/${INPUT}\" --init-file=applehelp.init --prefix=\"BibDesk Help\" --output=\"${LOC_DIR}/${DEST}\" --split=node && \\\n\tperl -pi -e 's#<!--AppleMeta-->#<meta name=\\\"AppleTitle\\\" content=\\\"BibDesk Help\\\"><meta name=\\\"AppleIcon\\\" content=\\\"BibDesk%20Help/gfx/BibDeskIcon.png\\\"><meta name=\\\"robots\\\" content=\\\"anchors\\\">#' \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help.html && \\\n\tpython postprocess-nontitle.py \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help_*.html;\\\ndone;\n";
+			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help;\ntexi2html=./texi2html\n\nINPUT='BibDesk Help/bibdesk.texi'\nDEST='BibDesk Help'\n\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\n\t/bin/rm -f \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help*.html; \\\n\t${texi2html} \"${LOC_DIR}/${INPUT}\" --init-file=applehelp.init --prefix=\"BibDesk Help\" --output=\"${LOC_DIR}/${DEST}\" --split=node && \\\n\tperl -pi -e 's#<!--AppleMeta-->#<meta name=\\\"AppleTitle\\\" content=\\\"BibDesk Help\\\"><meta name=\\\"AppleIcon\\\" content=\\\"BibDesk%20Help/gfx/BibDeskIcon.png\\\"><meta name=\\\"robots\\\" content=\\\"anchors\\\">#' \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help.html && \\\n\tpython postprocess-nontitle.py \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help_*.html;\\\ndone;\n";
 		};
 		F91E54660853576600208CDF /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4031,6 +4094,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				089C165DFE840E0CC02AAC07 /* English */,
+				F9C7D3FE0BE9280F00D65C7F /* French */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -4039,6 +4103,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				2730079C07CF214E00F2E485 /* English */,
+				F9C7D3EF0BE927E300D65C7F /* French */,
 			);
 			name = MacroTextFieldWindow.nib;
 			sourceTree = "<group>";
@@ -4047,6 +4112,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				2730079E07CF214E00F2E485 /* English */,
+				F9C7D3F00BE927E300D65C7F /* French */,
 			);
 			name = MacroWindow.nib;
 			sourceTree = "<group>";
@@ -4055,6 +4121,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				27AFAFA9080D1E5B0096F5D2 /* English */,
+				F9C7D3FA0BE927E400D65C7F /* French */,
 			);
 			name = TextImport.nib;
 			sourceTree = "<group>";
@@ -4063,6 +4130,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				29B97319FDCFA39411CA2CEA /* MainMenu.nib */,
+				F9C7D3F10BE927E400D65C7F /* French */,
 			);
 			name = MainMenu.nib;
 			sourceTree = "<group>";
@@ -4071,6 +4139,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3D0D76AE084898AA00A495A5 /* English */,
+				F9C7D3E10BE927E200D65C7F /* French */,
 			);
 			name = BibPref_Crossref.nib;
 			sourceTree = "<group>";
@@ -4079,6 +4148,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3D8663780802CF5C00FF1724 /* English */,
+				F9C7D3D70BE927E100D65C7F /* French */,
 			);
 			name = BDSKTypeInfoEditor.nib;
 			sourceTree = "<group>";
@@ -4087,6 +4157,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3D866C3F0803223900FF1724 /* English */,
+				F9C7D3C90BE927DF00D65C7F /* French */,
 			);
 			name = BDSKCharacterConversion.nib;
 			sourceTree = "<group>";
@@ -4095,30 +4166,16 @@
 			isa = PBXVariantGroup;
 			children = (
 				3D8A54F7082D1F86008E818C /* English */,
+				F9C7D4310BE93D7D00D65C7F /* French */,
 			);
 			name = "BibDesk Help";
-			sourceTree = "<group>";
-		};
-		3D8A5523082D1FF2008E818C /* bibdesk.texi */ = {
-			isa = PBXVariantGroup;
-			children = (
-				27E89E240805E9F500E4DA08 /* bibdesk.texi */,
-			);
-			name = bibdesk.texi;
-			sourceTree = "<group>";
-		};
-		3D8A552D082D25FB008E818C /* version.texi */ = {
-			isa = PBXVariantGroup;
-			children = (
-				27E89E230805E9F500E4DA08 /* version.texi */,
-			);
-			name = version.texi;
 			sourceTree = "<group>";
 		};
 		3D8CA0A307CB625300460D07 /* AutoFileProgress.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				3D8CA0A407CB625300460D07 /* English */,
+				F9C7D3C70BE927DF00D65C7F /* French */,
 			);
 			name = AutoFileProgress.nib;
 			sourceTree = "<group>";
@@ -4127,6 +4184,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9E0B08D083E49D2000109C6 /* English */,
+				F9C7D3FF0BE9280F00D65C7F /* French */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -4135,6 +4193,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				457538410B701ECD00C0E49B /* English */,
+				F9C7D3D90BE927E100D65C7F /* French */,
 			);
 			name = BDSKWebGroupView.nib;
 			sourceTree = "<group>";
@@ -4143,6 +4202,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE2209AA09363A05004D7D92 /* English */,
+				F9C7D3C80BE927DF00D65C7F /* French */,
 			);
 			name = BDSKAlert.nib;
 			sourceTree = "<group>";
@@ -4151,6 +4211,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE22E1D00A8CCFBD002CEFB8 /* English */,
+				F9C7D3D10BE927E000D65C7F /* French */,
 			);
 			name = BDSKOrphanedFilesFinder.nib;
 			sourceTree = "<group>";
@@ -4159,6 +4220,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE2391640A3348B1009F3A5B /* English */,
+				F9C7D3EC0BE927E300D65C7F /* French */,
 			);
 			name = DocumentInfoWindow.nib;
 			sourceTree = "<group>";
@@ -4167,6 +4229,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F994B8F607F5F65F00751DA1 /* English */,
+				F9C7D40B0BE9285500D65C7F /* French */,
 			);
 			name = RelNotes.rtf;
 			sourceTree = "<group>";
@@ -4175,6 +4238,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022D180758066000C3F701 /* English */,
+				F9C7D40A0BE9285500D65C7F /* French */,
 			);
 			name = ReadMe.rtf;
 			sourceTree = "<group>";
@@ -4183,6 +4247,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9FEFCB00A0BC14D009193CA /* English */,
+				F9C7D4040BE9282000D65C7F /* French */,
 			);
 			name = PreferenceSearchTerms.plist;
 			sourceTree = "<group>";
@@ -4191,6 +4256,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE38FB93091D953900BCB69D /* English */,
+				F9C7D3CF0BE927E000D65C7F /* French */,
 			);
 			name = BDSKFilter.nib;
 			sourceTree = "<group>";
@@ -4199,6 +4265,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE38FB96091D954E00BCB69D /* English */,
+				F9C7D3CA0BE927DF00D65C7F /* French */,
 			);
 			name = BDSKCondition.nib;
 			sourceTree = "<group>";
@@ -4207,6 +4274,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE3A1A4B0B19C2C800233208 /* English */,
+				F9C7D3F80BE927E400D65C7F /* French */,
 			);
 			name = SelectEncodingsPanel.nib;
 			sourceTree = "<group>";
@@ -4215,6 +4283,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE42A2690A99BE2400C62D85 /* English */,
+				F9C7D3CC0BE927DF00D65C7F /* French */,
 			);
 			name = BDSKErrorEditWindow.nib;
 			sourceTree = "<group>";
@@ -4223,6 +4292,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE43865D0BB8274600A56987 /* English */,
+				F9C7D3F60BE927E400D65C7F /* French */,
 			);
 			name = SearchBookmarksWindow.nib;
 			sourceTree = "<group>";
@@ -4231,6 +4301,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE518F6509E52D6A00E97C3A /* English */,
+				F9C7D3D60BE927E000D65C7F /* French */,
 			);
 			name = BDSKTextViewFindPanel.nib;
 			sourceTree = "<group>";
@@ -4239,6 +4310,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE67E315092B569000410758 /* English */,
+				F9C7D3DC0BE927E100D65C7F /* French */,
 			);
 			name = BibEditorDrawer.nib;
 			sourceTree = "<group>";
@@ -4247,6 +4319,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE76A53E0B430EA500E61066 /* English */,
+				F9C7D3D40BE927E000D65C7F /* French */,
 			);
 			name = BDSKSearchGroupSheet.nib;
 			sourceTree = "<group>";
@@ -4255,6 +4328,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE7A4A900B0B476400D1B333 /* English */,
+				F9C7D3CB0BE927DF00D65C7F /* French */,
 			);
 			name = BDSKCustomCiteDrawer.nib;
 			sourceTree = "<group>";
@@ -4263,6 +4337,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CE7F64C30B41694A00A919D0 /* English */,
+				F9C7D3D50BE927E000D65C7F /* French */,
 			);
 			name = BDSKSearchGroupView.nib;
 			sourceTree = "<group>";
@@ -4271,6 +4346,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CED65AC20906BE65003EED90 /* English */,
+				F9C7D3E80BE927E300D65C7F /* French */,
 			);
 			name = BibPref_ScriptHooks.nib;
 			sourceTree = "<group>";
@@ -4279,6 +4355,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CEEA5E9F0B595EE200434059 /* English */,
+				F9C7D3EB0BE927E300D65C7F /* French */,
 			);
 			name = ChangeFieldSheet.nib;
 			sourceTree = "<group>";
@@ -4287,6 +4364,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CEEFDE6B0B03EED300668BB0 /* English */,
+				F9C7D3D30BE927E000D65C7F /* French */,
 			);
 			name = BDSKScriptGroupSheet.nib;
 			sourceTree = "<group>";
@@ -4295,6 +4373,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CEEFDE650B03EEC400668BB0 /* English */,
+				F9C7D3D80BE927E100D65C7F /* French */,
 			);
 			name = BDSKURLGroupSheet.nib;
 			sourceTree = "<group>";
@@ -4303,6 +4382,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CEF71B070B91BFFF003A2771 /* English */,
+				F9C7D3F20BE927E400D65C7F /* French */,
 			);
 			name = NotesWindow.nib;
 			sourceTree = "<group>";
@@ -4311,6 +4391,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CEF7295909CC88EB00802D48 /* English */,
+				F9C7D3C50BE927DF00D65C7F /* French */,
 			);
 			name = AddFieldSheet.nib;
 			sourceTree = "<group>";
@@ -4319,6 +4400,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				CEF7295C09CC890400802D48 /* English */,
+				F9C7D3F50BE927E400D65C7F /* French */,
 			);
 			name = RemoveFieldSheet.nib;
 			sourceTree = "<group>";
@@ -4327,6 +4409,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F900F2B00B6958F300DB7962 /* English */,
+				F9C7D3F90BE927E400D65C7F /* French */,
 			);
 			name = SpotlightFileIconController.nib;
 			sourceTree = "<group>";
@@ -4335,6 +4418,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CBE0758049200C3F701 /* English */,
+				F9C7D3F40BE927E400D65C7F /* French */,
 			);
 			name = ReadMe.nib;
 			sourceTree = "<group>";
@@ -4343,6 +4427,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CC1075804A600C3F701 /* English */,
+				F9C7D3C60BE927DF00D65C7F /* French */,
 			);
 			name = AutoFile.nib;
 			sourceTree = "<group>";
@@ -4351,6 +4436,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CC3075804A600C3F701 /* BibDocument.nib */,
+				F9C7D3DA0BE927E100D65C7F /* French */,
 			);
 			name = BibDocument.nib;
 			sourceTree = "<group>";
@@ -4359,6 +4445,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CC5075804A600C3F701 /* English */,
+				F9C7D3DB0BE927E100D65C7F /* French */,
 			);
 			name = BibEditor.nib;
 			sourceTree = "<group>";
@@ -4367,6 +4454,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CCC075804E400C3F701 /* English */,
+				F9C7D3DD0BE927E100D65C7F /* French */,
 			);
 			name = BibPersonView.nib;
 			sourceTree = "<group>";
@@ -4375,6 +4463,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CCE075804E400C3F701 /* English */,
+				F9C7D3DE0BE927E200D65C7F /* French */,
 			);
 			name = BibPref_AutoFile.nib;
 			sourceTree = "<group>";
@@ -4383,6 +4472,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CD0075804E400C3F701 /* English */,
+				F9C7D3DF0BE927E200D65C7F /* French */,
 			);
 			name = BibPref_Cite.nib;
 			sourceTree = "<group>";
@@ -4391,6 +4481,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CD2075804E400C3F701 /* English */,
+				F9C7D3E00BE927E200D65C7F /* French */,
 			);
 			name = BibPref_CiteKey.nib;
 			sourceTree = "<group>";
@@ -4399,6 +4490,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CD4075804E400C3F701 /* English */,
+				F9C7D3E20BE927E200D65C7F /* French */,
 			);
 			name = BibPref_Defaults.nib;
 			sourceTree = "<group>";
@@ -4407,6 +4499,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CDC0758050E00C3F701 /* English */,
+				F9C7D3E60BE927E200D65C7F /* French */,
 			);
 			name = BibPref_General.nib;
 			sourceTree = "<group>";
@@ -4415,6 +4508,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CDE0758050E00C3F701 /* English */,
+				F9C7D3E70BE927E200D65C7F /* French */,
 			);
 			name = BibPref_InputManager.nib;
 			sourceTree = "<group>";
@@ -4423,6 +4517,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CE20758050E00C3F701 /* English */,
+				F9C7D3EA0BE927E300D65C7F /* French */,
 			);
 			name = BibPref_TeX.nib;
 			sourceTree = "<group>";
@@ -4431,6 +4526,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CE40758050E00C3F701 /* English */,
+				F9C7D3FD0BE9280F00D65C7F /* French */,
 			);
 			name = BibTeXKeys.strings;
 			sourceTree = "<group>";
@@ -4439,6 +4535,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CE60758050E00C3F701 /* English */,
+				F9C7D4090BE9285500D65C7F /* French */,
 			);
 			name = Credits.rtf;
 			sourceTree = "<group>";
@@ -4447,6 +4544,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9022CE80758050E00C3F701 /* English */,
+				F9C7D3F30BE927E400D65C7F /* French */,
 			);
 			name = Previewer.nib;
 			sourceTree = "<group>";
@@ -4455,6 +4553,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9252E2508F60D520045D563 /* English */,
+				F9C7D3CE0BE927E000D65C7F /* French */,
 			);
 			name = BDSKFileContentSearch.nib;
 			sourceTree = "<group>";
@@ -4463,6 +4562,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F924FC3A0BC4339600672839 /* English */,
+				F9C7D3F70BE927E400D65C7F /* French */,
 			);
 			name = SearchButtonView.nib;
 			sourceTree = "<group>";
@@ -4471,6 +4571,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F92ECBF009DF09C200A244D0 /* English */,
+				F9C7D3D20BE927E000D65C7F /* French */,
 			);
 			name = BDSKPasswordController.nib;
 			sourceTree = "<group>";
@@ -4479,6 +4580,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F92F4E440788DEC5001B8F82 /* English */,
+				F9C7D3E50BE927E200D65C7F /* French */,
 			);
 			name = BibPref_Files.nib;
 			sourceTree = "<group>";
@@ -4487,6 +4589,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F94AA36A0BE8FD87007BCE2B /* English */,
+				F9C7D4000BE9280F00D65C7F /* French */,
 			);
 			name = Preferences.strings;
 			sourceTree = "<group>";
@@ -4495,6 +4598,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F95D3FA609DDF51D00D793A6 /* English */,
+				F9C7D3E90BE927E300D65C7F /* French */,
 			);
 			name = BibPref_Sharing.nib;
 			sourceTree = "<group>";
@@ -4503,6 +4607,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F963E4480A1D7E1300695DDC /* English */,
+				F9C7D3E40BE927E200D65C7F /* French */,
 			);
 			name = BibPref_Export.nib;
 			sourceTree = "<group>";
@@ -4511,6 +4616,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F97965E30869098200050427 /* English */,
+				F9C7D3D00BE927E000D65C7F /* French */,
 			);
 			name = BDSKFindPanel.nib;
 			sourceTree = "<group>";
@@ -4519,6 +4625,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9B88C070B7CF60F00D5D42C /* English */,
+				F9C7D3ED0BE927E300D65C7F /* French */,
 			);
 			name = FileMatcher.nib;
 			sourceTree = "<group>";
@@ -4527,6 +4634,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9BE68340B80F92800B2597C /* English */,
+				F9C7D3EE0BE927E300D65C7F /* French */,
 			);
 			name = FileMatcherConfigSheet.nib;
 			sourceTree = "<group>";
@@ -4535,6 +4643,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9E0BCCC0895ADFB005E5FAA /* English */,
+				F9C7D3E30BE927E200D65C7F /* French */,
 			);
 			name = BibPref_Display.nib;
 			sourceTree = "<group>";
@@ -4543,6 +4652,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				F9E43B1208AD918800A0354B /* English */,
+				F9C7D3CD0BE927DF00D65C7F /* French */,
 			);
 			name = BDSKErrorPanel.nib;
 			sourceTree = "<group>";
