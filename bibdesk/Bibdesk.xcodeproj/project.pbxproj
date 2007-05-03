@@ -783,40 +783,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CE67E7CE092C9CCE00410758 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8D5B49B6048680CD000E48DA;
-			remoteInfo = BibDeskInputManager;
-		};
 		CE87D7E70BA964D50027BBDD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3D8A5779082D3077008E818C;
 			remoteInfo = "BibDesk Help";
-		};
-		CEBC820C0B4D0D2500CE0B2D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
-			remoteInfo = yaz;
-		};
-		F911CB4608972F7300ABDAC6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 034768E0FF38A50411DB9C8B;
-			remoteInfo = AGRegex;
-		};
-		F911CB4808972F7300ABDAC6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 2467EEE8050859D30078EF04;
-			remoteInfo = RegexTest;
 		};
 		F92BACF10BCC00D2008D5BC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -832,13 +804,6 @@
 			remoteGlobalIDString = 8DD76F960486AA7600D96B5E;
 			remoteInfo = SkimNotesAgent;
 		};
-		F94AA3990BE900BC007BCE2B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
-			remoteInfo = BibDeskInputManager;
-		};
 		F95CC112087F54BF002C5694 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
@@ -853,96 +818,187 @@
 			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = BibDesk;
 		};
-		F9AA02F1092FA2AB0094A059 /* PBXContainerItemProxy */ = {
+		F9AF4DF40BEA3E5B009B16D5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteInfo = BTParse;
+		};
+		F9AF56270BEA4160009B16D5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F98870BB07580DEF001D4D49 /* latex2rtf */;
+			remoteInfo = latex2rtf;
+		};
+		F9AF56290BEA4160009B16D5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F98870BF07580E0B001D4D49 /* pdftotext */;
+			remoteInfo = pdftotext;
+		};
+		F9AF562B0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* BTParse */;
+			remoteInfo = BTParse;
+		};
+		F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4A33D42808A0191B003A3FA5;
+			proxyType = 1;
+			remoteGlobalIDString = 4A33D40608A0191B003A3FA5 /* OmniBase */;
 			remoteInfo = OmniBase;
 		};
-		F9AA02FE092FA2CA0094A059 /* PBXContainerItemProxy */ = {
+		F9AF562F0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 4AA1E67A08AA764600E2FF6B /* OmniAppKit (Framework) */;
+			remoteInfo = "OmniAppKit (Framework)";
+		};
+		F9AF56310BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4A4E075308AA72B10098FF0F;
+			proxyType = 1;
+			remoteGlobalIDString = 4A4E05FE08AA72B10098FF0F /* OmniFoundation */;
 			remoteInfo = OmniFoundation;
 		};
-		F9AA0300092FA2CA0094A059 /* PBXContainerItemProxy */ = {
+		F9AF56330BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4A4E07CF08AA72B10098FF0F;
-			remoteInfo = OFUnitTests;
+			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D5B49AC048680CD000E48DA /* BibDeskInputManager */;
+			remoteInfo = BibDeskInputManager;
 		};
-		F9AA0302092FA2CA0094A059 /* PBXContainerItemProxy */ = {
+		F9AF56350BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4A4E077408AA72B10098FF0F;
-			remoteInfo = OFSimpleLockTest;
+			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F935665E0912D56F002B6957 /* AGRegex */;
+			remoteInfo = AGRegex;
 		};
-		F9AA0304092FA2CA0094A059 /* PBXContainerItemProxy */ = {
+		F9AF56370BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4A4E078508AA72B10098FF0F;
-			remoteInfo = OFLowerCaseTest;
+			containerPortal = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* yaz */;
+			remoteInfo = yaz;
 		};
-		F9AA0306092FA2CA0094A059 /* PBXContainerItemProxy */ = {
+		F9C7E5460BEA3C0500D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 4A4E079608AA72B10098FF0F;
-			remoteInfo = OFDedicatedThreadSchedulerTest;
+			remoteGlobalIDString = F93566740912D56F002B6957;
+			remoteInfo = AGRegex;
 		};
-		F9AA0308092FA2CA0094A059 /* PBXContainerItemProxy */ = {
+		F9C7E5480BEA3C0500D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 4A4E07A608AA72B10098FF0F;
-			remoteInfo = OFClobberDetectionZoneTest;
+			remoteGlobalIDString = F935668E0912D570002B6957;
+			remoteInfo = RegexTest;
 		};
-		F9AA030A092FA2CA0094A059 /* PBXContainerItemProxy */ = {
+		F9C7E5510BEA3C2700D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 4A4E07DF08AA72B10098FF0F;
-			remoteInfo = OFMainThreadLockTest;
+			remoteGlobalIDString = 8D5B49B6048680CD000E48DA;
+			remoteInfo = BibDeskInputManager;
 		};
-		F9AA0313092FA2E20094A059 /* PBXContainerItemProxy */ = {
+		F9C7E55D0BEA3C4700D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 4AA1E7F908AA764600E2FF6B;
 			remoteInfo = "OmniAppKit (Framework)";
 		};
-		F9AA0315092FA2E20094A059 /* PBXContainerItemProxy */ = {
+		F9C7E55F0BEA3C4700D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 4AA1E81108AA764700E2FF6B;
 			remoteInfo = OAUnitTests;
 		};
-		F9AA0317092FA2E20094A059 /* PBXContainerItemProxy */ = {
+		F9C7E5610BEA3C4700D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 4AA1E81E08AA764700E2FF6B;
 			remoteInfo = OAMakeImageSizeIntegral;
 		};
-		F9AA0319092FA2E20094A059 /* PBXContainerItemProxy */ = {
+		F9C7E5630BEA3C4700D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 4AA1E82C08AA764700E2FF6B;
 			remoteInfo = OAPatternColorPicker;
 		};
-		F9ABECF7086E142100741FC5 /* PBXContainerItemProxy */ = {
+		F9C7E56B0BEA3C5F00D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
+			containerPortal = F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A33D42808A0191B003A3FA5;
+			remoteInfo = OmniBase;
+		};
+		F9C7E57F0BEA3C7800D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A4E075308AA72B10098FF0F;
+			remoteInfo = OmniFoundation;
+		};
+		F9C7E5810BEA3C7800D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A4E07CF08AA72B10098FF0F;
+			remoteInfo = OFUnitTests;
+		};
+		F9C7E5830BEA3C7800D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A4E077408AA72B10098FF0F;
+			remoteInfo = OFSimpleLockTest;
+		};
+		F9C7E5850BEA3C7800D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A4E078508AA72B10098FF0F;
+			remoteInfo = OFLowerCaseTest;
+		};
+		F9C7E5870BEA3C7800D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A4E079608AA72B10098FF0F;
+			remoteInfo = OFDedicatedThreadSchedulerTest;
+		};
+		F9C7E5890BEA3C7800D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A4E07A608AA72B10098FF0F;
+			remoteInfo = OFClobberDetectionZoneTest;
+		};
+		F9C7E58B0BEA3C7800D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A4E07DF08AA72B10098FF0F;
+			remoteInfo = OFMainThreadLockTest;
+		};
+		F9C7E5940BEA3C9400D65C7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
-			remoteInfo = BTParse;
+			remoteInfo = yaz;
 		};
 		F9E0F88A085B9AFA00006A72 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -951,54 +1007,12 @@
 			remoteGlobalIDString = 3D8A5779082D3077008E818C;
 			remoteInfo = "BibDesk Help";
 		};
-		F9EF0CD70B4EFC6F00A1F282 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4A4E05FE08AA72B10098FF0F;
-			remoteInfo = OmniFoundation;
-		};
-		F9EF0CD90B4EFC7700A1F282 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4A33D40608A0191B003A3FA5;
-			remoteInfo = OmniBase;
-		};
-		F9EF0CDB0B4EFC7B00A1F282 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = BTParse;
-		};
-		F9EF0CDD0B4EFC8100A1F282 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = yaz;
-		};
-		F9EF0CDF0B4EFC8500A1F282 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F935665E0912D56F002B6957;
-			remoteInfo = AGRegex;
-		};
 		F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
 			remoteInfo = BibImporter;
-		};
-		F9EF0CE30B4EFC9500A1F282 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 4AA1E67A08AA764600E2FF6B;
-			remoteInfo = "OmniAppKit (Framework)";
 		};
 		F9F14A4E075811DA008BA22F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1383,13 +1397,13 @@
 		CEFDBDC40AEA86F0009EE99D /* BDSKStaticGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStaticGroup.m; sourceTree = "<group>"; };
 		CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKCategoryGroup.h; sourceTree = "<group>"; };
 		CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKCategoryGroup.m; sourceTree = "<group>"; };
-		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UKDirectoryEnumerator.h; path = ../bibdesk_vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.h; sourceTree = "<group>"; };
-		F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UKDirectoryEnumerator.m; path = ../bibdesk_vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.m; sourceTree = "<group>"; };
+		F900CD070A8EA97D005C3A0F /* UKDirectoryEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UKDirectoryEnumerator.h; path = vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.h; sourceTree = "<group>"; };
+		F900CD080A8EA97D005C3A0F /* UKDirectoryEnumerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UKDirectoryEnumerator.m; path = vendorsrc/ukdirectoryenumerator/UKDirectoryEnumerator.m; sourceTree = "<group>"; };
 		F900F2B00B6958F300DB7962 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SpotlightFileIconController.nib; sourceTree = "<group>"; };
 		F900F2B80B69593100DB7962 /* BDSKSpotlightIconController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpotlightIconController.h; sourceTree = "<group>"; };
 		F900F2B90B69593100DB7962 /* BDSKSpotlightIconController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpotlightIconController.m; sourceTree = "<group>"; };
-		F9022C1B0758013E00C3F701 /* BDAlias.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BDAlias.h; path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.h; sourceTree = "<group>"; };
-		F9022C1C0758013E00C3F701 /* BDAlias.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = BDAlias.m; path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.m; sourceTree = "<group>"; };
+		F9022C1B0758013E00C3F701 /* BDAlias.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BDAlias.h; path = vendorsrc/BDistributed/BDAlias/BDAlias.h; sourceTree = "<group>"; };
+		F9022C1C0758013E00C3F701 /* BDAlias.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = BDAlias.m; path = vendorsrc/BDistributed/BDAlias/BDAlias.m; sourceTree = "<group>"; };
 		F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteKeyFormatter.h; sourceTree = "<group>"; };
 		F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteKeyFormatter.m; sourceTree = "<group>"; };
 		F9022C3A0758027800C3F701 /* BDSKConverter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKConverter.h; sourceTree = "<group>"; };
@@ -1478,13 +1492,13 @@
 		F9022D180758066000C3F701 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = English; path = English.lproj/ReadMe.rtf; sourceTree = "<group>"; };
 		F9022D1B0758066000C3F701 /* TypeInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = TypeInfo.plist; sourceTree = "<group>"; };
 		F9022D2C0758069E00C3F701 /* BibDeskInputManager */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BibDeskInputManager; sourceTree = BUILT_PRODUCTS_DIR; };
-		F9022D4B0758073E00C3F701 /* direct.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = direct.cfg; path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/direct.cfg; sourceTree = SOURCE_ROOT; };
-		F9022D4D0758073E00C3F701 /* english.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = english.cfg; path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/english.cfg; sourceTree = SOURCE_ROOT; };
-		F9022D510758073E00C3F701 /* fonts.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = fonts.cfg; path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/fonts.cfg; sourceTree = SOURCE_ROOT; };
-		F9022D560758073E00C3F701 /* ignore.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ignore.cfg; path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/ignore.cfg; sourceTree = SOURCE_ROOT; };
-		F9022D690758073E00C3F701 /* style.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = style.cfg; path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/style.cfg; sourceTree = SOURCE_ROOT; };
-		F9022D6E0758073E00C3F701 /* latex2rtf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = latex2rtf; path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf; sourceTree = "<group>"; };
-		F9022D9E075807DC00C3F701 /* pdftotext */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = pdftotext; path = ../bibdesk_vendorsrc/foolabs/xpdf/xpdf/pdftotext; sourceTree = "<group>"; };
+		F9022D4B0758073E00C3F701 /* direct.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = direct.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/direct.cfg; sourceTree = SOURCE_ROOT; };
+		F9022D4D0758073E00C3F701 /* english.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = english.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/english.cfg; sourceTree = SOURCE_ROOT; };
+		F9022D510758073E00C3F701 /* fonts.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = fonts.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/fonts.cfg; sourceTree = SOURCE_ROOT; };
+		F9022D560758073E00C3F701 /* ignore.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ignore.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/ignore.cfg; sourceTree = SOURCE_ROOT; };
+		F9022D690758073E00C3F701 /* style.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = style.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/style.cfg; sourceTree = SOURCE_ROOT; };
+		F9022D6E0758073E00C3F701 /* latex2rtf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = latex2rtf; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf; sourceTree = "<group>"; };
+		F9022D9E075807DC00C3F701 /* pdftotext */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = pdftotext; path = vendorsrc/foolabs/xpdf/xpdf/pdftotext; sourceTree = "<group>"; };
 		F9022DA20758088000C3F701 /* Action_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Action_Pressed.tiff; path = Images/Action_Pressed.tiff; sourceTree = "<group>"; };
 		F9022DA30758088000C3F701 /* Action.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Action.tiff; path = Images/Action.tiff; sourceTree = "<group>"; };
 		F9022DA40758088000C3F701 /* Add_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add_Pressed.tiff; path = Images/Add_Pressed.tiff; sourceTree = "<group>"; };
@@ -1534,7 +1548,7 @@
 		F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFCharacterSet_BDSKExtensions.m; sourceTree = "<group>"; };
 		F90C64040AC62B7B008B2DDA /* BDSKShellCommandFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKShellCommandFormatter.h; sourceTree = "<group>"; };
 		F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKShellCommandFormatter.m; sourceTree = "<group>"; };
-		F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AGRegex.xcodeproj; path = ../bibdesk_vendorsrc/agkit_sourceforge/agregex/AGRegex.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AGRegex.xcodeproj; path = vendorsrc/agkit_sourceforge/agregex/AGRegex.xcodeproj; sourceTree = "<group>"; };
 		F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKThreadSafeMutableDictionary.h; sourceTree = "<group>"; };
 		F916E68F07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKThreadSafeMutableDictionary.m; sourceTree = "<group>"; };
 		F91B5C510764135B0011ED22 /* About the Scripts Menu.scpt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.scpt; name = "About the Scripts Menu.scpt"; path = "Scripting/About the Scripts Menu.scpt"; sourceTree = SOURCE_ROOT; };
@@ -1555,18 +1569,18 @@
 		F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDate_BDSKExtensions.m; sourceTree = "<group>"; };
 		F92405000BC5856900672839 /* BDSKLevelIndicatorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLevelIndicatorCell.h; sourceTree = "<group>"; };
 		F92405010BC5856900672839 /* BDSKLevelIndicatorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLevelIndicatorCell.m; sourceTree = "<group>"; };
-		F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AMButtonBar.h; path = ../bibdesk_vendorsrc/harmless/AMButtonBar.h; sourceTree = SOURCE_ROOT; };
-		F924FBF00BC3FFFC00672839 /* AMButtonBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBar.m; path = ../bibdesk_vendorsrc/harmless/AMButtonBar.m; sourceTree = SOURCE_ROOT; };
-		F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarCell.h; path = ../bibdesk_vendorsrc/harmless/AMButtonBarCell.h; sourceTree = SOURCE_ROOT; };
-		F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarCell.m; path = ../bibdesk_vendorsrc/harmless/AMButtonBarCell.m; sourceTree = SOURCE_ROOT; };
-		F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarItem.h; path = ../bibdesk_vendorsrc/harmless/AMButtonBarItem.h; sourceTree = SOURCE_ROOT; };
-		F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarItem.m; path = ../bibdesk_vendorsrc/harmless/AMButtonBarItem.m; sourceTree = SOURCE_ROOT; };
-		F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBezierPath_AMAdditons.h; path = ../bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.h; sourceTree = SOURCE_ROOT; };
-		F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBezierPath_AMAdditons.m; path = ../bibdesk_vendorsrc/harmless/NSBezierPath_AMAdditons.m; sourceTree = SOURCE_ROOT; };
-		F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSColor_AMAdditions.h; path = ../bibdesk_vendorsrc/harmless/NSColor_AMAdditions.h; sourceTree = SOURCE_ROOT; };
-		F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSColor_AMAdditions.m; path = ../bibdesk_vendorsrc/harmless/NSColor_AMAdditions.m; sourceTree = SOURCE_ROOT; };
-		F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSShadow_AMAdditions.h; path = ../bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.h; sourceTree = SOURCE_ROOT; };
-		F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSShadow_AMAdditions.m; path = ../bibdesk_vendorsrc/harmless/NSShadow_AMAdditions.m; sourceTree = SOURCE_ROOT; };
+		F924FBEF0BC3FFFC00672839 /* AMButtonBar.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AMButtonBar.h; path = vendorsrc/harmless/AMButtonBar.h; sourceTree = SOURCE_ROOT; };
+		F924FBF00BC3FFFC00672839 /* AMButtonBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBar.m; path = vendorsrc/harmless/AMButtonBar.m; sourceTree = SOURCE_ROOT; };
+		F924FBF10BC3FFFC00672839 /* AMButtonBarCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarCell.h; path = vendorsrc/harmless/AMButtonBarCell.h; sourceTree = SOURCE_ROOT; };
+		F924FBF20BC3FFFC00672839 /* AMButtonBarCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarCell.m; path = vendorsrc/harmless/AMButtonBarCell.m; sourceTree = SOURCE_ROOT; };
+		F924FBF30BC3FFFC00672839 /* AMButtonBarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AMButtonBarItem.h; path = vendorsrc/harmless/AMButtonBarItem.h; sourceTree = SOURCE_ROOT; };
+		F924FBF40BC3FFFC00672839 /* AMButtonBarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AMButtonBarItem.m; path = vendorsrc/harmless/AMButtonBarItem.m; sourceTree = SOURCE_ROOT; };
+		F924FBF90BC3FFFC00672839 /* NSBezierPath_AMAdditons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBezierPath_AMAdditons.h; path = vendorsrc/harmless/NSBezierPath_AMAdditons.h; sourceTree = SOURCE_ROOT; };
+		F924FBFA0BC3FFFC00672839 /* NSBezierPath_AMAdditons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBezierPath_AMAdditons.m; path = vendorsrc/harmless/NSBezierPath_AMAdditons.m; sourceTree = SOURCE_ROOT; };
+		F924FBFB0BC3FFFC00672839 /* NSColor_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSColor_AMAdditions.h; path = vendorsrc/harmless/NSColor_AMAdditions.h; sourceTree = SOURCE_ROOT; };
+		F924FBFC0BC3FFFC00672839 /* NSColor_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSColor_AMAdditions.m; path = vendorsrc/harmless/NSColor_AMAdditions.m; sourceTree = SOURCE_ROOT; };
+		F924FBFF0BC3FFFC00672839 /* NSShadow_AMAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSShadow_AMAdditions.h; path = vendorsrc/harmless/NSShadow_AMAdditions.h; sourceTree = SOURCE_ROOT; };
+		F924FC000BC3FFFC00672839 /* NSShadow_AMAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSShadow_AMAdditions.m; path = vendorsrc/harmless/NSShadow_AMAdditions.m; sourceTree = SOURCE_ROOT; };
 		F924FC2E0BC4322500672839 /* BDSKSearchButtonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchButtonController.h; sourceTree = "<group>"; };
 		F924FC2F0BC4322500672839 /* BDSKSearchButtonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchButtonController.m; sourceTree = "<group>"; };
 		F924FC3A0BC4339600672839 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/SearchButtonView.nib; sourceTree = "<group>"; };
@@ -1592,7 +1606,7 @@
 		F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = genericBibDocIcon.tiff; path = Images/genericBibDocIcon.tiff; sourceTree = "<group>"; };
 		F92F4E4C0788DEFC001B8F82 /* BibPref_Files.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_Files.h; sourceTree = "<group>"; };
 		F92F4E4D0788DEFC001B8F82 /* BibPref_Files.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_Files.m; sourceTree = "<group>"; };
-		F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = yaz.xcodeproj; path = ../bibdesk_vendorsrc/indexdata/yaz/objc/yaz.xcodeproj; sourceTree = "<group>"; };
+		F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = yaz.xcodeproj; path = vendorsrc/indexdata/yaz/objc/yaz.xcodeproj; sourceTree = "<group>"; };
 		F93840890906DD1F00FC37F2 /* scripthook.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = scripthook.tiff; path = Images/scripthook.tiff; sourceTree = "<group>"; };
 		F940D1070B5568E400B5917A /* BDSKReferParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKReferParser.h; sourceTree = "<group>"; };
 		F940D1080B5568E400B5917A /* BDSKReferParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKReferParser.m; sourceTree = "<group>"; };
@@ -1607,10 +1621,10 @@
 		F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAsynchronousDOServer.m; sourceTree = "<group>"; };
 		F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFDocument_BDSKExtensions.h; sourceTree = "<group>"; };
 		F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDFDocument_BDSKExtensions.m; sourceTree = "<group>"; };
-		F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFAppleScriptHandlerAdditionsCore.h; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.h; sourceTree = "<group>"; };
-		F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFAppleScriptHandlerAdditionsCore.m; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.m; sourceTree = "<group>"; };
-		F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "KFASHandlerAdditions-TypeTranslation.h"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.h"; sourceTree = "<group>"; };
-		F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "KFASHandlerAdditions-TypeTranslation.m"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.m"; sourceTree = "<group>"; };
+		F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFAppleScriptHandlerAdditionsCore.h; path = vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.h; sourceTree = "<group>"; };
+		F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFAppleScriptHandlerAdditionsCore.m; path = vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.m; sourceTree = "<group>"; };
+		F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "KFASHandlerAdditions-TypeTranslation.h"; path = "vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.h"; sourceTree = "<group>"; };
+		F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "KFASHandlerAdditions-TypeTranslation.m"; path = "vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.m"; sourceTree = "<group>"; };
 		F94AA36A0BE8FD87007BCE2B /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/Preferences.strings; sourceTree = "<group>"; };
 		F94DB0F60B3E2FA1006F37A2 /* BDSKSearchGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroup.h; sourceTree = "<group>"; };
 		F94DB0F70B3E2FA1006F37A2 /* BDSKSearchGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchGroup.m; sourceTree = "<group>"; };
@@ -1678,11 +1692,11 @@
 		F9A6742907D04E8000782ACD /* BDSKFontManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFontManager.m; sourceTree = "<group>"; };
 		F9A6772B07D2D57F00782ACD /* MultiplePageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MultiplePageView.h; sourceTree = "<group>"; };
 		F9A6772C07D2D57F00782ACD /* MultiplePageView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MultiplePageView.m; sourceTree = "<group>"; };
-		F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniBase.xcodeproj; path = ../bibdesk_vendorsrc/OmniGroup/OmniBase/OmniBase.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniFoundation.xcodeproj; path = ../bibdesk_vendorsrc/OmniGroup/OmniFoundation/OmniFoundation.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniAppKit.xcodeproj; path = ../bibdesk_vendorsrc/OmniGroup/OmniAppKit/OmniAppKit.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniBase.xcodeproj; path = vendorsrc/OmniGroup/OmniBase/OmniBase.xcodeproj; sourceTree = "<group>"; };
+		F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniFoundation.xcodeproj; path = vendorsrc/OmniGroup/OmniFoundation/OmniFoundation.xcodeproj; sourceTree = "<group>"; };
+		F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OmniAppKit.xcodeproj; path = vendorsrc/OmniGroup/OmniAppKit/OmniAppKit.xcodeproj; sourceTree = "<group>"; };
 		F9ABEC9E086E11B500741FC5 /* BTParse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = BTParse/BTParse.xcodeproj; sourceTree = "<group>"; };
+		F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = vendorsrc/gward/btparse/objc/BTParse.xcodeproj; sourceTree = "<group>"; };
 		F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem_PubMedLookup.h; sourceTree = "<group>"; };
 		F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibItem_PubMedLookup.m; sourceTree = "<group>"; };
 		F9B800920B41DFAF00A5A615 /* BDSKSearchGroupSheetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchGroupSheetController.h; sourceTree = "<group>"; };
@@ -1804,7 +1818,7 @@
 		F9EF21C908B1575D00AAC9A9 /* ScrollArrowRight_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ScrollArrowRight_Pressed.tiff; path = Images/ScrollArrowRight_Pressed.tiff; sourceTree = "<group>"; };
 		F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ScrollArrowRight.tiff; path = Images/ScrollArrowRight.tiff; sourceTree = "<group>"; };
 		F9F0856808247BC800812F2A /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDesk Help/postprocess-nontitle.py"; sourceTree = "<group>"; };
-		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = ../bibdeskinputmanager/BibDeskInputManager.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = inputmanager/BibDeskInputManager.xcodeproj; sourceTree = "<group>"; };
 		F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSError_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSError_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9F5ECCF0AE5E7C8007EBB31 /* BDSKURLGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKURLGroup.h; sourceTree = "<group>"; };
@@ -2369,22 +2383,6 @@
 			name = Document;
 			sourceTree = "<group>";
 		};
-		CE67E7CA092C9CCE00410758 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				CE67E7CF092C9CCE00410758 /* BibDeskInputManager.bundle */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		CEBC82090B4D0D2500CE0B2D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				CEBC820D0B4D0D2500CE0B2D /* yaz.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F9022D410758073E00C3F701 /* cfg */ = {
 			isa = PBXGroup;
 			children = (
@@ -2496,15 +2494,6 @@
 				CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */,
 			);
 			path = Scripting;
-			sourceTree = "<group>";
-		};
-		F911CB4108972F7300ABDAC6 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F911CB4708972F7300ABDAC6 /* AGRegex.framework */,
-				F911CB4908972F7300ABDAC6 /* RegexTest.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		F918104307583A6E00CF822D /* Headers */ = {
@@ -2816,43 +2805,68 @@
 			name = Subprojects;
 			sourceTree = "<group>";
 		};
-		F9AA02EE092FA2AB0094A059 /* Products */ = {
+		F9AF4DF10BEA3E5B009B16D5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F9AA02F2092FA2AB0094A059 /* OmniBase.framework */,
+				F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F9AA02F4092FA2CA0094A059 /* Products */ = {
+		F9C7E5420BEA3C0500D65C7F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F9AA02FF092FA2CA0094A059 /* OmniFoundation.framework */,
-				F9AA0301092FA2CA0094A059 /* OFUnitTests.otest */,
-				F9AA0303092FA2CA0094A059 /* OFSimpleLockTest */,
-				F9AA0305092FA2CA0094A059 /* OFLowerCaseTest */,
-				F9AA0307092FA2CA0094A059 /* OFDedicatedThreadSchedulerTest */,
-				F9AA0309092FA2CA0094A059 /* OFClobberDetectionTest */,
-				F9AA030B092FA2CA0094A059 /* OFMainThreadLockTest */,
+				F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */,
+				F9C7E5490BEA3C0500D65C7F /* RegexTest.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F9AA030D092FA2E20094A059 /* Products */ = {
+		F9C7E54D0BEA3C2700D65C7F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F9AA0314092FA2E20094A059 /* OmniAppKit.framework */,
-				F9AA0316092FA2E20094A059 /* OAUnitTests.otest */,
-				F9AA0318092FA2E20094A059 /* OAMakeImageSizeIntegral */,
-				F9AA031A092FA2E20094A059 /* OAPatternColorPicker.bundle */,
+				F9C7E5520BEA3C2700D65C7F /* BibDeskInputManager.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F9ABECF3086E142100741FC5 /* Products */ = {
+		F9C7E5570BEA3C4700D65C7F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F9ABECF8086E142100741FC5 /* BTParse.framework */,
+				F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */,
+				F9C7E5600BEA3C4700D65C7F /* OAUnitTests.otest */,
+				F9C7E5620BEA3C4700D65C7F /* OAMakeImageSizeIntegral */,
+				F9C7E5640BEA3C4700D65C7F /* OAPatternColorPicker.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F9C7E5680BEA3C5F00D65C7F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F9C7E5750BEA3C7800D65C7F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */,
+				F9C7E5820BEA3C7800D65C7F /* OFUnitTests.otest */,
+				F9C7E5840BEA3C7800D65C7F /* OFSimpleLockTest */,
+				F9C7E5860BEA3C7800D65C7F /* OFLowerCaseTest */,
+				F9C7E5880BEA3C7800D65C7F /* OFDedicatedThreadSchedulerTest */,
+				F9C7E58A0BEA3C7800D65C7F /* OFClobberDetectionTest */,
+				F9C7E58C0BEA3C7800D65C7F /* OFMainThreadLockTest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F9C7E5900BEA3C9400D65C7F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F9C7E5950BEA3C9400D65C7F /* yaz.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3200,15 +3214,17 @@
 			);
 			dependencies = (
 				F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */,
-				F9EF0CDA0B4EFC7700A1F282 /* PBXTargetDependency */,
-				F9EF0CD80B4EFC6F00A1F282 /* PBXTargetDependency */,
-				F9EF0CE40B4EFC9500A1F282 /* PBXTargetDependency */,
-				F9EF0CDC0B4EFC7B00A1F282 /* PBXTargetDependency */,
-				F9EF0CE00B4EFC8500A1F282 /* PBXTargetDependency */,
-				F9EF0CDE0B4EFC8100A1F282 /* PBXTargetDependency */,
+				F9AF56340BEA4160009B16D5 /* PBXTargetDependency */,
 				CE87D7E80BA964D50027BBDD /* PBXTargetDependency */,
 				F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */,
-				F94AA39A0BE900BC007BCE2B /* PBXTargetDependency */,
+				F9AF56280BEA4160009B16D5 /* PBXTargetDependency */,
+				F9AF562A0BEA4160009B16D5 /* PBXTargetDependency */,
+				F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */,
+				F9AF56320BEA4160009B16D5 /* PBXTargetDependency */,
+				F9AF56300BEA4160009B16D5 /* PBXTargetDependency */,
+				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
+				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
+				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
 			);
 			name = BibDesk;
 			productInstallPath = "$(HOME)/Applications";
@@ -3227,11 +3243,11 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = F911CB4108972F7300ABDAC6 /* Products */;
+					ProductGroup = F9C7E5420BEA3C0500D65C7F /* Products */;
 					ProjectRef = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
 				},
 				{
-					ProductGroup = CE67E7CA092C9CCE00410758 /* Products */;
+					ProductGroup = F9C7E54D0BEA3C2700D65C7F /* Products */;
 					ProjectRef = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
 				},
 				{
@@ -3239,19 +3255,19 @@
 					ProjectRef = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
 				},
 				{
-					ProductGroup = F9ABECF3086E142100741FC5 /* Products */;
+					ProductGroup = F9AF4DF10BEA3E5B009B16D5 /* Products */;
 					ProjectRef = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
 				},
 				{
-					ProductGroup = F9AA030D092FA2E20094A059 /* Products */;
+					ProductGroup = F9C7E5570BEA3C4700D65C7F /* Products */;
 					ProjectRef = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
 				},
 				{
-					ProductGroup = F9AA02EE092FA2AB0094A059 /* Products */;
+					ProductGroup = F9C7E5680BEA3C5F00D65C7F /* Products */;
 					ProjectRef = F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */;
 				},
 				{
-					ProductGroup = F9AA02F4092FA2CA0094A059 /* Products */;
+					ProductGroup = F9C7E5750BEA3C7800D65C7F /* Products */;
 					ProjectRef = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
 				},
 				{
@@ -3259,7 +3275,7 @@
 					ProjectRef = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 				},
 				{
-					ProductGroup = CEBC82090B4D0D2500CE0B2D /* Products */;
+					ProductGroup = F9C7E5900BEA3C9400D65C7F /* Products */;
 					ProjectRef = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
 				},
 			);
@@ -3279,34 +3295,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		CE67E7CF092C9CCE00410758 /* BibDeskInputManager.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = BibDeskInputManager.bundle;
-			remoteRef = CE67E7CE092C9CCE00410758 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		CEBC820D0B4D0D2500CE0B2D /* yaz.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = yaz.framework;
-			remoteRef = CEBC820C0B4D0D2500CE0B2D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F911CB4708972F7300ABDAC6 /* AGRegex.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = AGRegex.framework;
-			remoteRef = F911CB4608972F7300ABDAC6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F911CB4908972F7300ABDAC6 /* RegexTest.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = RegexTest.app;
-			remoteRef = F911CB4808972F7300ABDAC6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -3321,95 +3309,123 @@
 			remoteRef = F95CC112087F54BF002C5694 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F9AA02F2092FA2AB0094A059 /* OmniBase.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = OmniBase.framework;
-			remoteRef = F9AA02F1092FA2AB0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA02FF092FA2CA0094A059 /* OmniFoundation.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = OmniFoundation.framework;
-			remoteRef = F9AA02FE092FA2CA0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0301092FA2CA0094A059 /* OFUnitTests.otest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = OFUnitTests.otest;
-			remoteRef = F9AA0300092FA2CA0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0303092FA2CA0094A059 /* OFSimpleLockTest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = OFSimpleLockTest;
-			remoteRef = F9AA0302092FA2CA0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0305092FA2CA0094A059 /* OFLowerCaseTest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = OFLowerCaseTest;
-			remoteRef = F9AA0304092FA2CA0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0307092FA2CA0094A059 /* OFDedicatedThreadSchedulerTest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = OFDedicatedThreadSchedulerTest;
-			remoteRef = F9AA0306092FA2CA0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0309092FA2CA0094A059 /* OFClobberDetectionTest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = OFClobberDetectionTest;
-			remoteRef = F9AA0308092FA2CA0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA030B092FA2CA0094A059 /* OFMainThreadLockTest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = OFMainThreadLockTest;
-			remoteRef = F9AA030A092FA2CA0094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0314092FA2E20094A059 /* OmniAppKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = OmniAppKit.framework;
-			remoteRef = F9AA0313092FA2E20094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0316092FA2E20094A059 /* OAUnitTests.otest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = OAUnitTests.otest;
-			remoteRef = F9AA0315092FA2E20094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA0318092FA2E20094A059 /* OAMakeImageSizeIntegral */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = OAMakeImageSizeIntegral;
-			remoteRef = F9AA0317092FA2E20094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9AA031A092FA2E20094A059 /* OAPatternColorPicker.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = OAPatternColorPicker.bundle;
-			remoteRef = F9AA0319092FA2E20094A059 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F9ABECF8086E142100741FC5 /* BTParse.framework */ = {
+		F9AF4DF50BEA3E5B009B16D5 /* BTParse.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = BTParse.framework;
-			remoteRef = F9ABECF7086E142100741FC5 /* PBXContainerItemProxy */;
+			remoteRef = F9AF4DF40BEA3E5B009B16D5 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5470BEA3C0500D65C7F /* AGRegex.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = AGRegex.framework;
+			remoteRef = F9C7E5460BEA3C0500D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5490BEA3C0500D65C7F /* RegexTest.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = RegexTest.app;
+			remoteRef = F9C7E5480BEA3C0500D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5520BEA3C2700D65C7F /* BibDeskInputManager.bundle */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = BibDeskInputManager.bundle;
+			remoteRef = F9C7E5510BEA3C2700D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E55E0BEA3C4700D65C7F /* OmniAppKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = OmniAppKit.framework;
+			remoteRef = F9C7E55D0BEA3C4700D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5600BEA3C4700D65C7F /* OAUnitTests.otest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = OAUnitTests.otest;
+			remoteRef = F9C7E55F0BEA3C4700D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5620BEA3C4700D65C7F /* OAMakeImageSizeIntegral */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = OAMakeImageSizeIntegral;
+			remoteRef = F9C7E5610BEA3C4700D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5640BEA3C4700D65C7F /* OAPatternColorPicker.bundle */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = OAPatternColorPicker.bundle;
+			remoteRef = F9C7E5630BEA3C4700D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E56C0BEA3C5F00D65C7F /* OmniBase.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = OmniBase.framework;
+			remoteRef = F9C7E56B0BEA3C5F00D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5800BEA3C7800D65C7F /* OmniFoundation.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = OmniFoundation.framework;
+			remoteRef = F9C7E57F0BEA3C7800D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5820BEA3C7800D65C7F /* OFUnitTests.otest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = OFUnitTests.otest;
+			remoteRef = F9C7E5810BEA3C7800D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5840BEA3C7800D65C7F /* OFSimpleLockTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = OFSimpleLockTest;
+			remoteRef = F9C7E5830BEA3C7800D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5860BEA3C7800D65C7F /* OFLowerCaseTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = OFLowerCaseTest;
+			remoteRef = F9C7E5850BEA3C7800D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5880BEA3C7800D65C7F /* OFDedicatedThreadSchedulerTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = OFDedicatedThreadSchedulerTest;
+			remoteRef = F9C7E5870BEA3C7800D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E58A0BEA3C7800D65C7F /* OFClobberDetectionTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = OFClobberDetectionTest;
+			remoteRef = F9C7E5890BEA3C7800D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E58C0BEA3C7800D65C7F /* OFMainThreadLockTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = OFMainThreadLockTest;
+			remoteRef = F9C7E58B0BEA3C7800D65C7F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9C7E5950BEA3C9400D65C7F /* yaz.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = yaz.framework;
+			remoteRef = F9C7E5940BEA3C9400D65C7F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -3672,7 +3688,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake clean && make && strip latex2rtf\nexit 0";
+			shellScript = "cd $SOURCE_ROOT/vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake clean && make && strip latex2rtf\nexit 0";
 		};
 		F98870BE07580E0B001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3685,7 +3701,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/foolabs/xpdf\nexport CFLAGS=\"-O -g -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc\"\nexport CXXFLAGS=$CFLAGS\nmake distclean\n./configure --with-x=no --disable-dependency-tracking && make && strip xpdf/pdftotext\nexit 0";
+			shellScript = "cd $SOURCE_ROOT/vendorsrc/foolabs/xpdf\nexport CFLAGS=\"-O -g -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc\"\nexport CXXFLAGS=$CFLAGS\nmake distclean\n./configure --with-x=no --disable-dependency-tracking && make && strip xpdf/pdftotext\nexit 0";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4030,55 +4046,65 @@
 			name = SkimNotesAgent;
 			targetProxy = F92BACF30BCC00EB008D5BC3 /* PBXContainerItemProxy */;
 		};
-		F94AA39A0BE900BC007BCE2B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BibDeskInputManager;
-			targetProxy = F94AA3990BE900BC007BCE2B /* PBXContainerItemProxy */;
-		};
 		F98870D807580EA1001D4D49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
 			targetProxy = F98870D707580EA1001D4D49 /* PBXContainerItemProxy */;
+		};
+		F9AF56280BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F98870BB07580DEF001D4D49 /* latex2rtf */;
+			targetProxy = F9AF56270BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF562A0BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F98870BF07580E0B001D4D49 /* pdftotext */;
+			targetProxy = F9AF56290BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BTParse;
+			targetProxy = F9AF562B0BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OmniBase;
+			targetProxy = F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF56300BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "OmniAppKit (Framework)";
+			targetProxy = F9AF562F0BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF56320BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OmniFoundation;
+			targetProxy = F9AF56310BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF56340BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BibDeskInputManager;
+			targetProxy = F9AF56330BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF56360BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = AGRegex;
+			targetProxy = F9AF56350BEA4160009B16D5 /* PBXContainerItemProxy */;
+		};
+		F9AF56380BEA4160009B16D5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = yaz;
+			targetProxy = F9AF56370BEA4160009B16D5 /* PBXContainerItemProxy */;
 		};
 		F9E0F88B085B9AFA00006A72 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3D8A5779082D3077008E818C /* BibDesk Help */;
 			targetProxy = F9E0F88A085B9AFA00006A72 /* PBXContainerItemProxy */;
 		};
-		F9EF0CD80B4EFC6F00A1F282 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = OmniFoundation;
-			targetProxy = F9EF0CD70B4EFC6F00A1F282 /* PBXContainerItemProxy */;
-		};
-		F9EF0CDA0B4EFC7700A1F282 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = OmniBase;
-			targetProxy = F9EF0CD90B4EFC7700A1F282 /* PBXContainerItemProxy */;
-		};
-		F9EF0CDC0B4EFC7B00A1F282 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BTParse;
-			targetProxy = F9EF0CDB0B4EFC7B00A1F282 /* PBXContainerItemProxy */;
-		};
-		F9EF0CDE0B4EFC8100A1F282 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = yaz;
-			targetProxy = F9EF0CDD0B4EFC8100A1F282 /* PBXContainerItemProxy */;
-		};
-		F9EF0CE00B4EFC8500A1F282 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = AGRegex;
-			targetProxy = F9EF0CDF0B4EFC8500A1F282 /* PBXContainerItemProxy */;
-		};
 		F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = BibImporter;
 			targetProxy = F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */;
-		};
-		F9EF0CE40B4EFC9500A1F282 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "OmniAppKit (Framework)";
-			targetProxy = F9EF0CE30B4EFC9500A1F282 /* PBXContainerItemProxy */;
 		};
 		F9F14A4F075811DA008BA22F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
