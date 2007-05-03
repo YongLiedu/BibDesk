@@ -112,7 +112,7 @@ OBJS=l2r_fonts.o direct.o encode.o commands.o stack.o funct1.o tables.o \
 	preamble.o letterformat.o equation.o convert.o xref.o definitions.o graphics.o \
 	mygetopt.o style.o
 
-all : checkdir uptodate latex2rtf
+all : checkdir latex2rtf
 
 latex2rtf: $(OBJS) $(HDRS)
 	$(CC) $(CFLAGS) $(OBJS)	$(LIBS) -o $(BINARY_NAME)
