@@ -398,34 +398,33 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
 {
-    CFRange cmdStartRange;
-    CFIndex endLoc = NSMaxRange(searchRange);    
+    CFCharacterSetRef nonLetterCharacterSet = NULL;
     
-    if(BDStringFindCharacter((CFStringRef)self, '\\', *(CFRange*)&searchRange, &cmdStartRange) == FALSE)
-        return NSMakeRange(NSNotFound, 0);
-    
-    CFRange lbraceRange;
-    CFRange cmdSearchRange = CFRangeMake(cmdStartRange.location, endLoc - cmdStartRange.location);
-    
-    // find the nearest left brace, but return NSNotFound if there's a space between the command start and the left brace
-    if(BDStringFindCharacter((CFStringRef)self, '{', cmdSearchRange, &lbraceRange) == FALSE ||
-       BDStringFindCharacter((CFStringRef)self, ' ', CFRangeMake(cmdSearchRange.location, lbraceRange.location - cmdSearchRange.location), NULL) == TRUE)
-        return NSMakeRange(NSNotFound, 0);
-    
-    // search for the next right brace matching our left brace
-    CFRange rbraceRange;
-    Boolean foundRBrace = BDStringFindCharacter((CFStringRef)self, '}', CFRangeMake(lbraceRange.location, endLoc - lbraceRange.location), &rbraceRange);
-    
-    // check for an immediate right brace after the left brace, as in \LaTeX{}, since we
-    // don't want to remove those, either
-    if(foundRBrace && (rbraceRange.location == lbraceRange.location + 1)){
-        // if we want to consider \LaTeX a command to be removed, cmdStop = spaceLoc; this can mess
-        // up sorting, though, since \LaTeX is a word /and/ a command.
-        return NSMakeRange(NSNotFound, 0);
-    } else {
-        return NSMakeRange(cmdStartRange.location, (lbraceRange.location - cmdStartRange.location));
+    if (nonLetterCharacterSet == NULL) {
+        CFMutableCharacterSetRef letterCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetLetter));
+        CFCharacterSetInvert(letterCFCharacterSet);
+        nonLetterCharacterSet = CFCharacterSetCreateCopy(CFAllocatorGetDefault(), letterCFCharacterSet);
+        CFRelease(letterCFCharacterSet);
     }
     
+    CFRange bsSearchRange = *(CFRange*)&searchRange;
+    CFRange cmdStartRange, cmdEndRange;
+    CFIndex endLoc = NSMaxRange(searchRange);    
+    
+    while(bsSearchRange.length > 4 && BDStringFindCharacter((CFStringRef)self, '\\', bsSearchRange, &cmdStartRange) &&
+          CFStringFindCharacterFromSet((CFStringRef)self, nonLetterCharacterSet, CFRangeMake(cmdStartRange.location + 1, endLoc - cmdStartRange.location - 1), 0, &cmdEndRange)){
+        // if the char right behind the backslash is a non-letter char, it's a one-letter command
+        if(cmdEndRange.location == cmdStartRange.location + 1)
+            cmdEndRange.location++;
+        // see if we found a left brace, we ignore commands like \LaTeX{} which we want to keep
+        if('{' == CFStringGetCharacterAtIndex((CFStringRef)self, cmdEndRange.location) && 
+           '}' != CFStringGetCharacterAtIndex((CFStringRef)self, cmdEndRange.location + 1))
+            return NSMakeRange(cmdStartRange.location, cmdEndRange.location - cmdStartRange.location);
+        
+        bsSearchRange = CFRangeMake(cmdEndRange.location, endLoc - cmdEndRange.location);
+    }
+    
+    return NSMakeRange(NSNotFound, 0);
 }
 
 - (NSString *)stringByConvertingHTMLToTeX;
