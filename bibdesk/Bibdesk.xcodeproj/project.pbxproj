@@ -64,18 +64,6 @@
 			name = DiskImage;
 			productName = DiskImage;
 		};
-		F9F14A47075811CF008BA22F /* BuildMeFirst */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = F993F1F308553A61007A7657 /* Build configuration list for PBXAggregateTarget "BuildMeFirst" */;
-			buildPhases = (
-			);
-			dependencies = (
-				F9F14A4F075811DA008BA22F /* PBXTargetDependency */,
-				F9F14A51075811DA008BA22F /* PBXTargetDependency */,
-			);
-			name = BuildMeFirst;
-			productName = BuildMeFirst;
-		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
@@ -1014,20 +1002,6 @@
 			remoteGlobalIDString = 8D57630D048677EA00EA77CD;
 			remoteInfo = BibImporter;
 		};
-		F9F14A4E075811DA008BA22F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F98870BB07580DEF001D4D49;
-			remoteInfo = latex2rtf;
-		};
-		F9F14A50075811DA008BA22F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F98870BF07580E0B001D4D49;
-			remoteInfo = pdftotext;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1166,7 +1140,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -3287,7 +3261,6 @@
 				F98870BF07580E0B001D4D49 /* pdftotext */,
 				F98870CE07580E5F001D4D49 /* HeaderDoc */,
 				F98870D407580E94001D4D49 /* DiskImage */,
-				F9F14A47075811CF008BA22F /* BuildMeFirst */,
 				275E270607838EE30070398A /* TestBibItem */,
 				27CD032307D82C7400806B7E /* TestComplexString */,
 			);
@@ -4109,16 +4082,6 @@
 			isa = PBXTargetDependency;
 			name = BibImporter;
 			targetProxy = F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */;
-		};
-		F9F14A4F075811DA008BA22F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F98870BB07580DEF001D4D49 /* latex2rtf */;
-			targetProxy = F9F14A4E075811DA008BA22F /* PBXContainerItemProxy */;
-		};
-		F9F14A51075811DA008BA22F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F98870BF07580E0B001D4D49 /* pdftotext */;
-			targetProxy = F9F14A50075811DA008BA22F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -5179,76 +5142,6 @@
 			};
 			name = Test;
 		};
-		F993F1F408553A61007A7657 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = BuildMeFirst;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		F993F1F508553A61007A7657 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_SIGN_COMPARE = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_PARAMETER = NO;
-				GCC_WARN_UNUSED_VALUE = YES;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = BuildMeFirst;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		F993F1F608553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = BuildMeFirst;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Test;
-		};
 		F993F1F908553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5522,16 +5415,6 @@
 				F993F1EF08553A61007A7657 /* Debug */,
 				F993F1F008553A61007A7657 /* Release */,
 				F993F1F108553A61007A7657 /* Test */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		F993F1F308553A61007A7657 /* Build configuration list for PBXAggregateTarget "BuildMeFirst" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F993F1F408553A61007A7657 /* Debug */,
-				F993F1F508553A61007A7657 /* Release */,
-				F993F1F608553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
