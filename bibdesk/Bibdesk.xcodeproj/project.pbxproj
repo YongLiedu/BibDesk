@@ -829,63 +829,63 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F98870BB07580DEF001D4D49 /* latex2rtf */;
+			remoteGlobalIDString = F98870BB07580DEF001D4D49;
 			remoteInfo = latex2rtf;
 		};
 		F9AF56290BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F98870BF07580E0B001D4D49 /* pdftotext */;
+			remoteGlobalIDString = F98870BF07580E0B001D4D49;
 			remoteInfo = pdftotext;
 		};
 		F9AF562B0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9ABECF2086E142100741FC5 /* BTParse.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* BTParse */;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = BTParse;
 		};
 		F9AF562D0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA02ED092FA2AB0094A059 /* OmniBase.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 4A33D40608A0191B003A3FA5 /* OmniBase */;
+			remoteGlobalIDString = 4A33D40608A0191B003A3FA5;
 			remoteInfo = OmniBase;
 		};
 		F9AF562F0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 4AA1E67A08AA764600E2FF6B /* OmniAppKit (Framework) */;
+			remoteGlobalIDString = 4AA1E67A08AA764600E2FF6B;
 			remoteInfo = "OmniAppKit (Framework)";
 		};
 		F9AF56310BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 4A4E05FE08AA72B10098FF0F /* OmniFoundation */;
+			remoteGlobalIDString = 4A4E05FE08AA72B10098FF0F;
 			remoteInfo = OmniFoundation;
 		};
 		F9AF56330BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D5B49AC048680CD000E48DA /* BibDeskInputManager */;
+			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
 			remoteInfo = BibDeskInputManager;
 		};
 		F9AF56350BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F935665E0912D56F002B6957 /* AGRegex */;
+			remoteGlobalIDString = F935665E0912D56F002B6957;
 			remoteInfo = AGRegex;
 		};
 		F9AF56370BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* yaz */;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = yaz;
 		};
 		F9C7E5460BEA3C0500D65C7F /* PBXContainerItemProxy */ = {
@@ -3683,8 +3683,10 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/vendorsrc/latex2rtf_sourceforge/latex2rtf/version.h",
 			);
 			outputPaths = (
+				"$(SRCROOT)/vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -3696,8 +3698,10 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/vendorsrc/foolabs/xpdf/CHANGES",
 			);
 			outputPaths = (
+				"$(SRCROOT)/vendorsrc/foolabs/xpdf/xpdf/pdftotext",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
