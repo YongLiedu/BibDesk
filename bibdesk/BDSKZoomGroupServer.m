@@ -199,7 +199,7 @@ static NSString *BDSKDCXMLString = @"DC XML";
         
         NSEnumerator *keyEnum = [[info options] keyEnumerator];
         NSString *key;
-        NSSet *specialKeys = [NSSet setWithObjects:@"password", @"username", @"recordSyntax", @"resultEncoding", @"removeDiacritics", nil];
+        NSSet *specialKeys = [NSSet setWithObjects:@"password", @"username", @"recordSyntax", @"resultEncoding", @"removeDiacritics", @"queryConfig", nil];
         
         while (key = [keyEnum nextObject]) {
             if ([specialKeys containsObject:key] == NO)
