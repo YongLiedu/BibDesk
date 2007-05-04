@@ -52,6 +52,7 @@ typedef struct _BDSKDOServerFlags {
     id serverOnServerThread;             // proxy for the local server thread
     NSConnection *mainThreadConnection;  // so the local server thread can talk to the main thread
     NSConnection *localThreadConnection; // so the main thread can talk to the local server thread
+    NSThread *serverThread;              // mainly for debugging
     
     BDSKDOServerFlags serverFlags;       // state variables
 }

@@ -65,7 +65,6 @@
         
         mainThreadConnection = [[NSConnection alloc] initWithReceivePort:port1 sendPort:port2];
         [mainThreadConnection setRootObject:self];
-        [mainThreadConnection enableMultipleThreads];
        
         // set up flags
         memset(&serverFlags, 0, sizeof(serverFlags));
@@ -95,9 +94,17 @@
     return @protocol(BDSKAsyncDOServerMainThread); 
 }
 
-- (id)serverOnMainThread { return serverOnMainThread; }
+// Access to these objects is limited to the creating threads (we assume that it's initially created on the main thread).  If you want to communicate with the server from yet another thread, that thread needs to create its own connection and proxy object(s), which would also require access to the server's connection ivars.  Possibly using -enableMultipleThreads on both connections would work, but the documentation is too vague to be useful.
 
-- (id)serverOnServerThread { return serverOnServerThread; }
+- (id)serverOnMainThread { 
+    OBASSERT([[NSThread currentThread] isEqual:serverThread]);
+    return serverOnMainThread; 
+}
+
+- (id)serverOnServerThread { 
+    OBASSERT([NSThread inMainThread]);
+    return serverOnServerThread; 
+}
 
 #pragma mark MainThread
 
@@ -122,7 +129,8 @@
     localThreadConnection = nil;
     
     [serverOnMainThread release];
-    serverOnMainThread = nil;    
+    serverOnMainThread = nil;  
+    serverThread = nil;
 }
 
 - (void)runDOServerForPorts:(NSArray *)ports;
@@ -136,6 +144,10 @@
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags.shouldKeepRunning);
     
     @try {
+        
+        // this thread retains the server object
+        serverThread = [NSThread currentThread];
+        
         // we'll use this to communicate between threads on the localhost
         localThreadConnection = [[NSConnection alloc] initWithReceivePort:[ports objectAtIndex:0] sendPort:[ports objectAtIndex:1]];
         if(localThreadConnection == nil)
