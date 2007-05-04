@@ -56,24 +56,23 @@ typedef struct _BDSKDOServerFlags {
     BDSKDOServerFlags serverFlags;       // state variables
 }
 
-// use these proxies to message the server object; do not override
-- (id)serverOnMainThread;
-- (id)serverOnServerThread;
+// override for custom cleanup on the main thread; call super afterwards
+- (void)stopDOServer;
 
 // override for custom setup after the server has been setup; called on the server thread; default does nothing
 - (void)serverDidSetup;
 
-// override for custom cleanup on the main thread; call super afterwards
-- (void)stopDOServer;
-
 // override for custom cleanup on the server thread; call super afterwards
 - (void)cleanup;
 
-// run loop flag
+// run loop flag; thread safe
 - (BOOL)shouldKeepRunning;
 
-// override to add additional methods adopted by serverOn...Thread objects; they should always adopt our protocols
+// use these proxies to message the server object; do not override; only use them from the other thread
+- (id)serverOnMainThread;
+- (id)serverOnServerThread;
 
+// override to add additional methods adopted by serverOn...Thread objects; they should always adopt our protocols
 - (Protocol *)protocolForServerThread; // protocol must adopt <BDSKAsyncDOServerThread>
 - (Protocol *)protocolForMainThread;   // protocol must adopt <BDSKAsyncDOServerMainThread>
 

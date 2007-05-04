@@ -95,6 +95,12 @@
     return @protocol(BDSKAsyncDOServerMainThread); 
 }
 
+- (id)serverOnMainThread { return serverOnMainThread; }
+
+- (id)serverOnServerThread { return serverOnServerThread; }
+
+#pragma mark MainThread
+
 - (oneway void)setLocalServer:(byref id)anObject;
 {
     [anObject setProtocolForProxy:[self protocolForServerThread]];
@@ -167,8 +173,8 @@
 
 - (void)serverDidSetup{}
 
-#pragma mark -
 #pragma mark API
+#pragma mark Main Thread
 
 - (void)stopDOServer;
 {
@@ -187,8 +193,8 @@
     serverOnServerThread = nil;    
 }
 
+#pragma mark Thread Safe
+
 - (BOOL)shouldKeepRunning { return serverFlags.shouldKeepRunning == 1; }
-- (id)serverOnMainThread { return serverOnMainThread; }
-- (id)serverOnServerThread { return serverOnServerThread; }
 
 @end

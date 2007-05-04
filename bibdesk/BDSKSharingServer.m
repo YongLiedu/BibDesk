@@ -100,6 +100,8 @@ NSString *BDSKComputerName() {
 
 @end
 
+#pragma mark -
+
 @interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread> {
     NSConnection *connection;
     BDSKThreadSafeMutableDictionary *remoteClients;
@@ -401,6 +403,8 @@ NSString *BDSKComputerName() {
 
 @end
 
+#pragma mark -
+
 @implementation BDSKSharingDOServer
 
 // This is the minimal version for the client that we require
@@ -421,13 +425,151 @@ NSString *BDSKComputerName() {
     [super dealloc];
 }
 
+#pragma mark Thread Safe
+
 - (unsigned int)numberOfConnections { 
     return [remoteClients count]; 
 }
 
+#pragma mark Main Thread
+
 - (void)notifyClientConnectionsChanged;
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
+}
+
+#pragma mark Server Thread
+
+#pragma mark | DO Server
+
+- (Protocol *)protocolForServerThread { return @protocol(BDSKSharingServerLocalThread); }
+
+- (void)serverDidSetup
+{
+    // setup our DO server that will handle requests for publications and passwords
+    @try {
+        NSPort *receivePort = [NSSocketPort port];
+        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
+            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
+        connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
+        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
+        [connection setRootObject:checker];
+        
+        // so we get connection:shouldMakeNewConnection: messages
+        [connection setDelegate:self];
+                    
+    }
+    @catch(id exception) {
+        [self stopDOServer];
+    }
+}
+
+- (oneway void)cleanup
+{
+    NSEnumerator *e = [remoteClients keyEnumerator];
+    id proxyObject;
+    NSString *key;
+    
+    while(key = [e nextObject]){
+        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
+        @try {
+            [proxyObject invalidate];
+        }
+        @catch (id exception) {
+            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %@", [self class], exception, proxyObject);
+        }
+        [[proxyObject connectionForProxy] invalidate];
+    }
+    [remoteClients removeAllObjects];
+    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
+    
+    NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:[BDSKSharingServer sharingName]];
+    [[NSSocketPortNameServer sharedInstance] removePortForName:[BDSKSharingServer sharingName]];
+    [port invalidate];
+    [connection setDelegate:nil];
+    [connection setRootObject:nil];
+    [connection invalidate];
+    [connection release];
+    connection = nil;
+    
+    [super cleanup];
+}
+
+#pragma mark | NSConnection delegate
+
+- (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
+{
+    // set the child connection's delegate so we get authentication messages
+    // this hidden pref will be zero by default, but we'll add a limit here just in case it's needed
+    static unsigned int maxConnections = 0;
+    if(maxConnections == 0)
+        maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
+    
+    BOOL allowConnection = [remoteClients count] < maxConnections;
+    if(allowConnection){
+        [newConnection setDelegate:self];
+    } else {
+        NSLog(@"*** WARNING *** Maximum number of sharing clients (%d) exceeded.", maxConnections);
+        NSLog(@"Use `defaults write %@ BDSKSharingServerMaxConnections N` to change the limit to N.", [[NSBundle mainBundle] bundleIdentifier]);
+    }
+    return allowConnection;
+}
+
+- (BOOL)authenticateComponents:(NSArray *)components withData:(NSData *)authenticationData
+{
+    BOOL status = YES;
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
+        NSData *myPasswordHashed = [[BDSKPasswordController sharingPasswordForCurrentUserUnhashed] sha1Signature];
+        status = [authenticationData isEqual:myPasswordHashed];
+    }
+    return status;
+}
+
+- (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier version:(bycopy NSString *)version;
+{
+    NSParameterAssert(clientObject != nil && identifier != nil && version != nil);
+    
+    // we don't register clients that have a version we don't support
+    if([version numericCompare:[BDSKSharingDOServer requiredProtocolVersion]] == NSOrderedAscending)
+        return;
+    
+    [clientObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
+    NSDictionary *clientInfo = [NSDictionary dictionaryWithObjectsAndKeys:clientObject, @"object", version, @"version", nil];
+    [remoteClients setObject:clientInfo forKey:identifier];
+    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
+}
+
+#pragma mark | BDSKSharingProtocol
+
+- (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
+{
+    NSParameterAssert(identifier != nil);
+    id proxyObject = [[remoteClients objectForKey:identifier] objectForKey:@"object"];
+    [[proxyObject connectionForProxy] invalidate];
+    [remoteClients removeObjectForKey:identifier];
+    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
+}
+
+- (oneway void)notifyClientsOfChange;
+{
+    // here is where we notify other hosts that something changed
+    NSEnumerator *e = [remoteClients keyEnumerator];
+    id proxyObject;
+    NSString *key;
+    
+    while(key = [e nextObject]){
+        
+        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
+        
+        @try {
+            [proxyObject setNeedsUpdate:YES];
+        }
+        @catch (id exception) {
+            NSLog(@"server: \"%@\" trying to reach host %@", exception, proxyObject);
+            // since it's not accessible, remove it from future notifications (we know it has this key)
+            [self removeClientForIdentifier:key];
+        }
+    }
 }
 
 - (NSArray *)copyPublicationsFromOpenDocuments
@@ -488,135 +630,6 @@ NSString *BDSKComputerName() {
         }
     }
     return dataToSend;
-}
-
-#pragma mark -
-#pragma mark Server Thread
-
-- (Protocol *)protocolForServerThread { return @protocol(BDSKSharingServerLocalThread); }
-
-- (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
-{
-    // set the child connection's delegate so we get authentication messages
-    // this hidden pref will be zero by default, but we'll add a limit here just in case it's needed
-    static unsigned int maxConnections = 0;
-    if(maxConnections == 0)
-        maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
-    
-    BOOL allowConnection = [remoteClients count] < maxConnections;
-    if(allowConnection){
-        [newConnection setDelegate:self];
-    } else {
-        NSLog(@"*** WARNING *** Maximum number of sharing clients (%d) exceeded.", maxConnections);
-        NSLog(@"Use `defaults write %@ BDSKSharingServerMaxConnections N` to change the limit to N.", [[NSBundle mainBundle] bundleIdentifier]);
-    }
-    return allowConnection;
-}
-
-- (BOOL)authenticateComponents:(NSArray *)components withData:(NSData *)authenticationData
-{
-    BOOL status = YES;
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
-        NSData *myPasswordHashed = [[BDSKPasswordController sharingPasswordForCurrentUserUnhashed] sha1Signature];
-        status = [authenticationData isEqual:myPasswordHashed];
-    }
-    return status;
-}
-
-- (void)serverDidSetup
-{
-    // setup our DO server that will handle requests for publications and passwords
-    @try {
-        NSPort *receivePort = [NSSocketPort port];
-        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
-            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
-        connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
-        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
-        [connection setRootObject:checker];
-        
-        // so we get connection:shouldMakeNewConnection: messages
-        [connection setDelegate:self];
-                    
-    }
-    @catch(id exception) {
-        [self stopDOServer];
-    }
-}
-
-- (oneway void)cleanup
-{
-    NSEnumerator *e = [remoteClients keyEnumerator];
-    id proxyObject;
-    NSString *key;
-    
-    while(key = [e nextObject]){
-        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
-        @try {
-            [proxyObject invalidate];
-        }
-        @catch (id exception) {
-            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %@", [self class], exception, proxyObject);
-        }
-        [[proxyObject connectionForProxy] invalidate];
-    }
-    [remoteClients removeAllObjects];
-    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
-    
-    NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:[BDSKSharingServer sharingName]];
-    [[NSSocketPortNameServer sharedInstance] removePortForName:[BDSKSharingServer sharingName]];
-    [port invalidate];
-    [connection setDelegate:nil];
-    [connection setRootObject:nil];
-    [connection invalidate];
-    [connection release];
-    connection = nil;
-    
-    [super cleanup];
-}
-
-- (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier version:(bycopy NSString *)version;
-{
-    NSParameterAssert(clientObject != nil && identifier != nil && version != nil);
-    
-    // we don't register clients that have a version we don't support
-    if([version numericCompare:[BDSKSharingDOServer requiredProtocolVersion]] == NSOrderedAscending)
-        return;
-    
-    [clientObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
-    NSDictionary *clientInfo = [NSDictionary dictionaryWithObjectsAndKeys:clientObject, @"object", version, @"version", nil];
-    [remoteClients setObject:clientInfo forKey:identifier];
-    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
-}
-
-- (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
-{
-    NSParameterAssert(identifier != nil);
-    id proxyObject = [[remoteClients objectForKey:identifier] objectForKey:@"object"];
-    [[proxyObject connectionForProxy] invalidate];
-    [remoteClients removeObjectForKey:identifier];
-    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
-}
-
-- (oneway void)notifyClientsOfChange;
-{
-    // here is where we notify other hosts that something changed
-    NSEnumerator *e = [remoteClients keyEnumerator];
-    id proxyObject;
-    NSString *key;
-    
-    while(key = [e nextObject]){
-        
-        proxyObject = [[remoteClients objectForKey:key] objectForKey:@"object"];
-        
-        @try {
-            [proxyObject setNeedsUpdate:YES];
-        }
-        @catch (id exception) {
-            NSLog(@"server: \"%@\" trying to reach host %@", exception, proxyObject);
-            // since it's not accessible, remove it from future notifications (we know it has this key)
-            [self removeClientForIdentifier:key];
-        }
-    }
 }
 
 @end
