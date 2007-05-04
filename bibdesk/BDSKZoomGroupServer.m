@@ -196,6 +196,16 @@ static NSString *BDSKDCXMLString = @"DC XML";
             [connection setPreferredRecordSyntax:syntax];    
 
         [connection setResultEncodingToIANACharSetName:[info resultEncoding]];
+        
+        NSEnumerator *keyEnum = [[info options] keyEnumerator];
+        NSString *key;
+        NSSet *specialKeys = [NSSet setWithObjects:@"password", @"username", @"recordSyntax", @"resultEncoding", @"removeDiacritics", nil];
+        
+        while (key = [keyEnum nextObject]) {
+            if ([specialKeys containsObject:key] == NO)
+                [connection setOption:[[info options] objectForKey:key] forKey:key];
+        }
+        
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.needsReset);
     }else {
         connection = nil;
