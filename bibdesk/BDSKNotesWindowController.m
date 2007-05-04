@@ -66,7 +66,7 @@
 - (NSString *)windowNibName { return @"NotesWindow"; }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
-    return [NSString stringWithFormat:@"%@ - Notes", [[url path] lastPathComponent]];
+    return [NSString stringWithFormat:@"%@ %@ %@", [[url path] lastPathComponent], [NSString emdashString], NSLocalizedString(@"Notes", @"Partial window title")];
 }
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {

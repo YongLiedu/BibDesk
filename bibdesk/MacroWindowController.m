@@ -130,9 +130,9 @@
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     NSString *title = NSLocalizedString(@"Macros", @"title for macros window");
     if ([[macroResolver owner] isKindOfClass:[BDSKGroup class]])
-        title = [NSString stringWithFormat:@"%@ - %@", title, [(BDSKGroup *)[macroResolver owner] stringValue]];
+        title = [NSString stringWithFormat:@"%@ %@ %@", title, [NSString emdashString], [(BDSKGroup *)[macroResolver owner] stringValue]];
     if ([NSString isEmptyString:displayName] == NO)
-        title = [NSString stringWithFormat:@"%@ - %@", title, displayName];
+        title = [NSString stringWithFormat:@"%@ %@ %@", title, [NSString emdashString], displayName];
     return title;
 }
 
