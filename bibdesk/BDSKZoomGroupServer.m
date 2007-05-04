@@ -117,16 +117,12 @@ static NSString *BDSKDCXMLString = @"DC XML";
 {
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
     
-    if ([NSString isEmptyString:[group searchTerm]]) {
-        [self addPublicationsToGroup:nil];
-    } else {
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
-        id server = [self serverOnServerThread];
-        if (server)
-            [server downloadWithSearchTerm:[group searchTerm]];
-        else
-            [self performSelector:_cmd withObject:nil afterDelay:0.1];
-    }
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+    id server = [self serverOnServerThread];
+    if (server)
+        [server downloadWithSearchTerm:[group searchTerm]];
+    else
+        [self performSelector:_cmd withObject:nil afterDelay:0.1];
 }
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
@@ -204,8 +200,9 @@ static NSString *BDSKDCXMLString = @"DC XML";
     }else {
         connection = nil;
     }
-    [self setNumberOfAvailableResults:0];
-    [self setNumberOfFetchedResults:0];
+    // we're on the server thread, so call the server thread setters
+    [self setAvailableResults:0];
+    [self setFetchedResults:0];
 } 
 
 - (oneway void)terminateConnection;
