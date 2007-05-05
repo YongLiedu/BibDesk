@@ -50,7 +50,7 @@ static NSString *BDSKMARCXMLString = @"MARC XML";
 static NSString *BDSKDCXMLString = @"DC XML";
 
 
-NSString *BDSKHTTPProxySetting();
+static NSString *BDSKHTTPProxySetting();
 
 
 @implementation BDSKZoomGroupServer
@@ -348,10 +348,7 @@ NSString *BDSKHTTPProxySetting();
 @end
 
 
-NSString *BDSKHTTPProxySetting()
-    // Returns the current HTTP proxy settings 
-    // (in the buffer specified by host and hostSize) and 
-    // a port number.
+static NSString *BDSKHTTPProxySetting()
 {
     Boolean result;
     CFDictionaryRef proxyDict;
