@@ -356,7 +356,6 @@ static NSString *BDSKHTTPProxySetting()
     int enable;
     NSString *host;
     NSNumber *port;
-    int portInt;
     NSString *proxy = nil;
     
     // Get the dictionary.
