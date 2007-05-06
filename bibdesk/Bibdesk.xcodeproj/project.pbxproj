@@ -167,7 +167,6 @@
 		457538320B70170D00C0E49B /* BDSKWebGroupViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4575382C0B70170D00C0E49B /* BDSKWebGroupViewController.h */; };
 		457538330B70170D00C0E49B /* BDSKWebGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */; };
 		457538460B701ECD00C0E49B /* BDSKWebGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = 457538400B701ECD00C0E49B /* BDSKWebGroupView.nib */; };
-		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -296,6 +295,7 @@
 		CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */; };
 		CE6C04800BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */; };
 		CE6C04810BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */; };
+		CE6C0CB90BEE4974007BF0B5 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE6C0CB80BEE4974007BF0B5 /* MainMenu.nib */; };
 		CE6DACC40A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */; };
 		CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */; };
 		CE6FB32209DFFCB5005E3E14 /* BDSKSharingBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */; };
@@ -1096,7 +1096,7 @@
 		27E89E230805E9F500E4DA08 /* version.texi */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = version.texi; path = "English.lproj/BibDesk Help/version.texi"; sourceTree = "<group>"; };
 		27E89E240805E9F500E4DA08 /* bibdesk.texi */ = {isa = PBXFileReference; fileEncoding = 4; languageSpecificationIdentifier = man; lastKnownFileType = text; name = bibdesk.texi; path = "English.lproj/BibDesk Help/bibdesk.texi"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		29B97319FDCFA39411CA2CEA /* MainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = MainMenu.nib; path = English.lproj/MainMenu.nib; sourceTree = "<group>"; };
+		29B97319FDCFA39411CA2CEA /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/MainMenu.nib; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bibdesk_Prefix.pch; sourceTree = "<group>"; };
@@ -1261,6 +1261,7 @@
 		CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSParagraphStyle_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSLayoutManager_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSLayoutManager_BDSKExtensions.m; sourceTree = "<group>"; };
+		CE6C0CBC0BEE49EE007BF0B5 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MainMenu.nib; sourceTree = "<group>"; };
 		CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAToolbarItem_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAToolbarItem_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingBrowser.h; sourceTree = "<group>"; };
@@ -1738,7 +1739,6 @@
 		F9C7D3EE0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/FileMatcherConfigSheet.nib; sourceTree = "<group>"; };
 		F9C7D3EF0BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MacroTextFieldWindow.nib; sourceTree = "<group>"; };
 		F9C7D3F00BE927E300D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MacroWindow.nib; sourceTree = "<group>"; };
-		F9C7D3F10BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MainMenu.nib; sourceTree = "<group>"; };
 		F9C7D3F20BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/NotesWindow.nib; sourceTree = "<group>"; };
 		F9C7D3F30BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Previewer.nib; sourceTree = SOURCE_ROOT; };
 		F9C7D3F40BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/ReadMe.nib; sourceTree = SOURCE_ROOT; };
@@ -2029,7 +2029,7 @@
 				F9022CBD0758049200C3F701 /* ReadMe.nib */,
 				2730079B07CF214E00F2E485 /* MacroTextFieldWindow.nib */,
 				2730079D07CF214E00F2E485 /* MacroWindow.nib */,
-				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
+				CE6C0CB80BEE4974007BF0B5 /* MainMenu.nib */,
 				F9022CE70758050E00C3F701 /* Previewer.nib */,
 				CEF7295B09CC890400802D48 /* RemoveFieldSheet.nib */,
 				CE3A1A560B19C2F700233208 /* SelectEncodingsPanel.nib */,
@@ -3438,7 +3438,7 @@
 			files = (
 				F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */,
 				F9022D9B0758073F00C3F701 /* latex2rtf in Resources */,
-				8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */,
+				CE6C0CB90BEE4974007BF0B5 /* MainMenu.nib in Resources */,
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				F9022CBF0758049200C3F701 /* ReadMe.nib in Resources */,
 				F9022CC6075804A600C3F701 /* AutoFile.nib in Resources */,
@@ -4138,15 +4138,6 @@
 			name = TextImport.nib;
 			sourceTree = "<group>";
 		};
-		29B97318FDCFA39411CA2CEA /* MainMenu.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				29B97319FDCFA39411CA2CEA /* MainMenu.nib */,
-				F9C7D3F10BE927E400D65C7F /* French */,
-			);
-			name = MainMenu.nib;
-			sourceTree = "<group>";
-		};
 		3D0D76AD084898AA00A495A5 /* BibPref_Crossref.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -4325,6 +4316,15 @@
 				F9C7D3DC0BE927E100D65C7F /* French */,
 			);
 			name = BibEditorDrawer.nib;
+			sourceTree = "<group>";
+		};
+		CE6C0CB80BEE4974007BF0B5 /* MainMenu.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				29B97319FDCFA39411CA2CEA /* English */,
+				CE6C0CBC0BEE49EE007BF0B5 /* French */,
+			);
+			name = MainMenu.nib;
 			sourceTree = "<group>";
 		};
 		CE76A53D0B430EA500E61066 /* BDSKSearchGroupSheet.nib */ = {
