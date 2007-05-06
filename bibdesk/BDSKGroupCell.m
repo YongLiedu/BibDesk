@@ -43,9 +43,8 @@
 #import <OmniBase/OBUtilities.h>
 #import "NSImage+Toolbox.h"
 #import "NSGeometry_BDSKExtensions.h"
+#import "NSParagraphStyle_BDSKExtensions.h"
 
-static NSMutableParagraphStyle *BDSKGroupCellStringParagraphStyle = nil;
-static NSMutableParagraphStyle *BDSKGroupCellCountParagraphStyle = nil;
 static NSLayoutManager *layoutManager = nil;
 static CFMutableDictionaryRef integerStringDictionary = NULL;
 
@@ -64,10 +63,6 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 {
     OBINITIALIZE;
     
-    BDSKGroupCellStringParagraphStyle = [[NSMutableParagraphStyle alloc] init];
-    [BDSKGroupCellStringParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
-    BDSKGroupCellCountParagraphStyle = [[NSMutableParagraphStyle alloc] init];
-    [BDSKGroupCellCountParagraphStyle setLineBreakMode:NSLineBreakByClipping];
     layoutManager = [[NSLayoutManager alloc] init];
     [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
     
@@ -259,7 +254,7 @@ textRect.origin.y += floorf(vOffset); \
 	}
 
     // Draw the text
-    [label addAttribute:NSParagraphStyleAttributeName value:BDSKGroupCellStringParagraphStyle range:labelRange];
+    [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultClippingParagraphStyle] range:labelRange];
     
     // calculate after adding all attributes
     _calculateDrawingRectsAndSizes;
@@ -325,7 +320,7 @@ textRect.origin.y += floorf(vOffset); \
     [countAttributes setObject:countFont forKey:NSFontAttributeName];
     [countAttributes setObject:font forKey:@"NSOriginalFont"];
     [countAttributes setObject:[NSNumber numberWithFloat:-1.0] forKey:NSKernAttributeName];
-    [countAttributes setObject:BDSKGroupCellCountParagraphStyle forKey:NSParagraphStyleAttributeName];
+    [countAttributes setObject:[NSParagraphStyle defaultClippingParagraphStyle] forKey:NSParagraphStyleAttributeName];
 
 	[font release];
 }

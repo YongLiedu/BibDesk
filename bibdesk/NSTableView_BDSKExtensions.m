@@ -40,6 +40,7 @@
 #import "BDSKFieldEditor.h"
 #import "BibPrefController.h"
 #import "NSBezierPath_BDSKExtensions.h"
+#import "NSLayoutManager_BDSKExtensions.h"
 #import <OmniAppKit/OAApplication.h>
 #import <OmniFoundation/OFPreference.h>
 
@@ -212,11 +213,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
         font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
 	
 	[self setFont:font];
-    
-    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-    [lm setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
-    [self setRowHeight:([lm defaultLineHeightForFont:font] + 2.0f)];
-    [lm release];
+    [self setRowHeight:[NSLayoutManager defaultViewLineHeightForFont:font] + 2.0f];
         
 	[self tile];
     [self reloadData]; // othewise the change isn't immediately visible

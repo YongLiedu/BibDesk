@@ -292,6 +292,10 @@
 		CE6775170A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */; };
 		CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE67E314092B569000410758 /* BibEditorDrawer.nib */; };
 		CE69FF800B1DB719005D6187 /* BDSKCategoryGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */; };
+		CE6C04440BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */; };
+		CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */; };
+		CE6C04800BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */; };
+		CE6C04810BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */; };
 		CE6DACC40A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */; };
 		CE6DACC50A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */; };
 		CE6FB32209DFFCB5005E3E14 /* BDSKSharingBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */; };
@@ -1253,6 +1257,10 @@
 		CE6775140A8506A7003CFC58 /* NSDictionary_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSDictionary_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6775150A8506A7003CFC58 /* NSDictionary_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSDictionary_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE67E315092B569000410758 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
+		CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSParagraphStyle_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSParagraphStyle_BDSKExtensions.m; sourceTree = "<group>"; };
+		CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSLayoutManager_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSLayoutManager_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAToolbarItem_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAToolbarItem_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingBrowser.h; sourceTree = "<group>"; };
@@ -2156,6 +2164,10 @@
 				F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */,
 				CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */,
 				F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */,
+				CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */,
+				CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */,
+				CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */,
+				CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */,
 			);
 			name = "AppKit Extensions";
 			sourceTree = "<group>";
@@ -3123,6 +3135,8 @@
 				F92405020BC5856900672839 /* BDSKLevelIndicatorCell.h in Headers */,
 				F9936CC50BC746C300A32DC4 /* BDSKItemSearchIndexes.h in Headers */,
 				F92BACCE0BCBFEE0008D5BC3 /* BDSKSkimReader.h in Headers */,
+				CE6C04440BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h in Headers */,
+				CE6C04800BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4007,6 +4021,8 @@
 				F92405030BC5856900672839 /* BDSKLevelIndicatorCell.m in Sources */,
 				F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */,
 				F92BACCF0BCBFEE0008D5BC3 /* BDSKSkimReader.m in Sources */,
+				CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */,
+				CE6C04810BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -39,33 +39,16 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
+#import "NSParagraphStyle_BDSKExtensions.h"
+#import "NSLayoutManager_BDSKExtensions.h"
 
 /* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
 
-static NSMutableParagraphStyle *BDSKTextWithIconCellParagraphStyle = nil;
-static NSMutableParagraphStyle *BDSKFilePathCellParagraphStyle = nil;
-static NSLayoutManager *layoutManager = nil;
-
 @implementation BDSKTextWithIconCell
-
-+ (void)initialize;
-{
-    OBINITIALIZE;
-    
-    BDSKTextWithIconCellParagraphStyle = [[NSMutableParagraphStyle alloc] init];
-    [BDSKTextWithIconCellParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
-    
-    BDSKFilePathCellParagraphStyle = [[NSMutableParagraphStyle alloc] init];
-    [BDSKFilePathCellParagraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
-    
-    // string drawing uses this behavior currently
-    layoutManager = [[NSLayoutManager alloc] init];
-    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
-}
 
 + (NSParagraphStyle *)paragraphStyle;
 {
-    return BDSKTextWithIconCellParagraphStyle;
+    return [NSParagraphStyle defaultTruncatingTailParagraphStyle];
 }
 
 // Init and dealloc
@@ -169,7 +152,7 @@ if (imageSize.width > 0) \
 NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); \
 \
 /* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
-float vOffset = 0.5f * (NSHeight(aRect) - [layoutManager defaultLineHeightForFont:[self font]]); \
+float vOffset = 0.5f * (NSHeight(aRect) - [NSLayoutManager defaultViewLineHeightForFont:[self font]]); \
 \
 if (![controlView isFlipped]) \
 textRect.origin.y -= vOffset; \
@@ -285,7 +268,7 @@ textRect.origin.y += vOffset; \
 
 + (NSParagraphStyle *)paragraphStyle;
 {
-    return BDSKFilePathCellParagraphStyle;
+    return [NSParagraphStyle defaultTruncatingMiddleParagraphStyle];
 }
 
 - (id)init;
