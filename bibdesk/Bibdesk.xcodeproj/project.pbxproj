@@ -2164,9 +2164,7 @@
 				F97073AE0911592000526FC8 /* NSWorkspace_BDSKExtensions.m */,
 				CE6DACC30A503ECF00123185 /* OAToolbarItem_BDSKExtensions.m */,
 				F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */,
-				CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */,
 				CE6C04430BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m */,
-				CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */,
 				CE6C047F0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m */,
 			);
 			name = "AppKit Extensions";
@@ -2700,8 +2698,10 @@
 				CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */,
 				F9022C9C0758038000C3F701 /* NSImage+Toolbox.h */,
 				CE573D2409F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h */,
+				CE6C047E0BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h */,
 				F9FD63DA0A61B87800F9871B /* NSMenu_BDSKExtensions.h */,
 				CE8C731C0B0CA6C500E31E5A /* NSObject_BDSKExtensions.h */,
+				CE6C04420BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h */,
 				F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */,
 				F9022C9E0758038000C3F701 /* NSString_BDSKExtensions.h */,
 				CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */,

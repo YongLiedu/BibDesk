@@ -43,7 +43,7 @@
 
 + (NSParagraphStyle *)defaultClippingParagraphStyle {
     static NSParagraphStyle *defaultClippingParagraphStyle = nil;
-    if (defaultClippingParagraphStyle = nil) {
+    if (defaultClippingParagraphStyle == nil) {
         NSMutableParagraphStyle *tmpParagraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [tmpParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
         defaultClippingParagraphStyle = [tmpParagraphStyle copy];
@@ -54,7 +54,7 @@
 
 + (NSParagraphStyle *)defaultTruncatingTailParagraphStyle {
     static NSParagraphStyle *defaultTruncatingTailParagraphStyle = nil;
-    if (defaultTruncatingTailParagraphStyle = nil) {
+    if (defaultTruncatingTailParagraphStyle == nil) {
         NSMutableParagraphStyle *tmpParagraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [tmpParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
         defaultTruncatingTailParagraphStyle = [tmpParagraphStyle copy];
@@ -65,7 +65,7 @@
 
 + (NSParagraphStyle *)defaultTruncatingMiddleParagraphStyle {
     static NSParagraphStyle *defaultTruncatingMiddleParagraphStyle = nil;
-    if (defaultTruncatingMiddleParagraphStyle = nil) {
+    if (defaultTruncatingMiddleParagraphStyle == nil) {
         NSMutableParagraphStyle *tmpParagraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [tmpParagraphStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
         defaultTruncatingMiddleParagraphStyle = [tmpParagraphStyle copy];
