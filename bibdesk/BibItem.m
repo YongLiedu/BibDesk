@@ -1889,12 +1889,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         }
     }
     
-    // @@ temporary hack
     NSURL *aURL = [self URLForField:BDSKLocalUrlString];
     NSData *RTFData = nil;
     if (aURL && (RTFData = [[BDSKSkimReader sharedReader] RTFNotesAtURL:aURL])) {
         valueStr = [[NSAttributedString alloc] initWithRTF:RTFData documentAttributes:NULL];
-        [nonReqStr appendString:@"Skim notes" attributes:keyAttributes];
+        [nonReqStr appendString:NSLocalizedString(@"Skim notes", @"heading in preview of notes from Skim") attributes:keyAttributes];
         [nonReqStr appendString:@"\n"];
         [nonReqStr appendAttributedString:valueStr];
         [nonReqStr appendString:@"\n"];
