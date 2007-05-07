@@ -1255,9 +1255,6 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     [userInfo retain];
     
     NSArray *publications = [userInfo valueForKey:@"publications"];
-    NSMutableDictionary *metadata = nil;
-    NSMutableArray *entries = nil;
-    NSAutoreleasePool *innerPool = nil;
     NSError *error = nil;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
@@ -1297,12 +1294,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         [alias autorelease];
     
         NSEnumerator *entryEnum = [publications objectEnumerator];
-        
-        innerPool = [NSAutoreleasePool new];
-        
-        NSDictionary *dict;
-        
-        entries = [[NSMutableArray alloc] initWithCapacity:[publications count]];
+        NSMutableDictionary *metadata = [NSMutableDictionary dictionaryWithCapacity:10];    
         
         while(anItem = [entryEnum nextObject]){
             
@@ -1311,18 +1303,14 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
                 break;
             }
             
-            [innerPool release];
-            innerPool = [NSAutoreleasePool new];
-            
             citeKey = [anItem objectForKey:@"net_sourceforge_bibdesk_citekey"];
             if(citeKey == nil)
                 continue;
-            
-            metadata = [[NSMutableDictionary alloc] initWithCapacity:10];
-            
+                        
             // we won't index this, but it's needed to reopen the parent file
             [metadata setObject:aliasData forKey:@"FileAlias"];
-            [metadata setObject:docPath forKey:@"net_sourceforge_bibdesk_owningfilepath"]; // use as a backup in case the alias fails
+            // use doc path as a backup in case the alias fails
+            [metadata setObject:docPath forKey:@"net_sourceforge_bibdesk_owningfilepath"];
             
             [metadata addEntriesFromDictionary:anItem];
 			
@@ -1340,59 +1328,16 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
                 } else {
                     if(NO == [data writeToFile:path options:NSAtomicWrite error:&error])
                         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create cache file for %@", [anItem description]] userInfo:nil];
-                    else {
-                        dict =[[NSDictionary alloc] initWithObjectsAndKeys:metadata, @"metadata", path, @"path", nil];
-                        [entries addObject:dict];
-                        [dict release];
-                    }
                 }
             }
-            
-            [metadata release];
-            metadata = nil;
+            [metadata removeAllObjects];
         }
-        
-        [innerPool release];
-        innerPool = nil;
-        
-        long version;
-        OSStatus err = Gestalt(gestaltSystemVersion, &version);
-        
-        if (noErr == err && version < 0x00001050) {
-            entryEnum = [entries objectEnumerator];
-            
-            innerPool = [NSAutoreleasePool new];
-            
-            while(anItem = [entryEnum nextObject]){
-                
-                if(canWriteMetadata == 0){
-                    NSLog(@"Application will quit without finishing metadata cache icons.");
-                    break;
-                }
-                
-                [innerPool release];
-                innerPool = [NSAutoreleasePool new];
-                
-                if ((metadata = [anItem objectForKey:@"metadata"]) && (path = [anItem objectForKey:@"path"]))
-                    [[BDSKSpotlightIconController iconFamilyWithMetadataItem:metadata] setAsCustomIconForFile:path];
-            }
-            
-            [innerPool release];
-            innerPool = nil;
-        }
-        
-        [entries release];
-        entries = nil;
     }    
     @catch (id localException){
         NSLog(@"-[%@ %@] discarding exception %@", [self class], NSStringFromSelector(_cmd), [localException description]);
         // log the error since presentError: only gives minimum info
         NSLog(@"%@", [error description]);
         [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:error waitUntilDone:NO];
-        // if these are non-nil, they should be released
-        [metadata release];
-        [entries release];
-        [innerPool release];
     }
     @finally{
         [userInfo release];
