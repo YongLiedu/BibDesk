@@ -884,6 +884,7 @@ static NSString *UTIForPath(NSString *aPath)
     // Omni's boolValue method uses YES, Y, yes, y and 1 with isEqualToString
     if([self compare:[NSString stringWithBool:YES] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
        [self compare:@"y" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+       [self compare:@"yes" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
        [self isEqualToString:@"1"])
         return YES;
     else
@@ -896,6 +897,7 @@ static NSString *UTIForPath(NSString *aPath)
     }else if([self isEqualToString:@""] ||
              [self compare:[NSString stringWithBool:NO] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
              [self compare:@"n" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
+             [self compare:@"no" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
              [self isEqualToString:@"0"]){
         return NSOffState;
     }else{
