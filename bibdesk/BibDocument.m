@@ -2771,7 +2771,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
         
         [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:0.2];
+        [animation setDuration:BDSKDefaultAnimationTimeInterval];
         [animation setAnimationCurve:NSAnimationEaseInOut];
         [animation startAnimation];
     }
@@ -2821,7 +2821,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
         
         [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:0.2];
+        [animation setDuration:BDSKDefaultAnimationTimeInterval];
         [animation setAnimationCurve:NSAnimationEaseInOut];
         [animation startAnimation];
     }

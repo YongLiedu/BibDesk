@@ -49,6 +49,8 @@ while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtN
 
 #pragma mark ||  User Defaults Key String Declarations
 
+extern NSTimeInterval BDSKDefaultAnimationTimeInterval;
+
 @interface OAPreferenceController (HelpLookup)
 
 @end

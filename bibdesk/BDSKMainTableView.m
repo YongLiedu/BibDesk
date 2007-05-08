@@ -384,7 +384,7 @@
         [finalImage addRepresentation:imageRep];
         
         // block until this is done, so we can handle drawing manually
-        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseInOut];
+        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:BDSKDefaultAnimationTimeInterval animationCurve:NSAnimationEaseInOut];
         [animation setDelegate:self];
         [animation setAnimationBlockingMode:NSAnimationBlocking];
         

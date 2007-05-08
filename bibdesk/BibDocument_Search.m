@@ -328,7 +328,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         [fadeInDict release];
         
         [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:0.75];
+        [animation setDuration:BDSKDefaultAnimationTimeInterval];
         [animation setAnimationCurve:NSAnimationEaseIn];
         [animation startAnimation];
     }
@@ -363,7 +363,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         [fadeInDict release];
         
         [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:0.75];
+        [animation setDuration:BDSKDefaultAnimationTimeInterval];
         [animation setAnimationCurve:NSAnimationEaseIn];
         [animation setDelegate:self];
         [animation startAnimation];
