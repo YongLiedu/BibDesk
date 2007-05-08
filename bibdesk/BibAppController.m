@@ -75,7 +75,6 @@
 #import "BDSKCompletionServerProtocol.h"
 #import "BDSKDocumentController.h"
 #import "NSError_BDSKExtensions.h"
-#import "BDSKSpotlightIconController.h"
 #import "NSImage+Toolbox.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKFileMatcher.h"
