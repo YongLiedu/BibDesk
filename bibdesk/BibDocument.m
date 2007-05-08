@@ -2764,13 +2764,17 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [resizeView addSubview:controlView];
     [views release];
     
-    NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-    NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
-    
-    [animation setAnimationBlockingMode:NSAnimationBlocking];
-    [animation setDuration:0.2];
-    [animation setAnimationCurve:NSAnimationEaseInOut];
-    [animation startAnimation];
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
+        [resizeView setFrame:endRect];
+    } else {
+        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
+        NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
+        
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        [animation setDuration:0.2];
+        [animation setAnimationCurve:NSAnimationEaseInOut];
+        [animation startAnimation];
+    }
     
     views = [[resizeView subviews] copy];
     viewEnum = [views objectEnumerator];
@@ -2810,13 +2814,17 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [resizeView addSubview:controlView];
     [views release];
     
-    NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
-    NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
-    
-    [animation setAnimationBlockingMode:NSAnimationBlocking];
-    [animation setDuration:0.2];
-    [animation setAnimationCurve:NSAnimationEaseInOut];
-    [animation startAnimation];
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
+        [resizeView setFrame:endRect];
+    } else {
+        NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
+        NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
+        
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        [animation setDuration:0.2];
+        [animation setAnimationCurve:NSAnimationEaseInOut];
+        [animation startAnimation];
+    }
     
     [controlView removeFromSuperview];
     views = [[resizeView subviews] copy];

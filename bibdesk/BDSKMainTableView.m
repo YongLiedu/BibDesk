@@ -359,63 +359,44 @@
     [self updateColumnsMenu];
 }
 
-- (NSMenu *)columnsMenu{
-    NSMenu *menu = [[[self headerView] menu] copy];
-    if(menu == nil){
-        [self updateColumnsMenu];
-        menu = [[[self headerView] menu] copy];
-    }
-    [menu removeItem:[menu itemWithAction:@selector(autosizeColumn:)]];
-    return [menu autorelease];
-}
-
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)index {
-    NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
-    unsigned oldIndex = [shownColumns indexOfObject:identifier];
-    
-    // Check if an object already exists in the tableview, remove the old one if it does
-    // This means we can't have a column more than once.
-    if (oldIndex != NSNotFound) {
-        if (index > oldIndex)
-            index--;
-        else if (oldIndex == index)
-            return;
-        [shownColumns removeObject:identifier];
-    }
-    
+- (void)changeTableColumnsWithIdentifiers:(NSArray *)identifiers {
     // Store the new column in the preferences
-    [shownColumns insertObject:identifier atIndex:index];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[shownColumns arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[identifiers arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
     
-    NSView *cacheView = [self enclosingScrollView];
-    NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
-    NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
-    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
-    [initialImage addRepresentation:imageRep];
-    
-    // set the view up with the new columns; don't force a redraw, though
-    [self setupTableColumnsWithIdentifiers:shownColumns];
-    
-    // the added table column's content is not correct during the transition; -reloadData doesn't help
-    NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
-    imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
-    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
-    [finalImage addRepresentation:imageRep];
-    
-    // block until this is done, so we can handle drawing manually
-    BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseInOut];
-    [animation setDelegate:self];
-    [animation setAnimationBlockingMode:NSAnimationBlocking];
-    
-    [animation setTargetImage:finalImage];
-    [animation setStartingImage:initialImage];
-    [animation startAnimation];
-    
-    [finalImage release];
-    [initialImage release];
-    
-    [animation autorelease];
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
+        // set the view up with the new columns
+        [self setupTableColumnsWithIdentifiers:identifiers];
+    } else {
+        NSView *cacheView = [self enclosingScrollView];
+        NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+        NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+        [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+        [initialImage addRepresentation:imageRep];
+        
+        // set the view up with the new columns; don't force a redraw, though
+        [self setupTableColumnsWithIdentifiers:identifiers];
+        
+        // the added table column's content is not correct during the transition; -reloadData doesn't help
+        NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
+        imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
+        [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
+        [finalImage addRepresentation:imageRep];
+        
+        // block until this is done, so we can handle drawing manually
+        BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseInOut];
+        [animation setDelegate:self];
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        
+        [animation setTargetImage:finalImage];
+        [animation setStartingImage:initialImage];
+        [animation startAnimation];
+        
+        [finalImage release];
+        [initialImage release];
+        
+        [animation autorelease];
+    }
 }
 
 - (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
@@ -434,6 +415,25 @@
     [ctxt restoreGraphicsState];
 }
 
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)index {
+    NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
+    unsigned oldIndex = [shownColumns indexOfObject:identifier];
+    
+    // Check if an object already exists in the tableview, remove the old one if it does
+    // This means we can't have a column more than once.
+    if (oldIndex != NSNotFound) {
+        if (index > oldIndex)
+            index--;
+        else if (oldIndex == index)
+            return;
+        [shownColumns removeObject:identifier];
+    }
+    
+    [shownColumns insertObject:identifier atIndex:index];
+    
+    [self changeTableColumnsWithIdentifiers:shownColumns];
+}
+
 - (void)removeTableColumnWithIdentifier:(NSString *)identifier {
     NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
 
@@ -441,38 +441,19 @@
     if ([shownColumns containsObject:identifier] == NO)
         return;
     
-    NSView *cacheView = [self enclosingScrollView];
-    NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
-    NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
-    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
-    [initialImage addRepresentation:imageRep];
-
-    // Store the new column in the preferences
     [shownColumns removeObject:identifier];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[shownColumns arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
-                                                      forKey:BDSKShownColsNamesKey];
     
-    // set the view up with the new columns; don't force a redraw, though
-    [self setupTableColumnsWithIdentifiers:shownColumns];
-    
-    NSImage *finalImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
-    imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
-    [cacheView cacheDisplayInRect:[cacheView frame] toBitmapImageRep:imageRep];
-    [finalImage addRepresentation:imageRep];
-        
-    // block until this is done, so we can handle drawing manually
-    BDSKImageFadeAnimation *animation = [[BDSKImageFadeAnimation alloc] initWithDuration:0.3 animationCurve:NSAnimationEaseInOut];
-    [animation setDelegate:self];
-    [animation setAnimationBlockingMode:NSAnimationBlocking];
-        
-    [animation setTargetImage:finalImage];
-    [animation setStartingImage:initialImage];
-    [animation startAnimation];
-    
-    [finalImage release];
-    [initialImage release];
-    
-    [animation autorelease];
+    [self changeTableColumnsWithIdentifiers:shownColumns];
+}
+
+- (NSMenu *)columnsMenu{
+    NSMenu *menu = [[[self headerView] menu] copy];
+    if(menu == nil){
+        [self updateColumnsMenu];
+        menu = [[[self headerView] menu] copy];
+    }
+    [menu removeItem:[menu itemWithAction:@selector(autosizeColumn:)]];
+    return [menu autorelease];
 }
 
 @end

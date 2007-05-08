@@ -316,18 +316,22 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [mainBox addSubview:contentView];
     
-    NSViewAnimation *animation;
-    NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
-    NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:contentView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
+        
+    } else {
+        NSViewAnimation *animation;
+        NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
+        NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:contentView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
 
-    animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
-    [fadeOutDict release];
-    [fadeInDict release];
-    
-    [animation setAnimationBlockingMode:NSAnimationBlocking];
-    [animation setDuration:0.75];
-    [animation setAnimationCurve:NSAnimationEaseIn];
-    [animation startAnimation];
+        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
+        [fadeOutDict release];
+        [fadeInDict release];
+        
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        [animation setDuration:0.75];
+        [animation setAnimationCurve:NSAnimationEaseIn];
+        [animation startAnimation];
+    }
     
     [[previewer progressOverlay] remove];
     
@@ -347,19 +351,23 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     if(currentPreviewView != [previewTextView enclosingScrollView])
         [[previewer progressOverlay] overlayView:currentPreviewView];
     
-    NSViewAnimation *animation;
-    NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
-    NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
-    
-    animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
-    [fadeOutDict release];
-    [fadeInDict release];
-    
-    [animation setAnimationBlockingMode:NSAnimationBlocking];
-    [animation setDuration:0.75];
-    [animation setAnimationCurve:NSAnimationEaseIn];
-    [animation setDelegate:self];
-    [animation startAnimation];
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
+        
+    } else {
+        NSViewAnimation *animation;
+        NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
+        NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
+        
+        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
+        [fadeOutDict release];
+        [fadeInDict release];
+        
+        [animation setAnimationBlockingMode:NSAnimationBlocking];
+        [animation setDuration:0.75];
+        [animation setAnimationCurve:NSAnimationEaseIn];
+        [animation setDelegate:self];
+        [animation startAnimation];
+    }
     
     [[fileSearchController searchContentView] removeFromSuperview];
     

@@ -212,6 +212,7 @@ NSString *BDSKUpdateLatestNotifiedVersionKey = @"BDSKUpdateLatestNotifiedVersion
 NSString *BDSKSpotlightVersionInfo = @"BDSKSpotlightVersionInfo";
 
 NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
+NSString *BDSKDisableViewAnimationsKey = @"BDSKDisableViewAnimationsKey";
 
 
 #pragma mark Field name strings
