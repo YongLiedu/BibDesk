@@ -784,6 +784,8 @@
 					<data></data>
 					<key>BDSKDefaultGroupFieldSeparatorKey</key>
 					<string>; </string>
+					<key>BDSKDisableViewAnimationsKey</key>
+                    <false/>
 					<key>BDSKEmailTemplateKey</key>
 					<string></string>
 					<key>BDSKGroupFieldsKey</key>
