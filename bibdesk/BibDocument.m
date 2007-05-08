@@ -2792,9 +2792,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     if ([documentWindow isEqual:[controlView window]] == NO)
         return;
     
-    NSArray *views = [[[mainBox contentView] subviews] copy];
-    NSEnumerator *viewEnum;
-    NSView *view;
+    NSArray *views = [[NSArray alloc] initWithArray:[[mainBox contentView] subviews] copyItems:NO];
     NSRect controlFrame = [controlView frame];
     NSRect endRect, startRect = NSUnionRect([splitView frame], controlFrame);
     
@@ -2804,9 +2802,23 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     NSView *clipView = [[[NSView alloc] initWithFrame:startRect] autorelease];
     NSView *resizeView = [[[NSView alloc] initWithFrame:startRect] autorelease];
     
+    /* Retaining the graphics context is a workaround for our bug #1714565.
+        
+        To reproduce:
+        1) search LoC for "Bob Dylan"
+        2) enter "ab" in the document's searchfield
+        3) click the "Import" button for any one of the items
+        4) crash when trying to retain a dealloced instance of NSWindowGraphicsContext (enable zombies) in [resizeView addSubview:]
+
+       This seems to be an AppKit focus stack bug.  Something still isn't quite correct, since the button for -[BDSKMainTableView importItem:] is in the wrong table column momentarily, but I think that's unrelated to the crasher.
+    */
+    [[[NSGraphicsContext currentContext] retain] autorelease];
+    
     [mainBox addSubview:clipView];
     [clipView addSubview:resizeView];
-    viewEnum = [views objectEnumerator];
+    NSEnumerator *viewEnum = [views objectEnumerator];
+    NSView *view;
+
     while (view = [viewEnum nextObject]) {
         if (NSContainsRect(startRect, [view frame]))
             [resizeView addSubview:view];
