@@ -2764,9 +2764,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [resizeView addSubview:controlView];
     [views release];
     
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
-        [resizeView setFrame:endRect];
-    } else {
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
         NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
         NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
         
@@ -2774,6 +2772,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [animation setDuration:BDSKDefaultAnimationTimeInterval];
         [animation setAnimationCurve:NSAnimationEaseInOut];
         [animation startAnimation];
+    } else {
+        [resizeView setFrame:endRect];
     }
     
     views = [[resizeView subviews] copy];
@@ -2814,9 +2814,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [resizeView addSubview:controlView];
     [views release];
     
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
-        [resizeView setFrame:endRect];
-    } else {
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
         NSDictionary *viewInfo = [NSDictionary dictionaryWithObjectsAndKeys:resizeView, NSViewAnimationTargetKey, [NSValue valueWithRect:endRect], NSViewAnimationEndFrameKey, nil];
         NSViewAnimation *animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:viewInfo, nil]] autorelease];
         
@@ -2824,6 +2822,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [animation setDuration:BDSKDefaultAnimationTimeInterval];
         [animation setAnimationCurve:NSAnimationEaseInOut];
         [animation startAnimation];
+    } else {
+        [resizeView setFrame:endRect];
     }
     
     [controlView removeFromSuperview];

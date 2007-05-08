@@ -316,9 +316,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [mainBox addSubview:contentView];
     
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
-        
-    } else {
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
         NSViewAnimation *animation;
         NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
         NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:contentView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
@@ -351,9 +349,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     if(currentPreviewView != [previewTextView enclosingScrollView])
         [[previewer progressOverlay] overlayView:currentPreviewView];
     
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
-        
-    } else {
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
         NSViewAnimation *animation;
         NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
         NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];

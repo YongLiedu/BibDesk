@@ -364,10 +364,7 @@
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[identifiers arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString]
                                                       forKey:BDSKShownColsNamesKey];
     
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDisableViewAnimationsKey]) {
-        // set the view up with the new columns
-        [self setupTableColumnsWithIdentifiers:identifiers];
-    } else {
+    if (BDSKDefaultAnimationTimeInterval > 0.0) {
         NSView *cacheView = [self enclosingScrollView];
         NSImage *initialImage = [[NSImage alloc] initWithSize:[cacheView frame].size];
         NSBitmapImageRep *imageRep = [cacheView bitmapImageRepForCachingDisplayInRect:[cacheView frame]];
@@ -396,6 +393,9 @@
         [initialImage release];
         
         [animation autorelease];
+    } else {
+        // set the view up with the new columns
+        [self setupTableColumnsWithIdentifiers:identifiers];
     }
 }
 
