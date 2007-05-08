@@ -1504,7 +1504,7 @@ Separators that are recognized for groups are @samp{;:,} and @samp{and}, at pres
 @samp{and} will be ignored as separator when the entry contains any of the separator characters. 
 The separator characters can be changed with a hidden preference using Terminal.app. 
 To change it to, say, @samp{;,}, quit BibDesk and enter the following command in Terminal (exclude double quotes): 
-``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKGroupFieldSeparatorCharactersKey ';,'}''
+``@code{defaults write -app BibDesk BDSKGroupFieldSeparatorCharactersKey ';,'}''
 then hit return.
 
 You can add entries or files to a group via drag-and-drop by dragging the selected files to a
@@ -1515,7 +1515,7 @@ using @samp{Journal} as a group, and adding publications to that group!).
 The default group separator is a semicolon followed by a single space @samp{; }, but this can be
 changed with a hidden preference using Terminal.app.  To change the separator to a comma
 followed by a single space, quit BibDesk and enter the following command in Terminal (exclude double quotes): 
-``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKDefaultGroupFieldSeparatorKey ', '}''
+``@code{defaults write -app BibDesk BDSKDefaultGroupFieldSeparatorKey ', '}''
 then hit return.
 
 @subheading Editing
@@ -2845,7 +2845,7 @@ a custom Remote URL field called @samp{Citeseerurl}, and you want the header for
 corresponding column to show an image which you have put at the location 
 @samp{/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png}. For Bibdesk to use this image, 
 quit BibDesk and enter the following command in Terminal (exclude the outer double quotes): 
-``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKTableHeaderImages -dict-add 
+``@code{defaults write -app BibDesk BDSKTableHeaderImages -dict-add 
 Citeseerurl "/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png"}''
 then hit return. You can add as many field name/image path pairs as you like 
 inside the braces. 
@@ -2881,7 +2881,7 @@ entries won't be overwritten.
 
 Similarly, a hidden preference exists to write certain fields as an empty string, and is specified
 in the Terminal (excluding outer double quotes) as 
-``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKFieldsToWriteIfEmpty '(Key)'}'',
+``@code{defaults write -app BibDesk BDSKFieldsToWriteIfEmpty '(Key)'}'',
 where the value in parentheses can be a comma separated, capitalized list of field names.  These
 must also be default fields in the Defaults preference pane.  This can be used to prevent an item
 from inheriting its parent value.
