@@ -247,6 +247,9 @@
     @discussion (comprehensive description)
 */
 - (IBAction)moveLinkedFile:(id)sender;
+
+- (IBAction)showNotesForLinkedFile:(id)sender;
+
 - (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;

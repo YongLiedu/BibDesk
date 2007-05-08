@@ -467,7 +467,7 @@ enum{
     
 }
 
-- (IBAction)showLinkedFileNotes:(id)sender{
+- (IBAction)showNotesForLinkedFile:(id)sender{
 	NSString *field = [sender representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -559,7 +559,7 @@ enum{
 			[item setRepresentedObject:field];
             
 			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Notes For %@",@"Menu item title: Move Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
-                                   action:@selector(showLinkedFileNotes:)
+                                   action:@selector(showNotesForLinkedFile:)
                             keyEquivalent:@""];
 			[item setRepresentedObject:field];
 		}
@@ -926,6 +926,29 @@ enum{
 			[menuItem setTitle:NSLocalizedString(@"Move Linked File", @"Menu item title")];
 		return (isEditable && lurl != nil);
 	}
+	else if (theAction == @selector(showNotesForLinkedFile:)) {
+		NSString *field = (NSString *)[menuItem representedObject];
+		if (field == nil)
+			field = BDSKLocalUrlString;
+		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
+		if ([[menuItem menu] supermenu])
+			[menuItem setTitle:NSLocalizedString(@"Notes For Linked File", @"Menu item title")];
+		return (lurl == nil ? NO : YES);
+	}
+	else if (theAction == @selector(openRemoteURL:)) {
+		NSString *field = (NSString *)[menuItem representedObject];
+		if (field == nil)
+			field = BDSKUrlString;
+		if ([[menuItem menu] supermenu])
+			[menuItem setTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title")];
+		return ([publication remoteURLForField:field] != nil);
+	}
+    else if (theAction == @selector(saveFileAsLocalUrl:)) {
+		return (isEditable && [[[remoteSnoopWebView mainFrame] dataSource] isLoading] == NO);
+	}
+	else if (theAction == @selector(downloadLinkedFileAsLocalUrl:)) {
+		return (isEditable && isDownloading == NO);
+	}
 	else if (theAction == @selector(toggleSnoopDrawer:)) {
 		int requiredContent = [menuItem tag];
 		int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
@@ -948,29 +971,6 @@ enum{
             NSURL *lurl = [[publication URLForField:BDSKLocalUrlString] fileURLByResolvingAliases];
             return (lurl == nil ? NO : YES);
 		}
-	}
-	else if (theAction == @selector(openRemoteURL:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKUrlString;
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title")];
-		return ([publication remoteURLForField:field] != nil);
-	}
-	else if (theAction == @selector(showNotesForLinkedFile:)) {
-		NSString *field = (NSString *)[menuItem representedObject];
-		if (field == nil)
-			field = BDSKLocalUrlString;
-		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Notes For Linked File", @"Menu item title")];
-		return (lurl == nil ? NO : YES);
-	}
-    else if (theAction == @selector(saveFileAsLocalUrl:)) {
-		return (isEditable && [[[remoteSnoopWebView mainFrame] dataSource] isLoading] == NO);
-	}
-	else if (theAction == @selector(downloadLinkedFileAsLocalUrl:)) {
-		return (isEditable && isDownloading == NO);
 	}
     else if (theAction == @selector(editSelectedFieldAsRawBibTeX:)) {
         if (isEditable == NO)
