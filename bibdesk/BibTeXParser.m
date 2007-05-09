@@ -772,7 +772,7 @@ static BOOL addMacroToResolver(AST *entry, BDSKMacroResolver *macroResolver, NSS
             success = NO;
         }
         [macroKey release];
-        [NSString release];
+        [macroString release];
     } // end while field - process next macro    
     return success;
 }
