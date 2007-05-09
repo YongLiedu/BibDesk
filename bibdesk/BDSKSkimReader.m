@@ -221,10 +221,6 @@
 
 - (NSString *)textNotesAtURL:(NSURL *)fileURL;
 {   
-    NSData *RTF = [self RTFNotesAtURL:fileURL];
-    return RTF ? [[[[NSAttributedString alloc] initWithRTF:RTF documentAttributes:NULL] autorelease] string] : nil;
-    
-    // @@ fixme: not functional on the skim side; worth it to add a text version of notes in EA?
     NSString *string = nil;
     if ([self connectAndCheckTypeOfFile:fileURL]) {
         @try{
@@ -236,6 +232,7 @@
             [self destroyConnection];
         }
     }
+    NSLog(@"notes has %@", string);
     return string;
 }
 
