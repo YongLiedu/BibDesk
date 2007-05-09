@@ -232,7 +232,6 @@
             [self destroyConnection];
         }
     }
-    NSLog(@"notes has %@", string);
     return string;
 }
 
