@@ -47,9 +47,8 @@ typedef struct _ViewMargins {
 } ViewMargins;
 
 @interface BDSKPrintableView : MultiplePageView {
-    BOOL hasMultiplePages;
     NSScrollView *scrollView;
-    NSClipView *clipView;
+    BOOL hasMultiplePages;
     NSTextStorage *textStorage;
     ViewMargins margins;
     
