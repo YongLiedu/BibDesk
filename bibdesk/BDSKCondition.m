@@ -439,6 +439,12 @@
     }
 }
 
+// @@ workaround for timer retain cycle; could also use a CFRunLoopTimer that doesn't retain its context
+- (void)invalidateCacheTimer {
+    [cacheTimer invalidate];
+    cacheTimer = nil;
+}
+
 @end
 
 @implementation BDSKCondition (Private)

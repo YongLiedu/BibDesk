@@ -99,6 +99,7 @@
 - (void)dealloc {
 	[[self undoManager] removeAllActionsWithTarget:self];
     [undoManager release];
+    [conditions makeObjectsPerformSelector:@selector(invalidateCacheTimer)];
 	[conditions release];
 	[super dealloc];
 }
