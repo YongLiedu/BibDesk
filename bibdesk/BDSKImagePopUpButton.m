@@ -144,14 +144,14 @@
     
     if ([animation isAnimating])
         [animation stopAnimation];
-    
-    animation = [[BDSKImageFadeAnimation alloc] initWithDuration:1.0f animationCurve:NSAnimationEaseInOut];
-    [animation setDelegate:self];
-    [animation setAnimationBlockingMode:NSAnimationNonblocking];
-    
+        
     NSImage *iconImage = [self iconImage];
     
     if (nil != iconImage && nil != newImage) {
+        animation = [[BDSKImageFadeAnimation alloc] initWithDuration:1.0f animationCurve:NSAnimationEaseInOut];
+        [animation setDelegate:self];
+        [animation setAnimationBlockingMode:NSAnimationNonblocking];
+        
         [animation setTargetImage:newImage];
         [animation setStartingImage:iconImage];
         [animation startAnimation];
