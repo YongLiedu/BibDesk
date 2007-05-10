@@ -2289,7 +2289,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
     // NB: this method gets called for setPublications: also, so checking for AddItemNotification might not do what you expect
 	BOOL isDelete = [[notification name] isEqualToString:BDSKDocDelItemNotification];
-    if(isDelete == NO)
+    if(isDelete == NO && [self hasLibraryGroupSelected])
 		[self setSearchString:@""]; // clear the search when adding
 
     // update smart group counts
