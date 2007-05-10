@@ -398,9 +398,9 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
 {
-    CFCharacterSetRef nonLetterCharacterSet = NULL;
+    static CFCharacterSetRef nonLetterCharacterSet = NULL;
     
-    if (nonLetterCharacterSet == NULL) {
+    if (NULL == nonLetterCharacterSet) {
         CFMutableCharacterSetRef letterCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetLetter));
         CFCharacterSetInvert(letterCFCharacterSet);
         nonLetterCharacterSet = CFCharacterSetCreateCopy(CFAllocatorGetDefault(), letterCFCharacterSet);
