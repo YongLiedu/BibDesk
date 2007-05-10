@@ -64,11 +64,12 @@
             margins.bottom = [printInfo bottomMargin];
         }
         
-        NSScrollView *scrollView = [[[NSScrollView alloc] initWithFrame:NSZeroRect] autorelease];
+        scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
         NSClipView *clipView = [[NSClipView alloc] initWithFrame:NSZeroRect];
         
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];    
         
+        // this creates a retain cycle, see the -release override for its fix
         [clipView setDocumentView:self];
         
         [scrollView setContentView:clipView];
@@ -84,6 +85,15 @@
         [self setFont:[NSFont systemFontOfSize:[NSFont systemFontSize]]];
     }
     return self;
+}
+
+- (void)release {
+    // Fix retain cycle through scrollView and clipView
+    if (scrollView && [self retainCount] == 2) { 
+        [scrollView autorelease];
+        scrollView = nil;
+    }
+    [super release];
 }
 
 - (void)dealloc{
