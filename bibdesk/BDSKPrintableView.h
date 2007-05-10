@@ -46,8 +46,9 @@ typedef struct _ViewMargins {
     float bottom;
 } ViewMargins;
 
+// Important: This class should only be used as a temporary view for drawing and printing, i.e. as an autoreleased object
+
 @interface BDSKPrintableView : MultiplePageView {
-    NSScrollView *scrollView;
     BOOL hasMultiplePages;
     NSTextStorage *textStorage;
     ViewMargins margins;

@@ -289,7 +289,7 @@ static NSString *BDSKPreviewPanelFrameAutosaveName = @"BDSKPreviewPanel";
     if([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0){
         [pdfView printWithInfo:[NSPrintInfo sharedPrintInfo] autoRotate:NO];
     }else{
-        BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
+        BDSKPrintableView *printableView = [[[BDSKPrintableView alloc] initForScreenDisplay:NO] autorelease];
         [printableView setAttributedString:[rtfPreviewView textStorage]];    
         
         // Construct the print operation and setup Print panel

@@ -64,12 +64,11 @@
             margins.bottom = [printInfo bottomMargin];
         }
         
-        scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+        NSScrollView *scrollView = [[[NSScrollView alloc] initWithFrame:NSZeroRect] autorelease];
         NSClipView *clipView = [[NSClipView alloc] initWithFrame:NSZeroRect];
         
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];    
         
-#warning retain cycle created here
         [clipView setDocumentView:self];
         
         [scrollView setContentView:clipView];
