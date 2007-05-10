@@ -111,7 +111,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSDictionary *representedObject;
     BDSKOpenWithMenuController *controller = [BDSKOpenWithMenuController sharedInstance];
     
-    submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@""];
+    submenu = [[[NSMenu allocWithZone:[self zone]] initWithTitle:@""] autorelease];
     [submenu setDelegate:controller];
     
     // add the choose... item, the other items are inserted lazily by BDSKOpenWithMenuController
