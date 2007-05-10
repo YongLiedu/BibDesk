@@ -217,27 +217,38 @@ typedef struct WLDragMapEntryStruct
 	ICAttr junk = 0;
 	ICFileSpec spec;
     
-	CFURLRef pathURL = NULL;
-	long size = sizeof(ICFileSpec);
-    FSRef pathRef;
-	
-	err = ICStart(&inst, 'BDSK');
-	
-	if (err == noErr)
-	{
-		//Get the downloads folder
-		err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
-        
-        // convert FSSpec to FSRef
-        err = FSpMakeFSRef(&(spec.fss), &pathRef);
-        
-        if(err == noErr)
-            pathURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
-        
-		ICStop(inst);
-	}
+	static CFURLRef pathURL = NULL;
     
-    return [(id)pathURL autorelease];
+    
+    if (NULL == pathURL) {
+        long size = sizeof(ICFileSpec);
+        FSRef pathRef;
+        
+        err = ICStart(&inst, 'BDSK');
+        
+        if (noErr == err)
+            err = ICBegin(inst, icReadOnlyPerm);
+        
+        if (err == noErr)
+        {
+            //Get the downloads folder
+            err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
+            
+            if (noErr == err) {
+                ICEnd(inst);
+                ICStop(inst);
+            }
+            
+            // convert FSSpec to FSRef
+            err = FSpMakeFSRef(&(spec.fss), &pathRef);
+            
+            if(err == noErr)
+                pathURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
+            
+
+        }
+    }
+    return (NSURL *)pathURL;
 }
 
 - (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
