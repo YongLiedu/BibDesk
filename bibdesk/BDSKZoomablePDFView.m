@@ -108,6 +108,7 @@ static CFMutableSetRef nonretainedScrollviews = NULL;
 @implementation BDSKZoomablePDFView
 
 /* For genstrings:
+    NSLocalizedStringFromTable(@"Auto", @"ZoomValues", @"Zoom popup entry")
     NSLocalizedStringFromTable(@"10%", @"ZoomValues", @"Zoom popup entry")
     NSLocalizedStringFromTable(@"25%", @"ZoomValues", @"Zoom popup entry")
     NSLocalizedStringFromTable(@"50%", @"ZoomValues", @"Zoom popup entry")
