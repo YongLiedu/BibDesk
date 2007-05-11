@@ -9,32 +9,73 @@
 {\list\listtemplateid4\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid4}
 {\list\listtemplateid5\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid5}
 {\list\listtemplateid6\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid6}
-{\list\listtemplateid7\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid7}}
-{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}{\listoverride\listid5\listoverridecount0\ls5}{\listoverride\listid6\listoverridecount0\ls6}{\listoverride\listid7\listoverridecount0\ls7}}
-\vieww11680\viewh14300\viewkind1
+{\list\listtemplateid7\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid7}
+{\list\listtemplateid8\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid8}
+{\list\listtemplateid9\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid9}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}{\listoverride\listid5\listoverridecount0\ls5}{\listoverride\listid6\listoverridecount0\ls6}{\listoverride\listid7\listoverridecount0\ls7}{\listoverride\listid8\listoverridecount0\ls8}{\listoverride\listid9\listoverridecount0\ls9}}
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
 \f0\fs60 \cf0 BibDesk Release Notes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\fs22 \cf0 \
-Last update: 18 April 2007 (rev 
-\f2\fs20 10483)
+Last update: 10 May 2007 (rev 
+\f2\fs20 10606)
 \f1\fs22 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\b\fs28 \cf0 \
-Changes since 1.3.3\
+Changes since 1.3.4\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \i\fs26 \cf0 \
 New Features\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
 \ls1\ilvl0
+\f1\i0\b0\fs22 \cf0 {\listtext	\'95	}You can now force file->viewer mappings to override your system defaults (I still think this is weird, but it will stop some user complaints)\
+{\listtext	\'95	}French translation from Corentin Cras-M\'e9neur (thanks!)\
+{\listtext	\'95	}Arbitrary options can be passed to the z39.50 search...which is only useful if the ZOOM implementation recognizes the key-value pairs\
+{\listtext	\'95	}Proxy info is now passed to z39.50 servers, but we have no way of testing this\
+{\listtext	\'95	}Animation time is decreased, and user-settable by the hidden default BDSKDefaultAnimationTimeInterval; setting it to 0 will disable animations (and disable more user complaints)\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f0\i\b\fs26 \cf0 \
+Bugs Fixed\
+\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
+\ls2\ilvl0
+\f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Deprecated string methods are no longer used\
+{\listtext	\'95	}Search indexes are no longer leaked (Apple's docs are wrong about this)\
+{\listtext	\'95	}Search field timer is invalidated before the window closes, avoiding a possible exception (workaround for another Apple bug)\
+{\listtext	\'95	}Tail is truncated once again in main table text cells\
+{\listtext	\'95	}Tooltips are disabled in PDFViews due to an Apple bug\
+{\listtext	\'95	}We now avoid deTeXifying accented characters that can't be composed to a single unichar\
+{\listtext	\'95	}Empty keys are now allowed when parsing the Refer format\
+{\listtext	\'95	}AppleScript search results are separated with a |\
+{\listtext	\'95	}We now add an empty item with a rendered record in the Annote field for unparseable z39.50 items\
+{\listtext	\'95	}The MARC parser now allows a wrong space at character 22, since that's a common syntax error\
+{\listtext	\'95	}TeX font command parsing now handles nested commands\
+{\listtext	\'95	}Track files for custom default search group servers, as the file may not have the default name\
+{\listtext	\'95	}Skim notes works again (accidentally broken before release)\
+{\listtext	\'95	}Fixed crash when clearing the search field of a z39.50 search group\
+{\listtext	\'95	}Removed Spotlight file icon code, as it wasn't thread safe (will be used later in Leopard)\
+{\listtext	\'95	}Fixed a crash that would occur when you clicked the Import button in a search group, which was itself searched via the toolbar search field (looks like another Apple bug...)\
+{\listtext	\'95	}Fixed the valueOfMacro: exception that various users reported (due to a memory leak)\
+{\listtext	\'95	}Date-based conditions are no longer leaked\
+{\listtext	\'95	}Fixed other memory leaks\
+    
+\f0\b\fs28 \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+\cf0 Changes since 1.3.3\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\i\fs26 \cf0 \
+New Features\
+\pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
+\ls3\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Searching the bibliography now uses SearchKit, so Boolean operators &|! (AND, OR, NOT) are fully supported, as well as grouping with parentheses and wildcards\
 {\listtext	\'95	}Allow writing empty fields to the file to work around crossref limitations (RFE #1690155); requires a hidden preference 
 \f2\fs20 BDSKFieldsToWriteIfEmpty, documented in help\
-\ls1\ilvl0
+\ls3\ilvl0
 \f1\fs22 {\listtext	\'95	}Animated more search transitions\
 {\listtext	\'95	}Enabled feature for displaying Skim notes per-file\
 {\listtext	\'95	}Added support for indexing and searching Skim notes for the document\
@@ -44,7 +85,7 @@ New Features\
 \f0\i\b\fs26 \cf0 \
 Bugs Fixed\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls2\ilvl0
+\ls4\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Fixed various memory leaks\
 {\listtext	\'95	}Fixed various tooltip typos\
 {\listtext	\'95	}No longer use a fixed-size CFMutableString for macro expansion\
@@ -59,7 +100,7 @@ Changes since 1.3.2\
 \i\fs26 \cf0 \
 New Features\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls3\ilvl0
+\ls5\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Menu with search group bookmarks, so our new feature is more obvious and accessible\
 {\listtext	\'95	}If a file whose name is a valid a PubMed ID is dropped on the main table, its information is automatically retrieved and filled in\
 {\listtext	\'95	}Help menu now has items to open the RFE and bug trackers on SourceForge\
@@ -68,11 +109,11 @@ New Features\
 \f0\i\b\fs26 \cf0 \
 Bugs Fixed\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls4\ilvl0
+\ls6\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Get Info in Finder will display more metadata attributes\
 {\listtext	\'95	}Fixed rich text bug in AppleScript, no thanks to Apple's incorrect docs and examples\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls5\ilvl0\cf0 {\listtext	\'95	}User's locale will be used for displayed publication dates, and handle other date orderings\
+\ls7\ilvl0\cf0 {\listtext	\'95	}User's locale will be used for displayed publication dates, and handle other date orderings\
 {\listtext	\'95	}Fixed display scaling (resolution independence) problems with the Spotlight overlay when searching preferences\
 {\listtext	\'95	}Fixed a leak in code used for outline views\
 {\listtext	\'95	}Drawer state is now determined correctly when it is closed by dragging (bug #1673573)\
@@ -116,7 +157,7 @@ Changes since 1.3.1\
 \i\fs26 \cf0 \
 New Features\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls6\ilvl0
+\ls8\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}New "Publication Date" column for displaying a composite Month + Year, so we no longer have conflicts with existing Date fields\
 {\listtext	\'95	}Prefix/suffix addition to the Database Find & Replace panel\
 {\listtext	\'95	}Author's display name is now used for the author table and menu\
@@ -137,7 +178,7 @@ New Features\
 \f0\i\b\fs26 \cf0 \
 Bugs Fixed\
 \pard\tx220\tx720\tx1440\tx2880\tx4320\tx5760\tx7200\li720\fi-720\ql\qnatural
-\ls7\ilvl0
+\ls9\ilvl0
 \f1\i0\b0\fs22 \cf0 {\listtext	\'95	}Stale TeX intermediate files are removed between previews\
 {\listtext	\'95	}Added workaround for editor beachball when the Spotlight database is corrupted\
 {\listtext	\'95	}Saving from AppleScript no longer uses a stale encoding value\
