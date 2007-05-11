@@ -74,7 +74,7 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 }
 
 - (id)init {
-    if (self = [super initTextCell:@""]) {
+    if (self = [super initTextCell:[[[BDSKGroup alloc] initWithName:@"" count:0] autorelease]]) {
         
         [self setEditable:YES];
         [self setScrollable:YES];

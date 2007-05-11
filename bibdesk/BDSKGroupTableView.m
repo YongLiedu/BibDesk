@@ -81,6 +81,10 @@
 	[self setHeaderView:customTableHeaderView];	
     [customTableHeaderView release];
     
+    BDSKGroupCell *cell = [[BDSKGroupCell alloc] init];
+    [column setDataCell:cell];
+    [cell release];
+    
     BDSKGroupCellFormatter *formatter = [[BDSKGroupCellFormatter alloc] init];
     [[column dataCell] setFormatter:formatter];
     [formatter release];
