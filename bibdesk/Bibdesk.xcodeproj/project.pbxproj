@@ -3215,7 +3215,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -3258,7 +3257,6 @@
 				},
 			);
 			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8D1107260486CEB800E47090 /* BibDesk */,
 				3D8A5779082D3077008E818C /* BibDesk Help */,
@@ -4692,10 +4690,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = BibDesk;
 				VERSIONING_SYSTEM = "apple-generic";
-				WARNING_CFLAGS = (
-					"-Wfloat-equal",
-					"-Wstack-protector",
-				);
+				WARNING_CFLAGS = "-Wfloat-equal";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
