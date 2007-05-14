@@ -335,3 +335,32 @@ NSString *BDSKFileContentSearchString = @"FileContent";
 NSString *BDSKRelevanceString = @"Relevance";
 NSString *BDSKPersonString = @"Person";
 NSString *BDSKSkimNotesString = @"SkimNotes";
+
+/*
+ 
+ ** Hidden pref keys **
+ 
+ Last updated: Mon May 14 19:48:02 GMT 2007
+ 
+ BDSKRemoveExtendedAttributesFromDocuments       bool    false
+ BDSKDisableDocumentExtendedAttributes           bool    false
+ BDSKDisableExportAttributesKey                  bool    false
+ BDSKFieldsToWriteIfEmpty                        array   ()
+ BDSKShouldUseSpotlightCommentForURL             bool    false
+ BDSKEnableSharingWithSelfKey                    bool    false   // developers only
+ BDSKDisableRemoteChangeNotifications            bool    false
+ BDSKSharingServerMaxConnections                 integer 0       // ignored if < 20
+ BDSKDisableExceptionHandlingKey                 bool    false   // developers only
+ BDSKShouldLogFilesAddedToMatchingSearchIndex    bool    false   // developers only
+ BDSKUseXMLSpotlightCache                        bool    false   // developers only
+ DisableTypeAheadSelection                       bool    false
+ BDSKDisableBackgroundColorForGroupTableKey      bool    false
+ OAScriptMenuDisabled                            bool    false
+ BDSKAnnoteFieldName                             string  nil
+ BDSKDefaultAnimationTimeInterval                float   0.15    // set to zero to disable
+ BDSKTableHeaderImages                           dict    nil
+ BDSKGroupFieldSeparatorCharactersKey            string  ";:,"
+ BDSKDefaultGroupFieldSeparatorKey               string  "; "    // note trailing space!
+
+ */
+
