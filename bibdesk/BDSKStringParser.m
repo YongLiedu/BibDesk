@@ -47,6 +47,7 @@
 #import "BDSKWebOfScienceParser.h"
 #import "BDSKDublinCoreXMLParser.h"
 #import "BDSKReferParser.h"
+#import "BDSKMODSParser.h"
 
 @implementation BDSKStringParser
 
@@ -81,6 +82,9 @@ static Class classForType(int stringType)
             break;
         case BDSKReferStringType:
             parserClass = [BDSKReferParser class];
+            break;
+        case BDSKMODSStringType:
+            parserClass = [BDSKMODSParser class];
             break;
         default:
             parserClass = Nil;
@@ -134,6 +138,8 @@ static Class classForType(int stringType)
 		return BDSKNoKeyBibTeXStringType;
     if([BDSKReferParser canParseString:self])
         return BDSKReferStringType;
+    if([BDSKMODSParser canParseString:self])
+        return BDSKMODSStringType;
 	// don't check DC, as the check is too unreliable
     return BDSKUnknownStringType;
 }

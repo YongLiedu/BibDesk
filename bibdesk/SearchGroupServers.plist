@@ -98,7 +98,7 @@
             host = "z3950.copac.ac.uk";
             port = "2100";
             options = {
-                recordSyntax = "MARC XML";
+                recordSyntax = "MODS";
                 resultEncoding = "utf-8";
             };
         },

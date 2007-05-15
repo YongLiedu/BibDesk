@@ -50,7 +50,6 @@
 - (BOOL)isMARCString;
 - (BOOL)isFormattedMARCString;
 - (BOOL)isMARCXMLString;
-- (BOOL)canBeConvertedToMARC;
 - (NSString *)stringByFixingFormattedMARCStart;
 - (NSString *)stringByRemovingPunctuationCharactersAndBracketedText;
 @end
@@ -72,17 +71,10 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 - (NSArray *)parsedItems;
 @end
 
-static NSData *MODSToMARCXSLTData = nil;
-
 @implementation BDSKMARCParser
 
-+ (void)initialize{
-    OBINITIALIZE;
-    MODSToMARCXSLTData = [[NSData alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"MODS2MARC21slim" ofType:@"xsl"] options:NSMappedRead error:NULL];
-}
-
 + (BOOL)canParseString:(NSString *)string{
-	return [string isMARCString] || [string isFormattedMARCString] || [string isMARCXMLString] || [string canBeConvertedToMARC];
+	return [string isMARCString] || [string isFormattedMARCString] || [string isMARCXMLString];
 }
 
 + (NSArray *)itemsFromFormattedMARCString:(NSString *)itemString error:(NSError **)outError{
@@ -293,33 +285,6 @@ static NSData *MODSToMARCXSLTData = nil;
     return returnArray;
 }
 
-// @@ this lives here for now because itemsFromMARCXMLString is private, but should get its own class and types
-+ (NSArray *)itemsFromMODSXMLString:(NSString *)itemString error:(NSError **)outError{
-
-    NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:itemString options:0 error:outError];
-    if (nil == doc)
-        return [NSArray array];
-    
-    NSXMLDocument *marcDoc = [doc objectByApplyingXSLT:MODSToMARCXSLTData arguments:nil error:outError];
-    [doc autorelease];
-    if (nil == marcDoc)
-        return [NSArray array];
-    
-    NSData *xmlData = [marcDoc XMLData];
-    NSString *encodingName = [marcDoc characterEncoding];
-    NSStringEncoding encoding = 0;
-    if (encodingName) {
-        CFStringEncoding cfEnc = CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName);
-        if (kCFStringEncodingInvalidId == cfEnc)
-            encoding = NSUTF8StringEncoding;
-        else
-            encoding = CFStringConvertEncodingToNSStringEncoding(cfEnc);
-    }
-    
-    NSString *xmlString = [[[NSString alloc] initWithData:xmlData encoding:encoding] autorelease];
-    return [self itemsFromMARCXMLString:xmlString error:outError];
-}
-
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
     if([itemString isMARCString]){
         return [self itemsFromMARCString:itemString error:outError];
@@ -327,8 +292,6 @@ static NSData *MODSToMARCXSLTData = nil;
         return [self itemsFromFormattedMARCString:itemString error:outError];
     }else if([itemString isMARCXMLString]){
         return [self itemsFromMARCXMLString:itemString error:outError];
-    }else if([itemString canBeConvertedToMARC]){
-        return [self itemsFromMODSXMLString:itemString error:outError];
     }else {
         if(outError)
             OFErrorWithInfo(outError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unknown MARC format.", @"Error description"), nil);
@@ -447,28 +410,6 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
     AGRegex *regex = [AGRegex regexWithPattern:@"<record( xmlns=\"[^<>\"]*\")?>\n *<leader>[ 0-9]{5}[a-z]{3}[ a]{2}22[ 0-9]{5}[ 1-8uz][ a-z][ r]45[ 0]0</leader>\n *<controlfield tag=\"00[0-9]\">"];
     
     return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
-}
-
-- (BOOL)canBeConvertedToMARC{
-    
-#warning fixme: is this okay?
-    
-    // this may be sufficient, since the NSXMLDocument will fail to do the conversion later
-    return [self hasPrefix:@"<mods "];
-    
-    // this is pretty slow...
-    
-    NSError *nsError;
-    NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:self options:0 error:&nsError];
-    if (nil == doc)
-        return NO;
-    
-    NSXMLDocument *marcDoc = [doc objectByApplyingXSLT:MODSToMARCXSLTData arguments:nil error:&nsError];
-    [doc release];
-    if (nil == marcDoc)
-        return NO;
-    
-    return YES;
 }
 
 - (NSString *)stringByFixingFormattedMARCStart{

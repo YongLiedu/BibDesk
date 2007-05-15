@@ -1,11 +1,11 @@
 //
-//  BDSKMARCParser.h
+//  BDSKMODSParser.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 12/4/06.
+//  Created by Adam Maxwell on 05/14/07.
 /*
  This software is Copyright (c) 2006,2007
- Christiaan Hofman. All rights reserved.
+ Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -19,7 +19,7 @@
  the documentation and/or other materials provided with the
  distribution.
  
- - Neither the name of Christiaan Hofman nor the names of any
+ - Neither the name of Adam Maxwell nor the names of any
  contributors may be used to endorse or promote products derived
  from this software without specific prior written permission.
  
@@ -39,7 +39,6 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKStringParser.h"
 
+@interface BDSKMODSParser : BDSKStringParser
 
-@interface BDSKMARCParser : BDSKStringParser
-+ (NSArray *)itemsFromMARCXMLString:(NSString *)itemString error:(NSError **)outError;
 @end

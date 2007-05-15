@@ -49,7 +49,8 @@ enum {
 	BDSKJSTORStringType, 
 	BDSKWOSStringType, 
 	BDSKDublinCoreStringType,
-    BDSKReferStringType
+    BDSKReferStringType,
+    BDSKMODSStringType
 };
 
 @interface BDSKStringParser : NSObject {

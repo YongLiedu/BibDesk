@@ -721,6 +721,8 @@
 		F9CE58EC0842411D0072DF55 /* ArrowImage.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */; };
 		F9CEFCBB0A90090B00A0E54E /* BDSKOrphanedFileServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */; };
 		F9CEFCBC0A90090B00A0E54E /* BDSKOrphanedFileServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */; };
+		F9D0E5360BF92768001C6C22 /* BDSKMODSParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */; };
+		F9D0E5370BF92768001C6C22 /* BDSKMODSParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D0E5350BF92768001C6C22 /* BDSKMODSParser.m */; };
 		F9D3E285088DA01F00E70D49 /* BDSKFormCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F9D3E283088DA01F00E70D49 /* BDSKFormCell.h */; };
 		F9D3E286088DA01F00E70D49 /* BDSKFormCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D3E284088DA01F00E70D49 /* BDSKFormCell.m */; };
 		F9D5A8CB07B9B94F0092E7E2 /* BDSKDragWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C420758027800C3F701 /* BDSKDragWindow.h */; };
@@ -1141,7 +1143,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1753,6 +1755,8 @@
 		F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ArrowImage.tiff; path = Images/ArrowImage.tiff; sourceTree = "<group>"; };
 		F9CEFCB90A90090B00A0E54E /* BDSKOrphanedFileServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOrphanedFileServer.h; sourceTree = "<group>"; };
 		F9CEFCBA0A90090B00A0E54E /* BDSKOrphanedFileServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOrphanedFileServer.m; sourceTree = "<group>"; };
+		F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMODSParser.h; sourceTree = "<group>"; };
+		F9D0E5350BF92768001C6C22 /* BDSKMODSParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMODSParser.m; sourceTree = "<group>"; };
 		F9D3E283088DA01F00E70D49 /* BDSKFormCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFormCell.h; sourceTree = "<group>"; };
 		F9D3E284088DA01F00E70D49 /* BDSKFormCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFormCell.m; sourceTree = "<group>"; };
 		F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceController.h; sourceTree = "<group>"; };
@@ -2340,6 +2344,8 @@
 				F9E069B50981A03B00AEFBE7 /* BDSKWebOfScienceParser.m */,
 				F9022C960758038000C3F701 /* BibTeXParser.m */,
 				F9022CA70758038000C3F701 /* PubMedParser.m */,
+				F9D0E5340BF92768001C6C22 /* BDSKMODSParser.h */,
+				F9D0E5350BF92768001C6C22 /* BDSKMODSParser.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -3126,6 +3132,7 @@
 				F92BACCE0BCBFEE0008D5BC3 /* BDSKSkimReader.h in Headers */,
 				CE6C04440BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h in Headers */,
 				CE6C04800BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h in Headers */,
+				F9D0E5360BF92768001C6C22 /* BDSKMODSParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3665,7 +3672,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $SOURCE_ROOT/vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake clean && make && strip latex2rtf\nexit 0";
+			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\ncd $SOURCE_ROOT/vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake clean && make && strip latex2rtf\nexit 0";
 		};
 		F98870BE07580E0B001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3680,7 +3687,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $SOURCE_ROOT/vendorsrc/foolabs/xpdf\nexport CFLAGS=\"-O -g -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc\"\nexport CXXFLAGS=$CFLAGS\nmake distclean\n./configure --with-x=no --disable-dependency-tracking && make && strip xpdf/pdftotext\nexit 0";
+			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\ncd $SOURCE_ROOT/vendorsrc/foolabs/xpdf\nexport CFLAGS=\"-O -g -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc\"\nexport CXXFLAGS=$CFLAGS\nmake distclean\n./configure --with-x=no --disable-dependency-tracking && make && strip xpdf/pdftotext\nexit 0";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4010,6 +4017,7 @@
 				F92BACCF0BCBFEE0008D5BC3 /* BDSKSkimReader.m in Sources */,
 				CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */,
 				CE6C04810BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m in Sources */,
+				F9D0E5370BF92768001C6C22 /* BDSKMODSParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

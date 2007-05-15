@@ -19,7 +19,7 @@
  the documentation and/or other materials provided with the
  distribution.
  
- - Neither the name of Christiaan Hofman nor the names of any
+ - Neither the name of Adam Maxwell nor the names of any
  contributors may be used to endorse or promote products derived
  from this software without specific prior written permission.
  
@@ -48,6 +48,7 @@
 static NSString *BDSKUSMARCString = @"US MARC";
 static NSString *BDSKMARCXMLString = @"MARC XML";
 static NSString *BDSKDCXMLString = @"DC XML";
+static NSString *BDSKMODSString = @"MODS";
 
 
 static NSString *BDSKHTTPProxySetting();
@@ -62,13 +63,13 @@ static NSString *BDSKHTTPProxySetting();
 }
 
 + (NSArray *)supportedRecordSyntaxes {
-    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKMARCXMLString, BDSKDCXMLString, nil];
+    return [NSArray arrayWithObjects:BDSKUSMARCString, BDSKMARCXMLString, BDSKDCXMLString, BDSKMODSString, nil];
 }
 
 + (ZOOMSyntaxType)zoomRecordSyntaxForRecordSyntaxString:(NSString *)syntax{
     if ([syntax isEqualToString:BDSKUSMARCString]) 
         return USMARC;
-    else if ([syntax isEqualToString:BDSKMARCXMLString] || [syntax isEqualToString:BDSKDCXMLString]) 
+    else if ([syntax isEqualToString:BDSKMARCXMLString] || [syntax isEqualToString:BDSKDCXMLString] || [syntax isEqualToString:BDSKMODSString]) 
         return XML;
     else
         return UNKNOWN;
@@ -248,6 +249,8 @@ static NSString *BDSKHTTPProxySetting();
         stringType = BDSKDublinCoreStringType;
         if ([BDSKStringParser canParseString:string ofType:stringType] == NO)
             stringType = BDSKMARCStringType;
+    } else if([recordSyntax isEqualToString:BDSKMODSString]) {
+        stringType = BDSKMODSStringType;
     }
     if (NO == [BDSKStringParser canParseString:string ofType:stringType])
         stringType = [string contentStringType];
