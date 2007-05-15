@@ -252,7 +252,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 }
 
 - (BOOL)openLinkedFile:(NSString *)fullPath {
-    NSString *extension = [fullPath pathExtension];
+    NSString *extension = [[fullPath pathExtension] lowercaseString];
     NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
     NSString *appID = [defaultViewers objectForKey:extension];
     NSString *appPath = appID ? [self absolutePathForAppBundleWithIdentifier:appID] : nil;
