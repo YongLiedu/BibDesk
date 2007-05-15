@@ -103,7 +103,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
         NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
         NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
         NSString *bundleID = [defaultViewers objectForKey:extension];
-		if ([bundleID length])
+		if (bundleID)
             err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
         if(appURL == NULL)
             err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
