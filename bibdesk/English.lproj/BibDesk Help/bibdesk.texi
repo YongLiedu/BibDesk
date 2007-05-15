@@ -425,7 +425,8 @@ walks you through a semi-automatic creation process.
 
 The canonical reference for BibTeX itself is Oren Patashnik's
 @uref{http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/btxdoc.pdf, BibTeXing},
-which you may have already as @uref{/usr/local/teTeX/share/texmf.tetex/doc/bibtex/base/btxdoc.dvi, btxdoc.dvi} 
+which you may have already as @uref{file:///usr/local/teTeX/share/texmf.tetex/doc/bibtex/base/btxdoc.dvi, btxdoc.dvi} 
+or @uref{file:///usr/local/gwTeX/texmf.texlive/doc/bibtex/base/btxdoc.pdf, btxdoc.pdf} 
 in your TeX tree. Standard references such as @samp{The LaTeX Companion} are very
 helpful in understanding and debugging BibTeX, and searching the
 @uref{http://www.tex.ac.uk/cgi-bin/texfaq2html, TeX FAQ} is usually a
