@@ -51,6 +51,8 @@
  */
 - (BOOL)openURL:(NSURL *)fileURL withSearchString:(NSString *)searchString;
 
+- (BOOL)openLinkedFile:(NSString *)fullPath;
+
 /*!
     @method     UTIForURL:
     @abstract   Uses LaunchServices to find the UTI for a given file URL.

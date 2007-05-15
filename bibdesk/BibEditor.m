@@ -390,7 +390,7 @@ enum{
 	
     BOOL err = NO;
 
-    if(![sw openFile:[publication localFilePathForField:field]]){
+    if(![sw openLinkedFile:[publication localFilePathForField:field]]){
             err = YES;
     }
     if(err)
@@ -2249,7 +2249,11 @@ enum{
 }
 
 - (void)iconClickedInFormCell:(id)cell{
-    [[NSWorkspace sharedWorkspace] openURL:[publication URLForField:[cell representedObject]]];
+    NSString *field = [cell representedObject];
+    if ([field isLocalFileField])
+        [[NSWorkspace sharedWorkspace] openLinkedFile:[publication localFilePathForField:field]];
+    else
+        [[NSWorkspace sharedWorkspace] openURL:[publication URLForField:field]];
 }
 
 - (BOOL)formCellHasArrowButton:(id)cell{
@@ -2341,7 +2345,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
         NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(link) attribute:(id)kMDItemPath] firstObject];
         // if it was a valid key/link, we should definitely have a path, but better make sure
         if (path)
-            [[NSWorkspace sharedWorkspace] openFile:path];
+            [[NSWorkspace sharedWorkspace] openLinkedFile:path];
         else
             NSBeep();
     } else {

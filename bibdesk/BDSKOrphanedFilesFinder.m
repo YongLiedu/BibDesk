@@ -52,6 +52,7 @@
 #import "NSWindowController_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKFileMatcher.h"
+#import "NSWorkspace_BDSKExtensions.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -256,7 +257,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     
     while (path = [pathEnum nextObject]) {
         if(type == 1)
-            [[NSWorkspace sharedWorkspace] openFile:path];
+            [[NSWorkspace sharedWorkspace] openLinkedFile:path];
         else
             [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:nil];
     }

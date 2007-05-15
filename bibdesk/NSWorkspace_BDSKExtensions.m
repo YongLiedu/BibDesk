@@ -212,7 +212,7 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     // handle the case of '????' creator and probably others
     if (noErr != err)
-        err = (OSStatus)[self openURL:fileURL];
+        err = (OSStatus)([self openURL:fileURL] == NO);
     
     /* clean up and leave */
 	AEDisposeDesc(&targetListDesc);
@@ -249,6 +249,20 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     }
     
     return [(NSString *)theUTI autorelease];
+}
+
+- (BOOL)openLinkedFile:(NSString *)fullPath {
+    NSString *extension = [fullPath pathExtension];
+    NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
+    NSString *appID = [defaultViewers objectForKey:extension];
+    NSString *appPath = appID ? [self absolutePathForAppBundleWithIdentifier:appID] : nil;
+    BOOL rv = NO;
+    
+    if (appPath)
+        rv = [self openFile:fullPath withApplication:appPath];
+    if (rv == NO)
+        rv = [self openFile:fullPath];
+    return rv;
 }
 
 - (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
