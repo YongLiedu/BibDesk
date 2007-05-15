@@ -576,8 +576,11 @@
             searchString = @"";
         [[NSWorkspace sharedWorkspace] openURL:link withSearchString:searchString];
         return YES;
+    } else if ([link isKindOfClass:[NSString class]]) {
+        BibItem *pub = [[self publications] itemForCiteKey:link];
+        return pub != nil && [self editPub:pub] != nil;
     }
-    // let the next responder handle it if it was a string or non-file URL
+    // let the next responder handle it if it was a non-file URL
     return NO;
 }
 

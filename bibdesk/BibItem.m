@@ -69,6 +69,8 @@
 #import "BDSKPublicationsArray.h"
 #import "NSData_BDSKExtensions.h"
 #import "BDSKSkimReader.h"
+#import "BDSKCitationFormatter.h"
+
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
@@ -1769,9 +1771,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
 }
 
+- (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
+    return [[[self owner] publications] itemForCiteKey:key] != nil;
+}
+
 - (NSAttributedString *)attributedStringValue{
     NSString *key;
-        NSEnumerator *e = [[[self allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
+    NSEnumerator *e = [[[self allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
     NSDictionary *cachedFonts = [[NSFontManager sharedFontManager] cachedFontsForPreviewPane];
 
     NSDictionary *titleAttributes =
@@ -1815,6 +1821,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
     [reqStr appendString:[NSString stringWithFormat:@" (%@)\n",[self pubType]] attributes:typeAttributes];
 
+    BDSKCitationFormatter *citationFormatter = nil;
     NSCalendarDate *date = nil;
     NSString *stringValue = nil;
     BOOL notNote = NO;
@@ -1850,6 +1857,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     valueStr = [[NSMutableAttributedString alloc] initWithString:([theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : stringValue) attributes:bodyAttributes];
                     [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:theURL range:NSMakeRange(0, [valueStr length])];
                 }
+  
+			}else if([key isCitationField]){
+                // make valid cite keys clickable
+                if (citationFormatter == nil)
+                    citationFormatter = [[[BDSKCitationFormatter alloc] initWithDelegate:self] autorelease];
+                valueStr = [[citationFormatter attributedStringForObjectValue:stringValue withDefaultAttributes:bodyAttributes] retain];
   
 			}else if([key isEqualToString:BDSKRatingString]){
 				int rating = [self ratingValueOfField:BDSKRatingString];

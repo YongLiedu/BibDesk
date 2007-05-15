@@ -91,6 +91,7 @@
                 if ([[self delegate] citationFormatter:self isValidKey:keyString]) {
                     [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
                     [attrString addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:range];
+                    [attrString addAttribute:NSLinkAttributeName value:keyString range:range];
                 }
             }
         }
