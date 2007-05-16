@@ -340,7 +340,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  
  ** Hidden pref keys **
  
- Last updated: Mon May 14 19:48:02 GMT 2007
+ Last updated: Wed May 16 16:50:05 GMT 2007
  
  BDSKRemoveExtendedAttributesFromDocuments       bool    false
  BDSKDisableDocumentExtendedAttributes           bool    false
@@ -362,6 +362,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  BDSKTableHeaderTitles                           dict    nil
  BDSKGroupFieldSeparatorCharactersKey            string  ";:,"
  BDSKDefaultGroupFieldSeparatorKey               string  "; "    // note trailing space!
+ BDSKShouldShowWebGroup                          bool    false
 
  */
 
