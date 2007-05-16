@@ -359,6 +359,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  BDSKAnnoteFieldName                             string  nil
  BDSKDefaultAnimationTimeInterval                float   0.15    // set to zero to disable
  BDSKTableHeaderImages                           dict    nil
+ BDSKTableHeaderTitles                           dict    nil
  BDSKGroupFieldSeparatorCharactersKey            string  ";:,"
  BDSKDefaultGroupFieldSeparatorKey               string  "; "    // note trailing space!
 
