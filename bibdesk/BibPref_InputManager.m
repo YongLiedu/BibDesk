@@ -180,7 +180,7 @@ static int tableIconSize = 24;
     }
 	
     if(err == NO){
-        [fm copyPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager"] toPath:inputManagerPath handler:nil];
+        [fm copyPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"BibDeskInputManager"] toPath:inputManagerPath handler:nil];
     } else {
         NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Message in alert dialog when an error occurs")
 					   defaultButton:nil

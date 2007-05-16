@@ -268,7 +268,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
         }
         
-        [result addObject:[[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"Contents"] stringByAppendingPathComponent:@"Scripts"]];
+        [result addObject:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"Scripts"]];
         scriptPaths = [result copy];
         [result release];
     }

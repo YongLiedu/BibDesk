@@ -651,7 +651,7 @@
     
     // This task runs latex2rtf on our tex file to generate tmpbib.rtf
     // the arguments: it needs -P "path" which is the path to the cfg files in the app wrapper
-    return [self runTask:latex2rtfpath withArguments:[NSArray arrayWithObjects:@"-P", [[NSBundle mainBundle] resourcePath], [texPath baseNameWithoutExtension], nil]];
+    return [self runTask:latex2rtfpath withArguments:[NSArray arrayWithObjects:@"-P", [[NSBundle mainBundle] sharedSupportPath], [texPath baseNameWithoutExtension], nil]];
 }
 
 - (int)runTask:(NSString *)binPath withArguments:(NSArray *)arguments{

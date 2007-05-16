@@ -298,18 +298,18 @@ static void createTemporaryDirectory()
     }
     
     if (success) {
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportTemplate.html"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlItemExportTemplate.html"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportStyleSheet.css"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rssExportTemplate.rss"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfExportTemplate.rtf"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfdExportTemplate.rtfd"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"docExportTemplate.doc"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"citeServiceTemplate.txt"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"textServiceTemplate.txt"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate.rtf"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate default item.rtf"] overwrite:overwrite];
-        [fileManager copyFileFromResourcesToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate book.rtf"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportTemplate.html"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlItemExportTemplate.html"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"htmlExportStyleSheet.css"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rssExportTemplate.rss"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfExportTemplate.rtf"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfdExportTemplate.rtfd"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"docExportTemplate.doc"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"citeServiceTemplate.txt"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"textServiceTemplate.txt"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate.rtf"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate default item.rtf"] overwrite:overwrite];
+        [fileManager copyFileFromSharedSupportToApplicationSupport:[templates stringByAppendingPathComponent:@"rtfServiceTemplate book.rtf"] overwrite:overwrite];
     }    
 }
 
@@ -344,8 +344,8 @@ static void createTemporaryDirectory()
     // copy files to application support
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [self copyAllExportTemplatesToApplicationSupportAndOverwrite:NO];        
-    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
-    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt" overwrite:NO];   
+    [fileManager copyFileFromSharedSupportToApplicationSupport:@"previewtemplate.tex" overwrite:NO];
+    [fileManager copyFileFromSharedSupportToApplicationSupport:@"template.txt" overwrite:NO];   
     
     [self doSpotlightImportIfNeeded];
 }
@@ -867,7 +867,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     // someone may be mad enough to install this in NSLocalDomain or NSNetworkDomain, but we don't support that
     NSString *inputManagerBundlePath = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager/BibDeskInputManager.bundle"];
 
-    NSString *bundlePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager/BibDeskInputManager.bundle"];
+    NSString *bundlePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"BibDeskInputManager/BibDeskInputManager.bundle"];
     NSString *bundledVersion = [[[NSBundle bundleWithPath:bundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *installedVersion = [[[NSBundle bundleWithPath:inputManagerBundlePath] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
     
