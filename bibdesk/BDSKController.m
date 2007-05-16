@@ -63,7 +63,7 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
 
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(unsigned int)aMask;
 {
-    if (([sender exceptionHandlingMask] & aMask) == 0 || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExceptionHandlingKey"])
+    if (([sender exceptionHandlingMask] & aMask) == 0 || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableExceptionHandling"])
         return NO;
         
     static BOOL handlingException = NO;

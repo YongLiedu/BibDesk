@@ -120,7 +120,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
 {
     // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([[BDSKSharingServer sharingName] isEqualToString:[aNetService name]] == YES && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] == NO)
+    if([[BDSKSharingServer sharingName] isEqualToString:[aNetService name]] == YES && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO)
         return;
 
     // set as delegate and resolve, so we can find out if this originated from the localhost or a remote machine

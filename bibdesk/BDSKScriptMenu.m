@@ -91,7 +91,7 @@ static int recursionDepth = 0;
 + (BOOL)disabled;
 {
     // Omni disables their script menu on 10.4, saying the system one is better...
-    return [[NSUserDefaults standardUserDefaults] boolForKey:@"OAScriptMenuDisabled"];
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKScriptMenuDisabled"];
 }
 
 @end

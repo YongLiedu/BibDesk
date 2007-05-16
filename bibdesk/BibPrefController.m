@@ -344,18 +344,18 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  
  BDSKRemoveExtendedAttributesFromDocuments       bool    false
  BDSKDisableDocumentExtendedAttributes           bool    false
- BDSKDisableExportAttributesKey                  bool    false
+ BDSKDisableExportAttributes                     bool    false
  BDSKFieldsToWriteIfEmpty                        array   ()
  BDSKShouldUseSpotlightCommentForURL             bool    false
- BDSKEnableSharingWithSelfKey                    bool    false   // developers only
+ BDSKEnableSharingWithSelf                       bool    false   // developers only
  BDSKDisableRemoteChangeNotifications            bool    false
  BDSKSharingServerMaxConnections                 integer 0       // ignored if < 20
- BDSKDisableExceptionHandlingKey                 bool    false   // developers only
+ BDSKDisableExceptionHandling                    bool    false   // developers only
  BDSKShouldLogFilesAddedToMatchingSearchIndex    bool    false   // developers only
  BDSKUseXMLSpotlightCache                        bool    false   // developers only
- DisableTypeAheadSelection                       bool    false
- BDSKDisableBackgroundColorForGroupTableKey      bool    false
- OAScriptMenuDisabled                            bool    false
+ BDSKDisableTypeAheadSelection                   bool    false
+ BDSKDisableBackgroundColorForGroupTable         bool    false
+ BDSKScriptMenuDisabled                          bool    false
  BDSKAnnoteFieldName                             string  nil
  BDSKDefaultAnimationTimeInterval                float   0.15    // set to zero to disable
  BDSKTableHeaderImages                           dict    nil

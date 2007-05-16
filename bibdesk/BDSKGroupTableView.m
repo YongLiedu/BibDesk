@@ -123,7 +123,7 @@
     unichar c = [[theEvent characters] characterAtIndex:0];
     unsigned int modifierFlags = ([theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
 	// modified from NSTableView-OAExtensions.h which uses a shared typeahead helper instance (which we can't access to force it to recache)
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableTypeAheadSelection"]) {
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableTypeAheadSelection"]) {
 
         // @@ this is a hack; recaching in -reloadData doesn't work for us the first time around, but we don't want to recache on every keystroke
         if([[typeSelectHelper valueForKey:@"searchCache"] count] == 0)
@@ -302,7 +302,7 @@
 
 - (NSColor *)backgroundColor {
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableBackgroundColorForGroupTableKey"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableBackgroundColorForGroupTable"])
         return [super backgroundColor];
     
     static NSColor *backgroundColor = nil;
