@@ -84,9 +84,7 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
     // log so it's easy to spot in the console, but don't display the exception viewer window
     NSLog(@"%@", [NSString stringWithFormat:@"**** Exception:\n%@\n\n **** Stack Trace:\n%@\n ****", exception, [exception stackTrace]]);
 #else
-    @synchronized([BDSKExceptionViewer sharedViewer]) {
-        [[BDSKExceptionViewer sharedViewer] displayString:[NSString stringWithFormat:@"Exception:\n%@\n\nStack Trace:\n%@", exception, [exception stackTrace]]];
-    }
+    [[BDSKExceptionViewer sharedViewer] performSelectorOnMainThread:@selector(displayString:) withObject:[NSString stringWithFormat:@"Exception:\n%@\n\nStack Trace:\n%@", exception, [exception stackTrace]] waitUntilDone:YES];
 #endif
     handlingException = NO;
     

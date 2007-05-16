@@ -103,15 +103,20 @@ static BDSKRelNotesController *sharedRelNotesController = nil;
 
 + (id)sharedViewer {
     static id sharedInstance = nil;
-    @try {
-        if (sharedInstance == nil) {
-            sharedInstance = [[self alloc] init];
-            [sharedInstance window];
+    
+    @synchronized(@"BDSKExceptionViewer") {
+        
+        @try {
+            if (sharedInstance == nil) {
+                sharedInstance = [[self alloc] init];
+                [sharedInstance window];
+            }
         }
+        @catch(id exception){
+            NSLog(@"caught exception %@ in exception viewer", exception);
+            sharedInstance = nil;
+        }    
     }
-    @catch(id exception){
-        NSLog(@"caught exception %@ in exception viewer", exception);
-    }    
     return sharedInstance;
 }
 
