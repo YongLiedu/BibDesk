@@ -340,7 +340,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  
  ** Hidden pref keys **
  
- Last updated: Wed May 16 16:50:05 GMT 2007
+ Last updated: Thu May 17 16:29:22 GMT 2007
  
  BDSKRemoveExtendedAttributesFromDocuments       bool    false
  BDSKDisableDocumentExtendedAttributes           bool    false
@@ -363,6 +363,11 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  BDSKGroupFieldSeparatorCharactersKey            string  ";:,"
  BDSKDefaultGroupFieldSeparatorKey               string  "; "    // note trailing space!
  BDSKShouldShowWebGroup                          bool    false
+ BDSKEditorFormShouldAutoCompleteKey             bool    true
+ BDSKReadExtendedAttributesKey                   bool    false   // read/write BibTeX to files
+ BDSKShouldUsePDFMetadata                        bool    false   // reads standard PDF info
+ BDSKShouldWritePDFMetadata                      bool    false   // writes standard PDF info
+ 
 
  */
 
