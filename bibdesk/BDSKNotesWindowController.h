@@ -60,4 +60,5 @@
 @interface NSObject(BDSKNotesOutlineViewDelegate)
 - (BOOL)outlineView:(NSOutlineView *)ov canResizeRowByItem:(id)item;
 - (void)outlineView:(NSOutlineView *)ov setHeightOfRow:(int)newHeight byItem:(id)item;
+- (void)outlineView:(NSOutlineView *)ov copyItems:(NSArray *)items;
 @end

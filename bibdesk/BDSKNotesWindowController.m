@@ -149,6 +149,36 @@
     return [item valueForKey:@"type"] ? [item valueForKey:@"contents"] : [[item valueForKey:@"contents"] string];
 }
 
+- (void)outlineView:(NSOutlineView *)ov copyItems:(NSArray *)items {
+    NSEnumerator *itemEnum = [items objectEnumerator];
+    id item, lastItem = nil;
+    NSMutableString *string = [NSMutableString string];
+    NSFont *standardFont = [NSFont systemFontOfSize:12.0];
+    NSAttributedString *newlinesAttrString = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:[NSDictionary dictionaryWithObjectsAndKeys:standardFont, NSFontAttributeName, nil]];
+    
+    while (item = [itemEnum nextObject]) {
+        if ([lastItem objectForKey:@"child"] == item)
+            continue;
+        lastItem = item;
+        NSString *contents = [item valueForKey:@"type"] ? [item valueForKey:@"contents"] : [[item valueForKey:@"contents"] string];
+        
+        if ([contents length]) {
+            if ([string length])
+                [string appendString:@"\n\n"];
+            [string appendString:contents];
+            contents = [[item valueForKey:@"text"] string];
+            if ([contents length]) {
+                [string appendString:@"\n\n"];
+                [string appendString:contents];
+            }
+        }
+    }
+    
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
+    [pboard setString:string forType:NSStringPboardType];
+}
+
 @end
 
 
@@ -271,6 +301,21 @@
         }
     } else {
         [super resetCursorRects];
+    }
+}
+
+- (void)copy:(id)sender {
+    if ([self numberOfSelectedRows] && [[self delegate] respondsToSelector:@selector(outlineView:copyItems:)]) {
+        NSMutableArray *items = [NSMutableArray array];
+        NSIndexSet *rowIndexes = [self selectedRowIndexes];
+        unsigned int row = [rowIndexes firstIndex];
+        
+        while (row != NSNotFound) {
+            [items addObject:[self itemAtRow:row]];
+            row = [rowIndexes indexGreaterThanIndex:row];
+        }
+        
+        [[self delegate] outlineView:self copyItems:items];
     }
 }
 
