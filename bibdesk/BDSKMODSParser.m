@@ -91,6 +91,10 @@ static NSData *MODSToMARCXSLTData = nil;
 @implementation NSString (BDSKMODSParserExtensions)
 
 - (BOOL)isMODSString {
+    AGRegex *regex = [AGRegex regexWithPattern:@"<mods "];
+    
+    if (nil == [regex findInString:self])
+        return NO;
     
     NSError *nsError;
     NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:self options:0 error:&nsError];
