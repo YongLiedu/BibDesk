@@ -91,9 +91,7 @@ static NSData *MODSToMARCXSLTData = nil;
 @implementation NSString (BDSKMODSParserExtensions)
 
 - (BOOL)isMODSString {
-    AGRegex *regex = [AGRegex regexWithPattern:@"<mods "];
-    
-    if (nil == [regex findInString:self])
+    if ([self hasPrefix:@"<?xml "] == NO || [self rangeOfString:@"<mods "].location == NSNotFound)
         return NO;
     
     NSError *nsError;
