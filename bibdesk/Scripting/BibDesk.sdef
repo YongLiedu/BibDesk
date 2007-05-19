@@ -105,6 +105,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</property>
 			<property name="document" code="docu" type="document" access="r"
 				description="The document whose contents are being displayed in the window."/>
+			<property name="publication" code="bib" type="publication" access="r"
+				description="The publication whose details are being displayed in the window. Only for publication detail windows."/>
+			<property name="author" code="auth" type="author" access="r"
+				description="The author whose details are being displayed in the window. Only for author detail windows."/>
 			<responds-to name="close">
 				<cocoa method="handleCloseScriptCommand:"/>
 			</responds-to>

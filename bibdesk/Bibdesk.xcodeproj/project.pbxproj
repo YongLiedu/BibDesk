@@ -412,6 +412,8 @@
 		CEFA07F40AF0E52100A3B4B1 /* BDSKApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */; };
 		CEFA07F50AF0E52100A3B4B1 /* BDSKApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */; };
 		CEFA0F4E0AF1400900A3B4B1 /* BDSKOwnerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */; };
+		CEFD45880BFFC1F80027B933 /* NSWindow+Scripting.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */; };
+		CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */; };
 		CEFDBDBD0AEA86BA009EE99D /* BDSKSmartGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */; };
 		CEFDBDBE0AEA86BA009EE99D /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */; };
 		CEFDBDC50AEA86F0009EE99D /* BDSKStaticGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = CEFDBDC30AEA86F0009EE99D /* BDSKStaticGroup.h */; };
@@ -1377,6 +1379,8 @@
 		CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKApplication.h; sourceTree = "<group>"; };
 		CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKApplication.m; sourceTree = "<group>"; };
 		CEFA0F4C0AF1400900A3B4B1 /* BDSKOwnerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKOwnerProtocol.h; sourceTree = "<group>"; };
+		CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSWindow+Scripting.h"; path = "Scripting/NSWindow+Scripting.h"; sourceTree = "<group>"; };
+		CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSWindow+Scripting.m"; sourceTree = "<group>"; };
 		CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
 		CEFDBDBC0AEA86BA009EE99D /* BDSKSmartGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSmartGroup.m; sourceTree = "<group>"; };
 		CEFDBDC30AEA86F0009EE99D /* BDSKStaticGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStaticGroup.h; sourceTree = "<group>"; };
@@ -2237,7 +2241,6 @@
 		CE38FA81091D242E00BCB69D /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */,
 				F92BACCD0BCBFEE0008D5BC3 /* BDSKSkimReader.m */,
 				4575382B0B70170D00C0E49B /* BDSKWebGroup.m */,
 				CEFDBDDC0AEA87F8009EE99D /* BDSKCategoryGroup.m */,
@@ -2478,6 +2481,7 @@
 				3DD300F5075C054D003FD2D7 /* BibField.m */,
 				F9022FC507580B9400C3F701 /* BibItem+Scripting.m */,
 				CED65DCB0907A338003EED90 /* BDSKScriptHook+Scripting.m */,
+				CEFD45870BFFC1F80027B933 /* NSWindow+Scripting.m */,
 			);
 			path = Scripting;
 			sourceTree = "<group>";
@@ -2604,6 +2608,7 @@
 				CEBA3F450A73CCAF00588BB7 /* BDSKSheetController.h */,
 				F90C64040AC62B7B008B2DDA /* BDSKShellCommandFormatter.h */,
 				F9022C59075802E300C3F701 /* BDSKShellTask.h */,
+				F92BACCC0BCBFEE0008D5BC3 /* BDSKSkimReader.h */,
 				CEFDBDBB0AEA86BA009EE99D /* BDSKSmartGroup.h */,
 				CEF7AC040915929E00BE9E02 /* BDSKSplitView.h */,
 				F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */,
@@ -2709,6 +2714,7 @@
 				CE77A7FB0923BEBA0019D901 /* NSTableView_BDSKExtensions.h */,
 				F9022CA00758038000C3F701 /* NSTextView_BDSKExtensions.h */,
 				F97AF8ED09575E8B00D1F1B0 /* NSURL_BDSKExtensions.h */,
+				CEFD45860BFFC1F80027B933 /* NSWindow+Scripting.h */,
 				CE7EA95A0AAC55B2000FE8FD /* NSWindowController_BDSKExtensions.h */,
 				F97073AD0911592000526FC8 /* NSWorkspace_BDSKExtensions.h */,
 				CE6DACC20A503ECF00123185 /* OAToolbarItem_BDSKExtensions.h */,
@@ -3138,6 +3144,7 @@
 				CE6C04440BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.h in Headers */,
 				CE6C04800BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.h in Headers */,
 				F9D0E5360BF92768001C6C22 /* BDSKMODSParser.h in Headers */,
+				CEFD45880BFFC1F80027B933 /* NSWindow+Scripting.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4013,6 +4020,7 @@
 				CE6C04450BEDFA2D007BF0B5 /* NSParagraphStyle_BDSKExtensions.m in Sources */,
 				CE6C04810BEDFC96007BF0B5 /* NSLayoutManager_BDSKExtensions.m in Sources */,
 				F9D0E5370BF92768001C6C22 /* BDSKMODSParser.m in Sources */,
+				CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
