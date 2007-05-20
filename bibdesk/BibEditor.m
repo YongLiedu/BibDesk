@@ -3624,7 +3624,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)setupButtons {
     
     // Set the properties of viewLocalButton that cannot be set in IB
-	[viewLocalButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[viewLocalButton setShowsMenuWhenIconClicked:NO];
 	[[viewLocalButton cell] setAltersStateOfSelectedItem:NO];
 	[[viewLocalButton cell] setAlwaysUsesFirstItemAsSelected:YES];
@@ -3637,7 +3636,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[viewLocalButton setMenu:[self menuForImagePopUpButton:viewLocalButton]];
     
 	// Set the properties of viewRemoteButton that cannot be set in IB
-	[viewRemoteButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[viewRemoteButton setShowsMenuWhenIconClicked:NO];
 	[[viewRemoteButton cell] setAltersStateOfSelectedItem:NO];
 	[[viewRemoteButton cell] setAlwaysUsesFirstItemAsSelected:YES];
@@ -3650,7 +3648,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[viewRemoteButton setMenu:[self menuForImagePopUpButton:viewRemoteButton]];
     
 	// Set the properties of documentSnoopButton that cannot be set in IB
-	[documentSnoopButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[documentSnoopButton setShowsMenuWhenIconClicked:NO];
 	[[documentSnoopButton cell] setAltersStateOfSelectedItem:YES];
 	[[documentSnoopButton cell] setAlwaysUsesFirstItemAsSelected:NO];
@@ -3661,7 +3658,6 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[documentSnoopButton selectItemAtIndex:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey]];
     
     // Set the properties of actionMenuButton that cannot be set in IB
-	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];

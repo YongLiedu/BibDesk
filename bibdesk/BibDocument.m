@@ -407,14 +407,12 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [groupTableView registerForDraggedTypes:dragTypes];
 
 	// ImagePopUpButtons setup
-	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:NO];
 	
-	[groupActionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[groupActionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[groupActionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
