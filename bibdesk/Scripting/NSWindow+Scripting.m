@@ -47,7 +47,7 @@
 
 - (id)publication {
     id wc = [self windowController];
-    if ([self respondsToSelector:@selector(publication)]) {
+    if ([wc respondsToSelector:@selector(publication)]) {
         BibItem *pub = [wc publication];
         if ([[pub owner] isDocument])
             return pub;
@@ -57,7 +57,7 @@
 
 - (id)author {
     id wc = [self windowController];
-    if ([self respondsToSelector:@selector(person)]) {
+    if ([wc respondsToSelector:@selector(person)]) {
         BibAuthor *auth = [wc person];
         if ([[[auth publication] owner] isDocument])
             return auth;
