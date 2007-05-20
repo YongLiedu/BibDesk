@@ -183,6 +183,67 @@ char *strdup_nobadchars(char *text)
 }
 
 /******************************************************************************
+ purpose:  duplicates a string without newlines and CR replaced by '\n' or '\r'
+******************************************************************************/
+char *strdup_printable(char *s)
+{
+    char *dup;
+    int i;
+    
+    if (s == NULL) return NULL;
+
+    dup = malloc(2*strlen(s));
+
+    i=0;
+    while (*s) {
+        if (*s=='\r') {
+            dup[i++]='\\';
+            dup[i++]='r';
+         } else if (*s=='\n') {
+            dup[i++]='\\';
+            dup[i++]='n';
+         } else if (*s=='\t') {
+            dup[i++]='\\';
+            dup[i++]='t';
+         } else 
+            dup[i++]=*s;
+         s++;
+    }
+    dup[i]='\0';
+        
+    return dup;
+}
+
+/******************************************************************************
+ purpose:  duplicates a string without newlines and CR replaced by '\n' or '\r'
+******************************************************************************/
+void strncpy_printable(char* dst, char *src, int n)
+{
+    int i=0;
+    
+    if (dst == NULL)
+        return;
+
+    while (i<n-1 && *src) {
+
+        if (*src=='\r') {
+            dst[i++]='\\';
+            dst[i++]='r';
+         } else if (*src=='\n') {
+            dst[i++]='\\';
+            dst[i++]='n';
+         } else if (*src=='\t') {
+            dst[i++]='\\';
+            dst[i++]='t';
+         } else 
+            dst[i++]=*src;
+         src++;
+    }
+    
+    dst[i]='\0';
+}
+
+/******************************************************************************
  purpose:  duplicates a string without spaces or newlines at front or end
 ******************************************************************************/
 char *strdup_noendblanks(char *s)
@@ -206,7 +267,6 @@ char *strdup_noendblanks(char *s)
         return strdup("");
     return my_strndup(t, (size_t) (p - t + 1));
 }
-
 /******************************************************************************
   purpose: return a copy of tag from \label{tag} in the string text
  ******************************************************************************/
@@ -237,8 +297,10 @@ char *ExtractLabelTag(char *text)
  ******************************************************************************/
 char *ExtractAndRemoveTag(char *tag, char *text)
 {
-    char *s, *contents, *start, *end;
+    char *s, *contents, *start=NULL, *end;
 
+    if (text==NULL || *text=='\0') return NULL;
+    
     s = text;
     diagnostics(5, "target tag = <%s>", tag);
     diagnostics(5, "original text = <%s>", text);

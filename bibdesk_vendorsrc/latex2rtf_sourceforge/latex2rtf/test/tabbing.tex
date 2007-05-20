@@ -76,4 +76,27 @@ Gnu:            \> eaten by  \>    gnats
 three aligned columns}
 \end{center}
 \end{table}
+
+\begin{table}
+\centering
+\begin{tabbing}
+\t{oo} \= \verb|\t{oo}|~~~ \=
+\t{oo} \= \verb|\t{oo}|~~~ \=
+\t{oo} \= \verb|\t{oo}|~~~ \=
+\t{oo} \= \verb|\t{oo}|~~~ \=
+\t{oo} \= \verb|\t{oo}|~~~ \=
+\t{oo} \=                       \kill
+
+\a`{o} \> \verb|\`{o}|  \> \~{o}  \> \verb|\~{o}|  \> \v{o}  \> \verb|\v{o}| \>
+\c{o}  \> \verb|\c{o}|  \> \a'{o} \> \verb|\'{o}|  \\
+\a={o} \> \verb|\={o}|  \> \H{o}  \> \verb|\H{o}|  \> \d{o}  \> \verb|\d{o}| \>
+\^{o}  \> \verb|\^{o}|  \> \.{o}  \> \verb|\.{o}|  \\
+\t{oo} \> \verb|\t{oo}| \> \b{o}  \> \verb|\b{o}|  \\  \"{o} \> \verb|\"{o}| \>
+\u{o}  \> \verb|\u{o}|  \\
+\end{tabbing}
+\caption{This table only works with with Word 2004 for MacOSX.  Earlier versions fail
+to display the {\tt $\backslash$ H\{o\}} correctly because they do not really support unicode.
+Other RTF readers get the unicode right, but fail with the
+table formatting.}
+\end{table}
 \end{document}

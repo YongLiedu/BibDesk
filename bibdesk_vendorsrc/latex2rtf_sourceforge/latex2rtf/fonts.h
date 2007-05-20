@@ -1,4 +1,4 @@
-/* $Id: l2r_fonts.h,v 1.16 2004/10/03 22:35:25 prahl Exp $ */
+/* $Id: fonts.h,v 1.6 2004/12/07 03:17:54 prahl Exp $ */
 
 #define F_FAMILY_ROMAN          1
 #define F_FAMILY_ROMAN_1        2

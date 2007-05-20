@@ -22,6 +22,7 @@ This file is available from http://sourceforge.net/projects/latex2rtf/
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "main.h"
 #include "convert.h"
 #include "definitions.h"
@@ -32,9 +33,9 @@ This file is available from http://sourceforge.net/projects/latex2rtf/
 #include "counters.h"
 #include "funct1.h"
 
-#define MAX_DEFINITIONS 200
-#define MAX_ENVIRONMENTS 20
-#define MAX_THEOREMS 20
+#define MAX_DEFINITIONS 2000
+#define MAX_ENVIRONMENTS 200
+#define MAX_THEOREMS 200
 
 struct {
     char *name;
@@ -181,7 +182,12 @@ static char *expandmacro(char *macro, char *opt_param, int params)
 
             } else if (param < params) {
                 diagnostics(3, "expandmacro arg =<%s>", args[param]);
-                if (expanded+strlen(args[param]) <buffer+buff_size) {
+                if (expanded+strlen(args[param])+1 <buffer+buff_size) {
+                    char c = *(expanded-1);
+                    if (isalpha(c)) {
+                    	*expanded=' ';
+                        expanded++;
+                    }
                     strcpy(expanded, args[param]);
                     expanded += strlen(args[param]);
                 } else 

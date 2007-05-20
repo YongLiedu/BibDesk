@@ -28,7 +28,7 @@ Authors:
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
-#include "l2r_fonts.h"
+#include "fonts.h"
 #include "funct1.h"
 #include "encode.h"
 #include "encode_tables.h"
@@ -1293,6 +1293,37 @@ static void macukr_enc(int index)
     CmdCyrillicStrChar(s);
 }
 
+static void utf8_enc(char cThis)
+{
+    static int oldF = 0;
+    static int cnt = 0;
+    int code=(unsigned char)cThis;
+
+    if (code <= 0 || code >= 255)
+        return;
+
+    if((code & 0x80) == 0x00){
+        fprintRTF("%c", code);
+        cnt = -1;
+    }else if((code & 0xE0) == 0xC0){
+        oldF = (code & 0x1F);
+        cnt = 1;
+    }else if((code & 0xF0) == 0xE0){
+        oldF = (code & 0x0F);
+        cnt = 2;	
+    }else if((code & 0xF8) == 0xF0){
+        oldF = (code & 0x07);
+        cnt = 3;
+    }else{
+        oldF <<= 6;
+        oldF |= (code & 0x3F);
+        cnt--;
+    }
+    if(!cnt)
+        fprintRTF("\\u%d ", oldF);
+    
+}
+
 void WriteEightBitChar(char cThis)
 {
     int index = (int) cThis + 128;
@@ -1363,4 +1394,6 @@ void WriteEightBitChar(char cThis)
         maccyr_enc(index);
     else if (strcmp(g_charset_encoding_name, "macukr") == 0)
         macukr_enc(index);
+    else if (strcmp(g_charset_encoding_name, "utf8") == 0)
+        utf8_enc(cThis);
 }

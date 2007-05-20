@@ -81,7 +81,7 @@ Authors:
 
 #include "main.h"
 #include "convert.h"
-#include "l2r_fonts.h"
+#include "fonts.h"
 #include "funct1.h"
 #include "commands.h"
 #include "cfg.h"
@@ -107,12 +107,28 @@ int RtfFontNumber(char *Fname)
  ****************************************************************************/
 {
     int num = 0;
+    char *font_type, *font_name;
     ConfigEntryT **config_handle = CfgStartIterate(FONT_A);
 
+    diagnostics(5, "seeking=%s", Fname);
     while ((config_handle = CfgNext(FONT_A, config_handle)) != NULL) {
-        diagnostics(4, "font name =%s", (*config_handle)->RtfCommand);
-        if (strcmp((*config_handle)->RtfCommand, Fname) == 0) {
-            return num + 3;
+        font_type = (char *) (*config_handle)->TexCommand;
+        font_name = (char *) (*config_handle)->RtfCommand;
+        diagnostics(5, "name='%s' type='%s' num=%d", font_name, font_type, num);
+
+        if (strcmp(font_name, Fname) == 0) {
+			int charset = 0;
+	
+			if (strncmp(font_name, "Symbol", 6) == 0)
+				return num;      /* Symbol is same in all charsets! */
+	
+			if (strncmp(font_type, "Cyrillic", 8) == 0)
+				charset = 204;
+	
+			if (strncmp(font_type, "Latin2", 6) == 0)
+				charset = 238;
+
+			if (g_fcharset_number == charset) return num;
         }
         num++;
     }
@@ -126,7 +142,10 @@ int TexFontNumber(char *Fname)
   example: TexFontNumber("Roman")
  ****************************************************************************/
 {
-    return SearchRtfIndex(Fname, FONT_A) + 3;
+    int index;
+    index= SearchRtfIndex(Fname, FONT_A);
+	diagnostics(4, "seeking <%s> which has value %d", Fname, index);
+	return index;
 }
 
 void CmdFontFamily(int code)
@@ -745,7 +764,7 @@ int CurrentFontShape(void)
 int CurrentFontSize(void)
 
 /******************************************************************************
-  purpose: returns the current RTF size
+  purpose: returns the current RTF size in twips
  ******************************************************************************/
 {
     diagnostics(4, "CurrentFontSize -- size=%d", RtfFontInfo[FontInfoDepth].size);
@@ -782,7 +801,7 @@ void PushFontSettings(void)
 void PopFontSettings(void)
 {
     if (FontInfoDepth == 0)
-        diagnostics(ERROR, "FontInfoDepth = 0, cannot PopFontSettings()!");
+        diagnostics(WARNING, "FontInfoDepth = 0, cannot PopFontSettings()!");
 
     FontInfoDepth--;
     diagnostics(6, "PopFontSettings depth=%d, family=%d, size=%d, shape=%d, series=%d",
@@ -794,8 +813,8 @@ void MonitorFontChanges(char *text)
 {
     int n;
 
-    diagnostics(2, "\nMonitorFont %10s\n", text);
-    diagnostics(2, "MonitorFont before depth=%d, family=%d, size=%d, shape=%d, series=%d",
+    diagnostics(6, "\nMonitorFont %10s\n", text);
+    diagnostics(6, "MonitorFont before depth=%d, family=%d, size=%d, shape=%d, series=%d",
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
       RtfFontInfo[FontInfoDepth].size, RtfFontInfo[FontInfoDepth].shape, RtfFontInfo[FontInfoDepth].series);
 
@@ -839,7 +858,7 @@ void MonitorFontChanges(char *text)
         RtfFontInfo[FontInfoDepth].series = RtfFontInfo[0].series;
     }
 
-    diagnostics(2, "MonitorFont after depth=%d, family=%d, size=%d, shape=%d, series=%d",
+    diagnostics(6, "MonitorFont after depth=%d, family=%d, size=%d, shape=%d, series=%d",
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
       RtfFontInfo[FontInfoDepth].size, RtfFontInfo[FontInfoDepth].shape, RtfFontInfo[FontInfoDepth].series);
 

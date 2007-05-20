@@ -9,6 +9,10 @@
 #define TITLE_DATE 3
 #define TITLE_TITLEPAGE 4
 
+#define GRAPHICS_NONE     0
+#define GRAPHICS_GRAPHICS 1
+#define GRAPHICS_GRAPHICX 2
+
 #define CFOOT 1
 #define LFOOT 2
 #define RFOOT 3
@@ -23,8 +27,10 @@
 void CmdDocumentStyle(int code);
 void CmdUsepackage(int code);
 void CmdTitle(int code);
+void CmdAnd(int code);
 void CmdMakeTitle(int code);
 void CmdPreambleBeginEnd(int code);
+void CmdTableOfContents(int code);
 void PlainPagestyle(void);
 void CmdPagestyle(int code);
 void CmdHeader(int code);

@@ -11,21 +11,22 @@ RTF=accentchars.rtf array.rtf eqns.rtf fonts.rtf fontsize.rtf \
     tabular.rtf percent.rtf essential.rtf misc3.rtf misc4.rtf fancy.rtf \
 	align.rtf box.rtf \
 	babel_german.rtf babel_russian.rtf babel_czech.rtf babel_french.rtf \
-	babel_spanish.rtf babel_frenchb.rtf \
-	bib_simple.rtf bib_apalike.rtf bib_apalike2.rtf bib_natbib1.rtf bib_natbib2.rtf \
-	bib_natbib3.rtf bib_harvard.rtf \
+	babel_spanish.rtf babel_frenchb.rtf bib_simple.rtf \
 	enc_applemac.rtf enc_cp437.rtf enc_cp865.rtf    enc_latin2.rtf enc_latin5.rtf \
 	enc_cp1250.rtf   enc_cp850.rtf enc_decmulti.rtf enc_latin3.rtf enc_latin9.rtf\
 	enc_cp1252.rtf   enc_cp852.rtf enc_latin1.rtf   enc_latin4.rtf enc_next.rtf\
 	enc_cp1251.rtf   enc_cp855.rtf enc_cp866.rtf    enc_koi8-r.rtf enc_koi8-u.rtf \
-	enc_maccyr.rtf enc_macukr.rtf eqns-koi8.rtf \
+	enc_maccyr.rtf enc_macukr.rtf enc_utf8.rtf unicode.rtf eqns-koi8.rtf \
 	defs.rtf qualisex.rtf ttgfsr7.rtf excalibur.rtf include.rtf ch.rtf\
 	spago1.rtf theorem.rtf picture.rtf tabbing.rtf \
-	fig_test.rtf fig_test2.rtf fig_size.rtf \
+	fig_test2.rtf fig_size.rtf \
 	chem.rtf subsup.rtf linux.rtf color.rtf \
-	head_book.rtf head_article.rtf head_report.rtf endnote.rtf report.rtf
+	head_book.rtf head_article.rtf head_report.rtf endnote.rtf report.rtf \
+	bibentry_apalike.rtf bibentry_plain.rtf
 
-RTFX=bib_apacite.rtf bib_apanat.rtf bib_authordate.rtf fig_test3.rtf
+RTFX=bib_apacite.rtf bib_apanat.rtf bib_authordate.rtf fig_test3.rtf bib_harvard.rtf \
+     bib_apalike.rtf bib_apalike2.rtf bib_natbib1.rtf bib_natbib2.rtf bib_natbib3.rtf \
+     unicode.rtf fig_test.rtf
 
 all:
 	mkdir -p ../tmp
@@ -78,15 +79,29 @@ bib_apanat.rtf: bib_apanat.tex
 	$(LATEX) bib_apanat > latex.log
 	$(LATEX2RTF) $(OPTIONS) bib_apanat
 
-bib_harvard.rtf: bib_harvard.tex
-	$(LATEX) bib_harvard > latex.log
-	$(LATEX) bib_harvard > latex.log
-	$(LATEX2RTF) $(OPTIONS) bib_harvard
-
 bib_authordate.rtf: bib_authordate.tex
 	$(LATEX) bib_authordate > latex.log
 	$(LATEX) bib_authordate > latex.log
 	$(LATEX2RTF) $(OPTIONS) bib_authordate
+
+bib_harvard.rtf: bib_harvard.tex bib_harvard.bib
+	$(LATEX) bib_harvard > latex.log
+	$(BIBTEX) bib_harvard > bibtex.log
+	$(LATEX) bib_harvard > latex.log
+	$(LATEX) bib_harvard > latex.log
+	$(LATEX2RTF) $(OPTIONS) bib_harvard
+
+bibentry_plain.rtf: bibentry_plain.tex bibentry_plain.bib
+	$(LATEX) bibentry_plain > latex.log
+	$(BIBTEX) bibentry_plain > bibtex.log
+	$(LATEX) bibentry_plain > latex.log
+	$(LATEX2RTF) $(OPTIONS) bibentry_plain
+
+bibentry_apalike.rtf: bibentry_apalike.tex bibentry_apalike.bib
+	$(LATEX) bibentry_apalike > latex.log
+	$(BIBTEX) bibentry_apalike > bibtex.log
+	$(LATEX) bibentry_apalike > latex.log
+	$(LATEX2RTF) $(OPTIONS) bibentry_apalike
 
 misc2.rtf: misc2.tex
 	$(LATEX) misc2 > latex.log

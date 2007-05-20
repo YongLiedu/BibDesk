@@ -35,7 +35,7 @@ Authors:
 #include "stack.h"
 #include "util.h"
 #include "parser.h"
-#include "l2r_fonts.h"
+#include "fonts.h"
 #include "lengths.h"
 #include "definitions.h"
 #include "funct1.h"
@@ -94,11 +94,10 @@ void PopTrackLineNumber(void)
     g_track_line_number--;
 }
 
-int CurrentLineNumber(void)
-
 /***************************************************************************
  purpose:     returns the current line number of the text being processed
 ****************************************************************************/
+int CurrentLineNumber(void)
 {
     return g_parser_line;
 }
@@ -117,6 +116,18 @@ void UpdateLineNumber(char *s)
             g_parser_line++;
         s++;
     }
+}
+
+/***************************************************************************
+ purpose:     returns the current file descriptor
+****************************************************************************/
+int CurrentFileDescriptor(void)
+{
+    int fd=0;
+    if (g_parser_file)
+    	fd = fileno(g_parser_file);
+    
+    return fd;
 }
 
 char *CurrentFileName(void)
@@ -159,7 +170,7 @@ int PushSource(char *filename, char *string)
                 diagnostics(1, "i=%d file   =%s, line=%d", i, g_parser_stack[i].file_name, g_parser_stack[i].file_line);
 
             else {
-                strncpy(s, g_parser_stack[i].string, 25);
+                strncpy_printable(s, g_parser_stack[i].string, 25);
                 diagnostics(1, "i=%d string =%s, line=%d", i, s, g_parser_stack[i].file_line);
             }
         }
@@ -185,6 +196,7 @@ int PushSource(char *filename, char *string)
             return 1;
         g_parser_include_level++;
         g_parser_line = 1;
+        name = strdup(filename);
 
     } else {
         name = CurrentFileName();
@@ -220,7 +232,7 @@ int PushSource(char *filename, char *string)
                 diagnostics(1, "i=%d file   =%s, line=%d", i, g_parser_stack[i].file_name, g_parser_stack[i].file_line);
 
             else {
-                strncpy(s, g_parser_stack[i].string, 25);
+                strncpy_printable(s, g_parser_stack[i].string, 25);
                 diagnostics(1, "i=%d string =%s, line=%d", i, s, g_parser_stack[i].file_line);
             }
         }
@@ -245,7 +257,7 @@ void EndSource(void)
     if (g_parser_file)
         fseek(g_parser_file, 0, SEEK_END);
     else
-        *g_parser_string = NULL;
+        *g_parser_string = '\0';
 
     return;
 }
@@ -270,7 +282,7 @@ void PopSource(void)
                 diagnostics(1, "i=%d file   =%s, line=%d", i, g_parser_stack[i].file_name, g_parser_stack[i].file_line);
 
             else {
-                strncpy(s, g_parser_stack[i].string, 25);
+                strncpy_printable(s, g_parser_stack[i].string, 25);
                 diagnostics(1, "i=%d string =%s, line=%d", i, s, g_parser_stack[i].file_line);
             }
         }
@@ -323,7 +335,7 @@ void PopSource(void)
                 diagnostics(1, "i=%d file   =%s, line=%d", i, g_parser_stack[i].file_name, g_parser_stack[i].file_line);
 
             else {
-                strncpy(s, g_parser_stack[i].string, 25);
+                strncpy_printable(s, g_parser_stack[i].string, 25);
                 diagnostics(1, "i=%d string =%s, line=%d", i, s, g_parser_stack[i].file_line);
             }
         }
@@ -366,10 +378,30 @@ char getRawTexChar()
 
         g_parser_currentChar = (char) thechar;
 
-    } else {                    /* no need to sanitize strings! */
+    } else {
+
         if (g_parser_string && *g_parser_string) {
-            g_parser_currentChar = *g_parser_string;
+			thechar = *g_parser_string;
+
+			/* convert CR, CRLF, or LF to \n */			
+			if (thechar == CR) {   
+				g_parser_string++;
+				thechar = *g_parser_string;
+				if (thechar != LF)
+					g_parser_string--;
+				thechar = '\n';
+			} else if (thechar == LF)
+				thechar = '\n';
+			else if (thechar == '\t')
+            	thechar = ' ';
+            	
+            g_parser_currentChar = thechar;
             g_parser_string++;
+        } 
+        else if (g_parser_depth > 15) 
+        {
+             PopSource();    /* go back to parsing parent */
+             g_parser_currentChar = getRawTexChar();  /* get next char from parent file */
         } else
             g_parser_currentChar = '\0';
     }
@@ -379,6 +411,15 @@ char getRawTexChar()
 
     g_parser_penultimateChar = g_parser_lastChar;
     g_parser_lastChar = g_parser_currentChar;
+    if (1) {
+		if (g_parser_currentChar=='\n')
+			diagnostics(6,"getRawTexChar = <\\n>");
+		else if (g_parser_currentChar=='\0')
+			diagnostics(6,"getRawTexChar = <\\0> depth=%d, files=%d", g_parser_depth, g_parser_include_level);
+		else
+			diagnostics(6,"getRawTexChar = <%2c>",g_parser_currentChar);
+	}
+	/* if (g_parser_currentChar=='\0') exit(0);*/
     return g_parser_currentChar;
 }
 
@@ -439,7 +480,14 @@ char getTexChar()
         g_parser_backslashes++;
     else
         g_parser_backslashes = 0;
-    diagnostics(6, "after getTexChar=<%c> backslashes=%d line=%d", cThis, g_parser_backslashes, g_parser_line);
+	if (1) {
+		if (cThis=='\n')
+			diagnostics(6,"getRawTexChar = <\\n> backslashes=%d line=%ld", g_parser_backslashes, g_parser_line);
+		else if (cThis=='\0')
+			diagnostics(6,"getRawTexChar = <\\0> backslashes=%d line=%ld", g_parser_backslashes, g_parser_line);
+		else
+			diagnostics(6,"getRawTexChar = <%2c> backslashes=%d line=%ld",cThis, g_parser_backslashes, g_parser_line);
+	}
     return cThis;
 }
 
@@ -464,7 +512,9 @@ char getNonBlank(void)
 {
     char c;
 
-    while ((c = getTexChar()) && (c == ' ' || c == '\n')) {
+	c = getTexChar();
+    while (c == ' ' || c == '\n') {
+    	c = getTexChar();
     }
     return c;
 }
@@ -729,7 +779,7 @@ char *getBraceParam(void)
         text = getSimpleCommand();
 
     } else if (s[0] == '{')
-        text = getDelimitedText('{', '}', TRUE);
+        text = getDelimitedText('{', '}', FALSE);
 
     else {
         s[1] = '\0';
@@ -791,9 +841,9 @@ char *getTexUntil(char *target, int raw)
      returns: NULL if not found
  **************************************************************************/
 {
-    enum { BUFFSIZE = 8000 };
+    enum { BUFFSIZE = 16000 };
     char *s;
-    char buffer[BUFFSIZE + 1] = { '\0' };
+    char buffer[BUFFSIZE];
     int last_i = -1;
     int i = 0;                  /* size of string that has been read */
     size_t j = 0;               /* number of found characters */
@@ -835,7 +885,8 @@ char *getTexUntil(char *target, int raw)
     }
 
     if (i == BUFFSIZE)
-        diagnostics(ERROR, "Could not find <%s> in %d characters", BUFFSIZE);
+        diagnostics(ERROR, "Could not find <%s> in %d characters \n\
+        Recompile with larger BUFFSIZE in getTexUntil() in parser.c", target, BUFFSIZE);
 
     if (!end_of_file_reached)   /* do not include target in returned string */
         buffer[i - len] = '\0';
@@ -904,7 +955,7 @@ int getDimension(void)
 
     if (i == 19 || sscanf(buffer, "%f", &num) != 1) {
         diagnostics(WARNING, "Screwy number in TeX dimension");
-        diagnostics(1, "getDimension() number is <%s>", buffer);
+        diagnostics(WARNING, "getDimension() number is <%s>", buffer);
         return 0;
     }
 
@@ -914,6 +965,9 @@ int getDimension(void)
     skipSpaces();
     buffer[0] = tolower((int) getTexChar());
 
+	if (buffer[0] == '\0')  /* no units specified ... assume points */
+        return (int) (num * 20);
+	
 /* skip "true" */
     if (buffer[0] == 't') {
         cThis = getTexChar();
@@ -971,6 +1025,63 @@ int getDimension(void)
         return (int) num;
     }
 
+}
+
+void CmdInclude(int code)
+
+/******************************************************************************
+ purpose: handles \input file, \input{file}, \include{file}
+          code == 0 for \include
+          code == 1 for \input
+ ******************************************************************************/
+{
+    char name[50], cNext;
+    int i;
+    char *basename=NULL;
+    char *texname=NULL;
+
+    cNext = getNonSpace();
+
+    if (cNext == '{') {         /* \input{gnu} or \include{gnu} */
+        ungetTexChar(cNext);
+        basename = getBraceParam();
+
+    } else {                    /* \input gnu */
+        name[0] = cNext;
+        for (i = 1; i < 50; i++) {
+            name[i] = getTexChar();
+            if (isspace((int) name[i])) {
+                name[i] = '\0';
+                break;
+            }
+        }
+        basename = strdup(name);
+    }
+
+	if (strstr(basename, "german.sty") != NULL) {
+    	GermanMode = TRUE;
+     	PushEnvironment(GERMAN_MODE);
+     	free(basename);
+     	return;
+
+    } else if (strstr(basename, "french.sty") != NULL) {
+        FrenchMode = TRUE;
+        PushEnvironment(FRENCH_MODE);
+     	free(basename);
+     	return;
+	}
+	
+    if (basename && strstr(basename, ".tex") == NULL)         /* append .tex if missing */
+        texname = strdup_together(basename, ".tex");
+
+    if (texname && PushSource(texname, NULL) == 0)            /* Try the .tex name first*/
+        diagnostics(WARNING, "Including file <%s>", texname);
+      
+    else if (basename && PushSource(basename, NULL) == 0)     /* Try the basename second*/
+        diagnostics(WARNING, "Including file <%s>", basename);
+
+    if (basename) free(basename);
+    if (texname)  free(texname);
 }
 
 #define SECTION_BUFFER_SIZE 2048
@@ -1281,38 +1392,9 @@ void getSection(char **body, char **header, char **label)
         }
 
         if (i == input_item || i == include_item) {
-            char *s, *s2;
-
-            s = getBraceParam();
-            if (i == input_item)
-                diagnostics(4, "\\input{%s}", s);
-            else
-                diagnostics(4, "\\include{%s}", s);
-
-            if (strstr(s, "german.sty") != NULL) {
-                GermanMode = TRUE;
-                PushEnvironment(GERMAN_MODE);
-
-            } else if (strstr(s, "french.sty") != NULL) {
-                FrenchMode = TRUE;
-                PushEnvironment(FRENCH_MODE);
-
-            } else if (strcmp(s, "") == 0) {
-                diagnostics(WARNING, "Empty or invalid filename in \\include{}");
-
-            } else {
-
-                if (strstr(s, ".ltx") == NULL && strstr(s, ".tex") == NULL) {
-                    /* extension .tex is appended automatically if missing */
-                    s2 = strdup_together(s, ".tex");
-                    free(s);
-                    s = s2;
-                }
-
-                PushSource(s, NULL);    /* ignore return value */
-            }
+            
+            CmdInclude(0);
             delta -= (i == input_item) ? 6 : 8; /* remove \input or \include */
-            free(s);
             index = 0;          /* keep looking */
             continue;
         }
