@@ -136,9 +136,9 @@
 }
 
 - (void) setSelection: (NSArray *) newSelection {
-	// debugging revealed that we get an array of NSIndexSpecifiers and not of BibItem
+	// on Tiger: debugging revealed that we get an array of NSIndexSpecifiers and not of BibItem
     // the index is relative to all the publications the document (AS container), not the shownPublications
-	NSArray *pubsToSelect = [publications objectsAtIndexSpecifiers:newSelection];
+	NSArray *pubsToSelect = [[newSelection lastObject] isKindOfClass:[BibItem class]] ? newSelection : [publications objectsAtIndexSpecifiers:newSelection];
 	[self selectPublications:pubsToSelect];
 }
 
