@@ -2205,7 +2205,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:@"</keywords>"];
     [s appendString:@"<urls>"];
     [s appendString:@"<pdf-urls>"];
-    AddXMLField(@"url",BDSKLocalUrlString);
+    value = [[self localURL] absoluteString];
+    if ([NSString isEmptyString:value] == NO)
+        [s appendStrings:@"<url>", value, @"</url>", nil];
     [s appendString:@"</pdf-urls>"];
     [s appendString:@"<related-urls>"];
     AddXMLField(@"url",BDSKUrlString);
@@ -2217,8 +2219,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     // custom
     
-    [s appendStrings:@"<custom3>", entryType, @"</custom3>", nil];
-    AddXMLField(@"custom4",BDSKCrossrefString);
+    if ([NSString isEmptyString:[self valueOfField:@"Custom3"]])
+        [s appendStrings:@"<custom3>", entryType, @"</custom3>", nil];
+    if ([NSString isEmptyString:[self valueOfField:@"Custom4"]])
+        AddXMLField(@"custom4",BDSKCrossrefString);
+    AddXMLField(@"custom1",@"Custom1");
+    AddXMLField(@"custom2",@"Custom2");
+    AddXMLField(@"custom3",@"Custom3");
+    AddXMLField(@"custom4",@"Custom4");
+    AddXMLField(@"custom5",@"Custom5");
+    AddXMLField(@"custom6",@"Custom6");
     
     [s appendString:@"</record>\n"];
     
