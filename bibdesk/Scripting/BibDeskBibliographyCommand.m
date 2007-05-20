@@ -69,7 +69,7 @@ ssp: 2004-07-11
 	//NSLog([doc description]);
 	if (doc == nil) return nil;
 	
-	NSArray *pubs = [[doc publications] objectsAtIndexSpecifiers:(NSArray*)param];
+	NSArray *pubs = [[param lastObject] isKindOfClass:[BibItem class]] ? param : [[doc publications] objectsAtIndexSpecifiers:(NSArray*)param];
 	
 	// make RTF and return it.
 	NSTextStorage * ts = [doc textStorageForPublications:pubs];
