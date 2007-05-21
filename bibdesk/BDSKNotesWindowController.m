@@ -153,8 +153,6 @@
     NSEnumerator *itemEnum = [items objectEnumerator];
     id item, lastItem = nil;
     NSMutableString *string = [NSMutableString string];
-    NSFont *standardFont = [NSFont systemFontOfSize:12.0];
-    NSAttributedString *newlinesAttrString = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:[NSDictionary dictionaryWithObjectsAndKeys:standardFont, NSFontAttributeName, nil]];
     
     while (item = [itemEnum nextObject]) {
         if ([lastItem objectForKey:@"child"] == item)
