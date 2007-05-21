@@ -1354,13 +1354,17 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         
         int rv;
         
-        error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect encoding", @"error title when opening file")];
-        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"BibDesk tried to open the document using encoding %@, but it should have been opened with encoding %@.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect encoding", @"Message in alert dialog when opening a document with different encoding")];
+        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"BibDesk tried to open the document using encoding %@, but it should have been opened with encoding %@.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]] forKey:NSLocalizedRecoverySuggestionErrorKey];
         [error setValue:absoluteURL forKey:NSURLErrorKey];
         [error setValue:[NSNumber numberWithUnsignedInt:encoding] forKey:NSStringEncodingErrorKey];
         
         // If we allow the user to reopen here, NSDocumentController puts up an open failure here when we return NO from this instance, and the message appears after the successfully opened file is on-screen...which is confusing, to say the least.
-        NSAlert *encodingAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Incorrect encoding", @"error title when opening file") defaultButton:NSLocalizedString(@"Cancel", @"") alternateButton:NSLocalizedString(@"Ignore", @"") otherButton:nil informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The document will be opened with encoding %@, but it was previously saved with encoding %@.  You should cancel opening and then reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]]];
+        NSAlert *encodingAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Incorrect encoding", @"error title when opening file")
+                                                 defaultButton:NSLocalizedString(@"Cancel", @"Button title")
+                                               alternateButton:NSLocalizedString(@"Ignore", @"Button title")
+                                                   otherButton:NSLocalizedString(@"Reopen", @"Button title")
+                                     informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The document will be opened with encoding %@, but it was previously saved with encoding %@.  You should cancel opening and then reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:encoding], [NSString localizedNameOfStringEncoding:encodingFromFile]]];
         rv = [encodingAlert runModal];
 
         if (rv == NSAlertDefaultReturn) {
@@ -1369,6 +1373,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             NSLog(@"User ignored encoding alert");
+        }else if (rv == NSAlertOtherReturn){
+            // we just use the encoding whach was used for saving
+            encoding = encodingFromFile;
         }
     }
     
