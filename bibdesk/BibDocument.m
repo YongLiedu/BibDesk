@@ -252,24 +252,6 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         return @"BibDocument";
 }
 
-- (void)encodingAlertDidEnd:(NSAlert *)alert returnCode:(int)code contextInfo:(void *)ctxt {
-    if (NSAlertDefaultReturn == code) {
-        // setting delegate to nil ensures that xattrs won't be written out; the cleanup isn't an issue, since this doc just opened
-        [documentWindow setDelegate:nil];
-        [documentWindow close];
-        [self close];
-    } else if (NSAlertOtherReturn == code) {
-        // setting delegate to nil ensures that xattrs won't be written out; the cleanup isn't an issue, since this doc just opened
-        NSURL *fileURL = [[[self fileURL] retain] autorelease];
-        [documentWindow setDelegate:nil];
-        [documentWindow close];
-        [self close];
-        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:fileURL encoding:(int)ctxt];
-    } else {
-        NSLog(@"User decided to ignore an encoding warning.");
-    }    
-}
-
 - (void)showWindows{
     [super showWindows];
     
@@ -302,18 +284,6 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
     NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
     [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
-        
-    // this is a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs
-    NSStringEncoding encodingFromFile = [xattrDefaults unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:0];
-    if (encodingFromFile != 0 && encodingFromFile != [self documentStringEncoding]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Document was opened with incorrect encoding", @"Message in alert dialog when opening a document with different encoding")
-                                         defaultButton:NSLocalizedString(@"Close", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Ignore", @"Button title")
-                                           otherButton:NSLocalizedString(@"Reopen", @"Button title")
-                             informativeTextWithFormat:NSLocalizedString(@"The document was opened with encoding %@, but it was previously saved with encoding %@.  You should close it without saving and reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]];
-        [alert setAlertStyle:NSCriticalAlertStyle];
-        [alert beginSheetModalForWindow:documentWindow modalDelegate:self didEndSelector:@selector(encodingAlertDidEnd:returnCode:contextInfo:) contextInfo:(void *)encodingFromFile];
-    }    
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
@@ -1377,6 +1347,30 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     [macroResolver removeAllMacros];
     [groups removeAllNonSharedGroups]; // this also removes spinners and editor windows for external groups
     [frontMatter setString:@""];
+    
+    // This is only a sanity check; an encoding of 0 is not valid, so is a signal we should ignore xattrs; could only check for public.text UTIs, but it will be zero if it was never written (and we don't warn in that case).  The user can do many things to make the attribute incorrect, so this isn't very robust.
+    NSStringEncoding encodingFromFile = [[self mainWindowSetupDictionaryFromExtendedAttributes] unsignedIntForKey:BDSKDocumentStringEncodingKey defaultValue:0];
+    if (encodingFromFile != 0 && encodingFromFile != encoding) {
+        
+        int rv;
+        
+        error = [NSError mutableLocalErrorWithCode:kBDSKStringEncodingError localizedDescription:NSLocalizedString(@"Incorrect encoding", @"error title when opening file")];
+        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"BibDesk tried to open the document using encoding %@, but it should have been opened with encoding %@.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]] forKey:NSLocalizedRecoverySuggestionErrorKey];
+        [error setValue:absoluteURL forKey:NSURLErrorKey];
+        [error setValue:[NSNumber numberWithUnsignedInt:encoding] forKey:NSStringEncodingErrorKey];
+        
+        // If we allow the user to reopen here, NSDocumentController puts up an open failure here when we return NO from this instance, and the message appears after the successfully opened file is on-screen...which is confusing, to say the least.
+        NSAlert *encodingAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Incorrect encoding", @"error title when opening file") defaultButton:NSLocalizedString(@"Cancel", @"") alternateButton:NSLocalizedString(@"Ignore", @"") otherButton:nil informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"The document will be opened with encoding %@, but it was previously saved with encoding %@.  You should cancel opening and then reopen with the correct encoding.", @"Informative text in alert dialog when opening a document with different encoding"), [NSString localizedNameOfStringEncoding:[self documentStringEncoding]], [NSString localizedNameOfStringEncoding:encodingFromFile]]];
+        rv = [encodingAlert runModal];
+
+        if (rv == NSAlertDefaultReturn) {
+            // the user said to give up
+            if (outError) *outError = error; 
+            return NO;
+        }else if (rv == NSAlertAlternateReturn){
+            NSLog(@"User ignored encoding alert");
+        }
+    }
     
 	if ([aType isEqualToString:BDSKBibTeXDocumentType] || [aType isEqualToUTI:[[NSWorkspace sharedWorkspace] UTIForPathExtension:@"bib"]]){
         success = [self readFromBibTeXData:data fromURL:absoluteURL encoding:encoding error:&error];
