@@ -1,4 +1,4 @@
-// Copyright 2000-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -8,10 +8,9 @@
 #import "OAHierarchicalPopUpController.h"
 
 #import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OmniFoundation.h>
 #import <AppKit/AppKit.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAHierarchicalPopUpController.m 79094 2006-09-08 00:06:21Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAHierarchicalPopUpController.m 68913 2005-10-03 19:36:19Z kc $")
 
 NSString *OAFavoriteCharsetsDefaultsKey = @"FavoriteCharsets";
 
@@ -298,7 +297,9 @@ key, if non-nil, indicates that the recent selections should be stored in the de
     NSMutableArray *menuStructure;
 
     if (charsetCategories == nil) {
-        NSString *plistPath = [OMNI_BUNDLE pathForResource:@"CharsetCategories" ofType:@"plist"];
+        NSString *plistPath;
+
+        plistPath = [[NSBundle bundleWithIdentifier:@"com.omnigroup.OmniAppKit"] pathForResource:@"CharsetCategories" ofType:@"plist"];
         if (plistPath != nil)
             charsetCategories = [[NSDictionary alloc] initWithContentsOfFile:plistPath];
         if (charsetCategories == nil) {

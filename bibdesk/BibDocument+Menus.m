@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -45,11 +45,6 @@
 #import "BibItem.h"
 #import "BibTypeManager.h"
 #import "BDSKTemplate.h"
-#import "NSFileManager_BDSKExtensions.h"
-#import "BibDocument_Actions.h"
-#import "BibDocument_Search.h"
-#import "BDSKGroupsArray.h"
-#import "BDSKCustomCiteDrawerController.h"
 
 @implementation BibDocument (Menus)
 
@@ -58,7 +53,7 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection or selection includes shared groups
 		return NO;
 	}
@@ -73,7 +68,7 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
 		return NO;
 	}
@@ -102,15 +97,15 @@
     BOOL usesTeX = [sud boolForKey:BDSKUsesTeXKey];
 	int copyType = [menuItem tag];
 	NSString *s = nil;
-	NSString *copyString = NSLocalizedString(@"Copy", @"Menu item title");
+	NSString *copyString = NSLocalizedString(@"Copy", @"Copy");
 	int n = [self numberOfSelectedPubs];
 	
 	switch (copyType) {
 		case BDSKBibTeXDragCopyType:
 			if (n <= 1)
-				s = NSLocalizedString(@"BibTeX Record", @"Menu item title");
+				s = NSLocalizedString(@"BibTeX Record", @"BibTeX Record");
 			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"%i BibTeX Records", @"Menu item title"), n];
+				s = [NSString stringWithFormat:NSLocalizedString(@"%i BibTeX Records", @"%i BibTeX Records"), n];
 			break;
 		case BDSKCiteDragCopyType:
 			do {
@@ -118,11 +113,11 @@
 				NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
 				NSString *TeXName = (![startCiteBracket isEqualToString:@"["]) ? @"TeX" : @"ConTeXt";
 				if (n <= 1)
-					s = [NSString stringWithFormat:NSLocalizedString(@"%@ \\cite Command", @"Menu item title"), TeXName];
+					s = [NSString stringWithFormat:NSLocalizedString(@"%@ \\cite Command", @"%@ \\cite Command"), TeXName];
 				else if ([sud boolForKey:BDSKSeparateCiteKey]) 
-					s = [NSString stringWithFormat:NSLocalizedString(@"%i %@ \\cite Commands", @"Menu item title"), n, TeXName];
+					s = [NSString stringWithFormat:NSLocalizedString(@"%i %@ \\cite Commands", @"%i %@ \\cite Commands"), n, TeXName];
 				else
-					s = [NSString stringWithFormat:NSLocalizedString(@"%@ \\cite Command for %i Items", @"Menu item title"), TeXName, n];
+					s = [NSString stringWithFormat:NSLocalizedString(@"%@ \\cite Command for %i Items", @"%@ \\cite Command for %i Items"), TeXName, n];
 			} while (0);
 			break;
 		case BDSKPDFDragCopyType:
@@ -131,7 +126,7 @@
 			if (n <= 1)
 				s = NSLocalizedString(@"PDF", @"PDF");
 			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"PDF for %i Items", @"Menu item title"), n];
+				s = [NSString stringWithFormat:NSLocalizedString(@"PDF for %i Items", @"PDF for %i Items"), n];
 			break;
 		case BDSKRTFDragCopyType:
             if (usesTeX == NO)
@@ -139,7 +134,7 @@
 			if (n <= 1)
 				s = NSLocalizedString(@"Text", @"Text");
 			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"Text for %i Items", @"Menu item title"), n];
+				s = [NSString stringWithFormat:NSLocalizedString(@"Text for %i Items", @"Text for %i Items"), n];
 			break;
 		case BDSKLaTeXDragCopyType:
             if (usesTeX == NO)
@@ -147,7 +142,7 @@
 			if (n <= 1)
 				s = NSLocalizedString(@"LaTeX", @"LaTeX");
 			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"LaTeX for %i Items", @"Menu item title"), n];
+				s = [NSString stringWithFormat:NSLocalizedString(@"LaTeX for %i Items", @"LaTeX for %i Items"), n];
 			break;
 		case BDSKLTBDragCopyType:
             if (usesTeX == NO)
@@ -155,19 +150,19 @@
 			if (n <= 1)
 				s = NSLocalizedString(@"Amsrefs LaTeX", @"Amsrefs LaTeX");
 			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"Amsrefs LaTeX for %i Items", @"Menu item title"), n];
+				s = [NSString stringWithFormat:NSLocalizedString(@"Amsrefs LaTeX for %i Items", @"Amsrefs LaTeX for %i Items"), n];
 			break;
 		case BDSKMinimalBibTeXDragCopyType:
 			if (n <= 1)
 				s = NSLocalizedString(@"Minimal BibTeX Record", @"Minimal BibTeX Record");
 			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"%i Minimal BibTeX Records", @"Menu item title"), n];
+				s = [NSString stringWithFormat:NSLocalizedString(@"%i Minimal BibTeX Records", @"%i Minimal BibTeX Records"), n];
 			break;
 		case BDSKRISDragCopyType:
 			if (n <= 1)
-				s = NSLocalizedString(@"RIS Record", @"Menu item title");
+				s = NSLocalizedString(@"RIS Record", @"RIS Record");
 			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"%i RIS Records", @"Menu item title"), n];
+				s = [NSString stringWithFormat:NSLocalizedString(@"%i RIS Records", @"%i RIS Records"), n];
 			break;
         default:
             return (n > 0);
@@ -183,7 +178,7 @@
 	}
 	else if (n == 1) {
 		// single selection
-		NSString *forString = NSLocalizedString(@"for", @"Menu item title: [Copy format] for [cite key]");
+		NSString *forString = NSLocalizedString(@"for", @"for");
 		NSString *citeKey = [(BibItem*)[[self selectedPublications] objectAtIndex:0] citeKey];
 		if ([[menuItem menu] supermenu]) {
 			s = [NSString stringWithFormat:@"%@ %@ %@", s, forString, citeKey];
@@ -205,15 +200,41 @@
 }
 
 - (BOOL)validatePasteMenuItem:(NSMenuItem *)menuItem{
-	return ([documentWindow isKeyWindow] == YES && [[documentWindow firstResponder] isEqual:tableView]);
+	return ([documentWindow isKeyWindow] == YES && [documentWindow firstResponder] == tableView);
+}
+
+- (BOOL)validateExportMenuItem:(NSMenuItem *)menuItem{
+    switch ([menuItem tag]) {
+        case BDSKTemplateExportFileType:
+            return ([[BDSKTemplate allStyleNames] count] != 0);
+        case BDSKHTMLExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"html"] count] != 0);
+        case BDSKRSSExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"rss"] count] != 0);
+        case BDSKRTFExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"rtf"] count] != 0);
+        case BDSKRTFDExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"rtfd"] count] != 0);
+        case BDSKDocExportFileType:
+            return ([[BDSKTemplate allStyleNamesForFileType:@"doc"] count] != 0);
+        default:
+            return YES;
+    }
+}
+
+- (BOOL)validateExportSelectionMenuItem:(NSMenuItem *)menuItem{
+    if ([self numberOfSelectedPubs] == 0)
+        return NO;
+    else
+        return [self validateExportMenuItem:menuItem];
 }
 
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO)
         return NO;
-	if ([[documentWindow firstResponder] isEqual:tableView] == NO ||
+	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasExternalGroupsSelected] == YES)
+        [self hasSharedGroupsSelected] == YES)
 		return NO;
 	return YES;
 }
@@ -224,7 +245,7 @@
 	if ([self numberOfSelectedPubs] == 0) {
 		// no selection
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Get Info", @"Menu item title");
+			s = NSLocalizedString(@"Get Info", @"Get Info");
 			[menuItem setTitle:s];
 		}
 		return NO;
@@ -232,14 +253,14 @@
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Get Info for Publication", @"Menu item title");
+			s = NSLocalizedString(@"Get Info for Publication", @"Get Info for Publication");
 			[menuItem setTitle:s];
 		}
 		return YES;
 	}
 	else {
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Get Info for %i Publications", @"Menu item title");
+			s = NSLocalizedString(@"Get Info for %i Publications", @"Get Info for %i Publications");
 			[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		}
 		return YES;
@@ -251,10 +272,10 @@
 	int n = [self numberOfSelectedPubs];
 	
 	if (n == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Delete", @"Menu item title");
+			s = NSLocalizedString(@"Delete", @"Delete");
 			[menuItem setTitle:s];
 		}
 		return NO;
@@ -262,7 +283,7 @@
 	else if (n == 1) {
 		// single selection
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Delete Publication", @"Menu item title");
+			s = NSLocalizedString(@"Delete Publication", @"Delete Publication");
 			[menuItem setTitle:s];
 		}
 		return YES;
@@ -270,7 +291,7 @@
 	else {
 		// multiple selection
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Delete %i Publications", @"Menu item title");
+			s = NSLocalizedString(@"Delete %i Publications", @"Delete %i Publications");
 			[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		}
 		return YES;
@@ -287,15 +308,15 @@
 	if([selIndexes firstIndex] == 0) {
         return [self validateDeleteSelectionMenuItem:menuItem];
     } else {
-        m = [groups numberOfStaticGroupsAtIndexes:selIndexes];
-        if ([[self currentGroupField] isSingleValuedGroupField] == NO)
-            m += [groups numberOfCategoryGroupsAtIndexes:selIndexes];
+        m = [self numberOfStaticGroupsAtIndexes:selIndexes];
+        if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO)
+            m += [self numberOfCategoryGroupsAtIndexes:selIndexes];
     }
 	
 	if (n == 0 || m == 0) {
 		// no selection
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove from Group", @"Menu item title");
+			s = NSLocalizedString(@"Remove from Group", @"Remove from group");
 			[menuItem setTitle:s];
 		}
 		return NO;
@@ -304,9 +325,9 @@
 		// single selection
 		if (![[menuItem menu] supermenu]) {
 			if (m == 1)
-				s = NSLocalizedString(@"Remove Publication from Group", @"Menu item title");
+				s = NSLocalizedString(@"Remove Publication from Group", @"Remove Publication from Groups");
 			else
-				s = NSLocalizedString(@"Remove Publication from Groups", @"Menu item title");
+				s = NSLocalizedString(@"Remove Publication from Groups", @"Remove Publication from Groups");
 			[menuItem setTitle:s];
 		}
 		return YES;
@@ -315,34 +336,14 @@
 		// multiple selection
 		if (![[menuItem menu] supermenu]) {
 			if (m == 1)
-				s = NSLocalizedString(@"Remove %i Publications from Group", @"Menu item title");
+				s = NSLocalizedString(@"Remove %i Publications from Group", @"Remove %i Publications from Group");
 			else
-				s = NSLocalizedString(@"Remove %i Publications from Groups", @"Menu item title");
+				s = NSLocalizedString(@"Remove %i Publications from Groups", @"Remove %i Publications from Groups");
 			[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		}
 		return YES;
 	}
 }	
-
-- (BOOL)validateSendToLyXMenuItem:(NSMenuItem*) menuItem {
-    if ([self numberOfSelectedPubs] == 0)
-        return NO;
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *appSupportPath = [fileManager applicationSupportDirectory:kUserDomain];
-    NSString *lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX-1.4"] stringByAppendingPathComponent:@".lyxpipe.in"];
-    
-    if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-        lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX"] stringByAppendingPathComponent:@".lyxpipe.in"];
-        if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-            lyxPipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
-            if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-               return NO;
-            }
-        }
-    }
-    return YES;
-}
 
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
@@ -354,20 +355,20 @@
 	
 	if ([self numberOfSelectedPubs] == 0) {
 		// no selection
-		s = NSLocalizedString(@"Open Linked File", @"Menu item title");
+		s = NSLocalizedString(@"Open Linked File", @"Open Linked File");
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
-		s = NSLocalizedString(@"Open Linked File", @"Menu item title");
+		s = NSLocalizedString(@"Open Linked File", @"Open Linked File");
 		[menuItem setTitle:s];
 		selectedBI = [[self selectedPublications] objectAtIndex:0];
 		lurl = [selectedBI localFilePathForField:field];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
 	else {
-		s = NSLocalizedString(@"Open %i Linked Files", @"Menu item title");
+		s = NSLocalizedString(@"Open %i Linked Files", @"Open %i Linked Files");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 		while(selectedBI = [e nextObject]){
@@ -389,20 +390,20 @@
 	
 	if ([self numberOfSelectedPubs] == 0) {
 		// no selection
-		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title");
+		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Reveal Linked File in Finder");
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
-		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title");
+		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Reveal Linked File in Finder");
 		[menuItem setTitle:s];
 		selectedBI = [[self selectedPublications] objectAtIndex:0];
 		lurl = [selectedBI localFilePathForField:field];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
 	else {
-		s = NSLocalizedString(@"Reveal %i Linked Files in Finder", @"Menu item title");
+		s = NSLocalizedString(@"Reveal %i Linked Files in Finder", @"Reveal %i Linked Files in Finder");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 		while(selectedBI = [e nextObject]){
@@ -424,20 +425,20 @@
 	
 	if ([self numberOfSelectedPubs] == 0) {
 		// no selection
-		s = NSLocalizedString(@"Open URL in Browser", @"Menu item title");
+		s = NSLocalizedString(@"Open URL in Browser", @"Open URL in Browser");
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
-		s = NSLocalizedString(@"Open URL in Browser", @"Menu item title");
+		s = NSLocalizedString(@"Open URL in Browser", @"Open URL in Browser");
 		[menuItem setTitle:s];
 		selectedBI = [[self selectedPublications] objectAtIndex:0];
 		url = [selectedBI remoteURLForField:field];
 		return (url != nil);
 	}
 	else {
-		s = NSLocalizedString(@"Open %i URLs in Browser", @"Menu item title");
+		s = NSLocalizedString(@"Open %i URLs in Browser", @"Open %i URLs in Browser");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 		while(selectedBI = [e nextObject]){
@@ -449,59 +450,25 @@
 	}
 }	
 
-- (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
-	NSString *field = [menuItem representedObject];
-	BibItem *selectedBI = nil;
-	NSString *lurl = nil;
-    if (field == nil)
-		field = BDSKLocalUrlString;
-    
-	if ([self numberOfSelectedPubs] == 0) {
-		// no selection
-		s = NSLocalizedString(@"Show Notes For Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Show Notes For Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		selectedBI = [[self selectedPublications] objectAtIndex:0];
-		lurl = [selectedBI localFilePathForField:field];
-		return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
-	}
-	else {
-		s = NSLocalizedString(@"Show Notes For %i Linked Files", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-		while(selectedBI = [e nextObject]){
-			lurl = [selectedBI localFilePathForField:field];
-			return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
-		}
-		return NO;
-	}
-}	
-
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasExternalGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
-		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Menu item title");
+		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
-		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Menu item title");
+		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
 		[menuItem setTitle:[NSString stringWithFormat:s]];
 		return YES;
 	}
 	else {
-		s = NSLocalizedString(@"Duplicate %i Titles to Booktitles", @"Menu item title");
+		s = NSLocalizedString(@"Duplicate %i Titles to Booktitles", @"Duplicate %i Titles to Booktitles");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;
 	}
@@ -511,20 +478,20 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasExternalGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
-		s = NSLocalizedString(@"Generate Cite Key", @"Menu item title");
+		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
-		s = NSLocalizedString(@"Generate Cite Key", @"Menu item title");
+		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
 		[menuItem setTitle:[NSString stringWithFormat:s]];
 		return YES;
 	}
 	else {
-		s = NSLocalizedString(@"Generate %i Cite Keys", @"Menu item title");
+		s = NSLocalizedString(@"Generate %i Cite Keys", @"Generate %i Cite Keys");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;
 	}
@@ -535,21 +502,21 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasExternalGroupsSelected] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
-		s = [NSLocalizedString(@"Consolidate Linked Files", @"Menu item title") stringByAppendingEllipsis];
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked Files", @"Consolidate Linked Files..."),0x2026];
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
 		NSString * citeKey = [(BibItem*)[[self selectedPublications] objectAtIndex:0] citeKey];
-		s = [NSLocalizedString(@"Consolidate Linked File for %@", @"Menu item title") stringByAppendingEllipsis];
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked File for %@", @"Consolidate Linked File for %@..."),0x2026];
 		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
 		return YES;
 	}
 	else {
-		s = [NSLocalizedString(@"Consolidate %i Linked Files", @"Menu item title") stringByAppendingEllipsis];
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate %i Linked Files", @"Consolidate %i Linked Files..."),0x2026];
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;
 	}
@@ -567,55 +534,53 @@
 	}
 }
 
-- (BOOL) validateToggleToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
+- (BOOL) validateToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
-	if([drawerController isDrawerOpen]){
-		s = NSLocalizedString(@"Hide Custom \\cite Commands", @"Menu item title");
-		[menuItem setTitle:s];
-	}else{
-		s = NSLocalizedString(@"Show Custom \\cite Commands", @"Menu item title");
-		[menuItem setTitle:s];
-	}
+	if([customCiteDrawer state] == NSDrawerOpenState || [customCiteDrawer state] == NSDrawerOpeningState)
+		s = NSLocalizedString(@"Hide Custom \\cite Commands",@"");
+	else
+		s = NSLocalizedString(@"Show Custom \\cite Commands",@"should be the same as in the nib");
+    [menuItem setTitle:s];
 	return YES;
 }
 
 - (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem {
     NSString *s;
 	if ([statusBar isVisible]){
-		s = NSLocalizedString(@"Hide Status Bar", @"Menu item title");
+		s = NSLocalizedString(@"Hide Status Bar", @"Hide Status Bar");
 		[menuItem setTitle:s];
 	}
 	else {
-		s = NSLocalizedString(@"Show Status Bar", @"Menu item title");
+		s = NSLocalizedString(@"Show Status Bar", @"Show Status Bar");
 		[menuItem setTitle:s];
 	}
 	return YES;
 }
 
 - (BOOL) validateNewPubFromPasteboardMenuItem:(NSMenuItem*) menuItem {
-    NSString *s = [NSLocalizedString(@"New Publications from Clipboard", @"Menu item title") stringByAppendingEllipsis];
+    NSString *s = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"New Publications from Clipboard",@"New Publications from Clipboard"),0x2026];
 	[menuItem setTitle:s];
 	return YES;
 }
 
 - (BOOL) validateNewPubFromFileMenuItem:(NSMenuItem*) menuItem {
-    NSString *s = [NSLocalizedString(@"New Publications from File", @"Menu item title") stringByAppendingEllipsis];
+    NSString *s = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"New Publications from File",@"New Publications from File"),0x2026];
 	[menuItem setTitle:s];
 	return YES;
 }
 
 - (BOOL) validateNewPubFromWebMenuItem:(NSMenuItem*) menuItem {
-    NSString *s = [NSLocalizedString(@"New Publications from Web", @"Menu item title") stringByAppendingEllipsis];
+    NSString *s = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"New Publications from Web",@"New Publications from Web"),0x2026];
 	[menuItem setTitle:s];
 	return YES;
 }
 
 - (BOOL)validateSortForCrossrefsMenuItem:(NSMenuItem *)menuItem{
-    return ([self hasExternalGroupsSelected] == NO);
+    return ([self hasSharedGroupsSelected] == NO);
 }
 
 - (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1){
+    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         if(![NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
             return YES;
@@ -624,7 +589,7 @@
 }
 
 - (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1 && [self hasExternalGroupsSelected] == NO){
+    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         
         // only valid if the selected pub (parent-to-be) doesn't have a crossref field
@@ -661,32 +626,29 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    int n = [groups numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfURLGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfSearchGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    int n = [self numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    n += [self numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 	
 	NSString *s = @"";
 	
 	if (n == 0) {
 		// no smart group selected
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove Group", @"Menu item title");
+			s = NSLocalizedString(@"Remove Group", @"Remove group");
 			[menuItem setTitle:s];
 		}
 		return NO;
 	} else if (n == 1) {
 		// single smart group selected
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove Group", @"Menu item title");
+			s = NSLocalizedString(@"Remove Group", @"Remove group");
 			[menuItem setTitle:s];
 		}
 		return YES;
 	} else {
 		// multiple smart groups selected
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove %i Groups", @"Menu item title");
+			s = NSLocalizedString(@"Remove %i Groups", @"Remove %i groups");
 			[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		}
 		return YES;
@@ -697,7 +659,7 @@
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 &&
 		row > 0 &&
-        [[groups objectAtIndex:row] hasEditableName]) {
+        [[self objectInGroupsAtIndex:row] hasEditableName]) {
 		// single group selection
 		return YES;
 	} else {
@@ -712,7 +674,7 @@
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
 		// single group selection
-        return [[groups objectAtIndex:row] isEditable];
+        return [[self objectInGroupsAtIndex:row] isEditable];
 	} else {
 		// multiple selection or no smart group selected
 		return NO;
@@ -721,7 +683,7 @@
 
 - (BOOL) validateEditActionMenuItem:(NSMenuItem *)menuItem{
     if ([documentWindow isKeyWindow] == NO) {
-        [menuItem setTitle:NSLocalizedString(@"Get Info", @"Menu item title")];
+        [menuItem setTitle:NSLocalizedString(@"Get Info", @"Get Info")];
         return NO;
 	}
     id firstResponder = [documentWindow firstResponder];
@@ -768,57 +730,37 @@
     return ([documentWindow isKeyWindow] == YES);
 }
 
-- (BOOL)validateSelectLibraryGroupMenuItem:(NSMenuItem *)menuItem{
+- (BOOL)validateSelectAllPublicationsGroupMenuItem:(NSMenuItem *)menuItem{
     return ([documentWindow isKeyWindow] == YES);
 }
 
 - (BOOL) validateSelectDuplicatesMenuItem:(NSMenuItem *)menuItem{
-    return YES;
+    return ([self hasSharedGroupsSelected] == NO);
 }
 
 - (BOOL) validateSelectPossibleDuplicatesMenuItem:(NSMenuItem *)menuItem{
-    [menuItem setTitle:[NSString stringWithFormat:NSLocalizedString(@"Select Duplicates by %@", @"Menu item title"), [sortKey localizedFieldName]]];
-    return ([self hasExternalGroupsSelected] == NO);
-}
-
-- (BOOL) validateSelectIncompletePublicationsMenuItem:(NSMenuItem *)menuItem{
-    return ([self hasExternalGroupsSelected] == NO);
+    [menuItem setTitle:[NSLocalizedString(@"Select Duplicates by ", @"for selecting duplicate publications; requires a single trailing space") stringByAppendingString:[lastSelectedColumnForSort identifier]]];
+    return ([self hasSharedGroupsSelected] == NO);
 }
 
 - (BOOL)validateFindPanelActionMenuItem:(NSMenuItem *)menuItem {
 	switch ([menuItem tag]) {
-        case NSFindPanelActionShowFindPanel:
-        case NSFindPanelActionNext:
-        case NSFindPanelActionPrevious:
-        case NSFindPanelActionSetFindString:
+		case NSFindPanelActionShowFindPanel:
+		case NSFindPanelActionSetFindString:
 			return YES;
 		default:
 			return NO;
 	}
 }
 
-- (BOOL)validateEditNewStaticGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
+- (BOOL)validateEditNewGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
     NSString *s;
-    if ([self hasExternalGroupsSelected])
-        s = NSLocalizedString(@"New Static Group With Merged Selection", @"Menu item title");
+    if ([self hasSharedGroupsSelected])
+        s = NSLocalizedString(@"New Group With Merged Selection", @"New group with merged selection");
     else
-        s = NSLocalizedString(@"New Static Group With Selection", @"Menu item title");
+        s = NSLocalizedString(@"New Group With Selection", @"New group with selection");
     [menuItem setTitle:s];
     return ([self numberOfSelectedPubs] > 0);
-}
-
-- (BOOL)validateEditNewCategoryGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
-    NSString *s;
-    if ([self hasExternalGroupsSelected])
-        s = NSLocalizedString(@"New Field Group With Merged Selection", @"Menu item title");
-    else
-        s = NSLocalizedString(@"New Field Group With Selection", @"Menu item title");
-    [menuItem setTitle:s];
-    return ([self numberOfSelectedPubs] > 0 && [currentGroupField isEqualToString:@""] == NO);
-}
-
-- (BOOL)validateAddSearchBookmarkMenuItem:(NSMenuItem *)menuItem {
-    return [self hasSearchGroupsSelected];
 }
 
 - (BOOL)validateRevertDocumentToSavedMenuItem:(NSMenuItem *)menuItem {
@@ -827,7 +769,7 @@
 
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     [menuItem setState:([menuItem tag] == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]) ? NSOnState : NSOffState];
-    if ([menuItem tag] == BDSKTemplatePreviewDisplay && [[BDSKTemplate allStyleNamesForFileType:@"rtf"] count] == 0)
+    if ([menuItem tag] == 3 && [[BDSKTemplate allStyleNamesForFileType:@"rtf"] count] == 0)
         return NO;
     return YES;
 }
@@ -837,36 +779,12 @@
     return YES;
 }
 
-- (BOOL)validateMergeInExternalGroupMenuItem:(NSMenuItem *)menuItem {
-    if ([self hasSharedGroupsSelected]) {
-        [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Menu item title")];
-        return YES;
-    } else if ([self hasURLGroupsSelected]) {
-        [menuItem setTitle:NSLocalizedString(@"Merge In External File Group", @"Menu item title")];
-        return YES;
-    } else if ([self hasScriptGroupsSelected]) {
-        [menuItem setTitle:NSLocalizedString(@"Merge In Script Group", @"Menu item title")];
-        return YES;
-    } else if ([self hasSearchGroupsSelected]) {
-        [menuItem setTitle:NSLocalizedString(@"Merge In Search Group", @"Menu item title")];
-        return YES;
-    } else {
-        [menuItem setTitle:NSLocalizedString(@"Merge In Shared Group", @"Menu item title")];
-        return NO;
-    }
+- (BOOL)validateMergeInSharedGroupMenuItem:(NSMenuItem *)menuItem {
+    return ([self hasSharedGroupsSelected]);
 }
 
-- (BOOL)validateMergeInExternalPublicationsMenuItem:(NSMenuItem *)menuItem {
-    if ([self hasSharedGroupsSelected]) {
-        [menuItem setTitle:NSLocalizedString(@"Merge In Shared Publications", @"Menu item title")];
-        return [self numberOfSelectedPubs] > 0;
-    } else if ([self hasURLGroupsSelected] || [self hasScriptGroupsSelected] || [self hasSearchGroupsSelected]) {
-        [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
-        return [self numberOfSelectedPubs] > 0;
-    } else {
-        [menuItem setTitle:NSLocalizedString(@"Merge In External Publications", @"Menu item title")];
-        return NO;
-    }
+- (BOOL)validateMergeInSharedPublicationsMenuItem:(NSMenuItem *)menuItem {
+    return ([self hasSharedGroupsSelected] && [self numberOfSelectedPubs] > 0);
 }
 
 - (BOOL)validateRefreshSharingMenuItem:(NSMenuItem *)menuItem {
@@ -877,51 +795,6 @@
 - (BOOL)validateRefreshSharedBrowsingMenuItem:(NSMenuItem *)menuItem {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     return ([pw boolForKey:BDSKShouldLookForSharedFilesKey]);
-}
-
-- (BOOL)validateRefreshURLGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [[groups URLGroups] count] > 0;
-}
-
-- (BOOL)validateRefreshScriptGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [[groups scriptGroups] count] > 0;
-}
-
-- (BOOL)validateRefreshSearchGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [[groups searchGroups] count] > 0;
-}
-
-- (BOOL)validateRefreshSelectedGroupsMenuItem:(NSMenuItem *)menuItem {
-    if([self hasSharedGroupsSelected]){
-        [menuItem setTitle:NSLocalizedString(@"Refresh Shared Group", @"Menu item title")];
-        return YES;
-    }else if([self hasURLGroupsSelected]){
-        [menuItem setTitle:NSLocalizedString(@"Refresh External File Group", @"Menu item title")];
-        return YES;
-    }else if([self hasScriptGroupsSelected]){
-        [menuItem setTitle:NSLocalizedString(@"Refresh Script Group", @"Menu item title")];
-        return YES;
-    }else if([self hasSearchGroupsSelected]){
-        [menuItem setTitle:NSLocalizedString(@"Refresh Search Group", @"Menu item title")];
-        return YES;
-    } else {
-        [menuItem setTitle:NSLocalizedString(@"Refresh External Group", @"Menu item title")];
-        return NO;
-    }
-}
-
-- (BOOL)validateRefreshAllExternalGroupsMenuItem:(NSMenuItem *)menuItem {
-    return [[groups URLGroups] count] > 0 ||
-           [[groups scriptGroups] count] > 0 ||
-           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey];
-}
-
-- (BOOL)validateChangeSearchTypeMenuItem:(NSMenuItem *)menuItem {
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == [menuItem tag])
-        [menuItem setState:NSOnState];
-    else
-        [menuItem setState:NSOffState];
-    return YES;
 }
 
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
@@ -949,6 +822,12 @@
 	else if (act == @selector(editPubCmd:)) {
 		return [self validateEditSelectionMenuItem:menuItem];
 	}
+	else if (act == @selector(exportAsAction:)) {
+		return [self validateExportMenuItem:menuItem];
+	}
+	else if (act == @selector(exportSelectionAsAction:)) {
+		return [self validateExportSelectionMenuItem:menuItem];
+	}
 	else if (act == @selector(duplicateTitleToBooktitle:)) {
 		return [self validateDuplicateTitleToBooktitleMenuItem:menuItem];
 	}
@@ -967,9 +846,6 @@
 	else if(act == @selector(emailPubCmd:)) {
 		return ([self numberOfSelectedPubs] != 0);
 	}
-	else if(act == @selector(sendToLyX:)) {
-		return [self validateSendToLyXMenuItem:menuItem];
-	}
 	else if(act == @selector(openLinkedFile:)) {
 		return [self validateOpenLinkedFileMenuItem:menuItem];
 	}
@@ -979,14 +855,14 @@
 	else if(act == @selector(openRemoteURL:)) {
 		return [self validateOpenRemoteURLMenuItem:menuItem];
 	}
-	else if(act == @selector(showNotesForLinkedFile:)) {
-		return [self validateShowNotesForLinkedFileMenuItem:menuItem];
-	}
 	else if(act == @selector(toggleShowingCustomCiteDrawer:)) {
-		return [self validateToggleToggleCustomCiteDrawerMenuItem:menuItem];
+		return [self validateToggleCustomCiteDrawerMenuItem:menuItem];
 	}
 	else if (act == @selector(printDocument:)) {
 		return [self validatePrintDocumentMenuItem:menuItem];
+	}
+	else if (act == @selector(columnsMenuSelectTableColumn:)) {
+		return ([[menuItem menu] numberOfItems] > 3);
 	}
 	else if (act == @selector(toggleStatusBar:)) {
 		return [self validateToggleStatusBarMenuItem:menuItem];
@@ -1047,8 +923,8 @@
 	else if (act == @selector(deselectAllPublications:)){
         return [self validateDeselectAllPublicationsMenuItem:menuItem];
     }
-	else if (act == @selector(selectLibraryGroup:)){
-        return [self validateSelectLibraryGroupMenuItem:menuItem];
+	else if (act == @selector(selectAllPublicationsGroup:)){
+        return [self validateSelectAllPublicationsGroupMenuItem:menuItem];
     }
 	else if (act == @selector(selectDuplicates:)){
         return [self validateSelectDuplicatesMenuItem:menuItem];
@@ -1056,20 +932,11 @@
 	else if (act == @selector(selectPossibleDuplicates:)){
         return [self validateSelectPossibleDuplicatesMenuItem:menuItem];
     }
-	else if (act == @selector(selectIncompletePublications:)){
-        return [self validateSelectIncompletePublicationsMenuItem:menuItem];
-    }
 	else if (act == @selector(performFindPanelAction:)){
         return [self validateFindPanelActionMenuItem:menuItem];
     }
-    else if (act == @selector(editNewCategoryGroupWithSelection:)){
-        return [self validateEditNewCategoryGroupWithSelectionMenuItem:menuItem];
-    }
-    else if (act == @selector(editNewStaticGroupWithSelection:)){
-        return [self validateEditNewStaticGroupWithSelectionMenuItem:menuItem];
-    }
-    else if (act == @selector(addSearchBookmark:)){
-        return [self validateAddSearchBookmarkMenuItem:menuItem];
+    else if (act == @selector(editNewGroupWithSelection:)){
+        return [self validateEditNewGroupWithSelectionMenuItem:menuItem];
     }
     else if (act == @selector(revertDocumentToSaved:)){
         return [self validateRevertDocumentToSavedMenuItem:menuItem];
@@ -1080,35 +947,17 @@
     else if (act == @selector(changeIntersectGroupsAction:)){
         return [self validateChangeIntersectGroupsMenuItem:menuItem];
     }
-    else if (act == @selector(mergeInExternalGroup:)){
-        return [self validateMergeInExternalGroupMenuItem:menuItem];
+    else if (act == @selector(mergeInSharedGroup:)){
+        return [self validateMergeInSharedGroupMenuItem:menuItem];
     }
-    else if (act == @selector(mergeInExternalPublications:)){
-        return [self validateMergeInExternalPublicationsMenuItem:menuItem];
+    else if (act == @selector(mergeInSharedPublications:)){
+        return [self validateMergeInSharedPublicationsMenuItem:menuItem];
     }
     else if (act == @selector(refreshSharing:)){
         return [self validateRefreshSharingMenuItem:menuItem];
     }
     else if (act == @selector(refreshSharedBrowsing:)){
         return [self validateRefreshSharedBrowsingMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshURLGroups:)){
-        return [self validateRefreshURLGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshScriptGroups:)){
-        return [self validateRefreshScriptGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshSearchGroups:)){
-        return [self validateRefreshSearchGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshAllExternalGroups:)){
-        return [self validateRefreshAllExternalGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(refreshSelectedGroups:)){
-        return [self validateRefreshSelectedGroupsMenuItem:menuItem];
-    }
-    else if (act == @selector(changeSearchType:)){
-        return [self validateChangeSearchTypeMenuItem:menuItem];
     }
     else {
 		return [super validateMenuItem:menuItem];

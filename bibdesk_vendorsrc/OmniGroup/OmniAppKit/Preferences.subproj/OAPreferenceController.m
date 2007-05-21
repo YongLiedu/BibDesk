@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -7,8 +7,8 @@
 
 #import <OmniAppKit/OAPreferenceController.h>
 
-#import <Cocoa/Cocoa.h>
-#import <Carbon/Carbon.h> // For AESend
+#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
@@ -23,7 +23,7 @@
 #import "OAPreferencesToolbar.h"
 #import "OAPreferencesWindow.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.m 79090 2006-09-07 23:55:58Z kc $") 
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.m 67979 2005-09-06 19:44:43Z kc $") 
 
 static OAPreferenceClientRecord *_ClientRecordWithValueForKey(NSArray *records, NSString *key, NSString *value)
 {
@@ -301,12 +301,12 @@ static NSString *windowFrameSaveName = @"Preferences";
     [window setInitialFirstResponder:[nonretained_currentClient initialFirstResponder]];
     [window makeFirstResponder:[nonretained_currentClient initialFirstResponder]];
     
-    // Hook up the pane's keyView loop to ours.  returnToOriginalValuesButton is always present, but the help button might get removed if there is no help URL for this pane.
-    [[nonretained_currentClient lastKeyView] setNextKeyView:returnToOriginalValuesButton];
-    if (helpButton) {
-	OBASSERT([returnToOriginalValuesButton nextKeyView] == helpButton); // set in nib
-	[helpButton setNextKeyView:[nonretained_currentClient initialFirstResponder]];
-    }
+    // Hook up the pane's keyView loop to ours
+    if (helpButton)
+        [[nonretained_currentClient lastKeyView] setNextKeyView:helpButton];
+    else
+        [[nonretained_currentClient lastKeyView] setNextKeyView:returnToOriginalValuesButton];
+    [returnToOriginalValuesButton setNextKeyView:[nonretained_currentClient initialFirstResponder]];
     
     // As above, don't do this unless we are onscreen to avoid double become/resigns.
     if ([window isVisible]) {
@@ -479,9 +479,6 @@ static NSString *windowFrameSaveName = @"Preferences";
 {
     [[notification object] makeFirstResponder:nil];
     [nonretained_currentClient resignCurrentPreferenceClient];
-
-    // Save settings immediately when closing the window
-    [[OFPreferenceWrapper sharedPreferenceWrapper] synchronize];
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification;
@@ -735,7 +732,7 @@ static NSString *windowFrameSaveName = @"Preferences";
 
     toolbar = [[OAPreferencesToolbar alloc] initWithIdentifier:@"OAPreferenceIdentifiers"];
     [toolbar setAllowsUserCustomization:YES];
-    [toolbar setAutosavesConfiguration:YES];
+    [toolbar setAutosavesConfiguration:NO]; // Don't store the configured items or new items won't show up!
     [toolbar setDelegate:self];
     [toolbar setAlwaysCustomizableByDrag:YES];
     [toolbar setShowsContextMenu:NO];
@@ -980,7 +977,7 @@ static int _OAPreferenceControllerCompareCategoryNames(id name1, id name2, void 
 
 @end
 
-static BOOL OAOpenSystemPreferenceBundle(NSString *paneBundleIdentifier)
+BOOL OAOpenSystemPreferencePane(NSString *paneBundleIdentifier)
 {
     OSErr err;
     FSRef fRef;
@@ -1024,87 +1021,4 @@ static BOOL OAOpenSystemPreferenceBundle(NSString *paneBundleIdentifier)
     return didOpen;
 }
 
-static NSAppleEventDescriptor *whose(OSType form, OSType want, NSAppleEventDescriptor *seld, NSAppleEventDescriptor *container)
-{
-    NSAppleEventDescriptor *obj = [NSAppleEventDescriptor recordDescriptor];
-    
-    if (!container)
-        container = [NSAppleEventDescriptor nullDescriptor];
-    
-    [obj setDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:form] forKeyword:keyAEKeyForm];
-    [obj setDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:want] forKeyword:keyAEDesiredClass];
-    [obj setDescriptor:seld forKeyword:keyAEKeyData];
-    [obj setDescriptor:container forKeyword:keyAEContainer];
-    
-    return [obj coerceToDescriptorType:'obj '];
-}
-
-/* On 10.4, System Preferences has applescript support for revealing a specific tab (or anchor) within a specific pane. So we call that. */
-static BOOL OAOpenSystemPreferenceTab(NSString *paneIdentifier, NSString *tabIdentifier)
-{
-    NSString *systemPreferencesBundleID = @"com.apple.systempreferences";
-    NSAppleEventDescriptor *target = whose(formUniqueID, 'xppb', [NSAppleEventDescriptor descriptorWithString:paneIdentifier], nil);
-    if (tabIdentifier)
-        target = whose(formName, 'xppa', [NSAppleEventDescriptor descriptorWithString:tabIdentifier], target);
-    
-    NSData *prefsBundleID = [systemPreferencesBundleID dataUsingEncoding:NSUTF8StringEncoding];
-
-    OSErr err;
-    AppleEvent reveal, reply;
-    
-    err = AEBuildAppleEvent('misc','mvis',
-                      typeApplicationBundleID, [prefsBundleID bytes], [prefsBundleID length],
-                      kAutoGenerateReturnID,
-                      kAnyTransactionID,
-                      &reveal, NULL, "'----':@", [target aeDesc]);
-    if (err !=  aeBuildSyntaxNoErr)
-        return NO;
-    
-    // Send the event with a timeout of 5 seconds. That should be long enough to get a failure response, but not so long that it'll be really annoying if there's a holdup for some reason.
-    UInt32 aevtTimeout = 5 * 60;
-    
-    err = AESend(&reveal, &reply, kAEWaitReply|kAEAlwaysInteract|kAECanSwitchLayer, kAENormalPriority, aevtTimeout, NULL, NULL);
-    if (err == procNotFound) {
-        // Prefs hasn't been launched, perhaps.
-        BOOL ok;
-        ok = [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:systemPreferencesBundleID
-                                                                  options:NSWorkspaceLaunchWithoutActivation
-                                           additionalEventParamDescriptor:nil
-                                                         launchIdentifier:NULL];
-        if (ok)
-            err = AESend(&reveal, &reply, kAEWaitReply|kAEAlwaysInteract|kAECanSwitchLayer, kAENormalPriority, aevtTimeout, NULL, NULL);
-    }
-    AEDisposeDesc(&reveal);
-    if (err != noErr)
-        return NO;
-    
-    BOOL successResponse = YES;
-    AEDesc dummy;
-    
-    err = AEGetParamDesc(&reply, keyErrorNumber, typeWildCard, &dummy);
-    if (err == noErr) {
-        AEDisposeDesc(&dummy);
-        successResponse = NO;
-    } else {
-        err = AEGetParamDesc(&reply, keyErrorString, typeWildCard, &dummy);
-        if (err == noErr) {
-            AEDisposeDesc(&dummy);
-            successResponse = NO;
-        }
-    }
-    AEDisposeDesc(&reply);
-
-    return successResponse;
-}
-
-BOOL OAOpenSystemPreferencePane(NSString *bundleIdentifier, NSString *tabIdentifier)
-{
-    BOOL success = OAOpenSystemPreferenceTab(bundleIdentifier, tabIdentifier);
-    
-    /* Fall back to the 10.3 technique of asking System Preferences to open a given preference bundle. */
-    if (!success)
-        success = OAOpenSystemPreferenceBundle(bundleIdentifier);
-    
-    return success;
-}
 

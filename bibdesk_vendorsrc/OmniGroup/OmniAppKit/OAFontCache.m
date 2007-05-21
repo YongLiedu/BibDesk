@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,7 +14,7 @@
 
 #import "NSFontManager-OAExtensions.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OAFontCache.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OAFontCache.m 68913 2005-10-03 19:36:19Z kc $")
 
 @interface OAFontCache (Private)
 + (NSDictionary *)generateFontFamilyNameDictionary;
@@ -75,7 +75,7 @@ static NSDictionary *OAFontFamilySubstitutionDictionary = nil;
     dictionary = [self canonicalFontFamilyNameDictionary];
     if ((canonicalName = [dictionary objectForKey:fontFamily]))
         return canonicalName;
-    alternateName = [fontFamily stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    alternateName = [fontFamily stringByRemovingSurroundingWhitespace];
     if ((canonicalName = [dictionary objectForKey:alternateName]))
         return canonicalName;
     alternateName = [alternateName lowercaseString];

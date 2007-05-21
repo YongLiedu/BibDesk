@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 5/4/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,6 @@
 	IBOutlet NSButton *removeOptionalButton;
 	IBOutlet NSButton *revertCurrentToDefaultButton;
 	IBOutlet NSButton *revertAllToDefaultButton;
-	IBOutlet NSButton *canEditDefaultTypesButton;
 	NSMutableDictionary *fieldsForTypesDict;
 	NSMutableArray *types;
 	NSDictionary *defaultFieldsForTypesDict;
@@ -62,7 +61,6 @@
 	NSArray *currentDefaultRequiredFields;
 	NSArray *currentDefaultOptionalFields;
 	NSString *currentType;
-    BOOL canEditDefaultTypes;
 }
 
 + (BDSKTypeInfoEditor *)sharedTypeInfoEditor;
@@ -70,7 +68,6 @@
 - (void)revertTypes;
 
 - (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict;
-- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned)index;
 - (void)setCurrentType:(NSString *)newCurrentType;
 
 - (IBAction)addType:(id)sender;
@@ -81,7 +78,6 @@
 - (IBAction)removeOptional:(id)sender;
 - (IBAction)revertCurrentToDefault:(id)sender;
 - (IBAction)revertAllToDefault:(id)sender;
-- (IBAction)changeCanEditDefaultTypes:(id)sender;
 
 - (BOOL)canEditType:(NSString *)type;
 - (BOOL)canEditField:(NSString *)field;

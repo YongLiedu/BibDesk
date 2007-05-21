@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/02/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -39,74 +39,79 @@
 #import "CFString_BDSKExtensions.h"
 #import <OmniFoundation/OFPreference.h>
 
-// This object is a cache for our stop words, so we don't have to hit user defaults every time __BDDeleteArticlesForSorting() is called (which is fairly often).
+// This object is a cache for our stop words, so we don't have to hit user defaults every time __BDDeleteArticlesForSorting() is called (which is fairly often).  Alternately, we could require users to quit/relaunch after changing the stop words in prefs, but that's not too nice.  Anyway, it's private to CFString functions.
 
-typedef struct __BDSKStopWordCache {
+@interface BDSKStopWordController : NSObject 
+{
     CFArrayRef stopWords;
-    CFIndex    numberOfWords;
-} _BDSKStopWordCache;
-
-static _BDSKStopWordCache *stopWordCache = NULL;
-
-static void 
-stopWordNotificationCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
-{
-    if (stopWordCache->stopWords)
-        CFRelease(stopWordCache->stopWords);
-    stopWordCache->stopWords = CFPreferencesCopyAppValue((CFStringRef)BDSKIgnoredSortTermsKey, kCFPreferencesCurrentApplication);
-    if (stopWordCache->stopWords)
-        stopWordCache->numberOfWords = CFArrayGetCount(stopWordCache->stopWords);
-    else
-        stopWordCache->numberOfWords = 0;
 }
 
-__attribute__((constructor))
-static void initializeStopwordCache(void)
++ (id)sharedController;
+- (CFArrayRef)stopWords;
+- (void)handleStopWordsChangedNotification:(NSNotification *)note;
+
+static inline CFArrayRef BDSKStopwordsFromController(BDSKStopWordController *controller);
+
+@end
+
+@implementation BDSKStopWordController
+
+static id sharedController = nil;
+
++ (id)sharedController;
 {
-    stopWordCache = NSZoneMalloc(NULL, sizeof(_BDSKStopWordCache));
-    stopWordCache->stopWords = NULL;
-    stopWordCache->numberOfWords = 0;
-    stopWordNotificationCallback(NULL, NULL, NULL, NULL, NULL);
-    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), stopWordCache, stopWordNotificationCallback, CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+    if(sharedController == nil)
+        sharedController = [[self alloc] init];
+    return sharedController;
 }
 
-__attribute__((destructor))
-static void destroyStopwordCache(void)
+- (id)init;
 {
-    CFNotificationCenterRemoveObserver(CFNotificationCenterGetLocalCenter(), stopWordCache, CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL);
-    if (stopWordCache->stopWords) CFRelease(stopWordCache->stopWords);
-    NSZoneFree(NULL, stopWordCache);
+    if(self = [super init]){
+        [OFPreference addObserver:self selector:@selector(handleStopWordsChangedNotification:) forPreference:[OFPreference preferenceForKey:BDSKIgnoredSortTermsKey]];
+        stopWords = CFPreferencesCopyAppValue((CFStringRef)BDSKIgnoredSortTermsKey, kCFPreferencesCurrentApplication);
+    }
+    return self;
 }
 
-static inline CFArrayRef __BDSKGetStopwords(void) { return stopWordCache->stopWords; }
-static inline CFIndex __BDSKGetStopwordCount(void) { return stopWordCache->numberOfWords; }
+- (CFArrayRef)stopWords;
+{
+    return stopWords;
+}
+
+- (void)handleStopWordsChangedNotification:(NSNotification *)note;
+{
+    if(stopWords) CFRelease(stopWords);
+    stopWords = CFPreferencesCopyAppValue((CFStringRef)BDSKIgnoredSortTermsKey, kCFPreferencesCurrentApplication);
+}
+
+- (void)dealloc;
+{
+    [OFPreference removeObserver:self forPreference:nil];
+    if(stopWords) CFRelease(stopWords);
+    [super dealloc];
+}
+
+static inline CFArrayRef BDSKStopwordsFromController(BDSKStopWordController *controller)
+{
+    return controller->stopWords;
+}
+
+
+@end
 
 #pragma mark -
 
-#define STACK_BUFFER_SIZE 256
-
-static CFCharacterSetRef whitespaceCharacterSet = NULL;
-static CFCharacterSetRef whitespaceAndNewlineCharacterSet = NULL;
-
-__attribute__((constructor))
-static void initializeStaticCharacterSets(void)
-{
-    whitespaceCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespace));
-    whitespaceAndNewlineCharacterSet = CFRetain(CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline));
-}
+#define SAFE_ALLOCA_SIZE (8 * 8192)
 
 static inline
 BOOL __BDCharacterIsWhitespace(UniChar c)
 {
+    static CFCharacterSetRef csref = NULL;
+    if(csref == NULL)
+        csref = CFCharacterSetGetPredefined(kCFCharacterSetWhitespace);
     // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceCharacterSet, c) );
-}
-
-static inline
-BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
-{
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(whitespaceAndNewlineCharacterSet, c) );
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(csref, c) );
 }
 
 static inline
@@ -147,14 +152,20 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer(aString, &inlineBuffer, CFRangeMake(0, length));
     UniChar ch;
-    UniChar *buffer, stackBuffer[STACK_BUFFER_SIZE];
+    UniChar *buffer;
     CFStringRef retStr;
+    
+    BOOL isLarge = NO;
+    // see if we can allocate it on the stack (faster)
+    buffer = NULL;
+    size_t bufSize = sizeof(UniChar) * (length + 1);
+    if(bufSize < SAFE_ALLOCA_SIZE)
+        buffer = alloca(bufSize);
+    
     allocator = (allocator == NULL) ? CFGetAllocator(aString) : allocator;
-
-    if(length >= STACK_BUFFER_SIZE) {
-        buffer = (UniChar *)CFAllocatorAllocate(allocator, (length + 1) * sizeof(UniChar), 0);
-    } else {
-        buffer = stackBuffer;
+    if(buffer == NULL){
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, bufSize, 0);
+        isLarge = YES; // too large for the stack
     }
     
     NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
@@ -178,8 +189,18 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespace(CFAllocatorRef all
         bufCnt--;
     
     retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
-    if(buffer != stackBuffer) CFAllocatorDeallocate(allocator, buffer);
+    if(isLarge) CFAllocatorDeallocate(allocator, buffer);
     return retStr;
+}
+
+static inline
+BOOL __BDCharacterIsWhitespaceOrNewline(UniChar c)
+{
+    static CFCharacterSetRef csref = NULL;
+    if(csref == NULL)
+        csref = CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline);
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(csref, c) );
 }
 
 static inline
@@ -220,15 +241,20 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAlloc
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer(aString, &inlineBuffer, CFRangeMake(0, length));
     UniChar ch;
-    UniChar *buffer, stackBuffer[STACK_BUFFER_SIZE];
+    UniChar *buffer;
     CFStringRef retStr;
-
+    
+    BOOL isLarge = NO;
+    // see if we can allocate it on the stack (faster)
+    buffer = NULL;
+    size_t bufSize = sizeof(UniChar) * (length + 1);
+    if(bufSize < SAFE_ALLOCA_SIZE)
+        buffer = alloca(bufSize);
+    
     allocator = (allocator == NULL) ? CFGetAllocator(aString) : allocator;
-
-    if(length >= STACK_BUFFER_SIZE) {
-        buffer = (UniChar *)CFAllocatorAllocate(allocator, length * sizeof(UniChar), 0);
-    } else {
-        buffer = stackBuffer;
+    if(buffer == NULL){
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, bufSize, 0);
+        isLarge = YES; // too large for the stack
     }
     
     NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
@@ -252,7 +278,7 @@ CFStringRef __BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAlloc
         bufCnt--;
     
     retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
-    if(buffer != stackBuffer) CFAllocatorDeallocate(allocator, buffer);
+    if(isLarge) CFAllocatorDeallocate(allocator, buffer);
     return retStr;
 }
 
@@ -299,14 +325,13 @@ void __BDDeleteArticlesForSorting(CFMutableStringRef mutableString)
 {
     if(mutableString == nil)
         return;
-    
-    CFIndex count = __BDSKGetStopwordCount();
-    if(!count) return;
-    
     // remove certain terms for sorting, according to preferences
     // each one is typically an article, and we only look
     // for these at the beginning of a string   
-    CFArrayRef articlesToRemove = __BDSKGetStopwords();    
+    CFArrayRef articlesToRemove = BDSKStopwordsFromController([BDSKStopWordController sharedController]);
+    
+    CFIndex count = CFArrayGetCount(articlesToRemove);
+    if(!count) return;
     
     // get the max string length of any of the strings in the plist; we don't want to search any farther than necessary
     CFIndex maxRemoveLength = 0; 
@@ -353,7 +378,7 @@ void __BDDeleteTeXCommandsForSorting(CFMutableStringRef mutableString)
     }
 }
 
-static inline
+static inline 
 uint32_t __BDFastHash(CFStringRef aString)
 {
     
@@ -369,19 +394,21 @@ uint32_t __BDFastHash(CFStringRef aString)
     unsigned l = CFStringGetLength(aString);
     uint32_t fastHash = PHI;
     uint32_t tmp;
+    Boolean shouldFree = NO;
     
     const UniChar *s = CFStringGetCharactersPtr(aString);
-    UniChar *buf = NULL, stackBuffer[STACK_BUFFER_SIZE];
+    UniChar *buf = NULL;
     CFAllocatorRef allocator = NULL;
     
     if(s == NULL){
         
-        if(l > STACK_BUFFER_SIZE){
+        size_t bufSize = l * sizeof(UniChar);
+        buf = bufSize < SAFE_ALLOCA_SIZE ? (UniChar *)alloca(bufSize) : NULL;
+        if(buf == NULL){
             allocator = CFGetAllocator(aString);
             buf = (UniChar *)CFAllocatorAllocate(allocator, l * sizeof(UniChar), 0);;
             NSCAssert(buf != NULL, @"unable to allocate memory");
-        } else {
-            buf = stackBuffer;
+            shouldFree = YES;
         }
         CFStringGetCharacters(aString, CFRangeMake(0, l), buf);
         s = buf;
@@ -406,7 +433,7 @@ uint32_t __BDFastHash(CFStringRef aString)
         fastHash += fastHash >> 17;
     }
     
-    if(buf != stackBuffer) CFAllocatorDeallocate(allocator, buf);
+    if(shouldFree) CFAllocatorDeallocate(allocator, buf);
     
     // Force "avalanching" of final 127 bits
     fastHash ^= fastHash << 3;
@@ -438,13 +465,18 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer(aString, &inlineBuffer, CFRangeMake(0, length));
     UniChar ch;
-    UniChar *buffer, stackBuffer[STACK_BUFFER_SIZE];
+    UniChar *buffer;
     CFStringRef retStr;
-        
-    if(length >= STACK_BUFFER_SIZE) {
-        buffer = (UniChar *)CFAllocatorAllocate(allocator, (length + 1) * sizeof(UniChar), 0);
-    } else {
-        buffer = stackBuffer;
+    
+    BOOL isLarge = NO;
+    
+    // see if we can allocate it on the stack (faster)
+    size_t bufSize = sizeof(UniChar) * (length + 1);
+    buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
+    
+    if(buffer == NULL){
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, sizeof(UniChar) * (length + 1), 0);
+        isLarge = YES; // too large for the stack
     }
     
     NSCAssert1(buffer != NULL, @"failed to allocate memory for string of length %d", length);
@@ -456,17 +488,12 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
         if(__BDCharacterIsWhitespace(ch)){
             ignoreNextNewline = NO;
-            buffer[bufCnt++] = ' ';   // replace with a single space
-        } else if('\r' == ch){        // we can have \r\n, which should appear as a single \n
-            ignoreNextNewline = YES;
-            buffer[bufCnt++] = '\n';
-        } else if('\n' == ch){        // see if previous char was \r
-            if(!ignoreNextNewline)  
-                buffer[bufCnt++] = '\n';
-            ignoreNextNewline = NO;
+            buffer[bufCnt++] = ' '; // replace with a single space
         } else if(BDIsNewlineCharacter(ch)){
-            ignoreNextNewline = NO;
-            buffer[bufCnt++] = '\n';
+            if(!ignoreNextNewline){      // we can have \r\n, which should appear as a single \n
+                buffer[bufCnt++] = '\n'; // any newline would work here
+                ignoreNextNewline = YES;
+            }
         } else { 
             ignoreNextNewline = NO;
             buffer[bufCnt++] = ch;
@@ -474,13 +501,15 @@ CFStringRef __BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorRef al
     }
     
     retStr = CFStringCreateWithCharacters(allocator, buffer, bufCnt);
-    if(buffer != stackBuffer) CFAllocatorDeallocate(allocator, buffer);
+    if(isLarge) CFAllocatorDeallocate(allocator, buffer);
     return retStr;
 }
 
 static inline void
 __BDDeleteCharactersInCharacterSet(CFMutableStringRef theString, CFCharacterSetRef charSet)
-{    
+{
+    OBASSERT([(NSMutableString *)theString isMutableString]);
+    
     CFStringInlineBuffer inlineBuffer;
     CFIndex length = CFStringGetLength(theString);
     CFIndex cnt = 0;
@@ -581,13 +610,13 @@ CFArrayRef BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAlloc
     UniChar ch;
     
     // full length of string has to be large enough for the buffer
-    UniChar *buffer, stackBuffer[STACK_BUFFER_SIZE];
-    if(length >= STACK_BUFFER_SIZE) {
-        buffer = (UniChar *)CFAllocatorAllocate(allocator, length * sizeof(UniChar), 0);
-    } else {
-        buffer = stackBuffer;
-    }
-    
+    UniChar *buffer = NULL;
+    size_t bufSize = sizeof(UniChar) * length;
+    buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
+
+    Boolean isLarge = (buffer == NULL);
+    if(isLarge) buffer = (UniChar *)CFAllocatorAllocate(allocator, length * sizeof(UniChar), 0);
+
     NSCAssert1(buffer != NULL, @"Unable to allocate buffer for %@", string);
     CFIndex bufCnt = 0;
     CFStringRef component;
@@ -616,7 +645,7 @@ CFArrayRef BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAlloc
         CFRelease(component);
     }
     
-    if(buffer != stackBuffer) CFAllocatorDeallocate(allocator, buffer);
+    if(isLarge) CFAllocatorDeallocate(allocator, buffer);
     
     return array;
 }
@@ -629,16 +658,19 @@ CFHashCode BDCaseInsensitiveStringHash(const void *value)
     CFIndex len = CFStringGetLength(value);
     
     // use a generous length, in case the lowercase changes the number of characters
-    UniChar *buffer, stackBuffer[STACK_BUFFER_SIZE];
-    if(len + 10 >= STACK_BUFFER_SIZE) {
-        buffer = (UniChar *)CFAllocatorAllocate(allocator, (len + 10) * sizeof(UniChar), 0);
-    } else {
-        buffer = stackBuffer;
+    UniChar *buffer = NULL;
+    size_t bufSize = sizeof(UniChar) * (len + 10);
+    buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
+
+    Boolean shouldFree = FALSE;
+    if(buffer == NULL){
+        shouldFree = TRUE;
+        buffer = (UniChar *)CFAllocatorAllocate(allocator, (len + 10), 0);
     }
     CFStringGetCharacters(value, CFRangeMake(0, len), buffer);
     
     // If we create the string with external characters, CFStringGetCharactersPtr is guaranteed to succeed; since we're going to call CFStringGetCharacters anyway in fastHash if CFStringGetCharactsPtr fails, let's do it now when we lowercase the string
-    CFMutableStringRef mutableString = CFStringCreateMutableWithExternalCharactersNoCopy(allocator, buffer, len, len + 10, (buffer != stackBuffer ? allocator : kCFAllocatorNull));
+    CFMutableStringRef mutableString = CFStringCreateMutableWithExternalCharactersNoCopy(allocator, buffer, len, len + 10, shouldFree ? allocator : kCFAllocatorNull);
     CFStringLowercase(mutableString, NULL);
     uint32_t hash = __BDFastHash(mutableString);
     
@@ -672,21 +704,6 @@ Boolean BDStringFindCharacter(CFStringRef string, UniChar character, CFRange sea
     } while(++cnt < searchRange.length);
     
     return FALSE;
-}
-
-Boolean BDIsNewlineCharacter(UniChar c)
-{
-    // minor optimization: check for an ASCII character, since those are most common in TeX
-    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember((CFCharacterSetRef)[NSCharacterSet newlineCharacterSet], c) );
-}
-
-Boolean BDStringHasAccentedCharacters(CFStringRef string)
-{
-    CFMutableStringRef mutableString = CFStringCreateMutableCopy(CFGetAllocator(string), CFStringGetLength(string), string);
-    CFStringNormalize(mutableString, kCFStringNormalizationFormD);
-    Boolean success = CFStringFindCharacterFromSet(mutableString, CFCharacterSetGetPredefined(kCFCharacterSetNonBase), CFRangeMake(0, CFStringGetLength(mutableString)), 0, NULL);
-    CFRelease(mutableString);
-    return success;
 }
 
 #pragma mark Mutable Strings

@@ -5,7 +5,7 @@
 //  Created by Christiaan Hofman on 3/22/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -71,23 +71,9 @@
 		iconActionEnabled = YES;
 		alwaysUsesFirstItemAsSelected = NO;
 		refreshesMenu = NO;
-        
-        static NSImage *defaultArrowImage = nil;
-        if (defaultArrowImage == nil) {
-            defaultArrowImage = [[NSImage alloc] initWithSize:NSMakeSize(7.0, 5.0)];
-            [defaultArrowImage lockFocus];
-            NSBezierPath *path = [NSBezierPath bezierPath];
-            [path moveToPoint:NSMakePoint(0.5, 5.0)];
-            [path lineToPoint:NSMakePoint(6.5, 5.0)];
-            [path lineToPoint:NSMakePoint(3.5, 0.0)];
-            [path closePath];
-            [[NSColor colorWithDeviceWhite:0.0 alpha:0.75] setFill];
-            [path fill];
-            [defaultArrowImage unlockFocus];
-        }
-        
+
 		[self setIconImage: anImage];	
-		[self setArrowImage: defaultArrowImage];
+		[self setArrowImage: nil];
     }
     
     return self;
@@ -386,15 +372,23 @@
 	if ([buttonCell image] == nil || [self usesItemFromMenu]) {
 		// we need to redraw the image
 
-		NSImage *image = [self usesItemFromMenu] ? [[self selectedItem] image] : [self iconImage];
-				
+		NSImage *image;
+		
+		if ([self usesItemFromMenu] == NO) {
+			image = [self iconImage];
+		} else {
+			image = [[[[self selectedItem] image] copy] autorelease];
+		}
+		
+		[image setSize: [self iconSize]];
+		
 		NSSize drawSize = [self iconDrawSize];
 		NSRect iconRect = NSZeroRect;
 		NSRect iconDrawRect = NSZeroRect;
 		NSRect arrowRect = NSZeroRect;
 		NSRect arrowDrawRect = NSZeroRect;
  		
-		iconRect.size = [image size];
+		iconRect.size = [self iconSize];
 		iconDrawRect.size = drawSize;
 		if (arrowImage) {
 			arrowRect.size = arrowDrawRect.size = [arrowImage size];

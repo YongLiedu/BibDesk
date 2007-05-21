@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,34 +38,25 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchIndex, BDSKThreadSafeMutableArray;
-
-@protocol BDSKSearchIndexDelegate <NSObject>
-- (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
-- (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)index;
-@end
-
 // I think a union guarantees correct alignment; is that true for a struct as well?
 typedef struct _BDSKSearchIndexFlags
 {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
-    volatile int32_t isIndexing __attribute__ ((aligned (4)));  
-    volatile int32_t updateGranularity __attribute__ ((aligned (4)));
+    volatile int32_t isIndexing __attribute__ ((aligned (4)));    
 } BDSKSearchIndexFlags;
 
 @interface BDSKSearchIndex : NSObject {
     SKIndexRef index;
     id document;
-    NSMutableDictionary *titles;
     
-    id delegate;
     NSArray *initialObjectsToIndex;
     
-    BDSKThreadSafeMutableArray *notificationQueue;
+    NSMutableArray *notificationQueue;
     NSMachPort *notificationPort;
     pthread_t notificationThread;
     BDSKSearchIndexFlags flags;
-    double progressValue;
+        
+    NSLock *queueLock;
 }
 
 - (id)initWithDocument:(id)aDocument;
@@ -74,10 +65,5 @@ typedef struct _BDSKSearchIndexFlags
 - (SKIndexRef)index;
 - (void)cancel;
 - (BOOL)isIndexing;
-- (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject;
-- (void)setUpdateGranularity:(unsigned int)count;
-- (NSString *)titleForURL:(NSURL *)theURL;
-- (double)progressValue;
 
 @end
-

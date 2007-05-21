@@ -1,4 +1,4 @@
-// Copyright 2001-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,7 +14,7 @@
 #import "NSUserDefaults-OFExtensions.h"
 #import "OFNull.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OFPreference.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OFPreference.m 68739 2005-09-27 18:06:41Z toon $");
 
 //#define DEBUG_PREFERENCES
 
@@ -46,15 +46,22 @@ NSString *OFPreferenceDidChangeNotification = @"OFPreferenceDidChangeNotificatio
 
 static id _retainedObjectValue(OFPreference *self, id *_value, NSString *key)
 {
+    NSException *raisedException = nil;
     id result = nil;
-
-    @synchronized(self) {
+    
+    OFSimpleLock(&self->_lock);
+    NS_DURING {
         if (self->_generation != registrationGeneration)
             result = [unset retain];
         else
             result = [*_value retain];
-    }
+    } NS_HANDLER {
+        raisedException = localException;
+    } NS_ENDHANDLER;
+    OFSimpleUnlock(&self->_lock);
     
+    [raisedException raise];
+
     if (result == unset) {
         [result release];
         [self _refresh];
@@ -78,9 +85,12 @@ static inline id _objectValue(OFPreference *self, id *_value, NSString *key, NSS
     return result;
 }
 
-static void _setValue(id self, id *_value, NSString *key, id value)
+static void _setValue(id self, id *_value, OFSimpleLockType *lock, NSString *key, id value)
 {
-    @synchronized(self) {
+    NSException *raisedException = nil;
+    
+    OFSimpleLock(lock);
+    NS_DURING {
         if (value) {
             [value retain];
             [*_value release];
@@ -101,7 +111,12 @@ static void _setValue(id self, id *_value, NSString *key, id value)
             NSLog(@"OFPreference(0x%08x:%@) <- nil (is now %@)", self, key, *_value);
 #endif
         }
-    }
+    } NS_HANDLER {
+        raisedException = localException;
+    } NS_ENDHANDLER;
+    OFSimpleUnlock(lock);
+    
+    [raisedException raise];
     
     // Tell anyone who is interested that this default changed
     [preferenceNotificationCenter postNotificationName:OFPreferenceDidChangeNotification object:self];
@@ -112,7 +127,6 @@ static void _setValue(id self, id *_value, NSString *key, id value)
     OBINITIALIZE;
     
     standardUserDefaults = [[NSUserDefaults standardUserDefaults] retain];
-    [standardUserDefaults volatileDomainForName:NSRegistrationDomain]; // avoid a race condition
     preferencesByKey = [[NSMutableDictionary alloc] init];
     preferencesLock = [[NSLock alloc] init];
     unset = [[NSObject alloc] init];  // just getting a guaranteed-unique, retainable/releasable object
@@ -190,6 +204,7 @@ static void _setValue(id self, id *_value, NSString *key, id value)
 - (void)dealloc;
 {
     OBPRECONDITION(NO);
+    OFSimpleLockFree(&_lock);
     [_key release];
     [_value release];
     [_defaultValue release];
@@ -256,24 +271,23 @@ static void _setValue(id self, id *_value, NSString *key, id value)
     NSDictionary *registrationDictionary;
     id defaultValue;
 
-    @synchronized(self) {
-	if (_defaultValue != nil && _generation != registrationGeneration) {
-	    [_defaultValue release];
-	    _defaultValue = nil;
-	}
-	defaultValue = _defaultValue;
+    OFSimpleLock(&_lock);
+    if (_defaultValue != nil && _generation != registrationGeneration) {
+        [_defaultValue release];
+        _defaultValue = nil;
     }
-
+    defaultValue = _defaultValue;
+    OFSimpleUnlock(&_lock);
     if (defaultValue != nil)
         return _defaultValue;
 
     registrationDictionary = [standardUserDefaults volatileDomainForName:NSRegistrationDomain];
     defaultValue = [registrationDictionary objectForKey:_key];
 
-    @synchronized(self) {
-	if (_defaultValue == nil)
-	    _defaultValue = [defaultValue retain];
-    }
+    OFSimpleLock(&_lock);
+    if (_defaultValue == nil)
+        _defaultValue = [defaultValue retain];
+    OFSimpleUnlock(&_lock);
 
     return defaultValue;
 }
@@ -291,7 +305,7 @@ static void _setValue(id self, id *_value, NSString *key, id value)
 
 - (void) restoreDefaultValue;
 {
-    _setValue(self, &_value, _key, nil);
+    _setValue(self, &_value, &_lock, _key, nil);
 }
 
 - (id) objectValue;
@@ -403,58 +417,58 @@ static void _setValue(id self, id *_value, NSString *key, id value)
 
 - (void) setObjectValue: (id) value;
 {
-    _setValue(self, &_value, _key, value);
+    _setValue(self, &_value, &_lock, _key, value);
 }
 
 - (void) setStringValue: (NSString *) value;
 {
     OBPRECONDITION(!value || [value isKindOfClass: [NSString class]]);
-    _setValue(self, &_value, _key, value);
+    _setValue(self, &_value, &_lock, _key, value);
 }
 
 - (void) setArrayValue: (NSArray *) value;
 {
     OBPRECONDITION(!value || [value isKindOfClass: [NSArray class]]);
-    _setValue(self, &_value, _key, value);
+    _setValue(self, &_value, &_lock, _key, value);
 }
 
 - (void) setDictionaryValue: (NSDictionary *) value;
 {
     OBPRECONDITION(!value || [value isKindOfClass: [NSDictionary class]]);
-    _setValue(self, &_value, _key, value);
+    _setValue(self, &_value, &_lock, _key, value);
 }
 
 - (void) setDataValue: (NSData *) value;
 {
     OBPRECONDITION(!value || [value isKindOfClass: [NSData class]]);
-    _setValue(self, &_value, _key, value);
+    _setValue(self, &_value, &_lock, _key, value);
 }
 
 - (void) setIntegerValue: (int) value;
 {
     NSNumber *number = [[NSNumber alloc] initWithInt: value];
-    _setValue(self, &_value, _key, number);
+    _setValue(self, &_value, &_lock, _key, number);
     [number release];
 }
 
 - (void) setUnsignedIntegerValue: (int) value;
 {
     NSNumber *number = [[NSNumber alloc] initWithUnsignedInt: value];
-    _setValue(self, &_value, _key, number);
+    _setValue(self, &_value, &_lock, _key, number);
     [number release];
 }
 
 - (void) setFloatValue: (float) value;
 {
     NSNumber *number = [[NSNumber alloc] initWithFloat: value];
-    _setValue(self, &_value, _key, number);
+    _setValue(self, &_value, &_lock, _key, number);
     [number release];
 }
 
 - (void) setBoolValue: (BOOL) value;
 {
     NSNumber *number = [[NSNumber alloc] initWithBool: value];
-    _setValue(self, &_value, _key, number);
+    _setValue(self, &_value, &_lock, _key, number);
     [number release];
 }
 
@@ -473,6 +487,7 @@ static void _setValue(id self, id *_value, NSString *key, id value)
     OBPRECONDITION(key != nil);
 
     _key = [key copy];
+    OFSimpleLockInit(&_lock);
     _generation = 0;
     _value = [unset retain];
     
@@ -500,20 +515,20 @@ static void _setValue(id self, id *_value, NSString *key, id value)
 #ifdef DEBUG_PREFERENCES
     NSLog(@"OFPreference(0x%08x:%@) faulting in value %@ generation %u", self, _key, newValue, newGeneration);
 #endif
-
-    @synchronized(self) {
-	if (_value == unset) {
-	    [_value release];
-	    _value = newValue;
-	} else {
-	    [newValue release];
-	}
-	if (_generation != newGeneration) {
-	    [_defaultValue release];
-	    _defaultValue = nil;
-	    _generation = newGeneration;
-	}
+    
+    OFSimpleLock(&_lock);
+    if (_value == unset) {
+        [_value release];
+        _value = newValue;
+    } else {
+        [newValue release];
     }
+    if (_generation != newGeneration) {
+        [_defaultValue release];
+        _defaultValue = nil;
+        _generation = newGeneration;
+    }
+    OFSimpleUnlock(&_lock);
 }
 
 @end
@@ -700,11 +715,6 @@ static void _setValue(id self, id *_value, NSString *key, id value)
 - (void)autoSynchronize;
 {
     [standardUserDefaults autoSynchronize];
-}
-
-- (NSDictionary *)volatileDomainForName:(NSString *)name;
-{
-    return [[NSUserDefaults standardUserDefaults] volatileDomainForName:name];
 }
 
 @end

@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -9,10 +9,9 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/assertions.h>
 #import <OmniBase/rcsid.h>
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFHashTests.m 79087 2006-09-07 23:37:02Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/Tests/OFHashTests.m 68913 2005-10-03 19:36:19Z kc $");
 
 @interface OFHashTests : SenTestCase
 {
@@ -97,15 +96,10 @@ static NSData *tripletsAndSuffix(unsigned char triplet, unsigned int count, unsi
 
 }
 
+#if 0
 /* These next two vectors are 2^29 bytes (512MB) apiece; give them their own autorelease pools */
-/* The reason a 2^29-byte vector is significant is that SHA1 contains a 32-bit bit counter, which will roll over at 2^32 bits = 2^29 bytes */
 - (void)testGilloglyGrieu_Huge
 {
-    if (!getenv("RunSlowUnitTests")) {
-        NSLog(@"*** SKIPPING slow test [%@ %s]", [self class], _cmd);
-        return;
-    }
-    
     NSAutoreleasePool *pool;
 
     pool = [[NSAutoreleasePool alloc] init];
@@ -122,6 +116,7 @@ static NSData *tripletsAndSuffix(unsigned char triplet, unsigned int count, unsi
     [pool release];
 
 }
+#endif
 
 NSString *md5string(NSString *input)
 {

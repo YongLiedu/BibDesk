@@ -2,7 +2,7 @@
 // BibDesk
 // Created by Michael McCracken, 2002
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,36 +35,26 @@
  */
 
 #import "BibPref_TeX.h"
-#import "BibAppController.h"
-#import "BDSKStringEncodingManager.h"
 #import "BDSKPreviewer.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
 #import "BDSKShellCommandFormatter.h"
-#import <OmniAppKit/OAPreferenceClientRecord.h>
 
-#define BDSK_TEX_DOWNLOAD_URL @"http://tug.org/mactex/"
+#define BDSK_TEX_DOWNLOAD_URL @"http://ii2.sourceforge.net/tex-index.html"
 
-static NSSet *standardStyles = nil;
 
 @implementation BibPref_TeX
 
-+ (void)initialize{
-    
-    // contents of /usr/local/gwTeX/texmf.texlive/bibtex/bst/base
-    if (nil == standardStyles)
-        standardStyles = [[NSSet alloc] initWithObjects:@"abbrv", @"acm", @"alpha", @"apalike", @"ieeetr", @"plain", @"siam", @"unsrt", nil];
-}
-
 - (void)awakeFromNib{
     [super awakeFromNib];
+    encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
+    [encodingPopUpButton removeAllItems];
+    [encodingPopUpButton addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
     
-    BDSKShellCommandFormatter *formatter = [[BDSKShellCommandFormatter alloc] init];
-    [texBinaryPathField setFormatter:formatter];
+    [texBinaryPathField setFormatter:[[[BDSKShellCommandFormatter alloc] init] autorelease]];
     [texBinaryPathField setDelegate:self];
-    [bibtexBinaryPathField setFormatter:formatter];
+    [bibtexBinaryPathField setFormatter:[[[BDSKShellCommandFormatter alloc] init] autorelease]];
     [bibtexBinaryPathField setDelegate:self];
-    [formatter release];
 }
 
 - (void)updateUI{
@@ -73,7 +63,7 @@ static NSSet *standardStyles = nil;
     [texBinaryPathField setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
     [bibtexBinaryPathField setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
     [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
-    [encodingPopUpButton setEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]];
+    [encodingPopUpButton selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]]];
     [bibTeXStyleField setEnabled:[defaults boolForKey:BDSKUsesTeXKey]];
     
     if ([BDSKShellCommandFormatter isValidExecutableCommand:[defaults objectForKey:BDSKTeXBinPathKey]])
@@ -90,12 +80,12 @@ static NSSet *standardStyles = nil;
 
 -(IBAction)changeTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (IBAction)changeBibTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
@@ -107,12 +97,11 @@ static NSSet *standardStyles = nil;
     }else{
         [defaults setBool:YES forKey:BDSKUsesTeXKey];
     }
-    [defaults autoSynchronize];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error
 {
-	NSBeginAlertSheet(NSLocalizedString(@"Invalid Path",@"Message in alert dialog when binary path for TeX preview is invalid"), 
+	NSBeginAlertSheet(NSLocalizedString(@"Invalid Path",@"Invalid binary path for TeX preview"), 
     nil, nil, nil, 
     [[self controlBox] window], 
     self, 
@@ -125,59 +114,8 @@ static NSSet *standardStyles = nil;
     return YES;
 }
 
-- (void)styleAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSString *newStyle = [(id)contextInfo autorelease];
-    if (NSAlertDefaultReturn == returnCode) {
-        [defaults setObject:newStyle forKey:BDSKBTStyleKey];
-    } else if (NSAlertAlternateReturn == returnCode) {
-        [bibTeXStyleField setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
-    } else {
-        [self openTeXPreviewFile:self];
-    }
-    [defaults autoSynchronize];
-}
-
-- (BOOL)alertShowHelp:(NSAlert *)alert;
-{
-    OAPreferenceController *pc = [OAPreferenceController sharedPreferenceController];
-    NSEnumerator *recordsEnum = [[pc clientRecords] objectEnumerator];
-    
-    // this is crazy, but there's no way to get a client record from a client, since we don't know the identifier or short title
-    OAPreferenceClientRecord *record;
-    while(record = [recordsEnum nextObject]) {
-        if ([[record title] isEqualToString:title])
-            break;
-    }
-    if (record) {
-        NSString *helpAnchor = [record helpURL];
-        NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-        [[NSHelpManager sharedHelpManager] openHelpAnchor:helpAnchor inBook:helpBookName];
-    }
-    return YES;
-}
-
 - (IBAction)changeStyle:(id)sender{
-    NSString *newStyle = [sender stringValue];
-    NSString *oldStyle = [defaults stringForKey:BDSKBTStyleKey];
-    if ([newStyle isEqualToString:oldStyle] == NO) {
-        if ([standardStyles containsObject:newStyle]){
-            [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
-            [defaults autoSynchronize];
-        } else {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"This is a not a standard BibTeX style", @"Message in alert dialog")
-                                             defaultButton:NSLocalizedString(@"Use Anyway", @"Button title")
-                                           alternateButton:NSLocalizedString(@"Use Previous", @"Button title")
-                                               otherButton:NSLocalizedString(@"Edit TeX template", @"Button title")
-                                 informativeTextWithFormat:NSLocalizedString(@"This style is not one of the standard 8 BibTeX styles.  As such, it may require editing the TeX template manually to add necessary \\usepackage commands.", @"Informative text in alert dialog")];
-            // for the help delegate method
-            [alert setShowsHelp:YES];
-            [alert setDelegate:self];
-            [alert beginSheetModalForWindow:[[self controlBox] window]
-                              modalDelegate:self
-                             didEndSelector:@selector(styleAlertDidEnd:returnCode:contextInfo:)
-                                contextInfo:[newStyle copy]];
-        }
-    }
+    [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
 }
 
 - (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode path:(void *)path{
@@ -200,7 +138,7 @@ static NSSet *standardStyles = nil;
     url = [NSURL fileURLWithPath:path];
     
     if([[NSWorkspace sharedWorkspace] openURL:url] == NO && [[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:url] withAppBundleIdentifier:@"com.apple.textedit" options:0 additionalEventParamDescriptor:nil launchIdentifiers:NULL] == NO)
-        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file"), NSLocalizedString(@"Reveal", @"Button title"), NSLocalizedString(@"Cancel", @"Button title"), nil, [[BDSKPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @"Informative text in alert dialog"));
+        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[BDSKPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @""));
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -217,11 +155,11 @@ static NSSet *standardStyles = nil;
 }
 
 - (IBAction)resetTeXPreviewFile:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset TeX template to its original value?", @"Message in alert dialog when resetting preview TeX template file") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
-								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset TeX template to its original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
 									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.", @"Informative text in alert dialog")];
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will revert the TeX template file to its original content.",@"")];
 	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) 
@@ -233,8 +171,8 @@ static NSSet *standardStyles = nil;
 }
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{
-    [defaults setInteger:[sender encoding] forKey:BDSKTeXPreviewFileEncodingKey];        
-    [defaults autoSynchronize];
+    NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
+    [defaults setInteger:encoding forKey:BDSKTeXPreviewFileEncodingKey];        
 }
 
 

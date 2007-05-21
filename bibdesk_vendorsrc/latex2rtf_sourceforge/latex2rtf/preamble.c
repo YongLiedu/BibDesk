@@ -1,3 +1,4 @@
+
 /* preamble.c - Handles LaTeX commands that should only occur in the preamble.
 
 Copyright (C) 2001-2002 The Free Software Foundation
@@ -24,14 +25,11 @@ Authors:
 
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "main.h"
 #include "convert.h"
 #include "util.h"
 #include "preamble.h"
-#include "fonts.h"
+#include "l2r_fonts.h"
 #include "cfg.h"
 #include "encode.h"
 #include "parser.h"
@@ -43,8 +41,6 @@ Authors:
 #include "xref.h"
 #include "direct.h"
 #include "style.h"
-
-extern char *Version;  /*storage and definition in version.h */
 
 static bool g_preambleTwoside = FALSE;
 static bool g_preambleTwocolumn = FALSE;
@@ -87,10 +83,6 @@ void setPackageBabel(char *option)
         RussianMode = TRUE;
         PushEnvironment(RUSSIAN_MODE);
         ReadLanguage("russian");
-    }
-
-    if (strcmp(option, "spanish") == 0) {
-        ReadLanguage("spanish");
     }
 
     if (strcmp(option, "czech") == 0) {
@@ -140,10 +132,7 @@ void setPackageInputenc(char *option)
       strcmp(option, "1251") == 0 ||
       strcmp(option, "1252") == 0 ||
       strcmp(option, "maccyr") == 0 ||
-      strcmp(option, "macukr") == 0 || 
-      strcmp(option, "koi8-r") == 0 || 
-      strcmp(option, "koi8-u") == 0 ||
-      strcmp(option, "utf8") == 0) {
+      strcmp(option, "macukr") == 0 || strcmp(option, "koi8-r") == 0 || strcmp(option, "koi8-u") == 0) {
 
         strcpy(g_charset_encoding_name, option);
         g_fcharset_number = 0;  /* ANSI in RTF Specification */
@@ -204,9 +193,9 @@ static void setPackageFont(char *font)
     else if (strstr(font, "book"))
         fnumber = RtfFontNumber("Bookman");
 
-/*    InitializeDocumentFont(fnumber, -1, -1, -1); */
+    InitializeDocumentFont(fnumber, -1, -1, -1);
     if (fnumber == -1)
-        diagnostics(1, "Font Package <%s> not supported.", font);
+        fprintf(stderr, "\n Font Package <%s> not supported yet", font);
 }
 
 static void setThree(char *s, int ten, int eleven, int twelve)
@@ -416,15 +405,11 @@ static void setDocumentOptions(char *optionlist)
         else if (strcmp(option, "isolatin1") == 0)
             setPackageInputenc("latin1");
         else if (strcmp(option, "hyperlatex") == 0)
-            PushEnvironment(HYPERLATEX_MODE);
+            PushEnvironment(HYPERLATEX);
         else if (strcmp(option, "apalike") == 0)
             g_document_bibstyle = BIBSTYLE_APALIKE;
         else if (strcmp(option, "apanat1b") == 0)
             PushEnvironment(APACITE_MODE);
-        else if (strcmp(option, "endfloat") == 0)
-            g_endfloat_figures = TRUE;
-        else if (strcmp(option, "bibentry") == 0)
-            /* do nothing */;
         else if (strcmp(option, "harvard") == 0) {
             PushEnvironment(HARVARD_MODE);
             g_document_bibstyle = BIBSTYLE_HARVARD;
@@ -506,22 +491,29 @@ void CmdDocumentStyle(int code)
 /******************************************************************************
  purpose: handle \usepackage[option]{packagename}
 ******************************************************************************/
-static void CmdUseOnepackage(char* package, char *options)
+void CmdUsepackage(int code)
 {
+    char *package, *package_with_spaces;
+    char *options, *options_with_spaces;
+
+    options = NULL;
+    options_with_spaces = getBracketParam();
+    package_with_spaces = getBraceParam();
+    package = strdup_noblanks(package_with_spaces);
+    free(package_with_spaces);
+
+    if (options_with_spaces) {
+        options = strdup_noblanks(options_with_spaces);
+        free(options_with_spaces);
+        diagnostics(4, "Package {%s} with options [%s]", package, options);
+    } else
+        diagnostics(4, "Package {%s} with no options", package);
+
     if (strcmp(package, "inputenc") == 0 && options)
         setPackageInputenc(options);
 
-    else if (strcmp(package, "graphics") == 0)
-        g_graphics_package = GRAPHICS_GRAPHICS;
-
-    else if (strcmp(package, "graphicx") == 0)
-        g_graphics_package = GRAPHICS_GRAPHICX;
-
     else if (strcmp(package, "isolatin1") == 0)
         setPackageInputenc("latin1");
-
-    else if (strcmp(package, "spanish") == 0)
-            setPackageBabel(package);
 
     else if (strcmp(package, "babel") == 0) {
         if (options)
@@ -540,79 +532,18 @@ static void CmdUseOnepackage(char* package, char *options)
       strstr(package, "avant") || strstr(package, "newcen") || strstr(package, "helvet"))
         setPackageFont(package);
 
-    else if (strcmp(package, "endfloat") == 0) {
-        g_endfloat_figures = TRUE;
-        g_endfloat_tables  = TRUE;
-        if (options && strstr(options,"nomarkers")) g_endfloat_markers = FALSE;
-
-    } else if (strcmp(package, "cite") == 0) {
-       set_sorted_citations();
-       set_compressed_citations();
-
-    } else if (strcmp(package, "natbib") == 0) {
-        if (options && strstr(options, ""))
+    else if (strcmp(package, "natbib") == 0) {
+        if (strstr(options, ""))
             set_longnamesfirst();
-        if (options && strstr(options, "super"))
-            set_bibpunct_style_super();
-        if (options && strstr(options, "comma"))
-            set_bibpunct_style_separator(",");
-        if (options && strstr(options, "colon"))
-            set_bibpunct_style_separator(":");
-        if (options && strstr(options, "round"))
-            set_bibpunct_style_paren("(",")");
-        if (options && strstr(options, "square"))
-            set_bibpunct_style_paren("[","]");
-        if (options && strstr(options, "curly"))
-            set_bibpunct_style_paren("{","}");
-        if (options && strstr(options, "angle"))
-            set_bibpunct_style_paren("<",">");
-        if (options && strstr(options, "sort"))
-            set_sorted_citations();
-        if (options && strstr(options, "compress"))
-        	set_compressed_citations();
-
         PushEnvironment(NATBIB_MODE);
         g_document_bibstyle = BIBSTYLE_NATBIB;
     } else
         setDocumentOptions(package);
 
-}
-
-/******************************************************************************
- purpose: handle \usepackage[option]{pack1,pack2,pack3}
-******************************************************************************/
-void CmdUsepackage(int code)
-{
-    char *package, *package_with_spaces;
-    char *options, *options_with_spaces;
-	char *p,*comma;
-	
-    options = NULL;
-    options_with_spaces = getBracketParam();
-    package_with_spaces = getBraceParam();
-    package = strdup_noblanks(package_with_spaces);
-    free(package_with_spaces);
-
-    if (options_with_spaces) {
-        options = strdup_noblanks(options_with_spaces);
-        free(options_with_spaces);
-        diagnostics(2, "Package {%s} with options [%s]", package, options);
-    } else
-        diagnostics(2, "Package {%s} with no options", package);
-        
-    /* process package names one at a time */
-    p = package;
-    do {
-    	comma = strchr(p,',');
-    	if (comma) *comma = '\0';	/* replace ',' by '\0' */
-    	CmdUseOnepackage(p,options);
-    	if (comma) p = comma+1;
-    } while (comma != NULL);
-    
-    if (options) free(options);
+    if (options)
+        free(options);
     free(package);
 }
-
 
 void CmdTitle(int code)
 
@@ -642,36 +573,11 @@ void CmdTitle(int code)
     }
 }
 
-void CmdTableOfContents(int code)
-{
-	CmdStartParagraph(TITLE_PAR);
-	fprintRTF("{");
-	InsertStyle("contents_no_style");
-	fprintRTF(" ");
-	ConvertBabelName("CONTENTSNAME");
-	CmdEndParagraph(0);
-	fprintRTF("}");
-	CmdVspace(VSPACE_SMALL_SKIP);
-	
-	g_tableofcontents = TRUE;
-	fprintRTF("{\\field{\\*\\fldinst TOC \\\\o \"1-3\" }{\\fldrslt }}\n");  
-	CmdNewPage(NewPage);
-}
-
-/******************************************************************************
-  purpose: Handle \and in \author{A \and B}
- ******************************************************************************/
-void CmdAnd(int code)
-{
-	CmdEndParagraph(0);
-	CmdStartParagraph(TITLE_PAR);
-}
-
+void CmdMakeTitle(int code)
 
 /******************************************************************************
   purpose: Creates a title page based on saved values for author, title, and date
  ******************************************************************************/
-void CmdMakeTitle(int code)
 {
     char title_begin[10];
     char author_begin[10];
@@ -688,12 +594,12 @@ void CmdMakeTitle(int code)
         ConvertString(g_preambleTitle);
     fprintRTF("}");
 
-    fprintRTF("\n\\par\\pard\\qc {%s ", author_begin);
+    fprintRTF("\n\\par\\qc {%s ", author_begin);
     if (g_preambleAuthor != NULL && strcmp(g_preambleAuthor, "") != 0)
         ConvertString(g_preambleAuthor);
     fprintRTF("}");
 
-    fprintRTF("\n\\par\\pard\\qc {%s ", date_begin);
+    fprintRTF("\n\\par\\qc {%s ", date_begin);
     if (g_preambleDate != NULL && strcmp(g_preambleDate, "") != 0)
         ConvertString(g_preambleDate);
     fprintRTF("}");
@@ -761,7 +667,7 @@ void CmdPagestyle( /* @unused@ */ int code)
 
 Produces latex-like headers and footers.
 Needs to be terminated for:
-- headings chapter, section information and page numbering
+- headings chapter, section informations and page numbering
 - myheadings page nunmbering, combined with markboth, markright.
  ******************************************************************************/
 {
@@ -886,7 +792,7 @@ static void WriteFontHeader(void)
     fprintRTF("{\\fonttbl");
 
     config_handle = CfgStartIterate(FONT_A);
-    i = 0;
+    i = 3;
     while ((config_handle = CfgNext(FONT_A, config_handle)) != NULL) {
 
         font_type = (char *) (*config_handle)->TexCommand;
@@ -969,33 +875,33 @@ static void WritePageSize(void)
   \footery<N>     The footer is <N> twips from the bottom of the page (the default is 720).
 ****************************************************************************/
 {
-    int n;
-    int family = DefaultFontFamily();
+	int n;
+	int family = DefaultFontFamily();
 
-    fprintRTF("\\paperw%d", getLength("pagewidth"));
-    fprintRTF("\\paperh%d", getLength("pageheight"));
-    if (g_preambleTwoside)
-        fprintRTF("\\facingp");
-    if (g_preambleLandscape)
-        fprintRTF("\\landscape");
-    if (g_preambleTwocolumn)
-        fprintRTF("\\cols2\\colsx709"); /* two columns -- space between columns 709 */
+	fprintRTF("\\paperw%d", getLength("pagewidth"));
+	fprintRTF("\\paperh%d", getLength("pageheight"));
+	if (g_preambleTwoside)
+		fprintRTF("\\facingp");
+	if (g_preambleLandscape)
+		fprintRTF("\\landscape");
+	if (g_preambleTwocolumn)
+		fprintRTF("\\cols2\\colsx709");	 /* two columns -- space between columns 709 */
 
-    n = getLength("hoffset") + 72 * 20 + getLength("oddsidemargin");
-    fprintRTF("\\margl%d", n);
-    diagnostics(4, "Writepagesize left margin   =%d pt", n / 20);
-    n = getLength("pagewidth") - (n + getLength("textwidth"));
-    fprintRTF("\\margr%d", n);
-    diagnostics(4, "Writepagesize right margin  =%d pt", n / 20);
-    n = getLength("voffset") + 72 * 20 + getLength("topmargin") + getLength("headheight") + getLength("headsep");
-    fprintRTF("\\margt%d", n);
-    diagnostics(4, "Writepagesize top    margin =%d pt", n / 20);
-    n = getLength("pageheight") - (n + getLength("textheight") + getLength("footskip"));
-    fprintRTF("\\margb%d", n);
-    diagnostics(4, "Writepagesize bottom margin =%d pt", n / 20);
-
-    fprintRTF("\\pgnstart%d", getCounter("page"));
-    fprintRTF("\\widowctrl\\qj\\ftnbj\\f%d\\aftnnar\n", family);
+	n = getLength("hoffset") + 72*20 + getLength("oddsidemargin");
+	fprintRTF("\\margl%d", n);
+	diagnostics(4, "Writepagesize left margin   =%d pt", n/20);
+	n = getLength("pagewidth") - (n + getLength("textwidth"));
+	fprintRTF("\\margr%d", n);
+	diagnostics(4, "Writepagesize right margin  =%d pt", n/20);
+	n = getLength("voffset") + 72*20 + getLength("topmargin") + getLength("headheight")+getLength("headsep");
+	fprintRTF("\\margt%d", n);
+	diagnostics(4, "Writepagesize top    margin =%d pt", n/20);
+	n = getLength("pageheight") - (n + getLength("textheight") + getLength("footskip"));
+	fprintRTF("\\margb%d", n);
+	diagnostics(4, "Writepagesize bottom margin =%d pt", n/20);
+	
+	fprintRTF("\\pgnstart%d", getCounter("page"));
+	fprintRTF("\\widowctrl\\qj\\ftnbj\\f%d\n", family);
 }
 
 static void WriteHeadFoot(void)
@@ -1012,8 +918,6 @@ static void WriteHeadFoot(void)
 
 /*	fprintRTF("\\ftnbj\\sectd\\linex0\\endnhere\\qj\n"); */
 
-    int family = DefaultFontFamily();
-	int size   = DefaultFontSize(); 
     int textwidth = getLength("textwidth");
 
     if (g_preambleLFOOT || g_preambleCFOOT || g_preambleRFOOT) {
@@ -1032,8 +936,6 @@ static void WriteHeadFoot(void)
         }
 
         fprintRTF("\\par}\n");
-    } else {
-		fprintRTF("{\\footer\\pard\\plain\\f%d\\fs%d\\qc\\chpgn\\par}\n",family,size);
     }
 
     if (g_preambleLHEAD || g_preambleCHEAD || g_preambleRHEAD) {
@@ -1136,18 +1038,9 @@ static void WriteInfo(void)
   \version<N>     The version number of the document
   \doccomm        Comments displayed in Word's Summary Info dialog
   
-{\info {\title This is a page} {\doccomm Converted using}}
+{\info {\title This is a page} {\author \'ca}}
  ***************************************************************************/
 {
-/*	struct stat sb;*/
-	time_t tm;
-
-	fprintRTF("{\\info\n{\\title Original file was %s}\n",CurrentFileName());
-	tm = time(NULL);
-	fprintRTF("{\\doccomm Created using latex2rtf %s on %s}\n", Version, ctime(&tm));
-/*	if (fstat(CurrentFileDescriptor(),&sb)) {} */
-/*	fprintRTF("{\\creatim %s}\n", ctime(&tm)); */
-	fprintRTF("}\n");
 }
 
 void WriteRtfHeader(void)
@@ -1165,12 +1058,11 @@ purpose: writes header info for the RTF file
     diagnostics(4, "Writing header for RTF file");
 
 /*	fprintRTF("{\\rtf1\\ansi\\fs%d\\deff%d\\deflang1024\n", size, family); */
-    fprintRTF("{\\rtf1\\ansi\\uc1\\deff%d\\deflang1024\n", family);
+    fprintRTF("{\\rtf1\\ansi\\deff%d\\deflang1024\n", family);
     WriteFontHeader();
     WriteColorTable();
     WriteStyleHeader();
     WriteInfo();
     WriteHeadFoot();
     WritePageSize();
-    fprintRTF("\\uc0\n");
 }

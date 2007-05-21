@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Thu Jul 08 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,6 @@
 
 #import "BibDocument.h"
 
-@class BDSKMacro;
-
 @interface BibDocument (Scripting) 
 
 - (BibItem *)valueInPublicationsAtIndex:(unsigned int)index;
@@ -47,17 +45,11 @@
 - (void)insertInPublications:(BibItem *)pub;
 - (void)removeFromPublicationsAtIndex:(unsigned int)index;
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
-- (NSArray *)macros;
-
-- (BibAuthor *)valueInAuthorsWithName:(NSString *)name;
-- (BibAuthor *)valueInAuthorsAtIndex:(unsigned int)index;
-
 - (NSArray*) displayedPublications;
 
 - (NSArray*) selection;
 - (void) setSelection: (NSArray*) newSelection;
 
-- (NSTextStorage*) textStorageForPublications:(NSArray *)pubs;
+- (NSTextStorage*) textStorageForBibString:(NSString*) bibString;
 
 @end

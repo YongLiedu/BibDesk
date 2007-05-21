@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 27/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,18 +37,20 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKContainerView.h"
 #import "BDSKEdgeView.h"
 
 
-@interface BDSKCollapsibleView : BDSKContainerView {
+@interface BDSKCollapsibleView : NSView {
 	NSSize minSize;
 	int collapseEdges;
+	id contentView;
 }
 
 - (NSSize)minSize;
 - (void)setMinSize:(NSSize)size;
 - (int)collapseEdges;
 - (void)setCollapseEdges:(int)mask;
+- (id)contentView;
+- (NSRect)contentRect;
 
 @end

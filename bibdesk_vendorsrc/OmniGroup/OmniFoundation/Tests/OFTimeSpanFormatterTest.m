@@ -1,4 +1,4 @@
-// Copyright 2005-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2005 Omni Development, Inc. All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -9,10 +9,9 @@
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFTimeSpanFormatterTest.m 79087 2006-09-07 23:37:02Z kc $");
+RCS_ID("$Header$");
 
 @interface OFTimeSpanFormatterTest : SenTestCase
 {
@@ -25,97 +24,33 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 - (void)testDefaultFormatter;
 {
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y 1mo 1w 1d 1h";
+    NSNumber *timeSpan;
+    NSString *timeSpanString = @"1y 1m 1w 1d 1h";
     NSString *expectedTimeSpanString = @"53w 1d 1h";
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"-1y -1mo -1w -1d -1h";
-    expectedTimeSpanString = @"-53w -1d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"-1y -1mo -1w -1d 1h";
-    expectedTimeSpanString = @"-53w -1d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"-1y1mo1w1d1h";
-    expectedTimeSpanString = @"-53w -1d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"-1y1mo1w1d1h";
-    expectedTimeSpanString = @"-53w -1d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"1w - 1d 1h";
-    expectedTimeSpanString = @"3d 7h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"1w-1d1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"1w-1d1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"1w-1d+1h";
-    expectedTimeSpanString = @"4d 1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    [formatter release];
-}
-
-- (void)testStandardCalendarTimeFormatter;
-{
-    OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
-    [formatter setStandardCalendarTime];
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y";
-    NSString *expectedTimeSpanString = @"52w 1d";
-    
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"-1y";
-    expectedTimeSpanString = @"-52w -1d";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
 
 - (void)testAllFormats;
 {
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y 1mo 1w 1d 1h";
-    NSString *expectedTimeSpanString = @"1y 1mo 1w 1d 1h";
+    NSNumber *timeSpan;
+    NSString *timeSpanString = @"1y 1m 1w 1d 1h";
+    NSString *expectedTimeSpanString = @"1y 1m 1w 1d 1h";
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
 
     [formatter setDisplayMonths:YES];
     [formatter setDisplayYears:YES];
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"-1y -1mo -1w -1d -1h";
-    expectedTimeSpanString = @"-1y -1mo -1w -1d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
 
 - (void)testNoFormats;
 {
-    NSDecimalNumber *timeSpan;
+    NSNumber *timeSpan;
     NSString *timeSpanString = @"1y 1m 1w 1d 1h";
     NSString *expectedTimeSpanString = @"";
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
@@ -127,22 +62,16 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [formatter setDisplayYears:NO];
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1y -1m -1w -1d -1h";
-    expectedTimeSpanString = @"";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
 
 
 - (void)testNoYear;
 {
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y 1mo 1w 1d 1h";
-    NSString *expectedTimeSpanString = @"13mo 1w 1d 1h";
+    NSNumber *timeSpan;
+    NSString *timeSpanString = @"1y 1m 1w 1d 1h";
+    NSString *expectedTimeSpanString = @"13m 1w 1d 1h";
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
     
     [formatter setDisplayHours:YES];
@@ -152,20 +81,14 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [formatter setDisplayYears:NO];
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    timeSpanString = @"-1y -1mo -1w -1d -1h";
-    expectedTimeSpanString = @"-13mo -1w -1d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
 
 - (void)testNoMonth;
 {
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y 1mo 1w 1d 1h";
+    NSNumber *timeSpan;
+    NSString *timeSpanString = @"1y 1m 1w 1d 1h";
     NSString *expectedTimeSpanString = @"1y 5w 1d 1h";
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
     
@@ -176,21 +99,15 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [formatter setDisplayYears:YES];
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1y -1mo -1w -1d -1h";
-    expectedTimeSpanString = @"-1y -5w -1d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
 
 - (void)testNoWeeks;
 {
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y 1mo 1w 1d 1h";
-    NSString *expectedTimeSpanString = @"1y 1mo 6d 1h";
+    NSNumber *timeSpan;
+    NSString *timeSpanString = @"1y 1m 1w 1d 1h";
+    NSString *expectedTimeSpanString = @"1y 1m 6d 1h";
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
     
     [formatter setDisplayHours:YES];
@@ -200,21 +117,15 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [formatter setDisplayYears:YES];
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1y -1mo -1w -1d -1h";
-    expectedTimeSpanString = @"-1y -1mo -6d -1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
 
 - (void)testNoDays;
 {
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y 1mo 1w 1d 1h";
-    NSString *expectedTimeSpanString = @"1y 1mo 1w 9h";
+    NSNumber *timeSpan;
+    NSString *timeSpanString = @"1y 1m 1w 1d 1h";
+    NSString *expectedTimeSpanString = @"1y 1m 1w 9h";
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
     
     [formatter setDisplayHours:YES];
@@ -224,21 +135,15 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [formatter setDisplayYears:YES];
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1y -1mo -1w -1d -1h";
-    expectedTimeSpanString = @"-1y -1mo -1w -9h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
 
 - (void)testNoHours;
 {
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1y 1mo 1w 1d 1h";
-    NSString *expectedTimeSpanString = @"1y 1mo 1w 1.125d";
+    NSNumber *timeSpan;
+    NSString *timeSpanString = @"1y 1m 1w 1d 1h";
+    NSString *expectedTimeSpanString = @"1y 1m 1w 1d";
     OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
     
     [formatter setDisplayHours:NO];
@@ -248,136 +153,9 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [formatter setDisplayYears:YES];
     
     should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1y -1mo -1w -1d -1h";
-    expectedTimeSpanString = @"-1y -1mo -1w -1.125d";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
+    should ([expectedTimeSpanString isEqualToString:[formatter stringForObjectValue:timeSpan]]);
     [formatter release];
 }
-
-- (void)testDefaultEntryHours;
-{
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1";
-    NSString *expectedTimeSpanString = @"1h";
-    OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
-    
-    [formatter setDisplayHours:YES];
-    [formatter setDisplayDays:YES];
-    [formatter setDisplayWeeks:YES];
-    [formatter setDisplayMonths:YES];
-    [formatter setDisplayYears:YES];
-    
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1";
-    expectedTimeSpanString = @"-1h";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    [formatter release];
-}
-
-- (void)testDefaultEntryDays;
-{
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1";
-    NSString *expectedTimeSpanString = @"1d";
-    OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
-    
-    [formatter setDisplayHours:NO];
-    [formatter setDisplayDays:YES];
-    [formatter setDisplayWeeks:YES];
-    [formatter setDisplayMonths:YES];
-    [formatter setDisplayYears:YES];
-    
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1";
-    expectedTimeSpanString = @"-1d";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    [formatter release];
-}
-
-- (void)testDefaultEntryWeeks;
-{
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1";
-    NSString *expectedTimeSpanString = @"1w";
-    OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
-    
-    [formatter setDisplayHours:NO];
-    [formatter setDisplayDays:NO];
-    [formatter setDisplayWeeks:YES];
-    [formatter setDisplayMonths:YES];
-    [formatter setDisplayYears:YES];
-    
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1";
-    expectedTimeSpanString = @"-1w";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    [formatter release];
-}
-
-- (void)testDefaultEntryMonths;
-{
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1";
-    NSString *expectedTimeSpanString = @"1mo";
-    OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
-    
-    [formatter setDisplayHours:NO];
-    [formatter setDisplayDays:NO];
-    [formatter setDisplayWeeks:NO];
-    [formatter setDisplayMonths:YES];
-    [formatter setDisplayYears:YES];
-    
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1";
-    expectedTimeSpanString = @"-1mo";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    [formatter release];
-}
-
-- (void)testDefaultEntryYears;
-{
-    NSDecimalNumber *timeSpan;
-    NSString *timeSpanString = @"1";
-    NSString *expectedTimeSpanString = @"1y";
-    OFTimeSpanFormatter *formatter = [[OFTimeSpanFormatter alloc] init];
-    
-    [formatter setDisplayHours:NO];
-    [formatter setDisplayDays:NO];
-    [formatter setDisplayWeeks:NO];
-    [formatter setDisplayMonths:NO];
-    [formatter setDisplayYears:YES];
-    
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-
-    timeSpanString = @"-1";
-    expectedTimeSpanString = @"-1y";
-    should ([formatter getObjectValue:&timeSpan forString:timeSpanString errorDescription:nil]);
-    shouldBeEqual (expectedTimeSpanString, [formatter stringForObjectValue:timeSpan]);
-    
-    [formatter release];
-}
-
 
 @end
 

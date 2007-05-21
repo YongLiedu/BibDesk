@@ -5,15 +5,12 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAToolbar.h 71191 2005-12-15 22:25:26Z bungi $
+// $Header$
 
 #import <AppKit/NSToolbar.h>
 
 @interface OAToolbar : NSToolbar
 {
-    BOOL _isUpdatingVisible;
-    BOOL _updatingVisible;
-
     BOOL                 _isUpdatingDisplayMode;
     NSToolbarDisplayMode _updatingDisplayMode;
     
@@ -23,13 +20,10 @@
 
 - (NSToolbarDisplayMode)updatingDisplayMode;
 - (NSToolbarSizeMode)updatingSizeMode;
-- (BOOL)updatingVisible;
 
 @end
 
 @interface NSObject (OAToolbarDelegate)
-- (void)toolbar:(OAToolbar *)aToolbar willSetVisible:(BOOL)visible;
-- (void)toolbar:(OAToolbar *)aToolbar didSetVisible:(BOOL)visible;
 - (void)toolbar:(OAToolbar *)aToolbar willSetDisplayMode:(NSToolbarDisplayMode)displayMode;
 - (void)toolbar:(OAToolbar *)aToolbar didSetDisplayMode:(NSToolbarDisplayMode)displayMode;
 - (void)toolbar:(OAToolbar *)aToolbar willSetSizeMode:(NSToolbarSizeMode)sizeMode;

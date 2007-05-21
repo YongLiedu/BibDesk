@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/09/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     }
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)index;
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)index;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     [item setSubmenu:submenu];
@@ -77,12 +77,12 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     return item;
 }
 
-- (NSMenuItem *)addItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu;
+- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu;
 {
     return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:[self numberOfItems]];
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(unsigned int)index;
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(unsigned int)index;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:submenuTitle];
@@ -94,12 +94,12 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     return item;
 }
 
-- (NSMenuItem *)addItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate;
+- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate;
 {
     return [self insertItemWithTitle:itemTitle submenuTitle:submenuTitle submenuDelegate:delegate atIndex:[self numberOfItems]];
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)index;
+- (id <NSMenuItem>)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)index;
 {
     if (theURL == nil) {
         // just return an empty item
@@ -111,11 +111,11 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSDictionary *representedObject;
     BDSKOpenWithMenuController *controller = [BDSKOpenWithMenuController sharedInstance];
     
-    submenu = [[[NSMenu allocWithZone:[self zone]] initWithTitle:@""] autorelease];
+    submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:@""];
     [submenu setDelegate:controller];
     
     // add the choose... item, the other items are inserted lazily by BDSKOpenWithMenuController
-    item = [submenu addItemWithTitle:[NSLocalizedString(@"Choose", @"Menu item title") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
+    item = [submenu addItemWithTitle:[NSLocalizedString(@"Choose", @"Choose") stringByAppendingEllipsis] action:@selector(openURLWithApplication:) keyEquivalent:@""];
     [item setTarget:controller];
     representedObject = [[NSDictionary alloc] initWithObjectsAndKeys:theURL, BDSKMenuTargetURL, nil];
     [item setRepresentedObject:representedObject];
@@ -124,7 +124,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:index];
 }
 
-- (NSMenuItem *)addItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL;
+- (id <NSMenuItem>)addItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL;
 {
     return [self insertItemWithTitle:itemTitle andSubmenuOfApplicationsForURL:theURL atIndex:[self numberOfItems]];
 }
@@ -153,11 +153,11 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     NSURL *applicationURL;
     
     while(applicationURL = [appEnum nextObject]){
-        menuTitle = [[applicationURL lastPathComponent] stringByDeletingPathExtension];
+        menuTitle = [applicationURL lastPathComponent];
         
         // mark the default app, if we have one
         if([defaultEditorURL isEqual:applicationURL])
-            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Menu item title, Need a single leading space")];
+            menuTitle = [menuTitle stringByAppendingString:NSLocalizedString(@" (Default)", @"Need a single leading space")];
         
         // BDSKOpenWithMenuController singleton implements openURLWithApplication:
         item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:menuTitle action:@selector(openURLWithApplication:) keyEquivalent:@""];        
@@ -166,7 +166,9 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
         [item setRepresentedObject:representedObject];
         
         // use NSWorkspace to get an image; using [NSImage imageForURL:] doesn't work for some reason
-        [item setImageAndSize:[workspace iconForFileURL:applicationURL]];
+        NSImage *image = [workspace iconForFileURL:applicationURL];
+        [image setSize:NSMakeSize(16,16)];
+        [item setImage:image];
         [representedObject release];
         if([defaultEditorURL isEqual:applicationURL]){
             [self insertItem:item atIndex:0];
@@ -216,7 +218,7 @@ static id sharedOpenWithController = nil;
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"")];
     
     int rv = [openPanel runModalForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
                                         file:nil 
@@ -263,26 +265,3 @@ static id sharedOpenWithController = nil;
 
 @end
 
-@implementation NSMenuItem (BDSKImageExtensions)
-
-- (void)setImageAndSize:(NSImage *)image;
-{
-    const NSSize dstSize = { 16.0, 16.0 };
-    NSSize srcSize = [image size];
-    if (NSEqualSizes(srcSize, dstSize)) {
-        [self setImage:image];
-    } else {
-        NSImage *newImage = [[NSImage alloc] initWithSize:dstSize];
-        NSGraphicsContext *ctxt = [NSGraphicsContext currentContext];
-        [newImage lockFocus];
-        [ctxt saveGraphicsState];
-        [ctxt setImageInterpolation:NSImageInterpolationHigh];
-        [image drawInRect:NSMakeRect(0, 0, 16.0, 16.0) fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeCopy fraction:1.0];
-        [ctxt restoreGraphicsState];
-        [newImage unlockFocus];
-        [self setImage:newImage];
-        [newImage release];
-    }
-}
-        
-@end

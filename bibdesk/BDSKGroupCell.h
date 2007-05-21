@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 26/10/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,24 @@ extern NSString *BDSKGroupCellCountKey;
 
 @interface BDSKGroupCell : NSTextFieldCell
 {
-    BOOL settingUpFieldEditor;
+    struct {
+        unsigned int drawsHighlight:1;
+        unsigned int imagePosition:3;
+        unsigned int settingUpFieldEditor:1;
+    } _oaFlags;
     NSMutableDictionary *countAttributes;
+    BDSKGroup *groupValue;
     NSMutableAttributedString *label;
     NSMutableAttributedString *countString;
 }
 
-- (NSRect)textRectForBounds:(NSRect)theRect;
-- (NSRect)iconRectForBounds:(NSRect)theRect;
+// API
+- (NSCellImagePosition)imagePosition;
+- (void)setImagePosition:(NSCellImagePosition)aPosition;
+
+- (BOOL)drawsHighlight;
+- (void)setDrawsHighlight:(BOOL)flag;
+
+- (NSRect)textRectForFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 
 @end

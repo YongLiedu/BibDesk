@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 10/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 
 @interface NSTableView (BDSKExtensions)
 
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
+- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem;
 
 - (void)awakeFromNib;
 
@@ -53,14 +53,13 @@
 
 - (void)removeAllTableColumns;
 - (void)scrollRowToCenter:(unsigned int)row;
-- (NSArray *)tableColumnIdentifiers;
-- (IBAction)invertSelection:(id)sender;
 
 @end
 
 
 @interface NSObject (NSTableBDSKExtendedDataSource)
 
+- (NSString *)tableView:(NSTableView *)aTableView toolTipForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (NSImage *)tableView:(NSTableView *)aTableView dragImageForRowsWithIndexes:(NSIndexSet *)dragRows;
 - (void)tableView:(NSTableView *)aTableView concludeDragOperation:(NSDragOperation)operation;
 

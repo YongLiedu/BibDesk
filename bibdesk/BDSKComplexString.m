@@ -1,7 +1,7 @@
 // BDSKComplexString.m
 // Created by Michael McCracken, 2004
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -47,36 +47,36 @@ static NSCharacterSet *macroCharSet = nil;
 static NSZone *complexStringExpansionZone = NULL;
 static Class BDSKComplexStringClass = Nil;
 
-static BDSKMacroResolver *macroResolverForUnarchiving = nil;
-
-#define STACK_BUFFER_SIZE 256
+#define SAFE_ALLOCA_SIZE (8 * 8192)
 
 static inline
 CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolver *macroResolver)
 {
 	BDSKStringNode *node = nil;
-    BDSKStringNode **stringNodes, *stackBuffer[STACK_BUFFER_SIZE];
+    BDSKStringNode **stringNodes;
+    int iMax = [nodes count];
     
-    int iMax = nil == nodes ? 0 : CFArrayGetCount((CFArrayRef)nodes);
-    
-    if(0 == iMax) return nil;
+    if(nodes == nil || iMax == 0)
+        return nil;
         
-    if (iMax > STACK_BUFFER_SIZE) {
-        stringNodes = (BDSKStringNode **)NSZoneMalloc(complexStringExpansionZone, sizeof(BDSKStringNode *) * iMax);
-        if (NULL == stringNodes)
-            [NSException raise:NSInternalInconsistencyException format:@"Unable to malloc memory in zone %@", NSZoneName(complexStringExpansionZone)];
-    } else {
-        stringNodes = stackBuffer;
-    }
+    // Allocate memory on the stack using alloca() if possible, so we don't have malloc/free overhead; since the array of string nodes is typically small, this should almost always work.
+    BOOL usedMalloc = NO;
+    size_t bufSize = sizeof(BDSKStringNode *) * iMax;
+    if(bufSize < SAFE_ALLOCA_SIZE){
+        stringNodes = (BDSKStringNode **)alloca(bufSize);
+        usedMalloc = NO;
+    } else if(stringNodes = (BDSKStringNode **)NSZoneMalloc(complexStringExpansionZone, bufSize))
+        usedMalloc = YES;
+    else [NSException raise:NSInternalInconsistencyException format:@"Unable to malloc memory in zone %@", NSZoneName(complexStringExpansionZone)];
 
     // This avoids the overhead of calling objectAtIndex: or using an enumerator, since we can now just increment a pointer to traverse the contents of the array.
     CFArrayGetValues((CFArrayRef)nodes, (CFRange){0, iMax}, (const void **)stringNodes);
     
-    // Resizing can be a performance hit, but we can't safely use a fixed-size mutable string
-    CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), 0);
+    // Guess at size of (50 * (no. of nodes)); this is likely too high, but resizing is a sizeable performance hit.
+    CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
     CFStringRef nodeVal, expandedValue;
     
-    // Increment a different pointer, in case we need to free stringNodes later
+    // Increment this pointer, in case we need to free it later (if alloca didn't work)
     BDSKStringNode **stringNodeIdx = stringNodes;
     
     while(iMax--){
@@ -94,7 +94,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     
     OBPOSTCONDITION(!BDIsEmptyString(mutStr));
     
-    if(stackBuffer != stringNodes) NSZoneFree(complexStringExpansionZone, stringNodes);
+    if(usedMalloc) NSZoneFree(complexStringExpansionZone, stringNodes);
     
     return mutStr;
 }
@@ -121,17 +121,6 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     
     BDSKComplexStringClass = self;
 
-}
-
-+ (BDSKMacroResolver *)macroResolverForUnarchiving{
-    return macroResolverForUnarchiving;
-}
-
-+ (void)setMacroResolverForUnarchiving:(BDSKMacroResolver *)aMacroResolver{
-    if (macroResolverForUnarchiving != aMacroResolver) {
-        [macroResolverForUnarchiving release];
-        macroResolverForUnarchiving = [aMacroResolver retain];
-    }
 }
 
 + (id)allocWithZone:(NSZone *)aZone{
@@ -215,7 +204,11 @@ Rather than relying on the same call sequence to be used, I think we should igno
             nodes = [[coder decodeObjectForKey:@"nodes"] retain];
             complex = [coder decodeBoolForKey:@"complex"];
             inherited = [coder decodeBoolForKey:@"inherited"];
-            macroResolver = [BDSKComplexString macroResolverForUnarchiving];
+            NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
+            if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
+                macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
+            } else
+                macroResolver = nil;
         }
     } else {
         [[super init] release];
@@ -337,7 +330,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 // Returns the bibtex value of the string.
 - (NSString *)stringAsBibTeXString{
-    unsigned int i = 0;
+    int i = 0;
     NSMutableString *retStr = [NSMutableString string];
         
     for( i = 0; i < [nodes count]; i++){
@@ -450,30 +443,6 @@ Rather than relying on the same call sequence to be used, I think we should igno
 	return newString;
 }
 
-- (NSString *)stringByAppendingString:(NSString *)string{
-	NSString *newString = nil;
-    if ([self isComplex] == NO) {
-        newString = [[nodes objectAtIndex:0] stringByAppendingString:string];
-    } else if ([string isEqualAsComplexString:@""]) {
-        newString = self;
-    } else {
-        NSMutableArray *mutableNodes = [nodes mutableCopy];
-        NSArray *newNodes = nil;
-        if ([string isComplex]) {
-            newNodes = [[string nodes] mutableCopy];
-        } else {
-            BDSKStringNode *node = [[BDSKStringNode alloc] initWithQuotedString:string];
-            newNodes = [[NSMutableArray alloc] initWithObjects:node, nil];
-            [node release];
-        }
-        [mutableNodes addObjectsFromArray:newNodes];
-        [newNodes release];
-        newString = [BDSKComplexString stringWithNodes:mutableNodes macroResolver:macroResolver];
-        [mutableNodes release];
-    }
-    return newString;
-}
-
 #pragma mark complex string methods
 
 - (BDSKMacroResolver *)macroResolver{
@@ -483,12 +452,6 @@ Rather than relying on the same call sequence to be used, I think we should igno
 @end
 
 @implementation NSString (ComplexStringExtensions)
-
-static IMP originalStringByAppendingString;
-
-+ (void)didLoad{
-    originalStringByAppendingString = OBReplaceMethodImplementationWithSelector(self, @selector(stringByAppendingString:), @selector(replacementStringByAppendingString:));
-}
 
 - (id)initWithNodes:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
     [[self init] release];
@@ -759,23 +722,6 @@ static IMP originalStringByAppendingString;
 		[newString release];
 		return self;
 	}
-}
-
-- (NSString *)replacementStringByAppendingString:(NSString *)string{
-    NSString *newString = nil;
-    if ([self isEqualToString:@""]) {
-        newString = string;
-    } else if ([string isComplex]) {
-        BDSKStringNode *node = [[BDSKStringNode alloc] initWithQuotedString:self];
-        NSMutableArray *nodes = [[NSMutableArray alloc] initWithObjects:node, nil];
-        [nodes addObjectsFromArray:[string nodes]];
-        newString = [BDSKComplexString stringWithNodes:nodes macroResolver:[(BDSKComplexString *)string macroResolver]];
-        [node release];
-        [nodes release];
-	} else {
-        newString = originalStringByAppendingString(self, _cmd, string);
-    }
-    return newString;
 }
 
 @end

@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/18/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -81,6 +81,13 @@
     [coder encodeConditionalObject:parent forKey:@"parent"];
 }
 
+- (BOOL)isEqual:(id)other;
+{
+    // should we compare the children and/or parent as well?
+    return [other isKindOfClass:[self class]] && 
+           [((BDSKTreeNode *)other)->columnValues isEqualToDictionary:columnValues];
+}
+
 - (BDSKTreeNode *)parent { return parent; }
 
 - (void)setParent:(BDSKTreeNode *)anObject;
@@ -104,13 +111,12 @@
     NSMutableArray *newChildren = [[NSMutableArray alloc] initWithArray:[self children] copyItems:YES];
     [node setChildren:newChildren];
     [newChildren release];
-    [node setColumnValues:columnValues];
+    
+    node->columnValues = [columnValues mutableCopy];
     return node;
 }
 
-- (id)valueForUndefinedKey:(NSString *)key { 
-    return [columnValues valueForKey:key]; 
-}
+- (id)valueForUndefinedKey:(NSString *)key { return [columnValues valueForKey:key]; }
 
 - (void)setValue:(id)value forUndefinedKey:(NSString *)key;
 {
@@ -135,16 +141,11 @@
     [anObject setParent:self];
 }
 
-- (id)childAtIndex:(unsigned int)index;
-{
-    return [children objectAtIndex:index];
-}
-
 - (void)removeChild:(BDSKTreeNode *)anObject;
 {
     [anObject setParent:nil];
     
-    // make sure to orphan this child
+    // make sure to orphin this child
     [children removeObject:anObject];
 }
 
@@ -157,11 +158,6 @@
         // make sure these children know their parent
         [children makeObjectsPerformSelector:@selector(setParent:) withObject:self];
     }
-}
-
-- (void)sortChildrenUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
-{
-    [children sortUsingFunction:compare context:context];
 }
 
 - (NSArray *)children { return children; }

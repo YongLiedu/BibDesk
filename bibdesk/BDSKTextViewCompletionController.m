@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/08/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 
 #import "BDSKTextViewCompletionController.h"
 
-@interface BDSKTextViewCompletionWindow : NSWindow @end
+@class BDSKTextViewCompletionWindow;
 
 static id sharedController = nil;
 
@@ -290,7 +290,10 @@ static int BDSKCompletionMinHeight = 20;
     NSTableColumn *column = [[NSTableColumn alloc] initWithIdentifier:@"tc"];
     [column setMaxWidth:BDSKCompletionMaxWidth];
     [column setWidth:BDSKCompletionMaxWidth];
-    [column setResizingMask:NSTableColumnAutoresizingMask];
+    if([column respondsToSelector:@selector(setResizingMask:)])
+        [column setResizingMask:NSTableColumnAutoresizingMask];
+    else 
+        [column setResizable:YES];
     [column setEditable:NO];
     [tableView addTableColumn:column];
     [column release];
@@ -307,36 +310,32 @@ static int BDSKCompletionMinHeight = 20;
         newCompletions = [textView completionsForPartialWordRange:charRange indexOfSelectedItem:&idx];
     
     // if there are no completions, we should go away in order to avoid catching keystrokes when the completion window isn't visible; if the textview/delegate come up with a new list of completions, we'll be redisplayed anyway
-    if([newCompletions count] == 0){
-        
+    if([newCompletions count] == 0)
         [self endDisplayNoComplete];
-        
-    }else{
     
-        [tableView deselectAll:nil];
+    [tableView deselectAll:nil];
 
-        [self setCompletions:newCompletions];
-        [tableView reloadData];
-        
-        // reset the location in case it's changed; could keep charRange as an ivar as NSTextViewCompletionController does and compare against that?
-        NSPoint point = [textView locationForCompletionWindow];
-        // if the point is NSZeroPoint, it's not valid, so don't move the window; alternately, could endDisplayNoComplete, but we're probably ending anyway
-        if(NSEqualPoints(point, NSZeroPoint) == NO){
-            NSRect frame = NSZeroRect;
-            frame.size = [self windowSizeForLocation:point];
-            frame.origin = point;
-            frame.origin.y -= NSHeight(frame);
-            [completionWindow setFrame:frame display:NO];
-        }
-        
-        if(idx >= 0 && insert)
-            [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:idx] byExtendingSelection:NO];
-        
-        // originalString changes as we update; the range can be incorrect if we have an accent character being replaced
-        OBPRECONDITION([[textView string] length] >= NSMaxRange(charRange));
-        [self setOriginalString:([[textView string] length] >= NSMaxRange(charRange) ? [[textView string] substringWithRange:charRange] : nil)];
-        
+    [self setCompletions:newCompletions];
+    [tableView reloadData];
+    
+    // reset the location in case it's changed; could keep charRange as an ivar as NSTextViewCompletionController does and compare against that?
+    NSPoint point = [textView locationForCompletionWindow];
+    // if the point is NSZeroPoint, it's not valid, so don't move the window; alternately, could endDisplayNoComplete, but we're probably ending anyway
+    if(NSEqualPoints(point, NSZeroPoint) == NO){
+        NSRect frame = NSZeroRect;
+        frame.size = [self windowSizeForLocation:point];
+        frame.origin = point;
+        frame.origin.y -= NSHeight(frame);
+        [completionWindow setFrame:frame display:NO];
     }
+    
+    if(idx >= 0 && insert)
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:idx] byExtendingSelection:NO];
+    
+    // originalString changes as we update; the range can be incorrect if we have an accent character being replaced
+    OBPRECONDITION([[textView string] length] >= NSMaxRange(charRange));
+    [self setOriginalString:([[textView string] length] >= NSMaxRange(charRange) ? [[textView string] substringWithRange:charRange] : nil)];
+
 }
 
 - (NSSize)windowSizeForLocation:(NSPoint)topLeftPoint;
@@ -434,7 +433,7 @@ static int BDSKCompletionMinHeight = 20;
 
 @end
 
-#pragma mark NSWindow subclass
+@interface BDSKTextViewCompletionWindow : NSWindow @end
 
 @implementation BDSKTextViewCompletionWindow
     

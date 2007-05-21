@@ -5,9 +5,9 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFClobberDetectionZone.h 69339 2005-10-17 23:59:02Z wiml $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFClobberDetectionZone.h 68913 2005-10-03 19:36:19Z kc $
 
-#import <malloc/malloc.h>
+#import <objc/malloc.h>
 
 extern malloc_zone_t *OFClobberDetectionZoneCreate(void);
 

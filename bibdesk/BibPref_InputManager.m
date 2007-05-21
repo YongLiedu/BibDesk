@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on Fri Aug 27 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Adam Maxwell. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -42,16 +42,14 @@
 #import "BibTypeManager.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKTextWithIconCell.h"
-#import "NSSet_BDSKExtensions.h"
+#import "BDSKSearchResult.h"
 #import "BibAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
-#import "NSFileManager_BDSKExtensions.h"
 
 CFStringRef BDSKInputManagerID = CFSTR("net.sourceforge.bibdesk.inputmanager");
 CFStringRef BDSKInputManagerLoadableApplications = CFSTR("Application bundles that we recognize");
 
-static NSString *BDSKBundleIdentifierKey = @"bundleIdentifierKey";
 static int tableIconSize = 24;
 
 @implementation BibPref_InputManager
@@ -76,9 +74,6 @@ static int tableIconSize = 24;
     [[tableView tableColumnWithIdentifier:@"AppList"] setDataCell:cell];
     [tableView setRowHeight:(tableIconSize + 2)];
 
-    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:OATextWithIconCellStringKey ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
-    [arrayController setSortDescriptors:[NSArray arrayWithObject:sort]];
-    
     [self updateUI];
 }
 
@@ -86,17 +81,15 @@ static int tableIconSize = 24;
     NSParameterAssert(identifiers);
         
     NSString *bundleID;
-
-    // use a set so we don't add duplicate items to the array (not that it's particularly harmful)
-    NSMutableSet *currentBundleIdentifiers = [NSMutableSet caseInsensitiveStringSet];
-    [currentBundleIdentifiers addObjectsFromArray:[[arrayController content] valueForKey:OATextWithIconCellStringKey]];
-    
     NSEnumerator *identifierE = [identifiers objectEnumerator];
-        
-    while((bundleID = [identifierE nextObject]) && ([currentBundleIdentifiers containsObject:bundleID] == NO)){
+    
+    // use a set so we don't add duplicate items to the array (not that it's particularly harmful)
+    NSMutableSet *applicationSet = [NSMutableSet set];
+    
+    while(bundleID = [identifierE nextObject]){
     
         CFURLRef theURL = nil;
-        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] initWithCapacity:2];
+        BDSKSearchResult *dictionary = [[BDSKSearchResult alloc] initWithKey:bundleID caseInsensitive:YES];
         
         OSStatus err = LSFindApplicationForInfo( kLSUnknownCreator,
                                                  (CFStringRef)bundleID,
@@ -107,19 +100,22 @@ static int tableIconSize = 24;
         if(err == noErr){
             [dictionary setValue:[[(NSURL *)theURL lastPathComponent] stringByDeletingPathExtension] forKey:OATextWithIconCellStringKey];
             [dictionary setValue:[[NSWorkspace sharedWorkspace] iconForFileURL:(NSURL *)theURL] forKey:OATextWithIconCellImageKey];
-            [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         } else {
             // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
-            [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@"Message when unable to find app for plugin"), bundleID] forKey:OATextWithIconCellStringKey];
+            [dictionary setValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Unable to find icon for",@""), bundleID] forKey:OATextWithIconCellStringKey];
             [dictionary setValue:[NSImage iconWithSize:NSMakeSize(tableIconSize, tableIconSize) forToolboxCode:kGenericApplicationIcon] forKey:OATextWithIconCellImageKey];
-            [dictionary setValue:bundleID forKey:BDSKBundleIdentifierKey];
         }
         
-        [arrayController addObject:dictionary];
+        [applicationSet addObject:dictionary];
         [dictionary release];
     
     }
-    [arrayController rearrangeObjects];
+    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"dictionary.string" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
+    [self willChangeValueForKey:@"applications"];
+    [applications addObjectsFromSet:applicationSet];
+    [applications sortUsingDescriptors:[NSArray arrayWithObject:sort]];
+    [self didChangeValueForKey:@"applications"];
+    
     [self synchronizePreferences];
 }
 
@@ -127,8 +123,14 @@ static int tableIconSize = 24;
 - (void)synchronizePreferences{
     
     // this should be a unique list of the identifiers that we previously had in prefs; bundles are compared case-insensitively
-    NSMutableSet *applicationSet = [NSMutableSet caseInsensitiveStringSet];
-    [applicationSet addObjectsFromArray:[[arrayController content] valueForKey:BDSKBundleIdentifierKey]];
+    NSMutableSet *applicationSet = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &OFCaseInsensitiveStringSetCallbacks);
+    [applicationSet autorelease];
+    
+    NSEnumerator *enumerator = [applications objectEnumerator];
+    BDSKSearchResult *dictionary;
+    
+    while(dictionary = [enumerator nextObject])
+        [applicationSet addObject:[dictionary valueForKey:@"comparisonKey"]];
     
     CFPreferencesSetAppValue(BDSKInputManagerLoadableApplications, (CFArrayRef)[applicationSet allObjects], BDSKInputManagerID);
     BOOL success = CFPreferencesAppSynchronize( (CFStringRef)BDSKInputManagerID );
@@ -147,7 +149,9 @@ static int tableIconSize = 24;
 - (void)updateUI{
     BOOL isCurrent;
     if([[NSApp delegate] isInputManagerInstalledAndCurrent:&isCurrent])
-        [enableButton setTitle:isCurrent ? NSLocalizedString(@"Reinstall",@"Button title") : NSLocalizedString(@"Update", @"Button title")];
+        [enableButton setTitle:isCurrent ? NSLocalizedString(@"Reinstall",@"Reinstall input manager") : NSLocalizedString(@"Update", @"Update input manager")];
+    
+    [tableView reloadData];
     
     // this is a hack to show the blue highlight for the tableview, since it keeps losing first responder status
     [[controlBox window] makeFirstResponder:tableView];
@@ -180,13 +184,13 @@ static int tableIconSize = 24;
     }
 	
     if(err == NO){
-        [fm copyPath:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"BibDeskInputManager"] toPath:inputManagerPath handler:nil];
+        [fm copyPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager"] toPath:inputManagerPath handler:nil];
     } else {
-        NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Message in alert dialog when an error occurs")
+        NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
 					   defaultButton:nil
 					 alternateButton:nil
 					     otherButton:nil
-			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.", @"Informative text in alert dialog"), inputManagerPath];
+			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.",@""), inputManagerPath];
 	[anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
@@ -198,7 +202,7 @@ static int tableIconSize = 24;
 
 - (IBAction)enableAutocompletion:(id)sender{
     
-    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Message in alert dialog"), NSLocalizedString(@"Proceed", @"Button title"), NSLocalizedString(@"Cancel", @"Button title"), nil, [[self controlBox] window], self, @selector(enableCompletionSheetDidEnd:returnCode:contextInfo:), NULL, NULL, NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @"Informative text in alert dialog"));
+    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @""), NSLocalizedString(@"Proceed",@""), NSLocalizedString(@"Cancel",@""), nil, [[self controlBox] window], self, @selector(enableCompletionSheetDidEnd:returnCode:contextInfo:), NULL, NULL, NSLocalizedString(@"This will install a plugin bundle in ~/Library/InputManagers/BibDeskInputManager.  If you experience text input problems or strange application behavior after installing the plugin, try removing the \"BibDeskInputManager\" subfolder.", @""));
     
 }
 
@@ -207,8 +211,8 @@ static int tableIconSize = 24;
     NSOpenPanel *op = [NSOpenPanel openPanel];
     [op setCanChooseDirectories:NO];
     [op setAllowsMultipleSelection:NO];
-    [op setPrompt:NSLocalizedString(@"Add", @"Prompt for dialog to add an app for plugin")];
-    [op beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory]
+    [op setPrompt:NSLocalizedString(@"Add", @"")];
+    [op beginSheetForDirectory:nil
 			  file:nil
 			 types:[NSArray arrayWithObject:@"app"]
 		modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
@@ -227,11 +231,11 @@ static int tableIconSize = 24;
                              type:&fileType];
         if(![fileType isEqualToString:NSApplicationFileType]){
             [sheet orderOut:nil];
-            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Message in alert dialog when an error occurs")
+            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
                                defaultButton:nil
                              alternateButton:nil
                              otherButton:nil
-                       informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
+                       informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.",@""), [[sheet filenames] objectAtIndex:0]];
             [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil
@@ -243,11 +247,11 @@ static int tableIconSize = 24;
         NSString *bundleID = [[NSBundle bundleWithPath:[[sheet filenames] objectAtIndex:0]] bundleIdentifier];
         if(bundleID == nil){
             [sheet orderOut:nil];
-            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"No Bundle Identifier!",@"Message in alert dialog when no bundle identifier could be found for application to set for plugin")
+            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"No Bundle Identifier!",@"No Bundle Identifier!")
                                defaultButton:nil
                              alternateButton:nil
                              otherButton:nil
-                       informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.", @"Informative text in alert dialog"), [[sheet filenames] objectAtIndex:0]];
+                       informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.",@""), [[sheet filenames] objectAtIndex:0]];
             [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil
@@ -263,10 +267,12 @@ static int tableIconSize = 24;
 }
 
 - (IBAction)removeApplication:(id)sender{
-    unsigned int selIndex = [arrayController selectionIndex];
-    if (NSNotFound != selIndex)
-        [arrayController removeObjectAtArrangedObjectIndex:selIndex];
-    [self synchronizePreferences];
+    if([tableView selectedRow] != -1){
+        [self willChangeValueForKey:@"applications"];
+        [applications removeObjectAtIndex:[tableView selectedRow]];
+        [self didChangeValueForKey:@"applications"];
+        [self synchronizePreferences];
+    }
     [self updateUI];
 }
 

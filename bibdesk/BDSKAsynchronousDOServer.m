@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 04/24/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@
         
         mainThreadConnection = [[NSConnection alloc] initWithReceivePort:port1 sendPort:port2];
         [mainThreadConnection setRootObject:self];
+        [mainThreadConnection enableMultipleThreads];
        
         // set up flags
         memset(&serverFlags, 0, sizeof(serverFlags));
@@ -94,20 +95,6 @@
     return @protocol(BDSKAsyncDOServerMainThread); 
 }
 
-// Access to these objects is limited to the creating threads (we assume that it's initially created on the main thread).  If you want to communicate with the server from yet another thread, that thread needs to create its own connection and proxy object(s), which would also require access to the server's connection ivars.  Possibly using -enableMultipleThreads on both connections would work, but the documentation is too vague to be useful.
-
-- (id)serverOnMainThread { 
-    OBASSERT([[NSThread currentThread] isEqual:serverThread]);
-    return serverOnMainThread; 
-}
-
-- (id)serverOnServerThread { 
-    OBASSERT([NSThread inMainThread]);
-    return serverOnServerThread; 
-}
-
-#pragma mark MainThread
-
 - (oneway void)setLocalServer:(byref id)anObject;
 {
     [anObject setProtocolForProxy:[self protocolForServerThread]];
@@ -129,8 +116,7 @@
     localThreadConnection = nil;
     
     [serverOnMainThread release];
-    serverOnMainThread = nil;  
-    serverThread = nil;
+    serverOnMainThread = nil;    
 }
 
 - (void)runDOServerForPorts:(NSArray *)ports;
@@ -144,10 +130,6 @@
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&serverFlags.shouldKeepRunning);
     
     @try {
-        
-        // this thread retains the server object
-        serverThread = [NSThread currentThread];
-        
         // we'll use this to communicate between threads on the localhost
         localThreadConnection = [[NSConnection alloc] initWithReceivePort:[ports objectAtIndex:0] sendPort:[ports objectAtIndex:1]];
         if(localThreadConnection == nil)
@@ -185,15 +167,15 @@
 
 - (void)serverDidSetup{}
 
+#pragma mark -
 #pragma mark API
-#pragma mark Main Thread
 
 - (void)stopDOServer;
 {
-    // this cleans up the connections, ports and proxies on both sides
-    [serverOnServerThread cleanup];
     // we're in the main thread, so set the stop flag
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&serverFlags.shouldKeepRunning);
+    // this cleans up the connections, ports and proxies on both sides
+    [serverOnServerThread cleanup];
     
     // clean up the connection in the main thread; don't invalidate the ports, since they're still in use
     [mainThreadConnection setRootObject:nil];
@@ -205,8 +187,8 @@
     serverOnServerThread = nil;    
 }
 
-#pragma mark Thread Safe
-
 - (BOOL)shouldKeepRunning { return serverFlags.shouldKeepRunning == 1; }
+- (id)serverOnMainThread { return serverOnMainThread; }
+- (id)serverOnServerThread { return serverOnServerThread; }
 
 @end

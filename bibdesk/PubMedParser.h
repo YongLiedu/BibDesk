@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Sun Nov 16 2003.
 /*
- This software is Copyright (c) 2003,2004,2005,2006,2007
+ This software is Copyright (c) 2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,24 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "BDSKRISParser.h"
+#import "BibItem.h"
+#import "BibAppController.h"
+#import "AGRegex/AGRegex.h"
+#import "BDSKParserProtocol.h"
 
-@interface PubMedParser : BDSKRISParser {
+@interface PubMedParser : NSObject <BDSKParser> {
+
 }
+
+
+@end
+
+@interface NSString (RISExtensions)
+- (NSString *)stringByFixingRefMinerPubMedTags;
+- (NSString *)stringByFixingReferenceMinerString;
+- (NSString *)stringByFixingScopusEndTags;
+- (NSString *)stringByConvertingHTMLToTeX;
+- (NSArray *)sourceLinesBySplittingString;
++ (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
+
 @end

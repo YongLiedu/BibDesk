@@ -3,7 +3,7 @@
 //  Bibdesk
 //
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -46,27 +46,15 @@
 #import "BDSKFileContentSearchController.h"
 #import "BDSKGroupTableView.h"
 #import "NSTableView_BDSKExtensions.h"
-#import "BDSKPublicationsArray.h"
-#import "BDSKZoomablePDFView.h"
-#import "BDSKPreviewer.h"
-#import "BDSKOverlay.h"
-#import "BibDocument_Groups.h"
-#import "BDSKMainTableView.h"
-#import "BDSKFindController.h"
-#import <OmniAppKit/OAFindControllerTargetProtocol.h>
-#import <OmniAppKit/NSText-OAExtensions.h>
-#import "BDSKSearchButtonController.h"
-#import "BDSKItemSearchIndexes.h"
-#import "NSArray_BDSKExtensions.h"
-#import "BDSKGroup.h"
-#import "BDSKSharedGroup.h"
-#import "BDSKOwnerProtocol.h"
+
+static NSString *BDSKFileContentLocalizedString = nil;
+NSString *BDSKDocumentFormatForSearchingDates = nil;
 
 @implementation BibDocument (Search)
 
-- (IBAction)changeSearchType:(id)sender{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[sender tag] forKey:BDSKSearchMenuTagKey];
-    [self search:searchField];
++ (void)didLoad{
+    BDSKFileContentLocalizedString = [NSLocalizedString(@"File Content", @"") copy];
+    BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
 }
 
 - (IBAction)makeSearchFieldKey:(id)sender{
@@ -77,218 +65,349 @@
         [tb setDisplayMode:NSToolbarDisplayModeIconAndLabel];
     
 	[documentWindow makeFirstResponder:searchField];
-    [searchField selectText:sender];
 }
 
-- (NSString *)searchString {
+- (NSMenu *)searchFieldMenu{
+	NSMenu *cellMenu = [[[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Search Menu"] autorelease];
+	NSMenuItem *anItem;
+	
+	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Recent Searches", @"Recent Searches menu item") action:NULL keyEquivalent:@""];
+	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
+	
+    anItem = [cellMenu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
+	[anItem setTag:NSSearchFieldRecentsMenuItemTag];
+    
+	anItem = [cellMenu addItemWithTitle:NSLocalizedString(@"Clear Recent Searches", @"Clear menu item") action:NULL keyEquivalent:@""];
+	[anItem setTag:NSSearchFieldClearRecentsMenuItemTag];
+    
+    // this tag conditionally inserts a separator if there are recent searches (is it safe to set a tag on the separator item?)
+    anItem = [NSMenuItem separatorItem];
+	[anItem setTag:NSSearchFieldRecentsTitleMenuItemTag];
+	[cellMenu addItem:anItem];
+    
+	[cellMenu addItemWithTitle:NSLocalizedString(@"Search Types", @"Searchfield menu separator title") action:NULL keyEquivalent:@""];
+    [cellMenu addItemWithTitle:BDSKAllFieldsString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+    
+    // add a separator if we have this option; it and "Any Field" are special (and "File Content" looks out of place between "Any Field" and "Author")
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
+        [cellMenu addItemWithTitle:BDSKFileContentLocalizedString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+        [cellMenu addItem:[NSMenuItem separatorItem]];
+    }
+        
+	NSMutableArray *quickSearchKeys = [[NSMutableArray alloc] initWithObjects:BDSKAuthorString, BDSKDateString, BDSKTitleString, nil];
+    [quickSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKQuickSearchKeys]];
+    [quickSearchKeys sortUsingSelector:@selector(compare:)];
+    
+    NSString *aKey = nil;
+    NSEnumerator *quickSearchKeyE = [quickSearchKeys objectEnumerator];
+	
+    while(aKey = [quickSearchKeyE nextObject]){
+		[cellMenu addItemWithTitle:aKey action:@selector(searchFieldChangeKey:) keyEquivalent:@""]; 
+    }
+    [quickSearchKeys release];
+	
+	[cellMenu addItem:[NSMenuItem separatorItem]];
+	
+	[cellMenu addItemWithTitle:[NSLocalizedString(@"Add Field", @"Add Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchAddField:) keyEquivalent:@""];
+	[cellMenu addItemWithTitle:[NSLocalizedString(@"Remove Field", @"Remove Field... menu item") stringByAppendingEllipsis] action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
+    
+	return cellMenu;
+}
+
+- (void)setupSearchField{
+	
+	NSSearchFieldCell *searchCell = [searchField cell];
+	[searchCell setSearchMenuTemplate:[self searchFieldMenu]];
+	[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),quickSearchKey]];
+	[searchCell setRecentsAutosaveName:[NSString stringWithFormat:NSLocalizedString(@"%@ recent searches autosave ",@""),[self fileName]]];
+	
+	// set the search key's menuitem to NSOnState
+	[self setSelectedSearchFieldKey:quickSearchKey];
+}
+
+-(NSString*) filterField {
 	return [searchField stringValue];
 }
 
-- (void)setSearchString:(NSString *)filterterm {
+- (void)setFilterField:(NSString*) filterterm {
     NSParameterAssert(filterterm != nil);
-    if([[searchField stringValue] isEqualToString:filterterm] == NO){
-        [searchField setStringValue:filterterm];
-        [searchField sendAction:[searchField action] to:[searchField target]];
-    }
+    
+    NSResponder * oldFirstResponder = [documentWindow firstResponder];
+    [documentWindow makeFirstResponder:searchField];
+    
+    [searchField setObjectValue:filterterm];
+    [self searchFieldAction:searchField];
+    
+    [documentWindow makeFirstResponder:oldFirstResponder];
 }
 
-- (void)buttonBarSelectionDidChange:(NSNotification *)aNotification;
-{
-    NSString *field = [searchButtonController selectedItemIdentifier];
-    if (searchButtonController && nil == field) {
-        OBASSERT_NOT_REACHED("the search button controller should always have a selected field");
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
-        field = BDSKAllFieldsString;
-    }
-    
-    if([field isEqualToString:BDSKFileContentSearchString]) {
-        [self searchByContent:nil];
-    } else {
-        if ([[[fileSearchController searchContentView] window] isEqual:documentWindow])
-            [fileSearchController restoreDocumentState];
-        
-        NSArray *pubsToSelect = [self selectedPublications];
-        NSString *searchString = [searchField stringValue];
-        
-        if([NSString isEmptyString:searchString]){
-            [shownPublications setArray:groupedPublications];
+- (IBAction)searchFieldChangeKey:(id)sender{
+    [self setSelectedSearchFieldKey:[sender title]];
+}
 
+- (void)setSelectedSearchFieldKey:(NSString *)newKey{
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newKey
+                                                      forKey:BDSKCurrentQuickSearchKey];
+	
+	NSSearchFieldCell *searchCell = [searchField cell];
+	[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),newKey]];
+
+	NSMenu *templateMenu = [searchCell searchMenuTemplate];
+	if(![quickSearchKey isEqualToString:newKey]){
+		// find current key's menuitem and set it to NSOffState
+		NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
+		[oldItem setState:NSOffState];
+		if ([searchField target] != self && [quickSearchKey isEqualToString:BDSKFileContentLocalizedString])
+			[fileSearchController restoreDocumentState:nil];
+	}
+	
+	// set new key's menuitem to NSOnState
+	NSMenuItem *newItem = [templateMenu itemWithTitle:newKey];
+	[newItem setState:NSOnState];
+    
+    // @@ weird...this is required or else the checkmark doesn't show up
+	[searchCell setSearchMenuTemplate:templateMenu];
+    
+	if(newKey != quickSearchKey){
+		[quickSearchKey release];
+		quickSearchKey = [newKey copy];
+	}
+
+	if([newKey isEqualToString:BDSKFileContentLocalizedString])
+		[self searchByContent:searchField];
+ 
+	[self hidePublicationsWithoutSubstring:[searchField stringValue] //newQueryString
+								   inField:quickSearchKey];
+		
+}
+
+- (void)addSearchFieldSheetDidEnd:(BDSKAddFieldSheetController *)addFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	NSString *newSearchKey = [addFieldController field];
+    if(returnCode == NSCancelButton || [NSString isEmptyString:newSearchKey])
+        return;
+    
+    newSearchKey = [newSearchKey capitalizedString];
+    NSMutableArray *newSearchKeys = [NSMutableArray arrayWithCapacity:10];
+    [newSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+    [newSearchKeys addObject:newSearchKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newSearchKeys
+                                                      forKey:BDSKQuickSearchKeys];
+    
+    // this will sort the menu items for us
+    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+    [self setSelectedSearchFieldKey:newSearchKey];
+}
+
+- (IBAction)quickSearchAddField:(id)sender{
+    // first we fill the popup
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil]
+                                                excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+    
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
+                                                                                              fieldsArray:searchKeys];
+	[addFieldController beginSheetModalForWindow:documentWindow
+                                   modalDelegate:self
+                                  didEndSelector:@selector(addSearchFieldSheetDidEnd:returnCode:contextInfo:)
+                                     contextInfo:NULL];
+    [addFieldController release];
+}
+
+- (void)removeSearchFieldSheetDidEnd:(BDSKRemoveFieldSheetController *)removeFieldController returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
+    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+
+	NSString *oldSearchKey = [removeFieldController field];
+    if(returnCode == NSCancelButton || oldSearchKey == nil || [searchKeys count] == 0)
+        return;
+    
+    [searchKeys removeObject:oldSearchKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
+                                                      forKey:BDSKQuickSearchKeys];
+
+    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+    if([quickSearchKey isEqualToString:oldSearchKey])
+        [self setSelectedSearchFieldKey:BDSKAllFieldsString];
+}
+
+- (IBAction)quickSearchRemoveField:(id)sender{
+    NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
+    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+    [searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+
+    NSString *prompt = NSLocalizedString(@"Search field to remove:",@"");
+	if ([searchKeys count]) {
+		[searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	} else {
+		prompt = NSLocalizedString(@"No search fields to remove",@"");
+	}
+    
+    BDSKRemoveFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
+                                                                                                       fieldsArray:searchKeys];
+	[removeFieldController beginSheetModalForWindow:documentWindow
+                                      modalDelegate:self
+                                     didEndSelector:@selector(removeSearchFieldSheetDidEnd:returnCode:contextInfo:)
+                                        contextInfo:NULL];
+    [removeFieldController release];
+}
+
+- (IBAction)searchFieldAction:(id)sender{
+
+    if(sender != nil){
+        if([quickSearchKey isEqualToString:BDSKFileContentLocalizedString]){
+            OBASSERT((floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3) == NO);
+            [self searchByContent:sender];
         } else {
-            
-            [shownPublications setArray:[self publicationsMatchingSearchString:searchString indexName:field fromArray:groupedPublications]];
-            if([shownPublications count] == 1)
-                pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
-        }
-        
-        [tableView deselectAll:nil];
-        [self sortPubsByKey:nil];
-        [self updateStatus];
-        if([pubsToSelect count])
-            [self selectPublications:pubsToSelect];
-    }
-}
-
-/* 
-
-Ensure that views are always ordered vertically from top to bottom as
-
----- toolbar
----- search button view
----- search group view OR file content
-
-*/
-
-- (void)showSearchButtonView;
-{
-    if (nil == searchButtonController)
-        searchButtonController = [[BDSKSearchButtonController alloc] init];
-    
-    [searchButtonController setDelegate:self];
-    
-    if ([self hasExternalGroupsSelected]) {
-        [searchButtonController removeSkimNotesItem];
-        [searchButtonController removeFileContentItem];
-    } else {
-        [searchButtonController addSkimNotesItem];
-        [searchButtonController addFileContentItem];
-    }
-    
-    NSView *searchButtonView = [searchButtonController view];
-    
-    if ([self isDisplayingSearchButtons] == NO) {
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
-        [self insertControlView:searchButtonView atTop:YES];
-        if ([tableView tableColumnWithIdentifier:BDSKRelevanceString] == nil)
-            [tableView insertTableColumnWithIdentifier:BDSKRelevanceString atIndex:0];
-        
-    }
-}
-
-- (void)hideSearchButtonView
-{
-    NSView *searchButtonView = [searchButtonController view];
-    if ([self isDisplayingSearchButtons]) {
-        [tableView removeTableColumnWithIdentifier:BDSKRelevanceString];
-        [self removeControlView:searchButtonView];
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
-        
-        if ([previousSortKey isEqualToString:BDSKRelevanceString]) {
-            [previousSortKey release];
-            previousSortKey = [BDSKTitleString retain];
-        }
-        if ([sortKey isEqualToString:BDSKRelevanceString]) {
-            NSString *newSortKey = [[previousSortKey retain] autorelease];
-            docState.sortDescending = NO;
-            [self sortPubsByKey:newSortKey];
+            [self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
         }
     }
-    [searchButtonController setDelegate:nil];
-}
-
-- (IBAction)search:(id)sender{
-    if ([[sender stringValue] isEqualToString:@""])
-        [self hideSearchButtonView];
-    else [self showSearchButtonView];
-    
-    [self buttonBarSelectionDidChange:nil];
 }
 
 #pragma mark -
 
-// simplified search used by BibAppController's Service for legacy compatibility
-- (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field{
-    unsigned i, iMax = [publications count];
-    NSMutableArray *results = [NSMutableArray arrayWithCapacity:100];
-    for (i = 0; i < iMax; i++) {
-        BibItem *pub = [publications objectAtIndex:i];
-        if ([pub matchesSubstring:searchString withOptions:NSCaseInsensitiveSearch inField:field removeDiacritics:YES])
-            [results addObject:pub];
-    }
-    return results;
+- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
+	NSArray *pubsToSelect = [self selectedPublications];
+
+    if([NSString isEmptyString:substring]){
+        [shownPublications setArray:groupedPublications];
+    }else{
+		[shownPublications setArray:[self publicationsWithSubstring:substring inField:field forArray:groupedPublications]];
+		if([shownPublications count] == 1)
+			pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
+	}
+	
+	[tableView deselectAll:nil];
+    // @@ performance: this kills us on large files, since it gets called for every updateGroupsPreservingSelection (any add/del)
+	[self sortPubsByColumn:nil]; // resort
+	[self updateUI];
+	if(pubsToSelect)
+		[self highlightBibs:pubsToSelect];
 }
-
-
-NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
-{
-    // surround with wildcards for substring search; should we check for any operators?
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSearchMenuTagKey] == 0)
-        searchFieldString = [NSString stringWithFormat:@"*%@*", searchFieldString];
-    return searchFieldString;
-}
-
-#define SEARCH_BUFFER_MAX 100
         
-- (NSArray *)publicationsMatchingSearchString:(NSString *)searchString indexName:(NSString *)field fromArray:(NSArray *)arrayToSearch{
-    
-    searchString = BDSKSearchKitExpressionWithString(searchString);
-    
-    NSMutableArray *toReturn = [NSMutableArray arrayWithCapacity:[arrayToSearch count]];
-    
-    // we need the correct BDSKPublicationsArray for access to the identifierURLs
-    id<BDSKOwner> owner = [self hasExternalGroupsSelected] ? [[self selectedGroups] firstObject] : self;
-    SKIndexRef skIndex = [[owner searchIndexes] indexForField:field];
-    BDSKPublicationsArray *pubArray = [owner publications];
-    
-    NSAssert1(NULL != skIndex, @"No index for field %@", field);
-    
-    // note that the add/remove methods flush the index, so we don't have to do it again
-    SKSearchRef search = SKSearchCreate(skIndex, (CFStringRef)searchString, kSKSearchOptionDefault);
-    
-    SKDocumentID documents[SEARCH_BUFFER_MAX];
-    float scores[SEARCH_BUFFER_MAX];
-    CFIndex i, foundCount;
-    NSMutableSet *foundURLSet = [NSMutableSet set];
-    
-    Boolean more;
-    BibItem *aPub;
-    float maxScore = 0.0f;
-    
-    do {
+- (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
         
-        more = SKSearchFindMatches(search, SEARCH_BUFFER_MAX, documents, scores, 1.0, &foundCount);
-        
-        if (foundCount) {
-            CFURLRef documentURLs[SEARCH_BUFFER_MAX];
-            SKIndexCopyDocumentURLsForDocumentIDs(skIndex, foundCount, documents, documentURLs);
-            
-            for (i = 0; i < foundCount; i++) {
-                [foundURLSet addObject:(id)documentURLs[i]];
-                aPub = [pubArray itemForIdentifierURL:(NSURL *)documentURLs[i]];
-                CFRelease(documentURLs[i]);
-                [aPub setSearchScore:scores[i]];
-                maxScore = MAX(maxScore, scores[i]);
-            }
-        }
-                    
-    } while (foundCount && more);
-            
-    SKSearchCancel(search);
-    CFRelease(search);
+    unsigned searchMask = NSCaseInsensitiveSearch;
+    if([substring rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]].location != NSNotFound)
+        searchMask = 0;
+    BOOL doLossySearch = YES;
+    if(BDStringHasAccentedCharacters((CFStringRef)substring))
+        doLossySearch = NO;
     
-    // we searched all publications, but we only want to keep the subset that's shown (if a group is selected)
-    NSMutableSet *identifierURLsToKeep = [NSMutableSet setWithArray:[arrayToSearch valueForKey:@"identifierURL"]];
-    [foundURLSet intersectSet:identifierURLsToKeep];
     
-    NSEnumerator *keyEnum = [foundURLSet objectEnumerator];
-    NSURL *aURL;
-
-    // iterate and normalize search scores
-    while (aURL = [keyEnum nextObject]) {
-        aPub = [pubArray itemForIdentifierURL:aURL];
-        if (aPub) {
-            [toReturn addObject:aPub];
-            float score = [aPub searchScore];
-            [aPub setSearchScore:(score/maxScore)];
+    static NSSet *dateFields = nil;
+    if(nil == dateFields)
+        dateFields = [[NSSet alloc] initWithObjects:BDSKDateString, BDSKDateAddedString, BDSKDateModifiedString, nil];
+    
+    BOOL isDateField = [dateFields containsObject:field];
+    
+    // if it's a date field, figure out a format string to use based on the given date component(s)
+    // don't convert substring->date->string, though, or it's no longer a substring and will only match exactly
+    if(YES == isDateField){
+        [BDSKDocumentFormatForSearchingDates release];
+        BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSShortDateFormatString] copy];
+        NSCalendarDate *date = [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates];
+        if(nil == date){
+            [BDSKDocumentFormatForSearchingDates release];
+            BDSKDocumentFormatForSearchingDates = [[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString] copy];
+            date = [NSCalendarDate dateWithString:substring calendarFormat:BDSKDocumentFormatForSearchingDates];
         }
     }
+        
+    NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
+    NSEnumerator *andEnum = [[substring andSearchComponents] objectEnumerator];
+    NSEnumerator *orEnum = [[substring orSearchComponents] objectEnumerator];
+    
+    NSString *componentSubstring = nil;
+    BibItem *pub = nil;
+    NSEnumerator *pubEnum;
+    NSMutableArray *andResultsArray = [[NSMutableArray alloc] initWithCapacity:50];
 
-    return toReturn;
+    NSSet *copySet;
+
+    // cache the IMP for the BibItem search method, since we're potentially calling it several times per item
+    typedef BOOL (*searchIMP)(id, SEL, id, unsigned int, id, BOOL);
+    SEL matchSelector = @selector(matchesSubstring:withOptions:inField:removeDiacritics:);
+    searchIMP itemMatches = (searchIMP)[BibItem instanceMethodForSelector:matchSelector];
+    OBASSERT(NULL != itemMatches);
+    
+    // for each AND term, enumerate the entire publications array and search for a match; if we get a match, add it to a mutable set
+        
+    while(componentSubstring = [andEnum nextObject]){
+        
+        pubEnum = [arrayToSearch objectEnumerator];
+        while(pub = [pubEnum nextObject]){
+            
+            if(itemMatches(pub, matchSelector, componentSubstring, searchMask, field, doLossySearch))
+                [aSet addObject:pub];
+
+        }
+        copySet = [aSet copy];
+        [andResultsArray addObject:copySet];
+        [copySet release];
+        [aSet removeAllObjects]; // don't forget this step!
+    }
+
+    // Get all of the OR matches, each in a separate set added to orResultsArray
+    NSMutableArray *orResultsArray = [[NSMutableArray alloc] initWithCapacity:50];
+    
+    while(componentSubstring = [orEnum nextObject]){
+        
+        pubEnum = [arrayToSearch objectEnumerator];
+        while(pub = [pubEnum nextObject]){
+            
+            if(itemMatches(pub, matchSelector, componentSubstring, searchMask, field, doLossySearch))
+                [aSet addObject:pub];
+            
+        }
+        copySet = [aSet copy];
+        [orResultsArray addObject:copySet];
+        [copySet release];
+        [aSet removeAllObjects]; // don't forget this step!
+    }
+    
+    // we need to sort the set so we always start with the shortest one
+    static NSArray *setLengthSortDescriptors = nil;
+    if(setLengthSortDescriptors == nil){
+        NSSortDescriptor *setLengthSort = [[NSSortDescriptor alloc] initWithKey:@"self.@count" ascending:YES selector:@selector(compare:)];
+        setLengthSortDescriptors = [[NSArray alloc] initWithObjects:setLengthSort, nil];
+        [setLengthSort release];
+    }
+    
+    [andResultsArray sortUsingDescriptors:setLengthSortDescriptors];
+    NSEnumerator *e = [andResultsArray objectEnumerator];
+    
+    // don't start out by intersecting an empty set
+    [aSet setSet:[e nextObject]];
+
+    // now get the intersection of all successive results from the AND terms
+    while(copySet = [e nextObject]){
+        [aSet intersectSet:copySet];
+    }
+    [andResultsArray release];
+    
+    // union the results from the OR search
+    e = [orResultsArray objectEnumerator];
+    
+    while(copySet = [e nextObject]){
+        [aSet unionSet:copySet];
+    }
+    [orResultsArray release];
+        
+    return [aSet allObjects];
+    
 }
 
 #pragma mark File Content Search
 
 - (IBAction)searchByContent:(id)sender
 {
+    // Normal search if the fileSearchController is not present and the searchstring is empty, since the searchfield target has apparently already been reset (I think).  Fixes bug #1341802.
+    OBASSERT(searchField != nil && [searchField target] != nil);
+    if([searchField target] == self && [NSString isEmptyString:[searchField stringValue]]){
+        [self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
+        return;
+    }
+    
     // @@ File content search isn't really compatible with the group concept yet; this allows us to select publications when the content search is done, and also provides some feedback to the user that all pubs will be searched.  This is ridiculously complicated since we need to avoid calling searchByContent: in a loop.
     [tableView deselectAll:nil];
     [groupTableView updateHighlights];
@@ -296,46 +415,45 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     // here we avoid the table selection change notification that will result in an endless loop
     id tableDelegate = [groupTableView delegate];
     [groupTableView setDelegate:nil];
-    [groupTableView deselectAll:nil];
+    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
     [groupTableView setDelegate:tableDelegate];
     
     // this is what displaySelectedGroup normally ends up doing
-    [self handleGroupTableSelectionChangedNotification:nil];
-    [self sortPubsByKey:nil];
+    [shownPublications setArray:publications];
+    [tableView reloadData];
+    [self sortPubsByColumn:nil];
     
-    if(fileSearchController == nil){
+    if(fileSearchController == nil)
         fileSearchController = [[BDSKFileContentSearchController alloc] initForDocument:self];
-        NSData *sortDescriptorData = [[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKFileContentSearchSortDescriptorKey defaultObject:[[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey]];
-        if(sortDescriptorData)
-            [fileSearchController setSortDescriptorData:sortDescriptorData];
-    }
-    
+
     NSView *contentView = [fileSearchController searchContentView];
     NSRect frame = [splitView frame];
     [contentView setFrame:frame];
     [contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [mainBox addSubview:contentView];
+    [contentView setHidden:YES];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSViewAnimation *animation;
-        NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
-        NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:contentView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
+    NSViewAnimation *animation;
+    NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
+    NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:contentView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
 
-        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
-        [fadeOutDict release];
-        [fadeInDict release];
-        
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:BDSKDefaultAnimationTimeInterval];
-        [animation setAnimationCurve:NSAnimationEaseIn];
-        [animation startAnimation];
-    }
+    animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
+    [fadeOutDict release];
+    [fadeInDict release];
     
-    [[previewer progressOverlay] remove];
+    [animation setAnimationBlockingMode:NSAnimationBlocking]; // docs say this is the default, but apparently it isn't
+    [animation setDuration:0.5];
+    [animation startAnimation];
     
+    [splitView retain];
     [splitView removeFromSuperview];
-    // connect the searchfield to the controller and start the search
-    [fileSearchController setSearchField:searchField];
+    
+    [searchField setTarget:fileSearchController];
+    [searchField setAction:@selector(search:)];
+    [searchField setDelegate:fileSearchController];
+    
+    [fileSearchController search:searchField];
+    
 }
 
 // Method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.
@@ -345,31 +463,26 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     NSRect frame = [view frame];
     [splitView setFrame:frame];
     [mainBox addSubview:splitView];
+    [splitView setHidden:YES];
+    [splitView release];
     
-    if(currentPreviewView != [previewTextView enclosingScrollView])
-        [[previewer progressOverlay] overlayView:currentPreviewView];
+    NSViewAnimation *animation;
+    NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
+    NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
     
-    if (BDSKDefaultAnimationTimeInterval > 0.0) {
-        NSViewAnimation *animation;
-        NSDictionary *fadeOutDict = [[NSDictionary alloc] initWithObjectsAndKeys:view, NSViewAnimationTargetKey, NSViewAnimationFadeOutEffect, NSViewAnimationEffectKey, nil];
-        NSDictionary *fadeInDict = [[NSDictionary alloc] initWithObjectsAndKeys:splitView, NSViewAnimationTargetKey, NSViewAnimationFadeInEffect, NSViewAnimationEffectKey, nil];
-        
-        animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
-        [fadeOutDict release];
-        [fadeInDict release];
-        
-        [animation setAnimationBlockingMode:NSAnimationBlocking];
-        [animation setDuration:BDSKDefaultAnimationTimeInterval];
-        [animation setAnimationCurve:NSAnimationEaseIn];
-        [animation setDelegate:self];
-        [animation startAnimation];
-    }
+    animation = [[[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:fadeOutDict, fadeInDict, nil]] autorelease];
+    [fadeOutDict release];
+    [fadeInDict release];
     
-    [[fileSearchController searchContentView] removeFromSuperview];
+    [animation setAnimationBlockingMode:NSAnimationBlocking];
+    [animation setDuration:0.5];
+    [animation startAnimation];
     
-    // reconnect the searchfield
+    [view removeFromSuperview];
+    
     [searchField setTarget:self];
     [searchField setDelegate:self];
+    [searchField setAction:@selector(searchFieldAction:)];
     
     NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
     
@@ -380,79 +493,46 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
         
         // we match based on title, since that's all the index knows about the BibItem at present
         NSMutableArray *pubsToSelect = [NSMutableArray array];
-        NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+		NSEnumerator *pubEnum = [shownPublications objectEnumerator];
         BibItem *item;
         while(item = [pubEnum nextObject])
-            if([titlesToSelect containsObject:[item displayTitle]]) 
+            if([titlesToSelect containsObject:[item title]]) 
                 [pubsToSelect addObject:item];
-        [self selectPublications:pubsToSelect];
+		[self highlightBibs:pubsToSelect];
         [tableView scrollRowToCenter:[tableView selectedRow]];
-        
-        // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
-        if ([[documentWindow firstResponder] isEqual:[searchField currentEditor]] == NO)
-            [documentWindow makeFirstResponder:(NSResponder *)tableView];
-    }
+    } 
     
-    [mainBox setNeedsDisplay:YES];
-    
-    // _restoreDocumentStateByRemovingSearchView may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list
-    if ([[searchField stringValue] isEqualToString:@""])
-        [self hideSearchButtonView];  
-    else
-        [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
 }
 
 #pragma mark Find panel
 
-- (NSString *)selectedStringForFind;
-{
-    if([currentPreviewView isHidden])
-        return nil;
-    if(currentPreviewView != [previewTextView enclosingScrollView]){
-        NSTextView *textView = (NSTextView *)[(NSScrollView *)currentPreviewView documentView];
-        NSRange selRange = [textView selectedRange];
-        if (selRange.location == NSNotFound)
-            return nil;
-        return [[textView string] substringWithRange:selRange];
-    }else if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]]){
-        return [[(BDSKZoomablePDFView *)currentPreviewView currentSelection] string];
-    }
-    return nil;
-}
-
-// OAFindControllerAware informal protocol
-- (id <OAFindControllerTarget>)omniFindControllerTarget;
-{
-    if([currentPreviewView isKindOfClass:[NSScrollView class]] && [currentPreviewView isHidden] == NO)
-        return [(NSScrollView *)currentPreviewView documentView];
-    else
-        return nil;
+- (NSString *)selectedStringForFind {
+	NSRange selRange = [previewField selectedRange];
+	if (selRange.location == NSNotFound)
+		return nil;
+	return [[previewField string] substringWithRange:selRange];
 }
 
 - (IBAction)performFindPanelAction:(id)sender{
     NSString *selString = nil;
+    NSPasteboard *findPasteboard;
 
 	switch ([sender tag]) {
-        case NSFindPanelActionShowFindPanel:
-        case NSFindPanelActionNext:
-        case NSFindPanelActionPrevious:
-            if([currentPreviewView isKindOfClass:[NSScrollView class]] && [currentPreviewView isHidden] == NO)
-                [(NSTextView *)[(NSScrollView *)currentPreviewView documentView] performFindPanelAction:sender];
-            else
-                NSBeep();
+		case NSFindPanelActionShowFindPanel:
+            if ([[documentWindow toolbar] isVisible] == NO) 
+                [[documentWindow toolbar] setVisible:YES];
+            if ([[documentWindow toolbar] displayMode] == NSToolbarDisplayModeLabelOnly) 
+                [[documentWindow toolbar] setDisplayMode:NSToolbarDisplayModeDefault];
+            [searchField selectText:nil];
             break;
 		case NSFindPanelActionSetFindString:
-            selString = [self selectedStringForFind];
-            if ([NSString isEmptyString:selString])
-                return;
-            id firstResponder = [documentWindow firstResponder];
-            if (firstResponder == searchField || ([firstResponder isKindOfClass:[NSText class]] && [firstResponder delegate] == searchField)) {
+            selString = nil;
+            findPasteboard = [NSPasteboard pasteboardWithName:NSFindPboard];
+            if ([findPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]])
+                selString = [findPasteboard stringForType:NSStringPboardType];    
+            if ([NSString isEmptyString:selString] == NO)
                 [searchField setStringValue:selString];
-                [searchField selectText:nil];
-            } else {
-                [[BDSKFindController sharedFindController] setFindString:selString];
-                [previewTextView performFindPanelAction:sender];
-            }
+            [searchField selectText:nil];
             break;
         default:
             NSBeep();

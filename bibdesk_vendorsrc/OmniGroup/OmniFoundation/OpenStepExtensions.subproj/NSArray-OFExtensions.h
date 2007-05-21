@@ -1,18 +1,17 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSArray-OFExtensions.h 79089 2006-09-07 23:41:01Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSArray-OFExtensions.h 66043 2005-07-25 21:17:05Z kc $
 
 #import <Foundation/NSArray.h>
 
 #import <OmniFoundation/OFDictionaryInitialization.h>
 
-@class NSDecimalNumber, NSSet;
-@class OFMultiValueDictionary;
+@class NSDecimalNumber, OFMultiValueDictionary;
 
 @interface NSArray (OFExtensions)
 
@@ -35,12 +34,7 @@
 - (NSString *)componentsJoinedByCommaAndAnd;
     // (x) -> "x"; (x, y) -> "x and y";  (x, y, z) -> "x, y, and z", and so on
 
-- (unsigned)indexWhereObjectWouldBelong:(id)anObject inArraySortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
-- (unsigned)indexWhereObjectWouldBelong:(id)anObject inArraySortedUsingSelector: (SEL) selector;
-- (unsigned)indexOfObject: (id) anObject identical:(BOOL)requireIdentity inArraySortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
-
 - (unsigned)indexOfObject: (id) anObject inArraySortedUsingSelector: (SEL) selector;
-- (unsigned)indexOfObjectIdenticalTo: (id) anObject inArraySortedUsingSelector: (SEL) selector;
 - (BOOL) isSortedUsingSelector:(SEL)selector;
 - (BOOL) isSortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
 
@@ -58,7 +52,6 @@
 - (NSDictionary *)indexBySelector:(SEL)aSelector withObject:(id)argument;
 - (NSArray *)arrayByPerformingSelector:(SEL)aSelector;
 - (NSArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)anObject;
-- (NSSet *)setByPerformingSelector:(SEL)aSelector;
 
 - (NSArray *)objectsSatisfyingCondition:(SEL)aSelector;
 - (NSArray *)objectsSatisfyingCondition:(SEL)aSelector withObject:(id)anObject;

@@ -16,7 +16,7 @@
 #import "OFQueueProcessor.h"
 #import "OFWeakRetainConcreteImplementation.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFMessageQueue.m 66170 2005-07-28 17:40:10Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFMessageQueue.m 66170 2005-07-28 17:40:10Z kc $")
 
 @interface OFMessageQueue (Private)
 - (void)_createProcessorsForQueueSize:(unsigned int)queueCount;

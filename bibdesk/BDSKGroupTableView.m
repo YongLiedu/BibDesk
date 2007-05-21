@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/19/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -47,14 +47,6 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 #import "BDSKTypeSelectHelper.h"
-#import "BDSKGroup.h"
-#import "BibAuthor.h"
-#import "BDSKGroupCell.h"
-
-@interface BDSKGroupCellFormatter : NSFormatter
-@end
-
-#pragma mark
 
 @implementation BDSKGroupTableView
 
@@ -80,14 +72,6 @@
 	
 	[self setHeaderView:customTableHeaderView];	
     [customTableHeaderView release];
-    
-    BDSKGroupCell *cell = [[BDSKGroupCell alloc] init];
-    [column setDataCell:cell];
-    [cell release];
-    
-    BDSKGroupCellFormatter *formatter = [[BDSKGroupCellFormatter alloc] init];
-    [[column dataCell] setFormatter:formatter];
-    [formatter release];
     
     [super awakeFromNib]; // this updates the font
     
@@ -121,9 +105,9 @@
     if ([[theEvent characters] length] == 0)
         return;
     unichar c = [[theEvent characters] characterAtIndex:0];
-    unsigned int modifierFlags = ([theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
+    unsigned int modifierFlags = ([theEvent modifierFlags] & 0xffff0000U);
 	// modified from NSTableView-OAExtensions.h which uses a shared typeahead helper instance (which we can't access to force it to recache)
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableTypeAheadSelection"]) {
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableTypeAheadSelection"]) {
 
         // @@ this is a hack; recaching in -reloadData doesn't work for us the first time around, but we don't want to recache on every keystroke
         if([[typeSelectHelper valueForKey:@"searchCache"] count] == 0)
@@ -163,29 +147,11 @@
     [self setRowHeight:rowHeight];
     
     // default is (3.0, 2.0); use a larger spacing for the gradient and drop highlights
-    NSSize intercellSize = [self intercellSpacing];
-    intercellSize.height = MAX(2.0f, roundf(0.5f * rowHeight));
+    NSSize intercellSize = NSMakeSize(3.0, 0.5f * rowHeight);
     [self setIntercellSpacing:intercellSize];
 
 	[self tile];
     [self reloadData]; // otherwise the change isn't immediately visible
-}
-
-- (void)mouseDown:(NSEvent *)theEvent{
-    if ([theEvent clickCount] == 2) {
-        NSPoint point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        int row = [self rowAtPoint:point];
-        int column = [self columnAtPoint:point];
-        if (row != -1 && column == 0) {
-            BDSKGroupCell *cell = [[[self tableColumns] objectAtIndex:0] dataCellForRow:row];
-            NSRect iconRect = [cell iconRectForBounds:[self frameOfCellAtColumn:column row:row]];
-            if (NSPointInRect(point, iconRect)) {
-                [[self delegate] tableView:self doubleClickedOnIconOfRow:row];
-                return;
-            }
-        }
-    }
-    [super mouseDown:theEvent];
 }
 
 - (void)drawHighlightOnRows:(NSIndexSet *)rows usingColor:(NSColor *)highlightColor
@@ -193,22 +159,42 @@
     NSParameterAssert(rows != nil);
     NSParameterAssert(highlightColor != nil);
     
-    float lineWidth = 1.0;
-    float heightOffset = MAX(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
+    // don't highlight selected rows
+    NSMutableIndexSet *rowsToHighlight = [rows mutableCopy];
+    [rowsToHighlight removeIndexes:[self selectedRowIndexes]];
+    
+    float lineWidth = 1.0f;
+    float heightOffset = 0.5f * [self intercellSpacing].height;
     
     [self lockFocus];
     [NSGraphicsContext saveGraphicsState];
     
-    unsigned rowIndex = [rows firstIndex];
+    // use a dark stroke with a light center fill
+    [[highlightColor colorWithAlphaComponent:0.2] setFill];
+    [[highlightColor colorWithAlphaComponent:0.8] setStroke];
+    
+    unsigned rowIndex = [rowsToHighlight firstIndex];
     NSRect drawRect;
+    NSBezierPath *path;
     
     while(rowIndex != NSNotFound){
         
-        drawRect = NSInsetRect([self rectOfRow:rowIndex], 0.0, heightOffset);
-        [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:lineWidth color:highlightColor];
+        drawRect = [self rectOfRow:rowIndex];
+        drawRect.size.width -= 2.0f * lineWidth;
+        drawRect.origin.x += lineWidth;
         
-        rowIndex = [rows indexGreaterThanIndex:rowIndex];
+        drawRect.size.height -= heightOffset;
+        drawRect.origin.y += 0.5f * heightOffset;
+        
+        path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
+        [path setLineWidth:lineWidth];
+        [path fill];
+        [path stroke];
+        
+        rowIndex = [rowsToHighlight indexGreaterThanIndex:rowIndex];
     }
+    
+    [rowsToHighlight release];
     
     [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];    
@@ -220,18 +206,7 @@
 
 -(void)_drawDropHighlightOnRow:(int)rowIndex
 {
-    float lineWidth = 2.0;
-    float heightOffset = rowIndex == -1 ? 0.0f : MAX(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
-    
-    [self lockFocus];
-    [NSGraphicsContext saveGraphicsState];
-    
-    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
-    drawRect = NSInsetRect(drawRect, 0.0, heightOffset);
-    [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:lineWidth color:[NSColor alternateSelectedControlColor]];
-    
-    [NSGraphicsContext restoreGraphicsState];
-    [self unlockFocus];
+    [self drawHighlightOnRows:[NSIndexSet indexSetWithIndex:rowIndex] usingColor:[NSColor alternateSelectedControlColor]];
 }
 
 // public method for updating the highlights (as when another table's selection changes)
@@ -300,23 +275,7 @@
 	[self scrollRowToVisible:0];
 }
 
-- (NSColor *)backgroundColor {
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableBackgroundColorForGroupTable"])
-        return [super backgroundColor];
-    
-    static NSColor *backgroundColor = nil;
-    if (nil == backgroundColor) {
-        // from Mail.app on 10.4; should be based on control tint?
-        float red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
-        backgroundColor = [[NSColor colorWithDeviceRed:red green:green blue:blue alpha:1.0] retain];
-    }
-    return backgroundColor;
-}
-
 @end
-
-#pragma mark -
 
 @implementation BDSKGroupTableHeaderView 
 
@@ -397,25 +356,14 @@
 
 @end
 
-#pragma mark -
+@implementation BDSKGroupTextFieldCell 
 
-@implementation BDSKGroupCellFormatter
-
-// this is actually never used, as BDSKGroupCell doesn't go through the formatter for display
-- (NSString *)stringForObjectValue:(id)obj{
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    return [obj respondsToSelector:@selector(name)] ? [[obj name] description] : [obj description];
-}
-
-- (NSString *)editingStringForObjectValue:(id)obj{
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
-    id name = [obj name];
-    return [name isKindOfClass:[BibAuthor class]] ? [name originalName] : [name description];
-}
-
-- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
-    *obj = [[[BDSKGroup alloc] initWithName:string count:0] autorelease];
-    return YES;
+- (NSColor *)textColor;
+{
+    if (_cFlags.highlighted)
+        return [NSColor textBackgroundColor];
+    else
+        return [super textColor];
 }
 
 @end

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/3/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -70,14 +70,6 @@ typedef enum {
     BDSKInDateRange
 } BDSKDateComparison;
 
-enum {
-    BDSKDateField,
-    BDSKBooleanField,
-    BDSKTriStateField,
-    BDSKRatingField,
-    BDSKStringField
-};
-
 @interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
 	BDSKStringComparison stringComparison;
@@ -96,9 +88,6 @@ enum {
 + (NSString *)dictionaryVersion;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
-
-// call when disposing of the condition in order to break a retain cycle
-- (void)invalidateCacheTimer;
 
 - (NSDictionary *)dictionaryValue;
 
@@ -136,9 +125,4 @@ enum {
 
 - (BOOL)isDateCondition;
 
-@end
-
-
-@interface NSString (BDSKConditionExtensions)
-- (int)fieldType;
 @end

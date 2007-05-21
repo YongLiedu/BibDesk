@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Tue Jan 29 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,15 @@
 */
 
 #import <Cocoa/Cocoa.h>
+#import "PDFImageView.h"
+#import "BibPrefController.h"
+#import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
+#import "BDSKTeXTask.h"
+#import "BDSKOverlay.h"
+#import "BDSKZoomablePDFView.h"
 
-@class PDFView, BDSKZoomablePDFView, BDSKTeXTask, BDSKOverlay, BDSKPreviewerServer;
-
-typedef enum {
-	BDSKUnknownPreviewState = -1,
-	BDSKEmptyPreviewState   =  0,
-	BDSKWaitingPreviewState =  1,
-	BDSKShowingPreviewState =  2
-} BDSKPreviewState;
+@class BibDocument;
+@class BDSKPreviewMessageQueue;
 
 /*!
     @class BDSKPreviewer
@@ -55,17 +55,19 @@ typedef enum {
     @discussion ...
 */
 @interface BDSKPreviewer : NSWindowController {
-    IBOutlet BDSKZoomablePDFView *pdfView;
+	BDSKTeXTask *texTask;
+	
+    id pdfView;
+    IBOutlet PDFImageView *imagePreviewView;
     IBOutlet NSTextView *rtfPreviewView;
-    IBOutlet NSTextView *logView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet BDSKOverlay *progressOverlay;
-    IBOutlet NSImageView *warningImageView;
-    IBOutlet NSView *warningView;
     
-    BDSKPreviewerServer *server;
-    BDSKPreviewState previewState;
+    BDSKPreviewMessageQueue *messageQueue;
+	volatile int previewState;
+    
+    OFSimpleLockType stateLock;
 }
 
 /*!
@@ -75,18 +77,8 @@ typedef enum {
 */
 + (BDSKPreviewer *)sharedPreviewer;
 
-- (PDFView *)pdfView;
-- (NSTextView *)textView;
-- (BDSKOverlay *)progressOverlay;
-
-- (float)PDFScaleFactor;
-- (void)setPDFScaleFactor:(float)scaleFactor;
-- (float)RTFScaleFactor;
-- (void)setRTFScaleFactor:(float)scaleFactor;
-
-- (BOOL)isVisible;
-- (void)handleMainDocumentDidChangeNotification:(NSNotification *)notification;
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)handlePreviewNeedsUpdate:(NSNotification *)notification;
 
 /*!
     @method updateWithBibTeXString:
@@ -99,12 +91,20 @@ typedef enum {
 - (void)updateWithBibTeXString:(NSString *)bibStr;
 
 /*!
-    @method     displayPreviewsForState:
+    @method     drawPreviewsForState:
     @abstract   This will draw the previews or message in the appropriate views.
     @discussion This method sets the state flag and puts -performDrawingForState: on the main queue for drawing.
 	@param		state An integer indicating the preview state for which to draw.
 */
-- (void)displayPreviewsForState:(BDSKPreviewState)state success:(BOOL)success;
+- (void)drawPreviewsForState:(int)state;
+
+/*!
+    @method     performDrawingForState:
+    @abstract   Draws the previews or a message in their appropriate views and starts or stops the spinner.
+    @discussion This should only be called from the main thread. Don't call it directly, use -drawPreviewsForState.
+	@param		state An integer indicating the preview state for which to draw.
+*/
+- (void)performDrawingForState:(int)state;
 
 /*!
     @method     PDFDataWithString:color:
@@ -139,6 +139,30 @@ typedef enum {
 		or there are updates waiting. This should be thread safe. 
 */
 - (NSString *)LaTeXString;
+
+/*!
+    @method     isEmpty
+    @abstract   Returns YES if the previews were empty, and should show the default message for an empty selection. 
+    @discussion This is mostly a convenience accessor to check if our data is valid. This accessor is thread safe. 
+*/
+- (BOOL)isEmpty;
+
+/*!
+    @method     previewState
+    @abstract   Returns an integer indicating the currently expected state of the previews.
+    @discussion This accessor is thread safe. 
+	@result		An integer indicating the currently expected state. 0 = empty, 1 = waiting, 2 = showing. 
+*/
+- (int)previewState;
+
+/*!
+    @method     changePreviewState:
+    @abstract   Sets the current preview state to a new value. Returns a boolean to indicate whether a change was made. 
+    @discussion This accessor is thread safe. 
+	@param		state The integer indicating the state to set
+	@result		A boolean, return NO if the current state was aleady in the requested state.
+*/
+- (BOOL)changePreviewState:(int)state;
 
 /*!
     @method     handleApplicationWillTerminate:

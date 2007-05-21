@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Thu Jul 29 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 #import "NSImage+Toolbox.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "NSBezierPath_BDSKExtensions.h"
-#import <OmniAppKit/IconFamily.h>
+
+static NSImage *cautionIconImage = nil;
 
 @implementation NSImage (Toolbox)
 
@@ -95,6 +96,48 @@
     return image;
 }
 
++ (NSImage *)smallMissingFileImage {
+    static NSImage *image = nil;
+    if(image == nil){
+        image = [[NSImage alloc] initWithSize:NSMakeSize(16, 16)];
+        NSImage *genericDocImage = [self iconWithSize:NSMakeSize(16, 16) forToolboxCode:kGenericDocumentIcon];
+        NSImage *questionMark = [self iconWithSize:NSMakeSize(10, 10) forToolboxCode:kQuestionMarkIcon];
+        [image lockFocus];
+        [genericDocImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
+        [questionMark compositeToPoint:NSMakePoint(3, 3) operation:NSCompositeSourceOver];
+        [image unlockFocus];
+    }
+    return image;
+}
+
++ (NSImage *)cautionIconImage {
+	if (!cautionIconImage) {
+		cautionIconImage = [[self iconWithSize:NSMakeSize(16,16) forToolboxCode:kAlertCautionIcon] retain];
+	}
+	return cautionIconImage;
+}
+
++ (NSImage *)smallGenericInternetLocationImage{
+	static NSImage *image = nil;
+	if (image == nil)
+        image = [[NSImage iconWithSize:NSMakeSize(16,16) forToolboxCode:kInternetLocationGenericIcon] retain];
+	return image;
+}
+
++ (NSImage *)smallFTPInternetLocationImage{
+	static NSImage *image = nil;
+	if (image == nil) 
+        image = [[NSImage iconWithSize:NSMakeSize(16,16) forToolboxCode:kInternetLocationFTPIcon] retain];
+	return image;
+}
+
++ (NSImage *)smallHTTPInternetLocationImage{
+	static NSImage *image = nil;
+	if (image == nil)
+        image = [[NSImage iconWithSize:NSMakeSize(16,16) forToolboxCode:kInternetLocationHTTPIcon] retain];
+	return image;
+}
+
 + (NSImage *)imageForURL:(NSURL *)aURL{
     
     if(!aURL) return nil;
@@ -111,6 +154,60 @@
     else return [self genericInternetLocationImage];
 }
 
++ (NSImage *)smallImageForURL:(NSURL *)aURL{
+
+    if(!aURL) return nil;
+    
+    if([aURL isFileURL])
+        return [self smallImageForFile:[aURL path]];
+    
+    NSString *scheme = [aURL scheme];
+    
+    if([scheme isEqualToString:@"http"])
+        return [self smallHTTPInternetLocationImage];
+    else if([scheme isEqualToString:@"ftp"])
+        return [self smallFTPInternetLocationImage];
+    else return [self smallGenericInternetLocationImage];
+}
+
++ (NSImage *)smallImageForFileType:(NSString *)fileType{
+    // It turns out that -[NSWorkspace iconForFileType:] doesn't cache previously returned values, so we cache them here.
+    // Mainly useful for tableview datasource methods.
+    
+    static NSMutableDictionary *imageDictionary = nil;
+    id image = nil;
+    
+    if (!fileType)
+        return nil;
+    
+    if (imageDictionary == nil)
+        imageDictionary = [[NSMutableDictionary alloc] init];
+    
+    image = [imageDictionary objectForKey:fileType];
+    if (image == nil) {
+        
+        NSImage *baseImage = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];        
+        NSRect srcRect = {NSZeroPoint, [baseImage size]};
+        NSSize dstSize = NSMakeSize(16,16);
+        NSRect dstRect = {NSZeroPoint, dstSize};
+        
+        image = [[NSImage alloc] initWithSize:dstSize];
+        [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [baseImage drawInRect:dstRect fromRect:srcRect operation:NSCompositeCopy fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
+        [image unlockFocus];
+        [image autorelease];
+        
+        if (image == nil)
+            image = [NSNull null];
+        
+        [imageDictionary setObject:image forKey:fileType];
+    }
+    return image != [NSNull null] ? image : nil;
+}
+
 + (NSImage *)imageForFile:(NSString *)path{
     // It turns out that -[NSWorkspace iconForFileType:] doesn't cache previously returned values, so we cache them here.
     // Mainly useful for tableview datasource methods.
@@ -120,34 +217,98 @@
     
     if (!path)
         return nil;
-   
+    
+    NSString *pathExtension = [path pathExtension];
+    if(![pathExtension isEqualToString:@""])
+        return [NSImage imageForFileType:pathExtension]; // prefer this (more common case)
+    
     // if no file type, we'll just cache the path and waste some memory
     if (imageDictionary == nil)
         imageDictionary = [[NSMutableDictionary alloc] init];
     
+    image = [imageDictionary objectForKey:path];
+    if (image == nil) {
+        image = [[NSWorkspace sharedWorkspace] iconForFile:path];
+        if (image == nil)
+            image = [NSNull null];
+        [imageDictionary setObject:image forKey:path];
+    }
+    return image != [NSNull null] ? image : nil;
+}
+
++ (NSImage *)smallImageNamed:(NSString *)imageName{
+    
+    NSParameterAssert(imageName);
+    
+    static NSMutableDictionary *imageDictionary = nil;
+    if (imageDictionary == nil)
+        imageDictionary = [[NSMutableDictionary alloc] init];
+
+    id image = [imageDictionary objectForKey:imageName];
+    if (image == nil) {
+        
+        NSImage *baseImage = [self imageNamed:imageName];        
+        NSRect srcRect = {NSZeroPoint, [baseImage size]};
+        NSSize dstSize = NSMakeSize(16,16);
+        NSRect dstRect = {NSZeroPoint, dstSize};
+        
+        image = [[NSImage alloc] initWithSize:dstSize];
+        [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [baseImage drawInRect:dstRect fromRect:srcRect operation:NSCompositeCopy fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
+        [image unlockFocus];
+        [image autorelease];
+        
+        if (image == nil)
+            image = [NSNull null];
+        
+        [imageDictionary setObject:image forKey:imageName];
+    }
+    return image != [NSNull null] ? image : nil;
+ 
+}
+
++ (NSImage *)smallImageForFile:(NSString *)path{
+    // It turns out that -[NSWorkspace iconForFileType:] doesn't cache previously returned values, so we cache them here.
+    // Mainly useful for tableview datasource methods.
+    
+    static NSMutableDictionary *imageDictionary = nil;
+    id image = nil;
+    
+    if (!path)
+        return nil;
+    
     NSString *pathExtension = [path pathExtension];
-    if(![pathExtension isEqualToString:@""]) {
-        image = [imageDictionary objectForKey:pathExtension];
-        if (image == nil) {
-            IconFamily *iconFamily = [[IconFamily alloc] initWithIconOfFile:path];
-            image = [iconFamily imageWithAllReps];
-            [image setFlipped:NO];
-            if (image == nil)
-                image = [NSNull null];
-            [imageDictionary setObject:image forKey:pathExtension];
-            [iconFamily release];
-        }
-    } else {    
-        image = [imageDictionary objectForKey:path];
-        if (image == nil) {
-            IconFamily *iconFamily = [[IconFamily alloc] initWithIconOfFile:path];
-            image = [iconFamily imageWithAllReps];
-            [image setFlipped:NO];
-            if (image == nil)
-                image = [NSNull null];
-            [imageDictionary setObject:image forKey:path];
-            [iconFamily release];
-        }
+    if(![pathExtension isEqualToString:@""])
+        return [NSImage smallImageForFileType:pathExtension]; // prefer this (more common case)
+    
+    // if no file type, we'll just cache the path and waste some memory
+    if (imageDictionary == nil)
+        imageDictionary = [[NSMutableDictionary alloc] init];
+    
+    image = [imageDictionary objectForKey:path];
+    if (image == nil) {
+        
+        NSImage *baseImage = [[NSWorkspace sharedWorkspace] iconForFile:path];        
+        NSRect srcRect = {NSZeroPoint, [baseImage size]};
+        NSSize dstSize = NSMakeSize(16,16);
+        NSRect dstRect = {NSZeroPoint, dstSize};
+        
+        image = [[NSImage alloc] initWithSize:dstSize];
+        [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [baseImage drawInRect:dstRect fromRect:srcRect operation:NSCompositeCopy fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
+        [image unlockFocus];
+        [image autorelease];
+        
+        if (image == nil)
+            image = [NSNull null];
+        
+        [imageDictionary setObject:image forKey:path];
     }
     return image != [NSNull null] ? image : nil;
 }
@@ -192,20 +353,20 @@
 
 - (NSImage *)dragImageWithCount:(int)count;
 {
-    return [self dragImageWithCount:count inside:NO isIcon:YES];
+    return [self dragImageWithCount:count inside:NO];
 }
 
-- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
+- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside;
 {
     NSImage *labeledImage;
-    NSRect sourceRect = {NSZeroPoint, [self size]};
-    NSSize size = isIcon ? NSMakeSize(32.0, 32.0) : [self size];
-    NSRect targetRect = {NSZeroPoint, size};
     
     if (count > 1) {
         
         NSAttributedString *countString = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%i", count]
                                             attributeName:NSForegroundColorAttributeName attributeValue:[NSColor whiteColor]] autorelease];
+        NSSize size = [self size];
+        NSRect rect = {NSZeroPoint, size};
+        NSRect iconRect = rect;
         NSRect countRect = {NSZeroPoint, [countString size]};
         float countOffset;
         
@@ -214,20 +375,20 @@
         
         if (inside) {
             // large image, draw it inside the corner
-            countRect.origin = NSMakePoint(NSMaxX(targetRect) - NSWidth(countRect) - countOffset - 2.0, 3.0);
+            countRect.origin = NSMakePoint(NSMaxX(rect) - NSWidth(countRect) - countOffset - 2.0, 3.0);
         } else {
             // small image, draw it outside the corner
-            countRect.origin = NSMakePoint(NSMaxX(targetRect), 0.0);
+            countRect.origin = NSMakePoint(NSMaxX(rect), 0.0);
             size.width += NSWidth(countRect) + countOffset;
             size.height += countOffset;
-            targetRect.origin.y += countOffset;
+            rect.origin.y += countOffset;
         }
         
         labeledImage = [[[NSImage alloc] initWithSize:size] autorelease];
         
         [labeledImage lockFocus];
         
-        [self drawInRect:targetRect fromRect:sourceRect operation:NSCompositeCopy fraction:1.0];
+        [self drawInRect:rect fromRect:iconRect operation:NSCompositeCopy fraction:1.0];
         
         [NSGraphicsContext saveGraphicsState];
         // draw a count of the rows being dragged, similar to Mail.app
@@ -238,20 +399,16 @@
         
         [labeledImage unlockFocus];
         
-        sourceRect.size = size;
-        targetRect.size = size;
-        targetRect.origin = NSZeroPoint;
-        
     } else {
         
         labeledImage = self;
         
     }
 	
-    NSImage *dragImage = [[NSImage alloc] initWithSize:size];
+    NSImage *dragImage = [[NSImage alloc] initWithSize:[labeledImage size]];
 	
 	[dragImage lockFocus];
-	[labeledImage drawInRect:targetRect fromRect:sourceRect operation:NSCompositeCopy fraction:0.7];
+	[labeledImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
 	[dragImage unlockFocus];
 	
 	return [dragImage autorelease];

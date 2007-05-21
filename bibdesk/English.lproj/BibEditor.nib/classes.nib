@@ -1,8 +1,7 @@
 {
     IBClasses = (
-        {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
-        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
+        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {CLASS = BDSKForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
         {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 
@@ -30,6 +29,7 @@
                 changeFlag = id; 
                 changeRating = id; 
                 chooseLocalURL = id; 
+                citeKeyDidChange = id; 
                 consolidateLinkedFiles = id; 
                 createNewPubUsingCrossrefAction = id; 
                 deletePub = id; 

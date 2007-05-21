@@ -2,7 +2,7 @@
 //  NSFileManager_ExtendedAttributes.m
 //
 //  Created by Adam R. Maxwell on 05/12/05.
-//  Copyright 2005, 2006, 2007 Adam R. Maxwell. All rights reserved.
+//  Copyright 2005, 2006 Adam R. Maxwell. All rights reserved.
 //
 /*
  
@@ -40,7 +40,6 @@ static NSString *xattrError(int err, const char *path);
 {
     const char *fsPath = [self fileSystemRepresentationWithPath:path];
     NSString *errMsg;
-    int err;
     
     int xopts;
     
@@ -56,9 +55,8 @@ static NSString *xattrError(int err, const char *path);
     status = listxattr(fsPath, NULL, 0, xopts);
     
     if(status == -1){
-        err = errno;
-        errMsg = xattrError(err, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
+        errMsg = xattrError(errno, fsPath);
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return nil;
     }
     
@@ -69,14 +67,13 @@ static NSString *xattrError(int err, const char *path);
     status = listxattr(fsPath, namebuf, bufSize, xopts);
     
     if(status == -1){
-        err = errno;
-        errMsg = xattrError(err, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
+        errMsg = xattrError(errno, fsPath);
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         NSZoneFree(zone, namebuf);
         return nil;
     }
     
-    int idx, start = 0;
+    unsigned idx, start = 0;
 
     NSString *attribute = nil;
     NSMutableArray *attrs = [NSMutableArray array];
@@ -116,7 +113,7 @@ static NSString *xattrError(int err, const char *path);
             [array addObject:string];
             [string release];
         } else {
-            if(error) *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, [NSNumber numberWithInt:NSUTF8StringEncoding], NSStringEncodingErrorKey, NSLocalizedString(@"unable to convert to a string", @"Error description"), NSLocalizedDescriptionKey, nil]]; 
+            if(error) *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, [NSNumber numberWithInt:NSUTF8StringEncoding], NSStringEncodingErrorKey, NSLocalizedString(@"unable to convert to a string", @""), NSLocalizedDescriptionKey, nil]]; 
             return nil;
         }
     }
@@ -155,7 +152,6 @@ static NSString *xattrError(int err, const char *path);
     const char *fsPath = [self fileSystemRepresentationWithPath:path];
     const char *attrName = [attr UTF8String];
     NSString *errMsg;
-    int err;
     
     int xopts;
     
@@ -169,9 +165,8 @@ static NSString *xattrError(int err, const char *path);
     status = getxattr(fsPath, attrName, NULL, 0, 0, xopts);
     
     if(status == -1){
-        err = errno;
-        errMsg = xattrError(err, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
+        errMsg = xattrError(errno, fsPath);
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return nil;
     }
     
@@ -181,9 +176,8 @@ static NSString *xattrError(int err, const char *path);
     status = getxattr(fsPath, attrName, namebuf, bufSize, 0, xopts);
     
     if(status == -1){
-        err = errno;
-        errMsg = xattrError(err, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
+        errMsg = xattrError(errno, fsPath);
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         NSZoneFree(NSDefaultMallocZone(), namebuf);
         return nil;
     }
@@ -192,38 +186,6 @@ static NSString *xattrError(int err, const char *path);
     NSZoneFree(NSDefaultMallocZone(), namebuf);
     
     return [attribute autorelease];
-}
-
-- (id)propertyListFromExtendedAttributeNamed:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)traverse error:(NSError **)outError;
-{
-    NSError *error;
-    NSData *data = [self extendedAttributeNamed:attr atPath:path traverseLink:traverse error:&error];
-    id plist = nil;
-    if (nil == data) {
-        if (outError) *outError = [NSError errorWithDomain:@"BDSKErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, error, NSUnderlyingErrorKey, nil]];
-    } else {
-        // we compress plist types, but check just in case...
-        NSData *decompressedData = data;
-        if ([decompressedData mightBeCompressed]) {
-            @try {
-                decompressedData = [data decompressedBzip2Data];
-            }
-            @catch(id exception) {
-                NSLog(@"property list for extended attribute %@ at path %@ couldn't be decompressed", attr, path);
-                decompressedData = data;
-            }
-        }
-        NSString *errorString;
-        plist = [NSPropertyListSerialization propertyListFromData:decompressedData 
-                                                 mutabilityOption:NSPropertyListImmutable 
-                                                           format:NULL 
-                                                 errorDescription:&errorString];
-        if (nil == plist) {
-            if (outError) *outError = [NSError errorWithDomain:@"BDSKErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errorString, NSLocalizedDescriptionKey, nil]];
-            [errorString release];
-        }
-    }
-    return plist;
 }
 
 - (BOOL)addExtendedAttributeNamed:(NSString *)attr withStringValue:(NSString *)value atPath:(NSString *)path error:(NSError **)error;
@@ -254,14 +216,13 @@ static NSString *xattrError(int err, const char *path);
     size_t dataSize = [value length];
     const char *attrName = [attr UTF8String];
     NSString *errMsg;
-    int err;
     
     BOOL noFollow = NO;    // default setting of NO will prevent following symlinks
     BOOL createOnly = NO;  // YES will only allow creation (it will fail if the attr already exists)
     BOOL replaceOnly = NO; // YES will only allow replacement (it will fail if the attr does not exist)
     
     if(options != nil){
-        noFollow = [[options objectForKey:@"NoFollowLinks"] boolValue];
+        noFollow = [[options objectForKey:@"FollowLinks"] boolValue];
         createOnly = [[options objectForKey:@"CreateOnly"] boolValue];
         replaceOnly = [[options objectForKey:@"ReplaceOnly"] boolValue];
     }
@@ -278,38 +239,11 @@ static NSString *xattrError(int err, const char *path);
     int status = setxattr(fsPath, attrName, data, dataSize, 0, xopts);
     
     if(status == -1){
-        err = errno;
-        errMsg = xattrError(err, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
+        errMsg = xattrError(errno, fsPath);
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return NO;
     } else 
         return YES;
-}
-
-- (BOOL)setExtendedAttributeNamed:(NSString *)attr toPropertyListValue:(id)plist atPath:(NSString *)path options:(NSDictionary *)options error:(NSError **)error;
-{
-    NSString *errorString;
-    NSData *data = [NSPropertyListSerialization dataFromPropertyList:plist 
-                                                              format:NSPropertyListBinaryFormat_v1_0 
-                                                    errorDescription:&errorString];
-    BOOL success;
-    if (nil == data) {
-        if (error) *error = [NSError errorWithDomain:@"BDSKErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errorString, NSLocalizedDescriptionKey, nil]];
-        [errorString release];
-        success = NO;
-    } else {
-        // try to compress; this saves significant space under some conditions and avoids the size error
-        NSData *compressedData;
-        @try {
-            compressedData = [data compressedBzip2Data];
-        }
-        @catch(id exception) {
-            compressedData = data;
-            NSLog(@"property list could not be compressed for attribute %@ at path %@", attr, path);
-        }
-        success = [self setExtendedAttributeNamed:attr toValue:compressedData atPath:path options:options error:error];
-    }
-    return success;
 }
 
 - (BOOL)removeExtendedAttribute:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
@@ -318,7 +252,6 @@ static NSString *xattrError(int err, const char *path);
     const char *fsPath = [self fileSystemRepresentationWithPath:path];
     const char *attrName = [attr UTF8String];
     NSString *errMsg;
-    int err;
     
     int xopts;
     
@@ -330,88 +263,202 @@ static NSString *xattrError(int err, const char *path);
     int status = removexattr(fsPath, attrName, xopts);
     
     if(status == -1){
-        err = errno;
-        errMsg = xattrError(err, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
+        errMsg = xattrError(errno, fsPath);
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return NO;
     } else 
         return YES;    
     
 }
 
-- (BOOL)removeAllExtendedAttributesAtPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
-{
-    NSArray *allAttributes = [self extendedAttributeNamesAtPath:path traverseLink:follow error:error];
-    if  (nil == allAttributes)
-        return NO;
-    
-    NSEnumerator *e = [allAttributes objectEnumerator];
-    NSString *attrName;
-    while (attrName = [e nextObject]) {
-        
-        // return NO as soon as any single removal fails
-        if ([self removeExtendedAttribute:attrName atPath:path traverseLink:follow error:error] == NO)
-            return NO;
-    }
-    return YES;
-}
-
 // guaranteed to return non-nil
 static NSString *xattrError(int err, const char *myPath)
 {
-    NSString *errMsg = nil;
+    char *errMsg = NULL;
     switch (err)
     {
         case ENOTSUP:
-            errMsg = NSLocalizedString(@"File system does not support extended attributes or they are disabled.", @"Error description");
+            errMsg = "file system does not support extended attributes or they are disabled.";
             break;
         case ERANGE:
-            errMsg = NSLocalizedString(@"Buffer too small for attribute names.", @"Error description");
+            errMsg = "buffer too small for attribute names.";
             break;
         case EPERM:
-            errMsg = NSLocalizedString(@"This file system object does not support extended attributes.", @"Error description");
+            errMsg = "this file system object does not support extended attributes";
             break;
         case ENOTDIR:
-            errMsg = NSLocalizedString(@"A component of the path is not a directory.", @"Error description");
+            errMsg = "a component of the path is not a directory";
             break;
         case ENAMETOOLONG:
-            errMsg = NSLocalizedString(@"File name too long.", @"Error description");
+            errMsg = "name too long";
             break;
         case EACCES:
-            errMsg = NSLocalizedString(@"Search permission denied for this path.", @"Error description");
+            errMsg = "search permission denied for this path";
             break;
         case ELOOP:
-            errMsg = NSLocalizedString(@"Too many symlinks encountered resolving path.", @"Error description");
+            errMsg = "too many symlinks encountered resolving path";
             break;
         case EIO:
-            errMsg = NSLocalizedString(@"I/O error occurred.", @"Error description");
+            errMsg = "I/O error occurred";
             break;
         case EINVAL:
-            errMsg = NSLocalizedString(@"Options not recognized.", @"Error description");
+            errMsg = "options not recognized";
             break;
         case EEXIST:
-            errMsg = NSLocalizedString(@"Options contained XATTR_CREATE but the named attribute exists.", @"Error description");
+            errMsg = "options contained XATTR_CREATE but the named attribute exists";
             break;
         case ENOATTR:
-            errMsg = NSLocalizedString(@"The named attribute does not exist.", @"Error description");
+            errMsg = "options contained XATTR_REPLACE but the named attributed does not exist";
             break;
         case EROFS:
-            errMsg = NSLocalizedString(@"Read-only file system.  Unable to change attributes.", @"Error description");
+            errMsg = "read-only file system.  Unable to change attributes";
             break;
         case EFAULT:
-            errMsg = NSLocalizedString(@"Path or name points to an invalid address.", @"Error description");
+            errMsg = "path or name points to an invalid address";
             break;
         case E2BIG:
-            errMsg = NSLocalizedString(@"The data size of the extended attribute is too large.", @"Error description");
+            errMsg = "the data size of the extended attributed is too large";
             break;
         case ENOSPC:
-            errMsg = NSLocalizedString(@"No space left on file system.", @"Error description");
+            errMsg = "no space left on file system";
             break;
         default:
-            errMsg = NSLocalizedString(@"Unknown error occurred.", @"Error description");
+            errMsg = "unknown error occurred";
             break;
     }
-    return errMsg;
+    return [NSString stringWithCString:errMsg encoding:NSASCIIStringEncoding];
 }
     
+
+@end
+
+#import "NSURL_BDSKExtensions.h"
+#import <Quartz/Quartz.h>
+#import "PDFMetadata.h"
+
+@implementation NSFileManager (PDFMetadata)
+
+- (id)PDFMetadataForURL:(NSURL *)fileURL error:(NSError **)outError;
+{
+    
+    NSParameterAssert(fileURL != nil);
+
+    PDFMetadata *metadata = nil;
+    // check file type first?
+    NSError *error = nil;
+    NSString *errMsg = @"";
+    NSString *privateException = NSStringFromSelector(_cmd);
+    PDFDocument *document = nil;
+    
+    @try {
+        
+        fileURL = [fileURL fileURLByResolvingAliases];
+        if(fileURL == nil){
+            errMsg = NSLocalizedString(@"File does not exist.", @"");
+            @throw privateException;
+        }
+        
+        document = [[PDFDocument alloc] initWithURL:fileURL];
+        if(document == nil){
+            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"");
+            @throw privateException;
+        }
+        
+        NSDictionary *attributes = [document documentAttributes];
+        
+        if(attributes){
+            // have to use NSClassFromString unless we link with PDFMetadata
+            metadata = [[[NSClassFromString(@"PDFMetadata") alloc] init] autorelease];
+            [metadata setDictionary:attributes];
+        } else {
+            errMsg = NSLocalizedString(@"No PDF document attributes for file.", @"");
+            @throw privateException;
+        }
+        
+    }
+    
+    @catch(id exception){
+        
+        if([exception isEqual:privateException]){
+            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:3];
+            if([fileURL path])
+                [userInfo setObject:[fileURL path] forKey:NSFilePathErrorKey];
+            if(errMsg != nil)
+                [userInfo setObject:errMsg forKey:NSLocalizedDescriptionKey];
+            if(error != nil)
+                [userInfo setObject:error forKey:NSUnderlyingErrorKey];
+            error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
+        } else @throw;
+    }
+    
+    @finally {
+        [document release];
+    }
+    
+    if(outError)
+        *outError = error;
+    else
+        NSLog(@"%@ %@", self, error);
+    return metadata; // may be nil
+}
+
+// -[PDFDocument writeToURL:] can be really slow; since PDFDocument isn't thread safe, we're out of luck on this one
+- (BOOL)addPDFMetadata:(PDFMetadata *)attributes toURL:(NSURL *)fileURL error:(NSError **)outError;
+{
+    NSParameterAssert(attributes != nil);
+    NSParameterAssert(fileURL != nil);
+    
+    // check file type first?
+    NSError *error = nil;
+    NSString *errMsg = @"";
+    NSString *privateException = NSStringFromSelector(_cmd);
+    
+    @try {
+        
+        fileURL = [fileURL fileURLByResolvingAliases];
+        if(fileURL == nil){
+            errMsg = NSLocalizedString(@"File does not exist.", @"");
+            @throw privateException;
+        }
+        
+        PDFDocument *document = [[PDFDocument alloc] initWithURL:fileURL];
+        if(document == nil){
+            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"");
+            @throw privateException;
+        }
+        
+        [document setDocumentAttributes:[attributes dictionary]];
+        
+        // -[PDFDocument writeToURL:] returns YES even if it fails rdar://problem/4475062
+        if([[document dataRepresentation] writeToURL:fileURL options:NSAtomicWrite error:&error] == NO){
+            errMsg = NSLocalizedString(@"Unable to save PDF file.", @"");
+            [document release];
+            @throw privateException;
+        }
+        
+        [document release];
+    }
+    @catch(id exception){
+        
+        if([exception isEqual:privateException]){
+            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:3];
+            if([fileURL path])
+                [userInfo setObject:[fileURL path] forKey:NSFilePathErrorKey];
+            if(errMsg != nil)
+                [userInfo setObject:errMsg forKey:NSLocalizedDescriptionKey];
+            if(error != nil)
+                [userInfo setObject:error forKey:NSUnderlyingErrorKey];
+            error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
+            if(outError)
+                *outError = error;
+            else
+                NSLog(@"%@ %@", self, error);
+            return NO;
+        } else @throw;
+    }
+    
+    return YES;
+}
+
+
 @end

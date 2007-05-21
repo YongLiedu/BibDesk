@@ -2,7 +2,7 @@
 // Created by Michael McCracken, January 2005
 
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -161,6 +161,16 @@
 	if (contentView == nil)
 		contentView = control;
 	
+    [nc addObserver:self
+		   selector:@selector(controlTextDidChange:)
+			   name:NSControlTextDidChangeNotification
+			 object:control];
+	[nc addObserver:self
+		   selector:@selector(controlTextDidEndEditing:)
+			   name:NSControlTextDidEndEditingNotification
+			 object:control];
+    
+    // we're going away now, so we can unregister for the notifications we registered for earlier
 	[nc removeObserver:self name:NSControlTextDidChangeNotification object:control];
 	[nc removeObserver:self name:NSControlTextDidEndEditingNotification object:control];
 	[nc removeObserver:self name:NSViewFrameDidChangeNotification object:contentView];
@@ -205,7 +215,7 @@
 		color = [color blendedColorWithFraction:0.4 ofColor:[NSColor controlBackgroundColor]];
 	[expandedValueTextField setTextColor:color];
 	[expandedValueTextField setStringValue:expandedValue];
-	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"Tool tip message")];
+	[expandedValueTextField setToolTip:NSLocalizedString(@"This field contains macros and is being edited as it would appear in a BibTeX file. This is the expanded value.", @"")];
 }
 
 - (void)setErrorReason:(NSString *)reason errorMessage:(NSString *)message {
@@ -247,7 +257,7 @@
 }
 
 - (void)cellWindowDidBecomeKey:(NSNotification *)notification {
-	[backgroundView setShowFocusRing:[[self currentCell] isEditable]];
+	[backgroundView setShowFocusRing:YES];
 }
 
 - (void)cellWindowDidResignKey:(NSNotification *)notification {
@@ -275,7 +285,7 @@
 	OBASSERT([formatter isKindOfClass:[BDSKComplexStringFormatter class]]);
 	NSString *error = [formatter parseError];
 	if (error)
-		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Tool tip message"),error]];
+		[self setErrorReason:error errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid BibTeX string: %@. This change will not be recorded.", @"Invalid raw bibtex string error message"),error]];
 	else
 		[self setExpandedValue:[formatter parsedString]];
 }

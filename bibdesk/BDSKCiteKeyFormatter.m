@@ -1,7 +1,7 @@
 //  BDSKCiteStringFormatter.m
 //  Created by Michael McCracken on Sat Jul 06 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
     if([NSString isEmptyString:string]){
-        if(error) *error = NSLocalizedString(@"Empty cite keys are not allowed.", @"Error description");
+        if(error) *error = NSLocalizedString(@"Empty cite keys are not allowed.", @"");
         return NO;
     }
     *obj = string;
@@ -61,7 +61,7 @@
 	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
     NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
-        if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @"Error description"), [partialString substringWithRange:r]];
+        if(error) *error = [NSString stringWithFormat:NSLocalizedString(@"The character \"%@\" is not allowed in a BibTeX cite key.", @""), [partialString substringWithRange:r]];
         return NO;
     }else
         return YES;

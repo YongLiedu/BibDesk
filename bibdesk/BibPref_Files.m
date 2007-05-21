@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/02/05.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Adam Maxwell. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
  */
 
 #import "BibPref_Files.h"
-#import "BDSKStringEncodingManager.h"
 #import "BibAppController.h"
 #import "BDSKCharacterConversion.h"
 #import "BDSKConverter.h"
@@ -47,14 +46,33 @@
 
 @implementation BibPref_Files
 
+- (void)awakeFromNib{
+    [super awakeFromNib];
+    
+    encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
+    [encodingPopUp removeAllItems];
+    [encodingPopUp addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
+    
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        [autosaveDocumentButton setEnabled:NO];
+        [autosaveTimeField setEnabled:NO];
+        [autosaveTimeStepper setEnabled:NO];
+    }
+}
+
+- (void)dealloc{
+    [super dealloc];
+}
+
 - (void)updateUI{
-    [encodingPopUp setEncoding:[defaults integerForKey:BDSKDefaultStringEncodingKey]];
+    [encodingPopUp selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKDefaultStringEncodingKey]]];
     [showErrorsCheckButton setState: 
 		([defaults boolForKey:BDSKShowWarningsKey] == YES) ? NSOnState : NSOffState  ];	
     [shouldTeXifyCheckButton setState:([defaults boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == YES) ? NSOnState : NSOffState];
     [saveAnnoteAndAbstractAtEndButton setState:([defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] == YES) ? NSOnState : NSOffState];
     [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
     [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFile] ? NSOnState : NSOffState];
+    [autoSaveAsRSSButton setState:[defaults boolForKey:BDSKAutoSaveAsRSSKey] ? NSOnState : NSOffState];
     
     [autosaveDocumentButton setState:[defaults boolForKey:BDSKShouldAutosaveDocumentKey] ? NSOnState : NSOffState];
     
@@ -63,19 +81,23 @@
     [autosaveTimeField setIntValue:saveDelay];
     [autosaveTimeStepper setIntValue:saveDelay];
     
-    [autosaveTimeField setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
-    [autosaveTimeStepper setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){}
+    else {
+        [autosaveTimeField setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
+        [autosaveTimeStepper setEnabled:[defaults boolForKey:BDSKShouldAutosaveDocumentKey]];
+    }
     
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
-    [defaults setInteger:[sender encoding] forKey:BDSKDefaultStringEncodingKey];
-    [defaults autoSynchronize];
+    NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
+    
+    // NSLog(@"set encoding to %i for tag %i", [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue], [sender indexOfSelectedItem]);    
+    [defaults setInteger:encoding forKey:BDSKDefaultStringEncodingKey];    
 }
 
 - (IBAction)toggleShowWarnings:(id)sender{
     [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKShowWarningsKey];
-    [defaults autoSynchronize];
     if ([sender state] == NSOnState) {
         [[BDSKErrorObjectController sharedErrorObjectController] showWindow:self];
     }else{
@@ -85,22 +107,24 @@
 
 - (IBAction)toggleShouldTeXify:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (IBAction)toggleShouldUseNormalizedNames:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey];
-    [self valuesHaveChanged];
+    [self updateUI];
+}
+
+- (IBAction)toggleAutoSaveAsRSSChanged:(id)sender{
+    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKAutoSaveAsRSSKey];
 }
 
 - (IBAction)toggleShouldUseTemplateFile:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldUseTemplateFile];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)editTemplateFile:(id)sender{
@@ -122,11 +146,11 @@
 }
 
 - (IBAction)resetTemplateFile:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset the default template file to its original value?", @"Message in alert dialog when resetting bibtex template files") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
-								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset the default template file to its original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
 									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.", @"Informative text in alert dialog")];
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will restore the original content of the template file.",@"")];
 	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(templateAlertDidEnd:returnCode:contextInfo:) 
@@ -149,11 +173,11 @@
 }
 
 - (IBAction)resetConversions:(id)sender{
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset character conversions to their original value?", @"Message in alert dialog when resetting custom character conversions") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
-								   alternateButton:NSLocalizedString(@"Cancel", @"Button title") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Reset character conversions to their original value?",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:NSLocalizedString(@"Cancel",@"Cancel") 
 									   otherButton:nil 
-						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.", @"Informative text in alert dialog")];
+						 informativeTextWithFormat:NSLocalizedString(@"Choosing Reset will erase all custom character conversions.",@"")];
 	[alert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 					  modalDelegate:self
 					 didEndSelector:@selector(conversionsAlertDidEnd:returnCode:contextInfo:) 
@@ -165,14 +189,14 @@
     NSTimeInterval saveDelay = [sender intValue] * 60; // convert to seconds
     [defaults setInteger:saveDelay forKey:BDSKAutosaveTimeIntervalKey];
     [[NSDocumentController sharedDocumentController] setAutosavingDelay:saveDelay];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (IBAction)setShouldAutosave:(id)sender;
 {
     BOOL shouldSave = ([sender state] == NSOnState);
     [defaults setBool:shouldSave forKey:BDSKShouldAutosaveDocumentKey];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 @end

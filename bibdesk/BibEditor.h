@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Mon Dec 24 2001.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,16 @@
 
 @class BDSKRatingButton;
 @class BDSKRatingButtonCell;
+@class PDFImageView;
+@class BDSKFieldNameFormatter;
 @class BDSKComplexStringFormatter;
 @class BDSKCrossrefFormatter;
-@class BDSKCitationFormatter;
 @class MacroFormWindowController;
 @class BDSKImagePopUpButton;
 @class BibItem;
 @class BDSKStatusBar;
 @class BDSKAlert;
 @class BibAuthor;
-@class BDSKZoomablePDFView;
 
 /*!
     @class BibEditor
@@ -97,17 +97,20 @@
     IBOutlet NSMenu *actionMenu;
 	IBOutlet NSButton *addFieldButton;
 	
+    IBOutlet NSPanel *changeFieldNameSheet;
+    IBOutlet NSPopUpButton *oldFieldNamePopUp;
+    IBOutlet NSComboBox *newFieldNameComboBox;
     // ----------------------------------------------------------------------------------------
     BibItem *publication;
-    BOOL isEditable;
 // ----------------------------------------------------------------------------------------
 // doc preview stuff
 // ----------------------------------------------------------------------------------------
     IBOutlet NSDrawer* documentSnoopDrawer;
+    IBOutlet NSScrollView* documentSnoopScrollView;
 	int drawerState;
 	int drawerButtonState;
 	// doc textpreview stuff
-    IBOutlet BDSKZoomablePDFView *documentSnoopPDFView;
+    IBOutlet PDFImageView *documentSnoopImageView;
     IBOutlet NSView* pdfSnoopContainerView;
 	BOOL pdfSnoopViewLoaded;
 	// doc textpreview stuff
@@ -117,15 +120,6 @@
     IBOutlet WebView *remoteSnoopWebView;
     IBOutlet NSView* webSnoopContainerView;
 	BOOL webSnoopViewLoaded;
-// ----------------------------------------------------------------------------------------
-// URL downlaod stuff
-// ----------------------------------------------------------------------------------------
-	WebDownload *download;
-	BOOL isDownloading;
-	NSString *downloadFieldName;
-	NSString *downloadFileName;
-    int receivedContentLength;
-    int expectedContentLength;
 // ----------------------------------------------------------------------------------------
 // status bar stuff
 // ----------------------------------------------------------------------------------------
@@ -137,8 +131,7 @@
 // form cell formatter
     BDSKComplexStringFormatter *formCellFormatter;
     BDSKCrossrefFormatter *crossrefFormatter;
-	BDSKCitationFormatter *citationFormatter;
-    
+	
 // Author tableView
 	IBOutlet NSTableView *authorTableView;
 	IBOutlet NSScrollView *authorScrollView;
@@ -149,6 +142,7 @@
 	// edit field stuff
 	BOOL forceEndEditing;
     NSMutableDictionary *toolbarItems;
+    BOOL windowHasSheet;
 
     BOOL didSetupForm;
 	
@@ -185,9 +179,18 @@
 
 - (IBAction)toggleStatusBar:(id)sender;
 
+// ----------------------------------------------------------------------------------------
+// Add-field sheet support
+// ----------------------------------------------------------------------------------------
 - (IBAction)raiseAddField:(id)sender;
+
+// ----------------------------------------------------------------------------------------
+// Delete-field sheet support
+// ----------------------------------------------------------------------------------------
 - (IBAction)raiseDelField:(id)sender;
+
 - (IBAction)raiseChangeFieldName:(id)sender;
+- (IBAction)dismissChangeFieldNameSheet:(id)sender;
 
 /*!
     @method     editSelectedFieldAsRawBibTeX:
@@ -211,10 +214,7 @@
 
 - (void)updateCiteKeyAutoGenerateStatus;
 
-- (BOOL)autoFilePaper;
-
-- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue;
-- (int)userChangedField:(NSString *)fieldName from:(NSString *)oldValue to:(NSString *)newValue didAutoGenerate:(int)mask;
+- (void)autoFilePaper;
 
 - (NSString *)status;
 - (void)setStatus:(NSString *)status;
@@ -247,9 +247,6 @@
     @discussion (comprehensive description)
 */
 - (IBAction)moveLinkedFile:(id)sender;
-
-- (IBAction)showNotesForLinkedFile:(id)sender;
-
 - (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;
@@ -329,11 +326,18 @@
 - (IBAction)showCiteKeyWarning:(id)sender;
 
 /*!
-    @method     updateCiteKeyDuplicateWarning
+    @method     citeKeyDidChange:
+    @abstract   Action of the cite-key field to set a new cite-key.
+    @discussion (comprehensive description)
+*/
+- (IBAction)citeKeyDidChange:(id)sender;
+
+/*!
+    @method     setCiteKeyDuplicateWarning
     @abstract   Method to (un)set a warning to the user that the cite-key is a duplicate in te document. 
     @discussion (comprehensive description)
 */
-- (void)updateCiteKeyDuplicateWarning;
+- (void)setCiteKeyDuplicateWarning:(BOOL)set;
 
 /*!
     @method     bibTypeDidChange:
@@ -387,12 +391,6 @@
 */
 - (void)downloadLinkedFileAsLocalUrl:(id)sender;
 
-- (void)downloadURL:(NSURL *)linkURL forField:(NSString *)fieldName;
-
-- (void)setDownloading:(BOOL)downloading;
-
-- (void)cancelDownload;
-
 /*!
     @method     generateCiteKey:
     @abstract   Action to generate a cite-key for the bibitem, using the cite-key format string. 
@@ -414,15 +412,18 @@
 */
 - (IBAction)duplicateTitleToBooktitle:(id)sender;
 
-- (NSString *)keyField;
-- (void)setKeyField:(NSString *)fieldName;
+/*!
+    @method     makeKeyField:
+    @abstract   Selects the field and makes it key. 
+    @discussion (comprehensive description)
+*/
+- (void)makeKeyField:(NSString *)fieldName;
 
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
 - (void)customFieldsDidChange:(NSNotification *)aNotification;
 
 - (void)bibWillBeRemoved:(NSNotification *)notification;
-- (void)groupWillBeRemoved:(NSNotification *)notification;
 
 /*!
 	@method     openParentItemForField:
@@ -435,9 +436,6 @@
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
 - (IBAction)deletePub:(id)sender;
-
-- (IBAction)editPreviousPub:(id)sender;
-- (IBAction)editNextPub:(id)sender;
 
 - (void)editInheritedAlertDidEnd:(BDSKAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 

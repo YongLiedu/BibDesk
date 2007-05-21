@@ -71,7 +71,7 @@ parameter: code: on/off-option for environment
  ******************************************************************************/
 {
     if (code & ON) {
-        PushEnvironment(LETTER_MODE);
+        PushEnvironment(LETTER);
         if (g_letterToAddress)
             free(g_letterToAddress);
         g_letterToAddress = getBraceParam();

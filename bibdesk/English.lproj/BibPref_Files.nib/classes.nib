@@ -1,11 +1,6 @@
 {
     IBClasses = (
         {
-            CLASS = BDSKEncodingPopUpButton; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButton; 
-        }, 
-        {
             ACTIONS = {
                 editTemplateFile = id; 
                 resetConversions = id; 
@@ -14,6 +9,7 @@
                 setDefaultStringEncoding = id; 
                 setShouldAutosave = id; 
                 showConversionEditor = id; 
+                toggleAutoSaveAsRSSChanged = id; 
                 toggleSaveAnnoteAndAbstractAtEnd = id; 
                 toggleShouldTeXify = id; 
                 toggleShouldUseNormalizedNames = id; 
@@ -23,10 +19,11 @@
             CLASS = "BibPref_Files"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                autoSaveAsRSSButton = NSButton; 
                 autosaveDocumentButton = NSButton; 
                 autosaveTimeField = NSTextField; 
                 autosaveTimeStepper = NSStepper; 
-                encodingPopUp = BDSKEncodingPopUpButton; 
+                encodingPopUp = NSPopUpButton; 
                 outputTemplateFileButton = NSButton; 
                 saveAnnoteAndAbstractAtEndButton = NSButton; 
                 shouldTeXifyCheckButton = NSButton; 

@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Thu Jul 18 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTextViewFindController.h"
 #import <OmniAppKit/OAApplication.h>
-#import "NSObject_BDSKExtensions.h"
 
 @implementation NSTextView (BDSKExtensions)
 
@@ -97,38 +96,14 @@ static BDSKTextViewFindController *findController = nil;
 - (void)highlightComponentsOfSearchString:(NSString *)searchString;
 {
     NSParameterAssert(searchString != nil);
+    NSEnumerator *e = [[searchString allSearchComponents] objectEnumerator];
+    NSString *substring;
     NSTextStorage *textStorage = [self textStorage];
 
-    static NSCharacterSet *charactersToRemove = nil;
-    if (nil == charactersToRemove)
-        charactersToRemove = [[NSCharacterSet characterSetWithCharactersInString:@"\"!*()|&"] copy];
-    
-    NSMutableString *mutableString = [searchString mutableCopy];
-    
-    // @@ Presently limited; if we enable the phrase searching features, we'll need to be smarter about quotes.  This should be reliable enough for common usage without implementing a full SKSearch expression parser, though.
-    
-    // replace single-character operators with a single space
-    NSRange range = [mutableString rangeOfCharacterFromSet:charactersToRemove options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
-    while (range.length) {
-        [mutableString replaceCharactersInRange:range withString:@" "];
-        range = [mutableString rangeOfCharacterFromSet:charactersToRemove options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
-    }
-    
-    // case-sensitive replacement of text operators; we don't want to look for these
-    [mutableString replaceOccurrencesOfString:@" AND " withString:@" " options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
-    [mutableString replaceOccurrencesOfString:@" OR " withString:@" " options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
-    
-    // NOT strings won't appear, of course, but it's easier just to add the NOT components versus parsing it (NOT is likely not common, anyway)
-    [mutableString replaceOccurrencesOfString:@" NOT " withString:@" " options:NSLiteralSearch range:NSMakeRange(0, [mutableString length])];
-    
-    NSArray *allComponents = [mutableString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet] trimWhitespace:YES];
-    [mutableString release];
-
-    if ([allComponents count]) {
-        [textStorage beginEditing];
-        [self performSelector:@selector(highlightOccurrencesOfString:) withObjectsFromArray:allComponents];
-        [textStorage endEditing];
-    }
+    [textStorage beginEditing];
+    while(substring = [e nextObject])
+        [self highlightOccurrencesOfString:substring];
+    [textStorage endEditing];
 }
 
 - (void)highlightOccurrencesOfString:(NSString *)substring;
@@ -160,44 +135,6 @@ static BDSKTextViewFindController *findController = nil;
         range = [string rangeOfString:substring options:NSCaseInsensitiveSearch range:NSMakeRange(maxRangeLoc, length - maxRangeLoc)];
     }
     [textStorage endEditing];
-}
-
-- (IBAction)invertSelection:(id)sender;
-{
-    // Note the guarantees in the header for -selectedRanges and requirements for setSelectedRanges:
-    NSArray *ranges = [self selectedRanges];
-    NSMutableArray *newRanges = [NSMutableArray array];
-    unsigned i, iMax = [ranges count];
-    
-    // this represents the entire string
-    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [[self string] length])];
-    
-    // remove current selections
-    for (i = 0; i < iMax; i++) {
-        [indexes removeIndexesInRange:[[ranges objectAtIndex:i] rangeValue]];
-    }
-    
-    i = [indexes firstIndex];
-    if (NSNotFound == i) {
-        // nothing to select (select all, then choose to invert)
-        [newRanges addObject:[NSValue valueWithRange:NSMakeRange(0, 0)]];
-    } else {
-        
-        unsigned start, next;
-        start = i;
-        
-        while (NSNotFound != i) {
-            next = [indexes indexGreaterThanIndex:i];
-            // a discontinuity in the sequence indicates the start of a new range
-            if (NSNotFound == next || next != (i + 1)) {
-                [newRanges addObject:[NSValue valueWithRange:NSMakeRange(start, i - start + 1)]];
-                start = next;
-            }
-            i = next;
-        }
-    }
-    
-    [self setSelectedRanges:newRanges];
 }
 
 - (NSPoint)locationForCompletionWindow;

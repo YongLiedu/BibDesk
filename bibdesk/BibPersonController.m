@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Thu Mar 18 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,12 @@
 
 #import "BibPersonController.h"
 #import "BibTypeManager.h"
-#import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
-#import "BibDocument_Actions.h"
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BibTeXParser.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKDragImageView.h"
-#import "BDSKPublicationsArray.h"
-#import "NSWindowController_BDSKExtensions.h"
-#import "NSImage+Toolbox.h"
 #import <AddressBook/AddressBook.h>
 
 @implementation BibPersonController
@@ -68,8 +63,6 @@
         [self setPerson:aPerson];
         publications = nil;
         
-        isEditable = [[[person publication] owner] isDocument];
-        
         [person setPersonController:self];
 	}
 	return self;
@@ -77,6 +70,9 @@
 }
 
 - (void)dealloc{
+#if DEBUG
+    NSLog(@"personcontroller dealloc");
+#endif
     [pubsTableView setDelegate:nil];
     [pubsTableView setDataSource:nil];
     [person setPersonController:nil];
@@ -90,6 +86,8 @@
         [super awakeFromNib];
 	}
 	
+	// bind-to-owner bug workaround
+	[ownerController setContent:self];
 	[collapsibleView setMinSize:NSMakeSize(0.0, 38.0)];
 	[imageView setDelegate:self];
 	[splitView setPositionAutosaveName:@"OASplitView Position BibPersonView"];
@@ -101,34 +99,22 @@
                                              selector:@selector(handleBibItemChanged:)
                                                  name:BDSKBibItemChangedNotification
                                                object:nil];
-    if(isEditable == NO)
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleGroupWillBeRemoved:)
-                                                         name:BDSKDidAddRemoveGroupNotification
-                                                       object:nil];
 
 	[self updateUI];
     [pubsTableView setDoubleAction:@selector(openSelectedPub:)];
-    
-    if (isEditable)
-        [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
-    
-    [nameTextField setEditable:isEditable];
+    [imageView registerForDraggedTypes:[NSArray arrayWithObject:NSVCardPboardType]];
+
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     return [person name];
 }
 
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    return [[[person publication] owner] isDocument] ? nil : @"";
-}
-
 #pragma mark accessors
 
 - (NSArray *)publications{
     if (publications == nil)
-        publications = [[[[[person publication] owner] publications] itemsForAuthor:person] retain];
+        publications = [[(BibDocument *)[self document] publicationsForAuthor:person] copy];
     return publications;
 }
 
@@ -172,14 +158,12 @@
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    [self setPublications:nil];
+    [self setPublications:[(BibDocument *)[self document] publicationsForAuthor:person]];
 }
 
-- (void)handleGroupWillBeRemoved:(NSNotification *)note{
-	NSArray *groups = [[note userInfo] objectForKey:@"groups"];
-	
-	if ([groups containsObject:[[person publication] owner]])
-		[self close];
+- (void)windowWillClose:(NSNotification *)notification{
+	// bind-to-owner bug workaround
+	[ownerController setContent:nil];
 }
 
 - (void)openSelectedPub:(id)sender{
@@ -197,12 +181,8 @@
 	[newNameString release];
 }
 
-
-- (void)controlTextDidEndEditing:(NSNotification *)aNotification;
-{
-    id sender = [aNotification object];
-    if(sender == nameTextField && [sender isEditable]) // this shouldn't be called for uneditable cells, but it is
-        NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name"),  NSLocalizedString(@"Yes", @"Button title"), NSLocalizedString(@"No", @"Button title"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[sender stringValue] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"));
+- (IBAction)changeName:(id)sender{
+    NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @""),  NSLocalizedString(@"Yes", @"Yes"), NSLocalizedString(@"No", @"No"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[sender stringValue] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @""));
 }
 
 - (void)changeNameToString:(NSString *)newNameString{
@@ -259,7 +239,7 @@
     }
     CFRelease(people);
     
-	[undoManager setActionName:NSLocalizedString(@"Change Author Name", @"Undo action name")];
+	[undoManager setActionName:NSLocalizedString(@"Change Author Name", @"")];
     
     // needed to update our tableview with the new publications list after setting a new person
     [self handleBibItemChanged:nil];
@@ -286,10 +266,7 @@
 #pragma mark Dragging delegate methods
 
 - (NSDragOperation)dragImageView:(BDSKDragImageView *)view validateDrop:(id <NSDraggingInfo>)sender {
-    if(isEditable == NO)
-        return NO;
-    
-    if ([[sender draggingSource] isEqual:view])
+    if ([sender draggingSource] == view)
 		return NSDragOperationNone;
 	
 	NSPasteboard *pboard = [sender draggingPasteboard];
@@ -311,7 +288,7 @@
 	if([newAuthor isEqual:[BibAuthor emptyAuthor]])
 		return NO;
 	
-    NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @"Message in alert dialog when trying to edit author name"),  NSLocalizedString(@"Yes", @"Button title"), NSLocalizedString(@"No", @"Button title"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[newAuthor name] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @"Informative text in alert dialog"));
+    NSBeginAlertSheet(NSLocalizedString(@"Really Change Name?", @""),  NSLocalizedString(@"Yes", @"Yes"), NSLocalizedString(@"No", @"No"), nil, [self window], self, @selector(changeNameWarningSheetDidEnd:returnCode:newName:), NULL, [[newAuthor name] retain], NSLocalizedString(@"This will change matching names in any \"person\" field (e.g. \"Author\" and \"Editor\") of the publications shown in the list below.  Do you want to do this?", @""));
     return YES;
 }
 
@@ -339,45 +316,10 @@
 }
  
 - (NSImage *)dragImageForDragImageView:(BDSKDragImageView *)view {
-	return [[NSImage imageForFileType:@"vcf"] dragImageWithCount:1];
+	return [NSImage imageForFileType:@"vcf"];
 }
 
 #pragma mark Splitview delegate methods
-
-- (void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize {
-    NSView *pickerView = [[splitView subviews] objectAtIndex:0];
-    NSView *pubsView = [[splitView subviews] objectAtIndex:1];
-    NSRect pubsFrame = [pubsView frame];
-    NSRect pickerFrame = [pickerView frame];
-    float factor = (NSWidth([sender frame]) - [sender dividerThickness]) / (oldSize.width - [sender dividerThickness]);
-	
-	if (sender == splitView) {
-		// pubs = table, picker = preview
-        pickerFrame.size.width *= factor;
-        if (NSWidth(pickerFrame) < 1.0)
-            pickerFrame.size.width = 0.0;
-        pickerFrame = NSIntegralRect(pickerFrame);
-        pubsFrame.size.width = NSWidth([sender frame]) - NSWidth(pickerFrame) - [sender dividerThickness];
-        if (NSWidth(pubsFrame) < 0.0) {
-            pubsFrame.size.width = 0.0;
-            pickerFrame.size.width = NSWidth([sender frame]) - NSWidth(pubsFrame) - [sender dividerThickness];
-        }
-	} else {
-        pubsFrame.size.width *= factor;
-        if (NSWidth(pubsFrame) < 1.0)
-            pubsFrame.size.width = 0.0;
-        pubsFrame = NSIntegralRect(pubsFrame);
-        pickerFrame.size.width = NSWidth([sender frame]) - NSWidth(pubsFrame) - [sender dividerThickness];
-        if (NSWidth(pubsFrame) < 0.0) {
-            pickerFrame.size.width = 0.0;
-            pubsFrame.size.width = NSWidth([sender frame]) - NSWidth(pickerFrame) - [sender dividerThickness];
-        }
-    }
-	
-	[pubsView setFrame:pubsFrame];
-	[pickerView setFrame:pickerFrame];
-    [sender adjustSubviews];
-}
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
     NSView *pickerView = [[splitView subviews] objectAtIndex:0];
@@ -385,12 +327,12 @@
     NSRect pubsFrame = [pubsView frame];
     NSRect pickerFrame = [pickerView frame];
     
-    if(NSHeight(pickerFrame) > 0.0){ // can't use isSubviewCollapsed, because implementing splitView:canCollapseSubview: prevents uncollapsing
+    if(NSHeight(pickerFrame) != 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
         lastPickerHeight = NSHeight(pickerFrame); // cache this
         pubsFrame.size.height += lastPickerHeight;
         pickerFrame.size.height = 0;
     } else {
-        if(lastPickerHeight <= 0)
+        if(lastPickerHeight == 0)
             lastPickerHeight = 150.0; // a reasonable value to start
 		pickerFrame.size.height = lastPickerHeight;
         pubsFrame.size.height = NSHeight([splitView frame]) - lastPickerHeight - [splitView dividerThickness];

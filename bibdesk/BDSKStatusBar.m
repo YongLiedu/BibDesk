@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@
 #import "BDSKStatusBar.h"
 #import "NSGeometry_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
-#import "CIImage_BDSKExtensions.h"
-#import "BDSKCenterScaledImageCell.h"
 
 #define LEFT_MARGIN				5.0
 #define RIGHT_MARGIN			15.0
@@ -49,17 +47,17 @@
 
 @implementation BDSKStatusBar
 
-+ (CIColor *)lowerColor{
-    static CIColor *lowerColor = nil;
++ (NSColor *)lowerColor{
+    static NSColor *lowerColor = nil;
     if (lowerColor == nil)
-        lowerColor = [[CIColor alloc] initWithColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
+        lowerColor = [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] retain];
     return lowerColor;
 }
 
-+ (CIColor *)upperColor{
-    static CIColor *upperColor = nil;
++ (NSColor *)upperColor{
+    static NSColor *upperColor = nil;
     if (upperColor == nil)
-        upperColor = [[CIColor alloc] initWithColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+        upperColor = [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] retain];
     return upperColor;
 }
 
@@ -69,7 +67,7 @@
         textCell = [[NSCell alloc] initTextCell:@""];
 		[textCell setFont:[NSFont labelFontOfSize:0]];
 		
-        iconCell = [[BDSKCenterScaledImageCell alloc] init];
+        iconCell = [[NSImageCell alloc] init];
 		
 		progressIndicator = nil;
 		
@@ -78,7 +76,7 @@
 		delegate = nil;
         
         textOffset = 0.0;
-
+		
     }
     return self;
 }
@@ -90,21 +88,14 @@
 	[super dealloc];
 }
 
-- (CIColor *)upperColor
+- (NSColor *)upperColor
 {
     return [[self class] upperColor];
 }
 
-- (CIColor *)lowerColor
+- (NSColor *)lowerColor
 {
     return [[self class] lowerColor];
-}
-
-- (NSSize)cellSizeForIcon:(NSImage *)icon {
-    NSSize iconSize = [icon size];
-    float cellHeight = NSHeight([self bounds]) - 2.0;
-    float cellWidth = iconSize.width * cellHeight / iconSize.height;
-	return NSMakeSize(cellWidth, cellHeight);
 }
 
 - (void)drawRect:(NSRect)rect {
@@ -121,12 +112,12 @@
 	NSEnumerator *dictEnum = [icons objectEnumerator];
 	NSDictionary *dict;
 	NSImage *icon;
-	NSRect iconRect;    
+	NSRect iconRect;
 	NSSize size;
 	
 	while (dict = [dictEnum nextObject]) {
 		icon = [dict objectForKey:@"icon"];
-        size = [self cellSizeForIcon:icon];
+		size = [icon size];
         NSDivideRect(textRect, &iconRect, &textRect, size.width, NSMaxXEdge);
         NSDivideRect(textRect, &ignored, &textRect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
         iconRect = BDSKCenterRectVertically(iconRect, size.height, [self isFlipped]);
@@ -158,7 +149,7 @@
 	OBASSERT(contentView != nil);
 	
 	if ([self superview]) {
-		OBASSERT([[self superview] isEqual:contentView]);
+		OBASSERT([self superview] == contentView);
 		viewFrame.size.height += shiftHeight;
 		if ([contentView isFlipped] == NO)
 			viewFrame.origin.y -= shiftHeight;
@@ -201,8 +192,8 @@
 	}
 	winFrame.size.height += shiftHeight;
 	winFrame.origin.y -= shiftHeight;
-	if (minSize.height > 0.0) minSize.height += shiftHeight;
-	if (maxSize.height > 0.0) maxSize.height += shiftHeight;
+	if (minSize.height != 0.0) minSize.height += shiftHeight;
+	if (maxSize.height != 0.0) maxSize.height += shiftHeight;
 	if (winFrame.size.height < 0.0) winFrame.size.height = 0.0;
 	if (minSize.height < 0.0) minSize.height = 0.0;
 	if (maxSize.height < 0.0) maxSize.height = 0.0;
@@ -270,8 +261,10 @@
 }
 
 - (void)setTextOffset:(float)offset {
-    textOffset = offset;
-    [self setNeedsDisplay:YES];
+    if (textOffset != offset) {
+        textOffset = offset;
+        [self setNeedsDisplay:YES];
+    }
 }
 
 #pragma mark Icons
@@ -344,7 +337,7 @@
 	[self removeAllToolTips];
 	
 	while (dict = [dictEnum nextObject]) {
-        size = [self cellSizeForIcon:[dict objectForKey:@"icon"]];
+		size = [(NSImage *)[dict objectForKey:@"icon"] size];
         NSDivideRect(rect, &iconRect, &rect, size.width, NSMaxXEdge);
         NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
         iconRect = BDSKCenterRectVertically(iconRect, size.height, [self isFlipped]);
@@ -385,20 +378,17 @@
 		[progressIndicator removeFromSuperview];
 		progressIndicator = nil;
 	} else {
-		if ((int)[progressIndicator style] == style)
+		if ([progressIndicator style] == style)
 			return;
-		if(progressIndicator == nil) {
-            progressIndicator = [[NSProgressIndicator alloc] init];
-        } else {
-            [progressIndicator retain];
-            [progressIndicator removeFromSuperview];
-		}
-        [progressIndicator setAutoresizingMask:NSViewMinXMargin | NSViewMinYMargin | NSViewMaxYMargin];
+		progressIndicator = [[NSProgressIndicator alloc] init];
+		[progressIndicator setAutoresizingMask:NSViewMinXMargin | NSViewMinYMargin | NSViewMaxYMargin];
 		[progressIndicator setStyle:style];
 		[progressIndicator setControlSize:NSSmallControlSize];
 		[progressIndicator setIndeterminate:YES];
 		[progressIndicator setDisplayedWhenStopped:NO];
 		[progressIndicator sizeToFit];
+		[self addSubview:progressIndicator];
+		[progressIndicator release];
 		
 		NSRect rect, ignored;
 		NSSize size = [progressIndicator frame].size;
@@ -406,9 +396,6 @@
         NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
         rect = BDSKCenterRect(rect, size, [self isFlipped]);
 		[progressIndicator setFrame:rect];
-		
-        [self addSubview:progressIndicator];
-		[progressIndicator release];
 	}
 	[self rebuildToolTips];
 	[[self superview] setNeedsDisplayInRect:[self frame]];

@@ -11,7 +11,7 @@
 #import <objc/objc-class.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFIObjectSelectorInt.m 68913 2005-10-03 19:36:19Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFIObjectSelectorInt.m 68913 2005-10-03 19:36:19Z kc $")
 
 @implementation OFIObjectSelectorInt;
 

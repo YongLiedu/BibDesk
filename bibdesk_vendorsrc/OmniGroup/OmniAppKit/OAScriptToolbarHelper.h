@@ -5,18 +5,14 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OAScriptToolbarHelper.h 71209 2005-12-16 00:31:58Z bungi $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OAScriptToolbarHelper.h 68913 2005-10-03 19:36:19Z kc $
 
 #import <Foundation/NSObject.h>
 
 #import "OAToolbarWindowController.h"
 
-@class OAToolbarItem;
-
 @interface OAScriptToolbarHelper : NSObject <OAToolbarHelper> 
-@end
+{
+}
 
-@interface OAToolbarWindowController (OAScriptToolbarHelperExtensions)
-- (BOOL)scriptToolbarItemShouldExecute:(OAToolbarItem *)item;
-- (void)scriptToolbarItemFinishedExecuting:(OAToolbarItem *)item; // might be success, might be failure.
 @end

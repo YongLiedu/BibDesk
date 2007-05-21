@@ -15,7 +15,7 @@
 #import <OmniFoundation/OFObject.h>
 #import <pthread.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OFUtilities.m 70959 2005-12-07 20:34:33Z wiml $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OFUtilities.m 66640 2005-08-10 00:37:09Z kc $")
 
 #define OF_GET_INPUT_CHUNK_LENGTH 80
 
@@ -447,77 +447,5 @@ char *OFFormatFCC(unsigned long fcc, char fccString[13])
     *s = '\0';
 
     return fccString;
-}
-
-// Sigh. UTGetOSTypeFromString() / UTCreateStringForOSType() are in ApplicationServices, which we don't want to link from Foundation. Sux.
-// Taking this opportunity to make the API a little better.
-static BOOL ofGet4CCFromNSData(NSData *d, uint32_t *v)
-{
-    union {
-        uint32_t i;
-        char c[4];
-    } buf;
-    
-    if ([d length] == 4) {
-        [d getBytes:buf.c];
-        *v = CFSwapInt32BigToHost(buf.i);
-        return YES;
-    } else {
-        return NO;
-    }
-}
-
-BOOL OFGet4CCFromPlist(id pl, uint32_t *v)
-{
-    if (!pl)
-        return NO;
-    
-    if ([pl isKindOfClass:[NSString class]]) {
-        
-        /* Special case thanks to UTCreateStringForOSType() */
-        if ([pl length] == 0) {
-            *v = 0;
-            return YES;
-        }
-        
-        NSData *d = [(NSString *)pl dataUsingEncoding:NSMacOSRomanStringEncoding allowLossyConversion:NO];
-        if (d)
-            return ofGet4CCFromNSData(d, v);
-        else
-            return NO;
-    }
-    
-    if ([pl isKindOfClass:[NSData class]])
-        return ofGet4CCFromNSData((NSData *)pl, v);
-    
-    if ([pl isKindOfClass:[NSNumber class]]) {
-        *v = [pl unsignedIntValue];
-        return YES;
-    }
-    
-    return NO;
-}
-
-id OFCreatePlistFor4CC(uint32_t v)
-{
-    // Characters which are maybe less-than-safe to store in an NSString: either characters which are invalid in MacRoman, or which produce combining marks instead of plain characters (e.g., MacRoman 0x41 0xFB could undergo Unicode recombination and come out as 0x81).
-    static const uint32_t ok_chars[8] = {
-        0x00000000u, 0xAFFFFF3Bu, 0xFFFFFFFFu, 0x7FFFFFFFu,
-        0xFFFFFFFFu, 0xFFFFE7FFu, 0xFFFFFFFFu, 0x113EFFFFu
-    };
-    union {
-        uint32_t i;
-        UInt8 c[4];
-    } buf;
-    
-#define OK(ch) ( ok_chars[ch / 32] & (1 << (ch % 32)) )
-    buf.i = CFSwapInt32HostToBig(v);
-    
-    if (!OK(buf.c[0]) || !OK(buf.c[1]) || !OK(buf.c[2]) || !OK(buf.c[3]))
-        return [[NSData alloc] initWithBytes:buf.c length:4];
-    else {
-        CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault, buf.c, 4, kCFStringEncodingMacRoman, FALSE);
-        return (id)s;
-    }
 }
 

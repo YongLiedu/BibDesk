@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/25/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 
 #import "BibPref_Display.h"
 #import "BDSKTemplate.h"
-#import "BibAuthor.h"
 
 
 @implementation BibPref_Display
@@ -50,13 +49,8 @@
                                              selector:@selector(handlePreviewDisplayChangedNotification:)
                                                  name:BDSKPreviewDisplayChangedNotification
                                                object:nil];
-    [OFPreference addObserver:self 
-                     selector:@selector(handleTemplatePrefsChangedNotification:) 
-                forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
     
-    [self handleTemplatePrefsChangedNotification:nil];
-    
-    [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"Display all items in preview"), @"1", @"5", @"10", @"20", nil]];
+    [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"All"), @"1", @"5", @"10", @"20", nil]];
     [self updateUI];
 }
 
@@ -65,26 +59,39 @@
 	
     int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
 	if (maxNumber == 0)
-		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"Display all items in preview")];
+		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"All")];
 	else 
 		[previewMaxNumberComboBox setIntValue:maxNumber];
     
     [previewTemplatePopup setEnabled:[defaults integerForKey:BDSKPreviewDisplayKey] == 3];
     
     int tag, tagMax = 2;
-    int mask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
     OBPRECONDITION([authorNameMatrix numberOfColumns] == 1);
     OBPRECONDITION([authorNameMatrix numberOfRows] == tagMax + 1);
     for(tag = 0; tag <= tagMax; tag++){
         NSButtonCell *cell = [authorNameMatrix cellWithTag:tag];
         OBPOSTCONDITION(cell);
-        [cell setState:(mask & (1 << tag) ? NSOnState : NSOffState)];
-        if(1 << tag != BDSKAuthorDisplayFirstNameMask)
-            [cell setEnabled:mask & BDSKAuthorDisplayFirstNameMask];
+        NSString *prefKey = nil;
+        switch(tag){
+            case 0:
+                prefKey = BDSKShouldDisplayFirstNamesKey;
+                break;
+            case 1:
+                prefKey = BDSKShouldAbbreviateFirstNamesKey;
+                break;
+            case 2:
+                prefKey = BDSKShouldDisplayLastNameFirstKey;
+                break;
+            default:
+                [NSException raise:NSInvalidArgumentException format:@"Unrecognized cell %@ with tag %d", cell, [cell tag]];
+        }
+        OBPOSTCONDITION(prefKey);
+        [cell setState:([defaults boolForKey:prefKey] ? NSOnState : NSOffState)];
     }
+    
 }    
 
-- (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification{
+- (void)willBecomeCurrentPreferenceClient{
     NSString *currentStyle = [defaults stringForKey:BDSKPreviewTemplateStyleKey];
     NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFileType:@"rtf"]];
     [styles addObjectsFromArray:[BDSKTemplate allStyleNamesForFileType:@"rtfd"]];
@@ -97,7 +104,6 @@
     } else if ([styles count]) {
         [previewTemplatePopup selectItemAtIndex:0];
         [defaults setObject:[styles objectAtIndex:0] forKey:BDSKPreviewTemplateStyleKey];
-        [defaults autoSynchronize];
         if ([defaults integerForKey:BDSKPreviewDisplayKey] == 3)
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
@@ -111,7 +117,6 @@
     int tag = [[sender selectedCell] tag];
     if(tag != [defaults integerForKey:BDSKPreviewDisplayKey]){
         [defaults setInteger:tag forKey:BDSKPreviewDisplayKey];
-        [defaults autoSynchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
 }
@@ -120,7 +125,6 @@
     int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
     if(maxNumber != [defaults integerForKey:BDSKPreviewMaxNumberKey]){
 		[defaults setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
-        [defaults autoSynchronize];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 	} else 
         [self updateUI];
@@ -130,7 +134,6 @@
     NSString *style = [sender title];
     if ([style isEqualToString:[defaults stringForKey:BDSKPreviewTemplateStyleKey]] == NO) {
         [defaults setObject:style forKey:BDSKPreviewTemplateStyleKey];
-        [defaults autoSynchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
 }
@@ -155,8 +158,6 @@
     [mutableArray replaceObjectAtIndex:rowIndex withObject:anObject];
     [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
-    [defaults autoSynchronize];
-    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (IBAction)addTerm:(id)sender
@@ -170,8 +171,6 @@
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[mutableArray count] - 1] byExtendingSelection:NO];
     [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
     [mutableArray release];
-    [defaults autoSynchronize];
-    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
@@ -191,22 +190,29 @@
     [defaults setObject:mutableArray forKey:BDSKIgnoredSortTermsKey];
     [mutableArray release];
     [tableView reloadData];
-    [defaults autoSynchronize];
-    CFNotificationCenterPostNotification(CFNotificationCenterGetLocalCenter(), CFSTR("BDSKIgnoredSortTermsChangedNotification"), NULL, NULL, FALSE);
 }
 
 - (IBAction)changeAuthorDisplay:(id)sender;
 {
     OBPRECONDITION(sender == authorNameMatrix);
     NSButtonCell *clickedCell = [sender selectedCell];
-    int cellMask = 1 << [clickedCell tag];
-    int prefMask = [defaults integerForKey:BDSKAuthorNameDisplayKey];
-    if([clickedCell state] == NSOnState)
-        prefMask |= cellMask;
-    else
-        prefMask &= ~cellMask;
-    [defaults setInteger:prefMask forKey:BDSKAuthorNameDisplayKey];
-    [self valuesHaveChanged];
+    NSString *prefKey = nil;
+    switch([clickedCell tag]){
+        case 0:
+            prefKey = BDSKShouldDisplayFirstNamesKey;
+            break;
+        case 1:
+            prefKey = BDSKShouldAbbreviateFirstNamesKey;
+            break;
+        case 2:
+            prefKey = BDSKShouldDisplayLastNameFirstKey;
+            break;
+        default:
+            [NSException raise:NSInvalidArgumentException format:@"Unrecognized cell %@ with tag %d", clickedCell, [clickedCell tag]];
+    }
+    OBPOSTCONDITION(prefKey);
+    [defaults setBool:([clickedCell state] == NSOnState) forKey:prefKey];
+    [self updateUI];
 }
 
 
@@ -261,7 +267,6 @@
             [defaults setFloat:[font pointSize] forKey:BDSKPreviewBaseFontSizeKey];
             [defaults setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-            [defaults autoSynchronize];
             return;
         case 4:
             fontNameKey = BDSKEditorFontNameKey;
@@ -273,7 +278,6 @@
     // set the name last, as that is observed for changes
     [defaults setFloat:[font pointSize] forKey:fontSizeKey];
     [defaults setObject:[font fontName] forKey:fontNameKey];
-    [defaults autoSynchronize];
 }
 
 - (void)changeFont:(id)sender{

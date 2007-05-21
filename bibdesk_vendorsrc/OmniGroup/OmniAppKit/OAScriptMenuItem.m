@@ -1,4 +1,4 @@
-// Copyright 2002-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -18,7 +18,7 @@
 #import "OAOSAScript.h"
 #import "OAVersion.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OAScriptMenuItem.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OAScriptMenuItem.m 66043 2005-07-25 21:17:05Z kc $")
 
 @interface OAScriptMenuItem (Private)
 - (void)_setup;
@@ -114,8 +114,6 @@ static NSImage *scriptImage;
         scriptName = [scriptName stringByRemovingSuffix:@".scpt"];
         scriptName = [scriptName stringByRemovingSuffix:@".scptd"];
         scriptName = [scriptName stringByRemovingSuffix:@".applescript"];
-        if ([scriptName isEqualToString:@"OAAboutScriptsMenu"])
-            scriptName = NSLocalizedStringFromTableInBundle(@"About the Scripts Menu", @"OmniAppKit", [OAScriptMenuItem bundle], "Scripts menu item");
 
         id <NSMenuItem> item = [menu addItemWithTitle:scriptName action:@selector(_executeScript:) keyEquivalent:@""];
         [item setTarget:self];

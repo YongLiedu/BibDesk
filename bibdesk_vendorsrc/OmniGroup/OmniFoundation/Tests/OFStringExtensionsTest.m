@@ -1,24 +1,18 @@
-// Copyright 2004-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2004-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 
 #import <OmniBase/OmniBase.h>
-#import <OmniBase/system.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
-#import <OmniFoundation/NSString-OFPathExtensions.h>
 #import <OmniFoundation/NSMutableString-OFExtensions.h>
-#import <OmniFoundation/NSFileManager-OFExtensions.h>
 #import <OmniFoundation/OFUtilities.h>
 
-#include <c.h>
-
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFStringExtensionsTest.m 79087 2006-09-07 23:37:02Z kc $");
+RCS_ID("$Header$");
 
 @interface OFStringExtensionTest : SenTestCase
 @end
@@ -35,15 +29,10 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
         
         NSString *savable = [NSString defaultValueForCFStringEncoding:enc];
         CFStringEncoding roundTrip = [NSString cfStringEncodingForDefaultValue:savable];
-
-        //  kCFStringEncodingShiftJIS_X0213_00 comes through the roundtrip as kCFStringEncodingShiftJIS which produces a spurious(?) failure
-        if (enc == kCFStringEncodingShiftJIS_X0213_00 && roundTrip == kCFStringEncodingShiftJIS) {
-            NSLog(@"Allowing ShiftJIS_X0213_00 to map to ShiftJIS (via \"%@\") w/o unit test failure.", savable);
-            continue;
-        }
-        
         should1(roundTrip == enc,
                 ([NSString stringWithFormat:@"CFEncoding %u encodes to \"%@\" decodes to %u", enc, savable, roundTrip]));
+        
+        //  kCFStringEncodingShiftJIS_X0213_00 comes through the roundtrip as kCFStringEncodingShiftJIS which produces a spurious(?) failure
     }
     
     should([NSString cfStringEncodingForDefaultValue:@"iana iso-8859-1"] == kCFStringEncodingISOLatin1);
@@ -77,34 +66,18 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (void)testTrimming
 {
-    // Multi-codepoint characters.
-    unichar cmark1[] = { 0x20, 0x20, 'e', 0x301, 0x20, 0x20 };
-    unichar cmark2[] = { 0x20, 0x20, 'a', 0x300, 'e', 0x300, 0x20, 0x20 };
-    unichar surr[] = { 0x20, 0x20, 0xD834, 0xDD5F, 0x20, 0x20 };
-    unichar *s[3] = { cmark1, cmark2, surr };
-    int sl[3] = { 6, 8, 6 };
-    int i;
-
     shouldBeEqual([@"" stringByRemovingSurroundingWhitespace], @"");
     shouldBeEqual([@" " stringByRemovingSurroundingWhitespace], @"");
     shouldBeEqual([@"  " stringByRemovingSurroundingWhitespace], @"");
     shouldBeEqual([@"\t\n\r " stringByRemovingSurroundingWhitespace], @"");
     shouldBeEqual([@"foo " stringByRemovingSurroundingWhitespace], @"foo");
+    shouldBeEqual([@"foo " stringByRemovingSurroundingWhitespace], @"foo");
+    shouldBeEqual([@"foo " stringByRemovingSurroundingWhitespace], @"foo");
     shouldBeEqual([@"foo  " stringByRemovingSurroundingWhitespace], @"foo");
-    shouldBeEqual([@"o " stringByRemovingSurroundingWhitespace], @"o");
-    shouldBeEqual([@" f " stringByRemovingSurroundingWhitespace], @"f");
     shouldBeEqual([@" foo " stringByRemovingSurroundingWhitespace], @"foo");
     shouldBeEqual([@"  foo " stringByRemovingSurroundingWhitespace], @"foo");
     shouldBeEqual([@"foo" stringByRemovingSurroundingWhitespace], @"foo");
     shouldBeEqual([@"  foo" stringByRemovingSurroundingWhitespace], @"foo");
-    
-    for(i = 0; i < 3; i ++) {
-        NSString *t = [NSString stringWithCharacters:2+s[i] length:sl[i]-4];
-        shouldBeEqual([[NSString stringWithCharacters:s[i]   length:sl[i]  ] stringByRemovingSurroundingWhitespace], t);
-        shouldBeEqual([[NSString stringWithCharacters:s[i]+2 length:sl[i]-2] stringByRemovingSurroundingWhitespace], t);
-        shouldBeEqual([[NSString stringWithCharacters:s[i]   length:sl[i]-2] stringByRemovingSurroundingWhitespace], t);
-        shouldBeEqual([[NSString stringWithCharacters:s[i]+2 length:sl[i]-4] stringByRemovingSurroundingWhitespace], t);
-    }
     
     NSMutableString *buf = [[[NSMutableString alloc] init] autorelease];
     [buf setString:@""]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"");
@@ -115,18 +88,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [buf setString:@"foo  "]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"foo");
     [buf setString:@" foo "]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"foo");
     [buf setString:@"  foo "]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"foo");
-    [buf setString:@"o "]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"o");
-    [buf setString:@" f "]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"f");
     [buf setString:@"foo"]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"foo");
     [buf setString:@"  foo"]; [buf removeSurroundingWhitespace]; shouldBeEqual(buf, @"foo");
-
-    for(i = 0; i < 3; i ++) {
-        NSString *t = [NSString stringWithCharacters:2+s[i] length:sl[i]-4];
-        [buf setString:[NSString stringWithCharacters:s[i]   length:sl[i]  ]]; shouldBeEqual([buf stringByRemovingSurroundingWhitespace], t);
-        [buf setString:[NSString stringWithCharacters:s[i]+2 length:sl[i]-2]]; shouldBeEqual([buf stringByRemovingSurroundingWhitespace], t);
-        [buf setString:[NSString stringWithCharacters:s[i]   length:sl[i]-2]]; shouldBeEqual([buf stringByRemovingSurroundingWhitespace], t);
-        [buf setString:[NSString stringWithCharacters:s[i]+2 length:sl[i]-4]]; shouldBeEqual([buf stringByRemovingSurroundingWhitespace], t);
-    }
 }
 
 - (void)testDecimal:(double)d expecting:(NSString *)decimalized :(NSString *)exponential
@@ -215,33 +178,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     TESTIT(0.00017, 0, 0, ".00017");
     TESTIT(0.00017, 0, 1, "0.00017");
     
-#undef TESTIT
-}
-
-- (void)testDecimalFormattingULP
-{
-    float n;
-    int i;
-    
-    for(n = 1.0, i = 0;
-        i < 1000;
-        n = nextafterf(n, 100.0f), i++) {
-        char *buf = OFShortASCIIDecimalStringFromDouble(n, OF_FLT_DIGITS_E, 0, 1);
-        float n2 = -1;
-        should1(sscanf(buf, "%f", &n2) == 1 && (n == n2),
-                ([NSString stringWithFormat:@"formatted %.10g got \"%s\" scanned %.10g", n, buf, n2]));
-        free(buf);
-    }
-    
-    for(n = 1.0, i = 0;
-        i < 1000;
-        n = nextafterf(n, -100.0f), i++) {
-        char *buf = OFShortASCIIDecimalStringFromDouble(n, OF_FLT_DIGITS_E, 0, 1);
-        float n2 = -1;
-        should1(sscanf(buf, "%f", &n2) == 1 && (n == n2),
-                ([NSString stringWithFormat:@"formatted %.10g got \"%s\" scanned %.10g", n, buf, n2]));
-        free(buf);
-    }
+#undef TEST
 }
 
 - (void)testComponentsSeparatedByCharactersFromSet
@@ -333,180 +270,5 @@ NSString *unpair(NSString *str, NSRange *where, void *dummy)
     }
 }
 
-- (void)testFourCharCodes
-{
-    int i, shift, bg;
-    FourCharCode fcc, fcc_bg;
-    UInt8 backgrounds[5] = { 0, 32, 'x', 128, 255 };
-    
-    for(shift = 0; shift < 32; shift += 8) {
-        for(bg = 0; bg < 5; bg ++) {
-            fcc_bg = ( 0x01010101u - ( 0x01u << shift ) );
-            fcc_bg *= backgrounds[bg];
-            
-            for(i = 0; i < 256; i++) {
-                fcc = ( ((UInt8)i) << shift ) | fcc_bg;
-                NSString *str;
-                uint32_t tmp;
-                
-                id p = OFCreatePlistFor4CC(fcc);
-                should1(OFGet4CCFromPlist(p, &tmp) && (tmp == fcc), ([NSString stringWithFormat:@"s=%d i=%d 4cc=%08x", shift, i, fcc]));
-                
-                str = (NSString *)UTCreateStringForOSType(fcc);
-                should1(OFGet4CCFromPlist(str, &tmp) && (tmp == fcc), ([NSString stringWithFormat:@"s=%d i=%d 4cc=%08x out=%08x", shift, i, fcc, tmp]));
-                should1(UTGetOSTypeFromString((CFStringRef)str) == fcc, ([NSString stringWithFormat:@"s=%d i=%d 4cc=%08x", shift, i, fcc]));
-                should1([str fourCharCodeValue] == fcc, ([NSString stringWithFormat:@"s=%d i=%d 4cc=%08x", shift, i, fcc]));
-                
-                str = [NSString stringWithFourCharCode:fcc];
-                should1(OFGet4CCFromPlist(str, &tmp) && (tmp == fcc), ([NSString stringWithFormat:@"s=%d i=%d 4cc=%08x out=%08x", shift, i, fcc, tmp]));
-                should1(UTGetOSTypeFromString((CFStringRef)str) == fcc, ([NSString stringWithFormat:@"s=%d i=%d 4cc=%08x", shift, i, fcc]));
-                should1([str fourCharCodeValue] == fcc, ([NSString stringWithFormat:@"s=%d i=%d 4cc=%08x out=%08x", shift, i, fcc, [str fourCharCodeValue]]));
-            }
-        }
-    }
-}
-
-static NSString *fromutf8(const unsigned char *u, unsigned int length)
-{
-    NSString *s = [[NSString alloc] initWithBytes:u length:length encoding:NSUTF8StringEncoding];
-    [s autorelease];
-    return s;
-}
-
-- (void)testWithCharacter
-{
-    const unsigned char foo[3] = { 'f', 'o', 'o' };
-    const unsigned char fuu[6] = { 0xC3, 0xBE, 0xC3, 0xBC, 0xC3, 0xBC };
-    const unsigned char gorgo[4] = { 0xF0, 0x9D, 0x81, 0xB2 };
-    const unichar fuu16[4] = { 0x00FE, 0x0075, 0x0308, 0x00FC };
-    const unichar gorgo16[2] = { 0xD834, 0xDC72 };
-    
-    NSString *Foo = fromutf8(foo, sizeofA(foo));
-    NSString *Fuu = fromutf8(fuu, sizeofA(fuu));
-    NSString *Gorgo = fromutf8(gorgo, sizeofA(gorgo));
-    
-    NSString *Fuu16 = [[[NSString alloc] initWithCharacters:fuu16 length:sizeofA(fuu16)] autorelease];
-    NSString *Gorgo16 = [[[NSString alloc] initWithCharacters:gorgo16 length:sizeofA(gorgo16)] autorelease];
-    
-    NSString *s;
-    NSMutableString *t;
-    
-    s = [NSString stringWithCharacter:'f'];
-    shouldBeEqual(s, ([Foo substringWithRange:(NSRange){0,1}]));
-    
-    s = [NSString stringWithCharacter:0x00FE];  // LATIN SMALL LETTER THORN
-    shouldBeEqual(s, ([Fuu substringWithRange:(NSRange){0,1}]));
-    s = [s stringByAppendingString:[NSString stringWithCharacter:0x00FC]];  // LATIN SMALL LETTER U WITH DIAERESIS
-    t = [[s mutableCopy] autorelease];
-    [t appendCharacter:'u']; // LATIN SMALL LETTER U
-    [t appendCharacter:0x308]; // COMBINING DIAERESIS
-    should([t compare:Fuu options:0] == NSOrderedSame);
-    should([t compare:Fuu16 options:0] == NSOrderedSame);
-    should([Fuu compare:Fuu16 options:0] == NSOrderedSame);
-    shouldBeEqual([t decomposedStringWithCanonicalMapping], [Fuu decomposedStringWithCanonicalMapping]);
-    shouldBeEqual([t decomposedStringWithCanonicalMapping], [Fuu16 decomposedStringWithCanonicalMapping]);
-    t = [[s mutableCopy] autorelease];
-    [t appendCharacter:0xFC]; // LATIN SMALL LETTER U WITH DIAERESIS
-    shouldBeEqual(t, Fuu);
-    
-    s = [NSString stringWithCharacter:0x1D072]; // BYZANTINE MUSICAL SYMBOL GORGOSYNTHETON
-    shouldBeEqual(s, Gorgo);
-    shouldBeEqual(s, Gorgo16);
-    shouldBeEqual(Gorgo, Gorgo16);
-    
-    t = (NSMutableString *)[NSMutableString stringWithCharacter:'z'];
-    [t appendCharacter:0x1D072]; // BYZANTINE MUSICAL SYMBOL GORGOSYNTHETON
-    [t replaceCharactersInRange:(NSRange){0,1} withString:@""];
-    shouldBeEqual(t, Gorgo);
-    [t appendCharacter:'z'];
-    should(NSEqualRanges([t rangeOfComposedCharacterSequenceAtIndex:0],(NSRange){0,2}));
-    should(NSEqualRanges([t rangeOfComposedCharacterSequenceAtIndex:1],(NSRange){0,2}));
-    should(NSEqualRanges([t rangeOfComposedCharacterSequenceAtIndex:2],(NSRange){2,1}));
-}
-
 @end
 
-@interface OFStringPathUtilsTest : SenTestCase
-@end
-
-@implementation OFStringPathUtilsTest
-
-- (void)testRelativePaths;
-{
-    shouldBeEqual([NSString commonRootPathOfFilename:@"/this/is/a/path" andFilename:@"/this/is/another/path"], @"/this/is");
-    shouldBeEqual([NSString commonRootPathOfFilename:@"/this/is/a/path" andFilename:@"/that/is/another/path"], @"/");
-    shouldBeEqual([NSString commonRootPathOfFilename:@"/this/is/a/path" andFilename:@"/this/is"], @"/this/is");
-    shouldBeEqual([NSString commonRootPathOfFilename:@"/this" andFilename:@"/this/is/the/way/the/world/ends"], @"/this");
-    shouldBeEqual([NSString commonRootPathOfFilename:@"/I/scream/for/ice/cream" andFilename:@"/you/scream/for/ice/cream"], @"/");
-    shouldBeEqual([NSString commonRootPathOfFilename:@"/I/scream/for/ice/cream" andFilename:@"I/scream/for/ice/cream"], nil);
-    
-    shouldBeEqual([@"/biff/boof" relativePathToFilename:@"/biff/boof/zik/zak/zik"], @"zik/zak/zik");
-    shouldBeEqual([@"/biff/boof" relativePathToFilename:@"/biff/zik/zak/zik"], @"../zik/zak/zik");
-    shouldBeEqual([@"/biff/boof" relativePathToFilename:@"/zik/zak/zik"], @"../../zik/zak/zik");
-    shouldBeEqual([@"/biff/boof/zik/zak/zik" relativePathToFilename:@"/biff/boof"], @"../../..");
-    shouldBeEqual([@"/biff/boof/zik/zak/zik" relativePathToFilename:@"/biff/boof/"], @"../../..");
-    
-    shouldBeEqual([@"/biff/boof/" relativePathToFilename:@"/biff/boof/zik/zak/zik"], @"zik/zak/zik");
-    shouldBeEqual([@"/biff/boof/" relativePathToFilename:@"/biff/zik/zak/zik"], @"../zik/zak/zik");
-    shouldBeEqual([@"/biff/boof/" relativePathToFilename:@"/biff/zik/zak/zik/"], @"../zik/zak/zik");
-    shouldBeEqual([@"/biff/boof/" relativePathToFilename:@"/zik/zak/zik"], @"../../zik/zak/zik");
-    shouldBeEqual([@"/biff/boof/zik/zak/zik/" relativePathToFilename:@"/biff/boof"], @"../../..");
-    shouldBeEqual([@"/biff/boof/zik/zak/zik/" relativePathToFilename:@"/biff/boof/"], @"../../..");
-}
-
-- (void)testFancySubpath
-{
-    NSString *relative;
-    NSFileManager *fm = [NSFileManager defaultManager];
-    
-    relative = nil;
-    shouldnt([fm path:@"/foo/bar/baz" isAncestorOfPath:@"/foo/bar" relativePath:&relative]);
-    shouldBeEqual(relative, nil);
-    should([fm path:@"/foo/bar" isAncestorOfPath:@"/foo/bar/baz" relativePath:&relative]);
-    shouldBeEqual(relative, @"baz");
-    
-    NSString *scratchMe = [@"/tmp" stringByAppendingPathComponent:[NSString stringWithFormat:@"test-%@-%u-%u", NSUserName(), getpid(), time(NULL)]];
-    [fm createDirectoryAtPath:scratchMe attributes:nil];
-    NSString *sc0 = [scratchMe stringByAppendingPathComponent:@"zik"];
-    [fm createDirectoryAtPath:sc0 attributes:nil];
-    NSString *sc1 = [sc0 stringByAppendingPathComponent:@"zak"];
-    [fm createDirectoryAtPath:sc1 attributes:nil];
-    NSString *sc2 = [sc1 stringByAppendingPathComponent:@"zik"];
-    [fm createDirectoryAtPath:sc2 attributes:nil];
-    
-    //NSLog(@"%@", [[NSArray arrayWithObjects:scratchMe, sc0, sc1, sc2, nil] description]);
-    shouldBeEqual([scratchMe relativePathToFilename:sc2], @"zik/zak/zik");
-    
-    NSString *pScratchMe = [@"/private" stringByAppendingString:scratchMe];
-    NSString *psc0 = [pScratchMe stringByAppendingPathComponent:@"zik"];
-    NSString *psc1 = [psc0 stringByAppendingPathComponent:@"zak"];
-    NSString *psc2 = [psc1 stringByAppendingPathComponent:@"zik"];
-
-    //NSLog(@"%@", [[NSArray arrayWithObjects:pScratchMe, psc0, psc1, psc2, nil] description]);
-
-    should([fm fileExistsAtPath:psc2]);
-
-    relative = nil;
-    should([fm path:scratchMe isAncestorOfPath:sc2 relativePath:&relative]);
-    shouldBeEqual(relative, @"zik/zak/zik");
-    
-    relative = nil;
-    should([fm path:sc0 isAncestorOfPath:sc2 relativePath:&relative]);
-    shouldBeEqual(relative, @"zak/zik");
-    
-    relative = nil;
-    should([fm path:psc0 isAncestorOfPath:sc1 relativePath:&relative]);
-    shouldBeEqual(relative, @"zak");
-    
-    relative = nil;
-    should([fm path:scratchMe isAncestorOfPath:psc2 relativePath:&relative]);
-    shouldBeEqual(relative, @"zik/zak/zik");
-    
-    relative = nil;
-    should([fm path:psc0 isAncestorOfPath:sc2 relativePath:&relative]);
-    shouldBeEqual(relative, @"zak/zik");
-
-    system([[NSString stringWithFormat:@"rm -r '%@'", scratchMe] UTF8String]);
-}
-
-@end

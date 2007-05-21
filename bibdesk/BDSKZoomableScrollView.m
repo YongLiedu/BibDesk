@@ -41,12 +41,103 @@ static float BDSKScaleMenuFontSize = 11.0;
     return self;
 }
 
+- (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
+}
+
+#pragma mark Instance methods - drag-scrolling related
+
+//	canScroll -- Return YES if the user could scroll.
+- (BOOL) canScroll
+{
+    if ([[self documentView] frame].size.height > [self documentVisibleRect].size.height)
+        return YES;
+    if ([[self documentView] frame].size.width > [self documentVisibleRect].size.width)
+        return YES;
+
+    return NO;
+}
+
 - (void)awakeFromNib
 {
-    // make sure we have a horizontal scroller to show the popup
-    [self setHasHorizontalScroller:YES];
+	// make sure we have a horizontal scroller to show the popup
+	[self setHasHorizontalScroller:YES];
     if([self respondsToSelector:@selector(setAutohidesScrollers:)])
-       [self setAutohidesScrollers:NO];
+	[self setAutohidesScrollers:NO];
+	
+	NSView *clipView = [[self documentView] superview];
+	[clipView setPostsBoundsChangedNotifications:YES];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+						selector:@selector(clipViewBoundsDidChange)
+							name:NSViewBoundsDidChangeNotification
+						  object:clipView];
+}
+
+- (void)clipViewBoundsDidChange
+{
+	if ([self canScroll]) {
+        [self setDocumentCursor: [NSCursor openHandCursor]];
+    } else {
+        [self setDocumentCursor: [NSCursor arrowCursor]];
+	}
+}
+
+//	dragDocumentWithMouseDown: -- Given a mousedown event, which should be in
+//	our document view, track the mouse to let the user drag the document.
+- (BOOL) dragDocumentWithMouseDown: (NSEvent *) theEvent // RETURN: YES => user dragged (not clicked)
+{
+	NSPoint 		initialLocation;
+    NSRect			visibleRect;
+    BOOL			keepGoing;
+    BOOL			result = NO;
+
+	[[NSCursor closedHandCursor] push];
+	initialLocation = [theEvent locationInWindow];
+    visibleRect = [[self documentView] visibleRect];
+    keepGoing = YES;
+
+    while (keepGoing)
+    {
+        theEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
+        switch ([theEvent type])
+        {
+            case NSLeftMouseDragged:
+            {
+                NSPoint	newLocation;
+                NSRect	newVisibleRect;
+                float	xDelta, yDelta;
+
+                newLocation = [theEvent locationInWindow];
+                xDelta = initialLocation.x - newLocation.x;
+                yDelta = initialLocation.y - newLocation.y;
+
+                //	This was an amusing bug: without checking for flipped,
+                //	you could drag up, and the document would sometimes move down!
+                if ([[self documentView] isFlipped])
+                    yDelta = -yDelta;
+
+                //	If they drag MORE than one pixel, consider it a drag
+                if ( (abs (xDelta) > 1) || (abs (yDelta) > 1) )
+                    result = YES;
+
+                newVisibleRect = NSOffsetRect (visibleRect, xDelta / scaleFactor, yDelta / scaleFactor);
+                [[self documentView] scrollRectToVisible: newVisibleRect];
+            }
+            break;
+
+            case NSLeftMouseUp:
+                keepGoing = NO;
+                break;
+
+            default:
+                /* Ignore any other kind of event. */
+                break;
+        }								// end of switch (event type)
+    }									// end of mouse-tracking loop
+
+	[NSCursor pop];
+    return result;
 }
 
 #pragma mark Instance methods - scaling related
@@ -64,7 +155,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {
             [scalePopUpButton addItemWithTitle:NSLocalizedStringFromTable(BDSKDefaultScaleMenuLabels[cnt], @"ZoomValues", nil)];
             curItem = [scalePopUpButton itemAtIndex:cnt];
-            if (BDSKDefaultScaleMenuFactors[cnt] > 0.0) {
+            if (BDSKDefaultScaleMenuFactors[cnt] != 0.0) {
                 [curItem setRepresentedObject:[NSNumber numberWithFloat:BDSKDefaultScaleMenuFactors[cnt]]];
             }
         }
@@ -129,13 +220,14 @@ static float BDSKScaleMenuFontSize = 11.0;
 	if (flag) {
 		unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
 		
-		// We only work with some preset zoom values, so choose one of the appropriate values
-		while (cnt < numberOfDefaultItems - 1 && newScaleFactor > 0.5 * (BDSKDefaultScaleMenuFactors[cnt] + BDSKDefaultScaleMenuFactors[cnt + 1])) cnt++;
+		// We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
+		while (cnt < numberOfDefaultItems && newScaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+		if (cnt == numberOfDefaultItems) cnt--;
 		[scalePopUpButton selectItemAtIndex:cnt];
 		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
     }
 	
-	if (fabs(scaleFactor - newScaleFactor) > 0.01) {
+	if (scaleFactor != newScaleFactor) {
 		NSSize curDocFrameSize, newDocBoundsSize;
 		NSView *documentView = [self documentView];
 		NSView *clipView = [documentView superview];
@@ -154,46 +246,6 @@ static float BDSKScaleMenuFontSize = 11.0;
 		
 		[documentView setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
     }
-}
-
-- (IBAction)zoomToActualSize:(id)sender{
-    [self setScaleFactor:1.0];
-}
-
-- (IBAction)zoomIn:(id)sender{
-    int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    
-    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    cnt++;
-    while (cnt >= numberOfDefaultItems) cnt--;
-    [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
-}
-
-- (IBAction)zoomOut:(id)sender{
-    int cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    
-    // We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    cnt--;
-    if (cnt < 0) cnt++;
-    [self setScaleFactor:BDSKDefaultScaleMenuFactors[cnt]];
-}
-
-- (BOOL)canZoomToActualSize{
-    return fabs(scaleFactor - 1.0) > 0.01;
-}
-
-- (BOOL)canZoomIn{
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    return cnt < numberOfDefaultItems - 1;
-}
-
-- (BOOL)canZoomOut{
-    unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-    while (cnt < numberOfDefaultItems && scaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-    return cnt > 0;
 }
 
 - (void)setHasHorizontalScroller:(BOOL)flag {
@@ -228,18 +280,6 @@ static float BDSKScaleMenuFontSize = 11.0;
         buttonFrame.size.height = horizScrollerFrame.size.height - 1.0;
         [scalePopUpButton setFrame:buttonFrame];
     }
-}
-
-- (BOOL)validatMenuItem:(NSMenuItem *)menuItem{
-    if([menuItem action] == @selector(zoomIn:))
-        return [self canZoomIn];
-    else if([menuItem action] == @selector(zoomOut:))
-        return [self canZoomOut];
-    else if([menuItem action] == @selector(zoomToActualSize:))
-        return [self canZoomToActualSize];
-    else if ([[self superclass] instancesRespondToSelector:_cmd])
-        return [super validateMenuItem:menuItem];
-    return YES;
 }
 
 @end

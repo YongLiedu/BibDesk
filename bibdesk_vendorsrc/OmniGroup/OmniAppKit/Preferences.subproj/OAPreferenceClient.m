@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -15,7 +15,7 @@
 #import <OmniAppKit/OAPreferenceController.h>
 #import <OmniAppKit/OAPreferenceClientRecord.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceClient.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceClient.m 67685 2005-08-31 03:39:10Z rachael $")
 
 @interface OAPreferenceClient (Private)
 - (void)_restoreDefaultsSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
@@ -39,6 +39,9 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 {
     OBPRECONDITION(![NSString isEmptyString:newTitle]);
     OBPRECONDITION(controller);
+    
+    if (![super init])
+        return nil;
     
     _nonretained_controller = controller;
     title = [newTitle copy];
@@ -75,20 +78,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
         [self addPreference:[OFPreference preferenceForKey:key]];
     }
     defaults = [[OFPreferenceWrapper sharedPreferenceWrapper] retain];
-    
-    // Gather the initial values (not in the loop above since subclasses might have done something in -addPreference:)
-    NSMutableDictionary *initialValues = [NSMutableDictionary dictionary];
-    unsigned int preferenceIndex = [preferences count];
-    while (preferenceIndex--) {
-	OFPreference *preference = [preferences objectAtIndex:preferenceIndex];
-	id value = [preference objectValue];
-	OBASSERT(value); // Avoid raise, but this is really invalid.
-	if (value)
-	    [initialValues setObject:value forKey:[preference key]];
-    }
-
-    // Giving NSUserDefaultsController a wrapper that goes through our OFPreference stuff.  Iffy...
-    return [super initWithDefaults:(NSUserDefaults *)defaults initialValues:initialValues];
+    return self;
 }
 
 - (void)dealloc;
@@ -148,7 +138,11 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (void)restoreDefaultsNoPrompt;
 {
-    [self revertToInitialValues:nil];
+    unsigned int preferenceIndex;
+
+    preferenceIndex = [preferences count];
+    while (preferenceIndex--)
+        [[preferences objectAtIndex: preferenceIndex] restoreDefaultValue];
 }
 
 - (BOOL)haveAnyDefaultsChanged;
@@ -161,25 +155,30 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
             return YES;
     }
 
-    return [self hasUnappliedChanges]; // Checks if there are editors active
+    return NO;
 }
 
 /*" Prompts the user for a directory (using an open panel), then updates the text field to display it and calls -setValueForSender: specifying that field as the sender. "*/
 - (void)pickDirectoryForTextField:(NSTextField *)textField;
 {
-    NSOpenPanel *openPanel = [NSOpenPanel new];
+    NSOpenPanel *openPanel;
+    NSString *directory;
+
+    openPanel = [NSOpenPanel new];
     [openPanel setCanChooseDirectories:YES];
     if ([openPanel runModalForTypes:nil] != NSOKButton)
 	return;
     
-    NSString *directory = [[openPanel filenames] objectAtIndex: 0];
+    directory = [[openPanel filenames] objectAtIndex: 0];
     [textField setStringValue:directory];
     [self setValueForSender:textField];
 }
 
 - (void)resetFloatValueToDefaultNamed:(NSString *)defaultName inTextField:(NSTextField *)textField;
 {
-    OFPreference *preference = [OFPreference preferenceForKey: defaultName];
+    OFPreference *preference;
+    
+    preference = [OFPreference preferenceForKey: defaultName];
     [preference restoreDefaultValue];
     [textField setFloatValue:[preference floatValue]];
     NSBeep();
@@ -187,7 +186,9 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (void)resetIntValueToDefaultNamed:(NSString *)defaultName inTextField:(NSTextField *)textField;
 {
-    OFPreference *preference = [OFPreference preferenceForKey: defaultName];
+    OFPreference *preference;
+    
+    preference = [OFPreference preferenceForKey: defaultName];
     [preference restoreDefaultValue];
     [textField setIntValue:[preference integerValue]];
     NSBeep();

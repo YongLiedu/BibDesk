@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on 2/21/05.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
  */
 
 #import "MacroWindowController.h"
-#import "BDSKOwnerProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BibPrefController.h" // for notification name declarations
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
@@ -47,13 +46,10 @@
 #import "NSString_BDSKExtensions.h"
 #import "BibTeXParser.h"
 #import "BDSKComplexStringFormatter.h"
-#import "BDSKGroup.h"
-#import "BibItem.h"
 #import "BDSKMacroResolver.h"
-#import "NSWindowController_BDSKExtensions.h"
+
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "BDSKTypeSelectHelper.h"
-#import "BibDocument.h"
 
 @implementation MacroWindowController
 
@@ -72,8 +68,6 @@
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:aMacroResolver];
 		macroTextFieldWC = nil;
         
-        isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
-        
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
         if (aMacroResolver) {
@@ -81,18 +75,6 @@
                                                      selector:@selector(handleMacroChangedNotification:)
                                                          name:BDSKMacroDefinitionChangedNotification
                                                        object:aMacroResolver];
-            if (aMacroResolver != [BDSKMacroResolver defaultMacroResolver]) {
-                [[NSNotificationCenter defaultCenter] addObserver:self
-                                                         selector:@selector(handleMacroChangedNotification:)
-                                                             name:BDSKMacroDefinitionChangedNotification
-                                                           object:[BDSKMacroResolver defaultMacroResolver]];
-            }
-            if (isEditable == NO) {
-                [[NSNotificationCenter defaultCenter] addObserver:self
-                                                         selector:@selector(handleGroupWillBeRemovedNotification:)
-                                                             name:BDSKDidAddRemoveGroupNotification
-                                                           object:nil];
-            }
         }
         
         [self refreshMacros];
@@ -109,46 +91,20 @@
     [super dealloc];
 }
 
-- (void)updateButtons{
-    [addButton setEnabled:isEditable];
-    [removeButton setEnabled:isEditable && [tableView numberOfSelectedRows]];
-}
-
 - (void)awakeFromNib{
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
-    if(isEditable)
-        [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
     tc = [tableView tableColumnWithIdentifier:@"definition"];
     [[tc dataCell] setFormatter:tableCellFormatter];
     [tableView reloadData];
-    [[tc dataCell] setEditable:isEditable];
-    [[[tableView tableColumnWithIdentifier:@"macro"] dataCell] setEditable:isEditable];
-    [self updateButtons];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     NSString *title = NSLocalizedString(@"Macros", @"title for macros window");
-    if ([[macroResolver owner] isKindOfClass:[BDSKGroup class]])
-        title = [NSString stringWithFormat:@"%@ %@ %@", title, [NSString emdashString], [(BDSKGroup *)[macroResolver owner] stringValue]];
     if ([NSString isEmptyString:displayName] == NO)
-        title = [NSString stringWithFormat:@"%@ %@ %@", title, [NSString emdashString], displayName];
+        title = [NSString stringWithFormat:@"%@ - %@", title, displayName];
     return title;
-}
-
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
-    return [[macroResolver owner] isDocument] ? nil : @"";
-}
-
-- (BDSKMacroResolver *)macroResolver{
-    return macroResolver;
-}
-
-- (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif{
-	NSArray *groups = [[notif userInfo] objectForKey:@"groups"];
-	
-	if ([groups containsObject:[macroResolver owner]])
-		[self close];
 }
 
 - (void)refreshMacros{
@@ -160,25 +116,19 @@
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif{
     NSDictionary *info = [notif userInfo];
-    BDSKMacroResolver *sender = [notif object];
-    if (sender == macroResolver) {
-        NSString *type = [info objectForKey:@"type"];
-        if ([type isEqualToString:@"Add macro"]) {
-            NSString *key = [info objectForKey:@"macroKey"];
-            [macros addObject:key];
-        } else if ([type isEqualToString:@"Remove macro"]) {
-            NSString *key = [info objectForKey:@"macroKey"];
-            if (key)
-                [macros removeObject:key];
-            else
-                [macros removeAllObjects];
-        } else if ([type isEqualToString:@"Change key"]) {
-            NSString *newKey = [info objectForKey:@"newKey"];
-            NSString *oldKey = [info objectForKey:@"oldKey"];
-            int indexOfOldKey = [macros indexOfObject:oldKey];
-            [macros replaceObjectAtIndex:indexOfOldKey withObject:newKey];
-        }
-    }
+    NSString *type = [info objectForKey:@"type"];
+	if ([type isEqualToString:@"Add macro"]) {
+        NSString *key = [info objectForKey:@"macroKey"];
+		[macros addObject:key];
+	} else if ([type isEqualToString:@"Remove macro"]) {
+        NSString *key = [info objectForKey:@"macroKey"];
+		[macros removeObject:key];
+	} else if ([type isEqualToString:@"Change key"]) {
+        NSString *newKey = [info objectForKey:@"newKey"];
+        NSString *oldKey = [info objectForKey:@"oldKey"];
+        int indexOfOldKey = [macros indexOfObject:oldKey];
+        [macros replaceObjectAtIndex:indexOfOldKey withObject:newKey];
+	}
     [tableView reloadData];
 }
 
@@ -193,7 +143,7 @@
     
     [(BDSKMacroResolver *)macroResolver addMacroDefinition:@"definition"
                                                        forMacro:newKey];
-    [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
+    [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"add macro action name for undo")];
 	
     [self refreshMacros];
     [tableView reloadData];
@@ -220,7 +170,7 @@
     while(row != NSNotFound){
         NSString *key = [shadowOfMacros objectAtIndex:row];
         [(BDSKMacroResolver *)macroResolver removeMacro:key];
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"delete macro action name for undo")];
 		row = [rowIndexes indexGreaterThanIndex:row];
     }
     [self refreshMacros];
@@ -302,7 +252,7 @@
 #pragma mark NSControl text delegate
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification {
-	if ([[aNotification object] isEqual:tableView])
+	if ([aNotification object] == tableView)
 		[tableCellFormatter setEditAsComplexString:NO];
 }
 
@@ -327,7 +277,7 @@
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     NSUndoManager *undoMan = [[self window] undoManager];
 	if([undoMan isUndoingOrRedoing]) return;
-    NSParameterAssert(row >= 0 && row < (int)[macros count]);    
+    NSParameterAssert(row >= 0 && row < [macros count]);    
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
     
@@ -340,11 +290,11 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Message in alert dialog when entering empty macro key") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Empty Macro", @"Empty Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"Informative text in alert dialog when entering empty macro key")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro can not be empty.", @"")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -354,11 +304,11 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Message in alert dialog when entering duplicate macro key") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Macro", @"Duplicate Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"Informative text in alert dialog when entering duplicate macro key")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro key must be unique.", @"")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
@@ -369,18 +319,18 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
 		
         [(BDSKMacroResolver *)macroResolver changeMacroKey:key to:object];
 		
-		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"Undo action name")];
+		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"change macro key action name for undo")];
 
     }else{
         // do nothing if there was no change.
@@ -391,18 +341,18 @@
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
             [tableView editColumn:0 row:row withEvent:nil select:YES];
     		
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Message in alert dialog when entering macro with circular definition") 
-                                             defaultButton:NSLocalizedString(@"OK", @"Button title")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macro", @"Circular Macro") 
+                                             defaultButton:NSLocalizedString(@"OK", @"OK")
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"Informative text in alert dialog")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @"")];
             [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 			return;
 		}
         
 		[(BDSKMacroResolver *)macroResolver setMacroDefinition:object forMacro:key];
 		
-		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
+		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
     }
 }
 
@@ -412,10 +362,6 @@
 	if([[tableColumn identifier] isEqualToString:@"definition"]){
         [tableCellFormatter setHighlighted:[tv isRowSelected:row]];
 	}
-}
-
-- (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-    [self updateButtons];
 }
 
 #pragma mark || dragging operations
@@ -441,7 +387,7 @@
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
     if ([info draggingSource]) {
-        if([[info draggingSource] isEqual:tableView])
+        if([info draggingSource] == tableView)
         {
             // can't copy onto same table
             return NSDragOperationNone;
@@ -499,8 +445,7 @@
 }
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
-    // if this is called, we shouldn't belong to a group
-	BibDocument *document = (BibDocument *)[macroResolver owner];
+	BibDocument *document = [macroResolver document];
 	
     BOOL hadCircular = NO;
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];
@@ -524,17 +469,17 @@
             [(BDSKMacroResolver *)macroResolver setMacroDefinition:macroString forMacro:macroKey];
 		else
             hadCircular = YES;
-        [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
+        [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
     }
     [self refreshMacros];
     [tableView reloadData];
     
     if(hadCircular){
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Message in alert dialog when entering macro with circular definition") 
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Circular Macros") 
+                                         defaultButton:NSLocalizedString(@"OK", @"OK")
                                        alternateButton:nil
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"Informative text in alert dialog")];
+                             informativeTextWithFormat:NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @"")];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
     return YES;
@@ -632,7 +577,7 @@
         return;
     unichar c = [[event characters] characterAtIndex:0];
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
-    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
+    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
     if (c == NSDeleteCharacter ||
         c == NSBackspaceCharacter) {
         [[self delegate] removeSelectedMacros:nil];

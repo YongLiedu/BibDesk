@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/26/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,16 @@
 
 @interface BDSKGradientView : NSView
 {
-    @private
-    CIColor *startColor;
-    CIColor *endColor;
+    @private;
+    NSColor *startColor;
+    NSColor *endColor;
 }
 
 - (void)setLowerColor:(NSColor *)color;
 - (void)setUpperColor:(NSColor *)color;
 
 // for subclassers
-- (CIColor *)lowerColor;
-- (CIColor *)upperColor;
+- (NSColor *)lowerColor;
+- (NSColor *)upperColor;
 
 @end

@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Thu Jul 08 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,18 @@
 #import "BibDocument+Scripting.h"
 #import "BibAuthor.h"
 #import "BibItem.h"
-#import "BDSKMacro.h"
 #import "BDSKTeXTask.h"
-#import "BDSKItemPasteboardHelper.h"
-#import "BDSKOwnerProtocol.h"
-#import "BDSKPublicationsArray.h"
-#import "NSObject_BDSKExtensions.h"
-#import "NSArray_BDSKExtensions.h"
-#import "BDSKMacroResolver.h"
+#import "BDSKGroup.h"
+#import "BDSKSharedGroup.h"
 
+/* ssp
+Category on BibDocument to implement a few additional functions needed for scripting
+*/
 @implementation BibDocument (Scripting)
 
+/* cmh: 2004-1-28
+Scripting Key-Value coding methods to access publications
+*/
 - (BibItem *)valueInPublicationsAtIndex:(unsigned int)index {
     return [publications objectAtIndex:index];
 }
@@ -68,26 +69,10 @@
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name
-{
-	return [[[BDSKMacro alloc] initWithName:name macroResolver:[self macroResolver]] autorelease];
-}
 
-- (NSArray *)macros
-{
-    NSEnumerator *mEnum = [[[self macroResolver] macroDefinitions] keyEnumerator];
-	NSString *name = nil;
-	BDSKMacro *macro = nil;
-	NSMutableArray *macros = [NSMutableArray arrayWithCapacity:5];
-	
-	while (name = [mEnum nextObject]) {
-		macro = [[BDSKMacro alloc] initWithName:name macroResolver:[self macroResolver]];
-		[macros addObject:macro];
-		[macro release];
-	}
-	return macros;
-}
-
+/* ssp: 2004-08-03
+Scripting Key-Value coding method to access an author by his name
+*/
 - (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
     // create a new author so we can use BibAuthor's isEqual: method for comparison
     // instead of trying to do string comparisons
@@ -110,45 +95,64 @@
 }
 
 - (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)index {
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
 	NSMutableSet *auths = [NSMutableSet set];
 	
-    [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
+	while (pub = [pubEnum nextObject]) {
+		[auths addObjectsFromArray:[pub pubAuthors]];
+	}
 	
 	if (index < [auths count]) 
 		return [[auths allObjects] objectAtIndex:index];
 	return nil;
 }
 
+
+
+/* ssp: 2004-07-22
+Getting the displayed publications.
+*/
 - (NSArray*) displayedPublications {
 	return shownPublications;
 }
 
+
+
+
+/* ssp: 2004-07-11
+Getting and setting the selection of the table
+*/
 - (NSArray*) selection { 
     NSMutableArray *selection = [NSMutableArray arrayWithCapacity:[self numberOfSelectedPubs]];
     NSEnumerator *pubE = [[self selectedPublications] objectEnumerator];
     BibItem *pub;
     
-    // only items belonging to the document can be accessed through AppleScript
-    // items from external groups have no scriptable container, and AppleScript accesses properties of the document
-    while ((pub = [pubE nextObject]) && ([[pub owner] isEqual:self])) 
-        [selection addObject:pub];
+    while (pub = [pubE nextObject]) 
+        if ([pub document] != nil) [selection addObject:pub];
     return selection;
 }
 
+
 - (void) setSelection: (NSArray *) newSelection {
-	// on Tiger: debugging revealed that we get an array of NSIndexSpecifiers and not of BibItem
-    // the index is relative to all the publications the document (AS container), not the shownPublications
-	NSArray *pubsToSelect = [[newSelection lastObject] isKindOfClass:[BibItem class]] ? newSelection : [publications objectsAtIndexSpecifiers:newSelection];
-	[self selectPublications:pubsToSelect];
+	//NSLog(@"setSelection:");
+	NSEnumerator *itemEnum = [newSelection objectEnumerator];
+	// debugging revealed that we get an array of NSIndexspecifiers and not of BibItem
+	NSIndexSpecifier *item;
+	NSMutableArray *pubsToSelect = [NSMutableArray arrayWithCapacity:[newSelection count]];
+	
+	while (item = [itemEnum nextObject])
+		[pubsToSelect addObject:[publications objectAtIndex:[item index]]];
+	[self highlightBibs:pubsToSelect];
 }
 
-- (NSTextStorage*) textStorageForPublications:(NSArray *)pubs {
-    NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
-    [pboardHelper declareType:NSRTFPboardType dragCopyType:BDSKRTFDragCopyType forItems:pubs forPasteboard:pboard];
-    NSData *data = [pboard dataForType:NSRTFPboardType];
-    [pboardHelper clearPromisedTypesForPasteboard:pboard];
+
+- (NSTextStorage*) textStorageForBibString:(NSString*) bibString {
+    NSData *data = nil;
+    if([texTask runWithBibTeXString:bibString] && [texTask hasRTFData])
+        data = [texTask RTFData];
     
-    if(data == nil) return [[[NSTextStorage alloc] init] autorelease];
+    if(!data) return [[[NSTextStorage alloc] init] autorelease];
     	
 	return [[[NSTextStorage alloc] initWithRTF:data documentAttributes:NULL] autorelease];
 }

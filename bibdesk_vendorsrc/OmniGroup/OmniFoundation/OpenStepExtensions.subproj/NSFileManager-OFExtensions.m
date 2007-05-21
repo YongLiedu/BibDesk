@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -13,7 +13,6 @@
 #import "NSProcessInfo-OFExtensions.h"
 #import "NSArray-OFExtensions.h"
 #import "NSString-OFExtensions.h"
-#import "NSString-OFPathExtensions.h"
 #import "OFUtilities.h"
 
 #import <sys/errno.h>
@@ -26,7 +25,7 @@
 #import <sys/attr.h>
 #import <fcntl.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSFileManager-OFExtensions.m 76838 2006-06-22 21:07:06Z wiml $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSFileManager-OFExtensions.m 66043 2005-07-25 21:17:05Z kc $")
 @interface NSFileManager (OFPrivate)
 - (int)filesystemStats:(struct statfs *)stats forPath:(NSString *)path;
 - (NSString *)lockFilePathForPath:(NSString *)path;
@@ -953,67 +952,6 @@ typedef struct {
     }
 
     return path;
-}
-
-- (BOOL)fileIsStationeryPad:(NSString *)filename;
-{
-    const char *posixPath;
-    FSRef myFSRef;
-    FSCatalogInfo catalogInfo;
-    
-    posixPath = [filename fileSystemRepresentation];
-    if (posixPath == NULL)
-        return NO; // Protect FSPathMakeRef() from crashing
-    if (FSPathMakeRef((UInt8 *)posixPath, &myFSRef, NULL))
-        return NO;
-    if (FSGetCatalogInfo(&myFSRef, kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL) != noErr)
-        return NO;
-    return (((FileInfo *)(&catalogInfo.finderInfo))->finderFlags & kIsStationery) != 0;
-}
-
-- (BOOL)path:(NSString *)otherPath isAncestorOfPath:(NSString *)thisPath relativePath:(NSString **)relativeResult
-{
-    NSArray *commonComponents, *myContinuation, *parentContinuation;
-    
-    myContinuation = nil;
-    parentContinuation = nil;
-    commonComponents = OFCommonRootPathComponents(thisPath, otherPath, &myContinuation, &parentContinuation);
-    
-    if (commonComponents != nil && [parentContinuation count] == 0) {
-        if (relativeResult)
-            *relativeResult = [NSString pathWithComponents:myContinuation];
-        return YES;
-    }
-        
-    NSString *lastParentComponent = [otherPath lastPathComponent];
-    NSDictionary *lastParentComponentStat = nil;
-    NSArray *myComponents = [thisPath pathComponents];
-    unsigned componentIndex, componentCount = [myComponents count];
-    
-    componentIndex = componentCount;
-    while(componentIndex--) {
-        if ([lastParentComponent caseInsensitiveCompare:[myComponents objectAtIndex:componentIndex]] == NSOrderedSame) {
-            if (lastParentComponentStat == nil) {
-                lastParentComponentStat = [self fileAttributesAtPath:otherPath traverseLink:YES];
-                if (!lastParentComponentStat) {
-                    // Can't stat the putative parent --- so there's no way we're a subdirectory of it.
-                    return NO;
-                }
-            }
-            
-            NSString *thisPartialPath = [NSString pathWithComponents:[myComponents subarrayWithRange:(NSRange){0, componentIndex+1}]];
-            NSDictionary *thisPartialPathStat = [self fileAttributesAtPath:thisPartialPath traverseLink:YES];
-            // Compare the file stats. In particular, we're comparing the filesystem number and inode number: we're checking to see if they're the same file.
-            if ([lastParentComponentStat isEqual:thisPartialPathStat]) {
-                if (relativeResult) {
-                    *relativeResult = (componentIndex == componentCount-1 && [[lastParentComponentStat fileType] isEqualToString:NSFileTypeDirectory]) ? @"." : [NSString pathWithComponents:[myComponents subarrayWithRange:(NSRange){componentIndex+1, componentCount-componentIndex-1}]]; 
-                }
-                return YES;
-            }
-        }
-    }
-    
-    return NO;
 }
 
 @end

@@ -1,4 +1,4 @@
-// Copyright 2002-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -7,18 +7,15 @@
 
 #import <OmniFoundation/OFEnumNameTable.h>
 
-#import <OmniBase/OmniBase.h>
-
-#import <OmniFoundation/NSString-OFExtensions.h>
-#import <OmniFoundation/OFStringScanner.h>
 #import <OmniFoundation/OFXMLCursor.h>
 #import <OmniFoundation/OFXMLDocument.h>
 #import <OmniFoundation/OFXMLElement.h>
 #import <OmniFoundation/CFArray-OFExtensions.h>
 #import <OmniFoundation/CFDictionary-OFExtensions.h>
+#import <OmniBase/OmniBase.h>
 #import <OmniBase/system.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFEnumNameTable.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFEnumNameTable.m 66640 2005-08-10 00:37:09Z kc $");
 
 /*"
 This class is intended for use in a bi-directional mapping between an integer enumeration and string representations for the elements of the enumeration.  This is useful, for example, when converting data structures to and from an external representation.  Instead of encoding internal enumeration values as integers, they can be encoded as string names.  This makes it easier to interpret the external representation and easier to rearrange the private enumeration values without impact to existing external representations in files, defaults property lists, databases, etc.
@@ -211,50 +208,8 @@ The implementation does not currently assume anything about the range of the enu
     return YES;
 }
 
-#pragma mark -
-#pragma mark Masks
 
-- (NSString *)copyStringForMask:(unsigned int)mask withSeparator:(unichar)separator;
-{
-    if (mask == 0)
-	return [[self nameForEnum:0] copy];
-    
-    NSMutableString *result = [[NSMutableString alloc] init];
-    
-    unsigned int enumIndex, enumCount = [self count];
-    for (enumIndex = 0; enumIndex < enumCount; enumIndex++) {
-	unsigned int enumValue = [self enumForIndex:enumIndex];
-	if (mask & enumValue) { // The 0 entry will fail this trivially so we need not skip it manually
-	    NSString *name = [self nameForEnum:enumValue];
-	    if ([result length])
-		[result appendFormat:@"%C%@", separator, name];
-	    else
-		[result appendString:name];
-	}
-    }
-    
-    return result;
-}
-
-- (unsigned int)maskForString:(NSString *)string withSeparator:(unichar)separator;
-{
-    // Avoid passing nil to -[OFStringScanner initWithString:];
-    if ([string isEqualToString:[self nameForEnum:0]] || [NSString isEmptyString:string])
-	return 0;
-    
-    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:string];
-    NSString *name;
-    unsigned int mask = 0;
-    while ((name = [scanner readFullTokenWithDelimiterCharacter:separator])) {
-	mask |= [self enumForName:name];
-	[scanner readCharacter];
-    }
-    [scanner release];
-    
-    return mask;
-}
-
-// Archiving (primarily for OAEnumStyleAttribute)
+// Archving (primarily for OAEnumStyleAttribute)
 + (NSString *)xmlElementName;
 {
     return @"enum-name-table";

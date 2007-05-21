@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,6 @@
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
 #import "BibTypeManager.h"
-#import "BDSKThreadSafeMutableArray.h"
-#import "NSObject_BDSKExtensions.h"
 
 @interface BDSKSearchIndex (Private)
 
@@ -84,14 +82,10 @@ void *setupThreading(void *anObject);
         CFRelease(indexData); // @@ doc bug: is this owned by the index now?  seems to be...
             
         document = [aDocument retain];
-        delegate = nil;
         [self setInitialObjectsToIndex:[[aDocument publications] arrayByPerformingSelector:@selector(searchIndexInfo)]];
         
         flags.isIndexing = 0;
         flags.shouldKeepRunning = 1;
-        
-        // repeated flushes will cause performance to suck, so don't inform the delegate of every added file
-        flags.updateGranularity = 20;
         
         // We need setupThreading to run in a separate thread, but +[NSThread detachNewThreadSelector...] retains self, so we end up with a retain cycle
         pthread_attr_t attr;
@@ -100,11 +94,6 @@ void *setupThreading(void *anObject);
         
         int err = pthread_create(&notificationThread, &attr, &setupThreading, [[self retain] autorelease]);
         pthread_attr_destroy(&attr);
-        
-        // maintain a dictionary mapping URL -> item titles, since SKIndex properties are slow
-        titles = [[NSMutableDictionary alloc] initWithCapacity:128];
-        
-        progressValue = 0.0;
 
         if(err){
             [self release];
@@ -120,19 +109,17 @@ void *setupThreading(void *anObject);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [notificationPort release];
     [notificationQueue release];
-    [titles release];
+    
+    // the document does cleanup that should only be performed on the main thread (this was causing an assertion failure in -[BDSKFileContentSearchController cancelCurrentSearch:])
+    [document performSelectorOnMainThread:@selector(release) withObject:nil waitUntilDone:NO];
+    [queueLock release];
     if(index) CFRelease(index);
     [super dealloc];
 }
 
-// cancel is usually sent from the main thread
 - (void)cancel
 {
-    OSAtomicCompareAndSwap32(flags.shouldKeepRunning, 0, (int32_t *)&flags.shouldKeepRunning);
-    
-    // the document does cleanup that should only be performed on the main thread (this was causing an assertion failure in -[BDSKFileContentSearchController cancelCurrentSearch:])
-    [document performSelectorOnMainThread:@selector(release) withObject:nil waitUntilDone:NO];
-    document = nil;
+    OSAtomicDecrement32((int32_t *)&flags.shouldKeepRunning);
 }
 
 - (SKIndexRef)index
@@ -146,37 +133,6 @@ void *setupThreading(void *anObject);
     return isIndexing == 1;
 }
 
-- (void)setDelegate:(id <BDSKSearchIndexDelegate>)anObject
-{
-    if(anObject)
-        NSAssert1([(id)anObject conformsToProtocol:@protocol(BDSKSearchIndexDelegate)], @"%@ does not conform to BDSKSearchIndexDelegate protocol", [anObject class]);
-
-    delegate = anObject;
-}
-
-- (void)setUpdateGranularity:(unsigned int)count
-{
-    OSAtomicCompareAndSwap32Barrier(flags.updateGranularity, count, (int32_t *)&flags.updateGranularity);
-}
-
-- (NSString *)titleForURL:(NSURL *)theURL
-{
-    NSString *theTitle = nil;
-    @synchronized(titles) {
-        theTitle = [[titles objectForKey:theURL] retain];
-    }
-    return [theTitle autorelease];
-}
-
-- (double)progressValue
-{
-    double theValue;
-    @synchronized(self) {
-        theValue = progressValue;
-    }
-    return theValue;
-}
-
 @end
 
 @implementation BDSKSearchIndex (Private)
@@ -188,20 +144,12 @@ void *setupThreading(void *anObject);
     OBPRECONDITION(initialObjectsToIndex);
     NSEnumerator *enumerator = [initialObjectsToIndex objectEnumerator];
     id anObject = nil;
-    double totalObjectCount = [initialObjectsToIndex count];
-    double numberIndexed = 0;
         
-    while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1) {
+    while((anObject = [enumerator nextObject]) && flags.shouldKeepRunning == 1)
         [self indexFilesForItem:anObject];
-        numberIndexed++;
-        @synchronized(self) {
-            progressValue = (numberIndexed / totalObjectCount) * 100;
-        }
-    }
      
     // release these, since they're only used for the initial index creation
     [self setInitialObjectsToIndex:nil];
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidFinishInitialIndexing:) withObject:self waitUntilDone:NO];
 }
 
 - (void)indexFilesForItem:(id)anItem
@@ -213,12 +161,11 @@ void *setupThreading(void *anObject);
     volatile Boolean success;
     
     NSEnumerator *urlEnumerator = [[anItem valueForKey:@"urls"] objectEnumerator];
+    CFDictionaryRef properties;
         
     BOOL swap;
     swap = OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
-    
-    int32_t updateCount = flags.updateGranularity;
     
     while(url = [urlEnumerator nextObject]){
                 
@@ -226,26 +173,19 @@ void *setupThreading(void *anObject);
         OBPOSTCONDITION(skDocument);
         if(skDocument == NULL) continue;
         
-        // SKIndexSetProperties is more generally useful, but is really slow when creating the index
-        // SKIndexRenameDocument changes the URL, so it's not useful
-        @synchronized(titles) {
-            [titles setObject:[anItem valueForKey:@"title"] forKey:url];
-        }
+        // most documents on file will have a title, and the @"title" key is guaranteed to be non-nil
+        properties = (CFDictionaryRef)[[NSDictionary alloc] initWithObjectsAndKeys:[anItem valueForKey:@"title"], @"title", nil];
+        OBASSERT(properties);
         
         success = SKIndexAddDocument(index, skDocument, NULL, TRUE);
+        SKIndexSetDocumentProperties(index, skDocument, properties);
         OBPOSTCONDITION(success);
         
+        CFRelease(properties);
         CFRelease(skDocument);
-        
-        if (updateCount-- == 0) {
-            [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
-            updateCount = flags.updateGranularity;
-        }
     }
     swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
-    
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
 }
 
 void *setupThreading(void *anObject)
@@ -263,7 +203,8 @@ void *setupThreading(void *anObject)
         
         [self->notificationPort scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         
-        self->notificationQueue = [[BDSKThreadSafeMutableArray alloc] initWithCapacity:5];
+        self->notificationQueue = [[NSMutableArray alloc] initWithCapacity:5];
+        self->queueLock = [[NSLock alloc] init];
             
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKSearchIndexInfoChangedNotification object:self->document];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processNotification:) name:BDSKDocAddItemNotification object:self->document];
@@ -285,17 +226,15 @@ void *setupThreading(void *anObject)
     }
         
     // run the current run loop until we get a cancel message, or else the current thread/run loop will just go away when this function returns
+    volatile int32_t keepGoing;
     
     @try{
-        
-        NSRunLoop *rl = [NSRunLoop currentRunLoop];
-        BOOL didRun;
-        
         do {
+            keepGoing = (self->flags.shouldKeepRunning == 1);
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
             [pool release];
             pool = [[NSAutoreleasePool alloc] init];
-            didRun = [rl runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-        } while(self->flags.shouldKeepRunning == 1 && didRun);
+        } while(keepGoing);
     }
     @catch(id localException){
         NSLog(@"Exception %@ raised in search index; exiting thread run loop.", localException);
@@ -315,7 +254,9 @@ void *setupThreading(void *anObject)
 {    
     if( pthread_equal(notificationThread, pthread_self()) == FALSE ){
         // Forward the notification to the correct thread
+        [queueLock lock];
         [notificationQueue addObject:note];
+        [queueLock unlock];
         [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
         
     } else {
@@ -336,12 +277,12 @@ void *setupThreading(void *anObject)
 {
     OBASSERT(pthread_equal(notificationThread, pthread_self()));
 
-	NSArray *searchIndexInfo = [[note userInfo] valueForKey:@"searchIndexInfo"];
-    OBPRECONDITION(searchIndexInfo);
+	NSEnumerator *pubEnum = [[[note userInfo] valueForKey:@"searchIndexInfo"] objectEnumerator];
+    id pub;
+    OBPRECONDITION(pubEnum);
             
-    [self performSelector:@selector(indexFilesForItem:) withObjectsFromArray:searchIndexInfo];
-        
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
+	while (pub = [pubEnum nextObject])
+		[self indexFilesForItem:pub];
 }
 
 - (void)handleDocDelItemNotification:(NSNotification *)note
@@ -372,10 +313,6 @@ void *setupThreading(void *anObject)
 		for(idx = 0; idx < maxIdx; idx++){
 			
 			url = [urls objectAtIndex:idx];
-            
-            @synchronized(titles) {
-                [titles removeObjectForKey:url];
-            }
 			
 			skDocument = SKDocumentCreateWithURL((CFURLRef)url);
 			OBPOSTCONDITION(skDocument);
@@ -389,8 +326,6 @@ void *setupThreading(void *anObject)
 	}
     swap = OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isIndexing);
     OBASSERT(swap);
-	
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
 }
 
 - (void)handleSearchIndexInfoChangedNotification:(NSNotification *)note
@@ -399,20 +334,21 @@ void *setupThreading(void *anObject)
 
     // reindex all the files; unless you have many local files attached to the item, there won't be much savings vs. just adding the one that changed
     [self indexFilesForItem:[note userInfo]];
-    
-    // we used to remove the old object from the array, but it's a) not thread safe and b) having an extra document in the index isn't that bad
-    [delegate performSelectorOnMainThread:@selector(searchIndexDidUpdate:) withObject:self waitUntilDone:NO];
 }    
 
 - (void)handleMachMessage:(void *)msg
 {
 
+    [queueLock lock];
     while ( [notificationQueue count] ) {
         NSNotification *note = [[notificationQueue objectAtIndex:0] retain];
         [notificationQueue removeObjectAtIndex:0];
+        [queueLock unlock];
         [self processNotification:note];
         [note release];
-    }
+        [queueLock lock];
+    };
+    [queueLock unlock];
 }
 
 - (void)setInitialObjectsToIndex:(NSArray *)objects{

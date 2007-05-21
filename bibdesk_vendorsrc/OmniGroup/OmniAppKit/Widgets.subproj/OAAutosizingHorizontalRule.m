@@ -1,4 +1,4 @@
-// Copyright 2005-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -10,7 +10,7 @@
 #import <OmniBase/OmniBase.h>
 #import <AppKit/AppKit.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAAutosizingHorizontalRule.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header$");
 
 @implementation OAAutosizingHorizontalRule
 

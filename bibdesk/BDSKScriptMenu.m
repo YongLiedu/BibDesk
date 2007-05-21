@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 30/10/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -76,9 +76,7 @@ static int recursionDepth = 0;
     [scriptItem setSubmenu:newMenu];
     [newMenu setDelegate:[BDSKScriptMenuController sharedInstance]];
     [newMenu release];
-    int itemIndex = [[NSApp mainMenu] numberOfItems] - 1;
-    if (itemIndex > 0)
-        [[NSApp mainMenu] insertItem:scriptItem atIndex:itemIndex];
+    [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
     [scriptItem release];
 }    
 
@@ -91,7 +89,7 @@ static int recursionDepth = 0;
 + (BOOL)disabled;
 {
     // Omni disables their script menu on 10.4, saying the system one is better...
-    return [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKScriptMenuDisabled"];
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"OAScriptMenuDisabled"];
 }
 
 @end
@@ -268,7 +266,7 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
             [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
         }
         
-        [result addObject:[[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:@"Scripts"]];
+        [result addObject:[[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"Contents"] stringByAppendingPathComponent:@"Scripts"]];
         scriptPaths = [result copy];
         [result release];
     }
@@ -289,21 +287,21 @@ static NSDate *earliestDateFromBaseScriptsFolders(NSArray *folders)
     if (script == nil) {
         NSString *errorText, *messageText, *okButton;
         
-        errorText = [NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"Message in alert dialog when failing to load script"), scriptName];
-        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
-        okButton = NSLocalizedString(@"OK", @"Button title");
-        NSRunAlertPanel([errorText safeFormatString], [messageText safeFormatString], okButton, nil, nil);
+        errorText = [NSString stringWithFormat:NSLocalizedString(@"The script file '%@' could not be opened.", @"script loading error"), scriptName];
+        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        okButton = NSLocalizedString(@"OK", @"OK");
+        NSRunAlertPanel(errorText, messageText, okButton, nil, nil);
         return;
     }
     result = [script executeAndReturnError:&errorDictionary];
     if (result == nil) {
         NSString *errorText, *messageText, *okButton, *editButton;
         
-        errorText = [NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"Message in alert dialog when failing to execute script"), scriptName];
-        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"Informative text in alert dialog"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
-        okButton = NSLocalizedString(@"OK", "Button title");
-        editButton = NSLocalizedString(@"Edit Script", @"Button title");
-        if (NSRunAlertPanel([errorText safeFormatString], [messageText safeFormatString], okButton, editButton, nil) == NSAlertAlternateReturn) {
+        errorText = [NSString stringWithFormat:NSLocalizedString(@"The script '%@' could not complete.", @"script execute error"), scriptName];
+        messageText = [NSString stringWithFormat:NSLocalizedString(@"AppleScript reported the following error:\n%@", @"script error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        okButton = NSLocalizedString(@"OK", "OK");
+        editButton = NSLocalizedString(@"Edit Script", @"Edit Script");
+        if (NSRunAlertPanel(errorText, messageText, okButton, editButton, nil) == NSAlertAlternateReturn) {
             [[NSWorkspace sharedWorkspace] openFile:scriptFilename];
         }
         return;

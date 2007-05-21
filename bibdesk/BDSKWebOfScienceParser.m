@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/20/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 
 #import "BDSKWebOfScienceParser.h"
 #import "BibItem.h"
-#import "NSString_BDSKExtensions.h"
+#import "PubMedParser.h"
 #import "BibTypeManager.h"
 
 static void mergePageNumbers(NSMutableDictionary *dict)
@@ -141,12 +141,18 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
 
 @implementation BDSKWebOfScienceParser
 
-+ (BOOL)canParseString:(NSString *)string{
-    // remove leading newlines in case this originates from copy/paste
-    return [[string stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] hasPrefix:@"FN ISI Export Format"];
++ (NSMutableArray *)itemsFromString:(NSString *)itemString
+                              error:(NSError **)outError{
+    return [self itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
 }
 
-+ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
++ (NSMutableArray *)itemsFromString:(NSString *)itemString
+                              error:(NSError **)outError
+                        frontMatter:(NSMutableString *)frontMatter
+                           filePath:(NSString *)filePath{
+    
+    NSParameterAssert([itemString isWebOfScienceString]);
+    
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
@@ -155,7 +161,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     // for now, we'll only support version 1.0
     NSRange startRange = [itemString rangeOfString:@"VR 1.0\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @"Error description"), nil);
+        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"This Web of Science version is not supported", @""), nil);
         if(outError) *outError = error;
 		return returnArray;
     }
@@ -221,7 +227,8 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
                         type = type ? [typeManager bibtexTypeForWebOfScienceType:type] : BDSKMiscString;
                     }
                     
-                    newBI = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString citeKey:nil pubFields:pubDict isNew:YES];
+                    newBI = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString pubFields:pubDict isNew:YES];
+                    [newBI setCiteKeyString:[newBI suggestedCiteKey]];
 					[returnArray addObject:newBI];
 					[newBI release];
 				}
@@ -249,9 +256,6 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
             if([tag isEqualToString:@"AU"]){
                 [mutableValue appendString:@" and "];
                 [mutableValue appendString:fixedAuthorName([sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet])];
-            } else if([tag isEqualToString:@"CR"]){
-                [mutableValue appendString:@";"];
-                [mutableValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet]];
             } else {
                 [mutableValue appendString:@" "];
                 [mutableValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet]];

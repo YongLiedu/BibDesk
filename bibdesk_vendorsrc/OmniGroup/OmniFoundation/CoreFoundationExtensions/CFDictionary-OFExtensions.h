@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/CFDictionary-OFExtensions.h 69856 2005-11-01 02:42:33Z wiml $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/CFDictionary-OFExtensions.h 66640 2005-08-10 00:37:09Z kc $
 
 #import <CoreFoundation/CFDictionary.h>
 
@@ -14,8 +14,6 @@ extern const CFDictionaryKeyCallBacks OFCaseInsensitiveStringKeyDictionaryCallba
 
 extern const CFDictionaryKeyCallBacks    OFNonOwnedPointerDictionaryKeyCallbacks;
 extern const CFDictionaryValueCallBacks  OFNonOwnedPointerDictionaryValueCallbacks;
-
-extern const CFDictionaryKeyCallBacks    OFPointerEqualObjectDictionaryKeyCallbacks;
 
 extern const CFDictionaryKeyCallBacks    OFIntegerDictionaryKeyCallbacks;
 extern const CFDictionaryValueCallBacks  OFIntegerDictionaryValueCallbacks;

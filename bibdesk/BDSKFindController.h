@@ -5,7 +5,7 @@
 //  Created by Adam Maxwell on 06/21/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
     IBOutlet NSPopUpButton *searchTypePopUpButton;
     IBOutlet NSPopUpButton *searchScopePopUpButton;
     IBOutlet NSButton *ignoreCaseCheckbox;
-    IBOutlet NSMatrix *searchSelectionMatrix;
+    IBOutlet NSButton *searchSelectionCheckbox;
     IBOutlet NSComboBox *findComboBox;
     IBOutlet NSComboBox *replaceComboBox;
     IBOutlet NSButton *findAsMacroCheckbox;
@@ -67,16 +67,12 @@
 	int searchType;
 	int searchScope;
 	BOOL ignoreCase;
-	BOOL wrapAround;
 	BOOL searchSelection;
 	BOOL findAsMacro;
 	BOOL replaceAsMacro;
 	BOOL overwrite;
-    int operation;
 	int shouldMove;
-	NSString *replaceLabel;
 	NSString *replaceAllTooltip;
-    CFArrayRef editors;
 }
 
 /*!
@@ -95,7 +91,7 @@
 */
 - (void)updateUI;
 
-- (BOOL)commitEditing;
+- (void)finalizeEdits;
 
 /*!
     @method     regexIsValid:
@@ -120,9 +116,6 @@
 
 - (IBAction)openHelp:(id)sender;
 
-- (int)operation;
-- (void)setOperation:(int)newOperation;
-
 - (NSString *)field;
 - (void)setField:(NSString *)newFieldName;
 
@@ -141,9 +134,6 @@
 - (BOOL)ignoreCase;
 - (void)setIgnoreCase:(BOOL)newIgnoreCase;
 
-- (BOOL)wrapAround;
-- (void)setWrapAround:(BOOL)newWrapAround;
-
 - (BOOL)searchSelection;
 - (void)setSearchSelection:(BOOL)newSearchSelection;
 
@@ -159,9 +149,6 @@
 - (NSString *)replaceAllTooltip;
 - (void)setReplaceAllTooltip:(NSString *)newReplaceAllTooltip;
 
-- (NSString *)replaceLabel;
-- (void)setReplaceLabel:(NSString *)newReplaceLabel;
-
 - (BOOL)validateField:(id *)value error:(NSError **)error;
 - (BOOL)validateFindString:(id *)value error:(NSError **)error;
 - (BOOL)validateReplaceString:(id *)value error:(NSError **)error;
@@ -171,7 +158,7 @@
 - (BOOL)validateSearchSelection:(id *)value error:(NSError **)error;
 - (BOOL)validateFindAsMacro:(id *)value error:(NSError **)error;
 - (BOOL)validateReplaceAsMacro:(id *)value error:(NSError **)error;
-- (BOOL)validateOperation:(id *)value error:(NSError **)error;
+- (BOOL)validateOverwrite:(id *)value error:(NSError **)error;
 
 - (NSArray *)findHistory;
 - (unsigned)countOfFindHistory;

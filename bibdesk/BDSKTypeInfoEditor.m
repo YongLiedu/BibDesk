@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 5/4/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -42,10 +42,8 @@
 #import "BibAppController.h"
 #import "BibTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "NSIndexSet_BDSKExtensions.h"
 
 #define BDSKTypeInfoRowsPboardType	@"BDSKTypeInfoRowsPboardType"
-#define BDSKTypeInfoPboardType @"BDSKTypeInfoPboardType"
 
 static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
@@ -67,8 +65,6 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		defaultFieldsForTypesDict = [[tmpDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
 		defaultTypes = [[[tmpDict objectForKey:REQUIRED_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] retain];
 		
-        canEditDefaultTypes = NO;
-        
 		fieldsForTypesDict = [[NSMutableDictionary alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
 		types = [[NSMutableArray alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
 		[self revertTypes]; // this loads the current typeInfo from BibTypeManager
@@ -102,8 +98,6 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	tc = [optionalTableView tableColumnWithIdentifier:@"optional"];
     [[tc dataCell] setFormatter:fieldNameFormatter];
 	
-    [canEditDefaultTypesButton setState:canEditDefaultTypes ? NSOnState : NSOffState];
-    
 	[typeTableView reloadData];
 	[requiredTableView reloadData];
 	[optionalTableView reloadData];
@@ -134,8 +128,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 # pragma mark Accessors
 
-- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned)index {
-	[types insertObject:newType atIndex:index];
+- (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict {
+	[types addObject:newType];
 	
 	// create mutable containers for the fields
 	NSMutableArray *requiredFields;
@@ -150,10 +144,6 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: requiredFields, REQUIRED_KEY, optionalFields, OPTIONAL_KEY, nil];
 	[fieldsForTypesDict setObject:newDict forKey:newType];
-}
-
-- (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict {
-    [self insertType:newType withFields:fieldsDict atIndex:[types count]];
 }
 
 - (void)setCurrentType:(NSString *)newCurrentType {
@@ -349,41 +339,13 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	[self setDocumentEdited:YES];
 }
 
-- (void)warningSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    canEditDefaultTypes = returnCode == NSOKButton;
-    [canEditDefaultTypesButton setState:canEditDefaultTypes ? NSOnState : NSOffState];
-    
-    [typeTableView reloadData];
-	[requiredTableView reloadData];
-	[optionalTableView reloadData];
-	[self updateButtons];
-}
-
-- (IBAction)changeCanEditDefaultTypes:(id)sender {
-    if ([sender state] == NSOnState) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Are you sure you want to edit default types?", @"Message in alert dialog")
-                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
-                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
-                                           otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"Changing the default bibtex types and fields can give misleading information.", @"Informative text in alert dialog")];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:self
-                         didEndSelector:@selector(warningSheetDidEnd:returnCode:contextInfo:)
-                            contextInfo:NULL];
-	} else {
-        [self warningSheetDidEnd:nil returnCode:NSCancelButton contextInfo:NULL];
-    }
-}
-
 #pragma mark validation methods
 
 - (BOOL)canEditType:(NSString *)type {
-	return (canEditDefaultTypes || NO == [defaultTypes containsObject:type]);
+	return (![defaultTypes containsObject:type]);
 }
 
 - (BOOL)canEditField:(NSString *)field{
-    if (canEditDefaultTypes)
-        return YES;
 	if (currentType == nil) // there is nothing to edit
 		return NO;
 	if (![defaultTypes containsObject:currentType]) // we allow any edits for non-default types
@@ -512,7 +474,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	if (tv == typeTableView) {
         // NSDictionary copies its keys, so types may be the only thing retaining oldValue (see bug #1596532)
 		oldValue = [[[types objectAtIndex:row] retain] autorelease];
-		newValue = [(NSString *)object entryType];
+		newValue = [(NSString *)object lowercaseString];
 		if (![newValue isEqualToString:oldValue] && 
 			![types containsObject:newValue]) {
 			
@@ -526,7 +488,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	else if (tv == requiredTableView) {
 		oldValue = [currentRequiredFields objectAtIndex:row];
-		newValue = [(NSString *)object fieldName];
+		newValue = [(NSString *)object capitalizedString];
 		if (![newValue isEqualToString:oldValue] && 
 			![currentRequiredFields containsObject:newValue] && 
 			![currentOptionalFields containsObject:newValue]) {
@@ -538,7 +500,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	else if (tv == optionalTableView) {
 		oldValue = [currentOptionalFields objectAtIndex:row];
-		newValue = [(NSString *)object fieldName];
+		newValue = [(NSString *)object capitalizedString];
 		if (![newValue isEqualToString:oldValue] && 
 			![currentRequiredFields containsObject:newValue] && 
 			![currentOptionalFields containsObject:newValue]) {
@@ -559,165 +521,76 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
 	if ([self canEditTableView:tv row:row]) {
 		[cell setTextColor:[NSColor controlTextColor]]; // when selected, this is automatically changed to white
-	} else if ([[self window] isKeyWindow] && [[[self window] firstResponder] isEqual:tv] && [tv isRowSelected:row]) {
+	} else if ([[self window] isKeyWindow] && [[self window] firstResponder] == tv && [tv isRowSelected:row]) {
 		[cell setTextColor:[NSColor lightGrayColor]]; // selected disabled
 	} else {
 		[cell setTextColor:[NSColor darkGrayColor]]; // unselected disabled
 	}
 }
 
-#pragma mark Paste/Duplicate support
-
-// used by OmniAppKit category methods
-- (BOOL)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard {
-    NSArray *pbtypes = [pboard types];
-    if ([tv isEqual:typeTableView] && [pbtypes containsObject:BDSKTypeInfoPboardType]) {
-        NSArray *newTypes = [pboard propertyListForType:BDSKTypeInfoPboardType];
-        NSEnumerator *newTypeE = [newTypes objectEnumerator];
-        NSDictionary *aType;
-        NSString *newType = nil;
-        
-        while (aType = [newTypeE nextObject]) {
-            // append "copy" here instead of in the loop
-            NSString *name = [[aType objectForKey:@"name"] stringByAppendingString:@"-copy"];
-            newType = name;
-            int i = 0;
-            while ([types containsObject:newType]) {
-                newType = [NSString stringWithFormat:@"%@-%i",name, ++i];
-            }
-            [self addType:newType withFields:[aType objectForKey:@"fields"]];
-            
-        }
-        [typeTableView reloadData];
-        
-        // select and edit the first item we added
-        int row = [types count] - [newTypes count];
-
-        [typeTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-        [[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
-        [typeTableView editColumn:0 row:row withEvent:nil select:YES];
-        
-        [self setDocumentEdited:YES];
-        return YES;        
-    }
-    return NO;
-}
-
 #pragma mark NSTableView dragging
 
 - (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray *)rows toPasteboard:(NSPasteboard *)pboard {
 	// we only drag our own rows
-	[pboard declareTypes: [NSArray arrayWithObjects:BDSKTypeInfoRowsPboardType, BDSKTypeInfoPboardType, nil] owner:nil];
+	[pboard declareTypes: [NSArray arrayWithObject:BDSKTypeInfoRowsPboardType] owner:self];
 	// write the rows to the pasteboard
 	[pboard setPropertyList:rows forType:BDSKTypeInfoRowsPboardType];
-    if ([tv isEqual:typeTableView] && [rows count]) {
-        NSMutableArray *newTypes = [NSMutableArray array];
-        NSNumber *row;
-        NSEnumerator *rowE = [rows objectEnumerator];
-        while (row = [rowE nextObject]) {
-            NSMutableDictionary *aType = [NSMutableDictionary dictionary];
-            NSString *name = [types objectAtIndex:[row intValue]];
-            [aType setObject:name forKey:@"name"];
-            [aType setObject:[fieldsForTypesDict objectForKey:name] forKey:@"fields"];
-            [newTypes addObject:aType];
-        }
-        [pboard setPropertyList:newTypes forType:BDSKTypeInfoPboardType];
-    }
 	return YES;
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
-	if ([info draggingSource] != tv) {// we don't allow dragging between tables, as we want to keep default types in the same place
-		if ([info draggingSource] == typeTableView || tv == typeTableView || [self canEditType:currentType] == NO)
-            return NSDragOperationNone;
-	}
-    
+	if ([info draggingSource] != tv) // we don't allow dragging between tables, as we want to keep default types in the same place
+		return NSDragOperationNone;
+	
 	if (row == -1) // redirect drops on the table to the first item
 		[tv setDropRow:0 dropOperation:NSTableViewDropAbove];
 	if (op == NSTableViewDropOn) // redirect drops on an item
 		[tv setDropRow:row dropOperation:NSTableViewDropAbove];
 	
-    if (tv == typeTableView && [info draggingSourceOperationMask] == NSDragOperationCopy)
-        return NSDragOperationCopy;
-	else
-        return NSDragOperationMove;
+	return NSDragOperationMove;
 }
 
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op {
 	NSPasteboard *pboard = [info draggingPasteboard];
 	NSArray *rows = [pboard propertyListForType:BDSKTypeInfoRowsPboardType];
-    NSIndexSet *insertIndexes;
-    NSTableView *sourceTv = [info draggingSource];
+	NSEnumerator *rowEnum = [rows objectEnumerator];
+	NSNumber *rowNum;
+	int i;
+	int insertRow = row;
+	NSMutableArray *fields = nil;
+	NSArray *draggedFields;
+	NSMutableIndexSet *removeIndexes = [NSMutableIndexSet indexSet];
+	NSIndexSet *insertIndexes;
 	
-    if (tv == typeTableView && [info draggingSourceOperationMask] == NSDragOperationCopy) {
-        
-        NSEnumerator *typeEnum = [[types objectsAtIndexes:[NSIndexSet indexSetWithIndexesInArray:rows]] objectEnumerator];
-        NSString *type;
-        NSString *newType;
-        int i;
-        
-        insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(row, [rows count])];
-        
-        while (type = [typeEnum nextObject]) {
-            newType = [NSString stringWithFormat:@"%@-copy", type];
-            i = 0;
-            while ([types containsObject:newType]) {
-                newType = [NSString stringWithFormat:@"%@-copy-%i", type, ++i];
-            }
-            [self insertType:newType withFields:[fieldsForTypesDict objectForKey:type] atIndex:row];
-        }
-        
-    } else {
-        
-        NSEnumerator *rowEnum = [rows objectEnumerator];
-        NSNumber *rowNum;
-        int i;
-        int insertRow = row;
-        NSMutableArray *sourceFields = nil;
-        NSMutableArray *targetFields = nil;
-        NSArray *draggedFields;
-        NSMutableIndexSet *removeIndexes = [NSMutableIndexSet indexSet];
-        
-        // find the array of fields
-        if (sourceTv == typeTableView) {
-            sourceFields = types;
-        } else if (sourceTv == requiredTableView) {
-            sourceFields = currentRequiredFields;
-        } else if (sourceTv == optionalTableView) {
-            sourceFields = currentOptionalFields;
-        }
-        if (tv == typeTableView) {
-            targetFields = types;
-        } else if (tv == requiredTableView) {
-            targetFields = currentRequiredFields;
-        } else if (tv == optionalTableView) {
-            targetFields = currentOptionalFields;
-        }
-        
-        NSAssert(sourceFields != nil && targetFields != nil, @"An error occurred:  fields must not be nil when dragging");
-        
-        while (rowNum = [rowEnum nextObject]) {
-            i = [rowNum intValue];
-            if (sourceTv == tv && i < row) insertRow--;
-            [removeIndexes addIndex:i];
-        }
-        
-        draggedFields = [sourceFields objectsAtIndexes:removeIndexes];
-        insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertRow, [rows count])];
-        [sourceFields removeObjectsAtIndexes:removeIndexes];
-        [targetFields insertObjects:draggedFields atIndexes:insertIndexes];
-        
-    }
-    
-    // select the moved rows
-    if(![tv allowsMultipleSelection])
-        insertIndexes = [NSIndexSet indexSetWithIndex:[insertIndexes firstIndex]];
-    [tv selectRowIndexes:insertIndexes byExtendingSelection:NO];
-    [tv reloadData];
-    if (sourceTv != tv)
-        [sourceTv reloadData];
-    
-    [self setDocumentEdited:YES];
+	// find the array of fields
+	if (tv == typeTableView) {
+		fields = types;
+	} else if (tv == requiredTableView) {
+		fields = currentRequiredFields;
+	} else if (tv == optionalTableView) {
+		fields = currentOptionalFields;
+	}
+	
+	NSAssert(fields != nil, @"An error occurred:  fields must not be nil when dragging");
+	
+	while (rowNum = [rowEnum nextObject]) {
+		i = [rowNum intValue];
+		if (i < row) insertRow--;
+		[removeIndexes addIndex:i];
+	}
+	
+	draggedFields = [fields objectsAtIndexes:removeIndexes];
+	insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertRow, [rows count])];
+	[fields removeObjectsAtIndexes:removeIndexes];
+	[fields insertObjects:draggedFields atIndexes:insertIndexes];
+	
+	// select the moved rows
+	if(![tv allowsMultipleSelection])
+		insertIndexes = [NSIndexSet indexSetWithIndex:[insertIndexes firstIndex]];
+	[tv selectRowIndexes:insertIndexes byExtendingSelection:NO];
+	[tv reloadData];
+	
+	[self setDocumentEdited:YES];
     
     return YES;
 }

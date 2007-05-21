@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 18/1/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  */
 
 #import "BDSKJSTORParser.h"
-#import "NSString_BDSKExtensions.h"
+#import "PubMedParser.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
@@ -69,11 +69,15 @@ static void splitDateString(NSMutableDictionary *pubDict)
 
 @implementation BDSKJSTORParser
 
-+ (BOOL)canParseString:(NSString *)string{
-	return [string hasPrefix:@"JSTOR CITATION LIST"];
++ (NSMutableArray *)itemsFromString:(NSString *)itemString
+                              error:(NSError **)outError{
+    return [self itemsFromString:itemString error:outError frontMatter:nil filePath:BDSKParserPasteDragString];
 }
 
-+ (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError{
++ (NSMutableArray *)itemsFromString:(NSString *)itemString
+                              error:(NSError **)outError
+                        frontMatter:(NSMutableString *)frontMatter
+                           filePath:(NSString *)filePath{
     
     // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
     itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
@@ -88,7 +92,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
     
 	NSRange startRange = [itemString rangeOfString:@"--------------------------------------------------------------------------------\n" options:NSLiteralSearch];
 	if (startRange.location == NSNotFound){
-        OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"JSTOR delimiter not found", @"Error description"), nil);
+        OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"JSTOR delimiter not found", @""), nil);
         if(outError) *outError = error;
 		return returnArray;
     }
@@ -169,9 +173,10 @@ static void splitDateString(NSMutableDictionary *pubDict)
 			
 			newBI = [[BibItem alloc] initWithType:BDSKArticleString
 										 fileType:BDSKBibtexString
-										  citeKey:nil
 										pubFields:pubDict
                                             isNew:YES];
+			// set the citekey, since JSTOR types don't have a citekey field
+			[newBI setCiteKeyString:[newBI suggestedCiteKey]];
 			[returnArray addObject:newBI];
 			[newBI release];
 			
@@ -189,12 +194,16 @@ static void splitDateString(NSMutableDictionary *pubDict)
 					
 					newBI = [[BibItem alloc] initWithType:BDSKArticleString
 												 fileType:BDSKBibtexString
-												  citeKey:nil
 												pubFields:pubDict
                                                     isNew:YES];
+					// set the citekey, since JSTOR types don't have a citekey field
+					[newBI setCiteKeyString:[newBI suggestedCiteKey]];
 					[returnArray addObject:newBI];
 					[newBI release];
 				}
+				
+				// fix the date
+				splitDateString(pubDict);
 				
 				// reset these for the next pub
 				[pubDict removeAllObjects];
@@ -241,9 +250,10 @@ static void splitDateString(NSMutableDictionary *pubDict)
 		
 		newBI = [[BibItem alloc] initWithType:BDSKArticleString
 									 fileType:BDSKBibtexString
-									  citeKey:nil
 									pubFields:pubDict
                                         isNew:YES];
+		// set the citekey, since JSTOR types don't have a citekey field
+		[newBI setCiteKeyString:[newBI suggestedCiteKey]];
 		[returnArray addObject:newBI];
 		[newBI release];
 	}

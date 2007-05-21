@@ -14,7 +14,7 @@
 #import <OmniFoundation/CFDictionary-OFExtensions.h>
 #import <OmniFoundation/NSData-OFExtensions.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLIdentifierRegistry.m 69580 2005-10-25 17:58:51Z bungi $");
+RCS_ID("$Header$");
 
 
 
@@ -144,6 +144,11 @@ NSString *OFXMLIDFromString(NSString *str)
     return [self initWithRegistry:nil];
 }
 
+static void _objectRemoved(const void *key, const void *value, void *context)
+{
+    [(id <OFXMLIdentifierRegistryObject>)value removedFromIdentifierRegistry:(OFXMLIdentifierRegistry *)context];
+}
+
 - (void)dealloc;
 {
     OBINVARIANT([self checkInvariants]);
@@ -206,16 +211,7 @@ NSString *OFXMLIDFromString(NSString *str)
 - (void)applyFunction:(CFDictionaryApplierFunction)function context:(void *)context;
 {
     OBINVARIANT([self checkInvariants]);
-    
-    // The applier could be modifying the registrations directly or indirectly.  For example, when one object gets unregistered, it may unregister some of its sub-objects.
-    NSDictionary *mapping = [self copyIdentifierToObjectMapping];
-    
-    @try {
-	CFDictionaryApplyFunction((CFDictionaryRef)mapping, function, context);
-    } @finally {
-	[mapping release];
-    }
-    
+    CFDictionaryApplyFunction(_idToObject, function, context);
     OBINVARIANT([self checkInvariants]);
 }
 
@@ -223,11 +219,6 @@ NSString *OFXMLIDFromString(NSString *str)
 {
     [self _clear];
     [self _setup:nil];
-}
-
-- (NSMutableDictionary *)copyIdentifierToObjectMapping;
-{
-    return [[NSMutableDictionary alloc] initWithDictionary:(NSDictionary *)_idToObject];
 }
 
 #ifdef OMNI_ASSERTIONS_ON
@@ -290,11 +281,6 @@ static void _checkEntry(const void *key, const void *value, void *context)
         _objectToID = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &OFNonOwnedPointerDictionaryKeyCallbacks, &OFNonOwnedPointerDictionaryValueCallbacks);
     }
 
-}
-
-static void _objectRemoved(const void *key, const void *value, void *context)
-{
-    [(id <OFXMLIdentifierRegistryObject>)value removedFromIdentifierRegistry:(OFXMLIdentifierRegistry *)context];
 }
 
 - (void)_clear;

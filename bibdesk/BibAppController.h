@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Sat Jan 19 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class OFMessageQueue;
 @class BibDocument;
-@protocol BDSKOwner;
 
 /*!
     @class BibAppController
@@ -57,30 +57,33 @@
 	NSArray *requiredFieldsForCiteKey;
 	NSArray *requiredFieldsForLocalUrl;
     
-	IBOutlet NSMenu *columnsMenu;
-	IBOutlet NSMenu *groupSortMenu;
-	IBOutlet NSMenu *copyAsTemplateMenu;
-	IBOutlet NSMenu *searchBookmarksMenu;
+	IBOutlet NSMenuItem * columnsMenuItem;
+	IBOutlet NSMenuItem * groupSortMenuItem;
 
     NSLock *metadataCacheLock;
-    int32_t canWriteMetadata __attribute__ ((aligned (4)));
+    volatile BOOL canWriteMetadata;
     OFMessageQueue *metadataMessageQueue;
-    NSConnection *completionConnection;
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
 - (NSString *)temporaryFilePath:(NSString *)fileName createDirectory:(BOOL)create;
 
-- (NSMenu *)groupSortMenu;
+/* Accessor methods for the columnsMenuItem */
+- (NSMenuItem*) columnsMenuItem;
+/* Accessor methods for the groupSortMenuItem */
+- (NSMenuItem*) groupSortMenuItem;
 	
+- (void)updateColumnsMenu;
+
+- (void)handleTableColumnsChangedNotification:(NSNotification *)notification;
+
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (NSArray *)requiredFieldsForLocalUrl;
 - (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
 
-- (NSString *)folderPathForFilingPapersFromDocument:(id<BDSKOwner>)owner;
+- (NSString *)folderPathForFilingPapersFromDocument:(BibDocument *)document;
 
-- (void)addNamesForCompletion:(NSArray *)name;
 /*!
 @method addString:forCompletionEntry:
     @abstract 
@@ -110,7 +113,6 @@
 - (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXString:(NSString *)fullString;
 - (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index;
 
-- (IBAction)visitWebSite:(id)sender;
 - (IBAction)checkForUpdates:(id)sender;
 
 - (IBAction)showPreferencePanel:(id)sender;
@@ -119,9 +121,6 @@
 
 - (IBAction)showReadMeFile:(id)sender;
 - (IBAction)showRelNotes:(id)sender;
-
-- (IBAction)editSearchBookmarks:(id)sender;
-
 - (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current;
 - (void)showInputManagerUpdateAlert;
 
@@ -190,12 +189,5 @@
     @param      userInfo (description)
 */
 - (void)privateRebuildMetadataCache:(id)userInfo;
-
-/*!
-    @method     doSpotlightImportIfNeeded
-    @abstract   Reruns the bundled metadata importer when a new app version or OS version is detected.
-    @discussion (comprehensive description)
-*/
-- (void)doSpotlightImportIfNeeded;
 
 @end

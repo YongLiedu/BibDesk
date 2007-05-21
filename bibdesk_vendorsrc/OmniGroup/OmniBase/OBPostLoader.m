@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -15,7 +15,7 @@
 #import <objc/objc-runtime.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniBase/OBPostLoader.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniBase/OBPostLoader.m 66043 2005-07-25 21:17:05Z kc $")
 
 static NSRecursiveLock *lock = nil;
 static NSHashTable *calledImplementations = NULL;

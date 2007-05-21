@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/22/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,6 @@
 - (void)cleanUpAfterDragOperation:(NSDragOperation)operation forFormCell:(id)cell;
 - (NSDragOperation)canReceiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;
 - (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forFormCell:(id)aCell;
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView forFormCell:(id)aCell;
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key forFormCell:(id)aCell;
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex forFormCell:(id)aCell;
 @end
 
 @interface BDSKForm : NSForm {

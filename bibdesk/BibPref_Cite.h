@@ -2,7 +2,7 @@
 // BibDesk
 // Created by Michael McCracken, 2002
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,7 @@
 
 @interface BibPref_Cite : OAPreferenceClient
 {
-    IBOutlet NSPopUpButton* defaultDragCopyPopup;
-    IBOutlet NSPopUpButton* alternateDragCopyPopup;
-    
+    IBOutlet NSMatrix *dragCopyRadio;
     IBOutlet NSTextField* citeBehaviorLine; /*! for feedback */
     IBOutlet NSTextField* citeStringField; /*! for user input */
     IBOutlet NSButton* separateCiteCheckButton;
@@ -49,8 +47,7 @@
 	IBOutlet NSMatrix* citeBracketRadio;
 }
 
-- (IBAction)changeDefaultDragCopyFormat:(id)sender;
-- (IBAction)changeAlternateDragCopyFormat:(id)sender;
+- (IBAction)changeCopyBehavior:(id)sender;
 - (IBAction)changeSeparateCite:(id)sender;
 - (IBAction)changePrependTilde:(id)sender;
 - (IBAction)citeStringFieldChanged:(id)sender;

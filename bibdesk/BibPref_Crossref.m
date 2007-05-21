@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 28/5/05.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -50,11 +50,9 @@
     [[[[tableView tableColumns] objectAtIndex:0] dataCell] setFormatter:typeNameFormatter];
     [typeNameFormatter release];
     
-    [OFPreference addObserver:self selector:@selector(handleEditInheritedChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnEditInheritedKey]];
 }
 
 - (void)dealloc{
-    [OFPreference removeObserver:self forPreference:nil];
     [typesArray release];
     [super dealloc];
 }
@@ -73,34 +71,30 @@
     [autoSortCheckButton setState:[defaults boolForKey:BDSKAutoSortForCrossrefsKey] ? NSOnState : NSOffState];
 }
 
-- (void)handleEditInheritedChanged:(NSNotification *)notification {
-    [warnOnEditInheritedCheckButton setState:[defaults boolForKey:BDSKWarnOnEditInheritedKey] ? NSOnState : NSOffState];
-}
-
 - (IBAction)changeAutoSort:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKAutoSortForCrossrefsKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changeWarnOnEditInherited:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnEditInheritedKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changeDuplicateBooktitle:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKDuplicateBooktitleKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changeForceDuplicateBooktitle:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKForceDuplicateBooktitleKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)deleteType:(id)sender{
     if([tableView selectedRow] != -1){
         [typesArray removeObjectAtIndex:[tableView selectedRow]];
-        [self valuesHaveChanged];
+        [self updateUI];
     }
 }
 
@@ -127,7 +121,7 @@
     if([object isEqualToString:@""])
         [typesArray removeObjectAtIndex:row];
     else
-        [typesArray replaceObjectAtIndex:row withObject:[(NSString *)object entryType]];
+        [typesArray replaceObjectAtIndex:row withObject:[object lowercaseString]];
     [self updateUI];
 }
 

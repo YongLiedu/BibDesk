@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/06/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@
 #import "BDSKSearchIndex.h"
 #import "BDSKEdgeView.h"
 #import "BDSKStatusBar.h"
-#import "BDSKSearch.h"
 
 @protocol BDSKSearchContentView <NSObject>
 // Single method required by the BDSKSearchContentView protocol; the implementor is responsible for restoring its state by removing the view passed as an argument and resetting search field target/action.  It is sent to the document in response to a search field action with an empty string as search string.
@@ -71,25 +70,30 @@
 - (void)restoreDocumentStateByRemovingSearchView:(NSView *)view;
 @end
 
-@class BDSKSearch;
-
-@interface BDSKFileContentSearchController : NSWindowController <BDSKSearchDelegate>
+@interface BDSKFileContentSearchController : NSWindowController
 {
     NSMutableArray *results;
-    BDSKSearch *search;
-    BDSKSearchIndex *searchIndex;
+    SKSearchRef currentSearch;
+    NSNumber *maxValue;
+    NSNumber *minValue;
+    BDSKSearchIndex *currentSearchIndex;
+    NSString *currentSearchKey;
+    
+    id currentDocument;
         
+    IBOutlet NSObjectController *objectController;
     IBOutlet NSArrayController *resultsArrayController;
     IBOutlet NSTableView *tableView;
+    IBOutlet NSProgressIndicator *spinner;
     IBOutlet NSButton *stopButton;
-    IBOutlet NSView *progressView;
-    IBOutlet NSProgressIndicator *indexProgressBar;
-    BOOL canceledSearch;
+    IBOutlet BDSKStatusBar *statusBar;
+    
+    volatile BOOL searchCanceled;
+    CFMutableDictionaryRef indexDictionary;
+    NSLock *dictionaryLock;
     
     IBOutlet BDSKEdgeView *topBarView;
 	NSView *searchContentView;
-    BOOL searchFieldDidEndEditing;
-    NSSearchField *searchField;
 }
 
 // Use this method to instantiate a search controller for use within a document window
@@ -98,22 +102,22 @@
 - (NSView *)searchContentView;
 // This method returns the titles of all selected items (the text content of the rows)
 - (NSArray *)titlesOfSelectedItems;
-// Use this to connect a search field and initiate a search
-- (void)setSearchField:(NSSearchField *)aSearchField;
 
+- (void)rebuildResultsWithNewSearch:(NSString *)searchString;
+- (void)rebuildResultsWithCurrentString:(NSString *)searchString;
+- (void)updateSearchIfNeeded;
 - (void)setResults:(NSArray *)newResults;
 
-- (NSData *)sortDescriptorData;
-- (void)setSortDescriptorData:(NSData *)data;
-
 - (void)saveSortDescriptors;
-- (void)restoreDocumentState;
-- (void)stopSearching;
+- (void)cancelCurrentSearch:(id)sender;
+- (void)restoreDocumentState:(id)sender;
+- (void)setMaxValueWithDouble:(double)doubleValue;
+- (void)setMinValueWithDouble:(double)doubleValue;
 
 - (IBAction)search:(id)sender;
-- (IBAction)cancelCurrentSearch:(id)sender;
-- (IBAction)tableAction:(id)sender;
+- (void)tableAction:(id)sender;
 
+- (void)handleDocumentCloseNotification:(NSNotification *)notification;
 - (void)handleApplicationWillTerminate:(NSNotification *)notification;
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 

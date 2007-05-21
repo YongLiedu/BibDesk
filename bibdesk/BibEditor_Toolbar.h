@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 2/4/05.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,15 @@
 #import "BibEditor.h"
 #import "NSImage+Toolbox.h"
 
+
+extern NSString* 	BibEditorToolbarIdentifier;
+extern NSString*	BibEditorToolbarViewLocalItemIdentifier;
+extern NSString*	BibEditorToolbarViewRemoteItemIdentifier;
+extern NSString*	BibEditorToolbarSnoopDrawerItemIdentifier;
+extern NSString*	BibEditorToolbarActionItemIdentifier;
+extern NSString*	BibEditorToolbarAuthorTableItemIdentifier;
+extern NSString*	BibEditorToolbarDeleteItemIdentifier;
+extern NSString*	BibEditorToolbarAddWithCrossrefItemIdentifier;
 
 @interface BibEditor (Toolbar)
 

@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/23/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -50,31 +50,6 @@ NSString *BDSKServiceTemplateTree = @"BDSKServiceTemplateTree";
 NSString *BDSKTemplateAccessoryString = @"Accessory File";
 NSString *BDSKTemplateMainPageString = @"Main Page";
 NSString *BDSKTemplateDefaultItemString = @"Default Item";
-NSString *BDSKTemplateScriptString = @"Postprocess Script";
-
-static inline NSString *itemTemplateSubstring(NSString *templateString){
-    int start, end, length = [templateString length];
-    NSRange range = [templateString rangeOfString:@"<$publications>"];
-    start = NSMaxRange(range);
-    if (start != NSNotFound) {
-        range = [templateString rangeOfTrailingEmptyLineInRange:NSMakeRange(start, length - start)];
-        if (range.location != NSNotFound)
-            start = NSMaxRange(range);
-        range = [templateString rangeOfString:@"</$publications>" options:0 range:NSMakeRange(start, length - start)];
-        end = range.location;
-        if (end != NSNotFound) {
-            range = [templateString rangeOfString:@"<?$publications>" options:0 range:NSMakeRange(start, end - start)];
-            if (range.location != NSNotFound)
-                end = range.location;
-            range = [templateString rangeOfLeadingEmptyLineInRange:NSMakeRange(start, end - start)];
-            if (range.location != NSNotFound)
-                end = range.location;
-        } else
-            return nil;
-    } else
-        return nil;
-    return [templateString substringWithRange:NSMakeRange(start, end - start)];
-}
 
 @implementation BDSKTemplate
 
@@ -252,22 +227,6 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     return names;
 }
 
-+ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)format;
-{
-    NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[self exportTemplates] objectEnumerator];
-    id aNode;
-    NSString *name;
-    while(aNode = [nodeE nextObject]){
-        if([aNode isLeaf] == NO && [aNode mainPageTemplateURL] != nil){
-            name = [aNode valueForKey:BDSKTemplateNameString];
-            if(name != nil && [aNode templateFormat] & format)
-                [names addObject:name];
-        }
-    }
-    return names;
-}
-
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 {
     NSArray *names = [self  allStyleNamesForFileType:fileType];
@@ -326,10 +285,10 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         NSString *htmlString = [[[NSString alloc] initWithData:[NSData dataWithContentsOfURL:url] encoding:NSUTF8StringEncoding] autorelease];
         if (htmlString == nil)
             format = BDSKUnknownTemplateFormat;
-        else if ([htmlString rangeOfString:@"<$"].location == NSNotFound && [htmlString rangeOfString:@"&lt;$"].location != NSNotFound)
-            format = BDSKRichHTMLTemplateFormat;
-        else
+        else if ([htmlString rangeOfString:@"<$"].location != NSNotFound)
             format = BDSKTextTemplateFormat;
+        else // @@ 10.3 not supported
+            format = (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3) ? BDSKRichHTMLTemplateFormat : BDSKUnknownTemplateFormat;
     } else {
         format = BDSKTextTemplateFormat;
     }
@@ -363,13 +322,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     // return default template string if no type or no type-specific template
     if(nil == theURL)
         theURL = [self defaultItemTemplateURL];
-    if(nil != theURL)
-        return [NSString stringWithContentsOfURL:theURL];
-    if([type isEqualToString:BDSKTemplateMainPageString] == NO)
-        return nil;
-    // get the item template from the main page template
-    theURL = [self mainPageTemplateURL];
-    return itemTemplateSubstring([NSString stringWithContentsOfURL:theURL]);
+    return [NSString stringWithContentsOfURL:theURL];
 }
 
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
@@ -382,12 +335,6 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     if(nil == theURL)
         theURL = [self defaultItemTemplateURL];
     return [[[NSAttributedString alloc] initWithURL:theURL documentAttributes:NULL] autorelease];
-}
-
-- (NSString *)scriptPath;
-{
-    OBASSERT([self isLeaf] == NO);
-    return [NSString stringWithContentsOfURL:[self scriptURL]];
 }
 
 - (NSURL *)mainPageTemplateURL;
@@ -424,12 +371,6 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         }
     }
     return fileURLs;
-}
-
-- (NSURL *)scriptURL;
-{
-    OBASSERT([self isLeaf] == NO);
-    return [[self childForRole:BDSKTemplateScriptString] representedFileURL];
 }
 
 - (BOOL)addChildWithURL:(NSURL *)fileURL role:(NSString *)role;

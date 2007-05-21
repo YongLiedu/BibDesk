@@ -16,7 +16,7 @@
 #import "OAToolbar.h"
 #import "OAToolbarItem.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OAToolbarWindowController.m 71356 2005-12-30 21:26:26Z bungi $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OAToolbarWindowController.m 68913 2005-10-03 19:36:19Z kc $")
 
 @interface OAToolbarWindowController (Private)
 + (void)_loadToolbarNamed:(NSString *)toolbarName;
@@ -46,12 +46,6 @@ static NSMutableDictionary *helpersByExtension = nil;
     [helpersByExtension setObject:helperObject forKey:[helperObject itemIdentifierExtension]];
 }
 
-+ (NSBundle *)toolbarBundle;
-{
-    // +bundleForClass: can get fooled, particularly by DYLD_INSERT_LIBRARIES used by OOM.  Subclass this if you want to look in a different bundle (and don't use +bundleForClass:, obviously, use +bundleWithIdentifier:).
-    return [NSBundle mainBundle];
-}
-
 + (Class)toolbarClass;
 {
     return [OAToolbar class];
@@ -77,52 +71,29 @@ static NSMutableDictionary *helpersByExtension = nil;
 - (void)windowDidLoad; // Setup the toolbar and handle its delegate messages
 {
     [super windowDidLoad]; // DOX: These are called immediately before and after the controller loads its nib file.  You can subclass these but should not call them directly.  Always call super from your override.
-    [self createToolbar];
+
+    [isa _loadToolbarNamed:[self toolbarConfigurationName]];
+    toolbar = [[[isa toolbarClass] alloc] initWithIdentifier:[self toolbarIdentifier]];
+    [toolbar setAllowsUserCustomization:YES];
+    [toolbar setAutosavesConfiguration:YES];
+    [toolbar setDelegate:self];
+    [[self window] setToolbar:toolbar];
 }
 
-- (void)createToolbar;
+
+/* UNUSED? WJS DEC 2002
+- (NSDictionary *)itemInfoForIdentifier:(NSString *)itemIdentifier;
 {
-    OBPRECONDITION(_isCreatingToolbar == NO);
+    NSString *name;
+    NSDictionary *info;
     
-    _isCreatingToolbar = YES;
-    @try {
-	if (toolbar) {
-	    [toolbar setDelegate:nil];
-	    [toolbar release];
-	}
-	
-	// The subclass may change its response to all the subclass methods and then call this (see OmniOutliner's document-specific toolbar support)
-	[isa _loadToolbarNamed:[self toolbarConfigurationName]];
-	
-	Class toolbarClass = [isa toolbarClass];
-	OBASSERT(OBClassIsSubclassOfClass(toolbarClass, [OAToolbar class]));
-	
-	toolbar = [[toolbarClass alloc] initWithIdentifier:[self toolbarIdentifier]];
-	[toolbar setAllowsUserCustomization:[self shouldAllowUserToolbarCustomization]];
-	
-	NSDictionary *config = nil;
-	if ([self shouldAutosaveToolbarConfiguration])
-	    [toolbar setAutosavesConfiguration:YES];
-	else {
-	    [toolbar setAutosavesConfiguration:NO];
-	    config = [self toolbarConfigurationDictionary];
-	}
-	[toolbar setDelegate:self];
-	[[self window] setToolbar:toolbar];
-	
-	// Have to set this after adding the toolbar to the window.  Otherwise, the toolbar will keep the size/mode, but will use the default identifiers.
-	if (config)
-	    [toolbar setConfigurationFromDictionary:config];
-    } @finally {
-	_isCreatingToolbar = NO;
-    }
+    name = [self toolbarConfigurationName];
+    [isa _loadToolbarNamed:name];
+    info = [[ToolbarItemInfo objectForKey:name] objectForKey:itemIdentifier];
+    OBPOSTCONDITION(info);
+    return info;
 }
-
-// This can be useful if you listen for toolbar item add/remove notifications and don't want to tell whether that's because we are creating a toolbar or whether the user is editing it.  We can't use -customizationPaletteIsRunning since that doesn't account for the user command-dragging items off the toolbar.
-- (BOOL)isCreatingToolbar;
-{
-    return _isCreatingToolbar;
-}
+*/
 
 - (NSDictionary *)toolbarInfoForItem:(NSString *)identifier;
 {
@@ -146,22 +117,6 @@ static NSMutableDictionary *helpersByExtension = nil;
     return [self toolbarConfigurationName];
 }
 
-- (BOOL)shouldAllowUserToolbarCustomization;
-{
-    return YES;
-}
-
-- (BOOL)shouldAutosaveToolbarConfiguration;
-{
-    return YES;
-}
-
-- (NSDictionary *)toolbarConfigurationDictionary;
-{
-    // This is called if -shouldAutosaveConfiguration is NO (i.e., the configuration isn't in user defaults, so it has to come from somewhere)
-    OBRequestConcreteImplementation(isa, _cmd);
-    return nil;
-}
 
 // NSObject (NSToolbarDelegate) subclass 
 
@@ -316,21 +271,8 @@ static NSMutableDictionary *helpersByExtension = nil;
     if ([allowedToolbarItems objectForKey:toolbarName] != nil)
         return;
 
-    NSBundle *bundle = [self toolbarBundle];
-    
-    NSString *toolbarPath = [bundle pathForResource:toolbarName ofType:@"toolbar"];
-    if (!toolbarPath) {
-	NSLog(@"Unable to locate %@.toolbar from %@", toolbarName, bundle);
-	OBASSERT_NOT_REACHED("Unable to locate toolbar file");
-	return;
-    }
-    
-    toolbarPropertyList = [NSDictionary dictionaryWithContentsOfFile:toolbarPath];
-    if (!toolbarPropertyList) {
-	NSLog(@"Unable to load %@.toolbar from %@", toolbarName, toolbarPath);
-	OBASSERT_NOT_REACHED("Unable to load toolbar file");
-	return;
-    }
+    toolbarPropertyList = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle bundleForClass:self] pathForResource:toolbarName ofType:@"toolbar"]];
+    OBASSERT(toolbarPropertyList);
 
     [ToolbarItemInfo setObject:[toolbarPropertyList objectForKey:@"itemInfoByIdentifier"] forKey:toolbarName];
     [allowedToolbarItems setObject:[toolbarPropertyList objectForKey:@"allowedItemIdentifiers"] forKey:toolbarName];

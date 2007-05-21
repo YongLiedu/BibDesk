@@ -13,7 +13,7 @@
 #import <Foundation/NSString.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/CFDictionary-OFExtensions.m 69856 2005-11-01 02:42:33Z wiml $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/CFDictionary-OFExtensions.m 66640 2005-08-10 00:37:09Z kc $")
 
 
 const CFDictionaryKeyCallBacks OFNonOwnedPointerDictionaryKeyCallbacks = {
@@ -30,16 +30,6 @@ const CFDictionaryValueCallBacks OFNonOwnedPointerDictionaryValueCallbacks = {
     0, // release
     OFPointerCopyDescription,
     0, // equal
-};
-
-// -retain/-release, but no -hash/-isEqual:
-const CFDictionaryKeyCallBacks OFPointerEqualObjectDictionaryKeyCallbacks = {
-    0,   // version
-    OFNSObjectRetain,
-    OFNSObjectRelease,
-    OFNSObjectCopyDescription,
-    NULL, // equal
-    NULL, // hash
 };
 
 const CFDictionaryKeyCallBacks OFIntegerDictionaryKeyCallbacks = {

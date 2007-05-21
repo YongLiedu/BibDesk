@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Sun Jul 21 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,14 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
+
+enum {
+	BDSKUnknownStringType = -1, 
+	BDSKBibTeXStringType, 
+	BDSKRISStringType, 
+	BDSKJSTORStringType, 
+	BDSKWOSStringType
+};
 
 @interface NSString (BDSKExtensions)
 
@@ -97,32 +105,36 @@
 */
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 
+/*!
+    @method     stringWithCString:usingEncoding:
+    @abstract   Returns an autoreleased string allocated and initialized with the contents of the input characters (assumes a NULL terminated string).
+    @discussion Used to create Unicode string instances from C strings, based on the given string encoding.
+    @param      byteString (description)
+    @param      encoding (description)
+    @result     (description)
+*/
++ (NSString *)stringWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding;
+
     /*!
     @method     unicodeNameOfCharacter:
-     @abstract   Returns the unicode name of a character via CFStringTransform.
+     @abstract   Returns the unicode name of a character via CFStringTransform on 10.4, or else returns the character as a string;
      @discussion (comprehensive description)
      @param      ch (description)
      @result     (description)
      */
 + (NSString *)unicodeNameOfCharacter:(unichar)ch;
-
-/*!
-    @method     IANACharSetNameForEncoding:
-    @abstract   See http://www.iana.org/assignments/character-sets.  Returns nil if conversion failed.
-    @discussion (comprehensive description)
-    @param      enc (description)
+    
+    /*!
+    @method     initWithCString:usingEncoding:
+    @abstract   Initializes the receiver with the input string of (NULL terminated) bytes.
+    @discussion Used to create Unicode string instances from C strings, based on the given string encoding.
+    @param      byteString (description)
+    @param      encoding (description)
     @result     (description)
 */
-+ (NSString *)IANACharSetNameForEncoding:(NSStringEncoding)enc;
 
-/*!
-    @method     encodingForIANACharSetName:
-    @abstract   Name is in the list at http://www.iana.org/assignments/character-sets.  Returns 0 if conversion failed.
-    @discussion (comprehensive description)
-    @param      name
-*/
-+ (NSStringEncoding)encodingForIANACharSetName:(NSString *)name;
-    
+- (NSString *)initWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding;
+
 /*!
     @method     initWithContentsOfFile:encoding:guessEncoding:
     @abstract   Tries to load a file with the specified encoding; if guessEncoding is set to YES, it will employ some heuristics to guess the encoding if the specified encoding fails or is set to 0.
@@ -162,41 +174,16 @@
 
 #pragma mark TeX parsing
 
-/*!
-    @method     entryType
-    @abstract   Wrapper around lowercaseString for BibTeX types, caching values.  Note that lowercasing is an implementation detail, and this allows us to change at any time.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSString *)entryType;
 
 /*!
-    @method     fieldName
-    @abstract   Wrapper around capitalizedString that caches them for use as BibTeX fields.  Note that capitalizing is an implementation detail, and this allows us to change at any time.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSString *)fieldName;
-    
-/*!
-    @method     localizedFieldName
-    @abstract   Returns the localized field name used for display.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (NSString *)localizedFieldName;
-
-/*!
-@method     indexOfRightBraceMatchingLeftBraceInRange:
+@method     indexOfRightBraceMatchingLeftBraceAtIndex:
 @abstract   Counts curly braces from left-to-right, in order to find a match for a left brace <tt>{</tt>.
 @discussion Raises an exception if the character at <tt>startLoc</tt> is not a brace, and escaped braces are not (yet?) considered.
 An inline buffer is used for speed in accessing each character.
-@param      range The range to search for matching braces, the first character should be the left brace.
+@param      startLoc The index of the starting brace character.
 @result     The index of the matching brace character.
 */
-- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range;
-
-- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc;
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned)startLoc;
     
     /*!
     @method     isStringTeXQuotingBalancedWithBraces:connected:
@@ -217,7 +204,40 @@ An inline buffer is used for speed in accessing each character.
 */
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range;
 
-- (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range;
+/*!
+    @method     isRISString
+    @abstract   Check to see if the string is RIS by scanning for "PMID- " or "TY  - ", which should appear in an RIS string.
+    @discussion See the <a href="http://www.refman.com/support/risformat_intro.asp">RIS specification</a> for details on the format.  The heuristics here could be improved,
+                but this is mainly intended to be a quick check of the pasteboard, not a full parser.
+    @result     A Boolean.
+*/
+- (BOOL)isRISString;
+
+/*!
+    @method     isBibTeXString
+    @abstract   Tries to determine if a string is BibTeX or not, based on the regular expression ^@[[:alpha:]]+{.*,$
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isBibTeXString;
+
+/*!
+    @method     isJSTORString
+    @abstract   Tries to determine if a string is JSTOR or not, based on the first line
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isJSTORString;
+
+/*!
+    @method     isWebOfScienceString
+    @abstract   Tries to determine if a string is Web of Science export format, based on the first line
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isWebOfScienceString;
+
+- (int)contentStringType;
 
 /*!
 @method     rangeOfTeXCommandInRange:
@@ -229,21 +249,12 @@ An inline buffer is used for speed in accessing each character.
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
 
 /*!
-@method     stringWithPhoneyCiteKeys:
-@abstract   Adds temporary cite keys to the string, which should be a BibTeX string without citekeys.  uses code from openWithPhoneyKeys
+@method     stringByAddingRISEndTagsToPubMedString
+@abstract   Adds ER tags to a stream of PubMed records, so it's (more) valid RIS
 @discussion (comprehensive description)
-@param      tmpKey (description)
-@result     Returns an altered NSString
+@result     (description)
 */
-- (NSString *)stringWithPhoneyCiteKeys:(NSString *)tmpKey;
-
-- (NSString *)stringByConvertingHTMLToTeX;
-+ (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
-
-- (NSArray *)sourceLinesBySplittingString;
-
-- (NSString *)stringByEscapingGroupPlistEntities;
-- (NSString *)stringByUnescapingGroupPlistEntities;
+- (NSString *)stringByAddingRISEndTagsToPubMedString;
 
 #pragma mark Comparisons
 
@@ -283,8 +294,6 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSComparisonResult)sortCompare:(NSString *)other;
 
-- (NSComparisonResult)extensionCompare:(NSString *)other;
-
 /*!
     @method     triStateCompare:
     @abstract   For sorting triState string values
@@ -293,15 +302,6 @@ An inline buffer is used for speed in accessing each character.
     @result     (description)
 */
 - (NSComparisonResult)triStateCompare:(NSString *)other;
-
-/*!
-    @method     UTICompare:
-    @abstract   Compares the UTI of two files on disk case-insensitively.  
-    @discussion The receiver and/or argument may be an absolute or relative path, or string representation of a URL.  If a file does not exist or is a relative path, the UTI from its path extension is used.  Aliases are resolved in this comparison, so it may be slow.
-    @param      other (description)
-    @result     (description)
-*/
-- (NSComparisonResult)UTICompare:(NSString *)other;
 
 #pragma mark -
 
@@ -393,14 +393,6 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByNormalizingSpacesAndLineBreaks;
 
 /*!
-    @method     safeFormatString
-    @abstract   Add necessary percent escapes to a string that may contain unexpected format codes.
-    @discussion Various security vulnerabilities have been reported in NSRunAlertPanel and other functions that accept a format string as input.  If we pass user input to these functions, we run the risk of unintentionally passing format codes to a function with incorrect varargs.  See http://projects.info-pull.com/moab/MOAB-16-01-2007.html for details.
-    @result     (description)
-*/
-- (NSString *)safeFormatString;
-
-/*!
 @method     stringByTrimmingFromLastPunctuation
 @abstract   Returns the portion of a string following the last punctuation character.
 @discussion (comprehensive description)
@@ -425,13 +417,9 @@ An inline buffer is used for speed in accessing each character.
 - (NSString *)stringByEscapingBasicXMLEntitiesUsingUTF8;
 - (NSString *)xmlString;
 
-- (NSString *)csvString;
-- (NSString *)tsvString;
-
-#pragma mark Script arguments
-
-- (NSArray *)shellScriptArgumentsArray;
-- (NSArray *)appleScriptArgumentsArray;
+- (NSArray *)allSearchComponents;
+- (NSArray *)andSearchComponents;
+- (NSArray *)orSearchComponents;
 
 #pragma mark Empty lines
 
@@ -448,8 +436,6 @@ An inline buffer is used for speed in accessing each character.
 - (NSAttributedString *)smallIcon;
 - (NSAttributedString *)linkedIcon;
 - (NSAttributedString *)linkedSmallIcon;
-
-- (NSString *)titleCapitalizedString;
 
 @end
 

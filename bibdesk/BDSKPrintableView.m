@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 09/02/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -64,12 +64,10 @@
             margins.bottom = [printInfo bottomMargin];
         }
         
-        scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
-        NSClipView *clipView = [[NSClipView alloc] initWithFrame:NSZeroRect];
+        scrollView = [[NSScrollView alloc] init];
+        clipView = [[NSClipView alloc] init];
         
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];    
-        
-        // this creates a retain cycle, see the -release override for its fix
         [clipView setDocumentView:self];
         
         [scrollView setContentView:clipView];
@@ -87,16 +85,8 @@
     return self;
 }
 
-- (void)release {
-    // Fix retain cycle through scrollView and clipView
-    if (scrollView && [self retainCount] == 2) { 
-        [scrollView autorelease];
-        scrollView = nil;
-    }
-    [super release];
-}
-
 - (void)dealloc{
+    [scrollView release];
     [textStorage release];
     [super dealloc];
 }

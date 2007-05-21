@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/04/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,27 @@
 #import <OmniFoundation/CFSet-OFExtensions.h>
 #import "BDSKCountedSet.h"
 
+@interface BDSKSet : NSSet {} @end
+
+@implementation BDSKSet
+
++ (void)performPosing;
+{
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+        class_poseAs(self, NSClassFromString(@"NSSet"));
+}
+
+/* We replace this method so we can use @count with NSSet, which doesn't implement that key on 10.3.x (which really sucks).
+*/
+- (id)valueForUndefinedKey:(NSString *)key
+{
+    if([key isEqualToString:@"@count"])
+        return [NSNumber numberWithInt:[self count]];
+    return [super valueForUndefinedKey:key];
+}
+
+@end
+
 @implementation NSSet (BDSKExtensions)
 
 + (id)caseInsensitiveStringSetWithObjects:(id)object, ...;
@@ -65,11 +86,6 @@
 @end
 
 @implementation NSMutableSet (BDSKExtensions)
-
-+ (id)caseInsensitiveStringSet;
-{
-    return [(id)CFSetCreateMutable(kCFAllocatorDefault, 0, &BDSKCaseInsensitiveStringSetCallBacks) autorelease];
-}
 
 - (id)initCaseInsensitive
 {

@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/19/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@
 
 - (NSIndexSet *)indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
 - (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
-- (void)tableView:(BDSKGroupTableView *)tview doubleClickedOnIconOfRow:(int)row;
 
 @end
 
@@ -70,6 +69,10 @@
 @end
 
 ///////////
+
+@interface BDSKGroupTextFieldCell  : NSTextFieldCell {
+}
+@end
 
 @interface NSObject (BDSKGroupTableViewDelegate)
 - (NSMenu *)tableView:(BDSKGroupTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn onPopUp:(BOOL)flag;

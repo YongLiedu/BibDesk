@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -13,7 +13,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.m 66170 2005-07-28 17:40:10Z kc $")
 
 @implementation NSMutableArray (OFExtensions)
 
@@ -141,32 +141,42 @@ static NSComparisonResult orderObjectsBySavedIndex(id object1, id object2, void 
 
 
 /* Assumes the array is already sorted to insert the object quickly in the right place */
+/* (new objects are inserted just after old objects that are NSOrderedSame) */
 - (void)insertObject:anObject inArraySortedUsingSelector:(SEL)selector;
 {
-    unsigned int index = [self indexWhereObjectWouldBelong:anObject inArraySortedUsingSelector:selector];
-    [self insertObject:anObject atIndex:index];
+    unsigned int low = 0;
+    unsigned int range = 1;
+    unsigned int test = 0;
+    unsigned int count = [self count];
+    NSComparisonResult result;
+    IMP insertedImpOfSel = [anObject methodForSelector:selector];
+    IMP objectAtIndexImp = [self methodForSelector:@selector(objectAtIndex:)];
+
+    while (count >= range) /* range is the lowest power of 2 > count */
+        range <<= 1;
+
+    while (range) {
+        test = low + (range >>= 1);
+        if (test >= count)
+            continue;
+        result = (NSComparisonResult)insertedImpOfSel(anObject, selector, 
+			objectAtIndexImp(self, @selector(objectAtIndex:), test));
+        if (result == NSOrderedDescending)
+            low = test+1;
+    }
+    [self insertObject:anObject atIndex:low];
 }    
 
-- (void)insertObject:(id)anObject inArraySortedUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
-{
-    unsigned int index = [self indexWhereObjectWouldBelong:anObject inArraySortedUsingFunction:compare context:context];
-    [self insertObject:anObject atIndex:index];
-}
-
 /* Assumes the array is already sorted to find the object quickly and remove it */
-- (void)removeObjectIdenticalTo: (id)anObject fromArraySortedUsingSelector:(SEL)selector
+- (void)removeObject: (id)anObject fromArraySortedUsingSelector:(SEL)selector
 {
-    unsigned index = [self indexOfObjectIdenticalTo:anObject inArraySortedUsingSelector:selector];
+    unsigned index;
+    
+    index = [self indexOfObject: anObject inArraySortedUsingSelector: selector];
     if (index != NSNotFound)
         [self removeObjectAtIndex: index];
 }
 
-- (void)removeObjectIdenticalTo:(id)anObject fromArraySortedUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
-{
-    unsigned index = [self indexOfObject:anObject identical:YES inArraySortedUsingFunction:compare context:context];
-    if (index != NSNotFound)
-        [self removeObjectAtIndex:index];
-}
 
 struct sortOnAttributeContext {
     SEL getAttribute;

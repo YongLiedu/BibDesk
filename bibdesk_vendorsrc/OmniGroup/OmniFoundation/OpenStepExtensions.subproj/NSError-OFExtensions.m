@@ -1,4 +1,4 @@
-// Copyright 2005-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -11,10 +11,11 @@
 #import <OmniBase/rcsid.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSError-OFExtensions.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header$");
 
-NSString *OFUserCancelledActionErrorKey = OMNI_BUNDLE_IDENTIFIER @".ErrorDomain.ErrorDueToUserCancel";
-NSString *OFFileNameAndNumberErrorKey = OMNI_BUNDLE_IDENTIFIER @".ErrorDomain.FileLineAndNumber";
+#warning ARM: modified
+/* this was OMNI_BUNDLE_IDENTIFIER instead of the hard-coded bundle name, which is properly set in the target; the compiler gave an error, and I gave up on figuring out what's wrong here */
+NSString *OFUserCancelledActionErrorKey = @"com.omnigroup.framework.OmniFoundation" @".ErrorDomain.ErrorDueToUserCancel";
 
 static NSMutableDictionary *_createUserInfo(NSString *firstKey, va_list args)
 {
@@ -54,7 +55,7 @@ static NSMutableDictionary *_createUserInfo(NSString *firstKey, va_list args)
 
 @end
 
-void OFErrorWithDomainv(NSError **error, NSString *domain, int code, const char *fileName, unsigned int line, NSString *firstKey, va_list args)
+void OFErrorWithDomainv(NSError **error, NSString *domain, NSString *firstKey, va_list args)
 {
     OBPRECONDITION(error); // Must supply a error pointer or this is pointless (since it is in-out)
     
@@ -66,18 +67,12 @@ void OFErrorWithDomainv(NSError **error, NSString *domain, int code, const char 
 	[userInfo setValue:*error forKey:NSUnderlyingErrorKey];
     }
     
-    // Add in file and line information if the file was supplied
-    if (fileName) {
-	NSString *fileString = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:fileName length:strlen(fileName)];
-	[userInfo setValue:[fileString stringByAppendingFormat:@":%d", line] forKey:OFFileNameAndNumberErrorKey];
-    }
-    
-    *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
+    *error = [NSError errorWithDomain:domain code:0 userInfo:userInfo];
     [userInfo release];
 }
 
 /*" Convenience function, invoked by the OFError macro, that allows for creating error objects with user info objects without creating a dictionary object.  The keys and values list must be terminated with a nil key. Integer error codes are _so_ 1980...  This creates a different domain for each error based on the bundle identifier and a name and then uses code=0 within that domain. "*/
-void _OFError(NSError **error, NSString *bundleIdentifier, const char *name, const char *fileName, unsigned int line, NSString *firstKey, ...)
+void _OFError(NSError **error, NSString *bundleIdentifier, const char *name, NSString *firstKey, ...)
 {
     OBPRECONDITION(![NSString isEmptyString:bundleIdentifier]); // Did you forget to define OMNI_BUNDLE_IDENTIFIER in your target?
     
@@ -86,19 +81,7 @@ void _OFError(NSError **error, NSString *bundleIdentifier, const char *name, con
 
     va_list args;
     va_start(args, firstKey);
-    OFErrorWithDomainv(error, domain, 0, fileName, line, firstKey, args);
-    va_end(args);
-    [domain release];
-}
-
-/* As above, but if you want to use a plain domain with a list of integer codes */
-void _OFErrorWithCode(NSError **error, NSString *domain, int code, const char *fileName, unsigned int line, NSString *firstKey, ...)
-{
-    OBPRECONDITION(![NSString isEmptyString:domain]);
-    
-    va_list args;
-    va_start(args, firstKey);
-    OFErrorWithDomainv(error, domain, code, fileName, line, firstKey, args);
+    OFErrorWithDomainv(error, domain, firstKey, args);
     va_end(args);
     [domain release];
 }

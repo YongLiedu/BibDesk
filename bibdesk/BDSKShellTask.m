@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Sat Dec 14 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,69 +41,11 @@
 
 volatile int caughtSignal = 0;
 
-@interface BDSKShellTask (Private)
-// Note: the returned data is not autoreleased
-- (NSData *)privateRunShellCommand:(NSString *)cmd withInputString:(NSString *)input;
-- (NSData *)privateExecuteBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
-- (void)stdoutNowAvailable:(NSNotification *)notification;
-@end
-
-
 @implementation BDSKShellTask
 
-+ (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[self alloc] init];
-    NSString *output = nil;
-    NSData *outputData = [shellTask privateRunShellCommand:cmd withInputString:input];
-    if(outputData){
-        output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSUTF8StringEncoding];
-        if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSASCIIStringEncoding];
-        if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
-    }
-    [shellTask release];
-    return [output autorelease];
++ (BDSKShellTask *)shellTask{
+    return [[[BDSKShellTask alloc] init] autorelease];
 }
-
-+ (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[self alloc] init];
-    NSData *output = [[shellTask privateRunShellCommand:cmd withInputString:input] retain];
-    [shellTask release];
-    return [output autorelease];
-}
-
-+ (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input{
-    BDSKShellTask *shellTask = [[self alloc] init];
-    NSString *output = nil;
-    NSData *outputData = [shellTask privateExecuteBinary:executablePath inDirectory:currentDirPath withArguments:args environment:env inputString:input];
-    if(outputData){
-        output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSUTF8StringEncoding];
-        if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:NSASCIIStringEncoding];
-        if(!output)
-            output = [[NSString allocWithZone:[self zone]] initWithData:outputData encoding:[NSString defaultCStringEncoding]];
-    }
-    [shellTask release];
-    return [output autorelease];
-}
-
-- (id)init{
-    self = [super init];
-    if(self)
-        stdoutData = [[NSMutableData alloc] init];
-    return self;
-}
-
-- (void)dealloc{
-    [stdoutData release];
-    [super dealloc];
-}
-
-@end
-
-
-@implementation BDSKShellTask (Private)
 
 //
 // The following three methods are borrowed from Mike Ferris' TextExtras.
@@ -111,7 +53,7 @@ volatile int caughtSignal = 0;
 // - mmcc
 
 // was runWithInputString in TextExtras' TEPipeCommand class.
-- (NSData *)privateRunShellCommand:(NSString *)cmd withInputString:(NSString *)input{
+- (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *shellPath = @"/bin/sh";
     NSString *shellScriptPath = [[NSApp delegate] temporaryFilePath:@"shellscript" createDirectory:NO];
@@ -119,7 +61,7 @@ volatile int caughtSignal = 0;
     NSData *scriptData;
     NSMutableDictionary *currentAttributes;
     unsigned long currentMode;
-    NSData *output = nil;
+    NSString *output;
 
     // ---------- Check the shell and create the script ----------
     if (![fm isExecutableFileAtPath:shellPath]) {
@@ -152,7 +94,7 @@ volatile int caughtSignal = 0;
     // ---------- Execute the script ----------
 
     // MF:!!! The current working dir isn't too appropriate
-    output = [self privateExecuteBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputString:input];
+    output = [self executeBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputString:input];
 
     // ---------- Remove the script file ----------
     if (![fm removeFileAtPath:shellScriptPath handler:nil]) {
@@ -163,12 +105,13 @@ volatile int caughtSignal = 0;
 }
 
 // This method and the little notification method following implement synchronously running a task with input piped in from a string and output piped back out and returned as a string.   They require only a stdoutData instance variable to function.
-- (NSData *)privateExecuteBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input {
+- (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input {
     NSTask *task;
     NSPipe *inputPipe;
     NSPipe *outputPipe;
     NSFileHandle *inputFileHandle;
     NSFileHandle *outputFileHandle;
+    NSString *output = nil;
 
     task = [[NSTask allocWithZone:[self zone]] init];    
     [task setLaunchPath:executablePath];
@@ -182,7 +125,6 @@ volatile int caughtSignal = 0;
         [task setEnvironment:env];
     }
 
-    [task setStandardError:[NSFileHandle fileHandleWithStandardError]];
     inputPipe = [NSPipe pipe];
     inputFileHandle = [inputPipe fileHandleForWriting];
     [task setStandardInput:inputPipe];
@@ -193,50 +135,54 @@ volatile int caughtSignal = 0;
     // ignore SIGPIPE, as it causes a crash (seems to happen if the binaries don't exist and you try writing to the pipe)
     signal(SIGPIPE, SIG_IGN);
 
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [task launch];
 
-    @try{
-        
-        [nc addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadCompletionNotification object:outputFileHandle];
-        [outputFileHandle readInBackgroundAndNotify];
+    NS_DURING
+    if ([task isRunning]) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+        [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
 
-        [task launch];
-
-        if ([task isRunning]) {
-            
-            // run the runloop and pick up our notifications
-            [task waitUntilExit];
-            
-            [nc removeObserver:self name:NSFileHandleReadCompletionNotification object:outputFileHandle];
-            
-            // get leftover data, since the background method won't get the last read
-            NSData *remainingData = [outputFileHandle availableData];
-            if ([remainingData length])
-                [stdoutData appendData:remainingData];
-            
-        } else {
-            NSLog(@"Failed to launch task or task exited without accepting input.  Termination status was %d", [task terminationStatus]);
+        if (input) {
+            [inputFileHandle writeData:[input dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
         }
+        [inputFileHandle closeFile];
+
+        // Now loop the runloop in the special mode until we've processed the notification.
+        stdoutData = nil;
+        while (stdoutData == nil) {
+            // Run the run loop, briefly, until we get the notification...
+            [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+        }
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+
+        [task waitUntilExit];
+
+        output = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
+        if(!output){
+            output = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSASCIIStringEncoding];
+        }
+        
+        [stdoutData release];
+        stdoutData = nil;
+    } else {
+        NSLog(@"Failed to launch task or task exited without accepting input.  Termination status was %d", [task terminationStatus]);
     }
-    @catch(id exception){
+    NS_HANDLER
         // if the pipe failed, we catch an exception here and ignore it
-        NSLog(@"exception %@ encountered while trying to launch task %@", exception, executablePath);
-        [nc removeObserver:self name:NSFileHandleReadCompletionNotification object:outputFileHandle];
-    }
+        NSLog(@"exception %@ encountered while trying to launch task %@", [localException name], executablePath);
+    NS_ENDHANDLER
     
     // reset signal handling to default behavior
     signal(SIGPIPE, SIG_DFL);
     [task release];
 
-    return [stdoutData length] ? stdoutData : nil;
+    return [output autorelease];
 }
 
 - (void)stdoutNowAvailable:(NSNotification *)notification {
+    // This is the notification method that executeBinary:inDirectory:withArguments:environment:inputString: registers to get called when all the data has been read. It just grabs the data and stuffs it in an ivar.  The setting of this ivar signals the main method that the output is complete and available.
     NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    if ([outputData length]) {
-        [stdoutData appendData:outputData];
-    }
-    [[notification object] readInBackgroundAndNotify];
+    stdoutData = (outputData ? [outputData retain] : [[NSData allocWithZone:[self zone]] init]);
 }
 
 

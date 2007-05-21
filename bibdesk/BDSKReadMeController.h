@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/8/06.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -50,11 +50,4 @@
 @interface BDSKRelNotesController : BDSKReadMeController {}
 + (id)sharedRelNotesController;
 - (void)displayAttributedString:(NSAttributedString *)attrString;
-@end
-
-@interface BDSKExceptionViewer : BDSKRelNotesController
-
-+ (id)sharedViewer;
-- (void)displayString:(NSString *)string;
-
 @end

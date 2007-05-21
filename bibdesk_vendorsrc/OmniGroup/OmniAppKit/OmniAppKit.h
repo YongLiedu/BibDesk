@@ -1,11 +1,11 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OmniAppKit.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OmniAppKit.h 68913 2005-10-03 19:36:19Z kc $
 
 #import <OmniAppKit/NSAppleScript-OAExtensions.h>
 #import <OmniAppKit/NSApplication-OAExtensions.h>
@@ -17,14 +17,11 @@
 #import <OmniAppKit/NSColor-OAExtensions.h>
 #import <OmniAppKit/NSControl-OAExtensions.h>
 #import <OmniAppKit/NSData-CGDataProvider.h>
-#import <OmniAppKit/NSData-CGDataConsumer.h>
 #import <OmniAppKit/NSEvent-OAExtensions.h>
 #import <OmniAppKit/NSFileManager-OAExtensions.h>
-#import <OmniAppKit/NSFileWrapper-OAExtensions.h>
 #import <OmniAppKit/NSFont-OAExtensions.h>
 #import <OmniAppKit/NSFontManager-OAExtensions.h>
 #import <OmniAppKit/NSImage-OAExtensions.h>
-#import <OmniAppKit/NSLayoutManager-OAExtensions.h>
 #import <OmniAppKit/NSMenu-OAExtensions.h>
 #import <OmniAppKit/NSOutlineView-OAExtensions.h>
 #import <OmniAppKit/NSObject-NSDraggingInfo-OAExtensions.h>
@@ -42,7 +39,6 @@
 #import <OmniAppKit/NSUserDefaults-OAExtensions.h>
 #import <OmniAppKit/NSView-OAExtensions.h>
 #import <OmniAppKit/NSWindow-OAExtensions.h>
-#import <OmniAppKit/NSWindowController-OAExtensions.h>
 #import <OmniAppKit/NSWorkspace-OAExtensions.h>
 #import <OmniAppKit/OAAppKitQueueProcessor.h>
 #import <OmniAppKit/OAApplication.h>
@@ -54,13 +50,12 @@
 #import <OmniAppKit/OACompositeColorProfile.h>
 #import <OmniAppKit/NSColor-ColorSyncExtensions.h>
 #import <OmniAppKit/NSImage-ColorSyncExtensions.h>
-#import <OmniAppKit/OAChasingArrowsProgressIndicator.h>
 #import <OmniAppKit/OAColorPalette.h>
 #import <OmniAppKit/OAColorWell.h>
-#import <OmniAppKit/OAConstructionTimeView.h>
 #import <OmniAppKit/OAContextButton.h>
 #import <OmniAppKit/OAContextControl.h>
 #import <OmniAppKit/OAContextPopUpButton.h>
+#import <OmniAppKit/OAChasingArrowsProgressIndicator.h>
 #import <OmniAppKit/OADataSourceTableColumn.h>
 #import <OmniAppKit/OADefaultSettingIndicatorButton.h>
 #import <OmniAppKit/OADockStatusItem.h>

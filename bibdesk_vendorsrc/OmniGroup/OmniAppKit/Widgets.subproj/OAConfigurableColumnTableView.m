@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -12,12 +12,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAConfigurableColumnTableView.m 79079 2006-09-07 22:35:32Z kc $")
-
-@interface NSTableView (PrivateParts)
-- (void)_writePersistentTableColumns;
-@end
-
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAConfigurableColumnTableView.m 68913 2005-10-03 19:36:19Z kc $")
 
 @interface OAConfigurableColumnTableView (PrivateAPI)
 - (void)_commonInit;
@@ -172,15 +167,7 @@ Also note that this class doesn't subclass -addTableColumn: and -removeTableColu
     [item setState: YES];
     
     [self addTableColumn:column];
-    
-    // workaround for rdar://4508650. [NSTableView {add,remove}TableColumn:] honor autosaveTableColumns.
-    if ([self autosaveTableColumns] && [self autosaveName] != nil) {
-        if ([self respondsToSelector:@selector(_writePersistentTableColumns)])
-            [self _writePersistentTableColumns];
-        else
-            OBASSERT_NOT_REACHED("no _writePersistentTableColumns on NSTableView");
-    }
-        
+
     if (confDataSourceFlags.didActivate)
         [[self dataSource] configurableColumnTableView: self didActivateColumn: column];
 }
@@ -201,14 +188,6 @@ Also note that this class doesn't subclass -addTableColumn: and -removeTableColu
     
     [self removeTableColumn:column];
 
-    // workaround for rdar://4508650. [NSTableView {add,remove}TableColumn:] honor autosaveTableColumns.
-    if ([self autosaveTableColumns] && [self autosaveName] != nil) {
-        if ([self respondsToSelector:@selector(_writePersistentTableColumns)])
-            [self _writePersistentTableColumns];
-        else
-            OBASSERT_NOT_REACHED("no _writePersistentTableColumns on NSTableView");
-    }
-        
     if (confDataSourceFlags.didDeactivate)
         [[self dataSource] configurableColumnTableView: self didDeactivateColumn: column];
 }

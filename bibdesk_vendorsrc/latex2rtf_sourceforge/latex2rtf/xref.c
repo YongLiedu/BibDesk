@@ -35,10 +35,9 @@
 #include "parser.h"
 #include "preamble.h"
 #include "lengths.h"
-#include "fonts.h"
+#include "l2r_fonts.h"
 #include "style.h"
 #include "definitions.h"
-#include "equation.h"
 
 char *g_figure_label = NULL;
 char *g_table_label = NULL;
@@ -48,20 +47,9 @@ int g_suppress_name = FALSE;
 
 #define MAX_LABELS 200
 #define MAX_CITATIONS 1000
-#define BIB_STYLE_ALPHA  0
-#define BIB_STYLE_SUPER  1
-#define BIB_STYLE_NUMBER 2
-
-char *BIB_DASH_MARKER="%dash%";
 
 char *g_label_list[MAX_LABELS];
 int g_label_list_number = -1;
-
-typedef struct citekey_type {
-	char *key;
-	int number;
-} citekey_type;
-
 
 static char *g_all_citations[MAX_CITATIONS];
 static int g_last_citation = 0;
@@ -72,8 +60,6 @@ static char g_last_author_cited[201];
 static char g_last_year_cited[51];
 static int g_citation_longnamesfirst = 0;
 static int g_current_cite_item = 0;
-static int g_sorted_citations = FALSE;
-static int g_compressed_citations = FALSE;
 
 static char *g_bibpunct_open = NULL;
 static char *g_bibpunct_close = NULL;
@@ -82,7 +68,6 @@ static char *g_bibpunct_author_date_sep = NULL;
 static char *g_bibpunct_numbers_sep = NULL;
 static char *g_bibpunct_postnote_sep = NULL;
 static bool g_bibpunct_touched = FALSE;
-static int   g_bibpunct_style = BIB_STYLE_ALPHA;
 
 void InitializeBibliography(void)
 {
@@ -93,45 +78,11 @@ void InitializeBibliography(void)
 	g_bibpunct_numbers_sep = strdup(",");
     g_bibpunct_postnote_sep = strdup(", ");
     g_bibpunct_touched = FALSE;
-    g_bibpunct_style = BIB_STYLE_ALPHA;
 }
 
 void set_longnamesfirst(void)
 {
     g_citation_longnamesfirst = TRUE;
-}
-
-void set_bibpunct_style_super(void)
-{
-    g_bibpunct_style = BIB_STYLE_SUPER;
-}
-
-void set_bibpunct_style_number(void)
-{
-    g_bibpunct_style = BIB_STYLE_NUMBER;
-}
-
-void set_bibpunct_style_separator(char *s)
-{
-    g_bibpunct_touched = TRUE;
-	g_bibpunct_cite_sep=strdup(s);
-}
-
-void set_bibpunct_style_paren(char *open, char *close)
-{
-    g_bibpunct_touched = TRUE;
-	g_bibpunct_open = strdup(open);
-	g_bibpunct_close = strdup(close);
-}
-
-void set_sorted_citations(void)
-{
-	g_sorted_citations = TRUE;
-}
-
-void set_compressed_citations(void)
-{
-	g_compressed_citations = TRUE;
 }
 
 /*************************************************************************
@@ -154,30 +105,6 @@ static int citation_used(char *citation)
     }
 
     return 0;
-}
-
-#define CR (char) 0x0d
-#define LF (char) 0x0a
-
-static char my_getc(FILE *f)
-{
-	int c;
-	
-	if (!f) return '\0';
-	c = getc(f);
-	if (c==EOF) return '\0';
-		
-	if (c==CR) {
-		c = getc(f);
-		if (c == LF) return '\n';
-		ungetc(c,f);
-		return '\n';
-	} if (c==LF)
-		return '\n';
-	else if (c=='\t')
-		return ' ';
-	
-	return (char) c;
 }
 
 /*************************************************************************
@@ -241,64 +168,6 @@ static char *ScanAux(char *token, char *reference, int code)
         }
     }
     return NULL;
-}
-
-/*************************************************************************
-purpose: obtains a \bibentry{reference} from the .bbl file
-         this consists of all lines after \bibentry{reference} until two
-         newlines in a row are found.  
-         Finally, remove a '.' if at the end 
- ************************************************************************/
-static char *ScanBbl(char *reference)
-{
-    static FILE *f_bbl = NULL;
-    char buffer[4096];
-    char *s, *t;
-	char last_c;
-	int  i=1;
-	
-    if (g_bbl_file_missing || strlen(reference) == 0) {
-        return NULL;
-    }
-    diagnostics(4, "seeking '\\bibitem{%s}' in .bbl", reference);
-	
-    if (f_bbl == NULL && (f_bbl = my_fopen(g_bbl_name, "r")) == NULL) {
-        diagnostics(WARNING, "No .bbl file.  Run LaTeX to create %s\n", g_bbl_name);
-        g_bbl_file_missing = TRUE;
-        return NULL;
-    }
-    rewind(f_bbl);
-
-	/* scan each line for \bibentry{reference} */
-    while (fgets(buffer, 4095, f_bbl) != NULL) {
-        t = strstr(buffer, "\\bibitem");
-        if (t) {
-        	s = strstr(buffer+8, reference);
-        	if (s) break;
-        }
-    }
-
-	if (!s) return NULL;
-		
-	/* scan bbl file until we encounter \n\n */
-	s = buffer;
-	last_c = '\0';
-	*s = my_getc(f_bbl);
-	while ( !feof(f_bbl) && !(last_c == '\n' && *s == '\n') && i< 4095) {
-		last_c = *s;
-		s++;
-		*s = my_getc(f_bbl);
-		i++;
-	}
-		
-	/* strip trailing . and any spaces at the end */
-	while (*s==' ' || *s == '\n') s--;
-	if (*s == '.') s--;
-	
-	s++;
-	*s = '\0';
-	
-	return strdup(buffer);
 }
 
 /******************************************************************************
@@ -442,7 +311,7 @@ void CmdThebibliography(int code)
         CmdEndParagraph(0);
         CmdVspace(VSPACE_SMALL_SKIP);
 
-        PushEnvironment(BIBLIOGRAPHY_MODE);
+        PushEnvironment(GENERIC_ENV);
         setLength("parindent", -amount);
         g_left_margin_indent += 2 * amount;
     } else {
@@ -476,8 +345,7 @@ void CmdBibitem(int code)
         fprintRTF("]");
     } else {
         diagnostics(4, "CmdBibitem <%s>", s);
-        if (g_document_bibstyle == BIBSTYLE_STANDARD ||
-            (g_document_bibstyle == BIBSTYLE_NATBIB && g_bibpunct_style != BIB_STYLE_ALPHA)) {
+        if (g_document_bibstyle == BIBSTYLE_STANDARD) {
             fprintRTF("[");
             fprintRTF("{\\v\\*\\bkmkstart BIB_%s}", signet);
             ConvertString(s);
@@ -497,22 +365,6 @@ void CmdBibitem(int code)
 
     c = getNonBlank();
     ungetTexChar(c);
-}
-
-/******************************************************************************
- purpose: handle the \bibentry
- ******************************************************************************/
-void CmdBibEntry(int code)
-{
-    char *key, *s;
-
-    key = getBraceParam();
-    s = ScanBbl(key);
-    if (s) {
-		ConvertString(s);
-        free(s);
-    }
-    free(key);
 }
 
 void CmdNewblock(int code)
@@ -616,15 +468,6 @@ void InsertBookmark(char *name, char *text)
     free(signet);
 }
 
-void InsertContentMark(char marker, char *s1, char *s2, char *s3)
-{
-    fprintRTF("{\\field{\\*\\fldinst TC \"");
-	ConvertString(s1);
-	ConvertString(s2);
-	ConvertString(s3);
-    fprintRTF("\" \\\\f %c}{\\fldrslt }}", marker);
-}
-
 /******************************************************************************
 purpose: handles \label \ref \pageref \cite
 ******************************************************************************/
@@ -654,7 +497,6 @@ void CmdLabel(int code)
         case LABEL_HYPERREF:
         case LABEL_REF:
         case LABEL_EQREF:
-        case LABEL_VREF:
             signet = strdup_nobadchars(text);
             s = ScanAux("newlabel", text, 1);
             if (code == LABEL_EQREF)
@@ -672,21 +514,9 @@ void CmdLabel(int code)
             if (code == LABEL_EQREF)
                 fprintRTF(")");
 
-            if (code == LABEL_VREF) {
-            	fprintRTF(" ");
-				if (g_fields_use_REF) {
-					fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF BM%s \\\\p }}", signet);
-					fprintRTF("{\\fldrslt{");
-				}
-				fprintRTF("%s", signet);
-				if (g_fields_use_REF)
-					fprintRTF("}}}");
-            }
-
             free(signet);
             if (s)
                 free(s);
-                            
             break;
 
         case LABEL_HYPERPAGEREF:
@@ -701,8 +531,6 @@ void CmdLabel(int code)
                 fprintRTF("}}}");
             free(signet);
             break;
-
-
     }
 
     free(text);
@@ -778,45 +606,11 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post, int first)
     abbv = getBraceParam();
     full = getBraceParam();
     PopSource();
-    diagnostics(2, "natbib pre=[%s] post=<%s> n=<%s> year=<%s> abbv=<%s> full=<%s>", pre, post, n, year, abbv, full);
+    diagnostics(5, "natbib pre=[%s] post=<%s> n=<%s> year=<%s> abbv=<%s> full=<%s>", pre, post, n, year, abbv, full);
     author_repeated = FALSE;
     year_repeated = FALSE;
-
-	/* for numbers just write and then exit */
-	if (g_bibpunct_style != BIB_STYLE_ALPHA){
-		if (!first) {
-			ConvertString(g_bibpunct_cite_sep);
-			if (g_bibpunct_style == BIB_STYLE_NUMBER)
-	            fprintRTF(" ");
-	    }
-
-		ConvertString(n);
-		free(n);
-		free(year);
-		free(abbv);
-		free(full);
-		return;
-    }
-    
     switch (code) {
-
-        case CITE_CITE:			
-            v = abbv;
-            if (!isEmptyName(full)) 
-            	v = full;
-			if (isEmptyName(v))
-				v = n;
-				
-            if (strcmp(v, g_last_author_cited) == 0)
-                author_repeated = TRUE;
-
-            if (!first && !author_repeated) {
-            	ConvertString(g_bibpunct_cite_sep);
-                fprintRTF(" ");
-            }
-            ConvertString(v);
-            break;
-
+        case CITE_CITE:
         case CITE_T:
         case CITE_T_STAR:
             v = abbv;
@@ -826,6 +620,9 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post, int first)
             if (CITE_T_STAR == code)
                 if (!isEmptyName(full))
                     v = full;
+            if (CITE_CITE == code && g_citation_longnamesfirst)
+                if (!isEmptyName(full))
+                    v = full;
 
             if (strcmp(v, g_last_author_cited) == 0)
                 author_repeated = TRUE;
@@ -840,102 +637,23 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post, int first)
                 strcpy(g_last_author_cited, v);
                 strcpy(g_last_year_cited, year);
             }
-
-			if (g_bibpunct_style == BIB_STYLE_ALPHA){
-				fprintRTF(" ");
-				ConvertString(g_bibpunct_open);
-				
-				ConvertString(year);
-				if (pre) {
-					ConvertString(g_bibpunct_postnote_sep);
-					ConvertString(pre);
-				}
-				if (post) {
-					ConvertString(g_bibpunct_postnote_sep);
-					ConvertString(post);
-				}
-				ConvertString(g_bibpunct_close);
-            }
-            break;
-
-        case CITE_ALT:
-        case CITE_ALT_STAR:
-            v = abbv;
-
-            if (strcmp(v, g_last_author_cited) == 0)
-                author_repeated = TRUE;
-
-            if (!first && !author_repeated) {
-            	ConvertString(g_bibpunct_cite_sep);
-                fprintRTF(" ");
-            }
-
-            if (!author_repeated) { /* suppress repeated names */
-                ConvertString(v);
-                strcpy(g_last_author_cited, v);
-                strcpy(g_last_year_cited, year);
-            }
-
-			fprintRTF(" ");
-			
-			if (pre && post) {
-				ConvertString(pre);
-				fprintRTF(" ");
-			}
-
-			ConvertString(year);
-
-			if (pre && !post) {
-				fprintRTF(", ");
-				ConvertString(pre);
-			}
-
-			if (post) {
-				ConvertString(g_bibpunct_postnote_sep);
-				ConvertString(post);
-			}
-            break;
+            fprintRTF(" ");
+            ConvertString(g_bibpunct_open);
             
-        case CITE_P:
-            v = abbv;
-
-            if (strcmp(v, g_last_author_cited) == 0)
-                author_repeated = TRUE;
-
-            if (!first && !author_repeated) {
-            	ConvertString(g_bibpunct_cite_sep);
-                fprintRTF(" ");
-            }
-
-            if (pre && post && first) {
+            ConvertString(year);
+            if (pre) {
+             	ConvertString(g_bibpunct_postnote_sep);
                 ConvertString(pre);
-            	fprintRTF(" ");
             }
-
-            if (!author_repeated) { /* suppress repeated names */
-                ConvertString(v);
-                strcpy(g_last_author_cited, v);
-                strcpy(g_last_year_cited, year);
+            if (post) {
+             	ConvertString(g_bibpunct_postnote_sep);
+                ConvertString(post);
             }
-
-			fprintRTF(", ");
-			
-			ConvertString(year);
-
-			if (pre && !post) {
-				fprintRTF(", ");
-				ConvertString(pre);
-			}
-
-			if (post && *post != '\0') {
-				ConvertString(g_bibpunct_postnote_sep);
-				ConvertString(post);
-			}
+            ConvertString(g_bibpunct_close);
             break;
 
+        case CITE_P:
         case CITE_P_STAR:
-        case CITE_ALP:
-        case CITE_ALP_STAR:
             v = abbv;
             if (CITE_P == code && g_citation_longnamesfirst && !g_current_cite_seen)
                 if (!isEmptyName(full))
@@ -965,9 +683,9 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post, int first)
                 ConvertString(v);
                 strcpy(g_last_author_cited, v);
                 strcpy(g_last_year_cited, year);
-				ConvertString(g_bibpunct_author_date_sep);
-				fprintRTF(" ");
-				ConvertString(year);
+             	ConvertString(g_bibpunct_author_date_sep);
+                fprintRTF(" ");
+                ConvertString(year);
             } else {
                 if (!year_repeated) {
              		ConvertString(g_bibpunct_numbers_sep);
@@ -1017,7 +735,8 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post, int first)
                 fprintRTF(" ");
             }
 
-            if (CITE_YEAR != code && pre && !isEmptyName(post) && g_current_cite_item == 1) {
+            if (CITE_YEAR != code && pre && !isEmptyName(post)
+              && g_current_cite_item == 1) {
                 ConvertString(pre);
                 fprintRTF(" ");
             }
@@ -1137,12 +856,6 @@ void CmdBibpunct(int code)
 
     /* not implemented */
 	s=getBraceParam();
-	if (*s == 's')
-		g_bibpunct_style = BIB_STYLE_SUPER;
-	if (*s == 'n')
-		g_bibpunct_style = BIB_STYLE_NUMBER;
-	if (*s == 'a')
-		g_bibpunct_style = BIB_STYLE_ALPHA;
 	free(s);
 
 	free(g_bibpunct_author_date_sep);
@@ -1152,82 +865,6 @@ void CmdBibpunct(int code)
 	g_bibpunct_numbers_sep=getBraceParam();
 
 	g_bibpunct_touched = TRUE;
-}
-
-static int CmpFunc( const void * _a, const void * _b)
-{ 
-	citekey_type * aa = (citekey_type *) _a;
-	citekey_type * bb = (citekey_type *) _b;
-	int a = (*aa).number;
-	int b = (*bb).number;
-
- 	if (a > b) return 1;
-	if (a ==  b) return 0;
-	return -1;
-}
-
-static char * reorder_citations(char *keys, int scan_aux_code)
-{
-    char *key, *remaining_keys,*ordered_keys,*a,*b;
-    int n,i; 
-    int dash;
-    citekey_type names[100];
-
-	diagnostics(4,"original list <%s> scan aux code=%d",keys,scan_aux_code);
-	
-    /* gather citekeys and numbers into list */
-    key = keys;
-    remaining_keys = popCommaName(key);
-	n=0;
-    while (key  && n < 100) {
-		char *s = ScanAux("bibcite", key, scan_aux_code); 
-		if (s) {
-			int number;
-			sscanf(s,"%d",&number);
-			free(s);
-   			names[n].key = key;
-    		names[n].number = number;
-    		n++;
-		}
-        key = remaining_keys;
-        remaining_keys = popCommaName(key);
-    }
- 
- 	/* if there is no .aux file or only one key return original list */
- 	if (n<=1) {
- 		ordered_keys = strdup(keys);
- 		return ordered_keys;
- 	}
- 	
-    /* sort list according to the numbers */
- 	qsort(names, n, sizeof(citekey_type), CmpFunc);
-
-    /* write the sorted list of keys into a string */
-	ordered_keys=strdup(names[0].key);
-	dash = FALSE;
-
-	for (i=1; i<n; i++) {
-		if (g_compressed_citations && dash && i!=n-1 && names[i].number+1==names[i+1].number) 
-			continue;		/* skip intermediate numbers */
-
-		a = strdup_together(ordered_keys, ",");
-		
-		if (g_compressed_citations && !dash && i!=n-1 && names[i-1].number+2==names[i+1].number) {
-			/* insert dash */
-			dash = TRUE;
-			b = strdup_together(a, BIB_DASH_MARKER);
-		} else {
-			/* normal case */
-			dash = FALSE;
-			b = strdup_together(a, names[i].key);
-		}
-		free(a);
-		free(ordered_keys);
-		ordered_keys=b;
-	}
-	
-	diagnostics(4,"compressed list <%s>",ordered_keys);
-	return ordered_keys;    
 }
 
 /******************************************************************************
@@ -1291,17 +928,9 @@ void CmdCite(int code)
         ConvertString(pretext);
         fprintRTF(" ");
     }
-
-    /* clean-up keys and sort if necessary */
+    /* now start processing keys */
     keys = strdup_noblanks(text);
     free(text);
-    if (g_sorted_citations){
-    	text = reorder_citations(keys,0);
-    	free(keys);
-    	keys = text;
-    }
-
-    /* now start processing keys */
     key = keys;
     next_keys = popCommaName(key);
 
@@ -1311,14 +940,6 @@ void CmdCite(int code)
 
         g_current_cite_item++;
 
-		if (strcmp(key,BIB_DASH_MARKER)==0) {
-			fprintRTF("-");
-        	first_key = TRUE;				/* inhibit comma after dash */
-        	key = next_keys;
-        	next_keys = popCommaName(key);  /* key modified to be a * single key */
-			continue;
-		}
-		
 		s = ScanAux("bibcite", key, 0); /* look up bibliographic * reference */
             
         if (g_document_bibstyle == BIBSTYLE_APALIKE) {  /* can't use Word refs for APALIKE or APACITE */
@@ -1420,22 +1041,15 @@ void CmdNatbibCite(int code)
 	
 	pretext = getBracketParam();
 	option = getBracketParam();
-	if (code != CITE_P && code != CITE_P_STAR && code != CITE_YEAR_P)
+	if (code != CITE_P && code != CITE_P_STAR && code != CITE_ALP && code != CITE_ALP_STAR && code != CITE_YEAR_P)
 		g_current_cite_paren = FALSE;
     
-    if (g_bibpunct_style == BIB_STYLE_SUPER)
-    	g_current_cite_paren = FALSE;
-
-    if (g_bibpunct_style == BIB_STYLE_NUMBER)
-    	g_current_cite_paren = TRUE;
-    	
     text = getBraceParam();
     str1 = strdup_nocomments(text);
     free(text);
     text = str1;
         
-	/* no citation, just clean up and exit */
-	if (strlen(text) == 0) {
+    if (strlen(text) == 0) {
         free(text);
         if (pretext)
             free(pretext);
@@ -1443,70 +1057,52 @@ void CmdNatbibCite(int code)
             free(option);
         return;
     }
-
-	/* superscript style */
-	if (g_bibpunct_style == BIB_STYLE_SUPER)
-        fprintRTF("{\\up%d\\fs%d ", script_shift(), script_size());
     
-    /* write open parenthesis before citation starts */
-    if (g_current_cite_paren) 
+    /* output text before citation */
+    if (g_current_cite_paren) {
+        fprintRTF("\n"); 
         ConvertString(g_bibpunct_open);
-
-    /* clean-up keys and sort if necessary */
-    keys = strdup_noblanks(text);
-    free(text);
-    if (g_sorted_citations){
-    	text = reorder_citations(keys,1);
-    	free(keys);
-    	keys = text;
     }
 
-    /* now process each citation key */
-    g_current_cite_item = 0;
+    /* now start processing keys */
+    keys = strdup_noblanks(text);
+    free(text);
     key = keys;
     next_keys = popCommaName(key);
-    
+
+    g_current_cite_item = 0;
     while (key) {
         char *s;
 
         g_current_cite_item++;
 
-		if (strcmp(key,BIB_DASH_MARKER)==0) { /* a citation, not a dash */
-		
-			fprintRTF("-");    /* just write a dash */
-	        first_key = TRUE;  /* no comma after dash */
-			
+		s = ScanAux("bibcite", key, 0); /* look up bibliographic reference */
+            
+		diagnostics(2, "natbib key=[%s] <%s> ", key, s);
+		if (s) {
+			g_current_cite_seen = citation_used(key);
+			ConvertNatbib(s, code, pretext, option, first_key);
 		} else {
-		
-			/* look up citation and write it to the RTF stream */
-			s = ScanAux("bibcite", key, 0);
-				
-			diagnostics(3, "natbib key=[%s] <%s> ", key, s);
-			if (s) {
-				g_current_cite_seen = citation_used(key);
-				ConvertNatbib(s, code, pretext, option, first_key);
-			} else {
-				if (!first_key) {
-					ConvertString(g_bibpunct_cite_sep);
-					fprintRTF(" ");
-				}
-				ConvertString(key);
-			}
-        	if (s) free(s);
-        	first_key = FALSE;
-        }
+            if (!first_key) {
+            	ConvertString(g_bibpunct_cite_sep);
+                fprintRTF(" ");
+            }
+			ConvertString(key);
+		}
         
+        first_key = FALSE;
         key = next_keys;
-        next_keys = popCommaName(key);
+        next_keys = popCommaName(key);  /* key modified to be a single key */
+        if (s)
+            free(s);
     }
 
-    if (g_current_cite_paren)
+    if (g_current_cite_paren) {
+        fprintRTF("\n"); 
         ConvertString(g_bibpunct_close);
+    }
 
-	if (g_bibpunct_style == BIB_STYLE_SUPER)
-        fprintRTF("}"); 
-	
-	if (keys)
+    if (keys)
         free(keys);
     if (option)
         free(option);
@@ -1555,16 +1151,9 @@ void CmdHarvardCite(int code)
         ConvertString(g_bibpunct_open);
     }
 
-    /* clean-up keys and sort if necessary */
+    /* now start processing keys */
     keys = strdup_noblanks(text);
     free(text);
-    if (g_sorted_citations){
-    	text = reorder_citations(keys,0);
-    	free(keys);
-    	keys = text;
-    }
-
-    /* now start processing keys */
     key = keys;
     next_keys = popCommaName(key);
 
@@ -1573,14 +1162,6 @@ void CmdHarvardCite(int code)
         char *s;
 
         g_current_cite_item++;
-
-		if (strcmp(key,BIB_DASH_MARKER)==0) {
-			fprintRTF("-");
-        	first_key = TRUE;
-        	key = next_keys;
-        	next_keys = popCommaName(key); 
-			continue;
-		}
 
         s = ScanAux("harvardcite", key, 2); /* look up bibliographic reference */
             
@@ -1599,7 +1180,7 @@ void CmdHarvardCite(int code)
         
         first_key = FALSE;
         key = next_keys;
-        next_keys = popCommaName(key);
+        next_keys = popCommaName(key);  /* key modified to be a single key */
         if (s)
             free(s);
     }
@@ -1658,7 +1239,7 @@ void CmdHtml(int code)
 
 void CmdBCAY(int code)
 {
-    char *s=NULL, *t, *v, *year;
+    char *s, *t, *v, *year;
 
     s = getBraceParam();
 
@@ -1868,11 +1449,11 @@ purpose: handles \citename from authordate bib style
 ******************************************************************************/
 void CmdCiteName(int code)
 {
-    char *s=NULL;
+    char *s;
 
     s = getBraceParam();
 
-    diagnostics(4, "Entering CmdCitename [%s]", (s) ? s : "");
+    diagnostics(4, "Entering CmdCitename", s);
 
     if (!g_suppress_name)
         ConvertString(s);
@@ -1952,42 +1533,42 @@ void CmdContentsLine(int code)
 }
 
 /******************************************************************************
-purpose: handles \listoffigures \listoftables
+purpose: handles \listoffigures \tableofcontents \listoftables
 ******************************************************************************/
 void CmdListOf(int code)
 {
-	char c;
-	
+    /* 
+     * FILE *fp=NULL; char *name;
+     */
+
     diagnostics(4, "Entering CmdListOf");
 
-	CmdStartParagraph(TITLE_PAR);
-	fprintRTF("{");
-	InsertStyle("contents_no_style");
-	fprintRTF(" ");
-	
-	switch (code) {
-	
-		case LIST_OF_FIGURES:
-			ConvertBabelName("LISTFIGURENAME");
-			c = 'f';
-			break;
-			
-		case LIST_OF_TABLES:
-			ConvertBabelName("LISTTABLENAME");
-			c = 't';
-			break;
-	
-		case TABLE_OF_CONTENTS:
-			ConvertBabelName("CONTENTSNAME");
-			c = 'c';
-			break;
-	}
-	
-	CmdEndParagraph(0);
-	fprintRTF("}");
-	CmdVspace(VSPACE_SMALL_SKIP);
-	
-	g_tableofcontents = TRUE;
-	fprintRTF("{\\field{\\*\\fldinst TOC \\\\f %c }{\\fldrslt }}\n",c);  
-	CmdNewPage(NewPage);
+    /* this it probably the wrong way to implement \tableofcontents ! */
+
+    /* 
+     * print appropriate heading CmdVspace(VSPACE_BIG_SKIP);
+     * CmdStartParagraph(TITLE_PAR); fprintRTF("{"); if (g_document_type
+     * == FORMAT_BOOK || g_document_type == FORMAT_REPORT)
+     * InsertStyle("chapter"); else InsertStyle("section"); fprintRTF("
+     * ");
+     * 
+     * if (code == LIST_OF_FIGURES) { ConvertBabelName("LISTFIGURENAME"); }
+     * 
+     * if (code == LIST_OF_TABLES) { name = g_lot_name;
+     * ConvertBabelName("LISTTABLENAME"); }
+     * 
+     * if (code == TABLE_OF_CONTENTS) { name = g_toc_name;
+     * ConvertBabelName("CONTENTSNAME"); }
+     * 
+     * CmdEndParagraph(0); fprintRTF("}"); CmdVspace(VSPACE_SMALL_SKIP);
+     * 
+     * now set things up so that we start reading from the appropriate
+     * auxiliary file fp = my_fopen(name, "r"); if (fp == NULL) {
+     * diagnostics(WARNING, "Missing latex .lot/.lof/.toc file.  Run
+     * LaTeX to create %s\n", name); return; } else fclose(fp);
+     * esting for existence to give better error message
+     * 
+     * PushSource(name,NULL);
+     * 
+     */
 }

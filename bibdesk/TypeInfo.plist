@@ -1,16 +1,4 @@
 {
-    BibTeXTypesForHCiteTypes = {
-        "Journal Article" = article;
-        "Journal Paper" = article;
-        "Journal" = journal; /* mostly to allow for journal container hcites */
-        "Book" = book;
-        "Chapter" = inbook;
-        "Book Section" = inbook;
-        "Technical Report" = techreport;
-        Thesis = phdthesis;
-        "Proceedings" = proceedings;
-    };
-
     BibTeXFieldNamesForJSTORTags = {
         AB = Abstract; 
         AU = Author; 
@@ -25,29 +13,24 @@
         TI = Title; 
         VO = Volume; 
     }; 
-    BibTeXFieldNamesForMARCTags = {
-        010 = {a = "Library-Id"; }; 
-        020 = {a = Isbn; }; 
-        050 = {a = "Call-Number"; }; 
-        082 = {a = "Dewey-Call-Number"; }; 
+    BibTeXFieldNamesForMARCXMLSubFields = {
+        010 = {a = LibraryID; }; 
+        020 = {a = ISBN; }; 
+        050 = {a = CallNumber; }; 
+        082 = {a = DeweyCallNumber; }; 
         100 = {a = Author; }; 
-        245 = {a = Title; b = Title; }; 
+        245 = {a = Title; }; 
         250 = {a = Edition; }; 
-        260 = {a = Address; b = Publisher; c = Year; }; 
-        440 = {v = Volume; }; 
-        490 = {a = Series; v = Volume; }; 
-        500 = {a = Annote; }; 
-        504 = {a = Annote; }; 
-        505 = {a = Annote; }; 
-        520 = {a = Abstract; }; 
+        260 = {a = "Place-Published"; b = Publisher; c = "Publication-Date"; }; 
+        300 = {a = NumberOfPages; }; 
+        440 = {a = Series; }; 
+        490 = {a = Series; }; 
         650 = {a = Genre; }; 
-        700 = {a = Author; e = Editor; }; 
-        856 = {u = Url; }; 
+        700 = {a = Author; }; 
     }; 
     BibTeXFieldNamesForPubMedTags = {
         AB = Abstract; 
         AD = Address; 
-        AU = Author;
         BT = Title; 
         CP = Address; 
         CT = Title; 
@@ -97,33 +80,7 @@
         UT = Isi; 
         VL = Volume; 
     }; 
-    BibTeXFieldNamesForReferTags = {
-        A = Author; 
-        B = Booktitle; 
-        C = Address;
-        D = Date;
-        E = Editor;
-        F = Caption; 
-        I = Publisher;
-        J = Journal;
-        K = Keywords; 
-        N = Number; 
-        O = Annote;
-        P = Pages; 
-        Q = Author;
-        R = Type;      /* report, paper, or thesis type */
-        S = Booktitle; /* series title */
-        T = Title;
-        U = Url; 
-        V = Volume;
-        X = Abstract; 
-        Y = Editor; /* series editor */
-        3 = Doi;    /* maybe AGU only */
-        6 = Volume; /* the number of volumes? */
-        8 = Date;
-        9 = Type;   /* report type */
-    };
-    BibTeXFieldNamesForDublinCoreTerms = {
+        BibTeXFieldNamesForDublinCoreTerms = {
         "DC.description" = Abstract; 
         "DC.contributor" = Author; 
         "DC.creator" = Author;
@@ -139,7 +96,8 @@
         "DC.title" = Title; 
         "Url" = Url;
     }; 
-    BibTeXTypesForDublinCoreTypes = {
+
+        BibTeXTypesForDublinCoreTypes = {
         "Conference or Workshop Item" = inproceedings; 
         "Article" = "article";
         "Book" = "book";
@@ -148,7 +106,7 @@
         "Monograph" = techreport;
         "Thesis" = "phdthesis";
         "Other" = misc;
-    };
+};
     BibTeXTypesForMODSGenres = {
         "academic journal" = article; 
         book = book; 
@@ -170,25 +128,6 @@
         SER = incollection; 
         UNPB = unpublished; 
     }; 
-    /* http://www.ecst.csuchico.edu/~jacobsd/bib/formats/endnote.html */
-    BibTeXTypesForReferTypes = {
-        Artwork = misc; 
-        "Audiovisual Material" = misc; 
-        Book = book;
-        "Book Section" = inbook;
-        "Computer Program" = misc;
-        "Conference Proceedings" = book; 
-        "Edited Book" = book; 
-        Generic = misc; 
-        "Journal Article" = article; 
-        "Magazine Article" = misc; 
-        Map = misc;
-        "Newspaper Article" = misc;
-        Patent = misc;
-        "Personal Communication" = misc;
-        Report = techreport;
-        Thesis = thesis;
-    };
     BibTeXTypesForWebOfScienceTypes = {
         "Abstract of Published Item" = misc; 
         "Art Exhibit Review" = misc; 

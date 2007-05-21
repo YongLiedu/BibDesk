@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLIdentifierRegistry.h 69580 2005-10-25 17:58:51Z bungi $
+// $Header$
 
 #import <OmniFoundation/OFObject.h>
 #import <CoreFoundation/CFDictionary.h>
@@ -28,8 +28,6 @@
 - (void)applyFunction:(CFDictionaryApplierFunction)function context:(void *)context;
 
 - (void)clearRegistrations;
-
-- (NSMutableDictionary *)copyIdentifierToObjectMapping;
 
 #ifdef OMNI_ASSERTIONS_ON
 - (BOOL)checkInvariants;

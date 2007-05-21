@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 9/4/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,6 @@
 #import "NSWindowController_BDSKExtensions.h"
 
 
-@interface NSWindow (BDSKExtensions)
-- (void)replacementSetRepresentedFilename:(NSString *)path;
-@end
-
-
 @implementation NSWindowController (BDSKExtensions)
 
 - (BOOL)isWindowVisible;
@@ -61,63 +56,6 @@
     }else{
 		[self showWindow:sender];
     }
-}
-
-// we should only cascade windows if we have multiple documents open; bug #1299305
-// the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
-- (void)setWindowFrameAutosaveNameOrCascade:(NSString *)name {
-    [self setWindowFrameAutosaveNameOrCascade:name setFrame:NSZeroRect];
-}
-
-- (void)setWindowFrameAutosaveNameOrCascade:(NSString *)name setFrame:(NSRect)frameRect {
-    static NSMutableDictionary *nextWindowLocations = nil;
-    if (nextWindowLocations == nil)
-        nextWindowLocations = [[NSMutableDictionary alloc] init];
-    
-    NSValue *value = [nextWindowLocations objectForKey:name];
-    NSPoint point = [value pointValue];
-    
-    if (NSEqualRects(frameRect, NSZeroRect) == NO) {
-        [[self window] setFrameAutosaveName:name];
-        [[self window] setFrame:frameRect display:YES];
-        [self setShouldCascadeWindows:NO];
-        point = NSMakePoint(NSMinX(frameRect), NSMaxY(frameRect));
-    } else {
-        // Set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
-        [[self window] setFrameUsingName:name];
-        [self setShouldCascadeWindows:NO];
-        if ([[self window] setFrameAutosaveName:name] || value == nil) {
-            frameRect = [[self window] frame];
-            point = NSMakePoint(NSMinX(frameRect), NSMaxY(frameRect));
-        }
-    }
-    point = [[self window] cascadeTopLeftFromPoint:point];
-    [nextWindowLocations setObject:[NSValue valueWithPoint:point] forKey:name];
-}
-
-@end
-
-
-@implementation NSWindow (BDSKExtensions)
-
-static IMP originalSetRepresentedFilename;
-
-+ (void)didLoad;
-{
-    originalSetRepresentedFilename = OBReplaceMethodImplementationWithSelector(self, @selector(setRepresentedFilename:), @selector(replacementSetRepresentedFilename:));
-}
-
-// see bug #1471488; overriding representedFilename is not sufficient; apparently the window doesn't use its accessor
-- (void)replacementSetRepresentedFilename:(NSString *)path;
-{
-    id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(representedFilenameForWindow:)]) {
-        NSString *newPath = [delegate representedFilenameForWindow:self];
-        // if it returns nil, use the path we were passed
-        if (newPath) 
-            path = newPath;
-    }
-    originalSetRepresentedFilename(self, _cmd, path);
 }
 
 @end

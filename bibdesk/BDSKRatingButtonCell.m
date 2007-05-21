@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/9/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,9 @@
  */
 
 #import "BDSKRatingButtonCell.h"
-#import "NSBezierPath_BDSKExtensions.h"
 
 #define OUTER_SIZE			12
-#define MARKER_SIZE			10
+#define MARKER_SIZE			8
 #define PLACEHOLDER_SIZE	2
 #define BUTTON_TEXT_X_SEP	4
 #define BUTTON_TEXT_Y_SEP	2
@@ -90,6 +89,8 @@
 - (void)setRating:(unsigned int)newRating {
 	if (newRating > maxRating)
 		newRating = maxRating;
+	if (newRating < 0)
+		newRating = 0;
 	rating = newRating;
 }
 
@@ -140,7 +141,7 @@
 	float border = ([self isBordered] ? 1 : 0);
 	float margin = 0;
 	float offset;
-	unsigned int newRating;
+	int newRating;
 
 	float innerWidth = OUTER_SIZE * maxRating;
 	NSSize buttonSize = NSMakeSize(innerWidth, OUTER_SIZE);
@@ -198,8 +199,8 @@
                     rating = newRating;
                     [controlView setNeedsDisplayInRect:buttonRect];
                 }
-                if (keepOn == NO)
-                    [(NSControl *)controlView sendAction:[self action] to:[self target]];
+                if (keepOn == NO && [self target] && [self action])
+                    [[self target] performSelector:[self action] withObject:controlView];
                 break;
             default:
                 break;
@@ -309,11 +310,11 @@
 	NSRect rect = NSMakeRect(NSMinX(buttonRect) + margin + 0.5f * (OUTER_SIZE - MARKER_SIZE), NSMinY(buttonRect) + 0.5f * (NSHeight(buttonRect) - MARKER_SIZE), MARKER_SIZE, MARKER_SIZE);
 	NSColor *color = ([self isEnabled]) ? [NSColor grayColor] : [NSColor lightGrayColor];
 	BOOL selected = NO;
-	unsigned int i = 0;
+	int i = 0;
 	
 	if ([controlView isKindOfClass:[NSTableView class]]) {
 		NSTableView *tv = (NSTableView *)controlView;
-		if ([[tv window] isKeyWindow] && [[[tv window] firstResponder] isEqual:tv] && [tv isRowSelected:[tv rowAtPoint:cellFrame.origin]]) {
+		if ([[tv window] isKeyWindow] && [[tv window] firstResponder] == tv && [tv isRowSelected:[tv rowAtPoint:cellFrame.origin]]) {
 			color = ([self isEnabled]) ? [NSColor whiteColor] : [NSColor lightGrayColor];
 			selected = YES;
 		}
@@ -333,10 +334,7 @@
 	[color set];
 	
 	while (i++ < rating) {
-		if([controlView isFlipped])
-            [NSBezierPath fillInvertedStarInRect:rect];
-        else
-            [NSBezierPath fillStarInRect:rect];
+		[[NSBezierPath bezierPathWithOvalInRect:rect] fill];
 		rect.origin.x += OUTER_SIZE;
 	}
 	

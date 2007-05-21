@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -15,10 +15,9 @@
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFXMLDocumentTests.m 79087 2006-09-07 23:37:02Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/Tests/OFXMLDocumentTests.m 68824 2005-09-29 16:41:50Z bungi $");
 
 static NSString *DTDName = @"root-element";
 static CFURLRef dtdURL = NULL;
@@ -36,11 +35,14 @@ do { \
     NSString *string = (NSString *)CFStringCreateFromExternalRepresentation(kCFAllocatorDefault, (CFDataRef)data, [doc stringEncoding]); \
     [data release]; \
     \
-    STAssertEqualObjects(string, expectedString, @"SAVE_AND_COMPARE"); \
+    shouldBeEqual(string, expectedString); \
     [string release]; \
 } while (0)
 
 @interface OFXMLDocumentTests : SenTestCase
+{
+}
+
 @end
 
 @implementation OFXMLDocumentTests
@@ -341,7 +343,7 @@ do { \
     NSString *composedSequence = [NSString stringWithCharacter:0x10000];
     //NSLog(@"composedSequence = %@", composedSequence);
     
-#define CHECK(i, s) STAssertEqualObjects([[elements objectAtIndex:i] childAtIndex:0], s, @"child node"); STAssertEqualObjects([[elements objectAtIndex:i] attributeNamed:@"attr"], s, @"attribute value")
+#define CHECK(i, s) shouldBeEqual([[elements objectAtIndex:i] childAtIndex:0], s); shouldBeEqual([[elements objectAtIndex:i] attributeNamed:@"attr"], s)
     CHECK( 0, @"&");
     CHECK( 1, @"&amp;");
     CHECK( 2, @"<");

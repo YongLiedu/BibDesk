@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSAttributedString-OFExtensions.m 66043 2005-07-25 21:17:05Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSAttributedString-OFExtensions.m 66043 2005-07-25 21:17:05Z kc $")
 
 @implementation NSAttributedString (OFExtensions)
 

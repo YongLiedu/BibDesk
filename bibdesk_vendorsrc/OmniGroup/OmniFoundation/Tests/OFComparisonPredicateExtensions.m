@@ -1,4 +1,4 @@
-// Copyright 2000-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -9,11 +9,10 @@
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 #import <OmniFoundation/NSComparisonPredicate-OFExtensions.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFComparisonPredicateExtensions.m 79087 2006-09-07 23:37:02Z kc $")
+RCS_ID("$Header$")
 
 @interface OFComparisonPredicateExtensions : SenTestCase
 @end

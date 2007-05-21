@@ -1,34 +1,8 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addNewCondition = id; changeRating = id; removeThisCondition = id; }; 
-            CLASS = BDSKConditionController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addButton = NSButton; 
-                agoText = NSTextField; 
-                andNumberTextField = NSTextField; 
-                booleanButton = NSButton; 
-                comparisonBox = NSBox; 
-                comparisonPopUp = NSPopUpButton; 
-                dateComparisonPopUp = NSPopUpButton; 
-                dateTextField = NSTextField; 
-                keyComboBox = NSComboBox; 
-                numberTextField = NSTextField; 
-                periodPopUp = NSPopUpButton; 
-                ratingButton = NSButton; 
-                removeButton = NSButton; 
-                toDateTextField = NSTextField; 
-                triStateButton = NSButton; 
-                valueBox = NSBox; 
-                valueTextField = NSTextField; 
-                view = NSView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {
             ACTIONS = {addNewCondition = id; removeThisCondition = id; }; 
-            CLASS = BDSKConditionController1; 
+            CLASS = BDSKConditionController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addButton = NSButton; 
@@ -50,7 +24,6 @@
             }; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
     ); 
     IBVersion = 1; 

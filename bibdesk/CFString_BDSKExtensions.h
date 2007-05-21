@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/02/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,23 @@ extern void BDDeleteTeXForSorting(CFMutableStringRef mutableString);
 extern void BDDeleteArticlesForSorting(CFMutableStringRef mutableString);
 extern void BDDeleteCharactersInCharacterSet(CFMutableStringRef mutableString, CFCharacterSetRef charSet);
 extern CFHashCode BDCaseInsensitiveStringHash(const void *value);
-extern Boolean  BDIsNewlineCharacter(UniChar c);
-extern Boolean BDStringHasAccentedCharacters(CFStringRef string);
 
 static inline Boolean BDIsEmptyString(CFStringRef aString)
 { 
     return (aString == NULL || CFStringCompare(aString, CFSTR(""), 0) == kCFCompareEqualTo); 
+}
+
+static inline Boolean BDIsNewlineCharacter(UniChar c)
+{
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember((CFCharacterSetRef)[NSCharacterSet newlineCharacterSet], c) );
+}
+
+static inline Boolean BDStringHasAccentedCharacters(CFStringRef string)
+{
+    CFMutableStringRef mutableString = CFStringCreateMutableCopy(CFAllocatorGetDefault(), CFStringGetLength(string), string);
+    CFStringNormalize(mutableString, kCFStringNormalizationFormD);
+    Boolean success = CFStringFindCharacterFromSet(mutableString, CFCharacterSetGetPredefined(kCFCharacterSetNonBase), CFRangeMake(0, CFStringGetLength(mutableString)), 0, NULL);
+    CFRelease(mutableString);
+    return success;
 }

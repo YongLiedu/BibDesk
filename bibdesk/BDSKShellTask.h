@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Sat Dec 14 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,12 @@
 
 @interface BDSKShellTask : NSObject {
     // data used to store stdOut from the filter
-    NSMutableData *stdoutData;
+    NSData *stdoutData;
 }
-+ (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
-+ (NSData *)runRawShellCommand:(NSString *)cmd withInputString:(NSString *)input;
-+ (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
+
++ (BDSKShellTask *)shellTask;
+
+- (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
+- (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
+- (void)stdoutNowAvailable:(NSNotification *)notification;
 @end

@@ -1,6 +1,6 @@
 // BDSKMainTableView.h
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -47,20 +47,10 @@
     // datasource methods to support this are over in BibDocument_DataSource
     BDSKTypeSelectHelper *typeSelectHelper;
     NSMutableArray *trackingRects;
-    NSArray *alternatingRowBackgroundColors;
 }
-
-- (void)setAlternatingRowBackgroundColors:(NSArray *)colorArray;
-- (NSArray *)alternatingRowBackgroundColors;
 
 - (BDSKTypeSelectHelper *)typeSelectHelper;
 - (void)rebuildTrackingRects;
-
-- (void)setupTableColumnsWithIdentifiers:(NSArray *)identifiers;
-- (NSMenu *)columnsMenu;
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)index;
-- (void)removeTableColumnWithIdentifier:(NSString *)identifier;
-
 @end
 
 
@@ -68,15 +58,4 @@
 - (BOOL)tableView:(NSTableView *)aTableView shouldTrackTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView mouseEnteredTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (void)tableView:(NSTableView *)aTableView mouseExitedTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
-- (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView;
-- (void)tableView:(NSTableView *)aTableView importItemAtRow:(int)rowIndex;
-@end
-
-
-@interface NSColor (BDSKExtensions)
-+ (NSArray *)alternateControlAlternatingRowBackgroundColors;
-@end
-
-
-@interface BDSKRoundRectButtonCell : NSButtonCell
 @end

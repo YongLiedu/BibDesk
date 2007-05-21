@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/10/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,24 @@
 #import "NSGeometry_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
-#import "NSParagraphStyle_BDSKExtensions.h"
-#import "NSLayoutManager_BDSKExtensions.h"
 
 /* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
 
+static NSMutableParagraphStyle *BDSKTextWithIconCellParagraphStyle = nil;
+static NSLayoutManager *layoutManager = nil;
+
 @implementation BDSKTextWithIconCell
 
-+ (NSParagraphStyle *)paragraphStyle;
++ (void)initialize;
 {
-    return [NSParagraphStyle defaultTruncatingTailParagraphStyle];
+    OBINITIALIZE;
+    
+    BDSKTextWithIconCellParagraphStyle = [[NSMutableParagraphStyle alloc] init];
+    [BDSKTextWithIconCellParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
+    
+    // string drawing uses this behavior currently
+    layoutManager = [[NSLayoutManager alloc] init];
+    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
 }
 
 // Init and dealloc
@@ -152,7 +160,7 @@ if (imageSize.width > 0) \
 NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); \
 \
 /* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
-float vOffset = 0.5f * (NSHeight(aRect) - [NSLayoutManager defaultViewLineHeightForFont:[self font]]); \
+float vOffset = 0.5f * (NSHeight(aRect) - [layoutManager defaultLineHeightForFont:[self font]]); \
 \
 if (![controlView isFlipped]) \
 textRect.origin.y -= vOffset; \
@@ -180,19 +188,16 @@ textRect.origin.y += vOffset; \
         [label addAttribute:NSForegroundColorAttributeName value:[self textColor] range:labelRange];
     }
     
-    [label addAttribute:NSParagraphStyleAttributeName value:[[self class] paragraphStyle] range:labelRange];
+    [label addAttribute:NSParagraphStyleAttributeName value:BDSKTextWithIconCellParagraphStyle range:labelRange];
     [label drawInRect:textRect];
     [label release];
     
     // Draw the image
     imageRect = BDSKCenterRect(imageRect, imageSize, [controlView isFlipped]);
-    [NSGraphicsContext saveGraphicsState];
-    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
     if ([controlView isFlipped])
         [[self icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
     else
         [[self icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-	[NSGraphicsContext restoreGraphicsState];
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)flag;
@@ -216,14 +221,17 @@ textRect.origin.y += vOffset; \
     _oaFlags.settingUpFieldEditor = NO;
 }
 
-- (void)setObjectValue:(id <NSCopying>)obj;
+- (void)setObjectValue:(id <NSObject, NSCopying>)obj;
 {
-    [self setIcon:[(NSObject *)obj valueForKey:OATextWithIconCellImageKey]];
-    // using -[self/super setAttributedStringValue:] causes an endless loop and blows the stack
-    id objectValue = [(NSObject *)obj valueForKey:@"attributedString"];
-    if (nil == objectValue)
-        objectValue = [(NSObject *)obj valueForKey:OATextWithIconCellStringKey];
-    [super setObjectValue:objectValue];
+    if ([obj isKindOfClass:[NSDictionary class]]) {
+        NSDictionary *dictionary = (NSDictionary *)obj;
+        
+        [super setObjectValue:[dictionary objectForKey:OATextWithIconCellStringKey]];
+        [self setIcon:[dictionary objectForKey:OATextWithIconCellImageKey]];
+    } else {
+        [super setObjectValue:obj];
+        [self setIcon:nil];
+    }
 }
 
 // API
@@ -261,15 +269,17 @@ textRect.origin.y += vOffset; \
     _oaFlags.drawsHighlight = flag;
 }
 
+- (NSRect)textRectForFrame:(NSRect)aRect inView:(NSView *)controlView;
+{
+    _calculateDrawingRectsAndSizes;
+    
+    return textRect;
+}
+
 @end
 
 
 @implementation BDSKFilePathCell
-
-+ (NSParagraphStyle *)paragraphStyle;
-{
-    return [NSParagraphStyle defaultTruncatingMiddleParagraphStyle];
-}
 
 - (id)init;
 {
@@ -306,19 +316,19 @@ textRect.origin.y += vOffset; \
     if ([obj isKindOfClass:[NSString class]]) {
         path = [(NSString *)obj stringByStandardizingPath];
         if(path && [[NSFileManager defaultManager] fileExistsAtPath:path])
-            image = [NSImage imageForFile:path];
+            image = [NSImage smallImageForFile:path];
     } else if ([obj isKindOfClass:[NSURL class]]) {
         NSURL *fileURL = (NSURL *)obj;
         path = [[fileURL path] stringByStandardizingPath];
         if(path && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL])
-            image = [NSImage imageForURL:fileURL];
+            image = [NSImage smallImageForURL:fileURL];
     } else if ([obj isKindOfClass:[NSDictionary class]]) {
         NSDictionary *dict = (NSDictionary *)obj;
         if ([[dict objectForKey:OATextWithIconCellStringKey] isKindOfClass:[NSString class]]) {
             path = [[dict objectForKey:OATextWithIconCellStringKey] stringByStandardizingPath];
             image = [dict objectForKey:OATextWithIconCellImageKey];
             if(image == nil && path && [[NSFileManager defaultManager] fileExistsAtPath:path])
-                image = [NSImage imageForFile:path];
+                image = [NSImage smallImageForFile:path];
         } else {
             [super setObjectValue:dict];
             return;
@@ -351,28 +361,3 @@ textRect.origin.y += vOffset; \
 
 @end
 
-/* Category that implements -[NSObject valueForKey:] with OATextWithIconCellStringKey and OATextWithIconCellImageKey, so we can use any object that is KVC-compliant for -string or -attributedString and -image.  However, this breaks objects that provide these values via valueForUndefinedKey:, so it's a bad idea to pollute NSObject like this.
-
-We should probably change the definition of OATextWithIconCell*Key to have a prefix on it since -image or -attributedString are common method names.
- */
-/*
-@interface NSObject (BDSKTextWithIconCell) @end
-@implementation NSObject (BDSKTextWithIconCell)
-- (id)attributedString { return nil; }
-- (id)string { return nil; }
-- (id)image { return nil; }
-@end
-*/
-
-// special cases for strings
-@interface NSAttributedString (BDSKTextWithIconCell) @end
-@implementation NSAttributedString (BDSKTextWithIconCell)
-- (id)attributedString { return self; }
-- (id)image { return nil; }
-@end
-@interface NSString (BDSKTextWithIconCell) @end
-@implementation NSString (BDSKTextWithIconCell)
-- (id)attributedString { return nil; }
-- (NSString *)string { return self; }
-- (id)image { return nil; }
-@end

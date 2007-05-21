@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/23/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,6 @@ extern NSString *BDSKServiceTemplateTree;
 extern NSString *BDSKTemplateAccessoryString;
 extern NSString *BDSKTemplateMainPageString;
 extern NSString *BDSKTemplateDefaultItemString;
-extern NSString *BDSKTemplateScriptString;
 
 // concrete subclass with specific accessors for the template tree
 @interface BDSKTemplate : BDSKTreeNode
@@ -77,7 +76,6 @@ extern NSString *BDSKTemplateScriptString;
 + (NSArray *)allStyleNames;
 + (NSArray *)allFileTypes;
 + (NSArray *)allStyleNamesForFileType:(NSString *)fileType;
-+ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)format;
 + (NSString *)defaultStyleNameForFileType:(NSString *)fileType;
 
 // export templates
@@ -95,7 +93,6 @@ extern NSString *BDSKTemplateScriptString;
 
 - (NSString *)mainPageString;
 - (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;
-- (NSString *)scriptPath;
 
 // returns the contents of a child for the given type or of the default template
 // (pass nil for the type if you explicitly desire the default template content)
@@ -107,7 +104,6 @@ extern NSString *BDSKTemplateScriptString;
 - (NSURL *)defaultItemTemplateURL;
 - (NSURL *)templateURLForType:(NSString *)pubType;
 - (NSArray *)accessoryFileURLs;
-- (NSURL *)scriptURL;
 
 // child template accessors
 - (NSURL *)representedFileURL;

@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/02/06.
 /*
- This software is Copyright (c) 2006,2006,2007
+ This software is Copyright (c) 2006,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,26 +41,24 @@
 @implementation NSCharacterSet (BDSKExtensions)
 
 static NSCharacterSet *curlyBraceCharacterSet = nil;
-static NSCharacterSet *commaCharacterSet = nil;
+static NSCharacterSet *autocompletePunctuationCharacterSet = nil;
 static NSCharacterSet *searchStringSeparatorCharacterSet = nil;
 static NSCharacterSet *upAndDownArrowCharacterSet = nil;
 static NSCharacterSet *newlineCharacterSet = nil;
 static NSCharacterSet *nonWhitespaceCharacterSet = nil;
-static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
 
 + (void)didLoad;
 {
-    curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}"] copy];
-    commaCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@","] copy];
-    searchStringSeparatorCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"+| "] copy];
-    nonDecimalDigitCharacterSet = [[[NSCharacterSet decimalDigitCharacterSet] invertedSet] copy];
-        
+    curlyBraceCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"{}"] retain];
+    autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
+    searchStringSeparatorCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@"+| "] retain];
+    
     // up arrow and down arrow character set
     unichar upAndDownArrowCharacters[2];
     upAndDownArrowCharacters[0] = NSUpArrowFunctionKey;
     upAndDownArrowCharacters[1] = NSDownArrowFunctionKey;
     NSString *upAndDownArrowString = [NSString stringWithCharacters: upAndDownArrowCharacters  length: 2];
-    upAndDownArrowCharacterSet = [[NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString] copy];
+    upAndDownArrowCharacterSet = [[NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString] retain];
     
     // This will be a character set with all newline characters (including the weird Unicode ones)
     CFMutableCharacterSetRef newlineCFCharacterSet = NULL;
@@ -73,7 +71,7 @@ static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
     newlineCharacterSet = [(id)newlineCFCharacterSet copy];
     CFRelease(newlineCFCharacterSet);
     
-    nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] copy];
+    nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
 }
 
 + (NSCharacterSet *)curlyBraceCharacterSet;
@@ -81,9 +79,9 @@ static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
     return curlyBraceCharacterSet; 
 }    
 
-+ (NSCharacterSet *)commaCharacterSet;
++ (NSCharacterSet *)autocompletePunctuationCharacterSet;
 {
-    return commaCharacterSet;
+    return autocompletePunctuationCharacterSet;
 }
 
 + (NSCharacterSet *)searchStringSeparatorCharacterSet;
@@ -104,11 +102,6 @@ static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
 + (NSCharacterSet *)nonWhitespaceCharacterSet;
 {
     return nonWhitespaceCharacterSet;
-}
-
-+ (NSCharacterSet *)nonDecimalDigitCharacterSet;
-{
-    return nonDecimalDigitCharacterSet;
 }
 
 @end

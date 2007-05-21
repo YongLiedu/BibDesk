@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/27/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -51,8 +51,6 @@
  */
 - (BOOL)openURL:(NSURL *)fileURL withSearchString:(NSString *)searchString;
 
-- (BOOL)openLinkedFile:(NSString *)fullPath;
-
 /*!
     @method     UTIForURL:
     @abstract   Uses LaunchServices to find the UTI for a given file URL.
@@ -61,8 +59,6 @@
     @result     (description)
 */
 - (NSString *)UTIForURL:(NSURL *)fileURL;
-- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
-- (NSString *)UTIForURL:(NSURL *)fileURL resolveAliases:(BOOL)resolve error:(NSError **)error;
 
 /*!
     @method     UTIForPathExtension:
@@ -75,7 +71,6 @@
 
 - (NSArray *)editorAndViewerURLsForURL:(NSURL *)aURL;
 - (NSURL *)defaultEditorOrViewerURLForURL:(NSURL *)aURL;
-- (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
 - (NSImage *)iconForFileURL:(NSURL *)fileURL;
 - (BOOL)openURL:(NSURL *)aURL withApplicationURL:(NSURL *)applicationURL;
 

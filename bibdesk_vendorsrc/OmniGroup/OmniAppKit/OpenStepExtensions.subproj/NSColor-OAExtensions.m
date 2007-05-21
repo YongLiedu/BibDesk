@@ -1,4 +1,4 @@
-// Copyright 2000-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -15,63 +15,9 @@
 #import "OAColorProfile.h"
 #import "NSImage-OAExtensions.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSColor-OAExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSColor-OAExtensions.m 68216 2005-09-12 19:05:31Z kc $")
 
 NSString *OAColorXMLAdditionalColorSpace = @"OAColorXMLAdditionalColorSpace";
-
-static NSColorList *classicCrayonsColorList(void)
-{
-    static NSColorList *classicCrayonsColorList = nil;
-    
-    if (classicCrayonsColorList == nil) {
-	NSString *colorListName = NSLocalizedStringFromTableInBundle(@"Classic Crayons", @"OmniAppKit", OMNI_BUNDLE, "color list name");
-	classicCrayonsColorList = [[NSColorList alloc] initWithName:colorListName fromFile:[OMNI_BUNDLE pathForResource:@"Classic Crayons" ofType:@"clr"]];
-    }
-    return classicCrayonsColorList;
-}
-
-@interface NSColorPicker (Private)
-- (void)attachColorList:(id)list makeSelected:(BOOL)flag;
-- (void)refreashUI; // sic
-@end
-
-// Adding a color list to the color panel when it is NOT in list mode, will not to anything.  Radar #4341924.
-@implementation NSColorPanel (OAHacks)
-static void (*originalSwitchToPicker)(id self, SEL _cmd, NSColorPicker *picker);
-+ (void)performPosing;
-{
-    // No public API for this
-    if ([self instancesRespondToSelector:@selector(_switchToPicker:)])
-	originalSwitchToPicker = (typeof(originalSwitchToPicker))OBReplaceMethodImplementationWithSelector(self, @selector(_switchToPicker:), @selector(_replacement_switchToPicker:));
-}
-- (void)_replacement_switchToPicker:(NSColorPicker *)picker;
-{
-    originalSwitchToPicker(self, _cmd, picker);
-
-    static BOOL attached = NO;
-    if (!attached && [NSStringFromClass([picker class]) isEqual:@"NSColorPickerPageableNameList"]) {
-	attached = YES;
-	
-	// Look at the (private) preference for which color list to have selected.  If it is the one we are adding, use -attachColorList: (which will select it).  Otherwise, use the (private) -attachColorList:makeSelected: and specify to not select it (otherwise the color list selected when the real code sets up and reads the default will be overridden).  If we fail to select the color list we are adding, though, the picker will show an empty color list (since the real code will have tried to select it before it is added).  Pheh.  See <bug://30338> for some of these issues.  Logged Radar 4640063 to add for asks for -attachColorList:makeSelected: to be public.
-
-	// Sadly, the (private) preference encodes the color list name with a '1' at the beginning.  I have no idea what this is for.  I'm uncomfortable using [defaultColorList hasSuffix:[colorList name]] below since that might match more than one color list.
-	NSString *defaultColorList = [[NSUserDefaults standardUserDefaults] stringForKey:@"NSColorPickerPageableNameListDefaults"];
-	if ([defaultColorList hasPrefix:@"1"])
-	    defaultColorList = [defaultColorList substringFromIndex:1];
-	
-	NSColorList *colorList = classicCrayonsColorList();
-	if ([picker respondsToSelector:@selector(attachColorList:makeSelected:)]) {
-	    BOOL select = OFISEQUAL(defaultColorList, [colorList name]);
-
-	    [picker attachColorList:colorList makeSelected:select];
-	    if (select && [picker respondsToSelector:@selector(refreashUI)])
-		// The picker is in a bad state from trying to select a color list that wasn't there when -restoreDefaults was called.  Passing makeSelected:YES will apparently bail since the picker things that color list is already selected and we'll be left with an empty list of colors displayed.  First, select some other color list if possible.
-		[picker refreashUI];
-	} else
-	    [picker attachColorList:colorList];
-    }
-}
-@end
 
 @implementation NSColor (OAExtensions)
 
@@ -250,59 +196,32 @@ static void (*originalSwitchToPicker)(id self, SEL _cmd, NSColorPicker *picker);
 
 #ifdef MAC_OS_X_VERSION_10_2
 
-typedef struct {
-    NSString *name; // easy name lookup
-    float     h, s, v, a; // avoid conversions
-    float     r, g, B;
-    NSColor  *color; // in the original color space
-} OANamedColorEntry;
+static NSColorList *combinedColorList = nil;
 
-static OANamedColorEntry *_addColorsFromList(OANamedColorEntry *colorEntries, unsigned int *entryCount, NSColorList *colorList)
+static void _addColorsFromList(NSColorList *colorList)
 {
     if (colorList == nil)
-	return colorEntries;
+            return;
 
     NSArray *allColorKeys = [colorList allKeys];
     unsigned int colorIndex, colorCount = [allColorKeys count];
-    
-    // Make room for the extra entries
-    colorEntries = (OANamedColorEntry *)realloc(colorEntries, sizeof(*colorEntries)*(*entryCount + colorCount));
-    
     for (colorIndex = 0; colorIndex < colorCount; colorIndex++) {
-	NSString *colorKey = [allColorKeys objectAtIndex:colorIndex];
-	NSColor *color = [colorList colorWithKey:colorKey];
-	
-	OANamedColorEntry *entry = &colorEntries[*entryCount + colorIndex];
-	entry->name = [colorKey copy];
-	
-	NSColor *rgbColor = [color colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
-	[rgbColor getHue:&entry->h saturation:&entry->s brightness:&entry->v alpha:&entry->a];
-	[rgbColor getRed:&entry->r green:&entry->g blue:&entry->B alpha:&entry->a];
-	
-	entry->color = [color retain];
+            NSString *colorKey = [allColorKeys objectAtIndex:colorIndex];
+            NSColor *color = [colorList colorWithKey:colorKey];
+            [combinedColorList setColor:color forKey:colorKey];
     }
-    
-    // Inform caller of new entry count, finally
-    *entryCount += colorCount;
-    return colorEntries;
 }
 
-static const OANamedColorEntry *_combinedColorEntries(unsigned int *outEntryCount)
++ (NSColorList *)_combinedColorList;
 {
-    static OANamedColorEntry *entries = NULL;
-    static unsigned int entryCount = 0;
-    
-    if (entries == NULL) {
-	// Two built-in color lists that should get localized
-        entries = _addColorsFromList(entries, &entryCount, [NSColorList colorListNamed:@"Apple"]);
-        entries = _addColorsFromList(entries, &entryCount, [NSColorList colorListNamed:@"Crayons"]);
-	
-	// Load *our* color list last since it should be localized and has more colors than either of the above
-	entries = _addColorsFromList(entries, &entryCount, classicCrayonsColorList());
+    if (combinedColorList == nil) {
+        combinedColorList = [[NSColorList alloc] initWithName:@""];
+
+        _addColorsFromList([NSColorList colorListNamed:@"Apple"]);
+        _addColorsFromList([[[NSColorList alloc] initWithName:nil fromFile:[[OAColorProfile bundle] pathForResource:@"Classic Crayons" ofType:@"clr"]] autorelease]);
+        _addColorsFromList([NSColorList colorListNamed:@"Crayons"]);
     }
-    
-    *outEntryCount = entryCount;
-    return entries;
+    return combinedColorList;
 }
 
 static float _nearnessWithWrap(float a, float b)
@@ -313,20 +232,10 @@ static float _nearnessWithWrap(float a, float b)
     return MIN(ABS(value1), MIN(ABS(value2), ABS(value3)));
 }
 
-static float _colorCloseness(const OANamedColorEntry *e1, const OANamedColorEntry *e2)
+static float _hsbCloseness(float hue1, float hue2, float saturation1, float saturation2, float brightness1, float brightness2)
 {
-    // As saturation goes to zero, hue becomes irrelevant.  For example, black has h=0, but that doesn't mean it is "like" red.  So, we do the distance in RGB space.  But the modifier words in HSV.
-    float sdiff = ABS(e1->s - e2->s);
-    if (sdiff < 0.1 && e1->s < 0.1) {
-	float rd = e1->r - e2->r;
-	float gd = e1->g - e2->g;
-	float bd = e1->B - e2->B;
-	
-	return sqrt(rd*rd + gd*gd + bd*bd);
-    } else {
-	// We weight the hue stronger than the saturation or brightness, since it's easier to talk about 'dark yellow' than it is 'yellow except for with a little red in it'
-	return 3.0 * _nearnessWithWrap(e1->h, e2->h) + sdiff + ABS(e1->v - e2->v);
-    }
+    // We weight the hue stronger than the saturation or brightness, since it's easier to talk about 'dark yellow' than it is 'yellow except for with a little red in it'
+    return _nearnessWithWrap(hue1, hue2) * 3.0 + ABS(saturation1 - saturation2) + ABS(brightness1 - brightness2);
 }
         
 - (NSString *)similarColorNameFromColorLists;
@@ -337,87 +246,79 @@ static float _colorCloseness(const OANamedColorEntry *e1, const OANamedColorEntr
         return NSLocalizedStringFromTableInBundle(@"Image", @"OmniAppKit", [OAColorProfile bundle], "generic color name for pattern colors");
     else if ([[self colorSpaceName] isEqualToString:NSCustomColorSpace])
         return NSLocalizedStringFromTableInBundle(@"Custom", @"OmniAppKit", [OAColorProfile bundle], "generic color name for custom colors");
-
-    unsigned int entryCount;
-    const OANamedColorEntry *entries = _combinedColorEntries(&entryCount);
     
-    if (entryCount == 0) {
-	// Avoid crasher below if something goes wrong in building the entries
-	OBASSERT_NOT_REACHED("No color entries found");
-	return @"";
-    }
+    NSColorList *combinedColorList = [NSColor _combinedColorList];
+    float hue, saturation, brightness, alpha;
+    [[self colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
     
-    OANamedColorEntry colorEntry;
-    memset(&colorEntry, 0, sizeof(colorEntry));
-    NSColor *rgbColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
-    [rgbColor getHue:&colorEntry.h saturation:&colorEntry.s brightness:&colorEntry.v alpha:&colorEntry.a];
-    [rgbColor getRed:&colorEntry.r green:&colorEntry.g blue:&colorEntry.B alpha:&colorEntry.a];
+    NSString *closestColorKey = nil;
+    float closestHue = -1000, closestSaturation = -1000, closestBrightness = -1000;
 
-    const OANamedColorEntry *closestEntry = &entries[0];
-    float closestEntryDistance = 1e9;
+    NSArray *allColorKeys = [combinedColorList allKeys];
+    unsigned int colorIndex, colorCount = [allColorKeys count];
+    for (colorIndex = 0; colorIndex < colorCount; colorIndex++) {
+        NSString *colorKey = [allColorKeys objectAtIndex:colorIndex];
+        NSColor *color = [combinedColorList colorWithKey:colorKey];
 
-    // Entries at the end of the array have higher precedence; loop backwards
-    unsigned int entryIndex = entryCount;
-    while (entryIndex--) {
-	const OANamedColorEntry *entry = &entries[entryIndex];
-	float distance = _colorCloseness(&colorEntry, entry);
-	if (distance < closestEntryDistance) {
-	    closestEntryDistance = distance;
-	    closestEntry = entry;
-	}
+        float otherHue, otherSaturation, otherBrightness, otherAlpha;
+        [[color colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getHue:&otherHue saturation:&otherSaturation brightness:&otherBrightness alpha:&otherAlpha];
+
+        if (_hsbCloseness(hue, otherHue, saturation, otherSaturation, brightness, otherBrightness) < _hsbCloseness(hue, closestHue, saturation, closestSaturation, brightness, closestBrightness)) {
+            closestHue = otherHue;
+            closestSaturation = otherSaturation;
+            closestBrightness = otherBrightness;
+            closestColorKey = colorKey;
+        }
     }
 
-    float brightnessDifference = colorEntry.v - closestEntry->v;
+    float brightnessDifference = brightness - closestBrightness;
     NSString *brightnessString = nil;
-    if (brightnessDifference < -.1 && colorEntry.v < .1)
+    if (brightnessDifference < -.1 && brightness < .1)
         brightnessString =  NSLocalizedStringFromTableInBundle(@"Near-black", @"OmniAppKit", [OAColorProfile bundle], "word comparing color brightnesss");
     else if (brightnessDifference < -.2)
         brightnessString =  NSLocalizedStringFromTableInBundle(@"Dark", @"OmniAppKit", [OAColorProfile bundle], "word comparing color brightnesss");
     else if (brightnessDifference < -.1)
         brightnessString =  NSLocalizedStringFromTableInBundle(@"Smokey", @"OmniAppKit", [OAColorProfile bundle], "word comparing color brightnesss");
-    else if (brightnessDifference > .1 && colorEntry.v > .9)
+    else if (brightnessDifference > .1 && brightness > .9)
         brightnessString =  NSLocalizedStringFromTableInBundle(@"Off-white", @"OmniAppKit", [OAColorProfile bundle], "word comparing color brightnesss");
     else if (brightnessDifference > .2)
         brightnessString =  NSLocalizedStringFromTableInBundle(@"Bright", @"OmniAppKit", [OAColorProfile bundle], "word comparing color brightnesss");
     else if (brightnessDifference > .1)
         brightnessString =  NSLocalizedStringFromTableInBundle(@"Light", @"OmniAppKit", [OAColorProfile bundle], "word comparing color brightnesss");
 
-    // Input saturation less than some value means that the saturation is irrelevant.
+    float saturationDifference = saturation - closestSaturation;
     NSString *saturationString = nil;
-    if (colorEntry.s > 0.01) {
-	float saturationDifference = colorEntry.s - closestEntry->s;
-	if (saturationDifference < -0.3)
-	    saturationString =  NSLocalizedStringFromTableInBundle(@"Washed-out", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
-	else if (saturationDifference < -.2)
-	    saturationString =  NSLocalizedStringFromTableInBundle(@"Faded", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
-	else if (saturationDifference < -.1)
-	    saturationString =  NSLocalizedStringFromTableInBundle(@"Mild", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
-	else if (saturationDifference > -0.01 && saturationDifference < 0.01)
-	    saturationString = nil;
-	else if (saturationDifference < .1)
-	    saturationString = nil;
-	else if (saturationDifference < .2)
-	    saturationString =  NSLocalizedStringFromTableInBundle(@"Rich", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
-	else if (saturationDifference < .3)
-	    saturationString =  NSLocalizedStringFromTableInBundle(@"Deep", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
-	else
-	    saturationString =  NSLocalizedStringFromTableInBundle(@"Intense", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
-    }
-    
+    if (saturationDifference < -0.3)
+        saturationString =  NSLocalizedStringFromTableInBundle(@"Washed-out", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
+    else if (saturationDifference < -.2)
+        saturationString =  NSLocalizedStringFromTableInBundle(@"Faded", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
+    else if (saturationDifference < -.1)
+        saturationString =  NSLocalizedStringFromTableInBundle(@"Mild", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
+    else if (saturationDifference < -0)
+        saturationString = nil;
+    else if (saturationDifference < .1)
+        saturationString = nil;
+    else if (saturationDifference < .2)
+        saturationString =  NSLocalizedStringFromTableInBundle(@"Rich", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
+    else if (saturationDifference < .3)
+        saturationString =  NSLocalizedStringFromTableInBundle(@"Deep", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
+    else
+        saturationString =  NSLocalizedStringFromTableInBundle(@"Intense", @"OmniAppKit", [OAColorProfile bundle], "word comparing color saturations");
+
     NSString *closestColorDescription = nil;
     if (saturationString != nil && brightnessString != nil)
-        closestColorDescription = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@, %@ %@", @"OmniAppKit", [OAColorProfile bundle], "format string for color with saturation and brightness descriptions"), brightnessString, saturationString, closestEntry->name];
+        closestColorDescription = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@, %@ %@", @"OmniAppKit", [OAColorProfile bundle], "format string for color with saturation and brightness descriptions"), brightnessString, saturationString, closestColorKey];
     else if (saturationString != nil)
-        closestColorDescription = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@ %@", @"OmniAppKit", [OAColorProfile bundle], "format string for color with saturation description"), saturationString, closestEntry->name];
+        closestColorDescription = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@ %@", @"OmniAppKit", [OAColorProfile bundle], "format string for color with saturation description"), saturationString, closestColorKey];
     else if (brightnessString != nil)
-        closestColorDescription = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@ %@", @"OmniAppKit", [OAColorProfile bundle], "format string for color with brightness description"), brightnessString, closestEntry->name];
+        closestColorDescription = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@ %@", @"OmniAppKit", [OAColorProfile bundle], "format string for color with brightness description"), brightnessString, closestColorKey];
     else
-        closestColorDescription = closestEntry->name;
+        closestColorDescription = closestColorKey;
 
-    if (colorEntry.a <= 0.001)
+    if (alpha <= 0.001)
         return NSLocalizedStringFromTableInBundle(@"Clear", @"OmniAppKit", [OAColorProfile bundle], "name of completely transparent color");
-    else if (colorEntry.a < .999)
-        return [NSString stringWithFormat:@"%d%% %@", (int)(colorEntry.a * 100), closestColorDescription];
+    else if (alpha < .999)
+        return [NSString stringWithFormat:@"%d%% %@", (int)(alpha * 100), closestColorDescription];
     else
         return closestColorDescription;
 }
@@ -457,33 +358,23 @@ static float _colorCloseness(const OANamedColorEntry *e1, const OANamedColorEntr
 
 + (NSColor *)colorWithSimilarName:(NSString *)aName;
 {
-    // special case clear
-    if ([aName isEqualToString:@"Clear"] || [aName isEqualToString:NSLocalizedStringFromTableInBundle(@"Clear", @"OmniAppKit", [OAColorProfile bundle], "name of completely transparent color")])
-        return [NSColor clearColor];
-    
-    unsigned int entryCount;
-    const OANamedColorEntry *entries = _combinedColorEntries(&entryCount);
-    
-    if (entryCount == 0) {
-	// Avoid crasher below if something goes wrong in building the entries
-	OBASSERT_NOT_REACHED("No color entries found");
-	return @"";
-    }
-
-    // Entries at the end of the array have higher precedence; loop backwards
-    unsigned int entryIndex = entryCount;
-
+    NSColorList *combinedColorList = [NSColor _combinedColorList];
+    NSArray *allColorKeys = [combinedColorList allKeys];
+    unsigned int colorIndex, colorCount = [allColorKeys count];
     NSColor *baseColor = nil;
     unsigned int longestMatch = 0;
+
+    // special case clear
+    if ([aName isEqualToString:@"Clear"])
+        return [NSColor clearColor];
     
     // find base color
-    while (entryIndex--) {
-	const OANamedColorEntry *entry = &entries[entryIndex];
-        NSString *colorKey = entry->name;
+    for (colorIndex = 0; colorIndex < colorCount; colorIndex++) {
+        NSString *colorKey = [allColorKeys objectAtIndex:colorIndex];
         unsigned int length;
         
         if ([aName hasSuffix:colorKey] && (length = [colorKey length]) > longestMatch) {
-            baseColor = entry->color;
+            baseColor = [combinedColorList colorWithKey:colorKey];
             longestMatch = length;
         }
     }
@@ -687,16 +578,12 @@ NSString *OAColorToPropertyListTransformerName = @"OAColorToPropertyList";
 
 - (id)transformedValue:(id)value;
 {
-    if ([value isKindOfClass:[NSColor class]])
-	return [(NSColor *)value propertyListRepresentation];
-    return nil;
+    return [(NSColor *)value propertyListRepresentation];
 }
 
 - (id)reverseTransformedValue:(id)value;
 {
-    if ([value isKindOfClass:[NSDictionary class]])
-	return [NSColor colorFromPropertyListRepresentation:value];
-    return nil;
+    return [NSColor colorFromPropertyListRepresentation:value];
 }
 
 @end

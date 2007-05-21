@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/CoreServicesExtensions/OFCodeFragment.m 66170 2005-07-28 17:40:10Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/CoreServicesExtensions/OFCodeFragment.m 66170 2005-07-28 17:40:10Z kc $")
 
 
 // Adapted from code from Doug Davidson at Apple.  This builds a new blob of memory given the instruction template below.  This loads a 32-bit address for the given tvector into a volatile register and then loads the instruction pointer of the code into the count register, the RTOC value into r2 and jumps through the counter.

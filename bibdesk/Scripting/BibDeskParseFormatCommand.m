@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 10/18/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@
 #import "BibItem.h"
 #import "BibPrefController.h"
 #import "BibAppController.h"
-#import "BDSKOwnerProtocol.h"
 
 @implementation BibDeskParseFormatCommand
 
@@ -98,13 +97,13 @@
     BOOL isLocalFile = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field];
     NSString *papersFolderPath = nil;
     if (isLocalFile)
-        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
+        papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub document]];
 	
     NSString *suggestion = nil;
     if ([field isEqualToString:BDSKCiteKeyString]) {
         suggestion = [pub citeKey];
     } else if (isLocalFile) {
-        suggestion = [pub localFilePathForField:field inherit:NO];
+        suggestion = [pub localFilePathForField:field relativeTo:[[[pub document] fileName] stringByDeletingLastPathComponent] inherit:NO];
         if ([suggestion hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
             suggestion = [suggestion substringFromIndex:[papersFolderPath length]];
         else

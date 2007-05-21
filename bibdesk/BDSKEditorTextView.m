@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 02/28/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@
         [self fixAttributesForURLs];
     } else if(editedRange.location != NSNotFound){
         NSString *editedWord = [self URLStringFromRange:&editedRange inString:string];
-        if(editedWord && [editedWord rangeOfString:@"://"].length == 0)
+        if([editedWord rangeOfString:@"://"].length == 0)
             editedWord = nil;
         NSURL *url = editedWord ? [[NSURL alloc] initWithString:editedWord] : nil;
         if(url != nil)

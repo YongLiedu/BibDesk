@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/02/05.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Adam Maxwell. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,16 +38,18 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
+#import "BDSKStringEncodingManager.h"
 
-@class BDSKEncodingPopUpButton;
 
 @interface BibPref_Files : OAPreferenceClient {
+    BDSKStringEncodingManager *encodingManager;
     IBOutlet NSButton *showErrorsCheckButton;
-    IBOutlet BDSKEncodingPopUpButton *encodingPopUp;
+    IBOutlet NSPopUpButton *encodingPopUp;
     IBOutlet NSButton *shouldTeXifyCheckButton;
     IBOutlet NSButton *saveAnnoteAndAbstractAtEndButton;
     IBOutlet NSButton *useNormalizedNamesButton;
     IBOutlet NSButton *useTemplateFileButton;
+    IBOutlet NSButton* autoSaveAsRSSButton;
     IBOutlet NSButton *outputTemplateFileButton;
     
     IBOutlet NSButton *autosaveDocumentButton;
@@ -61,6 +63,7 @@
 - (IBAction)toggleShouldUseNormalizedNames:(id)sender;
 - (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender;
 - (IBAction)toggleShouldUseTemplateFile:(id)sender;
+- (IBAction)toggleAutoSaveAsRSSChanged:(id)sender;
 - (IBAction)editTemplateFile:(id)sender;
 - (IBAction)resetTemplateFile:(id)sender;
 - (IBAction)showConversionEditor:(id)sender;

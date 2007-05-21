@@ -15,7 +15,7 @@
 #import "OAApplication.h"
 
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTableView-OAColumnConfigurationExtensions.m 66110 2005-07-27 04:27:00Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTableView-OAColumnConfigurationExtensions.m 66110 2005-07-27 04:27:00Z kc $")
 
 @interface NSTableView (OAColumnConfigurationPrivate)
 - (void)_setupColumnsAndMenu;

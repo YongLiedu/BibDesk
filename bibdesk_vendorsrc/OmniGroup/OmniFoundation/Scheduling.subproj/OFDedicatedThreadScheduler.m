@@ -1,4 +1,4 @@
-// Copyright 1999-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,7 +14,7 @@
 #import <OmniFoundation/NSDate-OFExtensions.h>
 #import <OmniFoundation/OFObject-Queue.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFDedicatedThreadScheduler.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFDedicatedThreadScheduler.m 66043 2005-07-25 21:17:05Z kc $")
 
 @interface OFDedicatedThreadScheduler (Private)
 - (void)notifyDedicatedThreadIfFirstEventIsSoonerThanWakeDate;
@@ -140,13 +140,13 @@ static OFDedicatedThreadScheduler *dedicatedThreadScheduler = nil;
 
 - (void)notifyDedicatedThreadIfFirstEventIsSoonerThanWakeDate;
 {
-    NSDate *dateOfFirstEvent = [self dateOfFirstEvent];
-    NSDate *currentWakeDate = [self wakeDate];
+    NSDate *currentWakeDate;
+    NSDate *dateOfFirstEvent;
 
-    // The first part of this condition is fairly straightforward:  if the first scheduled event is before the current wake date, we notify the dedicated thread that it needs to wake sooner.
-
-    // The last condition is a little more subtle:  when the user changes the system clock, it can skip right past something which was originally scheduled to fire hours in the "future", since sleep times appear to be relative rather than absolute.  This can block new events which are supposed to fire in fractions of a second, so we test here to see if the currentWakeDate is already in the past (and if so we notify the dedicated thread that it needs to wake sooner).  A better solution would be to track system clock changes and guarantee that -notifyDedicatedThreadThatItNeedsToWakeSooner will get called whenever the system clock jumps forward.
-    if (dateOfFirstEvent != nil && (currentWakeDate == nil || [dateOfFirstEvent isBeforeDate:currentWakeDate] || [currentWakeDate timeIntervalSinceNow] < 0.0)) {
+    dateOfFirstEvent = [self dateOfFirstEvent];
+    currentWakeDate = [self wakeDate];
+    // NSLog(@"[dateOfFirstEvent(%@) isBeforeDate:wakeDate(%@)] = %d", dateOfFirstEvent, wakeDate, [dateOfFirstEvent isBeforeDate:wakeDate]);
+    if (dateOfFirstEvent != nil && (currentWakeDate == nil || [dateOfFirstEvent isBeforeDate:currentWakeDate])) {
         [self notifyDedicatedThreadThatItNeedsToWakeSooner];
     }
 }
@@ -217,18 +217,14 @@ static OFDedicatedThreadScheduler *dedicatedThreadScheduler = nil;
                     }
                 } else {
                     NSTimeInterval firstEventInterval = [dateOfFirstEvent timeIntervalSinceNow];
-		    // One might expect that the following assertion (now commented out) would always be valid:  after all, we just called -lockWhenCondition:beforeDate: and we didn't lock, so that means we reached our timeout--shouldn't that date actually be in the past?  But in fact, what we've found is that this asserts quite frequently (starting with 10.2 or so), so I'm disabling the assertion and we'll just test for the problem with the following while loop.
-                    // OBASSERT(firstEventInterval <= 1e-3);
+                    OBASSERT(firstEventInterval <= 0.0);
                     while (firstEventInterval > 0.0) {
-			// We woke up too early:  since our first scheduled event is in the future, -synchronouslyInvokeScheduledEvents won't find any events, and we'll end up back at the top of the loop, not really sleeping, and thus chewing CPU constantly until the event actually does fire.  Let's try an alternate means of sleeping:  -[NSDate(OFExtensions) sleepUntilDate] (which calls +[NSThread sleepUntilDate:]).
                         if (OFSchedulerDebug)
-                            NSLog(@"%@: Woke up %5.3f (%g) seconds too early, sleeping until %@", [self shortDescription], firstEventInterval, firstEventInterval, dateOfFirstEvent);
+                            NSLog(@"%@: Woke up %5.3f seconds too early, sleeping until %@", [self shortDescription], firstEventInterval, dateOfFirstEvent);
                         if (firstEventInterval < 1.0) {
-                            // We're quite close to the first event's date, let's try sleeping until that precise date.
                             [dateOfFirstEvent sleepUntilDate];
                             firstEventInterval = [dateOfFirstEvent timeIntervalSinceNow];
                         } else {
-			    // We woke up more than a second early.  Let's sleep for just one second, because someone might schedule another event between now and when our current event is scheduled to fire.  (Of course, this does mean that we won't look at any newly scheduled events for the next second.)
                             [[NSDate dateWithTimeIntervalSinceNow:1.0] sleepUntilDate];
                             break;
                         }

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 21/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,21 @@ static IMP originalMouseDown;
 
 + (void)didLoad {
     originalMouseDown = OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(replacementMouseDown:));
+}
+
+- (NSMenu *)menuForEvent:(NSEvent *)theEvent {
+	NSTableView *tableView = [self tableView];
+	id delegate = [tableView delegate];
+	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+	int column = [self columnAtPoint:location];
+	NSTableColumn *tableColumn = nil;
+    
+	if ([delegate respondsToSelector:@selector(tableView:menuForTableHeaderColumn:)]) {
+        if (column != -1)
+            tableColumn = [[tableView tableColumns] objectAtIndex:column];
+		return [delegate tableView:tableView menuForTableHeaderColumn:tableColumn];
+	}
+	return nil;
 }
 
 - (void)replacementMouseDown:(NSEvent *)theEvent{

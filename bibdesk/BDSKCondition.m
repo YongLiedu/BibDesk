@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/3/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
-#import "BibTypeManager.h"
 
 @interface BDSKCondition (Private)
 - (NSDate *)cachedEndDate;
@@ -90,7 +89,7 @@
 - (id)initWithDictionary:(NSDictionary *)dictionary {
 	if (self = [self init]) {
         NSString *aKey = [dictionary objectForKey:@"key"];
-		NSString *aValue = [[dictionary objectForKey:@"value"] stringByUnescapingGroupPlistEntities];
+		NSMutableString *escapedValue = [[dictionary objectForKey:@"value"] mutableCopy];
 		NSNumber *comparisonNumber = [dictionary objectForKey:@"comparison"];
 		
 		if (aKey != nil) 
@@ -100,18 +99,24 @@
         if (comparisonNumber != nil) 
 			[self setComparison:[comparisonNumber intValue]];
         
-		if (aValue != nil)
-			[self setValue:aValue];
+		if (escapedValue != nil) {
+			// we escape braces as they can give problems with btparse
+			[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
+			[escapedValue replaceAllOccurrencesOfString:@"%7D" withString:@"}"];
+			[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"];
+			[self setValue:escapedValue];
+			[escapedValue release];
+        }
         
         static BOOL didWarn = NO;
 		
         if (([[dictionary objectForKey:@"version"] intValue] < [[[self class] dictionaryVersion] intValue]) &&
             [self isDateCondition] && didWarn == NO) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Smart Groups Need Updating", @"Message in alert dialog when smart groups with obsolete date format are detected") 
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Smart Groups Need Updating",@"") 
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"The format for date conditions in smart groups has been changed. You should manually fix smart groups conditioning on Date-Added or Date-Modified.", @"Informative text in alert dialog")];
+                                 informativeTextWithFormat:NSLocalizedString(@"The format for date conditions in smart groups has been changed. You should manually fix smart groups conditioning on Date-Added or Date-Modified.", @"")];
             [alert runModal];
             didWarn = YES;
         }
@@ -160,8 +165,13 @@
 
 - (NSDictionary *)dictionaryValue {
 	NSNumber *comparisonNumber = [NSNumber numberWithInt:[self comparison]];
-	NSString *escapedValue = [[self value] stringByEscapingGroupPlistEntities];
+	NSMutableString *escapedValue = [[self value] mutableCopy];
+	// escape braces as they can give problems with btparse
+	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"];
+	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
+	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:key, @"key", escapedValue, @"value", comparisonNumber, @"comparison", [[self class] dictionaryVersion], @"version", nil];
+	[escapedValue release];
 	return [dict autorelease];
 }
 
@@ -416,7 +426,7 @@
 #pragma mark Other 
 
 - (BOOL)isDateCondition {
-    return [key fieldType] == BDSKDateField;
+    return ([key isEqualToString:BDSKDateAddedString] || [key isEqualToString:BDSKDateModifiedString]);
 }
 
 - (void)setDefaultValue {
@@ -428,21 +438,9 @@
         [self setPeriodValue:BDSKPeriodDay];
         [self setDateValue:today];
         [self setToDateValue:today];
-    } else if ([key isBooleanField]) {
-        [self setStringValue:[NSString stringWithBool:NO]];
-    } else if ([key isTriStateField]) {
-        [self setStringValue:[NSString stringWithTriStateValue:NSOffState]];
-    } else if ([key isRatingField]) {
-        [self setStringValue:@"0"];
     } else {
         [self setStringValue:@""];
     }
-}
-
-// @@ workaround for timer retain cycle; could also use a CFRunLoopTimer that doesn't retain its context
-- (void)invalidateCacheTimer {
-    [cacheTimer invalidate];
-    cacheTimer = nil;
 }
 
 @end
@@ -587,15 +585,15 @@
     if ([keyPath isEqualToString:@"key"]) {
         NSString *oldKey = [change objectForKey:NSKeyValueChangeOldKey];
         NSString *newKey = [change objectForKey:NSKeyValueChangeNewKey];
-        int oldFieldType = [oldKey fieldType];
-        int newFieldType = [newKey fieldType];
-        if(oldFieldType != newFieldType){
-            if (newFieldType == BDSKDateField) {
+        BOOL wasDate = ([oldKey isEqualToString:BDSKDateModifiedString] || [oldKey isEqualToString:BDSKDateAddedString]);
+        BOOL isDate = ([newKey isEqualToString:BDSKDateModifiedString] || [newKey isEqualToString:BDSKDateAddedString]);
+        if(wasDate != isDate){
+            if ([self isDateCondition]) {
                 [self setDateComparison:BDSKToday];
                 [self setDefaultValue];
             } else {
                 [self updateCachedDates]; // remove the cached date and stop the timer
-                [self setStringComparison:newFieldType == BDSKStringField ? BDSKContain : BDSKEqual];
+                [self setStringComparison:BDSKContain];
                 [self setDefaultValue];
             }
         }
@@ -604,24 +602,6 @@
             [self updateCachedDates];
         }
     }
-}
-
-@end
-
-
-@implementation NSString (BDSKConditionExtensions)
-
-- (int)fieldType {
-    if ([self isEqualToString:BDSKDateAddedString] || [self isEqualToString:BDSKDateModifiedString])
-        return BDSKDateField;
-    else if ([self isBooleanField])
-        return BDSKBooleanField;
-    else if ([self isTriStateField])
-        return BDSKTriStateField;
-    else if ([self isRatingField])
-        return BDSKRatingField;
-    else
-        return BDSKStringField;
 }
 
 @end

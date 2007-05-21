@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.h 69639 2005-10-26 22:27:07Z wiml $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.h 66170 2005-07-28 17:40:10Z kc $
 
 #import <Foundation/NSArray.h>
 
@@ -26,9 +26,7 @@
 
 // Maintaining sorted arrays
 - (void)insertObject:(id)anObject inArraySortedUsingSelector:(SEL)selector;
-- (void)insertObject:(id)anObject inArraySortedUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
-- (void)removeObjectIdenticalTo:(id)anObject fromArraySortedUsingSelector:(SEL)selector;
-- (void)removeObjectIdenticalTo:(id)anObject fromArraySortedUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
+- (void)removeObject:(id)anObject fromArraySortedUsingSelector:(SEL)selector;
 
 // Sorting on an object's attribute
 - (void)sortOnAttribute:(SEL)fetchAttributeSelector usingSelector:(SEL)comparisonSelector;

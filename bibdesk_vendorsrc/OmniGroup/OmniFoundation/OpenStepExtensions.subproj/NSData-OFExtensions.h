@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.h 70910 2005-12-06 02:54:01Z wiml $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.h 68913 2005-10-03 19:36:19Z kc $
 
 #import <Foundation/NSData.h>
 #import <stdio.h>
@@ -65,7 +65,6 @@ typedef struct OFQuotedPrintableMapping {
 
 - (NSRange)rangeOfData:(NSData *)data;
 - (unsigned)indexOfBytes:(const void *)bytes length:(unsigned int)patternLength;
-- (unsigned)indexOfBytes:(const void *)patternBytes length:(unsigned int)patternLength range:(NSRange)searchRange;
 
 - propertyList;
     // a cover for the CoreFoundation function call

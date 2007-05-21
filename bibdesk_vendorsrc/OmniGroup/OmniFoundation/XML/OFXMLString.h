@@ -1,11 +1,11 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLString.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLString.h 66043 2005-07-25 21:17:05Z kc $
 
 #import <Foundation/NSObject.h>
 
@@ -14,7 +14,7 @@
 #import <OmniFoundation/OFXMLWhitespaceBehavior.h>
 
 @class NSMutableString;
-@class OFXMLElement, OFXMLDocument;
+@class OFXMLDocument;
 
 /*
  This class gives you more control over how the XML string will be encoded than if you just append a NSString to the OFXMLDocument.  Much of this code was inherited from OmniOutliner.
@@ -37,34 +37,22 @@
 @end
 
 
-// &apos; is part of XML, which was created after HTML, so HTML 4 doesn't have that entity.
-// Each of ' and " has three options; XML entity, character entity or unquoed.
-#define OFXMLAposCharacterOptionsShift (8)
-#define OFXMLQuotCharacterOptionsShift (16)
-#define OFXMLCharacterOptionsMask      (0xff)
-
-#define OFXMLCharacterFlagWriteNamedEntity       (0x00)
-#define OFXMLCharacterFlagWriteCharacterEntity   (0x01)
-#define OFXMLCharacterFlagWriteUnquotedCharacter (0x02)
-
 #define OFXMLMinimalEntityMask  (0x00) // &lt; and &amp;
 #define OFXMLGtEntityMask       (0x01) // &gt;
-#define OFXMLNewlineEntityMask  (0x02) // write the optional newline string instead of the newline itself
-
-#define OFXMLAposEntityMask     (OFXMLCharacterFlagWriteNamedEntity << OFXMLAposCharacterOptionsShift) // default to writing &apos;
-#define OFXMLQuotEntityMask     (OFXMLCharacterFlagWriteNamedEntity << OFXMLQuotCharacterOptionsShift) // default to writing &quot;
+#define OFXMLAposEntityMask     (0x02) // &apos;
+#define OFXMLQuotEntityMask     (0x04) // &quot;
+#define OFXMLNewlineEntityMask  (0x10) // something special for newlines
+#define OFXMLAposAlternateEntityMask (0x20) // &12345; // HTML doesn't have &apos;
 
 #define OFXMLBasicEntityMask (OFXMLGtEntityMask|OFXMLAposEntityMask|OFXMLQuotEntityMask)
 #define OFXMLBasicWithNewlinesEntityMask (OFXMLBasicEntityMask|OFXMLNewlineEntityMask)
 
 // &apos; is part of XML, which was created after HTML, so HTML 4 doesn't have that entity.
 // TODO (2002-09-24): When do we need to quote '?
-#define OFXMLHTMLEntityMask (OFXMLGtEntityMask|OFXMLQuotEntityMask|(OFXMLCharacterFlagWriteCharacterEntity << OFXMLAposCharacterOptionsShift))
+#define OFXMLHTMLEntityMask (OFXMLGtEntityMask|OFXMLQuotEntityMask|OFXMLAposAlternateEntityMask)
 #define OFXMLHTMLWithNewlinesEntityMask (OFXMLHTMLEntityMask|OFXMLNewlineEntityMask)
 
 extern NSString *OFXMLCreateStringWithEntityReferencesInCFEncoding(NSString *sourceString, unsigned int entityMask, NSString *optionalNewlineString, CFStringEncoding anEncoding);
 extern NSString *OFXMLCreateParsedEntityString(NSString *sourceString);
 extern NSString *OFStringForEntityName(NSString *entityName);
 
-extern NSString *OFCharacterDataFromXMLTree(CFXMLTreeRef aTree);
-extern NSString *OFCharacterDataFromElement(OFXMLElement *element);

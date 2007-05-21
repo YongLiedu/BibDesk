@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on 4/13/05.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,15 +38,25 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKSheetController.h"
-#import "BDSKOwnerProtocol.h"
+#import "BibItem.h"
+#import "BibTypeManager.h"
+#import "MacroTextFieldWindowController.h"
+#import "BDSKImagePopUpButton.h"
+#import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import "BDSKTypeSelectHelper.h"
+#import <WebKit/WebKit.h>
 
-@class BibDocument, BibItem, BDSKEdgeView, WebView, WebDownload, BDSKImagePopUpButton, MacroTableViewWindowController;
-@class BDSKComplexStringFormatter, BDSKCiteKeyFormatter, BDSKCrossrefFormatter, BDSKCitationFormatter, BDSKTypeSelectHelper;
+@class BibDocument;
+@class BDSKEdgeView;
+@class WebView;
+@class WebDownload;
+@class BDSKComplexStringFormatter;
+@class BDSKCiteKeyFormatter;
+@class BDSKCrossrefFormatter;
 
-@interface BDSKTextImportController : BDSKSheetController <BDSKOwner> {
+@interface BDSKTextImportController : BDSKSheetController {
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
-    IBOutlet NSTextField* citeKeyField;
     IBOutlet NSTextField* statusLine;
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *addAndCloseButton;
@@ -68,7 +78,6 @@
     IBOutlet NSButton *stopOrReloadButton;
     IBOutlet NSTextField *bookmarkField;
     IBOutlet NSPanel *addBookmarkSheet;
-    IBOutlet NSButton *citeKeyWarningButton;
     
 	BibDocument* document;
     BibItem* item;
@@ -77,12 +86,8 @@
     NSMutableArray *bookmarks;
 	NSString *webSelection;
     
-    NSUndoManager *undoManager;
-    
 	BDSKComplexStringFormatter *tableCellFormatter;
 	BDSKCrossrefFormatter *crossrefFormatter;
-	BDSKCiteKeyFormatter *citeKeyFormatter;
-	BDSKCitationFormatter *citationFormatter;
 	NSTextView *tableFieldEditor;
 	
 	BOOL showingWebView;
@@ -93,6 +98,8 @@
 	NSString *downloadFileName;
     int receivedContentLength;
     int expectedContentLength;
+	
+	NSWindow *theDocWindow;
 	
 	MacroTableViewWindowController *macroTextFieldWC;
     
@@ -122,9 +129,6 @@
 - (IBAction)stopOrReloadAction:(id)sender;
 - (IBAction)addField:(id)sender;
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
-- (IBAction)generateCiteKey:(id)sender;
-- (IBAction)showCiteKeyWarning:(id)sender;
-- (IBAction)consolidateLinkedFiles:(id)sender;
 
 - (void)copyLocationAsRemoteUrl:(id)sender;
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
@@ -144,8 +148,3 @@
 - (IBAction)makePlainText:(id)sender;
 @end
 
-@interface NSObject (TextImportItemTableViewDelegate)
-- (BOOL)tableView:(NSTableView *)tView textViewShouldLinkKeys:(NSTextView *)textView;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)textView isValidKey:(NSString *)key;
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex;
-@end

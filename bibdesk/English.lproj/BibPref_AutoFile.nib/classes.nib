@@ -16,7 +16,6 @@
                 showLocalUrlFormatWarning = id; 
                 toggleFilePapersAutomaticallyAction = id; 
                 toggleUseRelativePathAction = id; 
-                toggleWarnOnMoveFolderAction = id; 
             }; 
             CLASS = "BibPref_AutoFile"; 
             LANGUAGE = ObjC; 
@@ -37,7 +36,6 @@
                 previewDisplay = NSTextField; 
                 previewTextField = NSTextField; 
                 useRelativePathCheckButton = NSButton; 
-                warnOnMoveFolderCheckButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

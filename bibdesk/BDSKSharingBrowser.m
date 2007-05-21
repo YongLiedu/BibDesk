@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 4/2/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 #import "BDSKSharingBrowser.h"
 #import "BibPrefController.h"
 #import "BibDocument_Groups.h"
-#import "BDSKSharedGroup.h"
+#import "BDSKGroup.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKSharingServer.h"
 #import "BDSKSharedGroup.h"
@@ -120,7 +120,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
 {
     // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([[BDSKSharingServer sharingName] isEqualToString:[aNetService name]] == YES && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelf"] == NO)
+    if([[BDSKSharingServer sharingName] isEqualToString:[aNetService name]] == YES && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] == NO)
         return;
 
     // set as delegate and resolve, so we can find out if this originated from the localhost or a remote machine
@@ -152,14 +152,9 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     }
 }
 
-- (BOOL)isBrowsing;
-{
-    return sharedGroups != nil;
-}
-
 - (void)enableSharedBrowsing;
 {
-    if([self isBrowsing] == NO){
+    if(sharedGroups == nil){
         sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
         browser = [[NSNetServiceBrowser alloc] init];
         [browser setDelegate:self];
@@ -172,7 +167,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)disableSharedBrowsing;
 {
-    if([self isBrowsing]){
+    if(sharedGroups != nil){
         [sharedGroups release];
         sharedGroups = nil;
         [browser release];

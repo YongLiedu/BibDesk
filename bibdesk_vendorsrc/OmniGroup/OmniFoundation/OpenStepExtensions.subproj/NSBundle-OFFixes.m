@@ -1,4 +1,4 @@
-// Copyright 1999-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,7 +14,7 @@
 #import <mach-o/dyld.h>
 #endif
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSBundle-OFFixes.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSBundle-OFFixes.m 68913 2005-10-03 19:36:19Z kc $")
 
 @implementation NSBundle (OFFixes)
 
@@ -22,17 +22,12 @@ static IMP oldBundleForClass = NULL;
 static NSMutableDictionary *cachedBundlesForClasses = nil;
 static NSLock *cachedBundlesForClassesLock = nil;
 
-static IMP original_bundleWithIdentifier = NULL;
-
 + (void) performPosing;
 {
     cachedBundlesForClasses = [[NSMutableDictionary alloc] init];
     cachedBundlesForClassesLock = [[NSLock alloc] init];
     oldBundleForClass = OBReplaceMethodImplementationWithSelector(((Class)self)->isa /* we're replacing a class method */, @selector(bundleForClass:), @selector(replacement_bundleForClass:));
     OBPOSTCONDITION(oldBundleForClass != NULL);
-    
-    original_bundleWithIdentifier = OBReplaceMethodImplementationWithSelector(((Class)self)->isa /* we're replacing a class method */, @selector(bundleWithIdentifier:), @selector(replacement_bundleWithIdentifier:));
-    OBPOSTCONDITION(original_bundleWithIdentifier != NULL);
 }
 
 // In 10.0.4, +bundleForClass: accesses the filesystem every time you call it, so we're now caching the results
@@ -65,26 +60,6 @@ static IMP original_bundleWithIdentifier = NULL;
         [cachedBundlesForClassesLock unlock];
     }
     return bundle;
-}
-
-/*
- Radar #4435970.
- If there is a duplicate copy of the app, LaunchServies can end up looking at that other bundle for strings and such.
- As part of this, it allocates and then deallocates a CFBundleRef for the other bundle.
- The deallocation of the duplicate bundle deregisters the running bundle!
- We've seen this happen for the main bundle, <bug://bugs/26790>.
- */
-+ (NSBundle *)replacement_bundleWithIdentifier:(NSString *)identifier;
-{
-    NSBundle *bundle = original_bundleWithIdentifier(self, _cmd, identifier);
-    if (bundle)
-	return bundle;
-    
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    if ([identifier isEqualToString:[mainBundle bundleIdentifier]])
-	return mainBundle;
-    
-    return nil;
 }
 
 @end

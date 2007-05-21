@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/18/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@
     NSString *prompt;
     NSArray *fieldsArray;
     NSString *field;
-    CFArrayRef editors;
 }
 
 - (id)initWithPrompt:(NSString *)prompt fieldsArray:(NSArray *)fields;
@@ -60,8 +59,6 @@
 - (NSString *)prompt;
 - (void)setPrompt:(NSString *)promptString;
 
-- (BOOL)commitEditing;
-
 @end
 
 @interface BDSKAddFieldSheetController : BDSKFieldSheetController {
@@ -70,23 +67,4 @@
 
 @interface BDSKRemoveFieldSheetController : BDSKFieldSheetController {
 }
-@end
-
-@interface BDSKChangeFieldSheetController : BDSKRemoveFieldSheetController {
-    IBOutlet NSComboBox *newFieldsComboBox;
-    IBOutlet NSTextField *newPromptField;
-    NSString *newPrompt;
-    NSArray *newFieldsArray;
-    NSString *newField;
-}
-
-- (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields newPrompt:(NSString *)newPromptString newFieldsArray:(NSArray *)newFields;
-
-- (NSString *)newField;
-- (void)setNewField:(NSString *)newField;
-- (NSArray *)newFieldsArray;
-- (void)setNewFieldsArray:(NSArray *)array;
-- (NSString *)newPrompt;
-- (void)setNewPrompt:(NSString *)promptString;
-
 @end

@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -10,11 +10,10 @@
 #import <Foundation/NSArray.h>
 #import <Foundation/NSDictionary.h>
 #import <Foundation/NSScriptCoercionHandler.h>
-#import <Foundation/NSValueTransformer.h>
 #import <OmniFoundation/NSObject-OFExtensions.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFPoint.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFPoint.m 66793 2005-08-11 20:40:20Z bungi $");
 
 /*
  A smarter wrapper for NSPoint than NSValue.  Used in OAVectorStyleAttribute.  This also has some AppleScript hooks (which are different from how OmniGraffle handles points -- i.e., we do not register a 'point' class).  Points in AppleScript are traditionally just 2 element lists.
@@ -96,27 +95,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     return self;
 }
 
-//
-// Property list support
-- (NSMutableDictionary *)propertyListRepresentation;
-{
-    return [NSMutableDictionary dictionaryWithObjectsAndKeys:
-        [NSNumber numberWithFloat:_value.x], @"x", 
-        [NSNumber numberWithFloat:_value.y], @"y", 
-        nil];
-}
-
-+ (OFPoint *)pointFromPropertyListRepresentation:(NSDictionary *)dict;
-{
-    if (![dict objectForKey:@"x"] || ![dict objectForKey:@"y"])
-        return nil;
-    
-    NSPoint point;
-    point.x = [[dict objectForKey:@"x"] floatValue];
-    point.y = [[dict objectForKey:@"y"] floatValue];
-    return [OFPoint pointWithPoint:point];
-}
-
 @end
 
 
@@ -150,42 +128,3 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 @end
 
-
-// Value transformer
-NSString *OFPointToPropertyListTransformerName = @"OFPointToPropertyListTransformer";
-
-@interface OFPointToPropertyListTransformer : NSValueTransformer
-@end
-
-@implementation OFPointToPropertyListTransformer
-
-+ (void)didLoad;
-{
-    [NSValueTransformer setValueTransformer:[[self alloc] init] forName:OFPointToPropertyListTransformerName];
-}
-
-+ (Class)transformedValueClass;
-{
-    return [NSDictionary class];
-}
-
-+ (BOOL)allowsReverseTransformation;
-{
-    return YES;
-}
-
-- (id)transformedValue:(id)value;
-{
-    if ([value isKindOfClass:[OFPoint class]])
-	return [(OFPoint *)value propertyListRepresentation];
-    return nil;
-}
-
-- (id)reverseTransformedValue:(id)value;
-{
-    if ([value isKindOfClass:[NSDictionary class]])
-	return [OFPoint pointFromPropertyListRepresentation:value];
-    return nil;
-}
-
-@end

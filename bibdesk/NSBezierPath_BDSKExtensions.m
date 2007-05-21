@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/22/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -92,16 +92,6 @@
     return path;
 }
 
-+ (void)drawHighlightInRect:(NSRect)rect radius:(float)radius lineWidth:(float)lineWidth color:(NSColor *)color
-{
-    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:NSInsetRect(rect, 0.5 * lineWidth, 0.5 * lineWidth) radius:radius];
-    [path setLineWidth:lineWidth];
-    [[color colorWithAlphaComponent:0.2] setFill];
-    [[color colorWithAlphaComponent:0.8] setStroke];
-    [path fill];
-    [path stroke];
-}
-
 + (void)fillHorizontalOvalAroundRect:(NSRect)rect
 {
     NSBezierPath *p = [self bezierPathWithHorizontalOvalAroundRect:rect];
@@ -135,56 +125,6 @@
     // Bottom edge and right half circle:
     [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rect), NSMidY(rect)) radius:radius startAngle:-90.0 endAngle:90.0];
     // Top edge:
-    [path closePath];
-    
-    return path;
-}
-
-+ (void)fillStarInRect:(NSRect)rect{
-    [[self bezierPathWithStarInRect:rect] fill];
-}
-
-+ (void)fillInvertedStarInRect:(NSRect)rect{
-    [[self bezierPathWithInvertedStarInRect:rect] fill];
-}
-
-+ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect{
-    float centerX = NSMidX(rect);
-    float centerY = NSMidY(rect);
-    float radiusX = 0.5 * NSWidth(rect);
-    float radiusY = 0.5 * NSHeight(rect);
-    int i = 0;
-    
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
-    
-    [path removeAllPoints];
-    
-    [path moveToPoint: NSMakePoint(NSMidX(rect), NSMaxY(rect))];
-    while(++i < 5)
-        [path lineToPoint:NSMakePoint(centerX + sin(0.8 * M_PI * i) * radiusX, centerY + cos(0.8 * M_PI * i) * radiusY)];
-    [path closePath];
-    
-    return path;
-}
-
-+ (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect{
-    float centerX = NSMidX(rect);
-    float centerY = NSMidY(rect);
-    float radiusX = 0.5 * NSWidth(rect);
-    float radiusY = 0.5 * NSHeight(rect);
-    int i;
-    
-	static NSBezierPath *path = nil;
-    if(path == nil)
-        path = [[self bezierPath] retain];
-    
-    [path removeAllPoints];
-    
-    [path moveToPoint:NSMakePoint(NSMidX(rect), NSMinY(rect))];
-    for(i = 1; i < 5; i++)
-        [path lineToPoint:NSMakePoint(centerX + sinf(0.8 * M_PI * i) * radiusX, centerY - cosf(0.8 * M_PI * i) * radiusY)];
     [path closePath];
     
     return path;

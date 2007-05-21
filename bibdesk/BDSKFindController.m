@@ -5,7 +5,7 @@
 //  Created by Adam Maxwell on 06/21/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@
 #import "BDSKComplexString.h"
 #import "BibDocument+Scripting.h"
 #import "BibDocument_Search.h"
-#import "BibDocument_Groups.h"
 #import "BDSKFieldNameFormatter.h"
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
@@ -67,13 +66,6 @@ enum {
     FCEndsWithSearch = 3,
 };
 
-enum {
-    FCOperationFindAndReplace = 0,
-    FCOperationOverwrite = 1,
-    FCOperationPrepend = 2,
-    FCOperationAppend = 3,
-};
-
 @implementation BDSKFindController
 
 + (BDSKFindController *)sharedFindController{
@@ -91,28 +83,24 @@ enum {
 		
 		findHistory = [[NSMutableArray alloc] initWithCapacity:MAX_HISTORY_COUNT == NSNotFound ? 10 : MAX_HISTORY_COUNT];
 		replaceHistory = [[NSMutableArray alloc] initWithCapacity:MAX_HISTORY_COUNT == NSNotFound ? 10 : MAX_HISTORY_COUNT];
-        
+		
 		findString = [((availableType == nil)? @"" : [pboard stringForType:NSStringPboardType]) copy];
         replaceString = [@"" retain];
         searchType = FCTextualSearch;
         searchScope = FCContainsSearch;
         ignoreCase = YES;
-        wrapAround = YES;
         searchSelection = YES;
         findAsMacro = NO;
         replaceAsMacro = NO;
 		overwrite = NO;
-        operation = FCOperationFindAndReplace;
 		
 		NSString *field = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
-		if([field isLocalFileField])
+		if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field])
 			shouldMove = NSMixedState;
 		else
 			shouldMove = NSOffState;
 		
-		replaceAllTooltip = [NSLocalizedString(@"Replace all matches.", @"Tool tip message") retain];
-		
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
+		replaceAllTooltip = [NSLocalizedString(@"Replace all matches.", @"") retain];
     }
     return self;
 }
@@ -123,7 +111,6 @@ enum {
     [replaceString release];
 	[statusBar release];
 	[replaceAllTooltip release];
-    CFRelease(editors);
     [super dealloc];
 }
 
@@ -166,42 +153,28 @@ enum {
 // no surprises from replacing unseen items!
 - (void)clearFrontDocumentQuickSearch{
     BibDocument *doc = [[NSDocumentController sharedDocumentController] currentDocument];
-    [doc setSearchString:@""];
+    [doc setFilterField:@""];
 }
 
 - (void)updateUI{
-	if(NO == [self findAsMacro] && [self replaceAsMacro] && FCOperationFindAndReplace == [self operation]){
+	if(![self findAsMacro] && [self replaceAsMacro]){
         [searchScopePopUpButton setEnabled:NO];
-		[statusBar setStringValue:NSLocalizedString(@"With these settings, only full strings will be replaced", @"Status message")];
+		[statusBar setStringValue:NSLocalizedString(@"With these settings, only full strings will be replaced",@"")];
 	}else{
-        [searchScopePopUpButton setEnabled:FCOperationFindAndReplace == [self operation]];
+        [searchScopePopUpButton setEnabled:YES];
 		[statusBar setStringValue:@""];
     }
     
-	if (FCOperationOverwrite == [self operation]) {
-		[self setReplaceLabel:NSLocalizedString(@"Value to set:", @"Label message")];
-        if ([self searchSelection])
-			[self setReplaceAllTooltip:NSLocalizedString(@"Overwrite or add the field in all selected publications.", @"Tool tip message")];
-		else
-			[self setReplaceAllTooltip:NSLocalizedString(@"Overwrite or add the field in all publications.", @"Tool tip message")];
-	} else if (FCOperationPrepend == [self operation]) {
-		[self setReplaceLabel:NSLocalizedString(@"Prefix to add:", @"Label message")];
+	if ([self overwrite]) {
 		if ([self searchSelection])
-			[self setReplaceAllTooltip:NSLocalizedString(@"Add a suffix to the field in all selected publications.", @"Tool tip message")];
+			[self setReplaceAllTooltip:NSLocalizedString(@"Overwrite or add the field in all selected publications.", @"")];
 		else
-			[self setReplaceAllTooltip:NSLocalizedString(@"Add a suffix to the field in all publications.", @"Tool tip message")];
-	} else if (FCOperationAppend == [self operation]) {
-		[self setReplaceLabel:NSLocalizedString(@"Suffix to add:", @"Label message")];
-		if ([self searchSelection])
-			[self setReplaceAllTooltip:NSLocalizedString(@"Add a prefix to the field in all selected publications.", @"Tool tip message")];
-		else
-			[self setReplaceAllTooltip:NSLocalizedString(@"Add a prefix to the field in all publications.", @"Tool tip message")];
+			[self setReplaceAllTooltip:NSLocalizedString(@"Overwrite or add the field in all publications.", @"")];
 	} else {
-		[self setReplaceLabel:NSLocalizedString(@"Replace with:", @"Label message")];
 		if ([self searchSelection])
-			[self setReplaceAllTooltip:NSLocalizedString(@"Replace all matches in all selected publications.", @"Tool tip message")];
+			[self setReplaceAllTooltip:NSLocalizedString(@"Replace all matches in all selected publications.", @"")];
 		else
-			[self setReplaceAllTooltip:NSLocalizedString(@"Replace all matches in all publications.", @"Tool tip message")];
+			[self setReplaceAllTooltip:NSLocalizedString(@"Replace all matches in all publications.", @"")];
 	}
 }
 
@@ -209,22 +182,31 @@ enum {
 	[self updateUI];
 }
 
+- (void)finalizeEdits{
+    NSResponder *firstResponder = [[self window] firstResponder];
+    
+	// need to finalize text field cells being edited
+	if([firstResponder isKindOfClass:[NSText class]] == NO)
+		return;
+		
+	NSText *fieldEditor = (NSText *)firstResponder;
+	NSRange selection = [fieldEditor selectedRange];
+	firstResponder = [fieldEditor delegate]; // the text field being edited
+	
+	// now make sure we submit the edit
+	if (![[self window] makeFirstResponder:[self window]]) {
+		[[self window] endEditingFor:nil];
+		return; // do we need to return here?
+	}
+	
+	if([[self window] makeFirstResponder:firstResponder]){
+		if([[fieldEditor string] length] < NSMaxRange(selection)) // check range for safety
+			selection = NSMakeRange([[fieldEditor string] length],0);
+		[fieldEditor setSelectedRange:selection];
+	}
+}
+
 #pragma mark Accessors
-
-- (int)operation {
-    return operation;
-}
-
-- (void)setOperation:(int)newOperation {
-    if (operation != newOperation) {
-        operation = newOperation;
-		if (FCOperationFindAndReplace != operation) {
-			[self setSearchSelection:YES];
-			[self setFindString:@""];
-		}
-		[self updateUI];
-    }
-}
 
 - (NSString *)field {
     return [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
@@ -232,7 +214,7 @@ enum {
 
 - (void)setField:(NSString *)newField {
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newField forKey:BDSKFindControllerLastFindAndReplaceFieldKey];
-	if([newField isLocalFileField])
+	if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:newField])
 		shouldMove = NSMixedState;
 	else
 		shouldMove = NSOffState;
@@ -300,16 +282,6 @@ enum {
     }
 }
 
-- (BOOL)wrapAround {
-    return wrapAround;
-}
-
-- (void)setWrapAround:(BOOL)newWrapAround {
-    if (wrapAround != newWrapAround) {
-        wrapAround = newWrapAround;
-    }
-}
-
 - (BOOL)searchSelection {
     return searchSelection;
 }
@@ -366,17 +338,6 @@ enum {
     if (replaceAllTooltip != newReplaceAllTooltip) {
         [replaceAllTooltip release];
         replaceAllTooltip = [newReplaceAllTooltip copy];
-    }
-}
-
-- (NSString *)replaceLabel {
-    return [[replaceLabel retain] autorelease];
-}
-
-- (void)setReplaceLabel:(NSString *)newReplaceLabel {
-    if (replaceLabel != newReplaceLabel) {
-        [replaceLabel release];
-        replaceLabel = [newReplaceLabel copy];
     }
 }
 
@@ -443,9 +404,9 @@ enum {
 	if ([self searchType] == FCRegexSearch) { // check the regex
 		if ([self regexIsValid:*value] == NO) {
             if(error != nil){
-                NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"Error description");
-                NSString *reason = NSLocalizedString(@"The regular expression you entered is not valid.", @"Error reason");
-                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+                NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"");
+                NSString *reason = NSLocalizedString(@"The regular expression you entered is not valid.", @"");
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
                 *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
             }
 			return NO;
@@ -454,8 +415,8 @@ enum {
 		NSString *reason = nil;
 		if ([self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
             if(error != nil){
-                NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"Error description");
-                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+                NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"");
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
                 *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
             }
 			return NO;
@@ -469,8 +430,8 @@ enum {
 	if ([self searchType] == FCTextualSearch && [self replaceAsMacro] == YES && 
 		[self stringIsValidAsComplexString:*value errorMessage:&reason] == NO) {
         if(error != nil){
-            NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"Error description");
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+            NSString *description = NSLocalizedString(@"Invalid BibTeX Macro.", @"");
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		return NO;
@@ -482,9 +443,9 @@ enum {
     if ([*value intValue] == FCRegexSearch && 
 		[self regexIsValid:[self findString]] == NO) {
         if(error != nil){
-            NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"Error description");
-            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"The entry \"%@\" is not a valid regular expression.", @"Error reason"), [self findString]];
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+            NSString *description = NSLocalizedString(@"Invalid Regular Expression.", @"");
+            NSString *reason = [NSString stringWithFormat:NSLocalizedString(@"The entry \"%@\" is not a valid regular expression.", @""), [self findString]];
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		[findComboBox selectText:self];
@@ -510,8 +471,8 @@ enum {
     if ([*value boolValue] == YES && [self searchType] == FCTextualSearch &&
 	    [self stringIsValidAsComplexString:[self findString] errorMessage:&reason] == NO) {
         if(error != nil){
-            NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+            NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"");
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		[findComboBox selectText:self];
@@ -525,8 +486,8 @@ enum {
     if([*value boolValue] == YES && [self searchType] == FCTextualSearch &&
 	   [self stringIsValidAsComplexString:[self replaceString] errorMessage:&reason] == NO){
         if(error != nil){
-            NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"Error description");
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, NSLocalizedFailureReasonErrorKey, nil];
+            NSString *description = NSLocalizedString(@"Invalid BibTeX Macro", @"");
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:description, NSLocalizedDescriptionKey, reason, @"NSLocalizedFailureReason", nil];
             *error = [NSError errorWithDomain:@"BDSKFindErrorDomain" code:1 userInfo:userInfo];
         }
 		[replaceComboBox selectText:self];
@@ -535,7 +496,7 @@ enum {
     return YES;
 }
 
-- (BOOL)validateOperation:(id *)value error:(NSError **)error {
+- (BOOL)validateOverwrite:(id *)value error:(NSError **)error {
 	return YES;
 }
 
@@ -572,12 +533,12 @@ enum {
     return valid;
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
     if ([menuItem action] == @selector(toggleStatusBar:)) {
 		if ([statusBar isVisible]) {
-			[menuItem setTitle:NSLocalizedString(@"Hide Status Bar", @"Menu item title")];
+			[menuItem setTitle:NSLocalizedString(@"Hide Status Bar", @"Hide Status Bar")];
 		} else {
-			[menuItem setTitle:NSLocalizedString(@"Show Status Bar", @"Menu item title")];
+			[menuItem setTitle:NSLocalizedString(@"Show Status Bar", @"Show Status Bar")];
 		}
 		return YES;
     } else if ([menuItem action] == @selector(performFindPanelAction:)) {
@@ -597,34 +558,10 @@ enum {
 	return YES;
 }
 
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (index != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
-}
-
-- (BOOL)commitEditing {
-    CFIndex index = CFArrayGetCount(editors);
-    
-	while (index--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
-			return NO;
-    
-    return YES;
-}
-
 #pragma mark Action methods
 
 - (IBAction)openHelp:(id)sender{
-    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"FindAndReplace" inBook:helpBookName];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"Find-and-Replace" inBook:@"BibDesk Help"];
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
@@ -686,11 +623,7 @@ enum {
     BibDocument *theDocument = [[NSDocumentController sharedDocumentController] currentDocument];
     if(!theDocument){
         NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"No document selected", @"Status message")];
-        return;
-	}else if([theDocument hasExternalGroupsSelected]){
-        NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
+		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
 	}
     
@@ -698,13 +631,13 @@ enum {
     
     if(selItem == nil){
         NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"Nothing selected", @"Status message")];
+		[statusBar setStringValue:NSLocalizedString(@"Nothing selected",@"")];
         return;
     }
 
     [self findAndReplaceInItems:[NSArray arrayWithObject:selItem] ofDocument:theDocument];
     // make sure we only highlight this item
-    [theDocument selectPublication:selItem];
+    [theDocument highlightBib:selItem];
 }
 
 - (void)findAndHighlightWithReplace:(BOOL)replace next:(BOOL)next{
@@ -713,32 +646,25 @@ enum {
     BibDocument *theDocument = [[NSDocumentController sharedDocumentController] currentDocument];
     if(!theDocument){
         NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"No document selected", @"Status message")];
+		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
-	}else if(replace && ([theDocument hasExternalGroupsSelected])){
-        NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
-        return;
-    }else if([self commitEditing] == NO){
-        NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"There were invalid values", @"Status message")];
-        return;
-    }
-    
+	}
     [self clearFrontDocumentQuickSearch];
+	
+	[self finalizeEdits];
    
     // this can change between clicks of the Find button, so we can't cache it
     NSArray *currItems = [self currentFoundItemsInDocument:theDocument];
     //NSLog(@"currItems has %@", currItems);
     if(currItems == nil){
         NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"Nothing found", @"Status message")];
+		[statusBar setStringValue:NSLocalizedString(@"Nothing found",@"")];
         return;
     }
 
     NSEnumerator *selPubE = [[theDocument selectedPublications] objectEnumerator];
     BibItem *selItem = [selPubE nextObject];
-    unsigned indexOfSelectedItem;
+    int indexOfSelectedItem;
     if(selItem == nil){ // no selection, so select the first one
         indexOfSelectedItem = 0;
     } else {        
@@ -754,11 +680,11 @@ enum {
         indexOfSelectedItem = [currItems indexOfObjectIdenticalTo:selItem];
         if(indexOfSelectedItem != NSNotFound){ // we've already selected an item from the search results...so select the next one
             if(next){
-				if(++indexOfSelectedItem == [currItems count])
-					indexOfSelectedItem = wrapAround ? 0 : NSNotFound; // wrap around
+				if(++indexOfSelectedItem >= [currItems count])
+					indexOfSelectedItem = 0; // wrap around
 			}else{
-				if(indexOfSelectedItem-- == 0)
-					indexOfSelectedItem = wrapAround ? [currItems count] - 1 : NSNotFound; // wrap around
+				if(--indexOfSelectedItem < 0)
+					indexOfSelectedItem = [currItems count] - 1; // wrap around
 			}
         } else {
             // the selected pub was some item we don't care about, so select item 0
@@ -766,12 +692,7 @@ enum {
         }
     }
     
-    if(indexOfSelectedItem != NSNotFound) {
-        [theDocument selectPublication:[currItems objectAtIndex:indexOfSelectedItem]];
-    } else {
-        NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"Nothing found", @"Status message")];
-    }
+    [theDocument highlightBib:[currItems objectAtIndex:indexOfSelectedItem]];
 }
 
 - (void)replaceAllInSelection:(BOOL)selection{
@@ -782,15 +703,7 @@ enum {
     BibDocument *theDocument = [[NSDocumentController sharedDocumentController] currentDocument];
     if(!theDocument){
         NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"No document selected", @"Status message")];
-        return;
-	}else if([theDocument hasExternalGroupsSelected]){
-        NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"Cannot replace in external items", @"Status message")];
-        return;
-    }else if([self commitEditing] == NO){
-        NSBeep();
-		[statusBar setStringValue:NSLocalizedString(@"There were invalid values", @"Status message")];
+		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
         return;
 	}
 	
@@ -808,6 +721,8 @@ enum {
         // we're doing a find/replace in all the document pubs
         publications = shownPublications; // we're not changing it; the cast just shuts gcc up
     }
+
+    [self finalizeEdits];
     
 	[self findAndReplaceInItems:publications ofDocument:theDocument];
 	
@@ -978,8 +893,8 @@ enum {
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
     
     while(bibItem = [pubE nextObject]){
-        // don't touch external items
-        if ([bibItem owner] != theDocument) 
+        // don't touch shared items
+        if ([bibItem document] != theDocument) 
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
@@ -1030,8 +945,8 @@ enum {
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 	
     while(bibItem = [pubE nextObject]){
-        // don't touch external items
-        if ([bibItem owner] != theDocument) 
+        // don't touch shared items
+        if ([bibItem document] != theDocument) 
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
@@ -1086,8 +1001,8 @@ enum {
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 
     while(bibItem = [pubE nextObject]){
-        // don't touch external items
-        if ([bibItem owner] != theDocument) 
+        // don't touch shared items
+        if ([bibItem document] != theDocument) 
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
@@ -1103,111 +1018,23 @@ enum {
 	return number;
 }
 
-- (unsigned int)prependInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
-	// prepend using BDSKComplexString methods
-    // first we setup all the search settings
-    NSString *replStr = [self replaceString];
-	// get the current search option settings
-    NSString *field = [self field];
-	
-    if(replStr == nil || [replStr isEqualAsComplexString:@""])
-        return 0;
-    
-	if(replaceAsMacro)
-		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
-		
-	// loop through the pubs to replace
-    NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
-    BibItem *bibItem;
-    NSString *origStr;
-	unsigned number = 0;
-	NSMutableArray *paperInfos = nil;
-	
-	if(shouldMove)
-		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
-
-    while(bibItem = [pubE nextObject]){
-        // don't touch external items
-        if ([bibItem owner] != theDocument) 
-            continue;
-        
-        origStr = [bibItem valueOfField:field inherit:NO];
-        if(origStr == nil || [origStr isEqualAsComplexString:@""])
-            continue;
-        
-        [self setField:field ofItem:bibItem toValue:[replStr stringByAppendingString:origStr] withInfos:paperInfos];
-        number++;
-    }
-	
-	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
-	    
-	return number;
-}
-
-- (unsigned int)appendInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
-	// prepend using BDSKComplexString methods
-    // first we setup all the search settings
-    NSString *replStr = [self replaceString];
-	// get the current search option settings
-    NSString *field = [self field];
-	
-    if(replStr == nil || [replStr isEqualAsComplexString:@""])
-        return 0;
-    
-	if(replaceAsMacro)
-		replStr = [NSString stringWithBibTeXString:replStr macroResolver:[theDocument macroResolver]];
-		
-	// loop through the pubs to replace
-    NSEnumerator *pubE = [arrayOfPubs objectEnumerator]; // an enumerator of BibItems
-    BibItem *bibItem;
-    NSString *origStr;
-	unsigned number = 0;
-	NSMutableArray *paperInfos = nil;
-	
-	if(shouldMove)
-		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
-
-    while(bibItem = [pubE nextObject]){
-        // don't touch external items
-        if ([bibItem owner] != theDocument) 
-            continue;
-        
-        origStr = [bibItem valueOfField:field inherit:NO];
-        if(origStr == nil || [origStr isEqualAsComplexString:@""])
-            continue;
-        
-        [self setField:field ofItem:bibItem toValue:[origStr stringByAppendingString:replStr] withInfos:paperInfos];
-        number++;
-    }
-	
-	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
-	    
-	return number;
-}
-
 - (unsigned int)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
     unsigned number;
 	
 	[self clearFrontDocumentQuickSearch];
 	
 	if(shouldMove == NSMixedState){
-		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Linked Files?", @"Message in alert dialog when chnaging local file field")
-											 defaultButton:NSLocalizedString(@"Move", @"Button title")
-										   alternateButton:NSLocalizedString(@"Don't Move", @"Button title")
+		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Linked Files?", @"")
+											 defaultButton:NSLocalizedString(@"Move", @"Move file")
+										   alternateButton:NSLocalizedString(@"Don't Move", @"Don't move file")
 											   otherButton:nil
-								 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked files to the new location?", @"Informative text in alert dialog")];
+								 informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked files to the new location?", @"")];
 		int rv = [alert runSheetModalForWindow:[self window]];
 		shouldMove = (rv == NSAlertDefaultReturn) ? NSOnState : NSOffState;
 	}
 	
-	if(FCOperationOverwrite == [self operation])
+	if([self overwrite])
 		number = [self overwriteInItems:arrayOfPubs ofDocument:theDocument];
-	else if(FCOperationPrepend == [self operation])
-		number = [self prependInItems:arrayOfPubs ofDocument:theDocument];
-	else if(FCOperationAppend == [self operation])
-		number = [self appendInItems:arrayOfPubs ofDocument:theDocument];
 	else if([self searchType] == FCTextualSearch)
 		number = [self stringFindAndReplaceInItems:arrayOfPubs ofDocument:theDocument];
 	else if([self regexIsValid:[self findString]])
@@ -1218,9 +1045,9 @@ enum {
 	NSString *fieldString = (number == 1)? NSLocalizedString(@"field",@"field") : NSLocalizedString(@"fields",@"fields");
 	NSString *message = nil;
 	if(shouldMove)
-		message = NSLocalizedString(@"Replaced and moved for %i %@",@"Status message: Replaced and moved in [number] field(s)");
+		message = NSLocalizedString(@"Replaced and moved for %i %@",@"Replaced and moved in [number] field(s)");
 	else
-		message = NSLocalizedString(@"Replaced in %i %@",@"Status message: Replaced in [number] field(s)");
+		message = NSLocalizedString(@"Replaced in %i %@",@"Replaced in [number] field(s)");
 	[statusBar setStringValue:[NSString stringWithFormat:message, number, fieldString]];
 	
 	return number;

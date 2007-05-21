@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 29/11/05.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,6 @@
 #import "BibDocument.h"
 #import "BibDocument+Scripting.h"
 #import "BibItem.h"
-#import "BDSKPublicationsArray.h"
-#import "NSArray_BDSKExtensions.h"
 
 /* 
 ssp: 2004-07-11
@@ -65,14 +63,24 @@ ssp: 2004-07-11
 	// Determine the document responsible for this
 	NSIndexSpecifier * index = [param objectAtIndex:0];
 	NSScriptObjectSpecifier * parent = [index containerSpecifier];
-	BibDocument *doc = [parent objectsByEvaluatingSpecifier];
-	//NSLog([doc description]);
-	if (doc == nil) return nil;
+	BibDocument * myBib = [parent objectsByEvaluatingSpecifier];
+	NSLog([myBib description]);
+	if (!myBib) return nil;
 	
-	NSArray *pubs = [[param lastObject] isKindOfClass:[BibItem class]] ? param : [[doc publications] objectsAtIndexSpecifiers:(NSArray*)param];
+	// run through the array
+	NSEnumerator *e = [(NSArray*)param objectEnumerator];
+	NSArray * thePubs = [myBib publications];
+    NSIndexSpecifier *i;
+	int  n ;
+	NSMutableString *bibString = [NSMutableString string];
+	
+	while (i = [e nextObject]) {
+		n = [i index];
+		[bibString appendString:[[thePubs objectAtIndex:n] bibTeXString]];
+	}
 	
 	// make RTF and return it.
-	NSTextStorage * ts = [doc textStorageForPublications:pubs];
+	NSTextStorage * ts = [myBib textStorageForBibString:bibString];
 	
 	return ts;
 }

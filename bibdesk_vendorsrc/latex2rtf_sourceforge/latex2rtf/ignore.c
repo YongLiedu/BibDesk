@@ -30,7 +30,7 @@ Authors:
 #include <string.h>
 #include "main.h"
 #include "direct.h"
-#include "fonts.h"
+#include "l2r_fonts.h"
 #include "cfg.h"
 #include "ignore.h"
 #include "funct1.h"
@@ -102,7 +102,7 @@ returns : TRUE if variable was ignored correctly, otherwise FALSE
         Ignore_Environment(str);
         free(str);
     } else if (strcmp(RtfCommand, "ENVCMD") == 0)
-        PushEnvironment(IGNORE_MODE);
+        PushEnvironment(IGN_ENV_CMD);
     else if (strcmp(RtfCommand, "PACKAGE") == 0) {
     } else
         result = FALSE;

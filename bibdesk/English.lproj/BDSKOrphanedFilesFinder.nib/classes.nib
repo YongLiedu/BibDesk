@@ -1,12 +1,6 @@
 {
     IBClasses = (
         {
-            CLASS = BDSKFileMatcher; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {outlineView = NSOutlineView; }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {
             CLASS = BDSKFilePathCell; 
             LANGUAGE = ObjC; 
             SUPERCLASS = BDSKTextWithIconCell; 
@@ -21,7 +15,6 @@
         {
             ACTIONS = {
                 hideOrphanedFilesPanel = id; 
-                matchFilesWithPubs = id; 
                 refreshOrphanedFiles = id; 
                 search = id; 
                 showFile = id; 
@@ -35,7 +28,6 @@
             OUTLETS = {
                 arrayController = BDSKOrphanedFilesArrayController; 
                 contextMenu = NSMenu; 
-                matchButton = NSButton; 
                 progressIndicator = NSProgressIndicator; 
                 refreshButton = NSButton; 
                 statusField = NSTextField; 

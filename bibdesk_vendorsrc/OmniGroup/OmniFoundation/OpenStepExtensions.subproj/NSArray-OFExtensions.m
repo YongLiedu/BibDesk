@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,7 +14,7 @@
 #import <OmniFoundation/OFRandom.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSArray-OFExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSArray-OFExtensions.m 66043 2005-07-25 21:17:05Z kc $")
 
 @implementation NSArray (OFExtensions)
 
@@ -111,7 +111,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     }
 }
 
-- (unsigned)indexWhereObjectWouldBelong:(id)anObject inArraySortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
+- (unsigned)indexOfObject: (id) anObject inArraySortedUsingSelector: (SEL) selector;
 {
     unsigned int low = 0;
     unsigned int range = 1;
@@ -119,6 +119,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     unsigned int count = [self count];
     NSComparisonResult result;
     id compareWith;
+    IMP removedImpOfSel = [anObject methodForSelector:selector];
     IMP objectAtIndexImp = [self methodForSelector:@selector(objectAtIndex:)];
     
     while (count >= range) /* range is the lowest power of 2 > count */
@@ -129,99 +130,51 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
         if (test >= count)
             continue;
 	compareWith = objectAtIndexImp(self, @selector(objectAtIndex:), test);
-	if (compareWith == anObject) 
+	if (compareWith == anObject) {
             return test;
-	result = (NSComparisonResult)comparator(anObject, compareWith, context);
-	if (result > 0) /* NSOrderedDescending */
+	}
+	result = (NSComparisonResult)removedImpOfSel(anObject, selector, compareWith);
+	if (result == NSOrderedDescending)
             low = test+1;
-	else if (result == NSOrderedSame) 
-            return test;
+	else if (result == NSOrderedSame) {
+	    /* uh oh - now we can't be sure of finding it by binary splitting */
+	    /* fall back on something disgustingly linear (but easy) */
+	    int sameAt = test;
+
+	    while (test--) {
+		compareWith = objectAtIndexImp(self, @selector(objectAtIndex:), test);
+		if (compareWith == anObject) {
+                    return test;
+		}
+		result = (NSComparisonResult)removedImpOfSel(anObject, selector,
+								 compareWith);
+		if (result != NSOrderedSame)
+		    break;
+	    }
+	    test = sameAt;
+	    while (++test < count) {
+		compareWith = objectAtIndexImp(self, @selector(objectAtIndex:), test);
+		if (compareWith == anObject) {
+                    return test;
+		}
+	    }
+	}
     }
-    return low;
-}
-
-struct selectorAndIMP {
-    SEL selector;
-    IMP implementation;
-};
-
-static int compareWithSelectorAndIMP(id obj1, id obj2, void *context)
-{
-    return (int)(((struct selectorAndIMP *)context) -> implementation)(obj1, (((struct selectorAndIMP *)context) -> selector), obj2);
-}
-
-- (unsigned)indexWhereObjectWouldBelong:(id)anObject inArraySortedUsingSelector: (SEL) selector;
-{
-    struct selectorAndIMP selAndImp;
     
-    selAndImp.selector = selector;
-    selAndImp.implementation = [anObject methodForSelector:selector];
-    
-    return [self indexWhereObjectWouldBelong:anObject inArraySortedUsingFunction:compareWithSelectorAndIMP context:&selAndImp];
-}
-
-- (unsigned)indexOfObject:(id)anObject identical:(BOOL)requireIdentity inArraySortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
-{
-    IMP objectAtIndexImp = [self methodForSelector:@selector(objectAtIndex:)];
-    int index = [self indexWhereObjectWouldBelong:anObject inArraySortedUsingFunction:comparator context:context];
-    int count = [self count];
-    id compareWith;
-    
-    if (index == count)
-        return NSNotFound;
-
-    if (requireIdentity) {            
-        int startingAtIndex = index;
-        do {
-            compareWith = objectAtIndexImp(self, @selector(objectAtIndex:), index);
-            if (compareWith == anObject) 
-                return index;
-            if ((NSComparisonResult)comparator(anObject, compareWith, context) != NSOrderedSame)
-                break;
-        } while (index--);
-        
-        index = startingAtIndex;
-        while (++index < count) {
-            compareWith = objectAtIndexImp(self, @selector(objectAtIndex:), index);
-            if (compareWith == anObject)
-                return index;
-            if ((NSComparisonResult)comparator(anObject, compareWith, context) != NSOrderedSame)
-                break;
-        }
-    } else {
-        compareWith = objectAtIndexImp(self, @selector(objectAtIndex:), index);
-        if ((NSComparisonResult)comparator(anObject, compareWith, context) == NSOrderedSame)
-            return index;
-    }
     return NSNotFound;
 }
 
-static int compareWithSelector(id obj1, id obj2, void *context)
+static int _compareWithSelector(id obj1, id obj2, void *context)
 {
     return (int)objc_msgSend(obj1, (SEL)context, obj2);
 }
 
-- (unsigned)indexOfObject:(id)anObject inArraySortedUsingSelector:(SEL)selector;
+- (BOOL) isSortedUsingSelector:(SEL)selector;
 {
-    struct selectorAndIMP selAndImp;
-    
-    selAndImp.selector = selector;
-    selAndImp.implementation = [anObject methodForSelector:selector];
-    
-    return [self indexOfObject:anObject identical:NO inArraySortedUsingFunction:compareWithSelectorAndIMP context:&selAndImp];
+    return [self isSortedUsingFunction:_compareWithSelector context:selector];
 }
 
-- (unsigned)indexOfObjectIdenticalTo:(id)anObject inArraySortedUsingSelector:(SEL)selector;
-{
-    struct selectorAndIMP selAndImp;
-    
-    selAndImp.selector = selector;
-    selAndImp.implementation = [anObject methodForSelector:selector];
-    
-    return [self indexOfObject:anObject identical:YES inArraySortedUsingFunction:compareWithSelectorAndIMP context:&selAndImp];
-}
-
-- (BOOL)isSortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
+- (BOOL) isSortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
 {
     unsigned int index, count;
 
@@ -234,15 +187,11 @@ static int compareWithSelector(id obj1, id obj2, void *context)
     for (index = 1; index < count; index++) {
         obj1 = obj2;
         obj2 = [self objectAtIndex: index];
-        if (comparator(obj1, obj2, context) > 0)
+        if (comparator(obj1, obj2, context) < 0)
             return NO;
     }
-    return YES;
-}
 
-- (BOOL)isSortedUsingSelector:(SEL)selector;
-{
-    return [self isSortedUsingFunction:compareWithSelector context:selector];
+    return YES;
 }
 
 - (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2;
@@ -423,45 +372,6 @@ static int compareWithSelector(id obj1, id obj2, void *context)
     }
 
     return result;
-}
-
-- (NSSet *)setByPerformingSelector:(SEL)aSelector;
-{
-    NSMutableSet *result;
-    id singleResult;
-    unsigned int index, count;
-    
-    singleResult = nil;
-    result = nil;
-    for (index = 0, count = [self count]; index < count; index++) {
-        id singleObject;
-        id selectorResult;
-        
-        singleObject = [self objectAtIndex:index];
-        selectorResult = [singleObject performSelector:aSelector /* withObject:anObject */ ];
-        
-        if (selectorResult) {
-            if (singleResult == selectorResult) {
-                /* ok */
-            } else if (result != nil) {
-                [result addObject:selectorResult];
-            } else if (singleResult == nil) {
-                singleResult = selectorResult;
-            } else {
-                result = [NSMutableSet set];
-                [result addObject:singleResult];
-                [result addObject:selectorResult];
-                singleResult = nil;
-            }
-        }
-    }
-    
-    if (result)
-        return result;
-    else if (singleResult)
-        return [NSSet setWithObject:singleResult];
-    else
-        return [NSSet set];
 }
 
 - (NSArray *)objectsSatisfyingCondition:(SEL)aSelector;

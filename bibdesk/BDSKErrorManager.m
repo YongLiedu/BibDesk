@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/30/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,6 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
         errorController = nil;
         editors = [[NSMutableArray alloc] initWithCapacity:3];
         [self setSourceDocument:aDocument];
-        documentStringEncoding = aDocument ? [aDocument documentStringEncoding] : [NSString defaultCStringEncoding];
     }
     return self;
 }
@@ -72,7 +71,6 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 - (void)dealloc;
 {
     [document removeObserver:self forKeyPath:@"displayName"];
-    [document removeObserver:self forKeyPath:@"documentStringEncoding"];
     [document release];
     [editors release];
     [documentDisplayName release];
@@ -102,17 +100,13 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 - (void)setSourceDocument:(BibDocument *)newDocument;
 {
     if (document != newDocument) {
-        if(document){
+        if(document)
             [document removeObserver:self forKeyPath:@"displayName"];
-            [document removeObserver:self forKeyPath:@"documentStringEncoding"];
-        }
         [document release];
         document = [newDocument retain];
         [self updateDisplayName];
-        if(document){
+        if(document)
             [document addObserver:self forKeyPath:@"displayName" options:0 context:NULL];
-            [document addObserver:self forKeyPath:@"documentStringEncoding" options:0 context:NULL];
-        }
     }
 }
 
@@ -164,16 +158,9 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
     [self didChangeValueForKey:@"displayName"];
 }
 
-- (NSStringEncoding)documentStringEncoding;
-{
-    return documentStringEncoding;
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if(object == document && [keyPath isEqualToString:@"displayName"])
         [self updateDisplayName];
-    else if(object == document && document && [keyPath isEqualToString:@"documentStringEncoding"])
-        documentStringEncoding = [document documentStringEncoding];
 }
 
 - (BDSKErrorEditor *)mainEditor;
@@ -230,7 +217,7 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 - (id)init;
 {
     if(self = [super initWithDocument:nil]){
-        documentDisplayName = [NSLocalizedString(@"All", @"Popup menu item for error window") retain];
+        documentDisplayName = [NSLocalizedString(@"All", @"All") retain];
     }
     return self;
 }

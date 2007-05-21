@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 10/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,14 +40,18 @@
 #import "BDSKFieldEditor.h"
 #import "BibPrefController.h"
 #import "NSBezierPath_BDSKExtensions.h"
-#import "NSLayoutManager_BDSKExtensions.h"
 #import <OmniAppKit/OAApplication.h>
 #import <OmniFoundation/OFPreference.h>
 
 @interface NSTableView (BDSKExtensionsPrivate)
+- (void)rebuildToolTips;
+- (void)replacementSetDataSource:(id)anObject;
+- (void)replacementReloadData;
+- (void)replacementNoteNumberOfRowsChanged;
 - (BOOL)replacementBecomeFirstResponder;
 - (void)replacementDealloc;
 - (void)replacementDraggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation;
+- (NSImage *)replacementDragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset;
 - (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset;
 -(void)_drawDropHighlightOnRow:(int)rowIndex;
 @end
@@ -56,20 +60,28 @@
 
 @implementation NSTableView (BDSKExtensions)
 
+static IMP originalSetDataSource;
+static IMP originalReloadData;
+static IMP originalNoteNumberOfRowsChanged;
 static BOOL (*originalBecomeFirstResponder)(id self, SEL _cmd);
 static IMP originalDealloc;
 static IMP originalDraggedImageEndedAtOperation;
+static IMP originalDragImageForRowsEventOffset;
 static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 
 + (void)didLoad;
 {
+    originalSetDataSource = OBReplaceMethodImplementationWithSelector(self, @selector(setDataSource:), @selector(replacementSetDataSource:));
+    originalReloadData = OBReplaceMethodImplementationWithSelector(self, @selector(reloadData), @selector(replacementReloadData));
+    originalNoteNumberOfRowsChanged = OBReplaceMethodImplementationWithSelector(self, @selector(noteNumberOfRowsChanged), @selector(replacementNoteNumberOfRowsChanged));
     originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
     originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
     originalDraggedImageEndedAtOperation = OBReplaceMethodImplementationWithSelector(self, @selector(draggedImage:endedAt:operation:), @selector(replacementDraggedImage:endedAt:operation:));
+    originalDragImageForRowsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRows:event:dragImageOffset:), @selector(replacementDragImageForRows:event:dragImageOffset:));
     originalDragImageForRowsWithIndexesTableColumnsEventOffset = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRowsWithIndexes:tableColumns:event:offset:), @selector(replacementDragImageForRowsWithIndexes:tableColumns:event:offset:));
 }
 
-- (BOOL)validateDelegatedMenuItem:(NSMenuItem *)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
+- (BOOL)validateDelegatedMenuItem:(id<NSMenuItem>)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
 	SEL action = [menuItem action];
 	
 	if ([_dataSource respondsToSelector:action]) {
@@ -97,7 +109,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 }
 
 // this is necessary as the NSTableView-OAExtensions defines these actions accordingly
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem{
 	SEL action = [menuItem action];
 	if (action == @selector(delete:)) {
 		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:deleteRows:)];
@@ -119,9 +131,6 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 	}
 	else if (action == @selector(duplicate:)) {
 		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:writeRows:toPasteboard:)];
-	}
-	else if (action == @selector(invertSelection:)) {
-		return [self allowsMultipleSelection];
 	}
     return YES; // we assume that any other implemented action is always valid
 }
@@ -213,7 +222,11 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
         font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
 	
 	[self setFont:font];
-    [self setRowHeight:[NSLayoutManager defaultViewLineHeightForFont:font] + 2.0f];
+    
+    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    [lm setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
+    [self setRowHeight:([lm defaultLineHeightForFont:font] + 2.0f)];
+    [lm release];
         
 	[self tile];
     [self reloadData]; // othewise the change isn't immediately visible
@@ -267,20 +280,6 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     [self scrollRectToVisible:rowRect];
 }
 
-- (NSArray *)tableColumnIdentifiers { return [[self tableColumns] valueForKey:@"identifier"]; }
-
-- (IBAction)invertSelection:(id)sender;
-{
-    NSIndexSet *selRows = [self selectedRowIndexes];
-    if ([self allowsMultipleSelection]) {
-        NSMutableIndexSet *indexesToSelect = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])];
-        [indexesToSelect removeIndexes:selRows];
-        [self selectRowIndexes:indexesToSelect byExtendingSelection:NO];
-    } else {
-        NSBeep();
-    }
-}
-
 @end
 
 #pragma mark -
@@ -288,6 +287,59 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 @implementation NSTableView (BDSKExtensionsPrivate)
 
 #pragma mark ToolTips for individual rows and columns
+
+// These are copied and modified from OAXTableView, as it was removed from NSTableView-OAExtensions
+
+- (void)resetCursorRects {
+	[self rebuildToolTips];
+}
+
+- (void)replacementSetDataSource:(id)anObject {
+	originalSetDataSource(self, _cmd, anObject);
+	[self rebuildToolTips];
+}
+
+- (void)replacementReloadData {
+	originalReloadData(self, _cmd);
+	[self rebuildToolTips];
+}
+
+- (void)replacementNoteNumberOfRowsChanged {
+	originalNoteNumberOfRowsChanged(self, _cmd);
+	[self rebuildToolTips];
+}
+
+- (void)rebuildToolTips {
+    NSRange rowRange, columnRange;
+    int rowIndex, columnIndex;
+	NSTableColumn *tableColumn;
+
+    if (![_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)])
+        return;
+
+    [self removeAllToolTips];
+    rowRange = [self rowsInRect:[self visibleRect]];
+    columnRange = [self columnsInRect:[self visibleRect]];
+    for (columnIndex = columnRange.location; columnIndex < NSMaxRange(columnRange); columnIndex++) {
+        tableColumn = [[self tableColumns] objectAtIndex:columnIndex];
+		for (rowIndex = rowRange.location; rowIndex < NSMaxRange(rowRange); rowIndex++) {
+            if ([_dataSource tableView:self toolTipForTableColumn:tableColumn row:rowIndex] != nil)
+                [self addToolTipRect:[self frameOfCellAtColumn:columnIndex row:rowIndex] owner:self userData:NULL];
+        }
+    }
+}
+
+- (NSString *)view:(NSView *)view stringForToolTip:(NSToolTipTag)tag point:(NSPoint)point userData:(void *)data {
+    if ([_dataSource respondsToSelector:@selector(tableView:toolTipForTableColumn:row:)]) {
+		int column = [self columnAtPoint:point];
+		int row = [self rowAtPoint:point];
+        if (column == -1 || row == -1)
+            return nil;
+		NSTableColumn *tableColumn = [[self tableColumns] objectAtIndex:column];
+		return [_dataSource tableView:self toolTipForTableColumn:tableColumn row:row];
+	}
+	return nil;
+}
 
 #pragma mark Font preferences overrides
 
@@ -314,6 +366,24 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
 }
 
+// @@ legacy implementation for 10.3 compatibility
+- (NSImage *)replacementDragImageForRows:(NSArray *)dragRows event:(NSEvent *)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
+    NSNumber *number;
+    NSEnumerator *rowE = [dragRows objectEnumerator];
+    while(number = [rowE nextObject])
+        [indexes addIndex:[number intValue]];
+    
+    NSPoint zeroPoint = NSZeroPoint;
+    NSImage *image = [self replacementDragImageForRowsWithIndexes:indexes tableColumns:[self tableColumns] event:dragEvent offset:&zeroPoint];
+    
+    if (image != nil) {
+        return image;
+    } else {
+        return originalDragImageForRowsEventOffset(self, _cmd, dragRows, dragEvent, dragImageOffset);
+    }
+}
+
 - (NSImage *)replacementDragImageForRowsWithIndexes:(NSIndexSet *)dragRows tableColumns:(NSArray *)tableColumns event:(NSEvent*)dragEvent offset:(NSPointPointer)dragImageOffset{
    	if([[self dataSource] respondsToSelector:@selector(tableView:dragImageForRowsWithIndexes:)]) {
 		NSImage *image = [[self dataSource] tableView:self dragImageForRowsWithIndexes:dragRows];
@@ -334,11 +404,26 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 // modified to use -intercellSpacing and save/restore graphics state
 
 -(void)_drawDropHighlightOnRow:(int)rowIndex{
-    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
+    NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+    float lineWidth = 2.0;
     
     [self lockFocus];
     [NSGraphicsContext saveGraphicsState];
-    [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
+    
+    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
+    
+    drawRect = NSInsetRect(drawRect, 0.5f * lineWidth, 0.5f * lineWidth);
+    
+    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
+    
+    [path setLineWidth:lineWidth];
+    
+    [[highlightColor colorWithAlphaComponent:0.2] set];
+    [path fill];
+    
+    [[highlightColor colorWithAlphaComponent:0.8] set];
+    [path stroke];
+    
     [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];
 }

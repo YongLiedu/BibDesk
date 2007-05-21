@@ -6,37 +6,25 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 openTextEncodingAccessoryView = NSView; 
-                openTextEncodingPopupButton = BDSKEncodingPopUpButton; 
+                openTextEncodingPopupButton = NSPopUpButton; 
                 openUsingFilterAccessoryView = NSView; 
                 openUsingFilterComboBox = NSComboBox; 
             }; 
             SUPERCLASS = NSDocumentController; 
         }, 
         {
-            CLASS = BDSKEncodingPopUpButton; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButton; 
-        }, 
-        {
             ACTIONS = {
                 checkForUpdates = id; 
-                editSearchBookmarks = id; 
                 showPreferencePanel = id; 
                 showReadMeFile = id; 
                 showRelNotes = id; 
                 toggleShowingErrorPanel = id; 
-                toggleShowingOrphanedFilesPanel = id; 
                 toggleShowingPreviewPanel = id; 
                 visitWebSite = id; 
             }; 
             CLASS = BibAppController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {
-                columnsMenu = NSMenu; 
-                copyAsTemplateMenu = NSMenu; 
-                groupSortMenu = NSMenu; 
-                searchBookmarksMenu = NSMenu; 
-            }; 
+            OUTLETS = {columnsMenuItem = NSMenuItem; groupSortMenuItem = NSMenuItem; }; 
             SUPERCLASS = NSObject; 
         }, 
         {
@@ -104,12 +92,8 @@
         }, 
         {
             ACTIONS = {
-                addScriptGroupAction = id; 
-                addSearchBookmark = id; 
-                addSearchGroupAction = id; 
                 addSmartGroupAction = id; 
                 addStaticGroupAction = id; 
-                addURLGroupAction = id; 
                 alternateCut = id; 
                 alternateDelete = id; 
                 changePreviewDisplay = id; 
@@ -124,50 +108,40 @@
                 duplicateTitleToBooktitle = id; 
                 editAction = id; 
                 editIgnoredSortPrefixes = id; 
-                editNewCategoryGroupWithSelection = id; 
-                editNewStaticGroupWithSelection = id; 
+                editNewGroupWithSelection = id; 
                 editPubCmd = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 emailPubCmd = id; 
+                exportAsAction = id; 
+                exportSelectionAsAction = id; 
                 find = id; 
                 generateCiteKey = id; 
                 importFromFileAction = id; 
                 importFromPasteboardAction = id; 
                 importFromWebAction = id; 
-                invertSelection = id; 
                 makeNewEmptyCollection = id; 
                 makeNewExternalSource = id; 
                 makeNewNotepad = id; 
                 makeSearchFieldKey = id; 
-                matchFiles = id; 
-                mergeInExternalPublications = id; 
+                mergeInSharedPublications = id; 
                 newBDSKLibrary = id; 
                 newPub = id; 
                 openDocumentUsingFilter = id; 
                 openDocumentUsingPhonyCiteKeys = id; 
                 openLinkedFile = id; 
                 openRemoteURL = id; 
-                refreshAllExternalGroups = id; 
-                refreshScriptGroups = id; 
-                refreshSharedBrowsing = id; 
-                refreshURLGroups = id; 
                 removeSelectedPubs = id; 
-                reportBug = id; 
-                requestFeature = id; 
                 revealLinkedFile = id; 
                 saveAsBDSKDocument = id; 
                 searchByContent = id; 
                 selectAllPublications = id; 
+                selectAllPublicationsGroup = id; 
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
-                selectIncompletePublications = id; 
-                selectLibraryGroup = id; 
                 selectPossibleDuplicates = id; 
-                sendToLyX = id; 
                 showDocumentInfoWindow = id; 
                 showFindPanel = id; 
                 showMacrosWindow = id; 
-                showNotesForLinkedFile = id; 
                 showReadMe = id; 
                 showRelNotes = id; 
                 sortForCrossrefs = id; 

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 4/19/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,18 +40,6 @@
 
 
 @implementation NSIndexSet (BDSKExtensions)
-
-+ (id)indexSetWithIndexesInArray:(NSArray *)indexArray;
-{
-    NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
-    NSEnumerator *numberEnum = [indexArray objectEnumerator];
-    NSNumber *number;
-    
-    while(number = [numberEnum nextObject])
-        [indexSet addIndex:[number intValue]];
-    
-    return indexSet;
-}
 
 - (BOOL)intersectsIndexSet:(NSIndexSet *)indexSet{
     if ([indexSet count] == 0)

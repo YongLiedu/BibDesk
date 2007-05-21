@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 04/03/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,15 +37,11 @@
  */
 
 #import "BDSKSharedGroup.h"
-#import "BDSKOwnerProtocol.h"
 #import "BDSKSharingServer.h"
 #import "BDSKPasswordController.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import <BDSKAsynchronousDOServer.h>
-#import "BDSKPublicationsArray.h"
-#import "BDSKMacroResolver.h"
-#import "BDSKItemSearchIndexes.h"
 
 typedef struct _BDSKSharedGroupFlags {
     volatile int32_t isRetrieving __attribute__ ((aligned (4)));
@@ -65,7 +61,6 @@ typedef struct _BDSKSharedGroupFlags {
 @protocol BDSKSharedGroupServerMainThread <BDSKAsyncDOServerMainThread>
 
 - (oneway void)unarchivePublications:(bycopy NSData *)archive;
-- (oneway void)unarchiveMacros:(bycopy NSData *)archive;
 - (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
 
@@ -109,7 +104,7 @@ static NSImage *lockedIcon = nil;
 static NSImage *unlockedIcon = nil;
 
 + (NSImage *)icon{
-    return [NSImage imageNamed:@"sharedFolderIcon"];
+    return [NSImage smallImageNamed:@"sharedFolderIcon"];
 }
 
 + (NSImage *)lockedIcon {
@@ -118,12 +113,11 @@ static NSImage *unlockedIcon = nil;
         NSRect badgeRect = NSMakeRect(7.0, 0.0, 11.0, 11.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
-        NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
         [NSGraphicsContext saveGraphicsState];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
+        [[self icon] drawInRect:iconRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
@@ -139,12 +133,11 @@ static NSImage *unlockedIcon = nil;
         NSRect badgeRect = NSMakeRect(6.0, 0.0, 11.0, 11.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
-        NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
         [NSGraphicsContext saveGraphicsState];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-        [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
+        [[self icon] drawInRect:iconRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
@@ -162,9 +155,8 @@ static NSImage *unlockedIcon = nil;
     if(self = [super initWithName:[aService name] count:0]){
 
         publications = nil;
-        macroResolver = [[BDSKMacroResolver alloc] initWithOwner:self];
         needsUpdate = YES;
-        searchIndexes = [[BDSKItemSearchIndexes alloc] init];
+        
         server = [[BDSKSharedGroupServer alloc] initWithGroup:self andService:aService];
     }
     
@@ -176,20 +168,24 @@ static NSImage *unlockedIcon = nil;
     [server stopDOServer];
     [server release];
     [publications release];
-    [macroResolver release];
-    [searchIndexes release];
     [super dealloc];
 }
 
-- (id)initWithCoder:(NSCoder *)aCoder
+// NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
+
+- (id)copyWithZone:(NSZone *)zone { return [self retain]; }
+
+// NSCoding protocol
+
+- (void)encodeWithCoder:(NSCoder *)aCoder;
 {
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
-    return nil;
+    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
 }
 
-- (void)encodeWithCoder:(NSCoder *)aCoder
+- (id)initWithCoder:(NSCoder *)aDecoder;
 {
-    [NSException raise:BDSKUnimplementedException format:@"Instances of %@ do not conform to NSCoding", [self class]];
+    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
+    return nil;
 }
 
 // Logging
@@ -201,7 +197,7 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark Accessors
 
-- (BDSKPublicationsArray *)publications;
+- (NSArray *)publications;
 {
     if([self isRetrieving] == NO && ([self needsUpdate] == YES || publications == nil)){
         // let the server get the publications asynchronously
@@ -218,13 +214,8 @@ static NSImage *unlockedIcon = nil;
 - (void)setPublications:(NSArray *)newPublications;
 {
     if(newPublications != publications){
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:nil];
         [publications release];
-        publications = newPublications == nil ? nil : [[BDSKPublicationsArray alloc] initWithArray:newPublications];
-        [publications makeObjectsPerformSelector:@selector(setOwner:) withObject:self];
-        [searchIndexes resetWithPublications:publications];
-        if (publications == nil)
-            [macroResolver removeAllMacros];
+        publications = [newPublications retain];
     }
     
     [self setCount:[publications count]];
@@ -233,17 +224,6 @@ static NSImage *unlockedIcon = nil;
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
 }
-
-
-- (BDSKMacroResolver *)macroResolver { return macroResolver; }
-
-- (NSUndoManager *)undoManager { return nil; }
-
-- (NSURL *)fileURL { return nil; }
-
-- (NSString *)documentInfoForKey:(NSString *)key { return nil; }
-
-- (BOOL)isDocument { return NO; }
 
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 
@@ -264,7 +244,7 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isShared { return YES; }
 
-- (BOOL)isExternal { return YES; }
+- (BOOL)hasEditableName { return NO; }
 
 - (BOOL)containsItem:(BibItem *)item {
     // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user canceled a password; containsItem is called very frequently
@@ -274,15 +254,7 @@ static NSImage *unlockedIcon = nil;
     return rv;
 }
 
-- (BOOL)isEqual:(id)other { return self == other; }
-
-- (unsigned int)hash {
-    return( ((unsigned int) self >> 4) | (unsigned int) self << (32 - 4));
-}
-
-- (BDSKItemSearchIndexes *)searchIndexes {
-    return searchIndexes;
-}
+- (BOOL)isValidDropTarget { return NO; }
 
 @end
 
@@ -374,7 +346,7 @@ static NSImage *unlockedIcon = nil;
 
         // flag authentication failures so we get a prompt the next time around (in case our password was wrong)
         // we also get this if the user canceled, since an empty data will be returned
-        if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:NSFailedAuthenticationException]){
+        if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException]){
             
             // if the user didn't cancel, set an auth failure flag and show an alert
             if(flags.canceledAuthentication == 0){
@@ -419,7 +391,7 @@ static NSImage *unlockedIcon = nil;
 {
     NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:NSLocalizedString(@"Enter password for %@", @"Prompt for Password dialog"), [service name]]];
+    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), [service name]]];
     [pwc close];
     [pwc release];
     return rv;
@@ -428,7 +400,7 @@ static NSImage *unlockedIcon = nil;
 - (int)runAuthenticationFailedAlert;
 {
     NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
-    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @"Message in alert dialog when authentication failed"), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @"Informative text in alert dialog"), [[service name] safeFormatString]], nil, nil, nil);
+    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), [service name]], nil, nil, nil);
 }
 
 // this can be called from any thread
@@ -488,30 +460,9 @@ static NSImage *unlockedIcon = nil;
     
     NSAssert([NSThread inMainThread] == 1, @"publications must be set from the main thread");
     
-    [BDSKComplexString setMacroResolverForUnarchiving:[group macroResolver]];
-    
     NSArray *publications = archive ? [NSKeyedUnarchiver unarchiveObjectWithData:archive] : nil;
     [archive release];
-    
-    [BDSKComplexString setMacroResolverForUnarchiving:nil];
-    
     [group setPublications:publications];
-}
-
-- (oneway void)unarchiveMacros:(bycopy NSData *)archive;
-{
-    // retain as the autoreleasepool of our caller will be released as we're oneway
-    [archive retain];
-    
-    NSAssert([NSThread inMainThread] == 1, @"macros must be set from the main thread");
-    
-    NSDictionary *macros = archive ? [NSKeyedUnarchiver unarchiveObjectWithData:archive] : nil;
-    [archive release];
-    
-    NSEnumerator *macroEnum = [macros keyEnumerator];
-    NSString *macro;
-    while(macro = [macroEnum nextObject])
-        [[group macroResolver] setMacroDefinition:[macros objectForKey:macro] forMacro:macro];
 }
 
 - (void)retrievePublicationsInBackground{ [[self serverOnServerThread] retrievePublications]; }
@@ -526,7 +477,6 @@ static NSImage *unlockedIcon = nil;
     
     @try {
         NSData *archive = nil;
-        NSData *macroArchive = nil;
         NSData *proxyData = [[self remoteServer] archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
@@ -540,13 +490,10 @@ static NSImage *unlockedIcon = nil;
                 @throw errorStr;
             } else {
                 archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
-                macroArchive = [dictionary objectForKey:BDSKSharedArchivedMacroDataKey];
             }
         }
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
-        if(macroArchive)
-            [[self serverOnMainThread] unarchiveMacros:macroArchive];
         [[self serverOnMainThread] unarchivePublications:archive];
     }
     @catch(id exception){

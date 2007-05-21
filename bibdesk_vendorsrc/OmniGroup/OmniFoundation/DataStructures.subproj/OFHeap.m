@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFHeap.m 68913 2005-10-03 19:36:19Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFHeap.m 68913 2005-10-03 19:36:19Z kc $")
 
 // In this case, the userInfo is the selector
 static NSComparisonResult OFHeapCompareBySelector(OFHeap *heap, void *userInfo, id object1, id object2)

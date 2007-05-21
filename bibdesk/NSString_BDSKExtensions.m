@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Sun Jul 21 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -44,12 +44,10 @@
 #import "CFString_BDSKExtensions.h"
 #import "OFCharacterSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSScanner_BDSKExtensions.h"
-#import "html2tex.h"
-#import "NSDictionary_BDSKExtensions.h"
-#import "NSWorkspace_BDSKExtensions.h"
-#import "BDSKStringEncodingManager.h"
 
+static AGRegex *tipRegex = nil;
+static AGRegex *andRegex = nil;
+static AGRegex *orRegex = nil;
 static NSString *yesString = nil;
 static NSString *noString = nil;
 static NSString *mixedString = nil;
@@ -58,8 +56,15 @@ static NSString *mixedString = nil;
 
 + (void)didLoad
 {
-    yesString = [NSLocalizedString(@"Yes", @"") copy];
-    noString = [NSLocalizedString(@"No", @"") copy];
+    // match any words up to but not including '+' or '|' if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
+    tipRegex = [[AGRegex alloc] initWithPattern:@"(?(?=^.+(\\+|\\|))(^.+(?=\\+|\\|))|^.++)" options:AGRegexLazy];
+    // match the word following a '+'; we consider a word boundary to be + or |
+    andRegex = [[AGRegex alloc] initWithPattern:@"\\+[^+|]+"];
+    // match the first word following a '|'
+    orRegex = [[AGRegex alloc] initWithPattern:@"\\|[^+|]+"]; 
+    
+    yesString = [NSLocalizedString(@"Yes", @"Yes") copy];
+    noString = [NSLocalizedString(@"No", @"No") copy];
     mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
     
 }
@@ -90,13 +95,17 @@ static int MAX_RATING = 5;
             CFDictionaryAddValue(ratings, (const void *)i, (const void *)[[ratingString copy] autorelease]);
             [ratingString appendCharacter:(0x278A + i)];
         } while(i++ < MAX_RATING);
-        OBPOSTCONDITION((int)[(id)ratings count] == MAX_RATING + 1);
+        OBPOSTCONDITION([(id)ratings count] == MAX_RATING + 1);
     }
     return (NSString *)CFDictionaryGetValue(ratings, (const void *)rating);
 }
 
 + (NSString *)stringWithBool:(BOOL)boolValue {
 	return boolValue ? yesString : noString;
+}
+
++ (NSString *)stringWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding{
+    return byteString == NULL ? nil : [(NSString *)CFStringCreateWithCString(CFAllocatorGetDefault(), byteString, CFStringConvertNSStringEncodingToEncoding(encoding)) autorelease];
 }
 
 + (NSString *)stringWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
@@ -125,32 +134,17 @@ static int MAX_RATING = 5;
     CFStringAppendCharacters(charString, &ch, 1);
     
     // ignore failures for now
-    CFStringTransform(charString, NULL, kCFStringTransformToUnicodeName, FALSE);
+    Boolean status;
+    
+    // This is a 10.4+ method; we'll just return the unichar as a string object in earlier versions.
+    if(CFStringTransform != NULL)
+        status = CFStringTransform(charString, NULL, kCFStringTransformToUnicodeName, FALSE);
     
     return [(id)charString autorelease];
 } 
-
-+ (NSString *)IANACharSetNameForEncoding:(NSStringEncoding)enc;
-{
-    CFStringEncoding cfEnc = CFStringConvertNSStringEncodingToEncoding(enc);
-    NSString *encName = nil;
-    if (kCFStringEncodingInvalidId != cfEnc)
-        encName = (NSString *)CFStringConvertEncodingToIANACharSetName(cfEnc);
-    return encName;
-}
-
-+ (NSStringEncoding)encodingForIANACharSetName:(NSString *)name
-{
-    NSStringEncoding nsEnc = 0;
-    CFStringEncoding cfEnc = kCFStringEncodingInvalidId;
-    
-    if (name)
-        cfEnc = CFStringConvertIANACharSetNameToEncoding((CFStringRef)name);
-
-    if (kCFStringEncodingInvalidId != cfEnc)
-        nsEnc = CFStringConvertEncodingToNSStringEncoding(cfEnc);
-    
-    return nsEnc;
+ 
+- (NSString *)initWithCString:(const char *)byteString usingEncoding:(NSStringEncoding)encoding{
+    return byteString == NULL ? nil : (NSString *)CFStringCreateWithCString(CFAllocatorGetDefault(), byteString, CFStringConvertNSStringEncodingToEncoding(encoding));
 }
 
 static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
@@ -183,8 +177,6 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
             string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         if(nil == string && try && encoding != [NSString defaultCStringEncoding])
             string = [[NSString alloc] initWithData:data encoding:[NSString defaultCStringEncoding]];
-        if(nil == string && try && encoding != [BDSKStringEncodingManager defaultEncoding])
-            string = [[NSString alloc] initWithData:data encoding:[BDSKStringEncodingManager defaultEncoding]];
         if(nil == string && try && encoding != NSISOLatin1StringEncoding)
             string = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
 
@@ -228,74 +220,29 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 
 #pragma mark TeX parsing
 
-- (NSString *)entryType;
-{
-    // we could save a little memory by using a case-insensitive dictionary, but this is faster (and these strings are small)
-    static NSMutableDictionary *entryDictionary = nil;
-    if (nil == entryDictionary)
-        entryDictionary = [[NSMutableDictionary alloc] initWithCapacity:100];
-    
-    NSString *entryType = [entryDictionary objectForKey:self];
-    if (nil == entryType) {
-        entryType = [self lowercaseString];
-        [entryDictionary setObject:entryType forKey:self];
-    }
-    return entryType;
-}
-
-- (NSString *)fieldName;
-{
-    // we could save a little memory by using a case-insensitive dictionary, but this is faster (and these strings are small)
-    static NSMutableDictionary *fieldDictionary = nil;
-    if (nil == fieldDictionary)
-        fieldDictionary = [[NSMutableDictionary alloc] initWithCapacity:100];
-    
-    NSString *fieldName = [fieldDictionary objectForKey:self];
-    if (nil == fieldName) {
-        fieldName = [self capitalizedString];
-        [fieldDictionary setObject:fieldName forKey:self];
-    }
-    return fieldName;
-}
-
-- (NSString *)localizedFieldName;
-{
-    // this is used for display, for now we don't do anything
-    return self;
-}
-
-- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned int)startLoc
-{
-    return [self indexOfRightBraceMatchingLeftBraceInRange:NSMakeRange(startLoc, [self length] - startLoc)];
-}
-
-- (unsigned)indexOfRightBraceMatchingLeftBraceInRange:(NSRange)range
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned)startLoc
 {
     
     CFStringInlineBuffer inlineBuffer;
     CFIndex length = CFStringGetLength((CFStringRef)self);
-    CFIndex startLoc = range.location;
-    CFIndex endLoc = NSMaxRange(range);
     CFIndex cnt;
     BOOL matchFound = NO;
     
     CFStringInitInlineBuffer((CFStringRef)self, &inlineBuffer, CFRangeMake(0, length));
     UniChar ch;
-    int nesting = 0;
+    int rb = 0, lb = 0;
     
     if(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, startLoc) != '{')
         [NSException raise:NSInternalInconsistencyException format:@"character at index %i is not a brace", startLoc];
     
     // we don't consider escaped braces yet
-    for(cnt = startLoc; cnt < endLoc; cnt++){
+    for(cnt = startLoc; cnt < length; cnt++){
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
-        if(ch == '\\')
-            cnt++;
-        else if(ch == '{')
-            nesting++;
-        else if(ch == '}')
-            nesting--;
-        if(nesting == 0){
+        if(ch == '{')
+            rb++;
+        if(ch == '}')
+            lb++;
+        if(rb == lb){
             //NSLog(@"match found at index %i", cnt);
             matchFound = YES;
             break;
@@ -348,401 +295,160 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 	return (nesting == 0);
 }
 
-// transforms a bibtex string to have temp cite keys, using the method in openWithPhoneyKeys.
-- (NSString *)stringWithPhoneyCiteKeys:(NSString *)tmpKey{
-		// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get
-		// from Bookends and EndNote, respectively.
-		AGRegex *theRegex = [AGRegex regexWithPattern:@"^([ \\t]*@[[:alpha:]]+[ \\t]*{)[ \\t]*,?$" options:AGRegexCaseInsensitive];
+- (BOOL)isRISString{ // sniff the string to see if it's or RIS
+    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
+    [scanner setCharactersToBeSkipped:nil];
+    BOOL isRIS = NO;
+    
+    // skip leading whitespace
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+    int rewindLoc = [scanner scanLocation];
+    
+    if([scanner scanString:@"PMID-" intoString:nil] &&
+       [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil]) // for Medline
+        isRIS = YES;
+    else {
+        [scanner setScanLocation:rewindLoc];
+        if([scanner scanString:@"TY" intoString:nil] &&
+           [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil] &&
+           [scanner scanString:@"-" intoString:nil]) // for RIS
+            isRIS = YES;
+    }
+    [scanner release];
+    return isRIS;
+}
 
-		// should assert that the noKeysString matches theRegex
-		//NSAssert([theRegex findInString:self] != nil, @"stringWithPhoneyCiteKeys called on non-matching string");
+- (BOOL)isJSTORString{ // sniff the string to see if it's JSTOR
+	return [self hasPrefix:@"JSTOR CITATION LIST"];
+}
 
-		// replace with "@type{FixMe,eol" (add the comma in, since we remove it if present)
-		NSCharacterSet *newlineCharacterSet = [NSCharacterSet newlineCharacterSet];
-		
-		// do not use NSCharacterSets with OFStringScanners!
-		OFCharacterSet *newlineOFCharset = [[[OFCharacterSet alloc] initWithCharacterSet:newlineCharacterSet] autorelease];
-		
-		OFStringScanner *scanner = [[[OFStringScanner alloc] initWithString:self] autorelease];
-		NSMutableString *mutableFileString = [NSMutableString stringWithCapacity:[self length]];
-		NSString *tmp = nil;
-		int scanLocation = 0;
-        NSString *replaceRegex = [NSString stringWithFormat:@"$1%@,", tmpKey];
-		
-		// we scan up to an (newline@) sequence, then to a newline; we then replace only in that line using theRegex, which is much more efficient than using AGRegex to find/replace in the entire string
-		do {
-			// append the previous part to the mutable string
-			tmp = [scanner readFullTokenWithDelimiterCharacter:'@'];
-			if(tmp) [mutableFileString appendString:tmp];
-			
-			scanLocation = scannerScanLocation(scanner);
-			if(scanLocation == 0 || [newlineCharacterSet characterIsMember:[self characterAtIndex:scanLocation - 1]]){
-				
-				tmp = [scanner readFullTokenWithDelimiterOFCharacterSet:newlineOFCharset];
-				
-				// if we read something between the @ and newline, see if we can do the regex find/replace
-				if(tmp){
-					// this should be a noop if the pattern isn't matched
-					tmp = [theRegex replaceWithString:replaceRegex inString:tmp];
-					[mutableFileString appendString:tmp]; // guaranteed non-nil result from AGRegex
-				}
-			} else
-				scannerReadCharacter(scanner);
-                        
-		} while(scannerHasData(scanner));
-		
-		NSString *toReturn = [NSString stringWithString:mutableFileString];
-		
-		return toReturn;
+- (BOOL)isBibTeXString{
+    
+    /* This regex needs to handle the following, for example:
+     
+     @Article{
+     citeKey ,
+     Author = {Some One}}
+     
+     The cite key regex is from Maarten Sneep on the TextMate mailing list.  Spaces and linebreaks must be fixed first.
+     
+     */
+
+    AGRegex *btRegex = [[AGRegex alloc] initWithPattern:/* type of item */ @"^@[[:alpha:]]+[ \\t]*[{(]" 
+                                                        /* spaces       */ @"[ \\n\\t]*" 
+                                                        /* cite key     */ @"[a-zA-Z0-9\\.,:/*!^_-]+?" 
+                                                        /* spaces       */ @"[ \\n\\t]*," 
+                                                options:AGRegexMultiline];
+    
+    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
+    NSString *normalizedString = [self stringByNormalizingSpacesAndLineBreaks];
+    BOOL found = ([btRegex findInString:normalizedString] != nil);
+    [btRegex release];
+    return found;
+}
+
+- (BOOL)isWebOfScienceString{
+    // remove leading newlines in case this originates from copy/paste
+    return [[self stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] hasPrefix:@"FN ISI Export Format"];
+}
+
+- (int)contentStringType{
+	if([self isBibTeXString])
+		return BDSKBibTeXStringType;
+	if([self isRISString])
+		return BDSKRISStringType;
+	if([self isJSTORString])
+		return BDSKJSTORStringType;
+	if([self isWebOfScienceString])
+		return BDSKWOSStringType;
+	return BDSKUnknownStringType;
 }
 
 - (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
 {
-    static CFCharacterSetRef nonLetterCharacterSet = NULL;
+    CFRange cmdStartRange;
+    CFIndex maxLen = CFStringGetLength((CFStringRef)self);    
     
-    if (NULL == nonLetterCharacterSet) {
-        CFMutableCharacterSetRef letterCFCharacterSet = CFCharacterSetCreateMutableCopy(CFAllocatorGetDefault(), CFCharacterSetGetPredefined(kCFCharacterSetLetter));
-        CFCharacterSetInvert(letterCFCharacterSet);
-        nonLetterCharacterSet = CFCharacterSetCreateCopy(CFAllocatorGetDefault(), letterCFCharacterSet);
-        CFRelease(letterCFCharacterSet);
+    if(BDStringFindCharacter((CFStringRef)self, '\\', CFRangeMake(0, maxLen), &cmdStartRange) == FALSE)
+        return NSMakeRange(NSNotFound, 0);
+    
+    CFRange lbraceRange;
+    CFRange cmdSearchRange = CFRangeMake(cmdStartRange.location, maxLen - cmdStartRange.location);
+    
+    // find the nearest left brace, but return NSNotFound if there's a space between the command start and the left brace
+    if(BDStringFindCharacter((CFStringRef)self, '{', cmdSearchRange, &lbraceRange) == FALSE ||
+       BDStringFindCharacter((CFStringRef)self, ' ', CFRangeMake(cmdSearchRange.location, lbraceRange.location - cmdSearchRange.location), NULL) == TRUE)
+        return NSMakeRange(NSNotFound, 0);
+    
+    // search for the next right brace matching our left brace
+    CFRange rbraceRange;
+    Boolean foundRBrace = BDStringFindCharacter((CFStringRef)self, '}', CFRangeMake(lbraceRange.location, maxLen - lbraceRange.location), &rbraceRange);
+    
+    // check for an immediate right brace after the left brace, as in \LaTeX{}, since we
+    // don't want to remove those, either
+    if(foundRBrace && (rbraceRange.location == lbraceRange.location + 1)){
+        // if we want to consider \LaTeX a command to be removed, cmdStop = spaceLoc; this can mess
+        // up sorting, though, since \LaTeX is a word /and/ a command.
+        return NSMakeRange(NSNotFound, 0);
+    } else {
+        return NSMakeRange(cmdStartRange.location, (lbraceRange.location - cmdStartRange.location));
     }
     
-    CFRange bsSearchRange = *(CFRange*)&searchRange;
-    CFRange cmdStartRange, cmdEndRange;
-    CFIndex endLoc = NSMaxRange(searchRange);    
-    
-    while(bsSearchRange.length > 4 && BDStringFindCharacter((CFStringRef)self, '\\', bsSearchRange, &cmdStartRange) &&
-          CFStringFindCharacterFromSet((CFStringRef)self, nonLetterCharacterSet, CFRangeMake(cmdStartRange.location + 1, endLoc - cmdStartRange.location - 1), 0, &cmdEndRange)){
-        // if the char right behind the backslash is a non-letter char, it's a one-letter command
-        if(cmdEndRange.location == cmdStartRange.location + 1)
-            cmdEndRange.location++;
-        // see if we found a left brace, we ignore commands like \LaTeX{} which we want to keep
-        if('{' == CFStringGetCharacterAtIndex((CFStringRef)self, cmdEndRange.location) && 
-           '}' != CFStringGetCharacterAtIndex((CFStringRef)self, cmdEndRange.location + 1))
-            return NSMakeRange(cmdStartRange.location, cmdEndRange.location - cmdStartRange.location);
-        
-        bsSearchRange = CFRangeMake(cmdEndRange.location, endLoc - cmdEndRange.location);
-    }
-    
-    return NSMakeRange(NSNotFound, 0);
 }
 
-- (NSString *)stringByConvertingHTMLToTeX;
+- (NSString *)stringByAddingRISEndTagsToPubMedString;
 {
-    static NSCharacterSet *asciiSet = nil;
-    if(asciiSet == nil)
-        asciiSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(0, 127)] retain];
+    OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:self];
+    NSMutableString *fixedString = [[NSMutableString alloc] initWithCapacity:[self length]];
     
-    // set these up here, so we don't autorelease them every time we parse an entry
-    // Some entries from Compendex have spaces in the tags, which is why we match 0-1 spaces between each character.
-    static AGRegex *findSubscriptLeadingTag = nil;
-    if(findSubscriptLeadingTag == nil)
-        findSubscriptLeadingTag = [[AGRegex alloc] initWithPattern:@"< ?s ?u ?b ?>"];
-    static AGRegex *findSubscriptOrSuperscriptTrailingTag = nil;
-    if(findSubscriptOrSuperscriptTrailingTag == nil)
-        findSubscriptOrSuperscriptTrailingTag = [[AGRegex alloc] initWithPattern:@"< ?/ ?s ?u ?[bp] ?>"];
-    static AGRegex *findSuperscriptLeadingTag = nil;
-    if(findSuperscriptLeadingTag == nil)
-        findSuperscriptLeadingTag = [[AGRegex alloc] initWithPattern:@"< ?s ?u ?p ?>"];
+    NSString *scannedString = [scanner readFullTokenUpToString:@"PMID- "];
+    unsigned start;
+    unichar prevChar;
+    BOOL scannedPMID = NO;
     
-    // This one might require some explanation.  An entry with TI of "Flapping flight as a bifurcation in Re<sub>&omega;</sub>"
-    // was run through the html conversion to give "...Re<sub>$\omega$</sub>", then the find sub/super regex replaced the sub tags to give
-    // "...Re$_$omega$$", which LaTeX barfed on.  So, we now search for <sub></sub> tags with matching dollar signs inside, and remove the inner
-    // dollar signs, since we'll use the dollar signs from our subsequent regex search and replace; however, we have to
-    // reject the case where there is a <sub><\sub> by matching [^<]+ (at least one character which is not <), or else it goes to the next </sub> tag
-    // and deletes dollar signs that it shouldn't touch.  Yuck.
-    static AGRegex *findNestedDollar = nil;
-    if(findNestedDollar == nil)
-        findNestedDollar = [[AGRegex alloc] initWithPattern:@"(< ?s ?u ?[bp] ?>[^<]+)(\\$)(.*)(\\$)(.*< ?/ ?s ?u ?[bp] ?>)"];
+    // this means we scanned some garbage before the PMID tag, or else this isn't a PubMed string...
+    OBPRECONDITION(scannedString == nil);
     
-    // Run the value string through the HTML2LaTeX conversion, to clean up &theta; and friends.
-    // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
-    // stuff will get munged.  Unfortunately, the C code for HTML2LaTeX will destroy accented characters, so we only send it ASCII, and just keep
-    // the accented characters to let BDSKConverter deal with them later.
+    do {
+        
+        start = scannerScanLocation(scanner);
+        
+        // scan past the PMID tag
+        scannedPMID = scannerReadString(scanner, @"PMID- ");
+        OBPRECONDITION(scannedPMID);
+        
+        // scan to the next PMID tag
+        scannedString = [scanner readFullTokenUpToString:@"PMID- "];
+        [fixedString appendString:[self substringWithRange:NSMakeRange(start, scannerScanLocation(scanner) - start)]];
+        
+        // see if the previous character is a newline; if not, then some clod put a "PMID- " in the text
+        if(scannerScanLocation(scanner)){
+            prevChar = *(scanner->scanLocation - 1);
+            if(BDIsNewlineCharacter(prevChar))
+                [fixedString appendString:@"ER  - \r\n"];
+        }
+        
+        OBASSERT(scannedString);
+        
+    } while(scannerHasData(scanner));
     
-    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
-    NSString *asciiAndHTMLChars, *nonAsciiAndHTMLChars;
-    NSMutableString *fullString = [[NSMutableString alloc] initWithCapacity:[self length]];
+    OBPOSTCONDITION(!scannerHasData(scanner));
     
-    while(![scanner isAtEnd]){
-        if([scanner scanCharactersFromSet:asciiSet intoString:&asciiAndHTMLChars])
-            [fullString appendString:[NSString TeXStringWithHTMLString:asciiAndHTMLChars ]];
-		if([scanner scanUpToCharactersFromSet:asciiSet intoString:&nonAsciiAndHTMLChars])
-			[fullString appendString:nonAsciiAndHTMLChars];
-    }
     [scanner release];
+    OBPOSTCONDITION(![NSString isEmptyString:fixedString]);
     
-    NSString *newValue = [[fullString copy] autorelease];
-    [fullString release];
+#if OMNI_FORCE_ASSERTIONS
+    // Here's our reference method, which caused swap death on large strings (AGRegex uses a lot of autoreleased NSData objects)
+	NSString *tmpStr;
+	
+    AGRegex *regex = [AGRegex regexWithPattern:@"(?<!\\A)^PMID- " options:AGRegexMultiline];
+    tmpStr = [regex replaceWithString:@"ER  - \r\nPMID- " inString:self];
+	
+    tmpStr = [tmpStr stringByAppendingString:@"ER  - \r\n"];
+    OBPOSTCONDITION([tmpStr isEqualToString:fixedString]);
+#endif
     
-    // see if we have nested math modes and try to fix them; see note earlier on findNestedDollar
-    if([findNestedDollar findInString:newValue] != nil){
-        NSLog(@"WARNING: found nested math mode; trying to repair...");
-        newValue = [findNestedDollar replaceWithString:@"$1$3$5"
-                                              inString:newValue];
-    }
-    
-    // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
-    // that Compendex (and possibly others) give us.
-    newValue = [findSubscriptLeadingTag replaceWithString:@"\\$_{" inString:newValue];
-    newValue = [findSuperscriptLeadingTag replaceWithString:@"\\$^{" inString:newValue];
-    newValue = [findSubscriptOrSuperscriptTrailingTag replaceWithString:@"}\\$" inString:newValue];
-    
-    return newValue;
-}
-
-+ (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
-{
-    const char *str = [htmlString UTF8String];
-    int ln = strlen(str);
-    FILE *freport = stdout;
-    char *html_fn = NULL;
-    BOOL in_math = NO;
-    BOOL in_verb = NO;
-    BOOL in_alltt = NO;
-    
-// ARM:  this code was taken directly from HTML2LaTeX.  I modified it to return
-// an NSString object, since working with FILE* streams led to really nasty problems
-// with NSPipe needing asynchronous reads to avoid blocking.
-// The NSMutableString appendFormat method was used to replace all of the calls to
-// fputc, fprintf, and fputs.
-// The following copyright notice was taken verbatim from the HTML2LaTeX code:
-    
-/* HTML2LaTeX -- Converting HTML files to LaTeX
-Copyright (C) 1995-2003 Frans Faase
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-GNU General Public License:
-http://home.planet.nl/~faase009/GNU.txt
-*/
-     
-
-    NSMutableString *mString = [NSMutableString stringWithCapacity:ln];
-    
-    BOOL option_warn = YES;
-    
-	for(; *str; str++)
-	{   BOOL special = NO;
-		int v = 0;
-		char ch = '\0';
-		char html_ch[10];
-		html_ch[0] = '\0';
-
-            if (*str == '&')
-            {   int i = 0;
-                BOOL correct = NO;
-                
-                if (isalpha(str[1]))
-                {   for (i = 0; i < 9; i++)
-					if (isalpha(str[i+1]))
-						html_ch[i] = str[i+1];
-					else
-						break;
-                    html_ch[i] = '\0';
-                    for (v = 0; v < NR_CH_TABLE; v++)
-                        if (   ch_table[v].html_ch != NULL
-                               && !strcmp(html_ch, ch_table[v].html_ch))
-                        {   special = YES;
-                            correct = YES;
-                            ch = ch_table[v].ch;
-                            break;
-                        }
-                }
-                    else if (str[1] == '#')
-                    {   int code = 0;
-                        html_ch[0] = '#';
-                        for (i = 1; i < 9; i++)
-                            if (isdigit(str[i+1]))
-                            {   html_ch[i] = str[i+1];
-                                code = code * 10 + str[i+1] - '0';
-                            }
-                                else
-                                    break;
-                        if ((code >= ' ' && code < 127) || code == 8)
-                        {   correct = YES;
-                            ch = code;
-                        }
-                        else if (code >= 160 && code <= 255)
-                        {
-                            correct = YES;
-                            special = YES;
-                            v = code - 160;
-                            ch = ch_table[v].ch;
-                        }
-                    }
-                    html_ch[i] = '\0';
-                    
-                    if (correct)
-                    {   str += i;
-                        if (str[1] == ';')
-                            str++;
-                    }
-                    else 
-                    {   if (freport != NULL && option_warn)
-                        if (html_ch[0] == '\0')
-                            fprintf(freport,
-                                    "%s (%d) : Replace `&' by `&amp;'.\n",
-                                    html_fn, ln);
-                        else
-                            fprintf(freport,
-                                    "%s (%d) : Unknown sequence `&%s;'.\n",
-                                    html_fn, ln, html_ch);
-                        ch = *str;
-                    }
-            }
-                else if (((unsigned char)*str >= ' ' && (unsigned char)*str <= HIGHASCII) || *str == '\t')
-                    ch = *str;
-                else if (option_warn && freport != NULL)
-                    fprintf(freport,
-                            "%s (%d) : Unknown character %d (decimal)\n",
-                            html_fn, ln, (unsigned char)*str);
-                if (mString)
-                {   if (in_verb)
-                {   
-                    [mString appendFormat:@"%c", ch != '\0' ? ch : ' '];
-                    if (   special && freport != NULL && option_warn
-                           && v < NR_CH_M)
-                    {   fprintf(freport, "%s (%d) : ", html_fn, ln);
-                        if (html_ch[0] == '\0')
-                            fprintf(freport, "character %d (decimal)", 
-                                    (unsigned char) *str);
-                        else
-                            fprintf(freport, "sequence `&%s;'", html_ch);
-                        fprintf(freport, " rendered as `%c' in verbatim\n",
-                                ch != '\0' ? ch : ' ');
-                    }
-                }
-                    else if (in_alltt)
-                    {   if (special)
-                    {   char *o = ch_table[v].tex_ch;
-                        if (o != NULL)
-                            if (*o == '$')
-                                [mString appendFormat:@"\\(%s\\)", o + 1];
-                            else
-                                [mString appendFormat:@"%s", o];
-                    }
-                        else if (ch == '{' || ch == '}')
-                            [mString appendFormat:@"\\%c", ch];
-                        else if (ch == '\\')
-                            [mString appendFormat:@"\\%c", ch];
-                        else if (ch != '\0')
-                            [mString appendFormat:@"%c", ch];
-                    }
-                    else if (special)
-                    {   char *o = ch_table[v].tex_ch;
-                        if (o == NULL)
-                        {   if (freport != NULL && option_warn)
-                        {   fprintf(freport,
-                                    "%s (%d) : no LaTeX representation for ",
-                                    html_fn, ln);
-                            if (html_ch[0] == '\0')
-                                fprintf(freport, "character %d (decimal)\n", 
-                                        (unsigned char) *str);
-                            else
-                                fprintf(freport, "sequence `&%s;'\n", html_ch);
-                        }
-                        }
-                        else if (*o == '$')
-                            if (in_math)
-                                [mString appendFormat:@"%s", o+1];
-                            else
-                                [mString appendFormat:@"{%s$}", o];
-                        else
-                            [mString appendFormat:@"%s", o];
-                    }
-                    else if (in_math)
-                    {   if (ch == '#' || ch == '%')
-                            [mString appendFormat:@"\\%c", ch];
-                        else
-                            [mString appendFormat:@"%c", ch];
-                    }
-                    else
-                    {   switch(ch)
-                    {   case '\0' : break;
-                                        case '\t': [mString appendString:@"        "]; break;
-					case '_': case '{': case '}':
-					case '#': case '$': case '%':
-                       [mString appendFormat:@"{\\%c}", ch]; break;
-                                        case '@' : [mString appendFormat:@"{\\char64}"]; break;
-					case '[' :
-					case ']' : [mString appendFormat:@"{$%c$}", ch]; break;
-					case '"' : [mString appendString:@"{\\tt{}\"{}}"]; break;
-					case '~' : [mString appendString:@"\\~{}"]; break;
-                                        case '^' : [mString appendString:@"\\^{}"]; break;
-					case '|' : [mString appendString:@"{$|$}"]; break;
-					case '\\': [mString appendString:@"{$\\backslash$}"]; break;
-					case '&' : [mString appendString:@"\\&"]; break;
-                                        default: [mString appendFormat:@"%c", ch]; break;
-                    }
-                    }
-                }
-	}
-    return mString;
-}
-
-- (NSArray *)sourceLinesBySplittingString;
-{
-    // ARM:  This code came from Art Isbell to cocoa-dev on Tue Jul 10 22:13:11 2001.  Comments are his.
-    //       We were using componentsSeparatedByString:@"\r", but this is not robust.  Files from ScienceDirect
-    //       have \n as newlines, so this code handles those cases as well as PubMed.
-    unsigned stringLength = [self length];
-    unsigned startIndex;
-    unsigned lineEndIndex = 0;
-    unsigned contentsEndIndex;
-    NSRange range;
-    NSMutableArray *sourceLines = [NSMutableArray array];
-    
-    // There is more than one way to terminate this loop.  Beware of an
-    // invalid termination test which might exist in this untested example :-)
-    while (lineEndIndex < stringLength)
-    {
-        // Include only a single character in range.  Not sure whether
-        // this will work with empty lines, but if not, try a length of 0.
-        range = NSMakeRange(lineEndIndex, 1);
-        [self getLineStart:&startIndex 
-                          end:&lineEndIndex 
-                  contentsEnd:&contentsEndIndex 
-                     forRange:range];
-        
-        // If you want to exclude line terminators...
-        [sourceLines addObject:[self substringWithRange:NSMakeRange(startIndex, contentsEndIndex - startIndex)]];
-    }
-    return sourceLines;
-}
-
-- (NSString *)stringByEscapingGroupPlistEntities{
-	NSMutableString *escapedValue = [self mutableCopy];
-	// escape braces as they can give problems with btparse
-	[escapedValue replaceAllOccurrencesOfString:@"%" withString:@"%25"]; // this should come first
-	[escapedValue replaceAllOccurrencesOfString:@"{" withString:@"%7B"];
-	[escapedValue replaceAllOccurrencesOfString:@"}" withString:@"%7D"];
-	[escapedValue replaceAllOccurrencesOfString:@"<" withString:@"%3C"];
-	[escapedValue replaceAllOccurrencesOfString:@">" withString:@"%3E"];
-	return [escapedValue autorelease];
-}
-
-- (NSString *)stringByUnescapingGroupPlistEntities{
-	NSMutableString *escapedValue = [self mutableCopy];
-	// escape braces as they can give problems with btparse, and angles as they can give problems with the plist xml
-	[escapedValue replaceAllOccurrencesOfString:@"%7B" withString:@"{"];
-	[escapedValue replaceAllOccurrencesOfString:@"%7D" withString:@"}"];
-	[escapedValue replaceAllOccurrencesOfString:@"%3C" withString:@"<"];
-	[escapedValue replaceAllOccurrencesOfString:@"%3E" withString:@">"];
-	[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"]; // this should come last
-	return [escapedValue autorelease];
+    return [fixedString autorelease];
 }
 
 #pragma mark Comparisons
@@ -804,17 +510,6 @@ http://home.planet.nl/~faase009/GNU.txt
 	return [self localizedCaseInsensitiveNumericCompare:other];
 }    
 
-- (NSComparisonResult)extensionCompare:(NSString *)other{
-    NSString *myExtension = [self pathExtension];
-    NSString *otherExtension = [other pathExtension];
-    BOOL otherIsEmpty = [NSString isEmptyString:otherExtension];
-	if ([myExtension isEqualToString:@""])
-		return otherIsEmpty ? NSOrderedSame : NSOrderedDescending;
-    if (otherIsEmpty)
-		return NSOrderedAscending;
-	return [myExtension localizedCaseInsensitiveCompare:otherExtension];
-}    
-
 - (NSComparisonResult)triStateCompare:(NSString *)other{
     // we order increasingly as 0, -1, 1
     int myValue = [self triStateValue];
@@ -827,64 +522,12 @@ http://home.planet.nl/~faase009/GNU.txt
         return NSOrderedDescending;
 }    
 
-static BOOL canCreateFileURL(NSString *aString, BOOL *isURLString)
-{
-    // default return values
-    BOOL canCreate = NO;
-    *isURLString = NO;
-
-    if ([aString hasPrefix:@"file://"]) {
-        *isURLString = YES;
-        canCreate = YES;
-    } else if ([aString length]) {
-        unichar ch = [aString characterAtIndex:0];
-        if ('/' == ch || '~' == ch)
-            canCreate = YES;
-    }
-    return canCreate;
-}
-
-static NSString *UTIForPath(NSString *aPath)
-{
-    BOOL isURLString;
-    NSString *theUTI = nil;
-    // !!! We return nil when a file doesn't exist if it's a properly resolvable path/URL, but we have no way of checking existence with a relative path.  Returning nil is preferable, since then nonexistent files will be sorted to the top or bottom and they're easy to find.
-    if (canCreateFileURL(aPath, &isURLString)) {
-        NSURL *fileURL = (isURLString ? [[NSURL alloc] initWithString:aPath] : [[NSURL alloc] initFileURLWithPath:[aPath stringByStandardizingPath]]);
-        
-        // UTI will be nil for a file that doesn't exist, yet had an absolute/resolvable path
-        if (fileURL) {
-            theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:fileURL error:NULL];
-            [fileURL release];
-        }
-        
-    } else {
-        
-        // fall back to extension; this is probably a relative path, so we'll assume it exists
-        NSString *extension = [aPath pathExtension];
-        if ([extension isEqualToString:@""] == NO)
-            theUTI = [[NSWorkspace sharedWorkspace] UTIForPathExtension:extension];
-    }
-    return theUTI;
-}
-
-- (NSComparisonResult)UTICompare:(NSString *)other{
-    NSString *otherUTI = UTIForPath(other);
-    NSString *selfUTI = UTIForPath(self);
-    if (nil == selfUTI)
-        return (nil == otherUTI ? NSOrderedSame : NSOrderedDescending);
-    if (nil == otherUTI)
-        return NSOrderedAscending;
-    return [selfUTI caseInsensitiveCompare:otherUTI];
-}
-
 #pragma mark -
 
 - (BOOL)booleanValue{
     // Omni's boolValue method uses YES, Y, yes, y and 1 with isEqualToString
     if([self compare:[NSString stringWithBool:YES] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
        [self compare:@"y" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
-       [self compare:@"yes" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
        [self isEqualToString:@"1"])
         return YES;
     else
@@ -897,7 +540,6 @@ static NSString *UTIForPath(NSString *aPath)
     }else if([self isEqualToString:@""] ||
              [self compare:[NSString stringWithBool:NO] options:NSCaseInsensitiveSearch] == NSOrderedSame ||
              [self compare:@"n" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
-             [self compare:@"no" options:NSCaseInsensitiveSearch] == NSOrderedSame ||
              [self isEqualToString:@"0"]){
         return NSOffState;
     }else{
@@ -981,7 +623,7 @@ static NSString *UTIForPath(NSString *aPath)
 
 - (BOOL)hasCaseInsensitivePrefix:(NSString *)prefix;
 {
-    unsigned int length = [prefix length];
+    CFIndex length = [prefix length];
     if(prefix == nil || length > [self length])
         return NO;
     
@@ -1015,28 +657,6 @@ static NSString *UTIForPath(NSString *aPath)
     return [(id)BDStringCreateByNormalizingWhitespaceAndNewlines(CFAllocatorGetDefault(), (CFStringRef)self) autorelease];
 }
 
-- (NSString *)safeFormatString;
-{
-    NSRange r = [self rangeOfString:@"%" options:NSLiteralSearch];
-    NSMutableString *toReturn = r.length ? [[self mutableCopy] autorelease] : self;
-    unsigned len = [toReturn length];
-    while (r.length > 0 && r.location < len && (r.location == len - 1 || [toReturn characterAtIndex:(r.location + 1)] != '%') ) {
-        
-        [toReturn replaceCharactersInRange:NSMakeRange(r.location, 0) withString:@"%"];
-        len = [toReturn length];
-        unsigned start = r.location + 2;
-        if (start < len)
-            r = [toReturn rangeOfString:@"%" options:NSLiteralSearch range:NSMakeRange(start, len - start)];
-        else
-            r = NSMakeRange(NSNotFound, 0);
-    }
-    return toReturn;    
-}
-
-- (NSString *)stringByAppendingEllipsis{
-    return [self stringByAppendingString:[NSString horizontalEllipsisString]];
-}
-
 - (NSString *)stringByTrimmingFromLastPunctuation{
     NSRange range = [self rangeOfCharacterFromSet:[NSCharacterSet punctuationCharacterSet] options:NSBackwardsSearch];
     
@@ -1063,6 +683,10 @@ static NSString *UTIForPath(NSString *aPath)
     return string ? string : self;
 }
 
+- (NSString *)stringByAppendingEllipsis{
+    return [self stringByAppendingString:[NSString horizontalEllipsisString]];
+}
+
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks{
@@ -1078,12 +702,6 @@ static NSString *UTIForPath(NSString *aPath)
 {
     return [OFXMLCreateStringWithEntityReferencesInCFEncoding(self, OFXMLBasicEntityMask, nil, kCFStringEncodingUTF8) autorelease];
 }
-    
-#define APPEND_PREVIOUS() \
-    string = [[NSString alloc] initWithCharacters:begin length:(ptr - begin)]; \
-        [result appendString:string]; \
-            [string release]; \
-                begin = ptr + 1;
 
 // Stolen and modified from the OmniFoundation -htmlString.
 - (NSString *)xmlString;
@@ -1093,210 +711,99 @@ static NSString *UTIForPath(NSString *aPath)
     NSString *string;
     int length;
     
-    length = [self length];
-    ptr = alloca(length * sizeof(unichar));
-    end = ptr + length;
-    [self getCharacters:ptr];
-    result = [NSMutableString stringWithCapacity:length];
-    
-    begin = ptr;
-    while (ptr < end) {
-        if (*ptr > 127) {
-            APPEND_PREVIOUS();
-            [result appendFormat:@"&#%d;", (int)*ptr];
-        } else if (*ptr == '&') {
-            APPEND_PREVIOUS();
-            [result appendString:@"&amp;"];
-        } else if (*ptr == '\"') {
-            APPEND_PREVIOUS();
-            [result appendString:@"&quot;"];
-        } else if (*ptr == '<') {
-            APPEND_PREVIOUS();
-            [result appendString:@"&lt;"];
-        } else if (*ptr == '>') {
-            APPEND_PREVIOUS();
-            [result appendString:@"&gt;"];
-        } else if (*ptr == '\n') {
-            APPEND_PREVIOUS();
-            if (ptr + 1 != end && *(ptr + 1) == '\n') {
-                [result appendString:@"&lt;p&gt;"];
+#define APPEND_PREVIOUS() \
+    string = [[NSString alloc] initWithCharacters:begin length:(ptr - begin)]; \
+        [result appendString:string]; \
+            [string release]; \
+                begin = ptr + 1;
+            
+            length = [self length];
+            ptr = alloca(length * sizeof(unichar));
+            end = ptr + length;
+            [self getCharacters:ptr];
+            result = [NSMutableString stringWithCapacity:length];
+            
+            begin = ptr;
+            while (ptr < end) {
+                if (*ptr > 127) {
+                    APPEND_PREVIOUS();
+                    [result appendFormat:@"&#%d;", (int)*ptr];
+                } else if (*ptr == '&') {
+                    APPEND_PREVIOUS();
+                    [result appendString:@"&amp;"];
+                } else if (*ptr == '\"') {
+                    APPEND_PREVIOUS();
+                    [result appendString:@"&quot;"];
+                } else if (*ptr == '<') {
+                    APPEND_PREVIOUS();
+                    [result appendString:@"&lt;"];
+                } else if (*ptr == '>') {
+                    APPEND_PREVIOUS();
+                    [result appendString:@"&gt;"];
+                } else if (*ptr == '\n') {
+                    APPEND_PREVIOUS();
+                    if (ptr + 1 != end && *(ptr + 1) == '\n') {
+                        [result appendString:@"&lt;p&gt;"];
+                        ptr++;
+                    } else
+                        [result appendString:@"&lt;br&gt;"];
+                }
                 ptr++;
-            } else
-                [result appendString:@"&lt;br&gt;"];
-        }
-        ptr++;
-    }
-    APPEND_PREVIOUS();
-    return result;
-}
-
-- (NSString *)csvString;
-{
-    unichar *ptr, *begin, *end;
-    NSMutableString *result;
-    NSString *string;
-    int length;
-    BOOL isQuoted, needsSpace;
-    
-    length = [self length];
-    ptr = alloca(length * sizeof(unichar));
-    end = ptr + length;
-    [self getCharacters:ptr];
-    result = [NSMutableString stringWithCapacity:length];
-    isQuoted = length > 0 && (*ptr == ' ' || *(end-1) == ' ');
-    needsSpace = NO;
-    
-    if(isQuoted == NO && [self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n\r\t\","]] == NO)
-        return self;
-    
-    begin = ptr;
-    while (ptr < end) {
-        switch (*ptr) {
-            case '\n':
-            case '\r':
-                APPEND_PREVIOUS();
-                if (needsSpace)
-                    [result appendString:@" "];
-            case ' ':
-            case '\t':
-                needsSpace = NO;
-                break;
-            case '"':
-                APPEND_PREVIOUS();
-                [result appendString:@"\"\""];
-            case ',':
-                isQuoted = YES;
-            default:
-                needsSpace = YES;
-                break;
-        }
-        ptr++;
-    }
-    APPEND_PREVIOUS();
-    if (isQuoted) {
-        [result insertString:@"\"" atIndex:0];
-        [result appendString:@"\""];
-    }
-    return result;
-}
-
-- (NSString *)tsvString;
-{
-    if([self containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t\n\r"]] == NO)
-        return self;
-    
-    unichar *ptr, *begin, *end;
-    NSMutableString *result;
-    NSString *string;
-    int length;
-    BOOL needsSpace;
-    
-    length = [self length];
-    ptr = alloca(length * sizeof(unichar));
-    end = ptr + length;
-    [self getCharacters:ptr];
-    result = [NSMutableString stringWithCapacity:length];
-    needsSpace = NO;
-    
-    begin = ptr;
-    while (ptr < end) {
-        switch (*ptr) {
-            case '\t':
-                needsSpace = YES;
-            case '\n':
-            case '\r':
-                APPEND_PREVIOUS();
-                if (needsSpace)
-                    [result appendString:@" "];
-            case ' ':
-                needsSpace = NO;
-                break;
-            default:
-                needsSpace = YES;
-                break;
-        }
-        ptr++;
-    }
-    APPEND_PREVIOUS();
-    return result;
+            }
+            APPEND_PREVIOUS();
+            return result;
 }
 
 #pragma mark -
-#pragma mark Script arguments
+#pragma mark Search string splitting
 
-// parses a space separated list of shell script argments
-// allows quoting parts of an argument and escaped characters outside quotes, according to shell rules
-- (NSArray *)shellScriptArgumentsArray {
-    static NSCharacterSet *specialChars = nil;
-    static NSCharacterSet *quoteChars = nil;
-    
-    if (specialChars == nil) {
-        NSMutableCharacterSet *tmpSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy];
-        [tmpSet addCharactersInString:@"\\\"'`"];
-        specialChars = [tmpSet copy];
-        [tmpSet release];
-        quoteChars = [[NSCharacterSet characterSetWithCharactersInString:@"\"'`"] retain];
-    }
-    
-    NSScanner *scanner = [NSScanner scannerWithString:self];
-    NSString *s = nil;
-    unichar ch = 0;
-    NSMutableString *currArg = [scanner isAtEnd] ? nil : [NSMutableString string];
-    NSMutableArray *arguments = [NSMutableArray array];
-    
-    [scanner setCharactersToBeSkipped:nil];
-    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
-    
-    while ([scanner isAtEnd] == NO) {
-        if ([scanner scanUpToCharactersFromSet:specialChars intoString:&s])
-            [currArg appendString:s];
-        if ([scanner scanCharacter:&ch] == NO)
-            break;
-        if ([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:ch]) {
-            // argument separator, add the last one we found and ignore more whitespaces
-            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
-            [arguments addObject:currArg];
-            currArg = [scanner isAtEnd] ? nil : [NSMutableString string];
-        } else if (ch == '\\') {
-            // escaped character
-            if ([scanner scanCharacter:&ch] == NO)
-                [NSException raise:NSInternalInconsistencyException format:@"Missing character"];
-            if ([currArg length] == 0 && [[NSCharacterSet newlineCharacterSet] characterIsMember:ch])
-                // ignore escaped newlines between arguments, as they should be considered whitespace
-                [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:NULL];
-            else // real escaped character, just add the character, so we can ignore it if it is a special character
-                [currArg appendFormat:@"%C", ch];
-        } else if ([quoteChars characterIsMember:ch]) {
-            // quoted part of an argument, scan up to the matching quote
-            if ([scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(ch, 1)] intoString:&s])
-                [currArg appendString:s];
-            if ([scanner scanCharacter:NULL] == NO)
-                [NSException raise:NSInternalInconsistencyException format:@"Unmatched %C", ch];
-        }
-    }
-    if (currArg)
-        [arguments addObject:currArg];
-    return arguments;
+- (NSArray *)allSearchComponents;
+{
+    NSMutableArray *array = [NSMutableArray arrayWithArray:[self andSearchComponents]];
+    [array addObjectsFromArray:[self orSearchComponents]];
+    return array;
 }
 
-// parses a comma separated list of AppleScript type arguments
-- (NSArray *)appleScriptArgumentsArray {
-    NSMutableArray *arguments = [NSMutableArray array];
-    NSScanner *scanner = [NSScanner scannerWithString:self];
-    unichar ch = 0;
-    id object;
+- (NSArray *)andSearchComponents;
+{
+    NSArray *matchArray = [andRegex findAllInString:self]; // an array of AGRegexMatch objects
+    NSMutableArray *andArray = [[NSMutableArray alloc] initWithCapacity:[matchArray count]]; // an array of all the AND terms we're looking for
     
-    [scanner setCharactersToBeSkipped:nil];
+    // get the tip of the search string first (always an AND)
+    NSString *tip = [[[tipRegex findInString:self] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if(!tip)
+        return [NSArray array];
+    else
+        [andArray addObject:tip];
     
-    while ([scanner isAtEnd] == NO) {
-        if ([scanner scanAppleScriptValueUpToCharactersInSet:[NSCharacterSet commaCharacterSet] intoObject:&object])
-            [arguments addObject:object];
-        if ([scanner scanCharacter:&ch] == NO)
-            break;
-        if (ch != ',')
-            [NSException raise:NSInternalInconsistencyException format:@"Missing ,"];
+    NSEnumerator *e = [matchArray objectEnumerator];
+    AGRegexMatch *m;
+    
+    NSString *s;
+    
+    while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
+        s = [[m group] stringByTrimmingCharactersInSet:[NSCharacterSet searchStringSeparatorCharacterSet]];
+        if(![NSString isEmptyString:s])
+            [andArray addObject:s];
+    }    
+    return [andArray autorelease];
+}
+
+- (NSArray *)orSearchComponents;
+{
+    NSArray *matchArray = [orRegex findAllInString:self];
+    NSEnumerator *e = [matchArray objectEnumerator];
+    AGRegexMatch *m;
+    NSString *s;
+    
+    NSMutableArray *orArray = [[NSMutableArray alloc] initWithCapacity:[matchArray count]]; // an array of all the OR terms we're looking for
+        
+    while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
+        s = [[m group] stringByTrimmingCharactersInSet:[NSCharacterSet searchStringSeparatorCharacterSet]];
+        if(![NSString isEmptyString:s])
+            [orArray addObject:s];
     }
-    return arguments;
+    return [orArray autorelease];
 }
 
 #pragma mark Empty lines
@@ -1376,42 +883,6 @@ static NSString *UTIForPath(NSString *aPath)
     return [[self url] linkedSmallIcon];
 }
 
-- (NSString *)titleCapitalizedString {
-    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
-    NSString *s = nil;
-    NSMutableString *returnString = [NSMutableString stringWithCapacity:[self length]];
-    [NSCharacterSet curlyBraceCharacterSet];
-    int nesting = 0;
-    unichar ch;
-    unsigned location;
-    NSRange range;
-    
-    [scanner setCharactersToBeSkipped:nil];
-    
-    while([scanner isAtEnd] == NO){
-        if([scanner scanUpToCharactersFromSet:[NSCharacterSet curlyBraceCharacterSet] intoString:&s])
-            [returnString appendString:nesting == 0 ? [s lowercaseString] : s];
-        if([scanner scanCharacter:&ch] == NO)
-            continue;
-        [returnString appendFormat:@"%C", ch];
-        location = [scanner scanLocation];
-        if(location > 0 && [self characterAtIndex:location - 1] == '\\')
-            continue;
-        if(ch == '{')
-            nesting++;
-        else
-            nesting--;
-    }
-    
-    range = [returnString rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
-    if(range.location != NSNotFound)
-        [returnString replaceCharactersInRange:range withString:[[returnString substringWithRange:range] uppercaseString]];
-    
-    [scanner release];
-    
-    return returnString;
-}
-
 @end
 
 
@@ -1423,7 +894,7 @@ static NSString *UTIForPath(NSString *aPath)
         [self appendCharacter:'X'];
     }
     @catch(id localException){
-        if([localException respondsToSelector:@selector(name)] && [[localException name] isEqual:NSInvalidArgumentException])
+        if([[localException name] isEqualToString:NSInvalidArgumentException])
             return NO;
         else
             @throw;

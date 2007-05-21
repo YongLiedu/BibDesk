@@ -2,7 +2,7 @@
 // BibDesk 
 // Created by Michael McCracken, 2002
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,19 +38,17 @@
 #import <OmniAppKit/OAPreferenceController.h>
 #import <OmniAppKit/OAPreferenceClientRecord.h>
 
-NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
-
 @implementation OAPreferenceController (HelpLookup)
 
+NSString *BDSKAllFieldsString = nil;
+
 + (void)didLoad
-{    
+{
+    BDSKAllFieldsString = [NSLocalizedString(@"Any Field", @"string specifying a search in all fields of an item") copy];
+    
     // Hidden default to allow for JabRef interoperability; (RFE #1546931) this is an all-or-nothing switch.  Alternate would be to use a script hook to copy annote->review when closing an editor, but then you have lots of duplication.
     if ([[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] != nil)
         BDSKAnnoteString = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKAnnoteFieldName"] copy];
-    
-    NSNumber *n = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKDefaultAnimationTimeInterval"];
-    if (nil != n)
-        BDSKDefaultAnimationTimeInterval = [n floatValue];
 }
 
 - (IBAction)showHelpForClient:(id)sender;
@@ -70,11 +68,10 @@ NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
 @end
 
 
-NSString *BDSKDefaultBibFileAliasKey = @"BDSKDefaultBibFileAliasKey";
+NSString *BDSKDefaultBibFilePathKey = @"Default Bib File";
 NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
 NSString *BDSKLastOpenFileNamesKey = @"Last Open FileNames";
 NSString *BDSKAutoCheckForUpdatesKey = @"Check for updates when starting";
-NSString *BDSKEmailTemplateKey = @"BDSKEmailTemplateKey";
 NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 NSString *BDSKShowingPreviewKey = @"Showing Preview";
 NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
@@ -87,10 +84,7 @@ NSString *BDSKReadExtendedAttributesKey = @"BDSKReadExtendedAttributesKey";
 NSString *BDSKShouldUsePDFMetadata = @"BDSKShouldUsePDFMetadata";
 NSString *BDSKShouldWritePDFMetadata = @"BDSKShouldWritePDFMetadata";
 NSString *BDSKIntersectGroupsKey = @"BDSKIntersectGroupsKey";
-NSString *BDSKSearchGroupBookmarksKey = @"BDSKSearchGroupBookmarksKey";
-NSString *BDSKSearchMenuTagKey = @"BDSKSearchMenuTagKey";
 
-NSString *BDSKStringEncodingsKey = @"BDSKStringEncodingsKey";
 NSString *BDSKDefaultStringEncodingKey = @"Default string encoding for opening and saving";
 NSString *BDSKShouldTeXifyWhenSavingAndCopyingKey = @"TeXify characters when saving or copying BibTeX";
 NSString *BDSKTeXPreviewFileEncodingKey = @"Character encoding for TeX preview file";
@@ -100,7 +94,7 @@ NSString *BDSKBibTeXBinPathKey = @"BibTeX Binary Path";
 NSString *BDSKBTStyleKey = @"BibTeX Style";
 NSString *BDSKUsesTeXKey = @"Uses TeX";
 
-NSString *BDSKDragCopyTypesKey = @"BDSKDragCopyTypesKey";
+NSString *BDSKDragCopyKey = @"Drag and Copy";
 NSString *BDSKEditOnPasteKey = @"Edit on Paste";
 NSString *BDSKSeparateCiteKey = @"Separate Cite";
 NSString *BDSKCitePrependTildeKey = @"Cite Prepend Tilde";
@@ -116,6 +110,7 @@ NSString *BDSKCiteKeyCleanOptionKey = @"Cite Key Clean Braces or TeX";
 
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
+NSString *BDSKColumnOrderKey = @"Column Names in Order";
 NSString *BDSKDefaultSortedTableColumnKey = @"Default table column to sort new documents";
 NSString *BDSKDefaultSortedTableColumnIsDescendingKey = @"Default table column sort order";
 NSString *BDSKSortGroupsKey = @"BDSKSortGroupsKey";
@@ -150,12 +145,11 @@ NSString *BDSKRemoteURLFieldsKey = @"Remote URL Fields";
 NSString *BDSKRatingFieldsKey = @"Rating fields";
 NSString *BDSKBooleanFieldsKey = @"Boolean fields";
 NSString *BDSKTriStateFieldsKey = @"Three state fields";
-NSString *BDSKCitationFieldsKey = @"Citation fields";
-NSString *BDSKPersonFieldsKey = @"Person fields";
-NSString *BDSKDefaultViewersKey = @"BDSKDefaultViewersKey";
 NSString *BDSKOutputTemplateFileKey = @"Output Template File";
 
 NSString *BDSKCustomCiteStringsKey = @"Custom CiteStrings";
+NSString *BDSKAutoSaveAsRSSKey = @"Auto-save as RSS";
+NSString *BDSKRSSDescriptionFieldKey = @"Field to use as Description in RSS";
 NSString *BDSKExportTemplateStyleKey = @"BDSKExportTemplateStyleKey";
 
 NSString *BDSKPubTypeStringKey = @"Current Publication Type String";
@@ -165,6 +159,13 @@ NSString *BDSKWarnOnDeleteKey = @"BDSKWarnOnDelete";
 NSString *BDSKWarnOnRenameGroupKey = @"BDSKWarnOnRenameGroup";
 NSString *BDSKWarnOnRemovalFromGroupKey = @"BDSKWarnOnRemovalFromGroupKey";
 
+NSString *BDSKCurrentQuickSearchKey = @"Current Quick Search Key";
+NSString *BDSKCurrentQuickSearchTextDictKey = @"Current Quick Search Text Dictionary";
+NSString *BDSKQuickSearchKeys = @"Quick Search Keys";
+NSString *BDSKRowColorRedKey = @"RedComponentColor of alternating rows Key";
+NSString *BDSKRowColorGreenKey = @"GreenComponentColor of alternating rows Key";
+NSString *BDSKRowColorBlueKey = @"BlueComponentColor of alternating rows Key";
+
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";
 NSString *BDSKAutoFileUsesRelativePathKey = @"AutoFile uses relative path";
@@ -172,7 +173,6 @@ NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
 NSString *BDSKLocalUrlLowercaseKey = @"Local-Url Generate Lowercase";
 NSString *BDSKLocalUrlCleanOptionKey = @"Local-Url Clean Braces or TeX";
-NSString *BDSKWarnOnMoveFolderKey = @"BDSKWarnOnMoveFolderKey";
 
 NSString *BDSKDuplicateBooktitleKey = @"Duplicate Booktitle for Crossref";
 NSString *BDSKForceDuplicateBooktitleKey = @"Overwrite Booktitle when Duplicating for Crossref";
@@ -188,8 +188,13 @@ NSString *BDSKBibStyleMacroDefinitionsKey = @"Macro definitions from bib style f
 NSString *BDSKGlobalMacroDefinitionsKey = @"BDSKGlobalMacroDefinitionsKey";
 NSString *BDSKGlobalMacroFilesKey = @"BDSKGlobalMacroFilesKey";
 
+NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey = @"Default field for find and replace";
+NSString *BDSKFindControllerSearchScopeKey = @"Search scope for find and replace";
+NSString *BDSKFindControllerCaseInsensitiveFindAndReplaceKey = @"Use case sensitive search for find and replace";
+NSString *BDSKFindControllerFindAndReplaceSelectedItemsKey = @"Search only selected items for find and replace";
 NSString *BDSKFindControllerLastFindAndReplaceFieldKey = @"Last field for find and replace";
-
+NSString *BDSKFindControllerFindAsMacroKey = @"Find text as macro for replacement";
+NSString *BDSKFindControllerReplaceAsMacroKey = @"Replace found text as macro";
 NSString *BDSKPreviewBaseFontSizeKey = @"Font size for preview pane in document view";
 NSString *BDSKShouldAutosaveDocumentKey = @"BDSKShouldAutosaveDocumentKey";
 NSString *BDSKAutosaveTimeIntervalKey = @"BDSKAutosaveTimeIntervalKey";
@@ -199,13 +204,13 @@ NSString *BDSKScriptHooksKey = @"Script Hooks";
 NSString *BDSKGroupFieldsKey = @"BDSKGroupFieldsKey";
 NSString *BDSKCurrentGroupFieldKey = @"BDSKCurrentGroupFieldKey";
 NSString *BDSKDefaultGroupFieldSeparatorKey = @"BDSKDefaultGroupFieldSeparatorKey";
-NSString *BDSKGroupFieldSeparatorCharactersKey = @"BDSKGroupFieldSeparatorCharactersKey";
 
 NSString *BDSKTableHeaderImagesKey = @"BDSKTableHeaderImages";
 NSString *BDSKTableHeaderTitlesKey = @"BDSKTableHeaderTitles";
 NSString *BDSKCiteseerHostKey = @"BDSKCiteseerHostKey";
 
-NSString *BDSKAuthorNameDisplayKey = @"BDSKAuthorNameDisplayKey";
+NSString *BDSKShouldDisplayFirstNamesKey = @"BDSKShouldDisplayFirstNamesKey";
+NSString *BDSKShouldAbbreviateFirstNamesKey = @"BDSKShouldAbbreviateFirstNamesKey";
 NSString *BDSKShouldDisplayLastNameFirstKey = @"BDSKShouldDisplayLastNameFirstKey";
 NSString *BDSKShouldShareFilesKey = @"BDSKShouldShareFilesKey";
 NSString *BDSKShouldLookForSharedFilesKey = @"BDSKShouldLookForSharedFilesKey";
@@ -215,10 +220,6 @@ NSString *BDSKWarnOnCiteKeyChangeKey = @"BDSKWarnOnCiteKeyChangeKey";
 NSString *BDSKUpdateCheckIntervalKey = @"BDSKUpdateCheckIntervalKey";
 NSString *BDSKUpdateCheckLastDateKey = @"BDSKUpdateCheckLastDateKey";
 NSString *BDSKUpdateLatestNotifiedVersionKey = @"BDSKUpdateLatestNotifiedVersionKey";
-NSString *BDSKSpotlightVersionInfo = @"BDSKSpotlightVersionInfo";
-
-NSString *BDSKShouldShowWebGroupPrefKey = @"BDSKShouldShowWebGroup";
-
 
 #pragma mark Field name strings
 
@@ -247,7 +248,6 @@ NSString *BDSKPublisherString = @"Publisher";
 NSString *BDSKDateAddedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
 NSString *BDSKDateString = @"Date";
-NSString *BDSKPubDateString = @"Publication Date";
 NSString *BDSKCrossrefString = @"Crossref";
 NSString *BDSKRatingString = @"Rating";
 NSString *BDSKReadString = @"Read";
@@ -262,7 +262,6 @@ NSString *BDSKThirdAuthorEditorString = @"3rd Author or Editor";
 NSString *BDSKAuthorEditorString = @"Author or Editor";
 NSString *BDSKLastAuthorEditorString = @"Last Author or Editor";
 NSString *BDSKItemNumberString = @"Item Number";
-NSString *BDSKImportOrderString = @"Import Order";
 NSString *BDSKTypeString = @"Type";
 NSString *BDSKAddressString = @"Address";
 NSString *BDSKDoiString = @"Doi";
@@ -283,11 +282,13 @@ NSString *BDSKMiscString = @"misc";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";
+NSString *BDSKDocumentWindowWillCloseNotification = @"Document Window Will Close Notification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
+NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
 NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotification";
 NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChangedNotification";
 NSString *BDSKGroupFieldChangedNotification = @"GroupFieldChangedNotification";
-NSString *BDSKGroupFieldAddRemoveNotification = @"BDSKGroupFieldAddRemoveNotification";
+NSString *BDSKGroupAddRemoveNotification = @"BDSKGroupAddRemoveNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKNeedsToBeFiledChangedNotification = @"BibItem NeedsToBeFiled Flag Changed notification";
 NSString *BDSKDocSetPublicationsNotification = @"Set the publications of a document";
@@ -300,28 +301,21 @@ NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Wind
 NSString *BDSKBibTypeInfoChangedNotification = @"TypeInfo Changed Notification";
 NSString *BDSKCustomFieldsChangedNotification = @"Custom Fields Changed Notification";
 NSString *BDSKFilterChangedNotification = @"Filter Changed Notification";
-NSString *BDSKGroupNameChangedNotification = @"BDSKGroupNameChangedNotification";
 NSString *BDSKStaticGroupChangedNotification = @"BDSKStaticGroupChangedNotification";
 NSString *BDSKSharedGroupsChangedNotification = @"BDSKSharedGroupsChangedNotification";
 NSString *BDSKSharedGroupUpdatedNotification = @"BDSKSharedGroupUpdatedNotification";
 NSString *BDSKSharingNameChangedNotification = @"BDSKSharingNameChangedNotification";
-NSString *BDSKURLGroupUpdatedNotification = @"BDSKURLGroupUpdatedNotification";
-NSString *BDSKScriptGroupUpdatedNotification = @"BDSKScriptGroupUpdatedNotification";
-NSString *BDSKSearchGroupUpdatedNotification = @"BDSKSearchGroupUpdatedNotification";
-NSString *BDSKWebGroupUpdatedNotification = @"BDSKWebGroupUpdatedNotification";
-NSString *BDSKDidAddRemoveGroupNotification = @"BDSKDidAddRemoveGroupNotification";
-NSString *BDSKWillAddRemoveGroupNotification = @"BDSKWillAddRemoveGroupNotification";
 NSString *BDSKClientConnectionsChangedNotification = @"BDSKClientConnectionsChangedNotification";
 NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedNotification";
 NSString *BDSKDocumentControllerAddDocumentNotification = @"BDSKDocumentControllerAddDocumentNotification";
 NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentControllerRemoveDocumentNotification";
-NSString *BDSKDocumentControllerDidChangeMainDocumentNotification = @"BDSKDocumentControllerDidChangeMainDocumentNotification";
 NSString *BDSKSearchIndexInfoChangedNotification = @"BDSKSearchIndexInfoChangedNotification";
-NSString *BDSKEncodingsListChangedNotification = @"BDSKEncodingsListChangedNotification";
 
 #pragma mark Exception name strings
 
 NSString *BDSKComplexStringException = @"BDSKComplexStringException";
+NSString *BDSKTeXifyException = @"BDSKTeXifyException";
+NSString *BDSKStringEncodingException = @"BDSKStringEncodingException";
 NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
 
 #pragma mark Error name strings
@@ -329,45 +323,3 @@ const char *BDSKParserError = "BDSKParserError";
 const char *BDSKNetworkError = "BDSKNetworkError";
 
 NSString *BDSKParserPasteDragString = @"Paste/Drag";
-
-NSString *BDSKAllFieldsString = @"AllFields";
-NSString *BDSKFileContentSearchString = @"FileContent";
-NSString *BDSKRelevanceString = @"Relevance";
-NSString *BDSKPersonString = @"Person";
-NSString *BDSKSkimNotesString = @"SkimNotes";
-
-/*
- 
- ** Hidden pref keys **
- 
- Last updated: Thu May 17 16:29:22 GMT 2007
- 
- BDSKRemoveExtendedAttributesFromDocuments       bool    false
- BDSKDisableDocumentExtendedAttributes           bool    false
- BDSKDisableExportAttributes                     bool    false
- BDSKFieldsToWriteIfEmpty                        array   ()
- BDSKShouldUseSpotlightCommentForURL             bool    false
- BDSKEnableSharingWithSelf                       bool    false   // developers only
- BDSKDisableRemoteChangeNotifications            bool    false
- BDSKSharingServerMaxConnections                 integer 0       // ignored if < 20
- BDSKDisableExceptionHandling                    bool    false   // developers only
- BDSKShouldLogFilesAddedToMatchingSearchIndex    bool    false   // developers only
- BDSKUseXMLSpotlightCache                        bool    false   // developers only
- BDSKDisableTypeAheadSelection                   bool    false
- BDSKDisableBackgroundColorForGroupTable         bool    false
- BDSKScriptMenuDisabled                          bool    false
- BDSKAnnoteFieldName                             string  nil
- BDSKDefaultAnimationTimeInterval                float   0.15    // set to zero to disable
- BDSKTableHeaderImages                           dict    nil
- BDSKTableHeaderTitles                           dict    nil
- BDSKGroupFieldSeparatorCharactersKey            string  ";:,"
- BDSKDefaultGroupFieldSeparatorKey               string  "; "    // note trailing space!
- BDSKShouldShowWebGroup                          bool    false
- BDSKEditorFormShouldAutoCompleteKey             bool    true
- BDSKReadExtendedAttributesKey                   bool    false   // read/write BibTeX to files
- BDSKShouldUsePDFMetadata                        bool    false   // reads standard PDF info
- BDSKShouldWritePDFMetadata                      bool    false   // writes standard PDF info
- 
-
- */
-

@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 03/17/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -39,19 +39,23 @@
 #import "BDSKPersistentSearch.h"
 
 static id sharedSearch = nil;
-static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would work here */
 
 @implementation BDSKPersistentSearch
 
 + (id)sharedSearch;
 {
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+        return nil;
+    
     if(sharedSearch == nil)
         sharedSearch = [[BDSKPersistentSearch alloc] init];
     return sharedSearch;
 }
 
 - (id)init
-{    
+{
+    NSAssert(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3, @"Only available on 10.4 and later systems.");
+    
     if(self = [super init])
         queries = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     
@@ -64,23 +68,16 @@ static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would wo
     [super dealloc];
 }
 
-- (BOOL)hasQuery:(NSString *)queryString;
-{ 
-    NSParameterAssert(queryString != nil);
-    return CFDictionaryContainsKey(queries, (CFStringRef)queryString);
-}
-
 - (BOOL)addQuery:(NSString *)queryString scopes:(NSArray *)searchScopes;
 {
     NSParameterAssert(queryString != nil);
     BOOL success = YES;
     MDQueryRef mdQuery = NULL;
     
-    if (CFDictionaryGetValueIfPresent(queries, (CFStringRef)queryString, (const void **)&mdQuery)) {
+    if(CFDictionaryGetValueIfPresent(queries, (CFStringRef)queryString, (const void **)&mdQuery)){
         
         // already present in the dictionary, so just modify the scope
-        if (CFEqual(nullQueryMarker, mdQuery) == FALSE)
-            MDQuerySetSearchScope(mdQuery, (CFArrayRef)searchScopes, 0);
+        MDQuerySetSearchScope(mdQuery, (CFArrayRef)searchScopes, 0);
 
     } else {
     
@@ -98,17 +95,6 @@ static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would wo
                 success = NO;
             
             CFRelease(mdQuery);
-        } else {
-            success = NO;
-            // add the bogus query, so we don't keep trying; a user reported beachballs when creating the query with a bad spotlight cache, so we'll just log a message and leave out this functionality
-            CFDictionaryAddValue(queries, (const void *)queryString, nullQueryMarker);
-#if OMNI_FORCE_ASSERTIONS
-            // warning for developers, in case of using an incorrect query string
-            NSRunAlertPanel([NSString stringWithFormat:@"Sorry, %@, I'm afraid I can't do that", NSUserName()], @"Either the query \"%@\" was not valid, or your Spotlight cache requires repair.", @"Doh!", nil, nil, [queryString safeFormatString]);
-#else
-            // log message for users,
-            NSLog(@"Unable to execute Spotlight query \"%@\" with search scopes %@", [queryString safeFormatString], searchScopes);
-#endif
         }
     }
     
@@ -120,10 +106,7 @@ static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would wo
     MDQueryRef mdQuery = (MDQueryRef)CFDictionaryGetValue(queries, (CFStringRef)queryString);
     NSMutableArray *results = nil;
     
-    if(mdQuery != NULL && CFEqual(nullQueryMarker, mdQuery) == FALSE){
-        
-        // supposed to disable updates before iterating results
-        MDQueryDisableUpdates(mdQuery);
+    if(mdQuery != NULL){
         CFIndex idx = MDQueryGetResultCount(mdQuery);
         results = [NSMutableArray arrayWithCapacity:idx];
 
@@ -138,7 +121,6 @@ static void *nullQueryMarker = @"Null MDQuery Marker"; /* any CFTypeRef would wo
                 CFRelease(value);
             }
         }
-        MDQueryEnableUpdates(mdQuery);
     }
     
     return results;

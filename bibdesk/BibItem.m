@@ -1,7 +1,7 @@
 //  BibItem.m
 //  Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,9 @@
 
 
 #import "BibItem.h"
-#import "BDSKOwnerProtocol.h"
 #import "NSDate_BDSKExtensions.h"
 #import "BDSKCountedSet.h"
 #import "BDSKGroup.h"
-#import "BDSKCategoryGroup.h"
 #import "BibEditor.h"
 #import "BibTypeManager.h"
 #import "BibAuthor.h"
@@ -57,8 +55,6 @@
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
-#import "NSArray_BDSKExtensions.h"
-#import "NSError_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKStringNode.h"
 #import "OFCharacterSet_BDSKExtensions.h"
@@ -66,14 +62,9 @@
 #import "BibField.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateParser.h"
-#import "BDSKPublicationsArray.h"
-#import "NSData_BDSKExtensions.h"
-#import "BDSKSkimReader.h"
-#import "BDSKCitationFormatter.h"
-
+#import "BibDocument_Search.h"
 
 static NSString *BDSKDefaultCiteKey = @"cite-key";
-static NSSet *fieldsToWriteIfEmpty = nil;
 
 enum {
     BDSKStringFieldCollection, 
@@ -118,9 +109,6 @@ enum {
 // updates derived info from the dictionary
 - (void)updateMetadataForKey:(NSString *)key;
 
-// rearranges the field dictionary, keeping old keys if they have a value
-- (void)makeType;
-
 @end
 
 
@@ -130,39 +118,9 @@ CFHashCode BibItemCaseInsensitiveCiteKeyHash(const void *item)
     return OFCaseInsensitiveStringHash([(BibItem *)item citeKey]);
 }
 
-CFHashCode BibItemEquivalenceHash(const void *item)
-{
-    OBASSERT([(id)item isKindOfClass:[BibItem class]]);
-    
-    NSString *type = [(BibItem *)item pubType];
-    CFHashCode hash = OFCaseInsensitiveStringHash(type);
-	
-	// hash only the standard fields; are these all we should compare?
-	BibTypeManager *btm = [BibTypeManager sharedManager];
-	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
-	[keys addObjectsFromArray:[btm requiredFieldsForType:type]];
-	[keys addObjectsFromArray:[btm optionalFieldsForType:type]];
-	[keys addObjectsFromArray:[btm userDefaultFieldsForType:type]];
-    [keys removeObject:BDSKLocalUrlString];
-	NSEnumerator *keyEnum = [keys objectEnumerator];
-    [keys release];
-    
-	NSString *key;
-	
-	while (key = [keyEnum nextObject])
-        hash ^= [[(BibItem *)item stringValueOfField:key inherit:NO] hash];
-    
-    return hash;
-}
-
 Boolean BibItemEqualityTest(const void *value1, const void *value2)
 {
     return ([(BibItem *)value1 isEqualToItem:(BibItem *)value2]);
-}
-
-Boolean BibItemEquivalenceTest(const void *value1, const void *value2)
-{
-    return ([(BibItem *)value1 isEquivalentToItem:(BibItem *)value2]);
 }
 
 // Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
@@ -174,26 +132,6 @@ const CFSetCallBacks BDSKBibItemEqualityCallBacks = {
     BibItemEqualityTest,
     BibItemCaseInsensitiveCiteKeyHash,
 };
-
-// Values are BibItems; used to determine if pubs are duplicates.  Items must not be edited while contained in a set using these callbacks, so dispose of the set before any editing operations.
-const CFSetCallBacks BDSKBibItemEquivalenceCallBacks = {
-    0,    // version
-    OFNSObjectRetain,  // retain
-    OFNSObjectRelease, // release
-    OFNSObjectCopyDescription,
-    BibItemEquivalenceTest,
-    BibItemEquivalenceHash,
-};
-
-static NSURL *createUniqueURL(void)
-{
-    CFUUIDRef uuid = CFUUIDCreate(NULL);
-    NSString *uuidStr = (id)CFUUIDCreateString(NULL, uuid);
-    NSURL *identifierURL = [[NSURL alloc] initWithString:[@"bdskidentifier://" stringByAppendingString:uuidStr]];
-    CFRelease(uuid);
-    [uuidStr release];
-    return identifierURL;
-}    
 
 /* Paragraph styles cached for efficiency. */
 static NSParagraphStyle* keyParagraphStyle = nil;
@@ -216,13 +154,15 @@ static CFDictionaryRef selectorTable = NULL;
     [defaultStyle setFirstLineHeadIndent:50];
     [defaultStyle setTailIndent:-30];
     bodyParagraphStyle = [defaultStyle copy];
-    [defaultStyle release];
     
     // Create a table of field/SEL pairs used for searching
     CFMutableDictionaryRef table = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFCopyStringDictionaryKeyCallBacks, &OFNonOwnedPointerDictionaryValueCallbacks);
     
     CFDictionaryAddValue(table, (CFStringRef)BDSKTitleString, NSSelectorFromString(@"title"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKAuthorString, NSSelectorFromString(@"bibTeXAuthorString"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKDateString, NSSelectorFromString(@"calendarDateDescription"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKDateModifiedString, NSSelectorFromString(@"calendarDateModifiedDescription"));
+    CFDictionaryAddValue(table, (CFStringRef)BDSKDateAddedString, NSSelectorFromString(@"calendarDateAddedDescription"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKAllFieldsString, NSSelectorFromString(@"allFieldsString"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKPubTypeString, NSSelectorFromString(@"pubType"));
     CFDictionaryAddValue(table, (CFStringRef)BDSKCiteKeyString, NSSelectorFromString(@"citeKey"));
@@ -234,11 +174,6 @@ static CFDictionaryRef selectorTable = NULL;
     CFDictionaryAddValue(table, CFSTR("Pub Type"), NSSelectorFromString(@"pubType"));
     selectorTable = CFDictionaryCreateCopy(CFAllocatorGetDefault(), table);
     CFRelease(table);
-    
-    // hidden pref as support for RFE #1690155 (partially implemented; view will represent this as inherited unless it goes through -[BibItem valueOfField:inherit:], which fields like "Key" certainly will)
-    NSArray *emptyFields = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKFieldsToWriteIfEmpty"];
-    if ([emptyFields count])
-        fieldsToWriteIfEmpty = [[NSSet alloc] initWithArray:emptyFields];
 }
 
 // for creating an empty item
@@ -246,7 +181,6 @@ static CFDictionaryRef selectorTable = NULL;
 {
 	self = [self initWithType:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPubTypeStringKey] 
                      fileType:BDSKBibtexString 
-                      citeKey:BDSKDefaultCiteKey 
                     pubFields:nil 
                         isNew:YES];
 	if (self) {
@@ -257,7 +191,7 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 // this is the designated initializer.
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew{ 
     if (self = [super init]){
 		if(fieldsDict){
 			pubFields = [fieldsDict mutableCopy];
@@ -272,13 +206,10 @@ static CFDictionaryRef selectorTable = NULL;
         
         people = nil;
         
-        owner = nil;
-        
-        fileOrder = nil;
-        identifierURL = createUniqueURL();
-        
+        document = nil;
         [self setFileType:inFileType];
         [self setPubTypeWithoutUndo:type];
+        [self setCiteKeyString: BDSKDefaultCiteKey];
         [self setDate: nil];
         [self setDateAdded: nil];
         [self setDateModified: nil];
@@ -286,17 +217,10 @@ static CFDictionaryRef selectorTable = NULL;
 		[self setNeedsToBeFiled:NO];
 		
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-        cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
 		
         templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
         [self updateMetadataForKey:nil];
-        
-        if (key == nil) {
-            [self setCiteKeyString: BDSKDefaultCiteKey];
-        } else {
-            [self setCiteKeyString: key];
-        }
         
         // used for determining if we need to re-save Spotlight metadata
         // set to YES initially so the first save after opening a file always writes the metadata, since we don't know beforehand if it's been written
@@ -309,7 +233,8 @@ static CFDictionaryRef selectorTable = NULL;
 // Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
     // We set isNew to YES as copied items are always added as new items to a document, e.g. for duplicates and text import, so the Date-Added should be reset.  Note that unless someone uses Date-Added or Date-Modified as a default field, a copy is equal according to isEqualToItem:
-    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType citeKey:citeKey pubFields:pubFields isNew:YES];
+    BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType fileType:fileType pubFields:pubFields isNew:YES];
+    [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
 	
     return theCopy;
@@ -327,14 +252,11 @@ static CFDictionaryRef selectorTable = NULL;
             [self setPubTypeWithoutUndo:[coder decodeObjectForKey:@"pubType"]];
             [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
             groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-            cachedURLs = [[NSMutableDictionary alloc] initWithCapacity:5];
             // set by the document, which we don't archive
-            owner = nil;
-            fileOrder = nil;
+            document = nil;
             hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
             // we don't bother encoding this
             spotlightMetadataChanged = YES;
-            identifierURL = createUniqueURL();
         }
     } else {       
         [[super init] release];
@@ -368,7 +290,6 @@ static CFDictionaryRef selectorTable = NULL;
     [pubFields release];
     [people release];
 	[groups release];
-    [cachedURLs release];
 
     [pubType release];
     [fileType release];
@@ -376,8 +297,6 @@ static CFDictionaryRef selectorTable = NULL;
     [pubDate release];
     [dateAdded release];
     [dateModified release];
-    [fileOrder release];
-    [identifierURL release];
     [super dealloc];
 }
 
@@ -406,41 +325,6 @@ static CFDictionaryRef selectorTable = NULL;
 	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm userDefaultFieldsForType:[self pubType]]];
-	NSEnumerator *keyEnum = [keys objectEnumerator];
-    [keys release];
-    
-	NSString *key;
-	
-    // @@ remove TeX?  case-sensitive?
-	while (key = [keyEnum nextObject]) {
-		if ([[self stringValueOfField:key inherit:NO] isEqualToString:[aBI stringValueOfField:key inherit:NO]] == NO)
-			return NO;
-	}
-	
-	NSString *crossref1 = [self valueOfField:BDSKCrossrefString inherit:NO];
-	NSString *crossref2 = [aBI valueOfField:BDSKCrossrefString inherit:NO];
-	if ([NSString isEmptyString:crossref1] == YES)
-		return [NSString isEmptyString:crossref2];
-	else if ([NSString isEmptyString:crossref2] == YES)
-		return NO;
-	return ([crossref1 caseInsensitiveCompare:crossref2] == NSOrderedSame);
-}
-
-- (BOOL)isEquivalentToItem:(BibItem *)aBI{ 
-    if (aBI == self)
-		return YES;
-    
-    // type should be compared case-insensitively from BibTeX's perspective
-	if ([[self pubType] caseInsensitiveCompare:[aBI pubType]] != NSOrderedSame)
-		return NO;
-	
-	// compare only the standard fields; are these all we should compare?
-	BibTypeManager *btm = [BibTypeManager sharedManager];
-	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
-	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
-	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
-	[keys addObjectsFromArray:[btm userDefaultFieldsForType:[self pubType]]];
-    [keys removeObject:BDSKLocalUrlString];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
     
@@ -503,6 +387,90 @@ static CFDictionaryRef selectorTable = NULL;
 
 #pragma mark -
 
+#pragma mark Type info
+
+// used to be a #define; changed to function for clarity in debugging
+static inline void setEmptyStringIfObjectIsNilAndExcludeFromRemoval(NSString *key, NSMutableDictionary *dict, NSMutableSet *removalSet)
+{
+    if([dict objectForKey:key] == nil)
+        [dict setObject:@"" forKey:key];
+    [removalSet removeObject:key];
+}
+
+// CFSetApplierFunction callback
+static void removeItemsInSetFromDictionary(const void *value, void *context)
+{
+    CFDictionaryRemoveValue((CFMutableDictionaryRef)context, value);
+}
+
+// CFSet string equality callback
+static Boolean stringIsEqualToString(const void *value1, const void *value2) { return [(id)value1 isEqualToString:(id)value2]; }
+
+- (void)makeType{
+    NSString *fieldString;
+    NSString *theType = [self pubType];
+    
+    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    
+    // enumerating small arrays by index is generally faster than NSEnumerator, and -makeType is called many times at load
+    CFArrayRef requiredFields = (CFArrayRef)[typeManager requiredFieldsForType:theType];
+    CFArrayRef optionalFields = (CFArrayRef)[typeManager optionalFieldsForType:theType];
+    CFArrayRef userFields = (CFArrayRef)[typeManager userDefaultFieldsForType:theType];
+    
+    // current state of this item's pubFields
+    CFArrayRef allFields = (CFArrayRef)[self allFieldNames];
+    
+    CFIndex requiredCount = CFArrayGetCount(requiredFields);
+    CFIndex optionalCount = CFArrayGetCount(optionalFields);
+    CFIndex userCount = CFArrayGetCount(userFields);
+    CFIndex allFieldsCount = CFArrayGetCount(allFields);
+    
+    // have to retain keys removed from the dictionary, but we know they're strings
+    CFSetCallBacks callBacks = { 0, OFCFTypeRetain, OFCFTypeRelease, CFCopyDescription, stringIsEqualToString, CFHash };
+    
+    // fixed-size mutable set; this needn't be larger than allFieldsCount
+    NSMutableSet *emptyFieldsToRemove = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), allFieldsCount, &callBacks);
+    NSString *key;
+    
+    CFIndex idx;
+    
+    // for each field currently in this publication, check if it's value is an empty string; if so, add to the set of fields to be removed
+    for (idx = 0; idx < allFieldsCount; idx++) {
+        key = (id)CFArrayGetValueAtIndex(allFields, idx);
+        if ([[pubFields objectForKey:key] isEqualAsComplexString:@""])
+            [emptyFieldsToRemove addObject:key];
+    }        
+        
+    // see if we have a nil value for any required field; if so, give it an empty value and don't remove it at the end
+    for (idx = 0; idx < requiredCount; idx++) {
+        fieldString = (id)CFArrayGetValueAtIndex(requiredFields, idx);
+        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
+    }
+
+    // now check the BibTeX-defined optional fields
+    for (idx = 0; idx < optionalCount; idx++) {
+        fieldString = (id)CFArrayGetValueAtIndex(optionalFields, idx);
+        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
+    }
+
+    // now check all user-defined default fields
+    for (idx = 0; idx < userCount; idx++) {
+        fieldString = (id)CFArrayGetValueAtIndex(userFields, idx);
+        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
+    }
+    
+    // I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others as being non-nil:
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKLocalUrlString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKUrlString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAnnoteString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAbstractString, pubFields, emptyFieldsToRemove);
+    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKRssDescriptionString, pubFields, emptyFieldsToRemove);
+
+    // now remove everything that's left in removeKeys from pubFields, since it's non-standard for this type
+    CFSetApplyFunction((CFMutableSetRef)emptyFieldsToRemove, removeItemsInSetFromDictionary, pubFields);
+    CFRelease(emptyFieldsToRemove);
+}
+
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
 	[self makeType];
 }
@@ -510,38 +478,27 @@ static CFDictionaryRef selectorTable = NULL;
 - (void)customFieldsDidChange:(NSNotification *)aNotification{
 	[self makeType];
 	[groups removeAllObjects];
-    // these fields may change type, so our cached values should be discarded
-    [people release];
-    people = nil;
-    [cachedURLs removeAllObjects];
 }
 
 #pragma mark Document
 
-- (id<BDSKOwner>)owner {
-    return owner;
+- (BibDocument *)document {
+    return document;
 }
 
-- (void)setOwner:(id<BDSKOwner>)newOwner {
-    if (owner != newOwner) {
-		owner = newOwner;
+- (void)setDocument:(BibDocument *)newDocument {
+    if (document != newDocument) {
+		document = newDocument;
 	}
 }
 
 - (NSUndoManager *)undoManager { // this may be nil
-    return [owner undoManager];
+    return [document undoManager];
 }
 
 // accessors for fileorder
 - (NSNumber *)fileOrder{
-    return fileOrder;
-}
-
-- (void)setFileOrder:(NSNumber *)newOrder{
-    if(fileOrder != newOrder){
-        [fileOrder release];
-        fileOrder = [newOrder retain];
-    }
+    return [document fileOrderOfPublication:self];
 }
 
 - (NSString *)fileType { 
@@ -555,35 +512,35 @@ static CFDictionaryRef selectorTable = NULL;
     }
 }
 
-// a per-session identifier that is used to track this item in SearchKit indexes
-- (NSURL *)identifierURL {
-    return identifierURL;
-}
-
 #pragma mark -
 #pragma mark Generic person handling code
 
-- (void)rebuildPeopleIfNeeded{
+- (void)rebuildPeople{
+    NSEnumerator *pEnum = [[[BibTypeManager sharedManager] personFieldsSet] objectEnumerator];
+    NSString *personStr;
+    NSMutableArray *tmpPeople;
+    NSString *personType;
     
-    if (people == nil) {
-        
-        NSEnumerator *pEnum = [[[BibTypeManager sharedManager] personFieldsSet] objectEnumerator];
-        NSString *personStr;
-        NSString *personType;
-        
+    if (people == nil)
         people = [[NSMutableDictionary alloc] initWithCapacity:2];
+    
+    while(personType = [pEnum nextObject]){
+        // get the string representation from pubFields
+        personStr = [pubFields objectForKey:personType];
         
-        while(personType = [pEnum nextObject]){
-            // get the string representation from pubFields
-            personStr = [pubFields objectForKey:personType];
-            
-            // parse into an array of BibAuthor objects
-            NSArray *tmpPeople = [BibTeXParser authorsFromBibtexString:personStr withPublication:self];
-            if([tmpPeople count])
-                [people setObject:tmpPeople forKey:personType];
+        // don't check for an empty string, since that is valid here (we may be deleting authors)
+        if(personStr != nil){
+            // parse into an array of author objects
+            tmpPeople = [[BibTeXParser authorsFromBibtexString:personStr withPublication:self] mutableCopy];
+            [people setObject:tmpPeople forKey:personType];
+            [tmpPeople release];
         }
-        
-    }    
+    }
+}
+
+- (void)rebuildPeopleIfNeeded{
+    if (people == nil)
+        [self rebuildPeople];
 }
 
 // this returns a set so it's clear that the objects are unordered
@@ -648,6 +605,7 @@ static CFDictionaryRef selectorTable = NULL;
 	if([peopleArray count] == 0)
         return @"";
     
+    [peopleArray retain];
     unsigned idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
@@ -658,6 +616,7 @@ static CFDictionaryRef selectorTable = NULL;
         if(idx != count - 1)
             [names appendString:@" and "];
     }
+    [peopleArray release];
     
 	return names;
 }
@@ -698,18 +657,25 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSArray *)pubAuthorsAsStrings{
-    return [[self pubAuthors] arrayByPerformingSelector:@selector(normalizedName)];
+    NSArray *pubAuthorArray = [self pubAuthors];
+    NSEnumerator *authE = [pubAuthorArray objectEnumerator];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[pubAuthorArray count]];
+    BibAuthor *anAuthor;
+    
+    while(anAuthor = [authE nextObject])
+        [array addObject:[anAuthor normalizedName]];
+    return array;
 }
 
 - (NSString *)pubAuthorsForDisplay{
     return [self peopleStringForDisplayFromField:BDSKAuthorString];
 }
 
-- (BibAuthor *)authorAtIndex:(unsigned int)index{ 
+- (BibAuthor *)authorAtIndex:(int)index{ 
     return [self authorAtIndex:index inherit:YES];
 }
 
-- (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsInheriting:inherit];
 	if ([auths count] > index)
         return [auths objectAtIndex:index];
@@ -737,6 +703,7 @@ static CFDictionaryRef selectorTable = NULL;
 	if([peopleArray count] == 0)
         return @"";
     
+    [peopleArray retain];
     unsigned idx, count = [peopleArray count];
     BibAuthor *person;
     NSMutableString *names = [NSMutableString stringWithCapacity:10 * count];
@@ -747,6 +714,7 @@ static CFDictionaryRef selectorTable = NULL;
         if(idx != count - 1)
             [names appendString:@" and "];
     }
+    [peopleArray release];
 
 	return names;
 }
@@ -798,11 +766,11 @@ static CFDictionaryRef selectorTable = NULL;
     return [self peopleStringForDisplayFromField:([[self peopleArrayForField:BDSKAuthorString] count] ? BDSKAuthorString : BDSKEditorString)];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index{ 
+- (BibAuthor *)authorOrEditorAtIndex:(int)index{ 
     return [self authorOrEditorAtIndex:index inherit:YES];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorOrEditorAtIndex:(int)index inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsOrEditorsInheriting:inherit];
 	if ([auths count] > index)
         return [auths objectAtIndex:index];
@@ -819,7 +787,7 @@ static CFDictionaryRef selectorTable = NULL;
 	if ([NSString isEmptyString:key])
 		return nil;
 	
-	return [[owner publications] itemForCiteKey:key];
+	return [document publicationForCiteKey:key];
 }
 
 // Container is an aspect of the BibItem that depends on the type of the item
@@ -852,7 +820,7 @@ static CFDictionaryRef selectorTable = NULL;
 	return c;
 }
 
-// this is used for the lower pane
+// this is used for the main table and lower pane and for various window titles
 - (NSString *)title{
     NSString *title = [self valueOfField:BDSKTitleString];
 	if (title == nil) 
@@ -860,11 +828,11 @@ static CFDictionaryRef selectorTable = NULL;
 	if ([[self pubType] isEqualToString:BDSKInbookString]) {
 		NSString *chapter = [self valueOfField:BDSKChapterString];
 		if (![NSString isEmptyString:chapter]) {
-			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter %@)", @"Inbook item title format: [Title of inbook] (chapter [Chapter])"), title, chapter];
+			title = [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter %@)", @"[Title of inbook] (chapter [Chapter])"), title, chapter];
 		} else {
             NSString *pages = [self valueOfField:BDSKPagesString];
             if (![NSString isEmptyString:pages]) {
-                title = [NSString stringWithFormat:NSLocalizedString(@"%@ (pp %@)", @"Inbook item title format: [Title of inbook] (pp [Pages])"), title, pages];
+                title = [NSString stringWithFormat:NSLocalizedString(@"%@ (pp %@)", @"[Title of inbook] (pp [Pages])"), title, pages];
             }
         }
 	}
@@ -874,15 +842,13 @@ static CFDictionaryRef selectorTable = NULL;
 	return title;
 }
 
-// used for the main tableview and other places we don't want a TeX string (window titles)
 - (NSString *)displayTitle{
-    // -title is always non-nil
 	NSString *title = [self title];
 	static NSString	*emptyTitle = nil;
 	
-	if ([@"" isEqualToString:title]) {
+	if ([NSString isEmptyString:title]) {
 		if (emptyTitle == nil)
-			emptyTitle = [NSLocalizedString(@"Empty Title", @"Publication display title for empty title") retain];
+			emptyTitle = [NSLocalizedString(@"Empty Title", @"Empty Title") retain];
 		title = emptyTitle;
 	}
     OBPOSTCONDITION([NSString isEmptyString:title] == NO);
@@ -947,7 +913,7 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:BDSKPubTypeString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", owner, @"owner", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newType, @"value", BDSKPubTypeString, @"key", @"Change", @"type", document, @"document", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -993,9 +959,10 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", oldCiteKey, @"oldCiteKey", owner, @"owner", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newCiteKey, @"value", BDSKCiteKeyString, @"key", @"Change", @"type", document, @"document", oldCiteKey, @"oldCiteKey", nil];
 
-    [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3)
+        [[NSFileManager defaultManager] removeSpotlightCacheFileForCiteKey:oldCiteKey];
     [oldCiteKey release];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -1020,7 +987,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSString *)suggestedCiteKey
 {
     NSString *suggestion = [self citeKey];
-    if ([self hasEmptyOrDefaultCiteKey] || [[owner publications] citeKeyIsUsed:suggestion byItemOtherThan:self])
+    if ([self hasEmptyOrDefaultCiteKey] || [document citeKeyIsUsed:suggestion byItemOtherThan:self])
         suggestion = nil;
     
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
@@ -1054,7 +1021,7 @@ static CFDictionaryRef selectorTable = NULL;
 				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
 				return NO;
 		} else if ([fieldName hasPrefix:@"Document: "]) {
-			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
+			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
 				return NO;
 		} else {
 			if ([NSString isEmptyString:[self valueOfField:fieldName]]) {
@@ -1068,7 +1035,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (BOOL)isValidCiteKey:(NSString *)proposedCiteKey{
 	if ([NSString isEmptyString:proposedCiteKey] == YES)
         return NO;
-    return ([[owner publications] citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
+    return ([document citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
 }
 
 - (int)canSetCrossref:(NSString *)aCrossref andCiteKey:(NSString *)aCiteKey{
@@ -1076,18 +1043,18 @@ static CFDictionaryRef selectorTable = NULL;
     if ([NSString isEmptyString:aCrossref] == NO) {
         if ([aCiteKey caseInsensitiveCompare:aCrossref] == NSOrderedSame)
             errorCode = BDSKSelfCrossrefError;
-        else if ([NSString isEmptyString:[[[owner publications] itemForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
+        else if ([NSString isEmptyString:[[document publicationForCiteKey:aCrossref] valueOfField:BDSKCrossrefString inherit:NO]] == NO)
             errorCode = BDSKChainCrossrefError;
-        else if ([[owner publications] citeKeyIsCrossreffed:aCiteKey])
+        else if ([document citeKeyIsCrossreffed:aCiteKey])
             errorCode = BDSKIsCrossreffedCrossrefError;
     }
     return errorCode;
 }
 
 - (NSString *)citation{
-       OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    return [NSString stringWithFormat:@"\\%@%@", [pw stringForKey:BDSKCiteStringKey],
-            [pw stringForKey:BDSKCiteStartBracketKey], [self citeKey], [pw stringForKey:BDSKCiteEndBracketKey]];
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    return [NSString stringWithFormat:@"\\%@%@", [pw stringForKey:BDSKCiteStringKey], 
+            [pw stringForKey:BDSKCiteStartBracketKey], [self citeKey], [pw stringForKey:BDSKCiteEndBracketKey]]; 
 }
 
 #pragma mark Pub Fields
@@ -1117,7 +1084,7 @@ static CFDictionaryRef selectorTable = NULL;
 		
 		[self setPubFields:newFields];
 		
-		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", owner, @"owner", nil]; // cmh: maybe not the best info, but handled correctly
+		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", document, @"document", nil]; // cmh: maybe not the best info, but handled correctly
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 															object:self
 														  userInfo:notifInfo];
@@ -1156,9 +1123,9 @@ static CFDictionaryRef selectorTable = NULL;
 	
 	NSDictionary *notifInfo;
 	if(oldValue != nil && value != nil)
-		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type", oldValue, @"oldValue", owner, @"owner", nil];
+		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type", document, @"document", oldValue, @"oldValue", nil];
 	else
-		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", owner, @"owner", nil];
+		notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", document, @"document", nil];
     [oldValue release];
     
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -1181,7 +1148,7 @@ static CFDictionaryRef selectorTable = NULL;
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit{
     NSString* value = [pubFields objectForKey:key];
 	
-	if (inherit && BDIsEmptyString((CFStringRef)value) && [fieldsToWriteIfEmpty containsObject:key] == NO) {
+	if (inherit && BDIsEmptyString((CFStringRef)value)) {
 		BibItem *parent = [self crossrefParent];
 		if (parent) {
 			NSString *parentValue = [parent valueOfField:key inherit:NO];
@@ -1203,13 +1170,9 @@ static CFDictionaryRef selectorTable = NULL;
 														withModDate:[self dateModified]];
 	}
 	
-	NSString *defaultValue = nil;
-	if ([key isBooleanField] || [key isTriStateField] || [key isRatingField]) {
-        defaultValue = @"";
-    } else {
-        defaultValue = [NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"Add data for field:", @"Default value for new field"), key];
-    }
-    [self setField:key toValue:defaultValue];
+	NSString *msg = [NSString stringWithFormat:@"%@ %@",
+		NSLocalizedString(@"Add data for field:", @""), key];
+	[self setField:key toValue:msg];
 	
 	if (date != nil) {
 		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
@@ -1218,7 +1181,7 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:key];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type", owner, @"owner", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:key, @"key", @"Add/Del Field", @"type",document, @"document", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -1251,7 +1214,7 @@ static CFDictionaryRef selectorTable = NULL;
 	}
 	[self updateMetadataForKey:key];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type", owner, @"owner", nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",document, @"document", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -1269,23 +1232,20 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (NSString *)stringValueOfField:(NSString *)field inherit:(BOOL)inherit {
+	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 		
-	if([field isRatingField]){
+	if([typeManager isRatingField:field]){
 		return [NSString stringWithFormat:@"%i", [self ratingValueOfField:field]];
-	}else if([field isBooleanField]){
+	}else if([typeManager isBooleanField:field]){
 		return [NSString stringWithBool:[self boolValueOfField:field]];
-    }else if([field isTriStateField]){
+    }else if([typeManager isTriStateField:field]){
 		return [NSString stringWithTriStateValue:[self triStateValueOfField:field]];
-    }else if([field isCitationField]){
-		return [self valueOfField:field inherit:NO];
 	}else if([field isEqualToString:BDSKPubTypeString]){
 		return [self pubType];
 	}else if([field isEqualToString:BDSKCiteKeyString]){
 		return [self citeKey];
 	}else if([field isEqualToString:BDSKAllFieldsString]){
         return [self allFieldsString];
-    }else if([field isEqualToString:BDSKRelevanceString]){
-        return [NSString stringWithFormat:@"%f", [self searchScore]];
     }else{
 		return [self valueOfField:field inherit:inherit];
     }
@@ -1293,12 +1253,13 @@ static CFDictionaryRef selectorTable = NULL;
 
 - (void)setField:(NSString *)field toStringValue:(NSString *)value{
     OBASSERT([field isEqualToString:BDSKAllFieldsString] == NO);
+	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 	
-	if([field isBooleanField]){
+	if([typeManager isBooleanField:field]){
 		[self setField:field toBoolValue:[value booleanValue]];
-    }else if([field isTriStateField]){
+    }else if([typeManager isTriStateField:field]){
         [self setField:field toTriStateValue:[value triStateValue]];
-	}else if([field isRatingField]){
+	}else if([typeManager isRatingField:field]){
 		[self setField:field toRatingValue:[value intValue]];
 	}else if([field isEqualToString:BDSKPubTypeString]){
 		[self setPubType:value];
@@ -1310,12 +1271,13 @@ static CFDictionaryRef selectorTable = NULL;
 }
 
 - (int)intValueOfField:(NSString *)field {
+	BibTypeManager *typeManager = [BibTypeManager sharedManager];
 		
-	if([field isRatingField]){
+	if([typeManager isRatingField:field]){
 		return [self ratingValueOfField:field];
-	}else if([field isBooleanField]){
+	}else if([typeManager isBooleanField:field]){
 		return (int)[self boolValueOfField:field];
-    }else if([field isTriStateField]){
+    }else if([typeManager isTriStateField:field]){
 		return (int)[self triStateValueOfField:field];
 	}else{
 		return [NSString isEmptyString:[self valueOfField:field]] ? 0 : 1;
@@ -1351,86 +1313,19 @@ static CFDictionaryRef selectorTable = NULL;
 	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
 }
 
-- (id)displayValueOfField:(NSString *)field{
-    static NSDateFormatter *shortDateFormatter = nil;
-    if(shortDateFormatter == nil) {
-        shortDateFormatter = [[NSDateFormatter alloc] init];
-        [shortDateFormatter setDateStyle:NSDateFormatterShortStyle];
-        [shortDateFormatter setTimeStyle:NSDateFormatterNoStyle];
-    }
-    
-    if([field isEqualToString:BDSKCiteKeyString]){
-        return [self citeKey];
-    }else if([field isEqualToString:BDSKItemNumberString]){
-        return [self fileOrder];
-    }else if([field isEqualToString: BDSKTitleString] ){
-        return [self displayTitle];
-    }else if([field isEqualToString: BDSKContainerString] ){
-        return [self container];
-    }else if([field isEqualToString: BDSKDateAddedString]){
-        return [shortDateFormatter stringFromDate:[self dateAdded]];
-    }else if([field isEqualToString: BDSKDateModifiedString]){
-        return [shortDateFormatter stringFromDate:[self dateModified]];
-    }else if([field isEqualToString: BDSKPubDateString] ){
-        NSCalendarDate *date = [self date];
-        if(nil == date) 
-            return nil;
-        NSString *monthStr = [self valueOfField:BDSKMonthString];
-        NSDictionary *locale = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
-        if([NSString isEmptyString:monthStr])
-            return [date descriptionWithCalendarFormat:@"%Y" locale:locale];
-        else
-            return [date descriptionWithCalendarFormat:@"%b %Y" locale:locale];
-    }else if([field isEqualToString: BDSKFirstAuthorString] ){
-        return [[self authorAtIndex:0] displayName];
-    }else if([field isEqualToString: BDSKSecondAuthorString] ){
-        return [[self authorAtIndex:1] displayName]; 
-    }else if([field isEqualToString: BDSKThirdAuthorString] ){
-        return [[self authorAtIndex:2] displayName];
-    }else if([field isEqualToString:BDSKLastAuthorString] ){
-        return [[self lastAuthor] displayName];
-    }else if([field isEqualToString: BDSKFirstAuthorEditorString] ){
-        return [[self authorOrEditorAtIndex:0] displayName];
-    }else if([field isEqualToString: BDSKSecondAuthorEditorString] ){
-        return [[self authorOrEditorAtIndex:1] displayName]; 
-    }else if([field isEqualToString: BDSKThirdAuthorEditorString] ){
-        return [[self authorOrEditorAtIndex:2] displayName];
-    }else if([field isEqualToString:BDSKLastAuthorEditorString] ){
-        return [[self lastAuthorOrEditor] displayName];
-    } else if([field isPersonField]) {
-        return [self peopleStringForDisplayFromField:field];
-    } else if([field isEqualToString:BDSKAuthorEditorString]){
-        return [self pubAuthorsOrEditorsForDisplay];
-    }else if([field isURLField]){
-        return [self imageForURLField:field];
-    }else if([field isRatingField]){
-        return [NSNumber numberWithInt:[self ratingValueOfField:field]];
-    }else if([field isBooleanField]){
-        return [NSNumber numberWithBool:[self boolValueOfField:field]];
-    }else if([field isTriStateField]){
-        return [NSNumber numberWithInt:[self triStateValueOfField:field]];
-    }else if([field isCitationField]){
-        return [self valueOfField:field inherit:NO];
-    }else if([field isEqualToString:BDSKPubTypeString]){
-        return [self pubType];
-    }else if([field isEqualToString:BDSKImportOrderString]){
-        return nil;
-    }else if([field isEqualToString:BDSKRelevanceString]){
-        return [NSNumber numberWithFloat:[self searchScore]];
-    }else{
-        // the tableColumn isn't something we handle in a custom way.
-        return [self valueOfField:field];
-    }
-}
-
 #pragma mark Search support
 
-- (void)setSearchScore:(float)val { searchScore = val; }
-- (float)searchScore { return searchScore; }
+- (NSString *)calendarDateDescription{
+	return [[self date] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
+}
 
-- (NSString *)skimNotesForLocalURL{
-    NSURL *theURL = [self URLForField:BDSKLocalUrlString];
-    return theURL ? [[BDSKSkimReader sharedReader] textNotesAtURL:theURL] : nil;
+// These accessors are wrappers used for searching.  Getting this right is tricky; the main tableview datasource uses NSShortDateFormatString, but the attributed preview uses NSDateFormatString.  Hence, we need to parse the date string on search input for comparison.
+- (NSString *)calendarDateModifiedDescription{
+    return [[self dateModified] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
+}
+
+- (NSString *)calendarDateAddedDescription{
+	return [[self dateAdded] descriptionWithCalendarFormat:BDSKDocumentFormatForSearchingDates];
 }
 
 static inline 
@@ -1458,12 +1353,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     SEL selector = (void *)CFDictionaryGetValue(selectorTable, (CFStringRef)field);
     if(NULL == selector){
         
-        if([field isBooleanField]){
+        BibTypeManager *typeManager = [BibTypeManager sharedManager];
+
+        if([typeManager isBooleanField:field]){
             return [self boolValueOfField:field] == [substring booleanValue];
-        } else if([field isTriStateField]){
+        } else if([typeManager isTriStateField:field]){
             return [self triStateValueOfField:field] == [substring triStateValue];
-        } else if([field isRatingField]){
-            return [self ratingValueOfField:field] == [substring intValue];
         }
     }
 
@@ -1484,15 +1379,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         if(aURL) [urls addObject:aURL];
     }
     
-    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self displayTitle], @"title", urls, @"urls", nil];
+    NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", [self title], @"title", urls, @"urls", nil];
     [urls release];
     return info;
 }
 
-- (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update{
+- (NSDictionary *)metadataCacheInfo{
     
-    // if we're updating, we only return if something changed
-    if (update && NO == spotlightMetadataChanged)
+    if (NO == spotlightMetadataChanged)
         return nil;
     
     // signify that this item is now current
@@ -1505,9 +1399,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     unsigned int rating;
     
     if(value = [self citeKey])
-        [info setObject:value forKey:@"net_sourceforge_bibdesk_citekey"];
-    
-    [info setObject:@"BibDesk" forKey:(NSString *)kMDItemCreator];
+        [info setObject:citeKey forKey:@"net_sourceforge_bibdesk_citekey"];
 
     // A given item is not guaranteed to have all of these, so make sure they are non-nil
     if(value = [self displayTitle])
@@ -1520,21 +1412,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
     if(value = [[self valueOfField:BDSKAbstractString] stringByRemovingTeX])
         [info setObject:value forKey:(NSString *)kMDItemDescription];
-    
-    if(value = [[self container] stringByRemovingTeX])
-        [info setObject:value forKey:@"net_sourceforge_bibdesk_container"];
-    
-    if(value = [self pubType])
-        [info setObject:value forKey:@"net_sourceforge_bibdesk_pubtype"];
-    
-    if(date = [self date])
-        [info setObject:date forKey:@"net_sourceforge_bibdesk_publicationdate"];
 
     if(date = [self dateModified])
         [info setObject:date forKey:(NSString *)kMDItemContentModificationDate];
-
-    if(date = [self dateAdded])
-        [info setObject:date forKey:(NSString *)kMDItemContentCreationDate];
 
     // keywords is supposed to be a CFArray type, so we'll use the group splitting code
     if(array = [[self groupsForField:BDSKKeywordsString] allObjects])
@@ -1543,11 +1423,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     if(rating = [self rating])
         [info setObject:[NSNumber numberWithInt:rating] forKey:(NSString *)kMDItemStarRating];
 
-    // properly supporting tri-state fields will need a new key of type CFNumber; it will only show up as a number in get info, though, which is not particularly useful
-    if([BDSKReadString isBooleanField])
+    // supporting tri-state fields will need a new key of type CFNumber; it will only show up as a number in get info, though, which is not particularly useful
+    if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:BDSKReadString] == NO)
         [info setObject:(id)([self boolValueOfField:BDSKReadString] ? kCFBooleanTrue : kCFBooleanFalse) forKey:@"net_sourceforge_bibdesk_itemreadstatus"];
-    else if([BDSKReadString isTriStateField])
-        [info setObject:(id)([self triStateValueOfField:BDSKReadString] == NSOnState ? kCFBooleanTrue : kCFBooleanFalse) forKey:@"net_sourceforge_bibdesk_itemreadstatus"];
 
     // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
     NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:2];
@@ -1563,39 +1441,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return info;
 }
 
-// return a KVC-compliant object; may not be a dictionary in future
-- (id)completionObject{
-    
-    // !!! when adding more keys, update BDSKCompletionServerProtocol.h
-    
-    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:4];
-    [dict setObject:[self citeKey] forKey:@"citeKey"];
-    // displayTitle removes TeX
-    [dict setObject:[self displayTitle] forKey:@"title"];
-    [dict setObject:[NSNumber numberWithInt:[self numberOfAuthorsOrEditors]] forKey:@"numberOfNames"];
-    
-    // now some optional keys that may be useful, but aren't guaranteed
-    id value = [[[self firstAuthorOrEditor] fullLastName] stringByRemovingTeX];
-    if (value)
-        [dict setObject:value forKey:@"lastName"];
-    
-    value = [[self firstAuthorOrEditor] sortableName];
-    if (value)
-        [dict setObject:value forKey:@"sortableName"];
-    
-    // passing this as an NSString causes a "more significant bytes than room to hold them" exception in the client
-    value = [self valueOfField:BDSKYearString];
-    if([NSString isEmptyString:value] == NO &&
-        (value = [NSNumber numberWithInt:[value intValue]]))
-    [dict setObject:value forKey:@"year"];
-    
-    return dict;
-}    
-
 #pragma mark -
 #pragma mark BibTeX strings
 
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSMutableSet *knownKeys = nil;
 	NSSet *urlKeys = nil;
@@ -1610,11 +1459,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
-		NSMutableArray *noteKeys = [[[btm noteFieldsSet] allObjects] mutableCopy];
-        [noteKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-        [keys removeObjectsInArray:noteKeys]; // make sure these fields are at the end, as they can be long
-		[keys addObjectsFromArray:noteKeys];
-        [noteKeys release];
+		NSArray *finalKeys = [[btm noteFieldsSet] allObjects];
+		[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
+		[keys addObjectsFromArray:finalKeys];
 	}
 	if (drop) {
         knownKeys = [[NSMutableSet alloc] initWithCapacity:14];
@@ -1638,130 +1485,66 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSSet *personFields = [btm personFieldsSet];
     
     while(field = [e nextObject]){
-        if (drop && ![knownKeys containsObject:field])
-            continue;
-        
+		if (drop && ![knownKeys containsObject:field])
+			continue;
+		
         value = [pubFields objectForKey:field];
+        NSString *valString;
         
-        if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
-            value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
-        }
+		if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
+			value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
+		}
+		
+		if(shouldTeXify && ![urlKeys containsObject:field]){
+			
+			@try{
+				value = [value stringByTeXifyingString];
+			}
+            @catch(id localException){
+                if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
+                    // the exception from the converter has a description of the unichar that couldn't convert; we add some useful context to it, then rethrow
+                    NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the %@ of %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], field, [self citeKey]] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, @"item", field, @"field", nil]];
+                    @throw exception;
+                } else @throw;
+			}
+		}                
+		
+        if(expand == YES)
+            valString = [value stringAsExpandedBibTeXString];
+        else
+            valString = [value stringAsBibTeXString];
         
-        if(shouldTeXify && ![urlKeys containsObject:field]){
-            value = [value stringByTeXifyingString];
-        }                
-        
-        if(![value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
+        if(![value isEqualToString:@""]){
             [s appendString:@",\n\t"];
             [s appendString:field];
             [s appendString:@" = "];
-            [s appendString:[value stringAsBibTeXString]];
+            [s appendString:valString];
         }
     }
-    [knownKeys release];
     [s appendString:@"}"];
-    
+    [knownKeys release];
     return s;
 }
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop encoding:(NSStringEncoding)encoding error:(NSError **)outError{
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL shouldTeXify = [pw boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-	NSMutableSet *knownKeys = nil;
-	NSSet *urlKeys = nil;
-	NSString *field;
-    NSString *value;
-    NSMutableData *data = [NSMutableData dataWithCapacity:200];
-    NSMutableArray *keys = [[self allFieldNames] mutableCopy];
-	NSEnumerator *e;
-    NSError *error= nil;
-    BOOL isOK = YES;
-    
-    
-    BibTypeManager *btm = [BibTypeManager sharedManager];
-    NSString *type = [self pubType];
-    NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
-	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
-		NSMutableArray *noteKeys = [[[btm noteFieldsSet] allObjects] mutableCopy];
-        [noteKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-        [keys removeObjectsInArray:noteKeys]; // make sure these fields are at the end, as they can be long
-		[keys addObjectsFromArray:noteKeys];
-        [noteKeys release];
-	}
-	if (drop) {
-        knownKeys = [[NSMutableSet alloc] initWithCapacity:14];
-		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:type]];
-		[knownKeys addObjectsFromArray:[btm optionalFieldsForType:type]];
-		[knownKeys addObject:BDSKCrossrefString];
-	}
-	if(shouldTeXify)
-        urlKeys = [[BibTypeManager sharedManager] allURLFieldsSet];
-	
-	e = [keys objectEnumerator];
-	[keys release];
-
-    //build BibTeX entry:
-    isOK = [data appendDataFromString:@"@" encoding:encoding error:&error] &&
-           [data appendDataFromString:type encoding:encoding error:&error] &&
-           [data appendDataFromString:@"{" encoding:encoding error:&error] &&
-           [data appendDataFromString:[self citeKey] encoding:encoding error:&error];
-    if(isOK == NO) {
-        error = [[error mutableCopy] autorelease];
-        [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert cite key of item with cite key \"%@\".", @"string encoding error context"), [self citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
-    }
-    
-    NSSet *personFields = [btm personFieldsSet];
-    
-    NSData *lineSeparator = [@",\n\t" dataUsingEncoding:encoding];
-    NSData *fieldValueSeparator = [@" = " dataUsingEncoding:encoding];
-    
-    while(isOK && (field = [e nextObject])){
-        if (drop && ![knownKeys containsObject:field])
-            continue;
-        
-        value = [pubFields objectForKey:field];
-        
-        if([personFields containsObject:field] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
-            value = [self bibTeXNameStringForField:field normalized:YES inherit:NO];
-        }
-        
-        if(shouldTeXify && ![urlKeys containsObject:field]){
-            value = [value stringByTeXifyingString];
-        }                
-                
-        if(NO == [value isEqualToString:@""] || [fieldsToWriteIfEmpty containsObject:field]){
-            
-            [data appendData:lineSeparator];
-            isOK = [data appendDataFromString:field encoding:encoding error:&error];
-            [data appendData:fieldValueSeparator];
-            
-            if(isOK)
-                isOK = [data appendDataFromString:[value stringAsBibTeXString] encoding:encoding error:&error];
-            
-            if(isOK == NO) {
-                error = [[error mutableCopy] autorelease];
-                [error setValue:[NSString stringWithFormat:NSLocalizedString(@"Unable to convert field \"%@\" of item with cite key \"%@\".", @"string encoding error context"), [field localizedFieldName], [self citeKey]] forKey:NSLocalizedRecoverySuggestionErrorKey];
-            }
-        }
-    }
-    [knownKeys release];
-    if(isOK)
-        isOK = [data appendDataFromString:@"}" encoding:encoding error:&error];
-    
-    if(isOK == NO && outError)
-        *outError = error;
-    
-    return isOK ? data : nil;
-}
-
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
     BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-    return [self bibTeXStringDroppingInternal:drop texify:shouldTeXify];
+    return [self bibTeXStringByExpandingMacros:expand dropInternal:drop texify:shouldTeXify];
 }
 
 - (NSString *)bibTeXString{
-	return [self bibTeXStringDroppingInternal:NO];
+	return [self bibTeXStringByExpandingMacros:NO dropInternal:NO];
+}
+
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
+	return [self bibTeXStringByExpandingMacros:NO dropInternal:drop];
+}
+
+- (NSString *)bibTeXStringByExpandingMacros{
+    return [self bibTeXStringByExpandingMacros:YES dropInternal:NO];
+}
+
+- (NSString *)bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields{
+    return [self bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO];
 }
 
 #pragma mark Other text representations
@@ -1771,13 +1554,9 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
 }
 
-- (BOOL)citationFormatter:(BDSKCitationFormatter *)formatter isValidKey:(NSString *)key {
-    return [[[self owner] publications] itemForCiteKey:key] != nil;
-}
-
 - (NSAttributedString *)attributedStringValue{
     NSString *key;
-    NSEnumerator *e = [[[self allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
+        NSEnumerator *e = [[[self allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
     NSDictionary *cachedFonts = [[NSFontManager sharedFontManager] cachedFontsForPreviewPane];
 
     NSDictionary *titleAttributes =
@@ -1799,35 +1578,39 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableAttributedString* reqStr = [[NSMutableAttributedString alloc] init];
     NSMutableAttributedString* nonReqStr = [[NSMutableAttributedString alloc] init];
 	NSAttributedString *valueStr;
+	NSAttributedString *keyStr;
     
-	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
+    BibTypeManager *btm = [BibTypeManager sharedManager];
+
+	NSSet *reqKeys = [[NSSet alloc] initWithArray:[btm requiredFieldsForType:[self pubType]]];
 
     static NSDateFormatter *dateFormatter = nil;
-    if(dateFormatter == nil) {
-        dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateStyle:NSDateFormatterFullStyle];
-        [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
-    }
+    if(dateFormatter == nil)
+        dateFormatter = [[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString]
+															 allowNaturalLanguage:NO];
     
-    [reqStr appendString:[self citeKey] attributes:typeAttributes];
-    [reqStr appendString:@"\n"];
+    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[self citeKey]]
+                                               attributes:typeAttributes];
+    [reqStr appendAttributedString:valueStr];
+    [valueStr release];
 
-    // make sure we don't use -displayTitle here
     valueStr = [[NSAttributedString alloc] initWithTeXString:[self title]
                                                   attributes:titleAttributes
                                           collapseWhitespace:YES];
     [reqStr appendAttributedString:valueStr];
     [valueStr release];
 
-    [reqStr appendString:[NSString stringWithFormat:@" (%@)\n",[self pubType]] attributes:typeAttributes];
+    valueStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" (%@)\n",[self pubType]]
+                                               attributes:typeAttributes];
+    [reqStr appendAttributedString:valueStr];
+    [valueStr release];
 
-    BDSKCitationFormatter *citationFormatter = nil;
     NSCalendarDate *date = nil;
     NSString *stringValue = nil;
     BOOL notNote = NO;
     
     while(key = [e nextObject]){
-		notNote = ![key isNoteField];
+		notNote = ![btm isNoteField:key];
         stringValue = [self valueOfField:key inherit:notNote];
         
         if(![stringValue isEqualToString:@""] &&
@@ -1845,24 +1628,18 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
-			}else if([key isPersonField]){
-				if((stringValue = [self peopleStringForDisplayFromField:key]))
+			}else if([key isEqualToString:BDSKAuthorString]){
+				if((stringValue = [self pubAuthorsForDisplay]))
                     valueStr = [[NSAttributedString alloc] initWithString:stringValue
                                                                attributes:bodyAttributes];
                 
-			}else if([key isURLField] || [key hasPrefix:@"Url"] /* Url1, Url2...UrlN can come from parsers */){
+			}else if([btm isURLField:key]){
                 // make this a clickable link if possible, showing an abbreviated path for file URLs
                 NSURL *theURL = [self URLForField:key];
 				if(theURL != nil){
                     valueStr = [[NSMutableAttributedString alloc] initWithString:([theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : stringValue) attributes:bodyAttributes];
                     [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:theURL range:NSMakeRange(0, [valueStr length])];
                 }
-  
-			}else if([key isCitationField]){
-                // make valid cite keys clickable
-                if (citationFormatter == nil)
-                    citationFormatter = [[[BDSKCitationFormatter alloc] initWithDelegate:self] autorelease];
-                valueStr = [[citationFormatter attributedStringForObjectValue:stringValue withDefaultAttributes:bodyAttributes] retain];
   
 			}else if([key isEqualToString:BDSKRatingString]){
 				int rating = [self ratingValueOfField:BDSKRatingString];
@@ -1880,42 +1657,34 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                        
             // the valueStr will be an empty NSConcreteAttributedString if created with a nil argument, so we check for nil before creating it
 			if(valueStr){
+                keyStr = [[NSAttributedString alloc] initWithString:key attributes:keyAttributes];
 				
                 if([reqKeys containsObject:key]){
 					
-					[reqStr appendString:key attributes:keyAttributes];
+					[reqStr appendAttributedString:keyStr];
 					[reqStr appendString:@"\n"];
 					[reqStr appendAttributedString:valueStr];
 					[reqStr appendString:@"\n"];
 					
 				}else{
 					
-					[nonReqStr appendString:key attributes:keyAttributes];
+					[nonReqStr appendAttributedString:keyStr];
 					[nonReqStr appendString:@"\n"];
 					[nonReqStr appendAttributedString:valueStr];
 					[nonReqStr appendString:@"\n"];
 					
 				}
                 
+				[keyStr release];
 				[valueStr release];
 			}
         }
     }
-    
-    NSURL *aURL = [self URLForField:BDSKLocalUrlString];
-    NSData *RTFData = nil;
-    if (aURL && (RTFData = [[BDSKSkimReader sharedReader] RTFNotesAtURL:aURL])) {
-        valueStr = [[NSAttributedString alloc] initWithRTF:RTFData documentAttributes:NULL];
-        [nonReqStr appendString:NSLocalizedString(@"Skim notes", @"heading in preview of notes from Skim") attributes:keyAttributes];
-        [nonReqStr appendString:@"\n"];
-        [nonReqStr appendAttributedString:valueStr];
-        [nonReqStr appendString:@"\n"];
-        [valueStr release];
-    }
 
     // now put them together
 	[reqStr appendAttributedString:nonReqStr];
-	[reqStr appendString:@" "];
+	[reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@" "
+                                                                  attributes:nil] autorelease]];
 	[nonReqStr release];
     [titleAttributes release];
     [typeAttributes release];
@@ -1975,15 +1744,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			v = [auths componentsJoinedByString:[NSString stringWithFormat:@"\n%@  - ", tag]];
         }else if([k isEqualToString:BDSKKeywordsString]){
 			NSMutableArray *arr = [NSMutableArray arrayWithCapacity:1];
-            NSCharacterSet *sepCharSet = [btm separatorCharacterSetForField:BDSKKeywordsString];
-			if([v rangeOfCharacterFromSet:sepCharSet].location != NSNotFound) {
+			if([v rangeOfCharacterFromSet:[NSCharacterSet autocompletePunctuationCharacterSet]].location != NSNotFound) {
 				NSScanner *wordScanner = [NSScanner scannerWithString:v];
 				[wordScanner setCharactersToBeSkipped:nil];
 				
 				while(![wordScanner isAtEnd]) {
-					if([wordScanner scanUpToCharactersFromSet:sepCharSet intoString:&v])
+					if([wordScanner scanUpToCharactersFromSet:[NSCharacterSet autocompletePunctuationCharacterSet] intoString:&v])
 						[arr addObject:v];
-					[wordScanner scanCharactersFromSet:sepCharSet intoString:nil];
+					[wordScanner scanCharactersFromSet:[NSCharacterSet autocompletePunctuationCharacterSet] intoString:nil];
 				}
 				v = [arr componentsJoinedByString:[NSString stringWithFormat:@"\n%@  - ", tag]];
 			}
@@ -2067,7 +1835,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableString *s = [NSMutableString stringWithString:@"<record>"];
     NSString *value;
     
-    NSString *fileName = [[[self owner] fileURL] path];
+    NSString *fileName = [[self document] fileName];
     
     int refTypeID;
     NSString *entryType = [self pubType];
@@ -2205,9 +1973,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [s appendString:@"</keywords>"];
     [s appendString:@"<urls>"];
     [s appendString:@"<pdf-urls>"];
-    value = [[self localURL] absoluteString];
-    if ([NSString isEmptyString:value] == NO)
-        [s appendStrings:@"<url>", value, @"</url>", nil];
+    AddXMLField(@"url",BDSKLocalUrlString);
     [s appendString:@"</pdf-urls>"];
     [s appendString:@"<related-urls>"];
     AddXMLField(@"url",BDSKUrlString);
@@ -2219,16 +1985,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     // custom
     
-    if ([NSString isEmptyString:[self valueOfField:@"Custom3"]])
-        [s appendStrings:@"<custom3>", entryType, @"</custom3>", nil];
-    if ([NSString isEmptyString:[self valueOfField:@"Custom4"]])
-        AddXMLField(@"custom4",BDSKCrossrefString);
-    AddXMLField(@"custom1",@"Custom1");
-    AddXMLField(@"custom2",@"Custom2");
-    AddXMLField(@"custom3",@"Custom3");
-    AddXMLField(@"custom4",@"Custom4");
-    AddXMLField(@"custom5",@"Custom5");
-    AddXMLField(@"custom6",@"Custom6");
+    [s appendStrings:@"<custom3>", entryType, @"</custom3>", nil];
+    AddXMLField(@"custom4",BDSKCrossrefString);
     
     [s appendString:@"</record>\n"];
     
@@ -2240,22 +1998,32 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *templateStyle = [BDSKTemplate defaultStyleNameForFileType:@"rss"];
     if (templateStyle) {
         BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
-        NSString *string = [self stringValueUsingTemplate:template];
-        if (string)
-            return string;
+        if ([template defaultItemTemplateURL]) {
+            [self setItemIndex:1];
+            return [self stringValueUsingTemplate:template];
+        }
     }
     
     // no item template found, so do some custom  stuff
     
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
 
-    [s appendString:@"<item>\n<title>"];
-	[s appendString:[[self displayTitle] xmlString]];
-    [s appendString:@"</title>\n<description>"];
-    [s appendString:[[self valueOfField:BDSKRssDescriptionString] xmlString]];
-    [s appendString:@"</description>\n<link>"];
+    NSString *descField = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKRSSDescriptionFieldKey];
+	NSString *description;
+
+    [s appendString:@"<item>\n"];
+    [s appendString:@"<title>\n"];
+	[s appendString:[[self title] xmlString]];
+    [s appendString:@"</title>\n"];
+    [s appendString:@"<description>\n"];
+    if(description = [self valueOfField:descField]){
+        [s appendString:[description xmlString]];
+    }
+    [s appendString:@"</description>\n"];
+    [s appendString:@"<link>"];
     [s appendString:[self valueOfField:BDSKUrlString]];
-    [s appendString:@"</link>\n</item>\n"];
+    [s appendString:@"</link>\n"];
+    [s appendString:@"</item>\n"];
     return s;
 }
 
@@ -2282,7 +2050,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableString *result = [[[NSMutableString alloc] initWithCapacity:([thePubFields count] * 10)] autorelease];
     
     [result appendString:[self citeKey]];
-    [result appendString:@"|"];
+    [result appendString:@" "];
     
     BibItem *parent = [self crossrefParent];
 
@@ -2294,7 +2062,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         while(key = [keyEnum nextObject]){
             [result appendString:[self valueOfField:key inherit:YES]];
-            [result appendString:@"|"];
+            [result appendString:@" "];
         }
                 
     } else {
@@ -2303,7 +2071,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         while(value = [pubFieldsE nextObject]){
             [result appendString:value];
-            [result appendString:@"|"];
+            [result appendString:@" "];
         }
     }       
     
@@ -2339,8 +2107,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSString *type = [self pubType];
     [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:type]];
     [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:type]];
-    [allFields addNonDuplicateObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:type]];
-    [allFields addNonDuplicateObjectsFromArray:[self allFieldNames]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:type]];
+    [allFields addObjectsFromArray:[self allFieldNames]]; // duplicate fields will be dropped
     return [[self fields] fieldsWithNames:allFields];
 }
 
@@ -2377,8 +2145,6 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (int)itemIndex{ return currentIndex; }
 
-- (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
-
 #pragma mark -
 #pragma mark URL handling
 
@@ -2388,33 +2154,43 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSImage *)imageForURLField:(NSString *)field{
     
-    NSURL *url = [self URLForField:field];
-    if(nil == url)
+    if([NSString isEmptyString:[self valueOfField:field]])
         return nil;
     
-    if([field isLocalFileField] && (url = [url fileURLByResolvingAliases]) == nil)
+    NSURL *url = [self URLForField:field];
+    
+    if([[BibTypeManager sharedManager] isLocalFileField:field] && (url = [url fileURLByResolvingAliases]) == nil)
         return [NSImage missingFileImage];
     
     return [NSImage imageForURL:url];
 }
 
+- (NSImage *)smallImageForURLField:(NSString *)field{
+
+    if([NSString isEmptyString:[self valueOfField:field]])
+        return nil;
+
+    NSURL *url = [self URLForField:field];
+    
+    if([[BibTypeManager sharedManager] isLocalFileField:field] && (url = [url fileURLByResolvingAliases]) == nil)
+        return [NSImage smallMissingFileImage];
+    
+    return [NSImage smallImageForURL:url];
+}
+
 - (NSURL *)URLForField:(NSString *)field{
-    return ([field isLocalFileField] ? [self localFileURLForField:field] : [self remoteURLForField:field]);
+    if([[BibTypeManager sharedManager] isLocalFileField:field]){
+        return [self localFileURLForField:field];
+    } else if([[BibTypeManager sharedManager] isRemoteURLField:field])
+        return [self remoteURLForField:field];
+    else 
+        [NSException raise:NSInvalidArgumentException format:@"Field \"%@\" is not a valid URL field.", field];
+    // not reached
+    return nil;
 }
 
 - (NSURL *)remoteURLForField:(NSString *)field{
-    
-    // check the cache first
-    NSURL *returnURL = [cachedURLs objectForKey:field];
-    if (returnURL)
-        return returnURL;
-    
     NSString *value = [self valueOfField:field inherit:NO];
-    
-    // early return to avoid using a struct from nil
-    if(nil == value)
-        return nil;
-    
     NSURL *baseURL = nil;
     
     // resolve DOI fields against a base URL if necessary, so they can be opened directly by NSWorkspace
@@ -2429,21 +2205,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     } else if([field isEqualToString:BDSKCiteseerUrlString] && [value rangeOfString:@"://"].length == 0){
         // JabRef and CiteSeer use Citeseerurl for CiteSeer links
         // cache this base URL; it's a hidden pref, so you have to quit/relaunch to set it anyway
-        baseURL = [NSURL URLWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteseerHostKey]];
+        static NSURL *citeSeerBaseURL = nil;
+        if(citeSeerBaseURL == nil)
+            citeSeerBaseURL = [[NSURL alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteseerHostKey]];
+        baseURL = citeSeerBaseURL;
     } else if([value hasPrefix:@"\\url{"] && [value hasSuffix:@"}"]){
         // URLs are often enclosed in a \url tex command in bibtex
         value = [value substringWithRange:NSMakeRange(5, [value length] - 6)];
-    } else if([value hasPrefix:@"\\href{"]){
-        // may also take the form \href{http://arXiv.org/abs/hep-th/0304033}{arXiv:hep-th/0304033}
-        unsigned loc = [value indexOfRightBraceMatchingLeftBraceAtIndex:5];
-        if (NSNotFound != loc)
-            value = [value substringWithRange:NSMakeRange(6, loc - 6)];
     }
 
-    returnURL = [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
-    if (returnURL)
-        [cachedURLs setObject:returnURL forKey:field];
-    return returnURL;
+    return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
 
 - (NSURL *)localURL{
@@ -2455,33 +2226,25 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)localUrlPathInheriting:(BOOL)inherit{
-	return [self localFilePathForField:BDSKLocalUrlString inherit:inherit];
+	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:inherit];
 }
 
 - (NSString *)localFilePathForField:(NSString *)field{
-	return [self localFilePathForField:field inherit:YES];
+	return [self localFilePathForField:field relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:YES];
 }
 
-- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit{
-    return [[self localFileURLForField:field inherit:inherit] path];
+- (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
+    return [[self localFileURLForField:field relativeTo:base inherit:inherit] path];
 }
 
 - (NSURL *)localFileURLForField:(NSString *)field{
-	return [self localFileURLForField:field inherit:YES];
+	return [self localFileURLForField:field relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:YES];
 }
 
-- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit{
-    
-    // check the cache first
-    NSURL *localURL = [cachedURLs objectForKey:field];
-    if (nil != localURL)
-        return localURL;
-    
+- (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit{
+    NSURL *localURL = nil;
     NSURL *resolvedURL = nil;
     NSString *localURLFieldValue = [self valueOfField:field inherit:inherit];
-    
-    // only cache absolute URLs
-    BOOL shouldCache = YES;
     
     if ([NSString isEmptyString:localURLFieldValue]) return nil;
     
@@ -2495,11 +2258,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         // check to see if it's a relative path
         UniChar ch = [localURLFieldValue characterAtIndex:0];
         if(ch != '/' && ch != '~'){
-            NSString *docPath = [[owner fileURL] path];
-            NSString *basePath = [NSString isEmptyString:docPath] ? NSHomeDirectory() : [docPath stringByDeletingLastPathComponent];
-			// It's a relative path from the containing document's path
-            localURLFieldValue = [basePath stringByAppendingPathComponent:localURLFieldValue];
-            shouldCache = NO;
+            
+			// It's a relative path using the base parameter we were passed.
+            localURLFieldValue = [([NSString isEmptyString:base] ? NSHomeDirectory() : base) stringByAppendingPathComponent:localURLFieldValue];
+            
         }
 
         localURL = [NSURL fileURLWithPath:[localURLFieldValue stringByStandardizingPath]];
@@ -2511,17 +2273,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     resolvedURL = [localURL fileURLByResolvingAliasesBeforeLastPathComponent];
     
     // if the path to the file does not exist resolvedURL is nil, so we return the unresolved path
-    NSURL *returnURL = (resolvedURL == nil) ? localURL : resolvedURL;
-    if (returnURL)
-        [cachedURLs setObject:returnURL forKey:field];
-    
-    return returnURL;
+    return (resolvedURL == nil) ? localURL : resolvedURL;
 }
 
 - (BOOL)isValidLocalUrlPath:(NSString *)proposedPath{
     if ([NSString isEmptyString:proposedPath])
         return NO;
-    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
+    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
     if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
         proposedPath = [proposedPath lowercaseString];
     return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
@@ -2529,7 +2287,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSString *)suggestedLocalUrl{
 	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:owner];
+	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
     
     NSString *oldPath = [self localUrlPathInheriting:NO];
     if ([oldPath hasPrefix:[papersFolderPath stringByAppendingString:@"/"]]) 
@@ -2552,7 +2310,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	if (nil == requiredFields || 
         ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
-		[NSString isEmptyString:[[[owner fileURL] path] stringByDeletingLastPathComponent]]))
+		[NSString isEmptyString:[[document fileName] stringByDeletingLastPathComponent]]))
 		return NO;
 	
 	NSEnumerator *fEnum = [requiredFields objectEnumerator];
@@ -2563,10 +2321,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
             if([self hasEmptyOrDefaultCiteKey])
 				return NO;
 		} else if ([fieldName isEqualToString:@"Document Filename"]) {
-			if ([NSString isEmptyString:[[owner fileURL] path]])
+			if ([NSString isEmptyString:[document fileName]])
 				return NO;
 		} else if ([fieldName hasPrefix:@"Document: "]) {
-			if ([NSString isEmptyString:[owner documentInfoForKey:[fieldName substringFromIndex:10]]])
+			if ([NSString isEmptyString:[document documentInfoForKey:[fieldName substringFromIndex:10]]])
 				return NO;
 		} else if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
 			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
@@ -2590,6 +2348,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNeedsToBeFiledChangedNotification object:self];
 }
 
+- (void)autoFilePaperAfterDelay
+{
+    // arm: for drag-and-drop operations, autofile after a delay, assuming the Finder is our drag source.  The Finder blocks our AESendMessage call in NSFileManager to get the file's comment string, likely because it's main event loop is busy trying to process the slide back image or some other part of the drag (getting the comment takes ~20 s in this case vs. the normal < 0.01 s).  A delay of 0.5 s was not sufficient.
+    [self performSelector:@selector(autoFilePaper) withObject:nil afterDelay:0.7];
+}
+
 - (BOOL)autoFilePaper
 {
     // we can't autofile if it's disabled or there is nothing to file
@@ -2597,15 +2361,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		return NO;
 	
 	if ([self canSetLocalUrl]) {
-        OBASSERT([owner isDocument]);
-        if ([owner isDocument]) {
-            [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
-                                  fromDocument:(BibDocument *)owner
-                                         check:NO]; 
-            return YES;
-		} else {
-            [self setNeedsToBeFiled:YES];
-        }
+		[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
+							  fromDocument:[self document] 
+                                     check:NO]; 
+		return YES;
 	} else {
 		[self setNeedsToBeFiled:YES];
 	}
@@ -2613,11 +2372,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSString *)documentFileName {
-    return [[owner fileURL] path];
+    return [document fileName];
 }
 
 - (NSString *)documentInfoForKey:(NSString *)key {
-    return [owner documentInfoForKey:key];
+    return [document documentInfoForKey:key];
 }
 
 #pragma mark -
@@ -2638,16 +2397,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	
 	NSMutableSet *mutableGroupSet;
 	
-    if([field isSingleValuedGroupField]){
+    if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field]){
 		// types and journals should be added as a whole
 		mutableGroupSet = [[NSMutableSet alloc] initCaseInsensitiveWithCapacity:1];
 		[mutableGroupSet addObject:value];
-	}else if([field isPersonField]){
+	}else if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field]){
 		mutableGroupSet = BDSKCreateFuzzyAuthorCompareMutableSet();
         [mutableGroupSet addObjectsFromArray:[self peopleArrayForField:field]];
 	}else{
         NSArray *groupArray;   
-        NSCharacterSet *acSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:field];
+        NSCharacterSet *acSet = [NSCharacterSet autocompletePunctuationCharacterSet];
         if([value containsCharacterInSet:acSet])
 			groupArray = [value componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
         else 
@@ -2664,18 +2423,18 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (BOOL)isContainedInGroupNamed:(id)name forField:(NSString *)field {
-    OBASSERT([field isPersonField] ? [name isKindOfClass:[BibAuthor class]] : 1);
+    OBASSERT([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field] ? [name isKindOfClass:[BibAuthor class]] : 1);
 	return [[self groupsForField:field] containsObject:name];
 }
 
 - (int)addToGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	OBASSERT([aGroup isCategory] == YES);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     // don't add it twice
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
-    if([[self groupsForField:field] containsObject:groupName])
+    if(document == nil || [[self groupsForField:field] containsObject:groupName])
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -2690,7 +2449,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		if(operation ==  BDSKOperationAsk || operation == BDSKOperationIgnore)
 			return operation;
 	}else{
-		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString])
+		if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field] || 
+		   [NSString isEmptyString:oldString])
 			operation = BDSKOperationSet;
 		else
 			operation = BDSKOperationAppend;
@@ -2706,10 +2466,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [string appendString:oldString];
         
 		// Use default separator string, unless this is an author/editor field
-        if([field isPersonField])
+        if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field])
             [string appendString:@" and "];
-        else if ([field isCitationField])
-            [string appendString:@", "];
         else
             [string appendString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey]];
     }
@@ -2722,13 +2480,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	OBASSERT([aGroup isCategory] == YES);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
 	NSSet *groupNames = [groups objectForKey:field];
-    if([groupNames containsObject:groupName] == NO)
+    if(document == nil || [groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -2744,7 +2502,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			return operation;
 	}
 	
-	if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || [groupNames count] < 2)
+	if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field] || 
+	   [NSString isEmptyString:oldString] || [groupNames count] < 2)
 		operation = BDSKOperationSet;
 	else
 		operation = BDSKOperationAppend; // Append really means Remove here
@@ -2783,7 +2542,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 	
 	// handle authors separately
-    if([field isPersonField]){
+    if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field]){
 		OBASSERT([groupName isKindOfClass:[BibAuthor class]]);
 		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
 		BibAuthor *auth;
@@ -2795,7 +2554,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
                     first = NO;
 				else 
                     [string appendString:@" and "];
-				[string appendString:[auth originalName]];
+				[string appendString:[auth name]];
 			}
 		}
 		[self setField:field toValue:string];
@@ -2804,11 +2563,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
 	
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
-    OFCharacterSet *delimiterCharSet = [[BibTypeManager sharedManager] separatorOFCharacterSetForField:field];
+    OFCharacterSet *delimiterCharSet = [OFCharacterSet autocompletePunctuationCharacterSet];
     OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
 	
 	BOOL useDelimiters = NO;
-	if([oldString containsCharacterInOFCharacterSet:delimiterCharSet])
+	if([oldString containsCharacterInSet:[NSCharacterSet autocompletePunctuationCharacterSet]])
 		useDelimiters = YES;
 	
 	OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:oldString];
@@ -2855,13 +2614,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (int)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation{
-	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
+	OBASSERT([aGroup isCategory] == YES);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
 	NSSet *groupNames = [groups objectForKey:field];
-    if([groupNames containsObject:groupName] == NO)
+    if(document == nil || [groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -2877,7 +2636,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			return operation;
 	}
 	
-	if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || [groupNames count] < 2)
+	if([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:field] || 
+	   [NSString isEmptyString:oldString] || [groupNames count] < 2)
 		operation = BDSKOperationSet;
 	else
 		operation = BDSKOperationAppend; // Append really means Replace here
@@ -2901,7 +2661,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 	
 	// handle authors separately
-    if([field isPersonField]){
+    if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:field]){
 		OBASSERT([groupName isKindOfClass:[BibAuthor class]]);
 		NSEnumerator *authEnum = [[self peopleArrayForField:field] objectEnumerator];
 		BibAuthor *auth;
@@ -2913,7 +2673,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			if([auth fuzzyEqual:groupName]){
 				[string appendString:newGroupName];
 			}else{
-				[string appendString:[auth originalName]];
+				[string appendString:[auth name]];
 			}
 		}
 		[self setField:field toValue:string];
@@ -2922,11 +2682,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
 	
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
-    OFCharacterSet *delimiterCharSet = [[BibTypeManager sharedManager] separatorOFCharacterSetForField:field];
+    OFCharacterSet *delimiterCharSet = [OFCharacterSet autocompletePunctuationCharacterSet];
     OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
 	
 	BOOL useDelimiters = NO;
-	if([oldString containsCharacterInOFCharacterSet:delimiterCharSet])
+	if([oldString containsCharacterInSet:[NSCharacterSet autocompletePunctuationCharacterSet]])
 		useDelimiters = YES;
 	
 	OFStringScanner *scanner = [[OFStringScanner alloc] initWithString:oldString];
@@ -2978,17 +2738,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (void)invalidateGroupNames{
 	[groups removeAllObjects];
 }
-
-- (BOOL)isImported{
-    return isImported;
-}
-
-- (void)setImported:(BOOL)flag{
-    if (isImported != flag) {
-        isImported = flag;
-    }
-}
-     
+        
 @end
 
 #pragma mark -
@@ -3032,12 +2782,12 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (void)addPDFMetadataToFileForLocalURLField:(NSString *)field;
 {
-    NSParameterAssert([field isLocalFileField]);
+    NSParameterAssert([[BibTypeManager sharedManager] isLocalFileField:field]);
     
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata]){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata] && floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         NSError *error = nil;
         if([[self PDFMetadata] addToURL:[self URLForField:field] error:&error] == NO && error != nil)
-            [NSApp presentError:error];
+            [[self document] presentError:error];
     }
 }
 
@@ -3073,7 +2823,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (void)setPubTypeWithoutUndo:(NSString *)newType{
-    newType = [newType entryType];
+    newType = [newType lowercaseString];
     OBASSERT(![NSString isEmptyString:newType]);
 	if(![[self pubType] isEqualToString:newType]){
 		[pubType release];
@@ -3086,12 +2836,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (void)updateMetadataForKey:(NSString *)key{
     
 	[self setHasBeenEdited:YES];
-    spotlightMetadataChanged = YES;   
-    
-    BOOL allFieldsChanged = [BDSKAllFieldsString isEqualToString:key];
+    spotlightMetadataChanged = YES;    
     
     // invalidate people (authors, editors, etc.) if necessary
-    if (allFieldsChanged || [key isPersonField]) {
+    if ([BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key]) {
         [people release];
         people = nil;
     }
@@ -3099,10 +2847,15 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	if([BDSKLocalUrlString isEqualToString:key]){
 		[self setNeedsToBeFiled:NO];
         // If the Finder comment from this file has a useful URL and our BibItem has an empty remote URL field, use the Finder comment as remote URL.  Do this before autofiling the paper, since we know the path to the file now (hidden user default).
-        if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldUseSpotlightCommentForURL"]){
-            NSString *possibleURLString = [[NSFileManager defaultManager] commentForURL:[self localURL]];
-            if(possibleURLString && [NSURL URLWithString:possibleURLString]!= nil && [self remoteURL] == nil)
-                [self setField:BDSKUrlString toValue:possibleURLString];
+        if(MDItemCreate != NULL && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKShouldUseSpotlightCommentForURL"]){
+            MDItemRef mdItem = NULL;
+            if(mdItem = MDItemCreate(kCFAllocatorDefault, (CFStringRef)[self localFilePathForField:key])){
+                NSString *remoteURLString = (NSString *)MDItemCopyAttribute(mdItem, kMDItemFinderComment);
+                CFRelease(mdItem);
+                if(remoteURLString && [NSURL URLWithString:remoteURLString]!= nil && [self remoteURL] == nil)
+                    [self setField:BDSKUrlString toValue:remoteURLString];
+                [remoteURLString release];
+            }
         }
     }
 	
@@ -3114,42 +2867,31 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
  	
 	// invalidate the cached groups; they are rebuilt when needed
-	if(allFieldsChanged){
+	if([BDSKAllFieldsString isEqualToString:key]){
 		[groups removeAllObjects];
         // re-call make type to make sure we still have all the appropriate bibtex defined fields...
         // but only if we have set the full pubFields array, as we should not be able to remove necessary fields.
         [self makeType];
-        
-        // the URL cache is certainly invalid now
-        [cachedURLs removeAllObjects];
 	}else if(key != nil){
 		[groups removeObjectForKey:key];
 	}
-    
-    if([key isURLField])
-        [cachedURLs removeObjectForKey:key];
 	
     NSCalendarDate *theDate = nil;
     
     // pubDate is a derived field based on Month and Year fields; we take the 15th day of the month to avoid edge cases
-    if (key == nil || allFieldsChanged || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
+    if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
 		NSString *yearValue = [pubFields objectForKey:BDSKYearString];
         if([yearValue isComplex])
             yearValue = [(BDSKStringNode *)[[yearValue nodes] objectAtIndex:0] value];
 		if (![NSString isEmptyString:yearValue]) {
 			NSString *monthValue = [pubFields objectForKey:BDSKMonthString];
-			if([monthValue isComplex]) {
-                NSArray *nodes = [monthValue nodes];
-                if ([nodes count] > 1 && [(BDSKStringNode *)[nodes objectAtIndex:1] type] == BSN_MACRODEF)
-                    monthValue = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-                else if ([nodes count] > 2 && [(BDSKStringNode *)[nodes objectAtIndex:2] type] == BSN_MACRODEF)
-                    monthValue = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-				else
-                    monthValue = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-			}
-            if (!monthValue) monthValue = @"";
-            // allows month as number, name or abbreviated name
-            theDate = [[NSCalendarDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-%@", monthValue, yearValue]];
+			if([monthValue isComplex])
+				monthValue = [(BDSKStringNode *)[[monthValue nodes] objectAtIndex:0] value];
+			if (!monthValue) monthValue = @"";
+			NSString *dateStr = [NSString stringWithFormat:@"%@-15-%@", monthValue, yearValue];
+            NSDate *date = [[NSDate alloc] initWithMonthDayYearString:dateStr];
+            theDate = [[NSCalendarDate alloc] initWithString:[date description]];
+            [date release];
 			[self setDate:theDate];
             [theDate release];
 		}else{
@@ -3158,7 +2900,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	}
 	
     // setDateAdded: is only called here; it is derived based on pubFields value of BDSKDateAddedString
-    if (key == nil || allFieldsChanged || [BDSKDateAddedString isEqualToString:key]) {
+    if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKDateAddedString isEqualToString:key]) {
 		NSString *dateAddedValue = [pubFields objectForKey:BDSKDateAddedString];
 		if (![NSString isEmptyString:dateAddedValue]) {
             theDate = [[NSCalendarDate alloc] initWithNaturalLanguageString:dateAddedValue];
@@ -3180,95 +2922,11 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [self setDateModified:nil];
     }
     
-    if([owner isDocument] && ([key isURLField] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
+    if([self document] != nil && ([[BibTypeManager sharedManager] isURLField:key] || [key isEqualToString:BDSKTitleString] || [key isEqualToString:BDSKAllFieldsString])){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchIndexInfoChangedNotification
-                                                            object:(BibDocument *)owner
+                                                            object:[self document]
                                                           userInfo:[self searchIndexInfo]];
     }
-}
-
-#pragma mark Type info
-
-// used to be a #define; changed to function for clarity in debugging
-static inline void setEmptyStringIfObjectIsNilAndExcludeFromRemoval(NSString *key, NSMutableDictionary *dict, NSMutableSet *removalSet)
-{
-    if([dict objectForKey:key] == nil)
-        [dict setObject:@"" forKey:key];
-    [removalSet removeObject:key];
-}
-
-// CFSetApplierFunction callback
-static void removeItemsInSetFromDictionary(const void *value, void *context)
-{
-    CFDictionaryRemoveValue((CFMutableDictionaryRef)context, value);
-}
-
-// CFSet string equality callback
-static Boolean stringIsEqualToString(const void *value1, const void *value2) { return [(id)value1 isEqualToString:(id)value2]; }
-
-- (void)makeType{
-    NSString *fieldString;
-    NSString *theType = [self pubType];
-    
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
-    
-    // enumerating small arrays by index is generally faster than NSEnumerator, and -makeType is called many times at load
-    CFArrayRef requiredFields = (CFArrayRef)[typeManager requiredFieldsForType:theType];
-    CFArrayRef optionalFields = (CFArrayRef)[typeManager optionalFieldsForType:theType];
-    CFArrayRef userFields = (CFArrayRef)[typeManager userDefaultFieldsForType:theType];
-    
-    // current state of this item's pubFields
-    CFArrayRef allFields = (CFArrayRef)[self allFieldNames];
-    
-    CFIndex requiredCount = CFArrayGetCount(requiredFields);
-    CFIndex optionalCount = CFArrayGetCount(optionalFields);
-    CFIndex userCount = CFArrayGetCount(userFields);
-    CFIndex allFieldsCount = CFArrayGetCount(allFields);
-    
-    // have to retain keys removed from the dictionary, but we know they're strings
-    CFSetCallBacks callBacks = { 0, OFCFTypeRetain, OFCFTypeRelease, CFCopyDescription, stringIsEqualToString, CFHash };
-    
-    // fixed-size mutable set; this needn't be larger than allFieldsCount
-    NSMutableSet *emptyFieldsToRemove = (NSMutableSet *)CFSetCreateMutable(CFAllocatorGetDefault(), allFieldsCount, &callBacks);
-    NSString *key;
-    
-    CFIndex idx;
-    
-    // for each field currently in this publication, check if it's value is an empty string; if so, add to the set of fields to be removed
-    for (idx = 0; idx < allFieldsCount; idx++) {
-        key = (id)CFArrayGetValueAtIndex(allFields, idx);
-        if ([[pubFields objectForKey:key] isEqualAsComplexString:@""])
-            [emptyFieldsToRemove addObject:key];
-    }        
-    
-    // see if we have a nil value for any required field; if so, give it an empty value and don't remove it at the end
-    for (idx = 0; idx < requiredCount; idx++) {
-        fieldString = (id)CFArrayGetValueAtIndex(requiredFields, idx);
-        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
-    }
-    
-    // now check the BibTeX-defined optional fields
-    for (idx = 0; idx < optionalCount; idx++) {
-        fieldString = (id)CFArrayGetValueAtIndex(optionalFields, idx);
-        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
-    }
-    
-    // now check all user-defined default fields
-    for (idx = 0; idx < userCount; idx++) {
-        fieldString = (id)CFArrayGetValueAtIndex(userFields, idx);
-        setEmptyStringIfObjectIsNilAndExcludeFromRemoval(fieldString, pubFields, emptyFieldsToRemove);
-    }
-    
-    // I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others as being non-nil:
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKLocalUrlString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKUrlString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAnnoteString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKAbstractString, pubFields, emptyFieldsToRemove);
-    setEmptyStringIfObjectIsNilAndExcludeFromRemoval(BDSKRssDescriptionString, pubFields, emptyFieldsToRemove);
-    
-    // now remove everything that's left in removeKeys from pubFields, since it's non-standard for this type
-    CFSetApplyFunction((CFMutableSetRef)emptyFieldsToRemove, removeItemsInSetFromDictionary, pubFields);
-    CFRelease(emptyFieldsToRemove);
 }
 
 @end
@@ -3290,7 +2948,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (id)valueForUndefinedKey:(NSString *)key{
-    key = [key fieldName];
+    key = [key capitalizedString];
     if (key == nil)
         return nil;
     [usedFields addObject:key];
@@ -3307,7 +2965,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (BOOL)isUsedField:(NSString *)name{
-    BOOL isUsed = [usedFields containsObject:[name fieldName]];
+    BOOL isUsed = [usedFields containsObject:[name capitalizedString]];
     [usedFields addObject:name];
     return isUsed;
 }

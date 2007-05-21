@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 03/17/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,6 @@
 
 // returns nil if functionality is not supported
 + (id)sharedSearch;
-
-- (BOOL)hasQuery:(NSString *)queryString;
 
 // queryString syntax is same as MDQuery (can be copied directly from a Finder saved search)
 // returns NO if there was an error in creating the asynchronous query

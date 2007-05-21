@@ -1,7 +1,7 @@
 //  BDSKConverter.m
 //  Created by Michael McCracken on Thu Mar 07 2002.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,6 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringNode.h"
-#import "NSObject_BDSKExtensions.h"
-#import "NSError_BDSKExtensions.h"
 
 @interface BDSKConverter (Private)
 - (void)setDetexifyAccents:(NSDictionary *)newAccents;
@@ -52,7 +50,6 @@
 - (void)setTexifyConversions:(NSDictionary *)newConversions;
 - (void)setDeTexifyConversions:(NSDictionary *)newConversions;
 static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharacterSet *baseCharacterSetForTeX, NSCharacterSet *accentCharSet, NSDictionary *texifyAccents);
-static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDictionary *detexifyAccents);
 @end
 
 @implementation BDSKConverter
@@ -115,11 +112,15 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
 	
 	// create a characterset from the characters we know how to convert
     NSMutableCharacterSet *workingSet;
-	
-    workingSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(0x80, 0x1d0)] mutableCopy]; //this should get all the characters in Latin-1 Supplement, Latin Extended-A, and Latin Extended-B
-    [workingSet addCharactersInRange:NSMakeRange(0x1e00, 0x100)]; //this should get all the characters in Latin Extended Additional.
-    [workingSet formIntersectionWithCharacterSet:[NSCharacterSet decomposableCharacterSet]];
-    [workingSet performSelector:@selector(addCharactersInString:) withObjectsFromArray:[tmpTexifyDict allKeys]];
+    
+    workingSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(461, 103)] mutableCopy]; //this should get all the composed characters in Latin Extended-B. exclude tilde, or we'll get an alert on it
+    [workingSet addCharactersInRange:NSMakeRange('~' + 1, 256)]; //this should get all the characters composed characters in Latin Extended-A.
+
+    NSEnumerator *e = [tmpTexifyDict keyEnumerator];
+    NSString *key;
+	while(key = [e nextObject]){
+		[workingSet addCharactersInString:key];
+	}
 	
     [self setFinalCharSet:workingSet];
     [workingSet release];
@@ -137,32 +138,27 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     [self setDetexifyAccents:[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY]];
 }
 
+- (NSString *)stringByTeXifyingString:(NSString *)s{
+    return [[self copyStringByTeXifyingString:s] autorelease];
+}
+
 - (NSString *)copyStringByTeXifyingString:(NSString *)s{
-    
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
 		BDSKComplexString *cs = (BDSKComplexString *)s;
 		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
 		BDSKStringNode *node, *newNode;
-		NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[cs nodes] count]];
-        NSString *string;
+		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
 		
 		while(node = [nodeEnum nextObject]){
-			if([node type] == BSN_STRING){
-				string = [self copyStringByTeXifyingString:[node value]];
-                if(string == nil) break;
-                newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
-                [string release];
-			} else {
+			if([node type] == BSN_STRING)
+				newNode = [[BDSKStringNode alloc] initWithQuotedString:[self stringByTeXifyingString:[node value]]];
+			else 
 				newNode = [node copy];
-			}
-            [nodes addObject:newNode];
+			[nodes addObject:newNode];
 			[newNode release];
 		}
-        
-        string = [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
-        [nodes release];
-		return string;
+		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
     // we expect to find composed accented characters, as this is also what we use in the CharacterConversion plist
@@ -180,7 +176,7 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)precomposedString, &inlineBuffer, CFRangeMake(0, numberOfCharacters));
     
-    for (index = 0; (index < numberOfCharacters); index++) {
+    for (index = 0; index < numberOfCharacters; index++) {
             
         ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, index);
         
@@ -200,13 +196,18 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
                 // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
                 offset += [tmpConv length] - 1;
                 
+            // if tmpConv is non-nil and decomposition failed, throw an exception
+            } else if(tmpConv != nil){
+                NSString *charString = [NSString unicodeNameOfCharacter:ch];
+                NSLog(@"unable to convert \"%@\" (unichar %@)", charString, [NSString hexStringForCharacter:ch]);
+                // raise exception after moving the scanner past the offending char
+                [NSException raise:BDSKTeXifyException format:@"%@", charString]; 
             }
             [tmpConv release];
         }
     }
     
     [precomposedString release];
-    
     return convertedSoFar;
 }
 
@@ -219,26 +220,21 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     // first check if we can convert this, we should have a base character + an accent we know
     if (decomposedLength == 0 || [baseCharacterSetForTeX characterIsMember:[charString characterAtIndex:0]] == NO)
         return NO;
-    // no-op; this case will likely never happen
     else if (decomposedLength == 1)
         return YES;
-    // @@ we could allow decomposedLength > 2, it doesn't break TeX (though it gives funny results)
     else if (decomposedLength > 2 || [accentCharSet characterIsMember:[charString characterAtIndex:1]] == NO)
         return NO;
     
-    CFAllocatorRef alloc = CFGetAllocator(charString);
     // isolate accent
-    NSString *accentChar = (NSString *)CFStringCreateWithSubstring(alloc, (CFStringRef)charString, CFRangeMake(1, 1));
-    NSString *accent = [texifyAccents objectForKey:accentChar];
-    [accentChar release];
+    NSString *accent = [texifyAccents objectForKey:[charString substringFromIndex:1]];
     
     // isolate character
-    NSString *character = (NSString *)CFStringCreateWithSubstring(alloc, (CFStringRef)charString, CFRangeMake(0, 1));
+    NSString *character = [charString substringToIndex:1];
     
     // handle i and j (others as well?)
     if (([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) &&
 		![accent isEqualToString:@"c "] && ![accent isEqualToString:@"d "] && ![accent isEqualToString:@"b "]) {
-	    character = [[@"\\" stringByAppendingString:character] copy];
+	    character = [@"\\" stringByAppendingString:character];
     }
     
     // [accent length] == 2 in some cases, and the 'character' may or may not have \\ prepended, so we'll just replace the entire string rather than trying to catch all of those cases by recomputing lengths
@@ -247,15 +243,17 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
     [charString appendString:character];
     [charString appendString:@"}"];
     
-    [character release];
-    
     return YES;
+}
+
+- (NSString *)stringByDeTeXifyingString:(NSString *)s{
+    return [[self copyStringByDeTeXifyingString:s] autorelease];
 }
 
 - (NSString *)copyStringByDeTeXifyingString:(NSString *)s{
 
     if([NSString isEmptyString:s]){
-        return [s retain];
+        return [@"" retain];
     }
     
 	// deTeXify only string nodes of complex strings;
@@ -264,23 +262,19 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
 		BDSKStringNode *node, *newNode;
 		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
-		NSString *string;
-        
+		
 		while(node = [nodeEnum nextObject]){
-			if([node type] == BSN_STRING){
-				string = [self copyStringByDeTeXifyingString:[node value]];
-				newNode = [[BDSKStringNode alloc] initWithQuotedString:string];
-                [string release];
-			} else {
+			if([node type] == BSN_STRING)
+				newNode = [[BDSKStringNode alloc] initWithQuotedString:[self stringByDeTeXifyingString:[node value]]];
+			else 
 				newNode = [node copy];
-			}
-            [nodes addObject:newNode];
+			[nodes addObject:newNode];
 			[newNode release];
 		}
 		return [[NSString alloc] initWithNodes:nodes macroResolver:[cs macroResolver]];
 	}
 	
-    NSMutableString *tmpConv = nil;
+    NSString *tmpConv = nil;
     NSString *TEXString = nil;
 
     NSMutableString *convertedSoFar = nil;
@@ -300,15 +294,12 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
             if (closingRange.length) {
                 
                 replaceRange = NSMakeRange(range.location, closingRange.location - range.location + 1);
-                CFStringRef tmpString = CFStringCreateWithSubstring(NULL, (CFStringRef)convertedSoFar, CFRangeMake(replaceRange.location, replaceRange.length));
-                tmpConv = [(NSString *)tmpString mutableCopy];
-                CFRelease(tmpString);
+                tmpConv = (NSString *)CFStringCreateWithSubstring(NULL, (CFStringRef)convertedSoFar, CFRangeMake(replaceRange.location, replaceRange.length));
                 
                 // see if the dictionary has a conversion, or try Unicode composition
-                if(TEXString = [detexifyConversions objectForKey:tmpConv]){
+                if((TEXString = [detexifyConversions objectForKey:tmpConv]) ||
+                    (TEXString = [self composedStringFromTeXString:tmpConv])){
                     [convertedSoFar replaceCharactersInRange:replaceRange withString:TEXString];
-                }else if(convertTeXStringToComposedCharacter(tmpConv, detexifyAccents)) {
-                    [convertedSoFar replaceCharactersInRange:replaceRange withString:tmpConv];
                 }
                 [tmpConv release];
                 
@@ -334,12 +325,8 @@ static BOOL convertComposedCharacterToTeX(NSMutableString *charString, NSCharact
 
 // takes a sequence such as "{\'i}" or "{\v S}" (no quotes) and converts to appropriate composed characters
 // returns nil if unable to convert
-static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDictionary *detexifyAccents)
-{        
-    // check this before creating a scanner
-    if (nil == texString)
-        return NO;
-    
+- (NSString *)composedStringFromTeXString:(NSString *)texString{
+        
 	NSString *texAccent = nil;
 	NSString *accent = nil;
     unsigned int idx = 0, length = [texString length];
@@ -347,10 +334,14 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)texString, &inlineBuffer, CFRangeMake(0, length));
     
+    // check this before creating a scanner
+    if (nil == texString)
+        return nil;
+    
     // check for {\ prefix
     if (CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx++) != '{' ||
         CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx++) != '\\')
-        return NO;
+        return nil;
     
     UniChar ch, accentCh = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx++);
     
@@ -360,13 +351,13 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     [texAccent release];
     
     if (nil == accent)
-        return NO;    
+        return nil;    
     
     // get the character immediately following the accent
     ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
     
     if ([[NSCharacterSet letterCharacterSet] characterIsMember:accentCh] && ch != ' ')
-        return NO; // error: if accentCh was a letter (e.g. {\v S}), it must be followed by a space
+        return nil; // error: if accentCh was a letter (e.g. {\v S}), it must be followed by a space
     else if (ch == ' ')
         idx++;      // TeX accepts {\' i} or {\'i}, but space shouldn't be included in the letter token
     
@@ -380,7 +371,7 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
         // scan up to the closing brace, since we don't know the character substring length beforehand
         if (ch == '}') {
 
-            CFAllocatorRef alloc = CFGetAllocator(texString);
+            CFAllocatorRef alloc = CFAllocatorGetDefault();
             character = (NSString *)CFStringCreateWithSubstring(alloc, (CFStringRef)texString, CFRangeMake(letterStart, idx - letterStart));
             
             // special cases for old style i, j
@@ -394,30 +385,24 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
             
             if ([character length] == 1) {
                 CFMutableStringRef mutableCharacter = CFStringCreateMutableCopy(alloc, 0, (CFStringRef)character);
+                CFRelease(character);
                 CFStringAppend(mutableCharacter, (CFStringRef)accent);
                 CFStringNormalize(mutableCharacter, kCFStringNormalizationFormC);
-                
-                if ([(NSString *)mutableCharacter length] == 1) {
-                    [texString setString:(NSString *)mutableCharacter];
-                } else {
-                    // if it can't be composed to a single character, we won't be able to convert it back
-                    [character release];
-                    return NO;
-                }
+                character = [(id)mutableCharacter autorelease];
                 
                 // should be at idx = length anyway
-                [character release];
-                return YES;
+                break;
             } else {
                 
                 // incorrect length of the character
                 [character release];
-                return NO;
+                character = nil;
+                break;
             }
         }
     }
     
-    return NO;
+    return character;
 }
 
 @end
@@ -477,9 +462,12 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
 
 @implementation NSString (BDSKConverter)
 
-- (NSString *)copyTeXifiedString { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:self]; }
-- (NSString *)stringByTeXifyingString { return [[self copyTeXifiedString] autorelease]; }
-- (NSString *)copyDeTeXifiedString { return [[BDSKConverter sharedConverter] copyStringByDeTeXifyingString:self]; }
-- (NSString *)stringByDeTeXifyingString { return [[self copyDeTeXifiedString] autorelease]; }
+- (NSString *)stringByTeXifyingString { return [[BDSKConverter sharedConverter] stringByTeXifyingString:self]; }
+
+- (NSString *)stringByDeTeXifyingString { return [[BDSKConverter sharedConverter] stringByDeTeXifyingString:self]; }
+
+- (NSString *)initTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByTeXifyingString:aString]; }
+
+- (NSString *)initDeTeXifiedStringWithString:(NSString *)aString { return [[BDSKConverter sharedConverter] copyStringByDeTeXifyingString:aString]; }
 
 @end

@@ -1,4 +1,4 @@
-// Copyright 2001-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -17,7 +17,7 @@
 #import <mach/mach_init.h>
 #import <mach/vm_map.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFClobberDetectionZone.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFClobberDetectionZone.m 67164 2005-08-18 05:25:43Z kc $")
 
 
 //#define USE_MUTEX
@@ -191,8 +191,7 @@ static void _OFMallocLogger(unsigned type, unsigned arg1, unsigned arg2, unsigne
 #warning **************************************
 #warning **** USING OFClobberDetectionZone ****
 #warning **************************************
-void OFUseClobberDetectionZoneAsDefaultZone()  __attribute__ ((constructor));
-
+#pragma CALL_ON_LOAD OFUseClobberDetectionZoneAsDefaultZone
 #endif
 
 static malloc_zone_t *originalDefaultZone = NULL;
@@ -415,9 +414,9 @@ static kern_return_t _OFClobberDetectionZoneEnumerator(task_t task, void *x, uns
 
 static size_t	_OFClobberDetectionZoneGoodSize(malloc_zone_t *zone, size_t size)
 {
-    //ERROR((OFClobberDetectionZone *)zone, "Function not implemented", NULL);
-    //_OFClobberAbort(NULL);
-    return size;
+    ERROR((OFClobberDetectionZone *)zone, "Function not implemented", NULL);
+    _OFClobberAbort(NULL);
+    return 0;
 }
 
 
@@ -761,10 +760,6 @@ static void _OFClobberDetectionZoneFree(struct _malloc_zone_t *zone, void *ptr)
     if (_OFClobberDetectionZoneLogEnabled)
         malloc_printf("Zone=0x%x -- *** Free ptr=0x%x\n", zone, ptr);
 
-    if (!ptr) {
-        ZUNLOCK(z);
-        return;
-    }
     block = _locked_OFClobberDetectionBlockForPointer(z, ptr);
     if (!block) {
 #warning TODO: Try to avoid this problem

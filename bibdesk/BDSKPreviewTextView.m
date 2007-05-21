@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/6/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 @implementation BDSKPreviewTextView
 
 - (void)updateFontPanel {
-    if ([[[self window] firstResponder] isEqual:self]) {
+    if ([[self window] firstResponder] == self) {
         NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey];
         float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewBaseFontSizeKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];

@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 02/17/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -44,14 +44,14 @@ extern NSString *BDSKPDFDocumentCreationDateAttribute;
 extern NSString *BDSKPDFDocumentKeywordsAttribute;			
 
 @interface PDFMetadata : NSObject {
-    NSMutableDictionary *dictionary;
+    NSMutableDictionary *metadata;
 }
 
 + (id)metadataWithBibItem:(id)anItem;
 + (id)metadataForURL:(NSURL *)fileURL error:(NSError **)outError;
 
 - (NSDictionary *)dictionary;
-- (void)setDictionary:(NSDictionary *)newDictionary;
+- (void)setDictionary:(NSDictionary *)dictionary;
 
 - (BOOL)addToURL:(NSURL *)fileURL error:(NSError **)outError;
 

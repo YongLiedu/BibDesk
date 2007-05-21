@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/21/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@
 #import "BibDocument.h"
 #import "BibAppController.h"
 #import "BDSKStringEncodingManager.h"
-#import "NSWindowController_BDSKExtensions.h"
 
 @implementation BDSKErrorEditor
 
@@ -99,7 +98,17 @@
 
 - (void)awakeFromNib;
 {
-    [self setWindowFrameAutosaveNameOrCascade:@"Edit Source Window"];
+    // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
+    [[self window] setFrameUsingName:@"Edit Source Window"];
+    // we should only cascade windows if we have multiple documents open; bug #1299305
+    // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
+    static NSPoint nextWindowLocation = {0.0, 0.0};
+    [self setShouldCascadeWindows:NO];
+    if ([[self window] setFrameAutosaveName:@"Edit Source Window"]) {
+        NSRect windowFrame = [[self window] frame];
+        nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
+    }
+    nextWindowLocation = [[self window] cascadeTopLeftFromPoint:nextWindowLocation];
     
     if(isPasteDrag)
         [reopenButton setEnabled:NO];
@@ -109,7 +118,7 @@
     
     [self loadFile:self];
     
-    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
+    NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
     
     OBASSERT(fileName);
     [[self window] setRepresentedFilename:fileName];
@@ -180,7 +189,7 @@
         [self willChangeValueForKey:@"displayName"];
         [self didChangeValueForKey:@"displayName"];
         
-        NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
+        NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Edit Paste/Drag") : NSLocalizedString(@"Edit Source", @"Edit Source");
         [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", prefix, [manager displayName]]];
     }
 }
@@ -213,12 +222,13 @@
     NSFileManager *dfm = [NSFileManager defaultManager];
     if (!fileName) return;
     
-    NSStringEncoding encoding = [manager documentStringEncoding];
+    // let's see if the document has an encoding (hopefully the user guessed correctly); if not, fall back to the default C string encoding
+    NSStringEncoding encoding = (document != nil ? [document documentStringEncoding] : [NSString defaultCStringEncoding]);
         
     if ([dfm fileExistsAtPath:fileName]) {
         NSString *fileStr = [[NSString alloc] initWithContentsOfFile:fileName encoding:encoding guessEncoding:YES];;
         if(!fileStr)
-            fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"Message when unable to determine encoding for error editor")];
+            fileStr = [[NSString alloc] initWithString:NSLocalizedString(@"Unable to determine the correct character encoding.", @"")];
         [textView setString:fileStr];
         [fileStr release];
     }
@@ -232,19 +242,12 @@
     NSString *expandedFileName = [[self fileName] stringByExpandingTildeInPath];
     
     expandedFileName = [[NSFileManager defaultManager] uniqueFilePath:expandedFileName createDirectory:NO];
-    NSURL *expandedFileURL = [NSURL fileURLWithPath:expandedFileName];
     
     // write this out with the user's default encoding, so the openDocumentWithContentsOfFile is more likely to succeed
     NSData *fileData = [[textView string] dataUsingEncoding:[BDSKStringEncodingManager defaultEncoding] allowLossyConversion:NO];
     [fileData writeToFile:expandedFileName atomically:YES];
     
-    NSError *err = nil;
-    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:expandedFileURL display:YES error:&err];
-
-    if(err != nil){
-        NSLog(@"error opening newly created document from error editor: %@", err);
-    }
-
+    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:expandedFileName display:YES];
 }
 
 - (IBAction)changeSyntaxHighlighting:(id)sender;

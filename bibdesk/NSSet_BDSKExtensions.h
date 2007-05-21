@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/04/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,6 @@
 @end
 
 @interface NSMutableSet (BDSKExtensions)
-
-+ (id)caseInsensitiveStringSet;
 
 - (id)initCaseInsensitive;
 - (id)initCaseInsensitiveWithCapacity:(unsigned)numItems;

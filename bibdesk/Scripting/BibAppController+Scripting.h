@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
 
 #import <Foundation/Foundation.h>
 #import "BibAppController.h"
-
-@class BDSKScriptHook, BDSKMacro;
+#import <OmniFoundation/OFPreference.h>
+#import "BDSKScriptHookManager.h"
 
 @interface BibAppController (Scripting) 
 
@@ -50,9 +50,6 @@
 - (NSArray *)allFieldNames;
 
 - (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID;
-
-- (BDSKMacro *)valueInMacrosWithName:(NSString *)name;
-- (NSArray *)macros;
 
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key;
 

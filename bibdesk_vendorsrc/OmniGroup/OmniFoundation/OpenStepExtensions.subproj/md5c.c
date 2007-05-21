@@ -10,37 +10,9 @@
 
 // This is an implementation of the MD5 Message Digest Algorithm (derived, somewhat indirectly, from the reference implementation in RFC 1321).
 
-/* Amusingly, MacOS X already ships with a large number of implementations of MD5 on the system. As of 10.4.3, there are copies of the MD5 routine in:
- /System/Library/Frameworks:
-   AppleShareClientCore.framework
-   CoreGraphics.framework (twice, it looks like)
-   JavaVM.framework/libsuncmm
-   Kerberos.framework
-   Python.framework
-   QuartzCore.framework
-   QuickTime.framework
-   XgridFoundation.framework
-/System/Library/PrivateFrameworks:
-   AirPortConfig.framework
-   Apple80211.framework  (yes, again!)
-   BEEP.framework
-   DiskImages.framework
-   PSNormalizer.framework/libnserverlite
-   TimClient.framework
-/usr/lib:
-   -lcrypto
-   -lcups
-   -lsasl2
-   -lSystem
-
-A bunch of frameworks call into libSystem's copy, _CC_MD5_foo(),  but it's not documented so we probably shouldn't rely on its continued existence... instead, we have yet another copy here.
-*/
-
-   
-
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/md5c.c 70713 2005-11-24 00:53:58Z wiml $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/md5c.c 68913 2005-10-03 19:36:19Z kc $")
 
 /* MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm */
 

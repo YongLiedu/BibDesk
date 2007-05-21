@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/18/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,7 @@
 #import "BibDeskTemplatedTextCommand.h"
 #import "BibDocument.h"
 #import "BDSKTemplate.h"
-#import "BDSKTemplateObjectProxy.h"
-#import "BDSKPublicationsArray.h"
-#import "NSArray_BDSKExtensions.h"
-#import "BibItem.h"
+
 
 @implementation BibDeskTemplatedTextCommand
 
@@ -62,12 +59,12 @@
 
 	if ([receiver isKindOfClass:[BibDocument class]]) {
         document = receiver;
-    } else if ([dPO isKindOfClass:[BibDocument class]]) {
+    } else if ([dPO isKindOfClass:[BibDocument class]] == NO) {
         document = dPO;
     } else {
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
+		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"")];
 		return @"";
 	}
 	
@@ -93,11 +90,18 @@
 		if ([obj isKindOfClass:[BibItem class]]) {
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
-            items = [[obj lastObject] isKindOfClass:[BibItem class]] ? obj : [publications objectsAtIndexSpecifiers:(NSArray *)obj];
+            NSEnumerator *e = [(NSArray *)obj objectEnumerator];
+            NSIndexSpecifier *i;
+            NSMutableArray *pubs = [NSMutableArray array];
+            
+            while (i = [e nextObject]) {
+                [pubs addObject:[publications objectAtIndex:[i index]]];
+            }
+            items = pubs;
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
-			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
+			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"")];
 			return @"";
 		}
 		
@@ -138,12 +142,12 @@
 
 	if ([receiver isKindOfClass:[BibDocument class]]) {
         document = receiver;
-    } else if ([dPO isKindOfClass:[BibDocument class]]) {
+    } else if ([dPO isKindOfClass:[BibDocument class]] == NO) {
         document = dPO;
     } else {
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
+		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"")];
 			return [[[NSTextStorage alloc] init] autorelease];;
 	}
 	
@@ -169,11 +173,18 @@
 		if ([obj isKindOfClass:[BibItem class]]) {
             items = [NSArray arrayWithObject:obj];
 		} else if ([obj isKindOfClass:[NSArray class]]) {
-            items = [[obj lastObject] isKindOfClass:[BibItem class]] ? obj : [publications objectsAtIndexSpecifiers:(NSArray *)obj];
+            NSEnumerator *e = [(NSArray *)obj objectEnumerator];
+            NSIndexSpecifier *i;
+            NSMutableArray *pubs = [NSMutableArray array];
+            
+            while (i = [e nextObject]) {
+                [pubs addObject:[publications objectAtIndex:[i index]]];
+            }
+            items = pubs;
         } else {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
-			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
+			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"")];
 			return [[[NSTextStorage alloc] init] autorelease];;
 		}
 		

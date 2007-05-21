@@ -23,7 +23,7 @@
 #import <bzlib.h>
 #import <zlib.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.m 70933 2005-12-06 22:27:45Z wiml $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.m 67545 2005-08-28 06:14:01Z kc $")
 
 @implementation NSData (OFExtensions)
 
@@ -846,42 +846,35 @@ static inline unichar hex(int i)
 
 - (unsigned)indexOfBytes:(const void *)patternBytes length:(unsigned int)patternLength;
 {
-    return [self indexOfBytes:patternBytes length:patternLength range:(NSRange){0, [self length]}];
-}
+    unsigned const char *selfPtr, *selfEnd, *selfRestart, *ptr, *ptrRestart, *end;
+    unsigned myLength, thisOffset;
 
-- (unsigned)indexOfBytes:(const void *)patternBytes length:(unsigned int)patternLength range:(NSRange)searchRange
-{
-    unsigned const char *selfBufferStart, *selfPtr, *selfPtrEnd;
-    unsigned int selfLength;
-    
-    selfLength = [self length];
-    if (searchRange.location > selfLength ||
-        (searchRange.location + searchRange.length) > selfLength) {
-        OBRejectInvalidCall(self, _cmd, @"Range {%u,%u} exceeds length %u", searchRange.location, searchRange.length, selfLength);
-    }
-
+    ptrRestart = patternBytes;
     if (patternLength == 0)
-        return searchRange.location;
-    if (patternLength > searchRange.length) {
-        // This test is a nice shortcut, but it's also necessary to avoid crashing: zero-length CFDatas will sometimes(?) return NULL for their bytes pointer, and the resulting pointer arithmetic can underflow.
+        return 0;
+    end = ptrRestart + patternLength;
+    selfRestart = [self bytes];
+    thisOffset = 0;
+    myLength = [self length];
+    if (myLength < patternLength) // This test is a nice shortcut, but it's also necessary to avoid crashing: zero-length CFDatas will sometimes(?) return NULL for their bytes pointer, and the resulting pointer arithmetic can underflow.
         return NSNotFound;
-    }
-    
-    
-    selfBufferStart = [self bytes];
-    selfPtr    = selfBufferStart + searchRange.location;
-    selfPtrEnd = selfBufferStart + searchRange.location + searchRange.length + 1 - patternLength;
-    
-    for (;;) {
-        if (memcmp(selfPtr, patternBytes, patternLength) == 0)
-            return (selfPtr - selfBufferStart);
-        
-        selfPtr++;
-        if (selfPtr == selfPtrEnd)
-            break;
-        selfPtr = memchr(selfPtr, *(const char *)patternBytes, (selfPtrEnd - selfPtr));
-        if (!selfPtr)
-            break;
+    selfEnd = selfRestart + (myLength - patternLength);
+
+    /* A note on the goto in the following code, for the structure-obsessed among us: it could be replaced with a flag and a 'break', yes, but since that code path is the most common one (and gcc3 doesn't optimize out control-flow flags) it seems worth the potential disapprobation from the use of reviled goto. */
+
+    while(selfRestart <= selfEnd) {
+        selfPtr = selfRestart;
+        ptr = ptrRestart;
+        while(ptr < end) {
+            if (*ptr++ != *selfPtr++)
+                goto notThisOffset;
+        }
+
+        return thisOffset;
+
+      notThisOffset:
+        selfRestart++;
+        thisOffset++;
     }
     return NSNotFound;
 }

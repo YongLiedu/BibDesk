@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/18/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,6 @@ typedef enum {
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *deleteButton;
     IBOutlet NSMatrix *prefListRadio;
-    IBOutlet NSWindow *chooseMainPageSheet;
-    IBOutlet NSPopUpButton *chooseMainPagePopup;
 }
 
 - (IBAction)changePrefList:(id)sender;
@@ -68,8 +66,5 @@ typedef enum {
 - (BOOL)canDeleteSelectedItem;
 
 - (IBAction)revealInFinder:(id)sender;
-- (IBAction)chooseFile:(id)sender;
-
-- (IBAction)dismissChooseMainPageSheet:(id)sender;
 
 @end

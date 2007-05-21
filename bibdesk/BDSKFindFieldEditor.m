@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 4/6/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@
 		[super performFindPanelAction:sender];
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem {
     id delegate = [[self window] delegate];
 	if ([menuItem action] == @selector(performFindPanelAction:) && [delegate respondsToSelector:@selector(performFindPanelAction:)] && [delegate respondsToSelector:@selector(validateMenuItem:)]) 
 		return [delegate validateMenuItem:menuItem];

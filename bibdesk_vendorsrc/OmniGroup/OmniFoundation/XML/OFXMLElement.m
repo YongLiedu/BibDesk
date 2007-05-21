@@ -19,7 +19,7 @@
 #import "OFXMLBuffer.h"
 #import "OFXMLFrozenElement.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLElement.m 66265 2005-07-29 04:07:59Z bungi $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLElement.m 66265 2005-07-29 04:07:59Z bungi $");
 
 @interface OFXMLElement (PrivateAPI)
 @end

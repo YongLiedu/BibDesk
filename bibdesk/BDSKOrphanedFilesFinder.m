@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/11/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,6 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKFile.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "NSIndexSet_BDSKExtensions.h"
-#import "BDSKFileMatcher.h"
-#import "NSWorkspace_BDSKExtensions.h"
 
 @interface BDSKOrphanedFilesFinder (Private)
 - (void)refreshOrphanedFiles;
@@ -114,12 +111,6 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     wasLaunched = YES;
 }
 
-- (IBAction)matchFilesWithPubs:(id)sender;
-{
-    [self close];
-    [(BDSKFileMatcher *)[BDSKFileMatcher sharedInstance] matchFiles:[self orphanedFiles] withPublications:nil];
-}
-
 - (NSURL *)baseURL
 {
     NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPapersFolderPathKey];
@@ -174,11 +165,11 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSString *papersFolderPath = [[self baseURL] path];
     
     if ([NSHomeDirectory() isEqualToString:papersFolderPath]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"Message in alert dialog when trying to find orphaned files in Home folder")
-                                         defaultButton:NSLocalizedString(@"Find", @"Button title: find orphaned files")
-                                       alternateButton:NSLocalizedString(@"Don't Find", @"Button title: don't find orphaned files")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Find Orphaned Files", @"")
+                                         defaultButton:NSLocalizedString(@"Find", @"Find")
+                                       alternateButton:NSLocalizedString(@"Don't Find", @"Don't Find")
                                            otherButton:nil
-                             informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphaned files in this folder could take a long time. Do you want to proceed?", @"Informative text in alert dialog")];
+                             informativeTextWithFormat:NSLocalizedString(@"You have chosen your Home Folder as your Papers Folder. Finding all orphaned files in this folder could take a long time. Do you want to proceed?",@"")];
         [alert beginSheetModalForWindow:[self window]
                           modalDelegate:self
                          didEndSelector:@selector(findAlertDidEnd:returnCode:contextInfo:)
@@ -197,7 +188,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     [arrayController setSearchString:[sender stringValue]];
     [arrayController rearrangeObjects];
     unsigned int count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @""), count];
     [statusField setStringValue:message];
 }    
 
@@ -229,7 +220,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 - (int)numberOfRowsInTableView:(NSTableView *)tView{ return 0; }
 - (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{ return nil; }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tableView toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     return [[[arrayController arrangedObjects] objectAtIndex:row] path];
 }
 
@@ -257,7 +248,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     
     while (path = [pathEnum nextObject]) {
         if(type == 1)
-            [[NSWorkspace sharedWorkspace] openLinkedFile:path];
+            [[NSWorkspace sharedWorkspace] openFile:path];
         else
             [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:nil];
     }
@@ -265,7 +256,13 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 // for 10.3 compatibility and OmniAppKit dataSource methods
 - (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
-	NSIndexSet *rowIndexes = [NSIndexSet indexSetWithIndexesInArray:rows];
+	NSMutableIndexSet *rowIndexes = [NSMutableIndexSet indexSet];
+	NSEnumerator *rowEnum = [rows objectEnumerator];
+	NSNumber *row;
+	
+	while (row = [rowEnum nextObject]) 
+		[rowIndexes addIndex:[row intValue]];
+	
 	return [self tableView:tv writeRowsWithIndexes:rowIndexes toPasteboard:pboard];
 }
 
@@ -315,7 +312,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 }
 
 - (void)refreshOrphanedFiles{
-    [self startAnimationWithStatusMessage:[NSLocalizedString(@"Looking for orphaned files", @"Status message") stringByAppendingEllipsis]];
+    [self startAnimationWithStatusMessage:[NSLocalizedString(@"Looking for orphaned files", @"") stringByAppendingEllipsis]];
     // do the actual work with a zero delay to let the UI update 
     [self performSelector:@selector(restartServer) withObject:nil afterDelay:0.0];
 }
@@ -340,23 +337,23 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
         
     } else {
         NSBeep();
-        [self stopAnimationWithStatusMessage:NSLocalizedString(@"Unknown papers folder.", @"Status message")];
+        [self stopAnimationWithStatusMessage:NSLocalizedString(@"Unknown papers folder.", @"")];
     }
 }
 
 - (void)startAnimationWithStatusMessage:(NSString *)message{
     [progressIndicator startAnimation:nil];
-    [refreshButton setTitle:NSLocalizedString(@"Stop", @"Button title")];
+    [refreshButton setTitle:NSLocalizedString(@"Stop", @"Stop")];
     [refreshButton setAction:@selector(stopRefreshing:)];
-    [refreshButton setToolTip:NSLocalizedString(@"Stop looking for orphaned files", @"Tool tip message")];
+    [refreshButton setToolTip:NSLocalizedString(@"Stop looking for orphaned files", @"")];
     [statusField setStringValue:message];
 }
 
 - (void)stopAnimationWithStatusMessage:(NSString *)message{
     [progressIndicator stopAnimation:nil];
-    [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Button title")];
+    [refreshButton setTitle:NSLocalizedString(@"Refresh", @"Refresh")];
     [refreshButton setAction:@selector(refreshOrphanedFiles:)];
-    [refreshButton setToolTip:NSLocalizedString(@"Refresh the list of orphaned files", @"Tool tip message")];
+    [refreshButton setToolTip:NSLocalizedString(@"Refresh the list of orphaned files", @"")];
     [statusField setStringValue:message];
 }
 
@@ -365,15 +362,15 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
     NSMutableArray *mutableArray = [self mutableArrayValueForKey:@"orphanedFiles"];
     [mutableArray addObjectsFromArray:newFiles];
     unsigned int count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @""), count];
     [statusField setStringValue:[message stringByAppendingEllipsis]];
 }
 
 - (void)orphanedFileServerDidFinish:(BDSKOrphanedFileServer *)aServer{
     unsigned int count = [[arrayController arrangedObjects] count];
-    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found", @"Status message"), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found", @"Status message"), count];
+    NSString *message = count == 1 ? [NSString stringWithFormat:NSLocalizedString(@"%d orphaned file found.", @""), count] : [NSString stringWithFormat:NSLocalizedString(@"%d orphaned files found.", @""), count];
     if ([server allFilesEnumerated] == NO)
-        message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Partial status message"), message];
+        message = [NSString stringWithFormat:@"%@. %@", NSLocalizedString(@"Stopped", @"Stopped"), message];
     [self stopAnimationWithStatusMessage:message];
 }
 

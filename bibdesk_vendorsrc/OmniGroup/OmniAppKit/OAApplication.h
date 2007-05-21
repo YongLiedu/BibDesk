@@ -1,11 +1,11 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OAApplication.h 79090 2006-09-07 23:55:58Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OAApplication.h 68130 2005-09-09 00:19:24Z bungi $
 
 #import <AppKit/NSApplication.h>
 
@@ -13,7 +13,6 @@
 @class NSPanel;
 
 #import <Foundation/NSDate.h> // For NSTimeInterval
-#import <Foundation/NSPathUtilities.h> // For NSSearchPathDomainMask
 #import <AppKit/NSNibDeclarations.h> // For IBAction
 
 @interface OAApplication : NSApplication
@@ -53,16 +52,10 @@
 
 // Actions
 - (IBAction)closeAllMainWindows:(id)sender;
+- (IBAction)miniaturizeAll:(id)sender;
 - (IBAction)cycleToNextMainWindow:(id)sender;
 - (IBAction)cycleToPreviousMainWindow:(id)sender;
 - (IBAction)showPreferencesPanel:(id)sender;
-
-- (void)miniaturizeWindows:(NSArray *)windows;
-
-// Application Support directory
-- (NSArray *)supportDirectoriesInDomain:(NSSearchPathDomainMask)domains;
-- (NSArray *)readableSupportDirectoriesInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...;
-- (NSString *)writableSupportDirectoryInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...;
 
 @end
 

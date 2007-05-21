@@ -1,4 +1,4 @@
-// Copyright 2004-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2004-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,7 +14,7 @@
 #import "NSImage-OAExtensions.h"
 #import "OAContextControl.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAContextPopUpButton.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header$");
 
 @implementation OAContextPopUpButton
 
@@ -78,8 +78,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     // First item is always the label.  If we don't do this, the label will get reset
     [[gearItem menu] removeItem:gearItem];
     [menu insertItem:gearItem atIndex:0];
-    
-    [self setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:[[self cell] controlSize]]]];
     
     [self setMenu:menu];
     [self setTarget:targetView];

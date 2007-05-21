@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -7,26 +7,18 @@
 
 #import <OmniAppKit/OAVectorView.h>
 
-#import <Cocoa/Cocoa.h>
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniAppKit/NSTextField-OAExtensions.h>
 #import <OmniAppKit/OAVectorCell.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAVectorView.m 79090 2006-09-07 23:55:58Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAVectorView.m 68913 2005-10-03 19:36:19Z kc $")
 
 @interface OAVectorView (PrivateAPI)
 - (void)_updateFields;
 @end
 
 @implementation OAVectorView
-
-- (void)dealloc
-{
-    [self unbind:@"vector"];
-    
-    [super dealloc];
-}
 
 //
 // NSView subclass
@@ -57,14 +49,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 {
     OBPRECONDITION(!objectValue || [objectValue isKindOfClass:[OFPoint class]]);
     [super setObjectValue:objectValue];
-    
-    if (observedObjectForVector != nil) {
-        id newObjectValue = objectValue;
-        if (vectorValueTransformer != nil) 
-            newObjectValue = [vectorValueTransformer reverseTransformedValue:newObjectValue]; 
-        
-        [observedObjectForVector setValue:objectValue forKeyPath:observedKeyPathForVector];
-    }
     [self _updateFields];
 }
 
@@ -209,61 +193,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 - (NSTextField *)yField;
 {
     return yField;
-}
-
-#pragma mark -
-#pragma mark NSKeyValueBinding support
-
-- (void)bind:(NSString *)binding toObject:(id)observable withKeyPath:(NSString *)keyPath options:(NSDictionary *)options; 
-{
-    if ([binding isEqualToString:@"vector"]) {
-        if (observedObjectForVector)
-            [self unbind:@"vector"];
-        
-        [observable addObserver:self forKeyPath:keyPath options:0 context:NULL];
-        
-        // Register what object and what keypath are
-        // associated with this binding
-        observedObjectForVector = [observable retain];
-        observedKeyPathForVector = [keyPath copy];
-        
-        // Record the value transformer, if there is one
-        NSString *vtName = [options objectForKey:@"NSValueTransformerName"];
-        if (vtName != nil) 
-            vectorValueTransformer = [[NSValueTransformer valueTransformerForName:vtName] retain];
-        
-        [self setObjectValue:[observable valueForKeyPath:keyPath]];
-    }
-}
-
-- (void)unbind:(NSString *)binding;
-{
-    OBASSERT([binding isEqualToString:@"vector"]);
-    
-    [observedObjectForVector removeObserver:self forKeyPath:observedKeyPathForVector];
-
-    [observedObjectForVector release];
-    observedObjectForVector = nil;
-    
-    [observedKeyPathForVector release];
-    observedKeyPathForVector = nil;
-    
-    [vectorValueTransformer release];
-    vectorValueTransformer = nil;
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    OBASSERT(observedObjectForVector);
-    
-    id newVector = [observedObjectForVector valueForKeyPath:observedKeyPathForVector];
-    if (vectorValueTransformer != nil) 
-        newVector = [vectorValueTransformer transformedValue:newVector]; 
-
-    if (![newVector isEqual:[self objectValue]]) {
-        [self setObjectValue:newVector];
-        [self setNeedsDisplay:YES];
-    }
 }
 
 @end

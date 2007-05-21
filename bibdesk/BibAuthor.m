@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Wed Dec 19 2001.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@
 
 - (void)splitName:(NSString *)newName;
 - (void)setNormalizedName:(NSString *)theName;
-- (void)setFullLastName:(NSString *)theName;
 - (void)setSortableName:(NSString *)theName;
 - (void)cacheNames;
 - (void)setVonPart:(NSString *)newVonPart;
@@ -111,8 +110,6 @@ static BibAuthor *emptyAuthorInstance = nil;
 
 		// set this first so we have the document for parser errors
         publication = aPub; // don't retain this, since it retains us
-        
-        originalName = [aName copy];
         // this does all the name parsing
 		[self splitName:aName];
 	}
@@ -121,18 +118,16 @@ static BibAuthor *emptyAuthorInstance = nil;
 }
 
 - (void)dealloc{
-    [originalName release];
+    [firstNames release];
     [name release];
 	[firstName release];
 	[vonPart release];
 	[lastName release];
 	[jrPart release];
-    [fullLastName release];
 	[normalizedName release];
     [sortableName release];
     [abbreviatedName release];
     [abbreviatedNormalizedName release];
-    [firstNames release];
     [fuzzyName release];
     [super dealloc];
 }
@@ -267,20 +262,25 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 #pragma mark String Representations
 
 - (NSString *)description{
-    return [self displayName];
+    return normalizedName;
 }
 
 - (NSString *)displayName{
-    int mask = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAuthorNameDisplayKey];
+    OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
+    BOOL displayFirst = [prefs boolForKey:BDSKShouldDisplayFirstNamesKey];
+    BOOL displayAbbreviated = [prefs boolForKey:BDSKShouldAbbreviateFirstNamesKey];
+    BOOL displayLastFirst = [prefs boolForKey:BDSKShouldDisplayLastNameFirstKey];
 
     NSString *theName = nil;
 
-    if((mask & BDSKAuthorDisplayFirstNameMask) == NO)
-        theName = fullLastName; // and then ignore the other options
-    else if(mask & BDSKAuthorLastNameFirstMask)
-        theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedNormalizedName] : normalizedName;
-    else
-        theName = mask & BDSKAuthorAbbreviateFirstNameMask ? [self abbreviatedName] : name;
+    if(displayFirst == NO){
+        theName = lastName; // and then ignore the other options
+    } else {
+        if(displayLastFirst)
+            theName = displayAbbreviated ? [self abbreviatedNormalizedName] : normalizedName;
+        else
+            theName = displayAbbreviated ? [self abbreviatedName] : name;
+    }
     return theName;
 }
 
@@ -291,16 +291,8 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 	return normalizedName;
 }
 
-- (NSString *)fullLastName{
-    return fullLastName;
-}
-
 - (NSString *)sortableName{
     return sortableName;
-}
-
-- (NSString *)originalName{
-    return originalName;
 }
 
 - (NSString *)name{
@@ -542,13 +534,6 @@ static NSString *createNameStringForComponent(CFAllocatorRef alloc, bt_name *the
     }
 }
 
-- (void)setFullLastName:(NSString *)theName{
-    if(fullLastName != theName){
-        [fullLastName release];
-        fullLastName = [theName copy];
-    }
-}
-
 // This follows the recommendations from Oren Patashnik's btxdoc.tex:
 /*To summarize, BibTeX allows three possible forms for the name: 
 "First von Last" 
@@ -601,8 +586,6 @@ You may almost always use the first form; you shouldn't if either there's a Jr p
         [theName appendString:@", "];
         [theName appendString:jrPart];
     }
-    
-    [self setFullLastName:theName];
     
     if(flags.hasFirst){
         [theName appendString:@", "];
@@ -700,6 +683,9 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
     
     // use fixed-size mutable strings; allow for extra ". "
     CFMutableStringRef abbrevName = CFStringCreateMutable(alloc, nameLength + firstNameMaxLength);
+    
+    // last name should never exceed the length of the full name
+    CFMutableStringRef fullLastName = CFStringCreateMutable(alloc, nameLength);
     CFMutableStringRef abbrevFirstName = NULL;
     
     if(flags.hasFirst){
@@ -720,18 +706,35 @@ static inline CFStringRef copyFirstLetterCharacterString(CFAllocatorRef alloc, C
         }
     }
     
+    // start creating the last name; fullLastName is now empty
+    if(flags.hasVon){
+        CFStringAppend(fullLastName, (CFStringRef)vonPart);
+        CFStringAppend(fullLastName, CFSTR(" "));
+    }
+    
+    if(flags.hasLast)
+        CFStringAppend(fullLastName, (CFStringRef)lastName);
+    
+    if(flags.hasJr){
+        CFStringAppend(fullLastName, CFSTR(", "));
+        CFStringAppend(fullLastName, (CFStringRef)jrPart);
+    }
+    
     // abbrevName is now empty; set it to the first name
     if(flags.hasFirst){
         CFStringAppend(abbrevName, abbrevFirstName);
         CFStringAppend(abbrevName, CFSTR(" "));
     }
     
-    CFStringAppend(abbrevName, (CFStringRef)fullLastName);
+    CFStringAppend(abbrevName, fullLastName);
     
     [self setAbbreviatedName:(NSString *)abbrevName];
     
     // now for the normalized abbreviated form; start with only the last name
-    CFStringReplaceAll(abbrevName, (CFStringRef)fullLastName);
+    CFStringReplaceAll(abbrevName, fullLastName);
+    
+    // all done with last name
+    CFRelease(fullLastName);
     
     if(flags.hasFirst){
         CFStringAppend(abbrevName, CFSTR(", "));

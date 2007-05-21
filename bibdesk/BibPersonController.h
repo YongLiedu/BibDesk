@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Thu Mar 18 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@
     IBOutlet NSTableView *pubsTableView;
     IBOutlet BDSKCollapsibleView *collapsibleView;
     IBOutlet OASplitView *splitView;
-    BOOL isEditable;
+    IBOutlet NSObjectController *ownerController;
 }
 
 #pragma mark initialization
@@ -72,8 +72,8 @@
 - (void)updateUI;
 - (void)handlePubListChanged:(NSNotification *)notification;
 - (void)handleBibItemChanged:(NSNotification *)note;
-- (void)handleGroupWillBeRemoved:(NSNotification *)note;
 - (void)openSelectedPub:(id)sender;
+- (IBAction)changeName:(id)sender;
 - (void)changeNameToString:(NSString *)newNameString;
 
 @end

@@ -1,23 +1,18 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSDictionary-OFExtensions.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSDictionary-OFExtensions.h 66170 2005-07-28 17:40:10Z kc $
 
 #import <Foundation/NSDictionary.h>
 
 #import <OmniFoundation/OFDictionaryInitialization.h>
 #import <Foundation/NSGeometry.h> // For NSPoint, NSSize, and NSRect
 
-@class NSAppleEventDescriptor;
-
 @interface NSDictionary (OFExtensions)
-
-+ (NSDictionary *)dictionaryWithUserRecord:(NSAppleEventDescriptor *)descriptor;
-- (NSAppleEventDescriptor *)userRecordValue;
 
 - (NSDictionary *)dictionaryWithObject:(id)anObj forKey:(NSString *)key;
 - (NSDictionary *)dictionaryByAddingObjectsFromDictionary:(NSDictionary *)otherDictionary;
@@ -52,10 +47,7 @@
 - (unsigned long long int)unsignedLongLongForKey:(NSString *)key defaultValue:(unsigned long long int)defaultValue;
 - (unsigned long long int)unsignedLongLongForKey:(NSString *)key;
 
-- (void)makeValuesPerformSelector:(SEL)sel withObject:(id)object;
-- (void)makeValuesPerformSelector:(SEL)sel;
-
-    // This seems more convenient than having to write your own if statement a zillion times
+// This seems more convenient than having to write your own if statement a zillion times
 - (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject;
 
 - (id)deepMutableCopy;

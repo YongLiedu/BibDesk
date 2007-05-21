@@ -9,9 +9,9 @@
 #import <OmniBase/OmniBase.h>
 #import <objc/objc-class.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/AppleScript/NSObjectSpecifier-OFFixes.m 70008 2005-11-03 01:24:19Z bungi $");
+RCS_ID("$Header$");
 
-@implementation NSWhoseSpecifier (OFFixes)
+@implementation NSScriptObjectSpecifier (OFFixes)
 
 static id (*originalObjectsByEvaluatingWithContainers)(id self, SEL cmd, id containers) = NULL;
 
@@ -27,18 +27,8 @@ static id (*originalObjectsByEvaluatingWithContainers)(id self, SEL cmd, id cont
     id result = originalObjectsByEvaluatingWithContainers(self, _cmd, containers);
     
     if (result == nil) {
-	// <bug://bugs/25410> Don't return empty arrays for whose specifiers that should return a single item
-	// Some 'whose' specifiers should return arrays and some shouldn't.  Don't return an array if we are trying to get a single item.
-	NSWhoseSubelementIdentifier startSubelement = [self startSubelementIdentifier];
-	NSWhoseSubelementIdentifier endSubelement = [self endSubelementIdentifier];
-	
-	// Requested a single item (start==index and end==index would probably be interpreted as a length 1 array)
-	if ((startSubelement == NSIndexSubelement || startSubelement == NSMiddleSubelement || startSubelement == NSRandomSubelement) &&
-	    endSubelement == NSNoSubelement)
-	    return nil;
-		
-        //NSLog(@"[#19944] fixup for %@", [self description]);
-        result = [NSArray array];
+        // NSLog(@"[#19944] fixup for %@", [self description]);
+        return [NSArray array];
     }
     
     return result;
@@ -163,4 +153,5 @@ static id (*originalObjectsByEvaluatingWithContainers)(id self, SEL cmd, id cont
 }
 
 @end
+
 

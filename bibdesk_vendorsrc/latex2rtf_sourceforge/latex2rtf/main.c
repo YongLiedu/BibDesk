@@ -37,7 +37,7 @@ Authors:
 #include "convert.h"
 #include "commands.h"
 #include "chars.h"
-#include "fonts.h"
+#include "l2r_fonts.h"
 #include "stack.h"
 #include "direct.h"
 #include "ignore.h"
@@ -60,7 +60,6 @@ char *g_toc_name = NULL;
 char *g_lof_name = NULL;
 char *g_lot_name = NULL;
 char *g_fff_name = NULL;
-char *g_ttt_name = NULL;
 char *g_bbl_name = NULL;
 char *g_home_dir = NULL;
 
@@ -94,7 +93,6 @@ bool g_show_equation_number = FALSE;
 int g_enumerate_depth = 0;
 bool g_suppress_equation_number = FALSE;
 bool g_aux_file_missing = FALSE;    /* assume that it exists */
-bool g_bbl_file_missing = FALSE;    /* assume that it exists */
 
 bool g_document_type = FORMAT_ARTICLE;
 int g_document_bibstyle = BIBSTYLE_STANDARD;
@@ -117,15 +115,10 @@ bool g_equation_inline_rtf = TRUE;
 bool g_equation_inline_bitmap = FALSE;
 bool g_equation_display_bitmap = FALSE;
 bool g_equation_comment = FALSE;
-bool g_tableofcontents = FALSE;
 
 double g_png_equation_scale = 1.22;
 double g_png_figure_scale = 1.35;
 bool g_latex_figures = FALSE;
-bool g_endfloat_figures = FALSE;
-bool g_endfloat_tables = FALSE;
-bool g_endfloat_markers = TRUE;
-int  g_graphics_package = GRAPHICS_NONE;
 
 int indent = 0;
 char alignment = JUSTIFIED;     /* default for justified: */
@@ -336,9 +329,6 @@ int main(int argc, char **argv)
     if (g_fff_name == NULL && basename != NULL)
         g_fff_name = strdup_together(basename, ".fff");
 
-    if (g_ttt_name == NULL && basename != NULL)
-        g_ttt_name = strdup_together(basename, ".ttt");
-
     if (basename) {
         diagnostics(3, "latex filename is <%s>", g_tex_name);
         diagnostics(3, "  rtf filename is <%s>", g_rtf_name);
@@ -388,8 +378,8 @@ static void ConvertWholeDocument(void)
     char *body, *sec_head, *sec_head2, *label;
     char t[] = "\\begin{document}";
 
-    PushEnvironment(DOCUMENT_MODE);  /* because we use ConvertString in preamble.c */
-    PushEnvironment(PREAMBLE_MODE);
+    PushEnvironment(DOCUMENT);  /* because we use ConvertString in preamble.c */
+    PushEnvironment(PREAMBLE);
     SetTexMode(MODE_VERTICAL);
     ConvertLatexPreamble();
     WriteRtfHeader();
@@ -426,40 +416,12 @@ static void ConvertWholeDocument(void)
         free(sec_head);
         sec_head = sec_head2;
     }
-    
-    if (g_endfloat_figures && g_fff_name) {
-    	g_endfloat_figures = FALSE;
-        if (PushSource(g_fff_name, NULL) == 0) {
-        	CmdNewPage(NewPage);
-        	CmdListOf(LIST_OF_FIGURES);
-			getSection(&body, &sec_head2, &g_section_label);
-			ConvertString(sec_head);
-			ConvertString(body);
-			if (g_section_label) free(g_section_label);
-			free(body);
-			free(sec_head);
-        }
-     }
-    
-    if (g_endfloat_tables && g_ttt_name) {
-    	g_endfloat_tables = FALSE;
-        if (PushSource(g_ttt_name, NULL) == 0) {
-        	CmdNewPage(NewPage);
-        	CmdListOf(LIST_OF_TABLES);
-			getSection(&body, &sec_head2, &g_section_label);
-			ConvertString(sec_head);
-			ConvertString(body);
-			if (g_section_label) free(g_section_label);
-			free(body);
-			free(sec_head);
-        }
-     }
 }
 
 static void print_version(void)
 {
     fprintf(stdout, "latex2rtf %s\n\n", Version);
-    fprintf(stdout, "Copyright (C) 2004 Free Software Foundation, Inc.\n");
+    fprintf(stdout, "Copyright (C) 2002 Free Software Foundation, Inc.\n");
     fprintf(stdout, "This is free software; see the source for copying conditions.  There is NO\n");
     fprintf(stdout, "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
     fprintf(stdout, "Written by Prahl, Lehner, Granzer, Dorner, Polzer, Trisko, Schlatterbeck.\n");
@@ -536,7 +498,8 @@ purpose: Writes the message to stderr depending on debugging level
 {
     char buffer[512], *buff_ptr;
     va_list apf;
-    int i, iEnvCount;
+    int i, linenumber, iEnvCount;
+    char *input;
 
     buff_ptr = buffer;
 
@@ -544,14 +507,16 @@ purpose: Writes the message to stderr depending on debugging level
 
     if (level <= g_verbosity_level) {
 
+        linenumber = CurrentLineNumber();
+        input = CurrentFileName();
         iEnvCount = CurrentEnvironmentCount();
 
-        fprintf(stderr, "\n%s:%d ",CurrentFileName(),CurrentLineNumber());
         switch (level) {
             case 0:
-                fprintf(stderr, "Error! ");
+                fprintf(stderr, "\nError! line=%d ", linenumber);
                 break;
             case 1:
+                fprintf(stderr, "\nWarning line=%d ", linenumber);
                 if (g_RTF_warnings) {
                     vsnprintf(buffer, 512, format, apf);
                     fprintRTF("{\\plain\\cf2 [latex2rtf:");
@@ -562,13 +527,12 @@ purpose: Writes the message to stderr depending on debugging level
                     fprintRTF("]}");
                 }
                 break;
-            case 5:
-            case 6:
-                fprintf(stderr, " rec=%d ", RecursionLevel);
-                /*fall through */
             case 2:
             case 3:
             case 4:
+            case 5:
+            case 6:
+                fprintf(stderr, "\n%s %4d rec=%d ", input, linenumber, RecursionLevel);
                 for (i = 0; i < BraceLevel; i++)
                     fprintf(stderr, "{");
                 for (i = 8; i > BraceLevel; i--)
@@ -578,6 +542,7 @@ purpose: Writes the message to stderr depending on debugging level
                     fprintf(stderr, "  ");
                 break;
             default:
+                fprintf(stderr, "\nline=%d ", linenumber);
                 break;
         }
         vfprintf(stderr, format, apf);
@@ -587,9 +552,10 @@ purpose: Writes the message to stderr depending on debugging level
     if (level == 0) {
         fprintf(stderr, "\n");
         fflush(stderr);
-        if (fRtf) 
+        if (fRtf) {
             fflush(fRtf);
-            
+            CloseRtf(&fRtf);
+        }
         exit(EXIT_FAILURE);
     }
 }
@@ -631,8 +597,6 @@ static void InitializeLatexLengths(void)
     setCounter("footnote", 0);
     setCounter("mpfootnote", 0);
     setCounter("secnumdepth", 2);
-    setCounter("endfloatfigure", 0);
-    setCounter("endfloattable", 0);
 
 /* vertical separation lengths */
     setLength("topsep", 3 * 20);
@@ -660,11 +624,10 @@ static void InitializeLatexLengths(void)
     setLength("marginparsep", 10 * 20);
 }
 
-static void RemoveInterpretCommentString(char *s)
-
 /****************************************************************************
 purpose: removes %InterpretCommentString from preamble (usually "%latex2rtf:")
  ****************************************************************************/
+static void RemoveInterpretCommentString(char *s)
 {
     char *p, *t;
     int n = strlen(InterpretCommentString);
@@ -770,9 +733,7 @@ purpose: output filter to escape characters written to an RTF file
 		 all output to the RTF file passes through this routine or the one below
  ****************************************************************************/
 {
-	if ((unsigned char) cThis > 127)
-        WriteEightBitChar(cThis);
-    else if (cThis == '\\')
+    if (cThis == '\\')
         fprintf(fRtf, "\\\\");
     else if (cThis == '{')
         fprintf(fRtf, "\\{");
@@ -793,8 +754,6 @@ purpose: output filter to track of brace depth and font settings
 {
     char buffer[1024];
     char *text;
-    char last='\0';
-    
     va_list apf;
 
     va_start(apf, format);
@@ -811,16 +770,15 @@ purpose: output filter to track of brace depth and font settings
         } else {
             fputc(*text, fRtf);
 
-            if (*text == '{' && last != '\\')
+            if (*text == '{')
                 PushFontSettings();
 
-            if (*text == '}' && last != '\\')
+            if (*text == '}')
                 PopFontSettings();
 
-            if (*text == '\\' && last != '\\')
+            if (*text == '\\')
                 MonitorFontChanges(text);
         }
-        last= *text;
         text++;
     }
 }

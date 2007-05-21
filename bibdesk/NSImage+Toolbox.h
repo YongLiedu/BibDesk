@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Thu Jul 29 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -44,13 +44,21 @@
 
 + (NSImage *)iconWithSize:(NSSize)iconSize forToolboxCode:(OSType) code;
 + (NSImage *)imageWithLargeIconForToolboxCode:(OSType) code;
++ (NSImage *)cautionIconImage;
 + (NSImage *)missingFileImage;
++ (NSImage *)smallMissingFileImage;
 
+// the small... image methods return a 16x16 scaled representation, cached for speed
++ (NSImage *)smallGenericInternetLocationImage;
++ (NSImage *)smallImageForFileType:(NSString *)fileType;
++ (NSImage *)smallImageForURL:(NSURL *)aURL;
++ (NSImage *)smallImageNamed:(NSString *)imageName;
 + (NSImage *)imageForURL:(NSURL *)aURL;
 + (NSImage *)imageForFile:(NSString *)path;
++ (NSImage *)smallImageForFile:(NSString *)path;
 - (NSImage *)imageFlippedHorizontally;
 - (NSImage *)highlightedImage;
 - (NSImage *)dragImageWithCount:(int)count;
-- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside isIcon:(BOOL)isIcon;
+- (NSImage *)dragImageWithCount:(int)count inside:(BOOL)inside;
 
 @end

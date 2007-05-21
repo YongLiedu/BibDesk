@@ -18,7 +18,7 @@
 #import "NSAppleEventDescriptor-OAExtensions.h"
 #import "OAFontCache.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSAppleScript-OAExtensions.m 71251 2005-12-19 18:46:25Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSAppleScript-OAExtensions.m 68913 2005-10-03 19:36:19Z kc $");
 
 @interface NSAppleScript (ApplePrivateMethods)
 // Foundation
@@ -90,12 +90,10 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     style = (*stylesHandle)[styleNumber].stFace;
     color = (*stylesHandle)[styleNumber].stColor;
 
-    NSString *fontName = nil;
-    if (ATSFontFamilyGetName(fontID, kATSOptionFlagsDefault, (CFStringRef *)&fontName) != noErr)
-        fontName = [[[NSFont userFontOfSize:pointSize] familyName] retain];
-    myFont = [OAFontCache fontWithFamily:fontName size:pointSize bold:((style & bold) != 0) italic:((style & italic) != 0)];
-    [fontName release];
-    OBASSERT(myFont != nil);
+    CFStringRef fontName;
+    ATSFontFamilyGetName(fontID, kATSOptionFlagsDefault, &fontName);
+    myFont = [OAFontCache fontWithFamily:(NSString *)fontName size:pointSize bold:((style & bold) != 0) italic:((style & italic) != 0)];
+    CFRelease(fontName);
 
     if ((style & underline) != 0)
         underlineStyle = NSSingleUnderlineStyle;
@@ -105,10 +103,9 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     myColor = [NSColor colorWithCalibratedRed:(color.red / 65535.0) green:(color.green / 65535.0) blue:(color.blue / 65535.0) alpha:1.0];
 
     attributes = [NSDictionary dictionaryWithObjectsAndKeys:
-        myColor, NSForegroundColorAttributeName,
-        [NSNumber numberWithInt:underlineStyle], NSUnderlineStyleAttributeName,
         myFont, NSFontAttributeName,
-        nil];
+        myColor, NSForegroundColorAttributeName,
+        [NSNumber numberWithInt:underlineStyle], NSUnderlineStyleAttributeName, nil];
 
     return attributes;
 }

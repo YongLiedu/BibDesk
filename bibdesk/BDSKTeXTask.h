@@ -5,7 +5,7 @@
 //  Created by Christiaan Hofman on 6/8/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -47,28 +47,32 @@ enum {
 	BDSKGenerateRTF = 3,
 };
 
-typedef struct _BDSKTeXTaskFlags {
-    volatile int32_t hasLTB __attribute__ ((aligned (4)));
-    volatile int32_t hasLaTeX __attribute__ ((aligned (4)));
-    volatile int32_t hasPDFData __attribute__ ((aligned (4)));
-    volatile int32_t hasRTFData __attribute__ ((aligned (4)));
-} BDSKTeXTaskFlags;
 
-@class BDSKTeXPath;
-
-@interface BDSKTeXTask : NSObject {	
+@interface BDSKTeXTask : NSObject {
+	NSString *workingDirPath;
+    NSString *applicationSupportPath;
+	
     NSString *texTemplatePath;
-    BDSKTeXPath *texPath;
+	NSString *fileName;
+    NSString *texFilePath;
+    NSString *bibFilePath;
+    NSString *bblFilePath;
+    NSString *pdfFilePath;
+    NSString *rtfFilePath;
+    NSString *logFilePath;
     NSString *binDirPath;
 	
 	id delegate;
-    NSInvocation *taskShouldStartInvocation;
-    NSInvocation *taskFinishedInvocation;
     NSTask *currentTask;
 	
-    BDSKTeXTaskFlags flags;
+	volatile BOOL hasLTB;
+	volatile BOOL hasLaTeX;
+	volatile BOOL hasPDFData;
+	volatile BOOL hasRTFData;
 
     OFSimpleLockType processingLock;    
+    OFSimpleLockType hasDataLock; 
+    OFSimpleLockType currentTaskLock;
     pthread_rwlock_t dataFileLock;
 }
 
@@ -79,14 +83,8 @@ typedef struct _BDSKTeXTaskFlags {
 - (id)delegate;
 - (void)setDelegate:(id)newDelegate;
 
-// the next few methods are thread-unsafe
-
 - (BOOL)runWithBibTeXString:(NSString *)bibStr;
 - (BOOL)runWithBibTeXString:(NSString *)bibStr generatedTypes:(int)flag;
-
-- (void)terminate;
-
-// these methods are thread-safe
 
 - (NSString *)logFileString;
 - (NSString *)LTBString;
@@ -94,18 +92,12 @@ typedef struct _BDSKTeXTaskFlags {
 - (NSData *)PDFData;
 - (NSData *)RTFData;
 
-- (NSString *)logFilePath;
-- (NSString *)LTBFilePath;
-- (NSString *)LaTeXFilePath;
-- (NSString *)PDFFilePath;
-- (NSString *)RTFFilePath;
-
 - (BOOL)hasLTB;
 - (BOOL)hasLaTeX;
 - (BOOL)hasPDFData;
 - (BOOL)hasRTFData;
-
 - (BOOL)isProcessing;
+- (void)terminate;
 
 @end
 

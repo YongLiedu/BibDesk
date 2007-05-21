@@ -13,7 +13,7 @@
 #define OMNI_STACK_START_SIZE NSPageSize()
 #define OMNI_STACK_DEBUG
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFStack.m 68913 2005-10-03 19:36:19Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFStack.m 68913 2005-10-03 19:36:19Z kc $")
 
 static BOOL _stackDebug = NO;
 

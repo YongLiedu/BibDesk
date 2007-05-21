@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 12/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,5 +46,4 @@
     SEL selector;
     BOOL ascending;
 }
-+ (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend;
 @end

@@ -5,7 +5,7 @@
 //  Created by Christiaan Hofman on 9/8/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,6 @@
 	
 	// if the parent is a floating panel, we also should be. Otherwise we won't get on top.
 	[self setFloatingPanel:([parentWindow isKindOfClass:[NSPanel class]] && [(NSPanel *)parentWindow isFloatingPanel])];
-    [self setHidesOnDeactivate:[parentWindow hidesOnDeactivate]];
     [self setLevel:[parentWindow level]];
 	[parentWindow addChildWindow:self ordered:NSWindowAbove];
 	
@@ -165,12 +164,8 @@
 }
 
 - (void)parentViewFrameChanged:(NSNotification *)notification {
-	NSRect viewRect = [parentView convertRect:[parentView bounds] toView:nil];
-	NSPoint windowOrigin = [[parentView window] frame].origin;
-	
-	viewRect.origin.x += windowOrigin.x;
-	viewRect.origin.y += windowOrigin.y;
-	
+	NSWindow *parentWindow = [parentView window];
+    NSRect viewRect = [parentWindow contentRectForFrameRect:[parentWindow frame]];
 	[self setFrame:viewRect display:YES];
 }
 

@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/FileManagement.subproj/OFAlias.h 66265 2005-07-29 04:07:59Z bungi $
+// $Header$
 
 #import <Foundation/NSObject.h>
 #import <Carbon/Carbon.h>

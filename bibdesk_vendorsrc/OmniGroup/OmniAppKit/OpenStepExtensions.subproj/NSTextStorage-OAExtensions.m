@@ -1,4 +1,4 @@
-// Copyright 2002-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -15,48 +15,7 @@
 #import <OmniAppKit/OAFindPattern.h>
 #import <OmniAppKit/OARegExFindPattern.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTextStorage-OAExtensions.m 79079 2006-09-07 22:35:32Z kc $")
-
-
-// <bug://bugs/26796> -- If you are linked against 10.4, Apple's code will raise if you access 'last character of SomeText' and 'SomeText' is empty.  Under earlier versions, it will create an NSSubTextStorage that contains the out-of-bounds reference, leading to crashes.   They have a log message that comes out under 10.4 saying that you'll get an exception under earlier OS's, but they goofed and you still get the crash.  Testing shows that this is only a problem in the 'characters' version (presumably since they can directly index the characters and thus avoided building an array and the bounds checking code).
-// 2005/03/23 -- Arg.  Testing again with all 10.4 SDKs this still fails.  Re-enabling the hack unconditionally for now.
-#if 1 || !defined(MAC_OS_X_VERSION_10_4) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
-@interface NSTextStorage (PrivateAPI)
-- (id)valueInCharactersAtIndex:(int)i;
-@end
-
-@implementation NSTextStorage (OAScriptFixes)
-
-static id (*originalValueInCharactersAtIndex)(id self, SEL _cmd, int i) = NULL;
-
-+ (void)didLoad;
-{
-    originalValueInCharactersAtIndex = (void *)OBReplaceMethodImplementationWithSelector(self,  @selector(valueInCharactersAtIndex:), @selector(replacement_valueInCharactersAtIndex:));
-}
-
-- (id)replacement_valueInCharactersAtIndex:(int)characterIndex;
-{
-    int originalIndex = characterIndex;
-    unsigned int length = [self length];
-    if (length == 0)
-	return nil;
-    
-    // -1 means 'last'
-    if (characterIndex < 0) {
-	characterIndex += length;
-	if (characterIndex < 0) // past the beginning
-	    return nil;
-    }
-    
-    if ((unsigned)characterIndex >= length) // past the end
-	return nil;
-    
-    return originalValueInCharactersAtIndex(self, _cmd, originalIndex);
-}
-
-@end
-#endif
-
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTextStorage-OAExtensions.m 66348 2005-08-01 23:54:36Z bungi $")
 
 @interface NSScriptSuiteRegistry (PrivateAPI)
 - (void)_setClassDescription:(NSScriptClassDescription *)classDesc forAppleEventCode:(unsigned long)eventCode;
@@ -467,11 +426,6 @@ static id (*originalValueInCharactersAtIndex)(id self, SEL _cmd, int i) = NULL;
         [result appendString:@"}"];
         return result;
     }
-}
-
-- (id)attachmentAtCharacterIndex:(unsigned int)characterIndex;
-{
-    return [self attribute:NSAttachmentAttributeName atIndex:characterIndex effectiveRange:NULL];
 }
 
 @end

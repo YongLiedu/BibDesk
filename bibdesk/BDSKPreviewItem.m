@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 5/9/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@
 #import "BDSKFormatParser.h"
 #import "BibTypeManager.h"
 #import "NSString_BDSKExtensions.h"
-#import "NSArray_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSArray-OFExtensions.h>
 
@@ -102,9 +101,10 @@
 }
 
 - (int)intValueOfField:(NSString *)field { 
-    if ([field isBooleanField] || [field isRatingField])
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    if ([typeMan isBooleanField:field] || [typeMan isRatingField:field])
         return 0;
-    else if ([field isTriStateField])
+    else if ([typeMan isTriStateField:field])
         return -1;
     else if ([pubFields objectForKey:field] != nil)
         return 1;
@@ -148,9 +148,14 @@
 }
 
 - (NSString *)displayText {
+    NSEnumerator *authE = [pubAuthors objectEnumerator];
+    BibAuthor *auth;
+    
     NSMutableArray *authors = [NSMutableArray arrayWithCapacity:[pubAuthors count]];
     NSMutableString *string = [NSMutableString string];
-    [authors addObjectsByMakingObjectsFromArray:pubAuthors performSelector:@selector(abbreviatedName)];
+    
+    while (auth = [authE nextObject]) 
+        [authors addObject:[auth abbreviatedName]];
     
     [string appendStrings:[authors componentsJoinedByCommaAndAnd], @",\n", 
                           [pubFields objectForKey:BDSKTitleString], @",\n", 

@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -9,10 +9,9 @@
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
-#import <OmniFoundation/OFStringDecoder.h>
 #import <OmniFoundation/OFStringScanner.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableString-OFExtensions.m 75232 2006-05-17 00:07:47Z wiml $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableString-OFExtensions.m 68913 2005-10-03 19:36:19Z kc $")
 
 @implementation NSMutableString (OFExtensions)
 
@@ -107,22 +106,12 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
         [self replaceAllOccurrencesOfString:@"\n" withString:newString];
 }
 
-- (void)appendCharacter:(unsigned int)aCharacter;
+- (void)appendCharacter:(unichar)aCharacter;
 {
-    unichar utf16[2];
+    // There isn't a particularly efficient way to do this using the ObjC interface, so...
+    const UniChar unicodeCharacters[1] = { aCharacter };
     
-    OBASSERT(sizeof(aCharacter)*CHAR_BIT >= 21);
-    /* aCharacter must be at least 21 bits to contain a full Unicode character */
-    
-    if (aCharacter <= 0xFFFF) {
-        utf16[0] = (unichar)aCharacter;
-        /* There isn't a particularly efficient way to do this using the ObjC interface, so... */
-        CFStringAppendCharacters((CFMutableStringRef)self, utf16, 1);
-    } else {
-        /* Convert Unicode characters in supplementary planes into pairs of UTF-16 surrogates */
-        OFCharacterToSurrogatePair(aCharacter, utf16);
-        CFStringAppendCharacters((CFMutableStringRef)self, utf16, 2);
-    }
+    CFStringAppendCharacters((CFMutableStringRef)self, unicodeCharacters, 1);
 }
 
 - (void)appendStrings: (NSString *)first, ...
@@ -143,21 +132,8 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (void)removeSurroundingWhitespace;
 {
-    NSCharacterSet *nonWhitespace = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
-    NSRange firstValidCharacter, lastValidCharacter;
-    
-    firstValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace];
-    if (firstValidCharacter.length == 0) {
-	[self setString:@""];
-        return;
-    }
-    
-    lastValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch];
-    // Delete tail first.  If we delete the head first, the range for the tail would need to be offset.
-    if (lastValidCharacter.length > 0 && NSMaxRange(lastValidCharacter) < [self length])
-        [self deleteCharactersInRange:NSMakeRange(NSMaxRange(lastValidCharacter), [self length] - NSMaxRange(lastValidCharacter))];
-    if (firstValidCharacter.length > 0 && firstValidCharacter.location > 0)
-        [self deleteCharactersInRange:NSMakeRange(0, firstValidCharacter.location)];
+    // ARM: original Omni implementation used @" \t\r\n" as charset, and had an off-by-one error in trimming @" string"
+    CFStringTrimWhitespace((CFMutableStringRef)self);
 }
 
 @end

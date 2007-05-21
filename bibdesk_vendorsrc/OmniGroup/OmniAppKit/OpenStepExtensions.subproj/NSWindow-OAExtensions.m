@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -7,14 +7,12 @@
 
 #import <OmniAppKit/NSWindow-OAExtensions.h>
 
-#import "OAConstructionTimeView.h"
-
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSWindow-OAExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSWindow-OAExtensions.m 68913 2005-10-03 19:36:19Z kc $")
 
 
 static void (*oldMakeKeyAndOrderFront)(id self, SEL _cmd, id sender);
@@ -44,11 +42,12 @@ static NSMutableArray *zOrder;
 // Note that this will not return miniaturized windows (or any other ordered out window)
 + (NSArray *)windowsInZOrder;
 {
-    zOrder = [[NSMutableArray alloc] init];
+    if (!zOrder)
+        zOrder = [[NSMutableArray alloc] init];
+    else
+        [zOrder removeAllObjects];
     [NSApp makeWindowsPerform:@selector(_addToZOrderArray) inOrder:YES];
-    NSArray *result = zOrder;
-    zOrder = nil;
-    return [result autorelease];
+    return zOrder;
 }
 
 - (NSPoint)frameTopLeftPoint;
@@ -167,22 +166,6 @@ static NSMutableArray *zOrder;
     _SetWindowCGOrderingEnabled(windowRef, false);
     return windowRef;
 }
-
-#if defined(MAC_OS_X_VERSION_10_4) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_4
-- (void)addConstructionWarning;
-{
-    // This is hacky, but you should only be calling this in alpha/beta builds of an app anyway.
-    NSView *borderView = [self valueForKey:@"borderView"];
-    
-    NSRect borderBounds = [borderView bounds];
-    const float constructionHeight = 21.0f;
-    NSRect contructionFrame = NSMakeRect(NSMinX(borderBounds), NSMaxY(borderBounds) - constructionHeight, NSWidth(borderBounds), constructionHeight);
-    OAConstructionTimeView *contructionView = [[OAConstructionTimeView alloc] initWithFrame:contructionFrame];
-    [contructionView setAutoresizingMask:NSViewWidthSizable|NSViewMinYMargin];
-    [borderView addSubview:contructionView positioned:NSWindowBelow relativeTo:nil];
-    [contructionView release];
-}
-#endif
 
 // NSCopying protocol
 

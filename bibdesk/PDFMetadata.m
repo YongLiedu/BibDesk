@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 02/17/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,7 @@
  */
 
 #import "PDFMetadata.h"
-#import <Quartz/Quartz.h>
-#import "NSURL_BDSKExtensions.h"
+#import "NSFileManager_ExtendedAttributes.h"
 
 static NSDictionary *translator = nil;
 
@@ -88,156 +87,46 @@ NSString *BDSKPDFDocumentKeywordsAttribute = @"Keywords";			    // NSArray of NS
 
 + (id)metadataForURL:(NSURL *)fileURL error:(NSError **)outError;
 {
-    
-    NSParameterAssert(fileURL != nil);
-
-    PDFMetadata *metadata = nil;
-    // check file type first?
-    NSError *error = nil;
-    NSString *errMsg = @"";
-    NSString *privateException = NSStringFromSelector(_cmd);
-    PDFDocument *document = nil;
-    
-    @try {
-        
-        fileURL = [fileURL fileURLByResolvingAliases];
-        if(fileURL == nil){
-            errMsg = NSLocalizedString(@"File does not exist.", @"Error description");
-            @throw privateException;
-        }
-        
-        document = [[PDFDocument alloc] initWithURL:fileURL];
-        if(document == nil){
-            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"Error description");
-            @throw privateException;
-        }
-        
-        NSDictionary *attributes = [document documentAttributes];
-        
-        if(attributes){
-            // have to use NSClassFromString unless we link with PDFMetadata
-            metadata = [[[self alloc] init] autorelease];
-            [metadata setDictionary:attributes];
-        } else {
-            errMsg = NSLocalizedString(@"No PDF document attributes for file.", @"Error description");
-            @throw privateException;
-        }
-        
-    }
-    
-    @catch(id exception){
-        
-        if([exception isEqual:privateException]){
-            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:3];
-            if([fileURL path])
-                [userInfo setObject:[fileURL path] forKey:NSFilePathErrorKey];
-            if(errMsg != nil)
-                [userInfo setObject:errMsg forKey:NSLocalizedDescriptionKey];
-            if(error != nil)
-                [userInfo setObject:error forKey:NSUnderlyingErrorKey];
-            error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
-        } else @throw;
-    }
-    
-    @finally {
-        [document release];
-    }
-    
-    if(outError)
-        *outError = error;
-    else
-        NSLog(@"%@ %@", self, error);
-    return metadata; // may be nil
+    // the only reason we don't implement the full method here is because this class can't link with PDFDocument for 10.3 compatibility
+    return [[NSFileManager defaultManager] PDFMetadataForURL:fileURL error:outError];
 }
 
 // the keys in the metadata dictionary must be PDFDocument keys
 - (id)init
 {
     if(self = [super init]){
-        dictionary = [[NSMutableDictionary alloc] initWithCapacity:5];
+        metadata = [[NSMutableDictionary alloc] initWithCapacity:5];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    [dictionary release];
+    [metadata release];
     [super dealloc];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"%@: %@", [self class], dictionary];
+    return [NSString stringWithFormat:@"%@: %@", [self class], metadata];
 }
 
 // these keys are /always/ PDFDocument keys
-- (id)valueForUndefinedKey:(NSString *)key { return [dictionary valueForKey:key]; }
-- (void)setValue:(id)value forUndefinedKey:(NSString *)key {  [dictionary setValue:value forKey:key]; }
+- (id)valueForUndefinedKey:(NSString *)key { return [metadata valueForKey:key]; }
+- (void)setValue:(id)value forUndefinedKey:(NSString *)key {  [metadata setValue:value forKey:key]; }
+- (NSDictionary *)dictionary { return metadata; }
 
-- (NSDictionary *)dictionary { return dictionary; }
-
-- (void)setDictionary:(NSDictionary *)newDictionary;
+- (void)setDictionary:(NSDictionary *)dictionary;
 {
-    if(newDictionary != dictionary){
-        [dictionary release];
-        dictionary = [newDictionary mutableCopy];
+    if(dictionary != metadata){
+        [metadata release];
+        metadata = [dictionary mutableCopy];
     }
 }
 
 - (BOOL)addToURL:(NSURL *)fileURL error:(NSError **)outError;
 {
-    NSParameterAssert(fileURL != nil);
-    
-    // check file type first?
-    NSError *error = nil;
-    NSString *errMsg = @"";
-    NSString *privateException = NSStringFromSelector(_cmd);
-    
-    @try {
-        
-        fileURL = [fileURL fileURLByResolvingAliases];
-        if(fileURL == nil){
-            errMsg = NSLocalizedString(@"File does not exist.", @"Error description");
-            @throw privateException;
-        }
-        
-        PDFDocument *document = [[PDFDocument alloc] initWithURL:fileURL];
-        if(document == nil){
-            errMsg = NSLocalizedString(@"Unable to read as PDF file.", @"Error description");
-            @throw privateException;
-        }
-        
-        [document setDocumentAttributes:dictionary];
-        
-        // -[PDFDocument writeToURL:] returns YES even if it fails rdar://problem/4475062
-        if([[document dataRepresentation] writeToURL:fileURL options:NSAtomicWrite error:&error] == NO){
-            errMsg = NSLocalizedString(@"Unable to save PDF file.", @"Error description");
-            [document release];
-            @throw privateException;
-        }
-        
-        [document release];
-    }
-    @catch(id exception){
-        
-        if([exception isEqual:privateException]){
-            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:3];
-            if([fileURL path])
-                [userInfo setObject:[fileURL path] forKey:NSFilePathErrorKey];
-            if(errMsg != nil)
-                [userInfo setObject:errMsg forKey:NSLocalizedDescriptionKey];
-            if(error != nil)
-                [userInfo setObject:error forKey:NSUnderlyingErrorKey];
-            error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
-            if(outError)
-                *outError = error;
-            else
-                NSLog(@"%@ %@", self, error);
-            return NO;
-        } else @throw;
-    }
-    
-    return YES;
+    return [[NSFileManager defaultManager] addPDFMetadata:self toURL:fileURL error:outError];
 }
 
 @end

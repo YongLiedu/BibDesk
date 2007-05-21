@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 24/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 
 #import "BDSKAlert.h"
 #import "NSImage+Toolbox.h"
-#import "NSAttributedString_BDSKExtensions.h"
 
 
 @implementation BDSKAlert
@@ -56,7 +55,7 @@
 	[informativeText release];
 	
 	if (defaultButtonTitle == nil) 
-		defaultButtonTitle = NSLocalizedString(@"OK", @"Button title");
+		defaultButtonTitle = NSLocalizedString(@"OK", @"OK");
 	[[alert addButtonWithTitle:defaultButtonTitle] setTag:NSAlertDefaultReturn];
 	if (otherButtonTitle != nil) 
 		[[alert addButtonWithTitle:otherButtonTitle] setTag:NSAlertOtherReturn];
@@ -173,9 +172,9 @@
     
 	if (numButtons == 0) {
 		[button setKeyEquivalent:@"\r"];
-	} else if ([aTitle isEqualToString:NSLocalizedString(@"Cancel", @"Button title")]) {
+	} else if ([aTitle isEqualToString:NSLocalizedString(@"Cancel", @"Cancel")]) {
 		[button setKeyEquivalent:@"\e"];
-	} else if ([aTitle isEqualToString:NSLocalizedString(@"Don't Save", @"Button title")]) {
+	} else if ([aTitle isEqualToString:NSLocalizedString(@"Don't Save", @"Don't Save")]) {
 		[button setKeyEquivalent:@"d"];
 		[button setKeyEquivalentModifierMask:NSCommandKeyMask];
 	}
@@ -214,22 +213,34 @@
 	
 	switch (alertStyle) {
 		case NSCriticalAlertStyle: 
-			title = NSLocalizedString(@"Critical", @"Alert dialog window title");
+			title = NSLocalizedString(@"Critical", @"Critical");
 			break;
 		case NSInformationalAlertStyle: 
-			title = NSLocalizedString(@"Information", @"Alert dialog window title");
+			title = NSLocalizedString(@"Information", @"Information");
 			break;
 		case NSWarningAlertStyle:
 		default:
-			title = NSLocalizedString(@"Alert", @"Alert dialog window title");
+			title = NSLocalizedString(@"Alert", @"Alert");
 	}
 	[[self window] setTitle: title];
 	
     // see if we should resize the message text
     NSRect frame = [[self window] frame];
     NSRect infoRect = [informationField frame];
-    NSRect textRect = [[informationField attributedStringValue] boundingRectForDrawingInViewWithSize:NSMakeSize(NSWidth(infoRect), 200.0)];
-    float extraHeight = NSHeight(textRect) - NSHeight(infoRect);
+    
+    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithAttributedString:[informationField attributedStringValue]] autorelease];
+    NSTextContainer *textContainer = [[[NSTextContainer alloc] initWithContainerSize:NSMakeSize(NSWidth(infoRect), 100.0)] autorelease];
+    NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
+    
+    [layoutManager addTextContainer:textContainer];
+    [textStorage addLayoutManager:layoutManager];
+    
+    // drawing in views uses a different typesetting behavior from the current one which leads to a mismatch in line height
+    // see http://www.cocoabuilder.com/archive/message/cocoa/2006/1/3/153669
+    [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
+    [layoutManager glyphRangeForTextContainer:textContainer];
+    
+    float extraHeight = NSHeight([layoutManager usedRectForTextContainer:textContainer]) - NSHeight(infoRect);
 
     if (extraHeight > 0) {
         frame.size.height += extraHeight;
@@ -246,7 +257,7 @@
 	}
 	
 	if (numButtons == 0)
-		[self addButtonWithTitle:NSLocalizedString(@"OK", @"Button title")];
+		[self addButtonWithTitle:NSLocalizedString(@"OK", @"OK")];
 	x = NSMinX([[buttons lastObject] frame]);
 	if (numButtons > 2 && x > 98.0) {
 		x = 98.0;

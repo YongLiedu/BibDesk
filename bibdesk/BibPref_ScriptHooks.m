@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/10/05.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@
 	
 	NSString *directory = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
 	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
 	[openPanel setAllowsMultipleSelection:NO];
     [openPanel beginSheetForDirectory:directory 
 								 file:nil
@@ -86,7 +86,7 @@
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
 	[dict setObject:path forKey:name];
 	[defaults setObject:dict forKey:BDSKScriptHooksKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)removeScriptHook:(id)sender{
@@ -97,7 +97,7 @@
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:BDSKScriptHooksKey]];
 	[dict removeObjectForKey:name];
 	[defaults setObject:dict forKey:BDSKScriptHooksKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (void)showOrChooseScriptFile:(id)sender {
@@ -138,7 +138,7 @@
 	}
 }
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)tableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
+- (NSString *)tableView:(NSTableView *)tableView toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	NSString *colID = [tableColumn identifier];
 	
 	if([colID isEqualToString:@"name"])
@@ -148,7 +148,7 @@
 	NSString *path = [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 	
 	if ([NSString isEmptyString:path])
-		return NSLocalizedString(@"No script hook associated with this action. Doubleclick or use the \"+\" button to add one.", @"Tooltip message");
+		return NSLocalizedString(@"No script hook associated with this action. Doubleclick or use the \"+\" button to add one.", @"");
 	else
 		return [[defaults dictionaryForKey:BDSKScriptHooksKey] objectForKey:name];
 }

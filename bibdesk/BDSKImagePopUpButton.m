@@ -5,7 +5,7 @@
 //  Created by Christiaan Hofman on 3/22/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@
 #import "BDSKImagePopUpButton.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniAppKit/OAApplication.h>
-#import "BDSKImageFadeAnimation.h"
 
 @implementation BDSKImagePopUpButton
 
@@ -50,6 +49,7 @@
 
 - (id)initWithFrame:(NSRect)frameRect {
 	if (self = [super initWithFrame:frameRect]) {
+		currentTimer = nil;
 		highlight = NO;
 		delegate = nil;
 	}
@@ -58,6 +58,7 @@
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
+		currentTimer = nil;
 		highlight = NO;
 		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
 		
@@ -85,9 +86,7 @@
 }
 
 - (void)dealloc{
-    [animation setDelegate:nil];
-    [animation stopAnimation];
-    [animation release];
+	[currentTimer invalidate];
 	[super dealloc];
 }
 
@@ -105,6 +104,7 @@
     return [[self cell] iconSize];
 }
 
+
 - (void) setIconSize:(NSSize)iconSize{
     [[self cell] setIconSize:iconSize];
 }
@@ -121,43 +121,57 @@
     return [[self cell] iconImage];
 }
 
-- (void)animationDidStop:(BDSKImageFadeAnimation *)anAnimation {
-    OBASSERT(anAnimation == animation);
-    [animation setDelegate:nil];
-    [animation autorelease];
-    animation = nil;
-}
-
-- (void)animationDidEnd:(BDSKImageFadeAnimation *)anAnimation {
-    OBASSERT(anAnimation == animation);
-    [self setIconImage:[anAnimation finalImage]];
-    [animation setDelegate:nil];
-    [animation autorelease];
-    animation = nil;
-}
-
-- (void)imageAnimationDidUpdate:(BDSKImageFadeAnimation *)anAnimation {
-    [self setIconImage:[anAnimation currentImage]];
-}
-
-- (void)fadeIconImageToImage:(NSImage *)newImage {
-    
-    if ([animation isAnimating])
-        [animation stopAnimation];
-        
-    NSImage *iconImage = [self iconImage];
-    
-    if (nil != iconImage && nil != newImage) {
-        animation = [[BDSKImageFadeAnimation alloc] initWithDuration:1.0f animationCurve:NSAnimationEaseInOut];
-        [animation setDelegate:self];
-        [animation setAnimationBlockingMode:NSAnimationNonblocking];
-        
-        [animation setTargetImage:newImage];
-        [animation setStartingImage:iconImage];
-        [animation startAnimation];
-    } else {
-        [self setIconImage:newImage];
+- (void)fadeIconImageToImage:(NSImage *)iconImage;{
+	// first make sure we stop a previous timer
+	if(currentTimer){
+		[currentTimer invalidate];
+		currentTimer = nil;
     }
+	
+    if([self iconImage] == nil || iconImage == nil){
+        [self setIconImage:iconImage];
+        return;
+    }
+	
+	NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+		[NSNumber numberWithFloat:0], @"time", iconImage, @"newImage", [self iconImage], @"oldImage", nil];
+    currentTimer = [NSTimer scheduledTimerWithTimeInterval:0.03  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES];
+}
+
+- (void)timerFired:(NSTimer *)timer;{
+    
+    NSImage *newImage = [[timer userInfo] objectForKey:@"newImage"];
+    float time = [[[timer userInfo] objectForKey:@"time"] floatValue];
+	
+    time += 0.1;
+	
+    if(time >= M_PI_2){
+        [self setIconImage:newImage];
+		if(![timer isEqual:currentTimer]){
+			[timer invalidate]; // this should never happen
+		}else if(currentTimer){
+			[currentTimer invalidate];
+			currentTimer = nil;
+		}
+        return;
+    }
+    
+    NSNumber *timeNumber = [[NSNumber alloc] initWithFloat:time];
+	[[timer userInfo] setObject:timeNumber forKey:@"time"];
+    [timeNumber release];
+
+    // original image we started with
+    NSImage *oldImage = [[timer userInfo] objectForKey:@"oldImage"];
+    
+    // we need a clear image to draw into, or else the shadows get superimposed
+    NSImage *image = [[NSImage alloc] initWithSize:[self iconSize]];
+    
+    [image lockFocus];
+    [oldImage dissolveToPoint:NSZeroPoint fraction:cos(time)]; // decreasing amount of old image
+    [newImage dissolveToPoint:NSZeroPoint fraction:sin(time)]; // increasing amount of new image
+    [image unlockFocus];
+    [self setIconImage:image];
+    [image release];
 }
 
 - (void)setIconImage:(NSImage *)iconImage{
@@ -167,6 +181,7 @@
 
 - (NSImage *)arrowImage{
     return [[self cell] arrowImage];
+	[self setNeedsDisplay:YES];
 }
 
 - (void)setArrowImage:(NSImage *)arrowImage{
@@ -223,9 +238,8 @@
 	} else {
 		iconImage = [[self selectedItem] image];
 	}
-    NSSize srcSize = [iconImage size];
 	[dragImage lockFocus];
-    [iconImage drawInRect:NSMakeRect(0, 0, size.width, size.height) fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeCopy fraction:0.6];
+	[iconImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.6];
 	[dragImage unlockFocus];
 
 	[self dragImage:dragImage at:mouseLoc offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES];
@@ -285,8 +299,23 @@
 	[super drawRect:rect];
 	
 	if (highlight)  {
+        NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+        float lineWidth = 2.0;
+        
+        NSRect highlightRect = NSInsetRect([self bounds], 0.5f * lineWidth, 0.5f * lineWidth);
+        
+        NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:highlightRect radius:4.0];
+        
+        [path setLineWidth:lineWidth];
+        
         [NSGraphicsContext saveGraphicsState];
-        [NSBezierPath drawHighlightInRect:[self bounds] radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
+        
+        [[highlightColor colorWithAlphaComponent:0.2] set];
+        [path fill];
+        
+        [[highlightColor colorWithAlphaComponent:0.8] set];
+        [path stroke];
+        
         [NSGraphicsContext restoreGraphicsState];
 	}
 }

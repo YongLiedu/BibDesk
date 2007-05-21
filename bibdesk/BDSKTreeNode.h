@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/18/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,6 @@
 // uses isEqual:
 - (void)removeChild:(BDSKTreeNode *)anObject;
 - (void)insertChild:(BDSKTreeNode *)anObject atIndex:(unsigned int)index;
-- (id)childAtIndex:(unsigned int)index;
 - (void)addChild:(BDSKTreeNode *)anObject;
 - (void)setChildren:(NSArray *)theChildren;
 - (NSArray *)children;
@@ -58,7 +57,6 @@
 - (BDSKTreeNode *)parent;
 - (void)setParent:(BDSKTreeNode *)aParent;
 - (BOOL)isLeaf;
-- (void)sortChildrenUsingFunction:(int (*)(id, id, void *))compare context:(void *)context;
 
 - (void)setColumnValues:(NSDictionary *)values;
 

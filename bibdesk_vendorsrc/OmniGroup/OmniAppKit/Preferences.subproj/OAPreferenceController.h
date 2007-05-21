@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.h 70223 2005-11-09 00:55:58Z wiml $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.h 66348 2005-08-01 23:54:36Z bungi $
 
 #import <OmniFoundation/OFObject.h>
 #import <Foundation/NSGeometry.h>
@@ -88,5 +88,5 @@ typedef enum OAPreferencesViewStyle {
 
 @end
 
-BOOL OAOpenSystemPreferencePane(NSString *bundleIdentifier, NSString *tabIdentifier);
+BOOL OAOpenSystemPreferencePane(NSString *bundleIdentifier);
 

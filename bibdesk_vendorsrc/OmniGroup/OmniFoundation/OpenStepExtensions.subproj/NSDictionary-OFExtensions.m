@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -13,47 +13,13 @@
 #import <OmniFoundation/NSArray-OFExtensions.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSDictionary-OFExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSDictionary-OFExtensions.m 66170 2005-07-28 17:40:10Z kc $")
 
 NSString *OmniDictionaryElementNameKey = @"__omniDictionaryElementNameKey";
 
 #define SAFE_ALLOCA_SIZE (8 * 8192)
 
 @implementation NSDictionary (OFExtensions)
-
-+ (NSDictionary *)dictionaryWithUserRecord:(NSAppleEventDescriptor *)descriptor;
-{
-    if (!(descriptor = [descriptor descriptorForKeyword:'usrf']))
-        return nil;
-    
-    NSMutableDictionary *result = [NSMutableDictionary dictionary];
-    int index, count = [descriptor numberOfItems];
-    
-    for (index = 1; index <= count; index += 2) {
-        NSString *key = [[descriptor descriptorAtIndex:index] stringValue];
-        NSString *value = [[descriptor descriptorAtIndex:index+1] stringValue];
-        [result setObject:value forKey:key];
-    }
-    return result;
-}
-
-- (NSAppleEventDescriptor *)userRecordValue;
-{
-    NSAppleEventDescriptor *listDescriptor = [NSAppleEventDescriptor listDescriptor];
-    NSEnumerator *enumerator = [self keyEnumerator];
-    NSString *key;
-    int listCount = 0;
-    
-    while ((key = [enumerator nextObject])) {
-        NSString *value = [[self objectForKey:key] description];
-        [listDescriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithString:key] atIndex:++listCount];
-        [listDescriptor insertDescriptor:[NSAppleEventDescriptor descriptorWithString:value] atIndex:++listCount];
-    }
-    
-    NSAppleEventDescriptor *result = [NSAppleEventDescriptor recordDescriptor];
-    [result setDescriptor:listDescriptor forKeyword:'usrf'];
-    return result;
-}
 
 - (id)anyObject;
 {
@@ -355,29 +321,6 @@ nochange_noalloc:
 - (unsigned long long int)unsignedLongLongForKey:(NSString *)key;
 {
     return [self unsignedLongLongForKey:key defaultValue:0ULL];
-}
-
-
-struct _makeValuesPerformSelectorContext {
-    SEL sel;
-    id object;
-};
-
-static void _makeValuesPerformSelectorApplier(const void *key, const void *value, void *context)
-{
-    struct _makeValuesPerformSelectorContext *ctx = context;
-    [(id)value performSelector:ctx->sel withObject:ctx->object];
-}
-
-- (void)makeValuesPerformSelector:(SEL)sel withObject:(id)object;
-{
-    struct _makeValuesPerformSelectorContext ctx = {sel, object};
-    CFDictionaryApplyFunction((CFDictionaryRef)self, _makeValuesPerformSelectorApplier, &ctx);
-}
-
-- (void)makeValuesPerformSelector:(SEL)sel;
-{
-    [self makeValuesPerformSelector:sel withObject:nil];
 }
 
 - (id)objectForKey:(NSString *)key defaultObject:(id)defaultObject;

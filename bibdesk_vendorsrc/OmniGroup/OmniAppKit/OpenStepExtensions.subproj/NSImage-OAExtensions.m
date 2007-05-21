@@ -15,7 +15,7 @@
 #import "IconFamily.h"
 #import "OAImageManager.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSImage-OAExtensions.m 66033 2005-07-25 20:19:45Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSImage-OAExtensions.m 66033 2005-07-25 20:19:45Z kc $")
 
 @implementation NSImage (OAImageExtensions)
 + (NSImage *)imageInClassBundleNamed:(NSString *)imageName;

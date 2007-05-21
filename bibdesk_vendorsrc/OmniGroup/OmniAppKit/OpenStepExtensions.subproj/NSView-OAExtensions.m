@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -16,7 +16,7 @@
 #import <OmniAppKit/NSFont-OAExtensions.h>
 #import <OmniAppKit/NSApplication-OAExtensions.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSView-OAExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSView-OAExtensions.m 68913 2005-10-03 19:36:19Z kc $")
 
 //#define TIME_LIMIT
 
@@ -254,49 +254,28 @@ static unsigned int scrollEntriesCount = 0;
     [self scrollRightByAdjustedPixels:percentage * NSHeight([self visibleRect])];
 }
 
-- (NSPoint)scrollPosition;
-{
-    NSScrollView *enclosingScrollView = [self enclosingScrollView];
-    NSClipView *clipView = [enclosingScrollView contentView];
-    if (clipView == nil)
-        return NSZeroPoint;
-
-    NSRect clipViewBounds = [clipView bounds];
-    return clipViewBounds.origin;
-}
-
-- (void)setScrollPosition:(NSPoint)scrollPosition;
-{
-    [self scrollPoint:scrollPosition];
-}
-
 - (NSPoint)scrollPositionAsPercentage;
 {
-    NSRect bounds = [self bounds];
-    NSScrollView *enclosingScrollView = [self enclosingScrollView];
-    if (nil == enclosingScrollView)
-        return NSZeroPoint;
-    
-    NSRect documentVisibleRect = [enclosingScrollView documentVisibleRect];
-
+    NSRect bounds, visibleRect;
     NSPoint scrollPosition;
-    
-    // Vertical position
-    if (NSHeight(documentVisibleRect) >= NSHeight(bounds)) {
-        scrollPosition.y = 0.0f; // We're completely visible
+
+    bounds = [self bounds];
+    visibleRect = [self visibleRect];
+
+    if (NSHeight(visibleRect) >= NSHeight(bounds)) {
+        scrollPosition.y = 0.0; // We're completely visible
     } else {
-        scrollPosition.y = (NSMinY(documentVisibleRect) - NSMinY(bounds)) / (NSHeight(bounds) - NSHeight(documentVisibleRect));
+        scrollPosition.y = (NSMinY(visibleRect) - NSMinY(bounds)) / (NSHeight(bounds) - NSHeight(visibleRect));
         if (![self isFlipped])
-            scrollPosition.y = 1.0f - scrollPosition.y;
-        scrollPosition.y = MIN(MAX(scrollPosition.y, 0.0f), 1.0f);
+            scrollPosition.y = 1.0 - scrollPosition.y;
+        scrollPosition.y = MIN(MAX(scrollPosition.y, 0.0), 1.0);
     }
 
-    // Horizontal position
-    if (NSWidth(documentVisibleRect) >= NSWidth(bounds)) {
-        scrollPosition.x = 0.0f; // We're completely visible
+    if (NSWidth(visibleRect) >= NSWidth(bounds)) {
+        scrollPosition.x = 0.0; // We're completely visible
     } else {
-        scrollPosition.x = (NSMinX(documentVisibleRect) - NSMinX(bounds)) / (NSWidth(bounds) - NSWidth(documentVisibleRect));
-        scrollPosition.x = MIN(MAX(scrollPosition.x, 0.0f), 1.0f);
+        scrollPosition.x = (NSMinX(visibleRect) - NSMinX(bounds)) / (NSWidth(bounds) - NSWidth(visibleRect));
+        scrollPosition.x = MIN(MAX(scrollPosition.x, 0.0), 1.0);
     }
 
     return scrollPosition;
@@ -304,31 +283,28 @@ static unsigned int scrollEntriesCount = 0;
 
 - (void)setScrollPositionAsPercentage:(NSPoint)scrollPosition;
 {
-    NSRect bounds = [self bounds];
-    NSScrollView *enclosingScrollView = [self enclosingScrollView];
-    NSRect desiredRect = [enclosingScrollView documentVisibleRect];
+    NSRect bounds, desiredRect;
 
-    // Vertical position
-    if (NSHeight(desiredRect) < NSHeight(bounds)) {
-        scrollPosition.y = MIN(MAX(scrollPosition.y, 0.0f), 1.0f);
-        if (![self isFlipped])
-            scrollPosition.y = 1.0f - scrollPosition.y;
-        desiredRect.origin.y = rintf(NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect)));
-        if (NSMinY(desiredRect) < NSMinY(bounds))
-            desiredRect.origin.y = NSMinY(bounds);
-        else if (NSMaxY(desiredRect) > NSMaxY(bounds))
-            desiredRect.origin.y = NSMaxY(bounds) - NSHeight(desiredRect);
-    }
+    bounds = [self bounds];
+    desiredRect = [self visibleRect];
+    if (NSHeight(desiredRect) >= NSHeight(bounds))
+        return; // We're entirely visible
 
-    // Horizontal position
-    if (NSWidth(desiredRect) < NSWidth(bounds)) {
-        scrollPosition.x = MIN(MAX(scrollPosition.x, 0.0f), 1.0f);
-        desiredRect.origin.x = rintf(NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect)));
-        if (NSMinX(desiredRect) < NSMinX(bounds))
-            desiredRect.origin.x = NSMinX(bounds);
-        else if (NSMaxX(desiredRect) > NSMaxX(bounds))
-            desiredRect.origin.x = NSMaxX(bounds) - NSHeight(desiredRect);
-    }
+    scrollPosition.y = MIN(MAX(scrollPosition.y, 0.0), 1.0);
+    if (![self isFlipped])
+        scrollPosition.y = 1.0 - scrollPosition.y;
+    desiredRect.origin.y = NSMinY(bounds) + scrollPosition.y * (NSHeight(bounds) - NSHeight(desiredRect));
+    if (NSMinY(desiredRect) < NSMinY(bounds))
+        desiredRect.origin.y = NSMinY(bounds);
+    else if (NSMaxY(desiredRect) > NSMaxY(bounds))
+        desiredRect.origin.y = NSMaxY(bounds) - NSHeight(desiredRect);
+
+    scrollPosition.x = MIN(MAX(scrollPosition.x, 0.0), 1.0);
+    desiredRect.origin.x = NSMinX(bounds) + scrollPosition.x * (NSWidth(bounds) - NSWidth(desiredRect));
+    if (NSMinX(desiredRect) < NSMinX(bounds))
+        desiredRect.origin.x = NSMinX(bounds);
+    else if (NSMaxX(desiredRect) > NSMaxX(bounds))
+        desiredRect.origin.x = NSMaxX(bounds) - NSHeight(desiredRect);
 
     [self scrollPoint:desiredRect.origin];
 }
@@ -412,6 +388,259 @@ static unsigned int scrollEntriesCount = 0;
 - (BOOL)shouldStartDragFromMouseDownEvent:(NSEvent *)event dragSlop:(float)dragSlop finalEvent:(NSEvent **)finalEventPointer;
 {
     return [self shouldStartDragFromMouseDownEvent:event dragSlop:dragSlop finalEvent:finalEventPointer timeoutDate:[NSDate distantFuture]];
+}
+
+//
+// Resizing
+//
+
+#define MIN_MORPH_DIST (5.0)
+
+- (void) morphToFrame: (NSRect) newFrame overTimeInterval: (NSTimeInterval) morphInterval;
+{
+    NSRect          currentFrame, deltaFrame;
+    NSTimeInterval  start, current, elapsed;
+    
+    currentFrame = [self frame];
+    deltaFrame.origin.x = newFrame.origin.x - currentFrame.origin.x;
+    deltaFrame.origin.y = newFrame.origin.y - currentFrame.origin.y;
+    deltaFrame.size.width = newFrame.size.width - currentFrame.size.width;
+    deltaFrame.size.height = newFrame.size.height - currentFrame.size.height;
+    
+    // If nothing interesting is going on, just jump to the end state
+    if (deltaFrame.origin.x < MIN_MORPH_DIST &&
+        deltaFrame.origin.y < MIN_MORPH_DIST &&
+        deltaFrame.size.width < MIN_MORPH_DIST &&
+        deltaFrame.size.height < MIN_MORPH_DIST) {
+        [self setFrame: newFrame];
+        return;
+    }
+    
+    start = [NSDate timeIntervalSinceReferenceDate];    
+    while (YES) {
+        float  ratio;
+        NSRect stepFrame;
+        
+        current = [NSDate timeIntervalSinceReferenceDate];
+        elapsed = current - start;
+        if (elapsed >  morphInterval || [NSApp peekEvent])
+            break;
+
+        ratio = elapsed / morphInterval;
+        stepFrame.origin.x = currentFrame.origin.x + ratio * deltaFrame.origin.x;
+        stepFrame.origin.y = currentFrame.origin.y + ratio * deltaFrame.origin.y;
+        stepFrame.size.width = currentFrame.size.width + ratio * deltaFrame.size.width;
+        stepFrame.size.height = currentFrame.size.height + ratio * deltaFrame.size.height;
+        
+        [self setFrame: stepFrame];
+        [_window display];
+        [_window flushWindow];
+    }
+    
+    // Make sure we don't end up with round off errors
+    [self setFrame: newFrame];
+    [_window display];
+    [_window flushWindow];
+}
+
+//
+// View fade in/out
+//
+
+/*
+The approach taken in both -fadeInSubview: and -fadeOutAndRemoveFromSuperview is to build two images and fade between them.  We could build only one image and ask the opaque superview to draw, but this could be arbitrarily expensive.  Instead, by only asking the view to draw once, we can build a more consistently performant method.
+*/
+
+- (void) fadeInSubview: (NSView *) subview overTimeInterval: (NSTimeInterval) fadeInterval;
+{
+    NSBitmapImageRep *oldImageRep;
+    NSBitmapImageRep *newImageRep = nil;
+    NSImage          *newImage;
+    NSTimeInterval    start, current, elapsed;
+    NSRect            subviewFrame, subviewBounds, opaqueRect, localRect;
+    NSWindow         *window;
+    NSView           *opaqueView;
+    
+    if (!subview)
+        return;
+
+    subviewFrame = [subview frame];
+    window = [self window];
+    if (!window || ![window isVisible]) {
+        // Don't lock focus since that'll raise an exception.  Also, we're not
+        // visible.  Showing off by yourself is just silly.
+        [self addSubview: subview];
+        return;
+    }
+    
+    opaqueView = [self opaqueAncestor];
+
+    // Capture the old contents of the window
+    [self lockFocus];
+    oldImageRep = [[[NSBitmapImageRep alloc] initWithFocusedViewRect: subviewFrame] autorelease];
+    [self unlockFocus];
+    //[[oldImageRep TIFFRepresentation] writeToFile: @"/tmp/old-fadein.tiff" atomically: YES];
+    
+
+    // Some views are really persistent about getting drawn when we don't
+    // want them to (like NSOutlineView).  Turning off needs display on 
+    // the window and all of its views doesn't work. 
+    // We'll put the smack down on that...
+    [_window disableFlushWindow];
+
+    NS_DURING {
+        [self addSubview: subview];
+        subviewBounds = [subview bounds];
+        opaqueRect = [subview convertRect: subviewBounds toView: opaqueView];
+        
+        [opaqueView lockFocus];
+        [opaqueView drawSelfAndSubviewsInRect: opaqueRect];
+        newImageRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect: opaqueRect];
+        [opaqueView unlockFocus];
+        //[[newImageRep TIFFRepresentation] writeToFile: @"/tmp/new-fadein.tiff" atomically: YES];
+        localRect = [subview convertRect:[subview bounds] toView:self];
+        [subview removeFromSuperview];
+    } NS_HANDLER {
+        [_window enableFlushWindow];
+        [localException raise];
+    } NS_ENDHANDLER;
+    
+    // Make sure all the drawing happens while window flushing is off
+    [NSApp peekEvent];
+    [_window enableFlushWindow];
+    
+    newImage = [[[NSImage alloc] initWithSize: opaqueRect.size] autorelease];
+    [newImage addRepresentation: newImageRep];
+    [newImageRep release];
+    
+    // Now, fade from the starting image to the ending image
+    start = [NSDate timeIntervalSinceReferenceDate];    
+    while (YES) {
+        current = [NSDate timeIntervalSinceReferenceDate];
+        elapsed = current - start;
+        if (elapsed >  fadeInterval || [NSApp peekEvent])
+            break;
+
+        [self lockFocus];
+        [oldImageRep drawAtPoint: localRect.origin];
+        [newImage dissolveToPoint: localRect.origin fraction: elapsed / fadeInterval];
+        [self unlockFocus];
+        
+        [window flushWindow];
+    }
+    
+    [self addSubview:subview];
+        
+    // Make sure the final version gets drawn
+    [subview displayRect: subviewBounds];
+    [_window flushWindow];
+}
+
+/* See notes above -fadeInSubview: for design of this method */
+- (void) fadeOutAndRemoveFromSuperviewOverTimeInterval: (NSTimeInterval) fadeInterval;
+{
+    NSBitmapImageRep *oldImageRep, *newImageRep;
+    NSImage          *newImage;
+    NSTimeInterval    start, current, elapsed;
+    NSView           *superview, *opaqueView;
+    NSRect            opaqueRect, superRect;
+    NSWindow         *window;
+    
+    // Hold onto this (since we are going to get removed)
+    superview = [self superview];
+    if (!superview)
+        return;
+
+    window = [superview window];
+    if (!window || ![window isVisible]) {
+        // Don't lock focus since that'll raise an exception.  Also, we're not
+        // visible.  Showing off by yourself is just silly.
+        [self removeFromSuperview];
+        return;
+    }
+
+    opaqueView = [self opaqueAncestor];
+    opaqueRect = [self convertRect: _bounds toView: opaqueView];
+    superRect = [self convertRect: _bounds toView: superview];
+    
+    [self lockFocus];
+    oldImageRep = [[[NSBitmapImageRep alloc] initWithFocusedViewRect: _bounds] autorelease];
+    [self unlockFocus];
+    
+    // When we get removed, we might get deallocated.  Make sure that this doesn't
+    // happen util the animation is done.  Also, tell our window that it doesn't
+    // need to be drawn since otherwise the NSEvent stuff below will cause it to get drawn
+    [[self retain] autorelease];
+    [self removeFromSuperview];
+    [window setViewsNeedDisplay: NO];
+    
+    // Build the new image now that we are out of the way
+    [opaqueView lockFocus];
+    [opaqueView drawSelfAndSubviewsInRect: opaqueRect];
+    newImageRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect: opaqueRect];
+    [opaqueView unlockFocus];
+    
+    newImage = [[[NSImage alloc] initWithSize: opaqueRect.size] autorelease];
+    [newImage addRepresentation: newImageRep];
+    [newImageRep release];
+    
+    
+    // Now, fade from the starting image to the ending image
+    start = [NSDate timeIntervalSinceReferenceDate];    
+    while (YES) {
+        current = [NSDate timeIntervalSinceReferenceDate];
+        elapsed = current - start;
+        if (elapsed >  fadeInterval || [NSApp peekEvent])
+            break;
+
+        [superview lockFocus];
+        [oldImageRep drawAtPoint: superRect.origin];
+        [newImage dissolveToPoint: superRect.origin fraction: elapsed / fadeInterval];
+        [superview unlockFocus];
+        
+        [window flushWindow];
+    }
+
+    // Make sure the final version gets drawn
+    [opaqueView displayRect: opaqueRect];
+    [window flushWindow];
+}
+
+- (NSBitmapImageRep *)bitmapForRect:(NSRect)rect;
+{
+    NSBitmapImageRep *imageRep;
+    NSRect boundsRect, intersection;
+    
+    boundsRect = [self bounds];
+    //NSLog(@"visible rect = %@", NSStringFromRect(visibleRect));
+    //NSLog(@"requested rect = %@", NSStringFromRect(rect));
+    
+    intersection = NSIntersectionRect(boundsRect, rect);
+    if (!NSEqualRects(rect, intersection)) {
+        [NSException raise: NSInvalidArgumentException
+                    format: @"-[NSView imageForRect:] -- Requested rect %@ is not totally contained in the bounds rect %@", NSStringFromRect(rect), NSStringFromRect(boundsRect)];
+    }
+
+    // Note: This does not include subviews
+    [self lockFocus];
+    imageRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:rect];
+    [self unlockFocus];
+
+    return [imageRep autorelease];
+}
+
+- (NSImage *)imageForRect:(NSRect)rect;
+{
+    NSBitmapImageRep *imageRep;
+    NSImage *image;
+    
+    if (!(imageRep = [self bitmapForRect:rect]))
+        return nil;
+    
+    image = [[[NSImage alloc] initWithSize:[imageRep size]] autorelease];
+    [image addRepresentation:imageRep];
+    
+    return image;
 }
 
 // Debugging

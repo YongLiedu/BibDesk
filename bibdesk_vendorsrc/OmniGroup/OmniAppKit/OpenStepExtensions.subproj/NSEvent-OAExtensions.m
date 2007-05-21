@@ -1,20 +1,18 @@
-// Copyright 2005-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
-#import <Carbon/Carbon.h> // For shiftKey, controlKey, etc.  Must be imported early so that IOGraphicsTypes.h knows that Point is already defined by Carbon's MacTypes.h.
-
 #import "NSEvent-OAExtensions.h"
 
 #import <Foundation/Foundation.h>
-#import <OmniBase/OmniBase.h>
+#import <OmniBase/rcsid.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import <AppKit/AppKit.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSEvent-OAExtensions.m 79090 2006-09-07 23:55:58Z kc $");
+RCS_ID("$Header$");
 
 @implementation NSEvent (OAExtensions)
 

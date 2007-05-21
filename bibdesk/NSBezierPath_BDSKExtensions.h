@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/22/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -44,15 +44,8 @@
 + (void)strokeRoundRectInRect:(NSRect)rect radius:(float)radius;
 + (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(float)radius;
 
-+ (void)drawHighlightInRect:(NSRect)rect radius:(float)radius lineWidth:(float)lineWidth color:(NSColor *)color;
-
 + (void)fillHorizontalOvalAroundRect:(NSRect)rect;
 + (void)strokeHorizontalOvalAroundRect:(NSRect)rect;
 + (NSBezierPath*)bezierPathWithHorizontalOvalAroundRect:(NSRect)rect;
-
-+ (void)fillStarInRect:(NSRect)rect;
-+ (void)fillInvertedStarInRect:(NSRect)rect;
-+ (NSBezierPath *)bezierPathWithStarInRect:(NSRect)rect;
-+ (NSBezierPath *)bezierPathWithInvertedStarInRect:(NSRect)rect;
 
 @end

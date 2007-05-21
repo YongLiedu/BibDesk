@@ -38,7 +38,7 @@
 
 #import "BDSKUpdateChecker.h"
 #import "BDSKReadMeController.h"
-#import "NSError_BDSKExtensions.h"
+#import <SystemConfiguration/SystemConfiguration.h>
 
 #define PROPERTY_LIST_URL @"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
@@ -293,10 +293,7 @@
                                                              errorDescription:&err];
         if(nil == versionDictionary){
             if (error) {
-                *error = [NSError mutableLocalErrorWithCode:kBDSKPropertyListDeserializationFailed localizedDescription:NSLocalizedString(@"Unable to read the version number from the server", @"Error description")];
-                [*error setValue:err forKey:NSLocalizedRecoverySuggestionErrorKey];
-                // add the parsing error as underlying error, if the retrieval actually succeeded
-                [*error embedError:downloadError];
+                OFError(error, "BDSKDeserializationError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to read the version number from the server", @"Error description"), nil);
             }
             [err release];
             
@@ -392,65 +389,24 @@
     [self scheduleUpdateCheckIfNeeded];
 }
 
-// @@ is this used anywhere?
-- (BOOL)attemptRecoveryFromError:(NSError *)error optionIndex:(unsigned int)recoveryOptionIndex;
-{
-    BOOL didRecover = NO;
-    
-    // we only receive this for a single error at present
-    if ([error isLocalError] && [error code] == kBDSKNetworkConnectionFailed) {
-        if (0 == recoveryOptionIndex) {
-            // ignore
-            didRecover = NO;
-            
-        } else if (1 == recoveryOptionIndex) {
-            // diagnose
-            CFURLRef theURL = (CFURLRef)[self propertyListURL];
-            CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
-            CFNetDiagnosticStatus status = CFNetDiagnosticDiagnoseProblemInteractively(diagnostic);
-            CFRelease(diagnostic);
-            didRecover = (status == kCFNetDiagnosticNoErr);
-            
-        } else if (2 == recoveryOptionIndex) {
-            // open console
-            didRecover = [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:@"com.apple.console" options:0 additionalEventParamDescriptor:nil launchIdentifier:NULL];
-        }
-    } else {
-        didRecover = NO;
-    }
-    
-    return didRecover;
-}
+- (BOOL)checkForNetworkAvailability:(NSError **)error{
+ 
+    BOOL result = NO;
+    SCNetworkConnectionFlags flags;
+    const char *hostName = "bibdesk.sourceforge.net";
 
-- (BOOL)checkForNetworkAvailability:(NSError **)error;
-{
-    CFURLRef theURL = (CFURLRef)[self propertyListURL];
-    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
-    
-    NSString *details;
-    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
-    CFRelease(diagnostic);
-    [details autorelease];
-    
-    BOOL success;
-    
-    if (kCFNetDiagnosticConnectionUp == status) {
-        success = YES;
-    } else {
-        if (nil == details) details = NSLocalizedString(@"Unknown network error", @"Error description");
-        
-        // This error contains all the information needed for NSErrorRecoveryAttempting.  
-        // Note that buttons in the alert will be ordered right-to-left {0, 1, 2} and correspond to objects in the NSLocalizedRecoveryOptionsErrorKey array.
-        if (error) {
-            *error = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:details];
-            [*error setValue:self forKey:NSRecoveryAttempterErrorKey];
-            [*error setValue:NSLocalizedString(@"Would you like to ignore this problem or attempt to diagnose it?  You may also open the Console log to check for errors.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
-            [*error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Ignore", @"Button title"), NSLocalizedString(@"Diagnose", @"Button title"), NSLocalizedString(@"Open Console", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
-        }
-        success = NO;
+    if( SCNetworkCheckReachabilityByName(hostName, &flags) ){
+        result = !(flags & kSCNetworkFlagsConnectionRequired) && (flags & kSCNetworkFlagsReachable);
     }
-    
-    return success;
+
+    if(result == NO){
+        if(error)
+            OFError(error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Network Unavailable", @""), @"NSLocalizedRecoverySuggestion", NSLocalizedString(@"BibDesk is unable to establish a network connection, possibly because your network is down or a firewall is blocking the connection.", @""), nil);
+        else
+            NSLog(@"Unable to contact %s, possibly because your network is down or a firewall is prevening the connection.", hostName);
+    }
+
+    return result;
 }
 
 - (void)checkForUpdatesInBackground;

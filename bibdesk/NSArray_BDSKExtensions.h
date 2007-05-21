@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/21/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -42,24 +42,19 @@
 @interface NSArray (BDSKExtensions)
 
 - (id)firstObject;
-- (NSArray *)arrayDroppingFirstObject;
-- (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
 - (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
-- (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
 
-- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)sortDescriptors;
+@end
 
+@interface NSArray (Mergesort)
+- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)descriptors;
 @end
 
 @interface NSMutableArray (BDSKExtensions)
 
-- (void)addNonDuplicateObjectsFromArray:(NSArray *)otherArray;
-- (void)addObjectsByMakingObjectsFromArray:(NSArray *)otherArray performSelector:(SEL)selector;
-
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;
 - (void)insertObject:anObject inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
 - (void)insertObjects:(NSArray *)objects inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
-
 - (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
 
 @end

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 12/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@
 	if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
 		return [NSDictionary dictionaryWithObjectsAndKeys:
 					abbrevPath, OATextWithIconCellStringKey, 
-					[NSImage imageForFile:path], OATextWithIconCellImageKey, nil];
+					[NSImage smallImageForFile:path], OATextWithIconCellImageKey, nil];
 	} else {
 		return abbrevPath;
 	}
@@ -81,7 +81,7 @@
 	if(abbrevPath && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
 		return [NSDictionary dictionaryWithObjectsAndKeys:
             abbrevPath, OATextWithIconCellStringKey, 
-            [NSImage imageForURL:fileURL], OATextWithIconCellImageKey, nil];
+            [NSImage smallImageForURL:fileURL], OATextWithIconCellImageKey, nil];
 	} else {
 		return abbrevPath;
 	}

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 19/12/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -72,59 +72,6 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[delegatedDraggedTypes release];
 	[super dealloc];
-}
-
-#pragma mark Linking methods
-
-- (void)updateLinks {    
-    if ([[self delegate] respondsToSelector:@selector(textViewShouldLinkKeys:)] == NO ||
-        [[self delegate] textViewShouldLinkKeys:self] == NO)
-        return;
-    
-    static NSCharacterSet *keySepCharSet = nil;
-    static NSCharacterSet *keyCharSet = nil;
-    
-    if (keySepCharSet == nil) {
-        keySepCharSet = [[NSCharacterSet characterSetWithCharactersInString:@", "] retain];
-        keyCharSet = [[keySepCharSet invertedSet] retain];
-    }
-    
-    NSTextStorage *textStorage = [self textStorage];
-    NSString *string = [textStorage string];
-    
-    unsigned start, length = [string length];
-    NSRange range = NSMakeRange(0, 0);
-    NSString *keyString;
-    
-    [textStorage removeAttribute:NSLinkAttributeName range:NSMakeRange(0, length)];
-    
-    do {
-        start = NSMaxRange(range);
-        range = [string rangeOfCharacterFromSet:keyCharSet options:0 range:NSMakeRange(start, length - start)];
-        
-        if (range.length) {
-            start = range.location;
-            range = [string rangeOfCharacterFromSet:keySepCharSet options:0 range:NSMakeRange(start, length - start)];
-            if (range.length == 0)
-                range.location = length;
-            if (range.location > start) {
-                range = NSMakeRange(start, range.location - start);
-                keyString = [string substringWithRange:range];
-                if ([[self delegate] textView:self isValidKey:keyString])
-                    [textStorage addAttribute:NSLinkAttributeName value:keyString range:range];
-            }
-        }
-    } while (range.length);
-}
-
-- (void)setSelectedRange:(NSRange)charRange {
-    [super setSelectedRange:charRange];
-    [self updateLinks];
-}
-
-- (void)didChangeText {
-    [super didChangeText];
-    [self updateLinks];
 }
 
 #pragma mark Delegated drag methods
@@ -209,7 +156,7 @@
 static inline BOOL completionWindowIsVisibleForTextView(NSTextView *textView)
 {
     BDSKTextViewCompletionController *controller = [BDSKTextViewCompletionController sharedController];
-    return ([[controller completionWindow] isVisible] && [[controller currentTextView] isEqual:textView]);
+    return ([[controller completionWindow] isVisible] && [controller currentTextView] == textView);
 }
 
 static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextView *textView)
@@ -276,6 +223,25 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 	if ([[self delegate] respondsToSelector:@selector(textView:rangeForUserCompletion:)]) 
 		return [[self delegate] textView:self rangeForUserCompletion:charRange];
 	return charRange;
+}
+
+- (void)insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag;
+{
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        // override this method since 10.3 won't insert anything if ([word length] == 1)
+        NSRange selRange = [self selectedRange];
+        NSRange replaceRange = NSUnionRange(charRange, selRange);
+
+        // call shouldChangeTextInRange:replacementString: to get undo support
+        if([self shouldChangeTextInRange:replaceRange replacementString:word]){
+            [self replaceCharactersInRange:replaceRange withString:word];
+
+            selRange = NSMakeRange(selRange.location, [word length]);
+            [self setSelectedRange:(flag ? NSMakeRange(replaceRange.location + [word length], 0) : selRange)];
+        }
+    }else{
+        [super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
+    }
 }
 
 #pragma mark Auto-completion methods

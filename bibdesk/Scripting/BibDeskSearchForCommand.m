@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Wed Jul 21 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ The command should have the form
 		if (![fC isKindOfClass:[NSNumber class]]) {
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
-			[self setScriptErrorString:NSLocalizedString(@"The 'for completion' option needs to be specified as yes or no. E.g.: search for search_term for completion yes", @"Error description")];
+			[self setScriptErrorString:NSLocalizedString(@"The 'for completion' option needs to be specified as yes or no. E.g.: search for search_term for completion yes",@"The 'for completion' option needs to be specified as yes or no. E.g.: search for search_term for completion yes")];
 			return [NSArray array];
 		}
 		
@@ -114,7 +114,7 @@ The command should have the form
     } else {
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-		[self setScriptErrorString:NSLocalizedString(@"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".", @"Error description")];
+		[self setScriptErrorString:NSLocalizedString(@"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".", @"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".")];
 		return [NSArray array];
 	}
 
@@ -128,7 +128,7 @@ The command should have the form
 		id  resultObject;
 		while (i < n) {
 			result = [results objectAtIndex:i];
-			resultObject = [result stringForCompletion];
+			resultObject = [result objectForCompletion];
 			[results replaceObjectAtIndex:i withObject:resultObject];
 			i++;
 		}
@@ -197,18 +197,13 @@ There could be other extensions, like matching for every word with conjunction o
 	BibAuthor *auth = nil;
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:20];	
 
-	while(auth = [authEnum nextObject]) {
+	while(auth = [authEnum nextObject])
 		[string appendString:[auth lastName]];
-        [string appendString:@"|"];
-	}
-    
+	
     // these are all guaranteed to be non-nil
     [string appendString:[self citeKey]];
-    [string appendString:@"|"];
-    [string appendString:[self displayTitle]];
-    [string appendString:@"|"];
+    [string appendString:[[self title] stringByRemovingTeX]];
     [string appendString:[self keywords]];
-    [string appendString:@"|"];
 
 	Boolean result = CFStringFindWithOptions((CFStringRef)string,(CFStringRef)searchterm, CFRangeMake(0, [string length]), kCFCompareCaseInsensitive, NULL);
     [string release];
@@ -218,7 +213,7 @@ There could be other extensions, like matching for every word with conjunction o
 
 // returns a string displayed by the autocomplete plugin
 
-- (NSString *) stringForCompletion {
+- (id) objectForCompletion {
 	// concatenate author surnames first
     NSArray *pubAuthors = [self pubAuthors];
 	NSEnumerator *authEnum = [pubAuthors objectEnumerator];
@@ -235,7 +230,7 @@ There could be other extensions, like matching for every word with conjunction o
         }
 	}
 	
-	return [[self citeKey] stringByAppendingFormat: @" %% %@, %@", surnames, [self displayTitle]];
+	return [[self citeKey] stringByAppendingFormat: @" %% %@, %@", surnames, [self title]];
 	
 }
 @end

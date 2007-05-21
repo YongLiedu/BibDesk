@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,9 @@
 #import "BibTypeManager.h"
 #import "BibAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "NSCharacterSet_BDSKExtensions.h"
-#import "OFCharacterSet_BDSKExtensions.h"
 
 static BibTypeManager *sharedInstance = nil;
 
-// note: if calling this in a loop, @synchronized() can be very expensive, so call it before entering the loop
 @implementation BibTypeManager
 + (BibTypeManager *)sharedManager{
     @synchronized(sharedInstance){
@@ -105,9 +102,6 @@ static BibTypeManager *sharedInstance = nil;
 	
 	strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
     
-    separatorCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]] retain];
-    separatorOFCharSet = [[OFCharacterSet alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKGroupFieldSeparatorCharactersKey]];
-    
     localFileFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
     remoteURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
     allURLFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
@@ -116,19 +110,16 @@ static BibTypeManager *sharedInstance = nil;
     ratingFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
     triStateFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
     booleanFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    citationFieldsSet = [[NSMutableSet alloc] initWithCapacity:5];
-    personFieldsSet = [[NSMutableSet alloc] initWithCapacity:2];
     [self reloadSpecialFields];
     
-    singleValuedGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
-    invalidGroupFieldsSet = [[NSMutableSet alloc] initWithCapacity:10];
+    singleValuedGroupFields = [[NSMutableSet alloc] initWithCapacity:10];
+    invalidGroupFields = [[NSMutableSet alloc] initWithCapacity:10];
     [self reloadGroupFields];
-    
-    // observe the pref changes for custom fields
-    NSEnumerator *prefKeyEnum = [[NSSet setWithObjects:BDSKDefaultFieldsKey, BDSKLocalFileFieldsKey, BDSKRemoteURLFieldsKey, BDSKRatingFieldsKey, BDSKBooleanFieldsKey, BDSKTriStateFieldsKey, BDSKCitationFieldsKey, BDSKPersonFieldsKey, nil] objectEnumerator];
-    NSString *prefKey;
-    while (prefKey = [prefKeyEnum nextObject])
-        [OFPreference addObserver:self selector:@selector(customFieldsDidChange:) forPreference:[OFPreference preferenceForKey:prefKey]];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(customFieldsDidChange:)
+												 name:BDSKCustomFieldsChangedNotification
+											   object:nil];
     
 	return self;
 }
@@ -140,15 +131,11 @@ static BibTypeManager *sharedInstance = nil;
 	[typesForFileTypeDict release];
 	[fieldNameForPubMedTagDict release];
 	[bibtexTypeForPubMedTypeDict release];
-	[fieldNamesForMARCTagDict release];
     [fieldNameForJSTORTagDict release];
     [fieldDescriptionForJSTORTagDict release];
     [fieldNameForWebOfScienceTagDict release];
     [fieldDescriptionForWebOfScienceTagDict release];
     [bibtexTypeForWebOfScienceTypeDict release];
-    [fieldNameForReferTagDict release];
-    [bibtexTypeForReferTypeDict release];
-    [bibtexTypeForHCiteTypeDict release];
     [bibtexTypeForDublinCoreTypeDict release];
     [fieldNameForDublinCoreTermDict release];
 	[MODSGenresForBibTeXTypeDict release];
@@ -167,10 +154,8 @@ static BibTypeManager *sharedInstance = nil;
     [ratingFieldsSet release];
     [triStateFieldsSet release];
     [booleanFieldsSet release];
-    [citationFieldsSet release];
-    [personFieldsSet release];
-    [singleValuedGroupFieldsSet release];
-    [invalidGroupFieldsSet release];
+    [singleValuedGroupFields release];
+    [invalidGroupFields release];
 	[super dealloc];
 }
 
@@ -198,7 +183,6 @@ static BibTypeManager *sharedInstance = nil;
         [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
         [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
         [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
-        [self setFieldNamesForMARCTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_MARC_TAGS_KEY]];
         [self setMODSGenresForBibTeXTypeDict:[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY]];
         [self setFieldNameForJSTORTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY]];
         [self setFieldDescriptionForJSTORTagDict:[typeInfoDict objectForKey:FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY]];
@@ -207,9 +191,6 @@ static BibTypeManager *sharedInstance = nil;
         [self setBibtexTypeForWebOfScienceTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_WOS_TYPES_KEY]];
         [self setBibtexTypeForDublinCoreTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_DC_TYPES_KEY]];        
         [self setFieldNameForDublinCoreTermDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_DC_TERMS_KEY]];
-        [self setFieldNameForReferTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_REFER_TAGS_KEY]];
-        [self setBibtexTypeForReferTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_REFER_TYPES_KEY]];
-        [self setBibtexTypeForHCiteTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_HCITE_TYPES_KEY]];
     }
 	
 	[self reloadAllFieldNames];
@@ -236,8 +217,6 @@ static BibTypeManager *sharedInstance = nil;
         [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
         [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
         [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKTriStateFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKCitationFieldsKey]];
-        [allFields addObjectsFromArray:[pw stringArrayForKey:BDSKPersonFieldsKey]];
         
         [self setAllFieldNames:allFields];
     }
@@ -262,19 +241,15 @@ static BibTypeManager *sharedInstance = nil;
         [ratingFieldsSet removeAllObjects];
         [triStateFieldsSet removeAllObjects];
         [booleanFieldsSet removeAllObjects];
-        [citationFieldsSet removeAllObjects];
-        [personFieldsSet removeAllObjects];
         
         [ratingFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey]];
         [triStateFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey]];
         [booleanFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey]];    
-        [citationFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKCitationFieldsKey]];   
-        [personFieldsSet addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKPersonFieldsKey]];
     }
 }
 
 - (void)reloadGroupFields{
-    [invalidGroupFieldsSet removeAllObjects];
+    [invalidGroupFields removeAllObjects];
     
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSMutableSet *invalidFields = [NSMutableSet setWithObjects:
@@ -284,14 +259,14 @@ static BibTypeManager *sharedInstance = nil;
 		BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil];
 	[invalidFields addObjectsFromArray:[pw stringArrayForKey:BDSKLocalFileFieldsKey]];
 	[invalidFields addObjectsFromArray:[pw stringArrayForKey:BDSKRemoteURLFieldsKey]];
-    [invalidGroupFieldsSet unionSet:invalidFields];
+    [invalidGroupFields unionSet:invalidFields];
     
-    [singleValuedGroupFieldsSet removeAllObjects];
+    [singleValuedGroupFields removeAllObjects];
     NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKPubTypeString, BDSKTypeString, BDSKCrossrefString, BDSKJournalString, BDSKYearString, BDSKMonthString, BDSKPublisherString, BDSKAddressString, nil];
 	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
 	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
 	[singleValuedFields addObjectsFromArray:[pw stringArrayForKey:BDSKTriStateFieldsKey]];  
-    [singleValuedGroupFieldsSet unionSet:singleValuedFields];
+    [singleValuedGroupFields unionSet:singleValuedFields];
 }
 
 - (void)customFieldsDidChange:(NSNotification *)notification {
@@ -299,10 +274,6 @@ static BibTypeManager *sharedInstance = nil;
     [self reloadURLFields];
     [self reloadSpecialFields];
     [self reloadGroupFields];
-    
-    // coalesce notifications; this is received once each OFPreference value that's set in BibPref_Defaults, but observers of BDSKCustomFieldsChangedNotification should only receive it once
-    NSNotification *note = [NSNotification notificationWithName:BDSKCustomFieldsChangedNotification object:self];
-    [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostASAP coalesceMask:NSNotificationCoalescingOnName forModes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
 }
 
 #pragma mark Setters
@@ -332,13 +303,6 @@ static BibTypeManager *sharedInstance = nil;
     if(fieldNameForPubMedTagDict != newNames){
         [fieldNameForPubMedTagDict release];
         fieldNameForPubMedTagDict = [newNames copy];
-    }
-}
-
-- (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames{
-    if(fieldNamesForMARCTagDict != newNames){
-        [fieldNamesForMARCTagDict release];
-        fieldNamesForMARCTagDict = [newNames copy];
     }
 }
 
@@ -413,28 +377,6 @@ static BibTypeManager *sharedInstance = nil;
     }
 }
 
-- (void)setFieldNameForReferTagDict:(NSDictionary *)newNames {
-    if(fieldNameForReferTagDict != newNames) {
-        [fieldNameForReferTagDict release];
-        fieldNameForReferTagDict = [newNames copy];
-    }
-}
-
-- (void)setBibtexTypeForReferTypeDict:(NSDictionary *)newNames {
-    if(bibtexTypeForReferTypeDict != newNames) {
-        [bibtexTypeForReferTypeDict release];
-        bibtexTypeForReferTypeDict = [newNames copy];
-    }
-}
-
-- (void)setBibtexTypeForHCiteTypeDict:(NSDictionary *)newBibtexTypeForHCiteTypeDict {
-    if (bibtexTypeForHCiteTypeDict != newBibtexTypeForHCiteTypeDict) {
-        [bibtexTypeForHCiteTypeDict release];
-        bibtexTypeForHCiteTypeDict = [newBibtexTypeForHCiteTypeDict copy];
-    }
-}
-
-
 #pragma mark Getters
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat{
@@ -477,12 +419,12 @@ static BibTypeManager *sharedInstance = nil;
     return [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey];
 }
 
-- (NSSet *)invalidGroupFieldsSet{
-	return invalidGroupFieldsSet;
+- (NSSet *)invalidGroupFields{
+	return invalidGroupFields;
 }
 
-- (NSSet *)singleValuedGroupFieldsSet{ 
-	return singleValuedGroupFieldsSet;
+- (NSSet *)singleValuedGroupFields{ 
+	return singleValuedGroupFields;
 }
 
 - (NSArray *)bibTypesForFileType:(NSString *)fileType{
@@ -495,10 +437,6 @@ static BibTypeManager *sharedInstance = nil;
 
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type{
     return [bibtexTypeForPubMedTypeDict objectForKey:type];
-}
-
-- (NSDictionary *)fieldNamesForMARCTag:(NSString *)tag{
-    return [fieldNamesForMARCTagDict objectForKey:tag];
 }
 
 - (NSString *)fieldNameForDublinCoreTerm:(NSString *)term{
@@ -533,7 +471,7 @@ static BibTypeManager *sharedInstance = nil;
     NSString *name = [fieldNameForJSTORTagDict objectForKey:tag];
 	if(name == nil){
 		name = [fieldDescriptionForJSTORTagDict objectForKey:tag];
-		name = [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+		name = [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
 	}
 	return name;
 }
@@ -542,7 +480,7 @@ static BibTypeManager *sharedInstance = nil;
     NSArray *tags = [fieldDescriptionForJSTORTagDict allKeysForObject:name];
     if([tags count])
 		return [fieldNameForJSTORTagDict objectForKey:[tags objectAtIndex:0]];
-	return [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+	return [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
 }
 
 - (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type{
@@ -553,7 +491,7 @@ static BibTypeManager *sharedInstance = nil;
     NSString *name = [fieldNameForWebOfScienceTagDict objectForKey:tag];
 	if(name == nil){
 		name = [fieldDescriptionForWebOfScienceTagDict objectForKey:tag];
-		name = [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+		name = [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
         if(name == nil)
             name = tag; // guard against a nil return; it turns out that not all WOS tags are documented
 	}
@@ -565,56 +503,23 @@ static BibTypeManager *sharedInstance = nil;
     NSArray *tags = [fieldDescriptionForWebOfScienceTagDict allKeysForObject:name];
     if([tags count])
         return [fieldNameForWebOfScienceTagDict objectForKey:[tags objectAtIndex:0]];
-    return [[name fieldName] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
+    return [[name capitalizedString] stringByReplacingAllOccurrencesOfString:@" " withString:@"-"];
 }    
 
-- (NSString *)fieldNameForReferTag:(NSString *)tag {
-    NSString *name = [fieldNameForReferTagDict objectForKey:tag];
-    if (nil == name) {
-        NSLog(@"Unknown Refer tag %@.  Please report this.", tag);
-        // numeric tags don't work with BibTeX; we could have fieldName check this, but it's specific to Refer at this point
-        if ([tag length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[tag characterAtIndex:0]])
-            name = [@"Refer" stringByAppendingString:tag];
-        else
-            name = [tag fieldName];
+- (BOOL)isRemoteURLField:(NSString *)field{
+    return [remoteURLFieldsSet containsObject:field];
+}
+
+- (BOOL)isLocalFileField:(NSString *)field{
+    BOOL rv;
+    @synchronized(self){
+        rv = [localFileFieldsSet containsObject:field];
     }
-    return name;
+    return rv;
 }
 
-- (NSString *)bibtexTypeForReferType:(NSString *)type {
-    NSString *btType = [bibtexTypeForReferTypeDict objectForKey:type];
-    if (nil == btType)
-        btType = BDSKMiscString;
-    return btType;
-}
-
-- (NSString *)bibtexTypeForHCiteType:(NSString *)type {
-    // first try to find 'type' in the list of regular types:
-    
-    if([[self bibTypesForFileType:BDSKBibtexString] containsObject:type])
-        return type;
-    
-    // then try to find 'type' in the custom dict:
-    NSString *btType = [bibtexTypeForHCiteTypeDict objectForKey:type];
-    
-    // if it's not there, give up and return "misc".
-    if (nil == btType)
-        btType = BDSKMiscString;
-    
-    return btType;
-}
-
-
-- (NSSet *)booleanFieldsSet{
-    return booleanFieldsSet;
-}
-
-- (NSSet *)triStateFieldsSet{
-    return triStateFieldsSet;
-}
-
-- (NSSet *)ratingFieldsSet{
-    return ratingFieldsSet;
+- (BOOL)isURLField:(NSString *)field{
+    return [allURLFieldsSet containsObject:field];
 }
 
 - (NSSet *)allURLFieldsSet{
@@ -630,14 +535,6 @@ static BibTypeManager *sharedInstance = nil;
     return set;
 }
 
-- (NSSet *)remoteURLFieldsSet{
-    return remoteURLFieldsSet;
-}
-
-- (NSSet *)citationFieldsSet{
-    return citationFieldsSet;
-}
-
 - (NSSet *)noteFieldsSet{
     static NSSet *noteFieldsSet = nil;
     if(nil == noteFieldsSet)
@@ -645,25 +542,37 @@ static BibTypeManager *sharedInstance = nil;
     return noteFieldsSet;
 }
 
-- (NSSet *)personFieldsSet{
-    return personFieldsSet;
+- (BOOL)isRatingField:(NSString *)field{
+    return [ratingFieldsSet containsObject:field];
 }
 
-- (NSSet *)numericFieldsSet{
-    static NSSet *numericFields = nil;
-	if (numericFields == nil)
-		numericFields = [[NSSet alloc] initWithObjects:BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil];
-    return numericFields;
+- (BOOL)isTriStateField:(NSString *)field{
+    return [triStateFieldsSet containsObject:field];
+}
+
+- (BOOL)isBooleanField:(NSString *)field{
+    return [booleanFieldsSet containsObject:field];
+}
+
+- (BOOL)isNoteField:(NSString *)field{
+    return [[self noteFieldsSet] containsObject:field];
+}
+
+- (NSSet *)personFieldsSet{
+    static NSSet *persons = nil;
+    if(persons == nil)
+        persons = [[NSSet alloc] initWithObjects:BDSKAuthorString, BDSKEditorString, nil];
+    return persons;
 }
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
-	if([localFileFieldsSet containsObject:fieldName]){
+	if([self isLocalFileField:fieldName]){
 		return invalidLocalUrlCharSet;
 	}
-	if([remoteURLFieldsSet containsObject:fieldName]){
+	if([self isRemoteURLField:fieldName]){
 		return invalidRemoteUrlCharSet;
 	}
 	return invalidGeneralCharSet;
@@ -673,17 +582,17 @@ static BibTypeManager *sharedInstance = nil;
 	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
-	if([localFileFieldsSet containsObject:fieldName]){
+	if([self isLocalFileField:fieldName]){
 		return strictInvalidLocalUrlCharSet;
 	}
-	if([remoteURLFieldsSet containsObject:fieldName]){
+	if([self isRemoteURLField:fieldName]){
 		return strictInvalidRemoteUrlCharSet;
 	}
 	return strictInvalidGeneralCharSet;
 }
 
 - (NSCharacterSet *)veryStrictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if([localFileFieldsSet containsObject:fieldName]){
+	if([self isLocalFileField:fieldName]){
 		return veryStrictInvalidLocalUrlCharSet;
 	}
 	return [self strictInvalidCharactersForField:fieldName inFileType:type];
@@ -701,31 +610,5 @@ static BibTypeManager *sharedInstance = nil;
 - (NSCharacterSet *)fragileCiteKeyCharacterSet{
 	return fragileCiteKeyCharSet;
 }
-
-- (NSCharacterSet *)separatorCharacterSetForField:(NSString *)fieldName{
-	return [fieldName isCitationField] ? [NSCharacterSet commaCharacterSet] : separatorCharSet;
-}
-
-- (OFCharacterSet *)separatorOFCharacterSetForField:(NSString *)fieldName{
-	return [fieldName isCitationField] ? [OFCharacterSet commaCharacterSet] : separatorOFCharSet;
-}
-
-@end
-
-@implementation NSString (BDSKTypeExtensions)
-
-- (BOOL)isBooleanField { return [[[BibTypeManager sharedManager] booleanFieldsSet] containsObject:self]; }
-- (BOOL)isTriStateField { return [[[BibTypeManager sharedManager] triStateFieldsSet] containsObject:self]; }
-- (BOOL)isRatingField { return [[[BibTypeManager sharedManager] ratingFieldsSet] containsObject:self]; }
-- (BOOL)isLocalFileField { return [[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:self]; }
-- (BOOL)isRemoteURLField { return [[[BibTypeManager sharedManager] remoteURLFieldsSet] containsObject:self]; }
-- (BOOL)isCitationField { return [[[BibTypeManager sharedManager] citationFieldsSet] containsObject:self]; }
-- (BOOL)isPersonField { return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:self]; }
-- (BOOL)isURLField { return [[[BibTypeManager sharedManager] allURLFieldsSet] containsObject:self]; }
-- (BOOL)isNoteField { return [[[BibTypeManager sharedManager] noteFieldsSet] containsObject:self]; }
-- (BOOL)isNumericField { return [[[BibTypeManager sharedManager] numericFieldsSet] containsObject:self]; }
-- (BOOL)isSingleValuedGroupField { return [[[BibTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self]; }
-- (BOOL)isSingleValuedField { return [[[BibTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self] || [self isInvalidGroupField]; }
-- (BOOL)isInvalidGroupField { return [[[BibTypeManager sharedManager] invalidGroupFieldsSet] containsObject:self]; }
 
 @end

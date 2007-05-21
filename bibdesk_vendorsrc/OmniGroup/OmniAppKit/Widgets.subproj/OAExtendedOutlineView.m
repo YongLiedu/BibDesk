@@ -20,7 +20,7 @@
 #import "OAOutlineViewEnumerator.h"
 #import "OATypeAheadSelectionHelper.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAExtendedOutlineView.m 68516 2005-09-19 22:07:59Z rachael $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAExtendedOutlineView.m 68516 2005-09-19 22:07:59Z rachael $")
 
 @interface NSOutlineView (PrivateAPIThatWeShouldNotHaveToCallDammit)
 - (void)_collapseItem:(id)item collapseChildren:(BOOL)collapseChildren clearExpandState:(BOOL)clearExpandState;

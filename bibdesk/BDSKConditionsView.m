@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 4/29/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -70,10 +70,12 @@
         [self setFrameSize:newSize];
     
     // resize the window up to a maximal size
-    NSRect winFrame = [[self window] frame];
-    winFrame.size.height += dh;
-    winFrame.origin.y -= dh;
-    [[self window] setFrame:winFrame display:YES animate:YES];
+    if (dh != 0.0f) {
+        NSRect winFrame = [[self window] frame];
+        winFrame.size.height += dh;
+        winFrame.origin.y -= dh;
+        [[self window] setFrame:winFrame display:YES animate:YES];
+    }
     
     if (newHeight > oldHeight)
         [self setFrameSize:newSize];
@@ -135,9 +137,13 @@
 }
 
 - (void)removeAllSubviews {
-    NSArray *subviews = [[self subviews] copy];
-    [subviews makeObjectsPerformSelector:@selector(removeFromSuperviewWithoutNeedingDisplay)];
-    [subviews release];
+    NSArray *subviews = [[[self subviews] copy] autorelease];
+    NSEnumerator *viewEnum = [subviews objectEnumerator];
+    NSView *view;
+    
+    while (view = [viewEnum nextObject]) {
+        [view removeFromSuperviewWithoutNeedingDisplay];
+    }
     [self updateSize];
     [self setNeedsDisplay:YES];
 }

@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -15,7 +15,7 @@
 #import <OmniBase/rcsid.h>
 #import <OmniBase/OBPostLoader.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniBase/OBObject.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniBase/OBObject.m 68913 2005-10-03 19:36:19Z kc $")
 
 @implementation OBObject
 /*" OBObject is an immediate subclass of NSObject, and adds common functionality which Omni has found to be valuable in its own development. OBObject is a superclass for virtually all (if not all) of the classes in Omni's Frameworks (such as OmniFoundation, OmniAppkit, and the publically available OmniNetworking frameworks) as well as in Omni's commercial applications (including OmniWeb and OmniPDF). Also, the class header file includes a couple of other header files which are used in many to virtually all of our classes, and recommended for your use as well. This way you need not include these utility headers everywhere.

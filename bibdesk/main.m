@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Mon Dec 17 2001.
 /*
-This software is Copyright (c) 2001,2002,2003,2004,2005,2006 ,2007Michael O. McCracken
+This software is Copyright (c) 2001,2002,2003,2004,2005,2006 Michael O. McCracken
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -24,7 +24,7 @@ int main(int argc, const char *argv[])
     long version;
     OSStatus err = Gestalt(gestaltSystemVersion, &version);
     
-    if (noErr != err || version < 0x00001040) {
+    if (noErr != err || version < 0x00001039) {
         DialogRef alert;
         OSStatus err;
         
@@ -44,7 +44,7 @@ int main(int argc, const char *argv[])
             0
         };
         
-        err = CreateStandardAlert(kAlertStopAlert, (CFStringRef)NSLocalizedString(@"Unsupported System Version", @""), (CFStringRef)NSLocalizedString(@"This version of BibDesk requires Mac OS X 10.4 or greater to run.  Older versions of BibDesk are still available for download.  Would you like to download an older version or quit now?", @""), &alertParamRec, &alert);
+        err = CreateStandardAlert(kAlertStopAlert, (CFStringRef)NSLocalizedString(@"Unsupported System Version", @""), (CFStringRef)NSLocalizedString(@"This version of BibDesk requires Mac OS X 10.3 or greater to run.  Older versions of BibDesk are still available for download.  Would you like to download an older version or quit now?", @""), &alertParamRec, &alert);
         DialogItemIndex index;
         
         if (noErr == err) {

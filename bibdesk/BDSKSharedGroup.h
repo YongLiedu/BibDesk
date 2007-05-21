@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 04/03/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,15 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
-#import "BDSKOwnerProtocol.h"
 
-@class BDSKSharedGroupServer, BDSKPublicationsArray, BDSKMacroResolver, BDSKItemSearchIndexes;
 
-@interface BDSKSharedGroup : BDSKGroup <BDSKOwner>
+@class BDSKSharedGroupServer;
+
+@interface BDSKSharedGroup : BDSKGroup
 {
-    BDSKPublicationsArray *publications;
-    BDSKMacroResolver *macroResolver;
+    NSArray *publications;
     BDSKSharedGroupServer *server;
     BOOL needsUpdate;
-    BDSKItemSearchIndexes *searchIndexes;
 }
 
 + (NSImage *)icon;
@@ -56,7 +54,7 @@
 + (NSImage *)unlockedIcon;
 
 - (id)initWithService:(NSNetService *)aService;
-- (BDSKPublicationsArray *)publications;
+- (NSArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;
 - (BOOL)needsUpdate;

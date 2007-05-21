@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 09/06/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -50,33 +50,12 @@ extern NSString *BDSKEncodingConversionException;
 - (void)appendUTF8DataFromString:(NSString *)string;
 
 /*!
-    @method     appendDataFromString:encoding:error:error
+    @method     appendDataFromString:encoding:
     @abstract   Appends the string to the receiver using the specified data representation.  Raises BDSKEncodingConversionException exception if the conversion did not occur losslessly.
     @discussion (comprehensive description)
     @param      string (description)
     @param      encoding (description)
-    @param      error (description)
 */
-- (BOOL)appendDataFromString:(NSString *)string encoding:(NSStringEncoding)encoding error:(NSError **)error;
-
-/*!
-    @method     appendStringData:convertedFromUTF8ToEncoding:error:error
-    @abstract   Appends the string data to the receiver after converting it from UTF-8 encoding to the specified encoding.
-    @discussion (comprehensive description)
-    @param      data (description)
-    @param      ecoding (description)
-*/
-- (BOOL)appendStringData:(NSData *)data convertedFromUTF8ToEncoding:(NSStringEncoding)encoding error:(NSError **)error;
-
-/*!
-    @method     appendStringData:convertedFromEncoding:toEncoding:error:error
-    @abstract   Appends the string data to the receiver after converting it using the specified encodings.  Raises BDSKEncodingConversionException exception if the conversion did not occur losslessly.
-    @discussion (comprehensive description)
-    @param      data (description)
-    @param      fromEncoding (description)
-    @param      toEncoding (description)
-    @param      error (description)
-*/
-- (BOOL)appendStringData:(NSData *)data convertedFromEncoding:(NSStringEncoding)fromEncoding toEncoding:(NSStringEncoding)toEncoding error:(NSError **)error;
+- (void)appendDataFromString:(NSString *)string useEncoding:(NSStringEncoding)encoding;
 
 @end

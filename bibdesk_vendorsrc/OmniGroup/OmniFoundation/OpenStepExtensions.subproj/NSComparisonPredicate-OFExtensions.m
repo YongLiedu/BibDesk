@@ -11,7 +11,7 @@
 #import <OmniBase/rcsid.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSComparisonPredicate-OFExtensions.m 68950 2005-10-03 21:53:41Z kc $");
+RCS_ID("$Header$");
 
 #if defined(MAC_OS_X_VERSION_10_4) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_4
 

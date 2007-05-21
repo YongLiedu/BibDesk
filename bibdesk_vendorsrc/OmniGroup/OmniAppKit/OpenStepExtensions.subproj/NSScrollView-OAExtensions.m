@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -15,7 +15,7 @@
 #import "NSView-OAExtensions.h"
 #import "OADocumentPositioningView.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSScrollView-OAExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSScrollView-OAExtensions.m 68913 2005-10-03 19:36:19Z kc $")
 
 @implementation NSScrollView (OAExtensions)
 
@@ -110,16 +110,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 - (void)scrollRightByAdjustedPixels:(float)pixels;
 {
     [[self documentView] scrollRightByAdjustedPixels:pixels];
-}
-
-- (NSPoint)scrollPosition;
-{
-    return [[self documentView] scrollPosition];
-}
-
-- (void)setScrollPosition:(NSPoint)scrollPosition;
-{
-    [[self documentView] setScrollPosition:scrollPosition];
 }
 
 - (NSPoint)scrollPositionAsPercentage;

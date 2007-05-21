@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 04/24/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -52,28 +52,28 @@ typedef struct _BDSKDOServerFlags {
     id serverOnServerThread;             // proxy for the local server thread
     NSConnection *mainThreadConnection;  // so the local server thread can talk to the main thread
     NSConnection *localThreadConnection; // so the main thread can talk to the local server thread
-    NSThread *serverThread;              // mainly for debugging
     
     BDSKDOServerFlags serverFlags;       // state variables
 }
 
-// override for custom cleanup on the main thread; call super afterwards
-- (void)stopDOServer;
+// use these proxies to message the server object; do not override
+- (id)serverOnMainThread;
+- (id)serverOnServerThread;
 
 // override for custom setup after the server has been setup; called on the server thread; default does nothing
 - (void)serverDidSetup;
 
+// override for custom cleanup on the main thread; call super afterwards
+- (void)stopDOServer;
+
 // override for custom cleanup on the server thread; call super afterwards
 - (void)cleanup;
 
-// run loop flag; thread safe
+// run loop flag
 - (BOOL)shouldKeepRunning;
 
-// use these proxies to message the server object; do not override; only use them from the other thread
-- (id)serverOnMainThread;
-- (id)serverOnServerThread;
-
 // override to add additional methods adopted by serverOn...Thread objects; they should always adopt our protocols
+
 - (Protocol *)protocolForServerThread; // protocol must adopt <BDSKAsyncDOServerThread>
 - (Protocol *)protocolForMainThread;   // protocol must adopt <BDSKAsyncDOServerMainThread>
 

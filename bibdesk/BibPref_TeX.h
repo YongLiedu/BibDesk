@@ -2,7 +2,7 @@
 // BibDesk
 // Created by Michael McCracken, 2002 
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniAppKit/OAPreferenceClient.h>
 #import "BibPrefController.h"
-
-@class BDSKEncodingPopUpButton;
+#import "BibAppController.h"
+#import "BDSKStringEncodingManager.h"
 
 @interface BibPref_TeX : OAPreferenceClient
 {
@@ -45,7 +46,8 @@
     IBOutlet NSTextField *texBinaryPathField;
     IBOutlet NSTextField *bibtexBinaryPathField;
     IBOutlet NSComboBox *bibTeXStyleField;
-    IBOutlet BDSKEncodingPopUpButton *encodingPopUpButton;
+    IBOutlet NSPopUpButton *encodingPopUpButton;
+    BDSKStringEncodingManager *encodingManager;
 }
 
 - (IBAction)changeUsesTeX:(id)sender;

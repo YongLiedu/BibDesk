@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OFUtilities.h 70959 2005-12-07 20:34:33Z wiml $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OFUtilities.h 66640 2005-08-10 00:37:09Z kc $
 
 #import <objc/objc-class.h>
 #import <objc/objc-runtime.h>
@@ -73,9 +73,3 @@ OmniFoundation_EXTERN size_t OFRemainingStackSize(void);
 // Formats a four character code into a ASCII representation.  This can take up to 4*3+1 characters.  Each byte can be up to three characters ('\ff'), plus the trailing NULL.  Returns the given fccString for ease in passing to NSLog/printf.
 // The fcc is really a FourCharCode (or OSType, OSStatus, ComponentResult, etc, etc, etc).  Don't want to include MacTypes.h here though.
 OmniFoundation_EXTERN char *OFFormatFCC(unsigned long fcc, char fccString[13]);
-
-// Parses a FourCharCode (or OSType) from an ObjC property-list type. This is compatible with the strings created by UTCreateStringForOSType(), but also accepts NSDatas and NSNumbers. Returns YES if successful, NO if not.
-BOOL OFGet4CCFromPlist(id pl, uint32_t *fourcc);
-
-// Creates a property-list representation of the given FourCharCode. Not necessarily compatible with UTGetOSTypeFromString(), because it might not return an NSString.
-id OFCreatePlistFor4CC(uint32_t fourcc);

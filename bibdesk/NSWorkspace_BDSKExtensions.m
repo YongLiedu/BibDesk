@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/27/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -43,29 +43,6 @@
 
 @implementation NSWorkspace (BDSKExtensions)
 
-static OSErr
-FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpec )
-{
-    OSErr err;
-    ProcessInfoRec info;
-    
-    psn->highLongOfPSN = 0;
-    psn->lowLongOfPSN  = kNoProcess;
-    do{
-        err= GetNextProcess(psn);
-        if( !err ) {
-            info.processInfoLength = sizeof(info);
-            info.processName = NULL;
-            info.processAppSpec = fileSpec;
-            err= GetProcessInformation(psn,&info);
-        }
-    } while( !err && info.processSignature != sig );
-    
-    if( !err )
-        *psn = info.processNumber;
-    return err;
-}
-
 - (BOOL)openURL:(NSURL *)fileURL withSearchString:(NSString *)searchString
 {
     
@@ -81,16 +58,18 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     OSStatus err = noErr;
 	AppleEvent theAEvent;
-	AEAddressDesc appAddress;
+	AEAddressDesc fndrAddress;
 	AEDescList targetListDesc;
-	OSType appCreator;
+	OSType fndrCreator;
+	AliasHandle targetAlias;    
     AEDesc searchText;
     
     // initialize descriptors so we can safely dispose of them
     AEInitializeDesc(&theAEvent);
-    AEInitializeDesc(&appAddress);
+    AEInitializeDesc(&fndrAddress);
     AEInitializeDesc(&targetListDesc);
     AEInitializeDesc(&searchText);
+	targetAlias = NULL;
 
     fileURL = [fileURL fileURLByResolvingAliases]; 
     OBASSERT(fileURL != nil);
@@ -99,21 +78,13 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     // Find the application that should open this file.  NB: we need to release this URL when we're done with it.
     CFURLRef appURL = NULL;
-	if(noErr == err){
-        NSString *extension = [[[fileURL path] pathExtension] lowercaseString];
-        NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
-        NSString *bundleID = [defaultViewers objectForKey:extension];
-		if (bundleID)
-            err = LSFindApplicationForInfo(kLSUnknownCreator, (CFStringRef)bundleID, NULL, NULL, &appURL);
-        if(appURL == NULL)
-            err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
-    }
+	if(noErr == err)
+		err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
+		
     
-    // convert application location to FSSpec in case we need it
-    FSRef appRef;
-    CFURLGetFSRef(appURL, &appRef);
-    FSSpec appSpec;
-    FSGetCatalogInfo(&appRef, kFSCatInfoNone, NULL, NULL, &appSpec, NULL);
+    // Make sure the app is launched before sending the event, or AE will give an error
+    if (err == noErr)
+        err = LSOpenCFURLRef(appURL, NULL);
     
     // Get the type info of the creator application from LS, so we know should receive the event
     LSItemInfoRecord lsRecord;
@@ -124,23 +95,22 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
     if(appURL) CFRelease(appURL);
     
-    OSType invalidCreator = '???\?';
-    
     if (err == noErr){
-        appCreator = lsRecord.creator;
-        OBASSERT(appCreator != 0); 
-        OBASSERT(appCreator != invalidCreator); 
-    } 
-    
-    // if the app has an invalid creator, our AppleEvent stuff won't work
-    if (appCreator == invalidCreator)
-        err = fnfErr;
+        fndrCreator = lsRecord.creator;
+        OBASSERT(fndrCreator != 0); 
+    } else {
+        // We'll try the Finder instead; remember to reset err, though!  The problem with passing this to the Finder is that keyAESearchText will be stripped off, but at least it should open the file.
+        fndrCreator = 'MACS';
+        err = noErr;
+    }
     
     if (err == noErr)
-        err = AECreateDesc(typeApplSignature, (Ptr) &appCreator, sizeof(OSType), &appAddress);
+        err = AECreateDesc(typeApplSignature, (Ptr) &fndrCreator, sizeof(fndrCreator), &fndrAddress);
     
 	if (err == noErr)
-        err = AECreateAppleEvent(kCoreEventClass, kAEOpenDocuments, &appAddress, kAutoGenerateReturnID, kAnyTransactionID, &theAEvent);
+        err = AECreateAppleEvent(kCoreEventClass, kAEOpenDocuments,
+                                 &fndrAddress, kAutoGenerateReturnID,
+                                 kAnyTransactionID, &theAEvent);
     
     // Here's the search text; convert it to UTF8 bytes without null termination.
     NSData *UTF8data = [searchString dataUsingEncoding:NSUTF8StringEncoding];
@@ -153,132 +123,56 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     
 	if (err == noErr)
         // We could create a list from an array of FSSpecs, as in the original FinderLaunch sample
-        err = AECreateList(NULL, 0, FALSE, &targetListDesc);
+        err = AECreateList(NULL, 0, false, &targetListDesc);
     
-    // FSRefs are now valid across processes, so we can pass them directly
+    // Was using BDAlias to get an AliasHandle, but it crashes if the file doesn't exist; we now check for that, and we'll create our own AliasHandle to be extra safe
     FSRef fileRef;
     if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
         err = coreFoundationUnknownErr;
     
-    if (noErr == err)
-        err = AEPutPtr(&targetListDesc, 1, typeFSRef, &fileRef, sizeof(FSRef));
+    if(err == noErr)
+        err = FSNewAlias(NULL, &fileRef, &targetAlias);
+    
+    if(err == noErr && targetAlias != NULL){
+        HLock((Handle)targetAlias);
+        err = AEPutPtr(&targetListDesc, 1, typeAlias, *targetAlias, GetHandleSize((Handle)targetAlias));
+        HUnlock((Handle)targetAlias);
+    }
 	
     /* add the file list to the apple event */
     if( err == noErr )
         err = AEPutParamDesc(&theAEvent, keyDirectObject, &targetListDesc);
     
-    if (noErr == err) {
-        
-        ProcessSerialNumber psn;
-        // don't overwrite our appSpec...
-        FSSpec runningAppSpec;
-        err = FindRunningAppBySignature(appCreator, &psn, &runningAppSpec);
-        
-        if (noErr == err) {
-            
-            // using this call, we end up with the newly opened doc in front; with 'misc'/'actv', window layering is messed up
-            err = SetFrontProcessWithOptions(&psn, 0);
-
-            // try to send the odoc event
-            if (noErr == err)
-                err = AESendMessage(&theAEvent, NULL, kAENoReply, kAEDefaultTimeout);
-            
-        }
-        
-         // If the app wasn't running, we need to use LaunchApplication...which doesn't seem to work if the app (at least Skim) is already running, hence the initial call to AESendMessage.  Possibly this can be done with LaunchServices, but the documentation for this stuff isn't sufficient to say and I'm not in the mood for any more trial-and-error AppleEvent coding.
-        if (procNotFound == err) {
-            
-            // This code was distilled from http://static.userland.com/Iowa/sourceListings/macbirdSource/Frontier%20SDK%204.1b1/Toolkits/Applet%20Toolkit/appletprocess.c.html
-            LaunchParamBlockRec pb;
-            memset(&pb, 0, sizeof(LaunchParamBlockRec));
-            pb.launchAppSpec = &appSpec;
-            pb.launchBlockID = extendedBlock;
-            pb.launchEPBLength = extendedBlockLen;
-            pb.launchControlFlags = launchContinue | launchNoFileFlags;
-            
-            typedef AppParameters **AppParametersHandle;
-            
-            AppParametersHandle params = NULL;
-            AEDesc launchDesc;
-            AEInitializeDesc(&launchDesc);
-            // the coercion is apparently a key to making this work
-            err = AECoerceDesc(&theAEvent, typeAppParameters, &launchDesc);
-            params = (AppParametersHandle)(launchDesc.dataHandle);
-            pb.launchAppParameters = *params;
-            err = LaunchApplication (&pb);
-            AEDisposeDesc(&launchDesc);
-        }
-    }
-    
-    // handle the case of '????' creator and probably others
-    if (noErr != err)
-        err = (OSStatus)([self openURL:fileURL] == NO);
+    // Finally send the event
+    if (err == noErr)
+        AESendMessage(&theAEvent, NULL, kAENoReply, kAEDefaultTimeout);
     
     /* clean up and leave */
 	AEDisposeDesc(&targetListDesc);
 	AEDisposeDesc(&theAEvent);
-	AEDisposeDesc(&appAddress);
+	AEDisposeDesc(&fndrAddress);
     AEDisposeDesc(&searchText);
 	
     return (err == noErr);
 }
 
-- (NSString *)UTIForURL:(NSURL *)fileURL resolveAliases:(BOOL)resolve error:(NSError **)error;
+- (NSString *)UTIForURL:(NSURL *)fileURL;
 {
     NSParameterAssert([fileURL isFileURL]);
     
-    NSURL *resolvedURL = resolve ? [fileURL fileURLByResolvingAliases] : fileURL;
-    OSStatus err = noErr;
-    
-    if (nil == resolvedURL)
-        err = fnfErr;
-    
+    fileURL = [fileURL fileURLByResolvingAliases];
     FSRef fileRef;
-    
-    if (noErr == err && FALSE == CFURLGetFSRef((CFURLRef)resolvedURL, &fileRef))
-        err = coreFoundationUnknownErr; /* should never happen unless fileURLByResolvingAliases returned nil */
-    
-    // kLSItemContentType returns a CFStringRef, according to the header
+    CFURLGetFSRef((CFURLRef)fileURL, &fileRef);
     CFTypeRef theUTI = NULL;
-    if (noErr == err)
-        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
+    OSStatus err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemContentType, &theUTI);
     
-    if (noErr != err && NULL != error) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:fileURL, NSURLErrorKey, NSLocalizedString(@"Unable to create UTI", @"Error description"), NSLocalizedDescriptionKey, nil];
-        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:userInfo];
+    if(err == noErr && theUTI != NULL){
+
+        NSAssert((CFGetTypeID(theUTI) == CFStringGetTypeID()), @"Unexpected CF type returned from LSCopyItemAttribute");
+        return [(NSString *)theUTI autorelease];
+    }else{
+        return nil;
     }
-    
-    return [(NSString *)theUTI autorelease];
-}
-
-- (BOOL)openLinkedFile:(NSString *)fullPath {
-    NSString *extension = [[fullPath pathExtension] lowercaseString];
-    NSDictionary *defaultViewers = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKDefaultViewersKey];
-    NSString *appID = [defaultViewers objectForKey:extension];
-    NSString *appPath = appID ? [self absolutePathForAppBundleWithIdentifier:appID] : nil;
-    BOOL rv = NO;
-    
-    if (appPath)
-        rv = [self openFile:fullPath withApplication:appPath];
-    if (rv == NO)
-        rv = [self openFile:fullPath];
-    return rv;
-}
-
-- (NSString *)UTIForURL:(NSURL *)fileURL error:(NSError **)error;
-{
-    return [self UTIForURL:fileURL resolveAliases:YES error:error];
-}
-
-- (NSString *)UTIForURL:(NSURL *)fileURL;
-{
-    NSError *error;
-    NSString *theUTI = [self UTIForURL:fileURL error:&error];
-#if defined (OMNI_ASSERTIONS_ON)
-    if (nil == theUTI)
-        NSLog(@"%@", error);
-#endif
-    return theUTI;
 }
 
 - (NSString *)UTIForPathExtension:(NSString *)extension;
@@ -320,40 +214,6 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     }
     
     return [(id)defaultEditorURL autorelease];
-}
-
-- (NSArray *)editorAndViewerNamesAndBundleIDsForPathExtension:(NSString *)extension;
-{
-    NSParameterAssert(extension);
-    
-    NSString *theUTI = [self UTIForPathExtension:extension];
-    
-    NSArray *bundleIDs = (NSArray *)LSCopyAllRoleHandlersForContentType((CFStringRef)theUTI, kLSRolesEditor | kLSRolesViewer);
-    
-    NSEnumerator *idEnum = [bundleIDs objectEnumerator];
-    NSString *bundleID;
-    NSMutableSet *set = [[NSMutableSet alloc] init];
-    NSMutableArray *applications = [NSMutableArray array];
-    
-    while(bundleID = [idEnum nextObject]){
-        if ([set containsObject:bundleID]) continue;
-        NSString *name = [[[self absolutePathForAppBundleWithIdentifier:bundleID] lastPathComponent] stringByDeletingPathExtension];
-        if (name == nil) continue;
-        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:bundleID, @"bundleID", name, @"name", nil];
-        [applications addObject:dict];
-        [dict release];
-        [set addObject:bundleID];
-    }
-    [set release];
-    if(bundleIDs)
-        CFRelease(bundleIDs);
-    
-    // sort by application name
-    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)];
-    [applications sortUsingDescriptors:[NSArray arrayWithObject:sort]];
-    [sort release];
-    
-    return applications;
 }
 
 - (NSImage *)iconForFileURL:(NSURL *)fileURL;

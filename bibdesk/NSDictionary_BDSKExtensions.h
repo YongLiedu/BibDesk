@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/5/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,4 @@
 
 @interface NSMutableDictionary (BDSKExtensions)
 - (id)initForCaseInsensitiveKeys;
-@end
-
-@interface NSDictionary (BDSKExtensions)
 @end

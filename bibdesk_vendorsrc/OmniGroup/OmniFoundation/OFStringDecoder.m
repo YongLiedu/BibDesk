@@ -1,4 +1,4 @@
-// Copyright 2000-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -10,11 +10,11 @@
 #import <CoreFoundation/CFCharacterSet.h>
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
-#import <OmniBase/system.h>
+#import <pthread.h>
 
 //#define OSX_10_1_KLUDGE
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OFStringDecoder.m 79089 2006-09-07 23:41:01Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OFStringDecoder.m 68913 2005-10-03 19:36:19Z kc $")
 
 /* From the Unicode standard:
  * U+FFFD REPLACEMENT CHARACTER 
@@ -390,11 +390,10 @@ CFDataRef OFCreateDataFromStringWithDeferredEncoding(CFStringRef str, CFRange ra
         CFIndex charCount = fastCursor - slowCursor;
         if (charCount > 0) {
             CFIndex precedingChars = CFDataGetLength(octets);
-            CFDataSetLength(octets, precedingChars + (sizeof(unichar) * charCount));
-
             UInt8 *charPtr = CFDataGetMutableBytePtr(octets) + precedingChars;
             unichar *unicharPtr = (unichar *)charPtr;
             
+            CFDataSetLength(octets, precedingChars + (sizeof(unichar) * charCount));
             CFStringGetCharacters(str, (CFRange){slowCursor, charCount}, unicharPtr);
             precedingChars += charCount;
             slowCursor = fastCursor; // slowCursor += charCount; 

@@ -1,11 +1,10 @@
-// Copyright 2004-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2004-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 
 #import <OmniBase/rcsid.h>
@@ -15,7 +14,7 @@
 #import <unistd.h>
 #import <fcntl.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFCompressionTest.m 79087 2006-09-07 23:37:02Z kc $");
+RCS_ID("$Header$");
 
 @interface OFCompressionTest : SenTestCase
 

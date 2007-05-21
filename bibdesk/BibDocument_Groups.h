@@ -3,7 +3,7 @@
 //  Bibdesk
 //
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Michael O. McCracken. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,31 +38,51 @@
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
 
-@class BDSKSmartGroup, BDSKStaticGroup, BDSKURLGroup, BDSKScriptGroup, BDSKFilterController, BDSKURLGroupSheetController, BDSKScriptGroupSheetController, BDSKWebGroup;
+@class BDSKSmartGroup;
+@class BDSKStaticGroup;
+@class BDSKFilterController;
 
 @interface BibDocument (Groups)
 
-- (BOOL)hasLibraryGroupSelected;
-- (BOOL)hasWebGroupSelected;
-- (BOOL)hasSharedGroupsSelected;
-- (BOOL)hasURLGroupsSelected;
-- (BOOL)hasScriptGroupsSelected;
-- (BOOL)hasSearchGroupsSelected;
-- (BOOL)hasSmartGroupsSelected;
-- (BOOL)hasStaticGroupsSelected;
-- (BOOL)hasCategoryGroupsSelected;
-- (BOOL)hasExternalGroupsSelected;
+- (unsigned int)countOfGroups;
+- (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index;
 
+- (NSRange)rangeOfCategoryGroups;
+- (NSRange)rangeOfSmartGroups;
+- (NSRange)rangeOfSharedGroups;
+- (NSRange)rangeOfStaticGroups;
+- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasCategoryGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasCategoryGroupsSelected;
+- (BOOL)hasSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSmartGroupsSelected;
+- (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSharedGroupsSelected;
+- (BOOL)hasStaticGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasStaticGroupsSelected;
+
+- (void)addSmartGroup:(BDSKSmartGroup *)group;
+- (void)removeSmartGroup:(BDSKSmartGroup *)group;
+- (void)removeSmartGroupNamed:(id)name;
+- (void)addStaticGroup:(BDSKStaticGroup *)group;
+- (void)removeStaticGroup:(BDSKStaticGroup *)group;
+- (void)removeStaticGroupNamed:(id)name;
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
 
-- (NSArray *)selectedGroups;
-- (void)updateCategoryGroupsPreservingSelection:(BOOL)preserve;
-- (void)updateSmartGroupsCountAndContent:(BOOL)shouldUpdate;
-- (void)displaySelectedGroups;
-- (BOOL)selectGroup:(BDSKGroup *)aGroup;
-- (BOOL)selectGroups:(NSArray *)theGroups;
+- (NSMutableArray *)staticGroups;
 
+- (NSArray *)selectedGroups;
+- (void)updateGroupsPreservingSelection:(BOOL)preserve;
+- (void)displaySelectedGroups;
+- (void)selectGroup:(BDSKGroup *)aGroup;
+- (void)selectGroups:(NSArray *)theGroups;
+
+- (void)updateAllSmartGroups;
+- (NSArray *)publicationsInCurrentGroups;
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group;
 - (BOOL)removePublications:(NSArray *)pubs fromGroups:(NSArray *)groupArray;
 - (BOOL)movePublications:(NSArray *)pubs fromGroup:(BDSKGroup *)group toGroupNamed:(NSString *)newGroupName;
@@ -72,60 +92,37 @@
 - (IBAction)addGroupFieldAction:(id)sender;
 - (IBAction)removeGroupFieldAction:(id)sender;
 
-- (void)showSearchGroupView;
-- (void)hideSearchGroupView;
-
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
-- (void)handleGroupFieldAddRemoveNotification:(NSNotification *)notification;
-- (void)handleGroupNameChangedNotification:(NSNotification *)notification;
-- (void)handleWebGroupUpdatedNotification:(NSNotification *)notification;
+- (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
 - (void)handleStaticGroupChangedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
-- (void)handleURLGroupUpdatedNotification:(NSNotification *)notification;
-- (void)handleScriptGroupUpdatedNotification:(NSNotification *)notification;
-- (void)handleSearchGroupUpdatedNotification:(NSNotification *)notification;
-- (void)handleWillAddRemoveGroupNotification:(NSNotification *)notification;
-- (void)handleDidAddRemoveGroupNotification:(NSNotification *)notification;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
-
 - (IBAction)addSmartGroupAction:(id)sender;
 - (IBAction)addStaticGroupAction:(id)sender;
-- (IBAction)addURLGroupAction:(id)sender;
-- (IBAction)addScriptGroupAction:(id)sender;
-- (IBAction)addSearchGroupAction:(id)sender;
-- (IBAction)newSearchGroupFromBookmark:(id)sender;
-- (IBAction)addSearchBookmark:(id)sender;
-- (IBAction)dismissSearchBookmarkSheet:(id)sender;
 - (IBAction)addGroupButtonAction:(id)sender;
 - (IBAction)removeSelectedGroups:(id)sender;
-- (void)editGroupAtRow:(int)row;
 - (IBAction)editGroupAction:(id)sender;
 - (IBAction)renameGroupAction:(id)sender;
-- (IBAction)selectLibraryGroup:(id)sender;
+- (IBAction)selectAllPublicationsGroup:(id)sender;
 - (IBAction)changeIntersectGroupsAction:(id)sender;
-- (IBAction)editNewStaticGroupWithSelection:(id)sender;
-- (IBAction)editNewCategoryGroupWithSelection:(id)sender;
-- (void)smartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
-- (void)URLGroupSheetDidEnd:(BDSKURLGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
-- (void)scriptGroupSheetDidEnd:(BDSKScriptGroupSheetController *)sheetController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+- (IBAction)editNewGroupWithSelection:(id)sender;
+- (void)addSmartGroupSheetDidEnd:(BDSKFilterController *)filterController returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
-- (IBAction)mergeInExternalGroup:(id)sender;
-- (IBAction)mergeInExternalPublications:(id)sender;
+- (IBAction)mergeInSharedGroup:(id)sender;
+- (IBAction)mergeInSharedPublications:(id)sender;
 - (NSArray *)mergeInPublications:(NSArray *)items;
-- (IBAction)refreshURLGroups:(id)sender;
-- (IBAction)refreshScriptGroups:(id)sender;
-- (IBAction)refreshSearchGroups:(id)sender;
-- (IBAction)refreshAllExternalGroups:(id)sender;
-- (IBAction)refreshSelectedGroups:(id)sender;
+
+- (void)setSmartGroupsFromSerializedData:(NSData *)data;
+- (void)setStaticGroupsFromSerializedData:(NSData *)data;
+- (NSData *)serializedSmartGroupsData;
+- (NSData *)serializedStaticGroupsData;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;
-
-- (void)setImported:(BOOL)flag forPublications:(NSArray *)pubs inGroup:(BDSKGroup *)aGroup;
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
 - (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;

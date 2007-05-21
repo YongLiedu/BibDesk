@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -11,7 +11,7 @@
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAImageManager.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAImageManager.m 68913 2005-10-03 19:36:19Z kc $");
 
 @implementation OAImageManager
 
@@ -37,9 +37,6 @@ static OAImageManager *SharedImageManager = nil;
 
 - (NSImage *)imageNamed:(NSString *)imageName;
 {
-    OBPRECONDITION(imageName); // Crashes under 10.3 otherwise
-    if (!imageName)
-	return nil;
     return [NSImage imageNamed:imageName];
 }
 

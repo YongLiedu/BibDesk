@@ -1,4 +1,4 @@
-// Copyright 2005-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -8,9 +8,9 @@
 #import "OFXMLBuffer.h"
 
 #import <Foundation/Foundation.h>
-#import <OmniBase/OmniBase.h>
+#import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLBuffer.m 79089 2006-09-07 23:41:01Z kc $");
+RCS_ID("$Header$");
 
 
 struct _OFXMLBuffer {
@@ -45,13 +45,9 @@ static inline void _OFXMLBufferEnsureSpace(OFXMLBuffer buf, CFIndex additionalLe
 
 void OFXMLBufferAppendString(OFXMLBuffer buf, CFStringRef str)
 {
-    OBPRECONDITION(str);
-    if (!str)
-	return;
-    
-    unsigned additionalLength = CFStringGetLength(str);
+    unsigned additionalLength = CFStringGetLength((CFStringRef)str);
     _OFXMLBufferEnsureSpace(buf, additionalLength);
-    CFStringGetCharacters(str, (CFRange){0, additionalLength}, &buf->characters[buf->length]);
+    CFStringGetCharacters((CFStringRef)str, (CFRange){0, additionalLength}, &buf->characters[buf->length]);
     buf->length += additionalLength;
 }
 
@@ -69,7 +65,6 @@ void OFXMLBufferAppendASCIICString(OFXMLBuffer buf, const char *str)
 CFDataRef OFXMLBufferCopyData(OFXMLBuffer buf, CFStringEncoding encoding)
 {
     CFStringRef str = CFStringCreateWithCharactersNoCopy(kCFAllocatorDefault, buf->characters, buf->length, kCFAllocatorNull/*no free*/);
-    OBASSERT(str);
     CFDataRef data = CFStringCreateExternalRepresentation(kCFAllocatorDefault, str, encoding, 0/*lossByte*/);
     CFRelease(str);
     return data;

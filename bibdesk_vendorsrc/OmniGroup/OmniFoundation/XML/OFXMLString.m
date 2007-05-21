@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -18,7 +18,7 @@
 
 #import "OFXMLBuffer.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLString.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLString.m 66043 2005-07-25 21:17:05Z kc $");
 
 @interface OFXMLString (Private)
 @end
@@ -27,9 +27,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - initWithString: (NSString *) unquotedString quotingMask: (unsigned int) quotingMask newlineReplacment: (NSString *) newlineReplacment;
 {
-    OBPRECONDITION(unquotedString);
-    OBPRECONDITION(((quotingMask & OFXMLNewlineEntityMask) == 0) == (newlineReplacment == nil));
-    
     _unquotedString     = [unquotedString copy];
     _quotingMask        = quotingMask;
     _newlineReplacement = [newlineReplacment copy];
@@ -54,54 +51,20 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 - (void)appendXML:(struct _OFXMLBuffer *)xml withParentWhiteSpaceBehavior: (OFXMLWhitespaceBehaviorType) parentBehavior document: (OFXMLDocument *) doc level: (unsigned int) level;
 {
     NSString *text = OFXMLCreateStringWithEntityReferencesInCFEncoding(_unquotedString, _quotingMask, _newlineReplacement, [doc stringEncoding]);
-    OBASSERT(text);
-    if (text)
-	OFXMLBufferAppendString(xml, (CFStringRef)text);
+    OFXMLBufferAppendString(xml, (CFStringRef)text);
     [text release];
 }
 
 @end
-
-static void _OFXMLAppendCharacterEntityWithOptions(CFMutableStringRef result, uint32_t options, unichar c, CFStringRef characterEntity, CFStringRef namedEntity)
-{
-    switch (options) {
-	case OFXMLCharacterFlagWriteNamedEntity:
-            CFStringAppend(result, namedEntity);
-	    break;
-	case OFXMLCharacterFlagWriteCharacterEntity:
-            CFStringAppend(result, characterEntity);
-	    break;
-	case OFXMLCharacterFlagWriteUnquotedCharacter:
-            CFStringAppendCharacters(result, &c, 1);
-	    break;
-	default:
-	    OBASSERT_NOT_REACHED("Bad options setting; character dropped");
-	    break;
-    }
-}
 
 // Replace characters with basic entities
 static NSString *_OFXMLCreateStringWithEntityReferences(NSString *sourceString, unsigned int entityMask, NSString *optionalNewlineString)
 {
     // Could maybe build smaller character sets for different entityMask combinations, but this should get most of the benefit (any special character we handle here).
     static CFCharacterSetRef entityCharacters = NULL;
-    if (!entityCharacters) {
-	// XML doesn't allow low ASCII characters.  See the 'Char' production in section 2.2 of the spec:
-	//
-	// Char := #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]	/* any Unicode character, excluding the surrogate blocks, FFFE, and FFFF. */
-	CFMutableCharacterSetRef set = CFCharacterSetCreateMutable(kCFAllocatorDefault);
-	CFCharacterSetAddCharactersInRange(set, (CFRange){0, 0x20});
-	CFCharacterSetRemoveCharactersInRange(set, (CFRange){0x9, 1});
-	CFCharacterSetRemoveCharactersInRange(set, (CFRange){0xA, 1});
-	CFCharacterSetRemoveCharactersInRange(set, (CFRange){0xD, 1});
-	
-	// Additionally, XML uses a few special characters for elements, entities and quoting.  We'll write character entities for all of these (unless some quoting flags tell us differently)
-	CFCharacterSetAddCharactersInString(set, CFSTR("&<>\"'\n"));
-	
-        entityCharacters = CFCharacterSetCreateCopy(kCFAllocatorDefault, set);
-	CFRelease(set);
-    }
-    
+    if (!entityCharacters)
+        entityCharacters = CFCharacterSetCreateWithCharactersInString(kCFAllocatorDefault, CFSTR("&<\"'>\n"));
+
     CFIndex charIndex, charCount = CFStringGetLength((CFStringRef)sourceString);
     CFRange fullRange = (CFRange){0, charCount};
 
@@ -120,24 +83,17 @@ static NSString *_OFXMLCreateStringWithEntityReferences(NSString *sourceString, 
             CFStringAppend(result, (CFStringRef)@"&amp;");
         } else if (c == '<') {
             CFStringAppend(result, (CFStringRef)@"&lt;");
+        } else if (c == '\"' && (entityMask & OFXMLQuotEntityMask) == OFXMLQuotEntityMask) {
+            CFStringAppend(result, (CFStringRef)@"&quot;");
+        } else if (c == '\'' && (entityMask & OFXMLAposEntityMask) == OFXMLAposEntityMask) {
+            CFStringAppend(result, (CFStringRef)@"&apos;");
+        } else if (c == '\'' && (entityMask & OFXMLAposAlternateEntityMask) == OFXMLAposAlternateEntityMask) {
+            CFStringAppend(result, (CFStringRef)@"&#39;");
         } else if (c == '>' && (entityMask & OFXMLGtEntityMask) == OFXMLGtEntityMask) {
             CFStringAppend(result, (CFStringRef)@"&gt;");
-	} else if (c == '\"') {
-	    _OFXMLAppendCharacterEntityWithOptions(result, (entityMask >> OFXMLQuotCharacterOptionsShift) & OFXMLCharacterOptionsMask,
-						   c, (CFStringRef)@"&#34;", (CFStringRef)@"&quot;");
-	} else if (c == '\'') {
-	    _OFXMLAppendCharacterEntityWithOptions(result, (entityMask >> OFXMLAposCharacterOptionsShift) & OFXMLCharacterOptionsMask,
-						   c, (CFStringRef)@"&#39;", (CFStringRef)@"&apos;");
-        } else if (c == '\n') { // 0xA
-	    if (optionalNewlineString && (entityMask & OFXMLNewlineEntityMask) == OFXMLNewlineEntityMask)
+        } else if (c == '\n' && (entityMask & OFXMLNewlineEntityMask) == OFXMLNewlineEntityMask) {
+            if (optionalNewlineString != nil)
                 CFStringAppend(result, (CFStringRef)optionalNewlineString);
-	    else
-		CFStringAppendCharacters(result, &c, 1);
-	} else if (c == '\t' || c == '\r') { // 0x9 || 0xD
-            CFStringAppendCharacters(result, &c, 1);
-	} else if (CFCharacterSetIsCharacterMember(entityCharacters, c)) {
-	    // This is a low-ascii, non-whitespace byte and isn't allowed in XML character at all.  Drop it.
-	    OBASSERT(c < 0x20 && c != 0x9 && c != 0xA && c != 0xD);
         } else
             // TODO: Might want to have a local buffer of queued characters to append rather than calling this in a loop.  Need to flush the buffer before each append above and after the end of the loop.
             CFStringAppendCharacters(result, &c, 1);
@@ -319,67 +275,3 @@ NSString *OFStringForEntityName(NSString *entityName)
     [text release];
 }
 @end
-
-
-static void _OFAppendCharacterDataFromXMLTreeToString(CFXMLTreeRef aTree, NSMutableString *str)
-{
-    NSString *tmpString;
-    CFXMLNodeRef xmlNode = CFXMLTreeGetNode(aTree);
-    CFXMLNodeTypeCode nodeType = CFXMLNodeGetTypeCode(xmlNode);
-    
-    switch (nodeType) {
-	case kCFXMLNodeTypeText:
-	case kCFXMLNodeTypeCDATASection:
-	    tmpString = (NSString *)CFXMLNodeGetString(xmlNode);
-	    if (tmpString != nil)
-		[str appendString:tmpString];
-		break;
-	case kCFXMLNodeTypeEntityReference:
-	    tmpString = OFStringForEntityName((NSString *)CFXMLNodeGetString(xmlNode));
-	    if (tmpString != nil)
-		[str appendString:tmpString];
-		break;
-	default:
-	    //NSLog(@"Ignoring node type %d (%@)", nodeType, NSStringFromXMLNodeType(nodeType));
-	    break;
-    }
-    
-    unsigned int childIndex, childCount = CFTreeGetChildCount(aTree);
-    for (childIndex = 0; childIndex < childCount; childIndex++) {
-        CFXMLTreeRef childTree = CFTreeGetChildAtIndex(aTree, childIndex);
-        _OFAppendCharacterDataFromXMLTreeToString(childTree, str);
-    }
-}
-
-NSString *OFCharacterDataFromXMLTree(CFXMLTreeRef aTree)
-{
-    NSMutableString *str = [NSMutableString string];
-    _OFAppendCharacterDataFromXMLTreeToString(aTree, str);
-    return str;
-}
-
-
-static void _OFCharacterDataFromElement(id element, NSMutableString *str)
-{
-    if ([element isKindOfClass:[NSString class]]) {
-        [str appendString: element];
-    } else if ([element isKindOfClass:[OFXMLElement class]]) {
-        NSArray *children;
-        unsigned int childIndex, childCount;
-	
-        children = [element children];
-        childCount = [children count];
-        for (childIndex = 0; childIndex < childCount; childIndex++)
-            _OFCharacterDataFromElement([children objectAtIndex: childIndex], str);
-    } else if ([element isKindOfClass: [OFXMLString class]]) {
-        [str appendString: [element unquotedString]];
-    }
-}
-
-NSString *OFCharacterDataFromElement(OFXMLElement *element)
-{
-    NSMutableString *str = [NSMutableString string];
-    _OFCharacterDataFromElement(element, str);
-    return str;
-}
-

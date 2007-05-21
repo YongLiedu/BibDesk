@@ -1,4 +1,4 @@
-// Copyright 2000-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -13,7 +13,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniAppKit/NSImage-OAExtensions.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAAquaButton.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAAquaButton.m 68913 2005-10-03 19:36:19Z kc $")
 
 @interface OAAquaButton (PrivateAPI)
 - (void)_setButtonImages;
@@ -70,9 +70,9 @@ NSString *OAAquaButtonGraphiteImageSuffix = @"Graphite";
     [clearImage release];
     [aquaImage release];
     [graphiteImage release];
-    clearImage = [[NSImage imageNamed:anImageName inBundle:aBundle] retain];
-    aquaImage = [[NSImage imageNamed:[anImageName stringByAppendingString:OAAquaButtonAquaImageSuffix] inBundle:aBundle] retain];
-    graphiteImage = [[NSImage imageNamed:[anImageName stringByAppendingString:OAAquaButtonGraphiteImageSuffix] inBundle:aBundle] retain];
+    clearImage = [NSImage imageNamed:anImageName inBundle:aBundle];
+    aquaImage = [NSImage imageNamed:[anImageName stringByAppendingString:OAAquaButtonAquaImageSuffix] inBundle:aBundle];
+    graphiteImage = [NSImage imageNamed:[anImageName stringByAppendingString:OAAquaButtonGraphiteImageSuffix] inBundle:aBundle];
     
     [self _setButtonImages];
 }

@@ -19,7 +19,7 @@
 #import "OAPageSelectableDocumentProtocol.h"
 #import "OAZoomableViewProtocol.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAScrollView.m 66043 2005-07-25 21:17:05Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAScrollView.m 66043 2005-07-25 21:17:05Z kc $")
 
 @interface OAScrollView (Private)
 - (void)_setupScrollView;

@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,12 +14,7 @@
 #import "NSImage-OAExtensions.h"
 #import "OAContextControl.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAContextButton.m 79079 2006-09-07 22:35:32Z kc $");
-
-@interface OAContextButton (Private)
-- (void)_popUpContextMenuWithEvent:(NSEvent *)simulatedEvent;
-@end
-
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAContextButton.m 68913 2005-10-03 19:36:19Z kc $");
 
 @implementation OAContextButton
 
@@ -61,26 +56,14 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (void)awakeFromNib
 {
-    NSImage *image = [self image];
-    if (image == nil) {
+    if ([self image] == nil) {
         if ([[self cell] controlSize] == NSSmallControlSize)
             [self setImage:[OAContextButton miniActionImage]];
         else
             [self setImage:[OAContextButton actionImage]];
-    } else {
-	// IB will disable the size control if you use a flat image in the nib.  Sigh.
-	// Need to have the control size set on the cell correctly for font calculation in -_popUpContextMenuWithEvent:
-	if ([[image name] isEqualToString:@"OAMiniAction"])
-	    [[self cell] setControlSize:NSSmallControlSize];
     }
-    
     if ([NSString isEmptyString:[self toolTip]])
         [self setToolTip:OAContextControlToolTip()];
-    
-    if ([self action] == NULL && [self target] == nil) {
-        [self setTarget:self];
-        [self setAction:@selector(runMenu:)];
-    }
 }
 
 //
@@ -88,7 +71,29 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 //
 - (void)mouseDown:(NSEvent *)event;
 {
-    [self _popUpContextMenuWithEvent:event];
+    if (![self isEnabled])
+        return;
+
+    NSView *targetView;
+    NSMenu *menu;
+    OAContextControlGetMenu(delegate, self, &menu, &targetView);
+
+    if (targetView == nil)
+        menu = OAContextControlNoActionsMenu();
+    
+    NSPoint eventLocation = [self frame].origin;
+    eventLocation = [[self superview] convertPoint:eventLocation toView:nil];
+    if ([[[self window] contentView] isFlipped])
+        eventLocation.y += 3;
+    else
+        eventLocation.y -= 3;
+        
+    [[self cell] setHighlighted:YES];
+        
+    NSEvent *simulatedEvent = [NSEvent mouseEventWithType:NSLeftMouseDown location:eventLocation modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[event windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
+    [NSMenu popUpContextMenu:menu withEvent:simulatedEvent forView:targetView];
+
+    [[self cell] setHighlighted:NO];
 }
 
 //
@@ -107,48 +112,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 - (BOOL)validate;
 {
     return ([self locateActionMenu] != nil);
-}
-
-- (void)runMenu:(id)sender;
-{
-    NSEvent *event = [NSApp currentEvent];
-    [self _popUpContextMenuWithEvent:event];
-}
-
-@end
-
-@implementation OAContextButton (Private)
-
-- (void)_popUpContextMenuWithEvent:(NSEvent *)event
-{
-    if (![self isEnabled])
-        return;
-    
-    NSView *targetView;
-    NSMenu *menu;
-    OAContextControlGetMenu(delegate, self, &menu, &targetView);
-    
-    if (targetView == nil)
-        menu = OAContextControlNoActionsMenu();
-    
-    NSPoint eventLocation = [self frame].origin;
-    eventLocation = [[self superview] convertPoint:eventLocation toView:nil];
-    if ([[[self window] contentView] isFlipped])
-        eventLocation.y += 3;
-    else
-        eventLocation.y -= 3;
-
-    NSEvent *simulatedEvent;
-    if ([event type] == NSLeftMouseDown) {
-        simulatedEvent = [NSEvent mouseEventWithType:NSLeftMouseDown location:eventLocation modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[event windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
-    } else 
-        simulatedEvent = [NSEvent mouseEventWithType:NSLeftMouseDown location:eventLocation modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[event windowNumber] context:[event context] eventNumber:0 clickCount:1 pressure:1.0];
-    
-    NSFont *font = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:[[self cell] controlSize]]];
-
-    [[self cell] setHighlighted:YES];
-    [NSMenu popUpContextMenu:menu withEvent:simulatedEvent forView:targetView withFont:font];
-    [[self cell] setHighlighted:NO];
 }
 
 @end

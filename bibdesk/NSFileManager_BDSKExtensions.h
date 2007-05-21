@@ -5,7 +5,7 @@
 //  Created by Adam Maxwell on 07/08/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,9 @@
 - (NSString *)currentApplicationSupportPathForCurrentUser;
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)applicationsDirectory;
-- (NSURL *)downloadFolderURL;
+- (NSURL *)internetConfigDownloadURL;
 
-- (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
+- (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 
 /*!
     @method     createWeblocFileAtPath:withURL:

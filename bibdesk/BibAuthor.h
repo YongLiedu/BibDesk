@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Wed Dec 19 2001.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -52,25 +52,17 @@ typedef struct _BibAuthorFlags {
     BOOL hasJr;
 } BibAuthorFlags;
 
-enum {
-    BDSKAuthorDisplayFirstNameMask = 1,
-    BDSKAuthorAbbreviateFirstNameMask = 2,
-    BDSKAuthorLastNameFirstMask = 4
-};
-
 /*!
     @class BibAuthor
     @abstract Modeling authors as objects that can have interesting relationships
     @discussion none.
 */
 @interface BibAuthor : OFObject <NSCopying, NSCoding> {
-    NSString *originalName;
     NSString *name;
     NSString *firstName;
     NSString *vonPart;
     NSString *lastName;
     NSString *jrPart;
-    NSString *fullLastName;
     NSString *normalizedName;
     NSString *sortableName;
     NSString *abbreviatedName;
@@ -114,9 +106,7 @@ enum {
 */
 - (NSString *)displayName;
 - (NSString *)normalizedName;
-- (NSString *)fullLastName;
 - (NSString *)sortableName;
-- (NSString *)originalName;
 - (NSString *)name;
 - (NSString *)firstName;
 - (NSString *)vonPart;

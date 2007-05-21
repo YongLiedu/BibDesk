@@ -2,7 +2,7 @@
 // BibDesk
 // Created by Michael McCracken, 2002
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -55,11 +55,9 @@
 	BOOL prependTilde = [defaults boolForKey:BDSKCitePrependTildeKey];
 	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, startCiteBracket];
 	
-    [defaultDragCopyPopup selectItemWithTag:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:0] intValue]];
-    [alternateDragCopyPopup selectItemWithTag:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:1] intValue]];
+    [dragCopyRadio selectCellWithTag:[defaults integerForKey:BDSKDragCopyKey]];
     [separateCiteCheckButton setState:[defaults boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
     [prependTildeCheckButton setState:[defaults boolForKey:BDSKCitePrependTildeKey] ? NSOnState : NSOffState];
-    [citeBracketRadio selectCellWithTag:[[defaults objectForKey:BDSKCiteStartBracketKey] isEqualToString:@"{"] ? 1 : 2];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
     if([separateCiteCheckButton state] == NSOnState){
         [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"%@key1%@%@key2%@", startCite, endCiteBracket, startCite, endCiteBracket]];
@@ -75,39 +73,24 @@
 	[controlBox setNeedsDisplay:YES];
 }
 
-- (IBAction)changeDefaultDragCopyFormat:(id)sender{
-    NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
-    NSNumber *number = [NSNumber numberWithInt:[[sender selectedItem] tag]];
-    [dragCopyTypes replaceObjectAtIndex:0 withObject:number];
-    [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
-    [dragCopyTypes release];
-    [defaults autoSynchronize];
-}
-
-- (IBAction)changeAlternateDragCopyFormat:(id)sender{
-    NSMutableArray *dragCopyTypes = [[defaults arrayForKey:BDSKDragCopyTypesKey] mutableCopy];
-    NSNumber *number = [NSNumber numberWithInt:[[sender selectedItem] tag]];
-    [dragCopyTypes replaceObjectAtIndex:1 withObject:number];
-    [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
-    [dragCopyTypes release];
-    [defaults autoSynchronize];
+- (IBAction)changeCopyBehavior:(id)sender{
+    [defaults setInteger:[[sender selectedCell] tag] forKey:BDSKDragCopyKey];
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changePrependTilde:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKCitePrependTildeKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)citeStringFieldChanged:(id)sender{
     [defaults setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
                  forKey:BDSKCiteStringKey];
     [self changeSeparateCite:separateCiteCheckButton];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)setCitationBracketStyle:(id)sender{
@@ -120,28 +103,26 @@
 		[defaults setObject:@"[" forKey:BDSKCiteStartBracketKey];
 		[defaults setObject:@"]" forKey:BDSKCiteEndBracketKey];
 	}
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil)
-        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @"Message in alert dialog when entering invalid entry"), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
+        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
     return NO;
 }
 
 @end
-
-#pragma mark -
 
 @implementation BDSKDragCopyCiteKeyFormatter
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
     if([string containsString:@"~"]){
         // some people apparently can't see the checkbox for adding a tilde (bug #1422451)
-        if(error) *error = NSLocalizedString(@"Use the checkbox below to prepend a tilde.", @"Error description");
+        if(error) *error = NSLocalizedString(@"Use the checkbox below to prepend a tilde.", @"");
         return NO;
     } else if([string isEqualToString:@""] || [string characterAtIndex:0] != 0x005C){ // backslash
-        if(error) *error = NSLocalizedString(@"The key must begin with a backslash.", @"Error description");
+        if(error) *error = NSLocalizedString(@"The key must begin with a backslash.", @"");
         return NO;
     }
     if(obj) *obj = string;

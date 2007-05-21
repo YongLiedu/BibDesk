@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -21,7 +21,7 @@
 #import "OASheetRequest.h"
 #import "OAScriptMenuItem.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OAApplication.m 78738 2006-08-25 20:47:11Z rachael $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OAApplication.m 68130 2005-09-09 00:19:24Z bungi $")
 
 NSString *OAFlagsChangedNotification = @"OAFlagsChangedNotification";
 
@@ -293,6 +293,70 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
                 break;
             }
                         
+            case NSScrollWheel:
+            {
+                NSView *contentView;
+                NSView *viewUnderMouse;
+                NSScrollView *scrollView;
+                BOOL scrollWheelButtonIsDown;
+    
+                contentView = [[event window] contentView];
+                viewUnderMouse = [contentView hitTest:[event locationInWindow]];
+                scrollView = [viewUnderMouse enclosingScrollView];
+                if (([event modifierFlags] & NSCommandKeyMask) == 0) {
+                    NSScrollView *idealScrollView;
+
+                    // TODO:  when scrollwheels let you scroll in both directions simultaneously, we'll need to rewrite this block to handle that
+                    idealScrollView = scrollView;
+                    if ([event deltaY] != 0.0) {
+                        while (idealScrollView != nil && ![idealScrollView hasVerticalScroller])
+                            idealScrollView = [idealScrollView enclosingScrollView];
+                    }
+                    if ([event deltaX] != 0.0) {
+                        while (idealScrollView != nil && ![idealScrollView hasHorizontalScroller])
+                            idealScrollView = [idealScrollView enclosingScrollView];
+                    }
+                    if (idealScrollView != nil)
+                        scrollView = idealScrollView;
+                }
+                scrollWheelButtonIsDown = [self scrollWheelButtonIsDown];
+                if (scrollView == nil || [scrollView methodForSelector:@selector(scrollWheel:)] != [NSScrollView instanceMethodForSelector:@selector(scrollWheel:)]) {
+                    // We're not over a scroll view, or the scroll view has a custom implementation of -scrollWheel:.
+                    [super sendEvent:event];
+                } else {
+		    [scrollView scrollWheel:event];
+                    if (scrollWheelButtonIsDown) {
+			// Scroll faster
+			[scrollView scrollWheel:event];
+			[scrollView scrollWheel:event];
+			[scrollView scrollWheel:event];
+			[scrollView scrollWheel:event];
+		    }
+		    break;
+#ifdef CustomScrollWheelHandling
+                    float deltaX, deltaY;
+
+                    deltaX = -[event deltaX];
+                    deltaY = -[event deltaY];
+                    if (scrollWheelButtonIsDown) {
+                        [scrollView scrollRightByPages:deltaX];
+                        [scrollView scrollDownByPages:deltaY];
+                    } else {
+                        float scrollFactor;
+
+                        scrollFactor = OAScrollFactorForWheelEvent(event);
+                        if (scrollFactor >= PAGE_FACTOR) {
+                            [scrollView scrollRightByPages:deltaX];
+                            [scrollView scrollDownByPages:deltaY];
+                        } else {
+                            [scrollView scrollRightByLines:MIN(scrollFactor, MAXIMUM_LINE_FACTOR) * deltaX];
+                            [scrollView scrollDownByLines:MIN(scrollFactor, MAXIMUM_LINE_FACTOR) * deltaY];
+                        }
+                    }
+#endif
+                }
+                break;
+            }
             default:
                 [super sendEvent:event];
                 break;
@@ -427,7 +491,9 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
 // Prefix the URL string with "anchor:" if the string is the name of an anchor in the help files. Prefix it with "search:" to search for the string in the help book.
 - (void)showHelpURL:(NSString *)helpURL;
 {
-    id applicationDelegate = [NSApp delegate];
+    id applicationDelegate;
+        
+    applicationDelegate = [NSApp delegate];
     if ([applicationDelegate respondsToSelector:@selector(openAddressWithString:)]) {
         // We're presumably in OmniWeb, in which case we display our help internally
         NSString *omniwebHelpBaseURL = @"omniweb:/Help/";
@@ -435,24 +501,15 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
             helpURL = @"reference/preferences/Update.html";
         [applicationDelegate performSelector:@selector(openAddressWithString:) withObject:[omniwebHelpBaseURL stringByAppendingString:helpURL]];
     } else {
-	NSBundle *mainBundle = [NSBundle mainBundle];
-        NSString *bookName = [mainBundle localizedStringForKey:@"CFBundleHelpBookName" value:@"" table:@"InfoPlist"];
+        NSString *bookName;
+
+        bookName = [[NSBundle mainBundle] localizedStringForKey:@"CFBundleHelpBookName" value:@"" table:@"InfoPlist"];
         if (![bookName isEqualToString:@"CFBundleHelpBookName"]) {
-            // We've got Apple Help.  First, make sure the help book is registered.  NSHelpManager would do this for us, but we use AHGotoPage, which it doesn't cover.
-	    static BOOL helpBookRegistered = NO;
-	    if (!helpBookRegistered) {
-		helpBookRegistered = YES;
-		NSURL *appBundleURL = [NSURL fileURLWithPath:[mainBundle bundlePath]];
-		FSRef appBundleRef;
-		if (!CFURLGetFSRef((CFURLRef)appBundleURL, &appBundleRef))
-		    NSLog(@"Unable to get FSRef for app bundle URL of '%@' for bundle '%@'", appBundleURL, mainBundle);
-		else
-		    AHRegisterHelpBook(&appBundleRef);
-	    }
-	    
-	    
+            // We've got Apple Help
+            NSRange range;
             OSStatus err;
-            NSRange range = [helpURL rangeOfString:@"search:"];
+
+            range = [helpURL rangeOfString:@"search:"];
             if ((range.length != 0) || (range.location == 0))
                 err = AHSearch((CFStringRef)bookName, (CFStringRef)[helpURL substringFromIndex:NSMaxRange(range)]);
             else {
@@ -472,95 +529,6 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
     }
 }
 
-// Application Support directory
-- (NSArray *)supportDirectoriesInDomain:(NSSearchPathDomainMask)domains;
-{
-    // TODO: Cache this?
-    NSArray *appSupp;
-    NSString *appSupportDirectory = nil;
-    
-    if (appSupportDirectory == nil) {
-        id appDelegate = [NSApp delegate];
-        if (appDelegate != nil && [appDelegate respondsToSelector:@selector(applicationSupportDirectoryName)])
-            appSupportDirectory = [appDelegate applicationSupportDirectoryName];
-        
-        if (appSupportDirectory == nil)
-            appSupportDirectory = [[NSProcessInfo processInfo] processName];
-    }
-    
-    OBASSERT(appSupportDirectory != nil);
-    
-    appSupp = nil;
-#if MAC_OS_X_VERSION_10_4 <= MAC_OS_X_VERSION_MAX_ALLOWED
-    // Unfortunately, calling NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, ...) on 10.3 doesn't return a reasonable failure, like nil or something --- it returns an array containing some garbage paths. So we check the Foundation version number here.
-#ifndef NSFoundationVersionNumber10_4
-#define NSFoundationVersionNumber10_4 501  // Unknown. Apple doesn't declare it anywhere. But 10.3.9 is 500.59.
-#endif
-    if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_4) {
-        appSupp = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, domains, YES);
-    }
-#endif
-    
-    if (appSupp == nil) {
-        NSArray *library = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, domains, YES);
-        if (library == nil)
-            return nil;
-        appSupp = [library arrayByPerformingSelector:@selector(stringByAppendingPathComponent:) withObject:@"Application Support"];
-    }
-        
-    return [appSupp arrayByPerformingSelector:@selector(stringByAppendingPathComponent:) withObject:appSupportDirectory];
-}
-
-- (NSArray *)readableSupportDirectoriesInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...;
-{
-    NSArray *paths = [self supportDirectoriesInDomain:domains];
-    unsigned int pathCount = [paths count], pathIndex;
-    NSFileManager *filemgr = [NSFileManager defaultManager];
-    NSMutableArray *result = [NSMutableArray arrayWithCapacity:pathCount];
-    for(pathIndex = 0; pathIndex < pathCount; pathIndex ++) {
-        va_list varg;
-        BOOL isDir;
-        va_start(varg, subdir);
-        NSString *component = subdir;
-        NSString *path = [paths objectAtIndex:pathIndex];
-        while(component != nil) {
-            path = [path stringByAppendingPathComponent:component];
-            component = va_arg(varg, NSString *);
-        }
-        va_end(varg);
-        if ([filemgr fileExistsAtPath:path isDirectory:&isDir] && isDir)
-            [result addObject:path];
-    }
-    return result;
-}
-
-- (NSString *)writableSupportDirectoryInDomain:(NSSearchPathDomainMask)domains withComponents:(NSString *)subdir, ...;
-{
-    NSArray *paths = [self supportDirectoriesInDomain:domains];
-    unsigned int pathCount = [paths count], pathIndex;
-    NSFileManager *filemgr = [NSFileManager defaultManager];
-    for(pathIndex = 0; pathIndex < pathCount; pathIndex ++) {
-        va_list varg;
-        BOOL isDir;
-        va_start(varg, subdir);
-        NSString *component = subdir;
-        NSString *path = [paths objectAtIndex:pathIndex];
-        while(component != nil) {
-            path = [path stringByAppendingPathComponent:component];
-            component = va_arg(varg, NSString *);
-        }
-        va_end(varg);
-        if ([filemgr fileExistsAtPath:path isDirectory:&isDir]) {
-            if(isDir && [filemgr isWritableFileAtPath:path])
-                return path;
-        } else {
-            if ([filemgr createDirectoryAtPath:path attributes:nil])
-                return path;
-        }
-    }
-    return nil;
-}
-
 // Actions
 
 - (IBAction)closeAllMainWindows:(id)sender;
@@ -576,6 +544,22 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
         window = [windows objectAtIndex:windowIndex];
         if ([window canBecomeMainWindow])
             [window performClose:nil];
+    }
+    [windows release];
+}
+
+- (IBAction)miniaturizeAll:(id)sender;
+{
+    NSArray *windows;
+    unsigned int windowIndex, windowCount;
+    
+    windows = [[NSArray alloc] initWithArray:[self orderedWindows]];
+    windowCount = [windows count];
+    for (windowIndex = 0; windowIndex < windowCount; windowIndex++) {
+        NSWindow *window;
+
+        window = [windows objectAtIndex:windowIndex];
+        [window performMiniaturize:nil];
     }
     [windows release];
 }
@@ -628,25 +612,6 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
 - (IBAction)showPreferencesPanel:(id)sender;
 {
     [[OAPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
-}
-
-static NSArray *overrideWindows = nil;
-
-- (NSArray *)windows;
-{
-    if (overrideWindows)
-        return overrideWindows;
-    return [super windows];
-}
-
-- (void)miniaturizeWindows:(NSArray *)windows;
-{
-    overrideWindows = windows;
-    @try {
-        [super miniaturizeAll:nil];
-    } @finally {
-        overrideWindows = nil;
-    }
 }
 
 // OFController observer informal protocol

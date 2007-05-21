@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Sat Sep 27 2003.
 /*
- This software is Copyright (c) 2003,2004,2005,2006,2007
+ This software is Copyright (c) 2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
     r = [partialString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]];
     if ( r.location != NSNotFound) {
         // this is a BibDesk requirement, since we expect type names to be lowercase
-        *newString = [partialString entryType];
+        *newString = [partialString lowercaseString];
         return NO;
     }
     else return YES;

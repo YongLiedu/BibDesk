@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,46 +38,37 @@
 
 #import <Cocoa/Cocoa.h>
 @class BibDocument, BibItem;
-@protocol BDSKOwner;
 
 @interface BibTeXParser : NSObject {
 }
 
-+ (BOOL)canParseString:(NSString *)string;
-+ (BOOL)canParseStringAfterFixingKeys:(NSString *)string;
-
 /*!
-    @method     itemsFromString:error:document:encoding:error:
-    @abstract   Convenience method that returns an array of BibItems from the input string; used by the pasteboard.  Uses libbtparse to parse the data.
+    @method     itemsFromData:error:document:
+    @abstract   Convenience method that returns an array of BibItems from the input NSData; used by the pasteboard.  Uses libbtparse to parse the data.
     @discussion (comprehensive description)
-    @param      aString (description)
-    @param      anOwner (description)
-    @param      outError (description)
+    @param      inData (description)
+    @param      hadProblems (description)
+    @param      aDocument (description)
     @result     (description)
 */
-+ (NSArray *)itemsFromString:(NSString *)aString document:(id<BDSKOwner>)anOwner isPartialData:(BOOL *)isPartialData
-error:(NSError **)outError;
++ (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError document:(BibDocument *)aDocument;
 
 /*!
-    @method     itemsFromData:error:frontMatter:filePath:document:encoding:error:
+    @method     itemsFromData:error:frontMatter:filePath:document:
     @abstract   Parsing method that returns an array of BibItems from data, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
     @param      inData (description)
+    @param      hadProblems (description)
     @param      frontMatter (description)
     @param      filePath (description)
-    @param      anOwner (description)
-    @param      parserEncoding (description)
-    @param      isPartialData Returns by reference an indication of whether problems occurred
-    @param      outError May be NULL.  If non-NULL and the item has partial data, will be filled.
+    @param      aDocument (description)
     @result     (description)
 */
-+ (NSArray *)itemsFromData:(NSData *)inData
++ (NSMutableArray *)itemsFromData:(NSData *)inData
+                            error:(NSError **)outError
                       frontMatter:(NSMutableString *)frontMatter
                          filePath:(NSString *)filePath
-						 document:(id<BDSKOwner>)anOwner
-                         encoding:(NSStringEncoding)parserEncoding
-                    isPartialData:(BOOL *)isPartialData
-                            error:(NSError **)outError;
+						 document:(BibDocument *)aDocument;
 
 /*!
     @method     macrosFromBibTeXString:document:

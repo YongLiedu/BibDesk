@@ -1,7 +1,7 @@
 //  BibDocument_DataSource.h
 //  Created by Michael McCracken on Tue Mar 26 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,19 +35,28 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
+@class BibAuthor;
 
 /*! @category  BibDocument(DataSource)
 @discussion Additions to BibDocument for handling table views.
 */
 @interface BibDocument (DataSource)
-
 - (BOOL)writePublications:(NSArray*)pubs forDragCopyType:(int)dragCopyType citeString:(NSString *)citeString toPasteboard:(NSPasteboard*)pboard;
 - (void)setPromiseDragColumnIdentifier:(NSString *)identifier;
-- (NSImage *)dragImageForPromisedItemsUsingCiteString:(NSString *)citeString;
-- (void)clearPromisedDraggedItems;
 - (NSString *)promiseDragColumnIdentifier;
-- (NSDictionary *)currentTableColumnWidthsAndIdentifiers;
-- (BOOL)isDragFromExternalGroups;
-- (void)setDragFromExternalGroups:(BOOL)flag;
+
+@end
+
+@interface NSPasteboard (JCRDragWellExtensions)
+
+- (BOOL) hasType:(id)aType; /*"Returns TRUE if aType is one of the types
+available from the receiving pastebaord."*/
+
+- (BOOL) containsFiles; /*"Returns TRUE if there are filenames available
+    in the receiving pasteboard."*/
+
+- (BOOL) containsURL;
+
+- (BOOL)containsUnparseableFile;
 
 @end

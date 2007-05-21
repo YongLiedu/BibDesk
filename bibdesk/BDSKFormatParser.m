@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/4/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,6 @@
 #import "BibTypeManager.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
-#import "NSScanner_BDSKExtensions.h"
-#import "BDSKStringNode.h"
 
 @implementation BDSKFormatParser
 
@@ -70,8 +68,7 @@
 	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
 	NSString *string, *authSep, *nameSep, *etal, *slash;
-	unsigned int number, numAuth, i, uniqueNumber;
-    int intValue;
+	int number, numAuth, i, uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSArray *authArray;
 	NSMutableArray *arr;
@@ -90,8 +87,10 @@
 		}
 		// does nothing at the end; allows but ignores % at end
 		[scanner scanString:@"%" intoString:NULL];
-        // found %, so now there should be a specifier char
-		if ([scanner scanCharacter:&specifier]) {
+		if (![scanner isAtEnd]) {
+			// found %, so now there should be a specifier char
+			specifier = [format characterAtIndex:[scanner scanLocation]];
+			[scanner setScanLocation:[scanner scanLocation]+1];
 			switch (specifier) {
 				case 'a':
 				case 'p':
@@ -111,13 +110,14 @@
 								[scanner scanString:@"]" intoString:NULL];
 							}
 						}
-						if ([scanner peekCharacter:&nextChar]) {
+						if (![scanner isAtEnd]) {
 							// look for #names
+							nextChar = [format characterAtIndex:[scanner scanLocation]];
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (unsigned)(nextChar - '0');
+								numAuth = (int)(nextChar - '0');
 								// scan for #chars per name
-								if (![scanner scanUnsignedInt:&number]) number = 0;
+								if (![scanner scanInt:&number]) number = 0;
 							}
 						}
 					}
@@ -171,11 +171,12 @@
 								}
 							}
 						}
-						if ([scanner peekCharacter:&nextChar]) {
+						if (![scanner isAtEnd]) {
 							// look for #names
+							nextChar = [format characterAtIndex:[scanner scanLocation]];
 							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
-								numAuth = (unsigned)(nextChar - '0');
+								numAuth = (int)(nextChar - '0');
 							}
 						}
 					}
@@ -218,7 +219,7 @@
 					if (isLocalFile) {
 						string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 					}
-					if (![scanner scanUnsignedInt:&number]) number = 0;
+					if (![scanner scanInt:&number]) number = 0;
 					if (number > 0 && [string length] > number) {
 						[parsedStr appendString:[string substringToIndex:number]];
 					} else {
@@ -228,7 +229,7 @@
 				case 'T':
 					// title, optional #words
                     string = [pub title];
-					if (![scanner scanUnsignedInt:&number]) number = 0;
+					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
 						// split the title into words using the same methodology as addString:forCompletionEntry:
@@ -281,15 +282,6 @@
 					// month
                     string = [pub stringValueOfField:BDSKMonthString];
                     if ([NSString isEmptyString:string] == NO) {
-                        if([string isComplex]) {
-                            NSArray *nodes = [string nodes];
-                            if ([nodes count] > 1 && [(BDSKStringNode *)[nodes objectAtIndex:1] type] == BSN_MACRODEF)
-                                string = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-                            else if ([nodes count] > 2 && [(BDSKStringNode *)[nodes objectAtIndex:2] type] == BSN_MACRODEF)
-                                string = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-                            else
-                                string = [(BDSKStringNode *)[nodes objectAtIndex:0] value];
-                        }
                         NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-2000", string]];
 						string = [date descriptionWithCalendarFormat:@"%m" timeZone:nil locale:nil];
 						[parsedStr appendString:string];
@@ -305,20 +297,19 @@
 						[scanner scanString:@"]" intoString:NULL];
 					}
 					string = [pub stringValueOfField:BDSKKeywordsString];
-					if (![scanner scanUnsignedInt:&number]) number = 0;
+					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
 						// split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
-                        NSCharacterSet *sepCharSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
-                        NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:sepCharSet];
+						NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:[NSCharacterSet autocompletePunctuationCharacterSet]];
 						if (keywordPunctuationRange.location != NSNotFound) {
 							wordScanner = [NSScanner scannerWithString:string];
 							[wordScanner setCharactersToBeSkipped:nil];
 							
 							while (![wordScanner isAtEnd]) {
-								if ([wordScanner scanUpToCharactersFromSet:sepCharSet intoString:&string])
+								if ([wordScanner scanUpToCharactersFromSet:[NSCharacterSet autocompletePunctuationCharacterSet] intoString:&string])
 									[arr addObject:string];
-								[wordScanner scanCharactersFromSet:sepCharSet intoString:nil];
+								[wordScanner scanCharactersFromSet:[NSCharacterSet autocompletePunctuationCharacterSet] intoString:nil];
 							}
 						} else {
 							[arr addObject:string];
@@ -334,7 +325,7 @@
 					break;
 				case 'l':
 					// old filename without extension
-					if ([fieldName isLocalFileField])
+					if ([[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:fieldName])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];
@@ -346,7 +337,7 @@
 					break;
 				case 'L':
 					// old filename with extension
-					if ([fieldName isLocalFileField])
+					if ([[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:fieldName])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];
@@ -358,7 +349,7 @@
 					break;
 				case 'e':
 					// old file extension
-					if ([fieldName isLocalFileField])
+					if ([[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:fieldName])
 						string = [pub localFilePathForField:fieldName];
 					else
 						string = [pub localFilePathForField:BDSKLocalUrlString];
@@ -391,7 +382,7 @@
 							[scanner scanString:@"]" intoString:NULL];
 						}
 					
-						if (![scanner scanUnsignedInt:&number]) number = 0;
+						if (![scanner scanInt:&number]) number = 0;
 						if (![fieldName isEqualToString:BDSKCiteKeyString] &&
 							[string isEqualToString:BDSKCiteKeyString]) {
 							string = [pub citeKey];
@@ -420,7 +411,7 @@
 					if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&string] &&
 						[scanner scanString:@"}" intoString:NULL]) {
-						if (![scanner scanUnsignedInt:&number]) number = 3;
+						if (![scanner scanInt:&number]) number = 3;
 				
 						string = [[pub stringValueOfField:string] acronymValueIgnoringWordLength:number];
 						string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
@@ -453,9 +444,9 @@
                                 }
                             }
                         }
-						if (![scanner scanUnsignedInt:&number]) number = 0;
-                        intValue = [pub intValueOfField:string];
-                        string = (intValue == 0 ? noValue : (intValue == 1 ? yesValue : mixedValue));
+						if (![scanner scanInt:&number]) number = 0;
+                        i = [pub intValueOfField:string];
+                        string = (i == 0 ? noValue : (i > 0 ? yesValue : mixedValue));
                         if (number > 0 && [string length] > number) {
                             [parsedStr appendString:[string substringToIndex:number]];
                         } else {
@@ -472,7 +463,7 @@
 						[scanner scanUpToString:@"}" intoString:&string] &&
 						[scanner scanString:@"}" intoString:NULL]) {
 					
-						if (![scanner scanUnsignedInt:&number]) number = 0;
+						if (![scanner scanInt:&number]) number = 0;
                         string = [pub documentInfoForKey:string];
 						if (string != nil) {
 							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
@@ -489,21 +480,21 @@
 					break;
 				case 'r':
 					// random lowercase letters
-					if (![scanner scanUnsignedInt:&number]) number = 1;
+					if (![scanner scanInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%c",'a' + (char)(rand() % 26)];
 					}
 					break;
 				case 'R':
 					// random uppercase letters
-					if (![scanner scanUnsignedInt:&number]) number = 1;
+					if (![scanner scanInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%c",'A' + (char)(rand() % 26)];
 					}
 					break;
 				case 'd':
 					// random digits
-					if (![scanner scanUnsignedInt:&number]) number = 1;
+					if (![scanner scanInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%i",(int)(rand() % 10)];
 					}
@@ -532,7 +523,7 @@
 						uniqueSpecifier = specifier;
 						prefixStr = parsedStr;
 						parsedStr = [NSMutableString string];
-						if (![scanner scanUnsignedInt:&uniqueNumber]) uniqueNumber = 1;
+						if (![scanner scanInt:&uniqueNumber]) uniqueNumber = 1;
 					}
 					else {
 						NSLog(@"Specifier %%%C can only be used once in the format.", specifier);
@@ -820,7 +811,7 @@
 	BOOL foundUnique = NO;
 	NSMutableAttributedString *attrString = nil;
 	NSString *errorMsg = nil;
-	unsigned int location = 0;
+	int location = 0;
 	
 	if (attrFormatString != NULL)
 		attrString = [[NSMutableAttributedString alloc] init];
@@ -839,23 +830,25 @@
 		}
 		
 		// found %, so now there should be a specifier char
-		if (![scanner scanCharacter:&specifier]) {
-			errorMsg = NSLocalizedString(@"Empty specifier % at end of format.", @"Error description");
+		if ([scanner isAtEnd]) {
+			errorMsg = NSLocalizedString(@"Empty specifier % at end of format.", @"");
 			break;
 		}
+		specifier = [*formatString characterAtIndex:[scanner scanLocation]];
+		[scanner setScanLocation:[scanner scanLocation]+1];
 		
 		// see if it is a valid specifier
 		if (![validSpecifierChars characterIsMember:specifier]) {
-			errorMsg = [NSString stringWithFormat:NSLocalizedString(@"Invalid specifier %%%C in format.", @"Error description"), specifier];
+			errorMsg = [NSString stringWithFormat:NSLocalizedString(@"Invalid specifier %%%C in format.", @""), specifier];
 			break;
 		}
 		else if ([validEscapeSpecifierChars characterIsMember:specifier] && [invalidCharSet characterIsMember:specifier]) {
-			errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Invalid escape specifier %%%C in format.", @"Error description"), specifier];
+			errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Invalid escape specifier %%%C in format.", @""), specifier];
 			break;
 		}
 		else if ([validUniqueSpecifierChars characterIsMember:specifier]) {
 			if (foundUnique) { // a second 'unique' specifier was found
-				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Unique specifier %%%C can appear only once in format.", @"Error description"), specifier];
+				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Unique specifier %%%C can appear only once in format.", @""), specifier];
 				break;
 			}
 			foundUnique = YES;
@@ -869,11 +862,11 @@
 				 ![scanner scanString:@"{" intoString: NULL] ||
 				 ![scanner scanUpToString:@"}" intoString:&string] ||
 				 ![scanner scanString:@"}" intoString:NULL]) {
-				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @"Error description"), specifier];
+				errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @""), specifier];
 				break;
 			}
 			string = [self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type]; // cite-key sanitization is strict, so we use that for fieldnames
-			string = [string fieldName]; // we need to have BibTeX field names capitalized
+			string = [string capitalizedString]; // we need to have BibTeX field names capitalized
 			if ([string isEqualToString:@"Cite-Key"] || [string isEqualToString:@"Citekey"])
 				string = BDSKCiteKeyString;
 			AppendStringToFormatStrings(@"{", specAttr);
@@ -889,7 +882,7 @@
 					if (![scanner scanUpToString:@"]" intoString:&string]) 
 						string = @"";
 					if (![scanner scanString:@"]" intoString:NULL]) {
-						errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Missing \"]\" after specifier %%%C.", @"Error description"), specifier];
+						errorMsg = [NSString stringWithFormat: NSLocalizedString(@"Missing \"]\" after specifier %%%C.", @""), specifier];
 						break;
 					}
 					string = [self stringBySanitizingString:string forField:fieldName inFileType:type];

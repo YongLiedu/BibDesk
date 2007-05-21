@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -12,7 +12,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSPopUpButton-OAExtensions.m 74796 2006-05-03 20:08:11Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSPopUpButton-OAExtensions.m 66348 2005-08-01 23:54:36Z bungi $")
 
 @implementation NSPopUpButton (OAExtensions)
 
@@ -57,41 +57,45 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 - (void)addRepresentedObjects:(NSArray *)objects titleSelector:(SEL)titleSelector;
 {
+    unsigned int objectIndex, objectCount;
+    
     // Don't bother doing anything on nil or empty arrays
     if ([objects count] == 0)
         return;
         
-    NSMenu *menu = [self menu];
-
-    unsigned int objectIndex, objectCount;
     for (objectIndex = 0, objectCount = [objects count]; objectIndex < objectCount; objectIndex++) {
-        id object = [objects objectAtIndex:objectIndex];
-        NSString *title = [object performSelector:titleSelector];
+        NSString *title;
+        id <NSMenuItem> item;
+        id object;
         
-        NSMenuItem *newItem = [[NSMenuItem alloc] initWithTitle:title action:NULL keyEquivalent:@""];
-        [newItem setRepresentedObject:object];
-        [menu addItem:newItem];
-        [newItem release];
+        object = [objects objectAtIndex:objectIndex];
+        title = [object performSelector:titleSelector];
+        
+        [self addItemWithTitle:title];
+        item = [self itemAtIndex:[self numberOfItems] - 1];
+        [item setRepresentedObject:object];
     }
 }
 
 - (void)addRepresentedObjects:(NSArray *)objects titleKeyPath:(NSString *)keyPath;
 {
+    unsigned int objectIndex, objectCount;
+    
     // Don't bother doing anything on nil or empty arrays
     if ([objects count] == 0)
         return;
         
-    NSMenu *menu = [self menu];
-
-    unsigned int objectIndex, objectCount;
     for (objectIndex = 0, objectCount = [objects count]; objectIndex < objectCount; objectIndex++) {
-        id object = [objects objectAtIndex:objectIndex];
-        NSString *title = [object valueForKeyPath:keyPath];
+        NSString *title;
+        id <NSMenuItem> item;
+        id object;
         
-        NSMenuItem *newItem = [[NSMenuItem alloc] initWithTitle:title action:NULL keyEquivalent:@""];
-        [newItem setRepresentedObject:object];
-        [menu addItem:newItem];
-        [newItem release];
+        object = [objects objectAtIndex:objectIndex];
+        title = [object valueForKeyPath:keyPath];
+        
+        [self addItemWithTitle:title];
+        item = [self itemAtIndex:[self numberOfItems] - 1];
+        [item setRepresentedObject:object];
     }
 }
 

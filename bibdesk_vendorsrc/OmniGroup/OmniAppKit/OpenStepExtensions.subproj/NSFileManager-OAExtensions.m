@@ -1,4 +1,4 @@
-// Copyright 2002-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -16,7 +16,7 @@
 #import "IconFamily.h"
 #import "NSImage-OAExtensions.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSFileManager-OAExtensions.m 77583 2006-07-18 23:32:27Z wiml $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSFileManager-OAExtensions.m 66043 2005-07-25 21:17:05Z kc $")
 
 @interface NSAppleEventDescriptor (JaguarAPI)
 + (NSAppleEventDescriptor *)descriptorWithString:(NSString *)string;
@@ -51,54 +51,27 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [[NSWorkspace sharedWorkspace] noteFileSystemChanged:path];
 }
 
-static BOOL fillAEDescFromPath(AEDesc *fileRefDesc, NSString *path)
+static void fillAEDescFromPath(AEDesc *fileRefDesc, NSString *path)
 {
     FSRef fileRef;
     OSErr err;
 
     bzero(&fileRef, sizeof(fileRef));
     err = FSPathMakeRef((UInt8 *)[path fileSystemRepresentation], &fileRef, NULL);
-    if (err == fnfErr || err == dirNFErr || err == notAFileErr) {
-        return NO;
-    } else if (err != noErr) {
+    if (err != noErr) {
         [NSException raise:NSInvalidArgumentException format:@"Unable to convert path to an FSRef (%d): %@", err, path];
     }
 
     AEInitializeDesc(fileRefDesc);
-    err = AECoercePtr(typeFSRef, &fileRef, sizeof(fileRef), typeAlias, fileRefDesc);
+    AEReplaceDescData(typeFSRef, &fileRef, sizeof(fileRef), fileRefDesc);
+
+    /* The Finder isn't very good at coercions, so we have to do this ourselves */
+    err = AECoerceDesc(fileRefDesc, typeAlias, fileRefDesc);
     if (err != noErr) {
+        AEDisposeDesc(fileRefDesc);
         [NSException raise:NSInternalInconsistencyException format:@"Unable to coerce FSRef to Alias: %d", err];
     }
-    
-    return YES;
 }
-
-#if 0
-static void fillAEDescFromURL(AEDesc *fileRefDesc, NSURL *url)
-{
-    if ([url isFileURL]) {
-        if (fillAEDescFromPath(fileRefDesc, [url path]))
-            return;
-    }
-    
-    /* See http://developer.apple.com/technotes/tn/tn2022.html */
-    /* Nobody seems to actually accept typeFileURL, but maybe they will in the future */
-    
-    CFDataRef urlBytes = CFURLCreateData(kCFAllocatorDefault, (CFURLRef)url, kCFStringEncodingUTF8, true);
-    if (urlBytes == NULL) {
-        [NSException raise:NSInternalInconsistencyException format:@"Unable to extract bytes of URL (%@)", url];
-    }
-        
-    OSErr err;
-    
-    err = AECreateDesc(typeFileURL, CFDataGetBytePtr(urlBytes), CFDataGetLength(urlBytes), fileRefDesc);
-    CFRelease(urlBytes);
-    
-    if (err != noErr) {
-        [NSException raise:NSGenericException format:@"Unable to create AEDesc in fillAEDescFromURL()"];
-    }
-}
-#endif
 
 /* function doSetFileComment():
 
@@ -138,8 +111,7 @@ static OSType finderSignatureBytes = 'MACS';
     commentTextDesc = [NSAppleEventDescriptor descriptorWithString:newComment];
 
     /* This may raise, so do it first */
-    if (!fillAEDescFromPath(&fileDesc, path))
-        return;  // fillAEDescFromPath() returns without raising if the file doesn't exist
+    fillAEDescFromPath(&fileDesc, path);
 
     AEInitializeDesc(&builtEvent);
     AEInitializeDesc(&replyEvent);
@@ -155,15 +127,16 @@ static OSType finderSignatureBytes = 'MACS';
     if (err != noErr) {
         [NSException raise:NSInternalInconsistencyException format:@"Unable to create AppleEvent: AEBuildAppleEvent() returns %d", err];
     }
-    
-    err = AESendMessage(&builtEvent, &replyEvent,
-                        kAENoReply, kAEDefaultTimeout);
+
+    err = AESend(&builtEvent, &replyEvent,
+                 kAENoReply, kAENormalPriority, kAEDefaultTimeout,
+                 NULL, NULL);
 
     AEDisposeDesc(&builtEvent);
     AEDisposeDesc(&replyEvent);
 
     if (err != noErr) {
-        NSLog(@"Unable to set comment for file %@ (AESendMessage() returns %d)", path, err);
+        NSLog(@"AESend() --> %d", err);
     }
 }
 
@@ -180,8 +153,7 @@ static OSType finderSignatureBytes = 'MACS';
         "}";
 
     /* This may raise, so do it first */
-    if (!fillAEDescFromPath(&fileDesc, path))
-        return;  // fillAEDescFromPath() returns without raising if the file doesn't exist
+    fillAEDescFromPath(&fileDesc, path);
 
     AEInitializeDesc(&builtEvent);
     AEInitializeDesc(&replyEvent);
@@ -198,8 +170,9 @@ static OSType finderSignatureBytes = 'MACS';
         [NSException raise:NSInternalInconsistencyException format:@"Unable to create AppleEvent: AEBuildAppleEvent() returns %d", err];
     }
 
-    err = AESendMessage(&builtEvent, &replyEvent,
-                        kAENoReply, kAEDefaultTimeout);
+    err = AESend(&builtEvent, &replyEvent,
+                 kAENoReply, kAENormalPriority, kAEDefaultTimeout,
+                 NULL, NULL);
 
     AEDisposeDesc(&builtEvent);
     AEDisposeDesc(&replyEvent);

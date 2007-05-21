@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@
 #import "BibPrefController.h"
 #import "BibDocument.h"
 #import "BibTeXParser.h"
-#import "BDSKPublicationsArray.h"
 
 /* ssp
 A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.
@@ -54,12 +53,11 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
  Needs a properly working -document method to work with multpiple documents.
 */
 - (NSScriptObjectSpecifier *) objectSpecifier {
-    // only items belonging to a BibDocument are scriptable
-    BibDocument *myDoc = (BibDocument *)[self owner];
-	NSArray * ar = [myDoc publications];
+	// NSLog(@"BibItem objectSpecifier");
+	NSArray * ar = [[self document] publications];
 	unsigned index = [ar indexOfObjectIdenticalTo:self];
     if (index != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
+        NSScriptObjectSpecifier *containerRef = [[self document] objectSpecifier];
         return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:index] autorelease];
     } else {
         return nil;
@@ -73,7 +71,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 */
 - (BibField *)valueInBibFieldsWithName:(NSString *)name
 {
-	return [[[BibField alloc] initWithName:[name fieldName] bibItem:self] autorelease];
+	return [[[BibField alloc] initWithName:[name capitalizedString] bibItem:self] autorelease];
 }
 
 - (NSArray *)bibFields
@@ -84,7 +82,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	NSMutableArray *bibFields = [NSMutableArray arrayWithCapacity:5];
 	
 	while (name = [fEnum nextObject]) {
-		field = [[BibField alloc] initWithName:[name fieldName] bibItem:self];
+		field = [[BibField alloc] initWithName:[name capitalizedString] bibItem:self];
 		[bibFields addObject:field];
 		[field release];
 	}
@@ -276,26 +274,26 @@ Extra wrapping of the created and modified date methods to
  This may be a bit of a hack for a few reasons: (a) there seems to be no good way to initialise a BibItem from a BibString when it already exists and (b) I suspect this isn't the way you're supposed to do AS.
 */
 - (void) setBibTeXString:(NSString*) btString {
+    NSData *data = [btString dataUsingEncoding:NSUTF8StringEncoding];
 	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
 
 	// we do not allow setting the bibtex string after an edit, only at initialization
 	if([self hasBeenEdited]){
 		if (cmd) {
 			[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-			[cmd setScriptErrorString:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Error description")];
+			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Cannot set BibTeX string after initialization.")]];
 		}
 		return;
 	}
 
     NSError *error = nil;
-    BOOL isPartialData;
-    NSArray *newPubs = [BibTeXParser itemsFromString:btString document:[self owner] isPartialData:&isPartialData error:&error];
+    NSArray *newPubs = [BibTeXParser itemsFromData:data error:&error document:[self document]];
 	
 	// try to do some error handling for AppleScript
-	if(isPartialData) {
+	if(error) {
 		if (cmd) {
 			[cmd setScriptErrorNumber:NSInternalScriptError];
-			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@ with error %@. It may be malformed.",@"Error description"), btString, [error localizedDescription]]];
+			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@with error %@. It may be malformed.",@""), btString, [error localizedDescription]]];
 		}
 		return;
 	}

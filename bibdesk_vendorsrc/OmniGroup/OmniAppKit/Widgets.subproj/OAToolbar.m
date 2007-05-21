@@ -11,30 +11,9 @@
 #import <AppKit/AppKit.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAToolbar.m 71191 2005-12-15 22:25:26Z bungi $");
+RCS_ID("$Header$");
 
 @implementation OAToolbar
-
-- (void)setVisible:(BOOL)visible;
-{
-    if (visible == [self isVisible])
-	return;
-    
-    _isUpdatingVisible = YES;
-    _updatingVisible = visible;
-    id delegate = [self delegate];
-    
-    @try {
-        if ([delegate respondsToSelector:@selector(toolbar:willSetVisible:)])
-            [delegate toolbar:self willSetVisible:visible];
-        [super setVisible:visible];
-    } @finally {
-        _isUpdatingVisible = NO;
-    }
-    
-    if ([delegate respondsToSelector:@selector(toolbar:didSetVisible:)])
-        [delegate toolbar:self didSetVisible:visible];
-}
 
 - (void)setDisplayMode:(NSToolbarDisplayMode)displayMode;
 {
@@ -45,14 +24,16 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     _updatingDisplayMode = displayMode;
     id delegate = [self delegate];
 
-    @try {
+    NS_DURING {
         if ([delegate respondsToSelector:@selector(toolbar:willSetDisplayMode:)])
             [delegate toolbar:self willSetDisplayMode:displayMode];
         [super setDisplayMode:displayMode];
-    } @finally {
+    } NS_HANDLER {
         _isUpdatingDisplayMode = NO;
-    }
-    
+        [localException raise];
+    } NS_ENDHANDLER;
+    _isUpdatingDisplayMode = NO;
+
     if ([delegate respondsToSelector:@selector(toolbar:didSetDisplayMode:)])
         [delegate toolbar:self didSetDisplayMode:displayMode];
 }
@@ -66,13 +47,15 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     _updatingSizeMode = sizeMode;
     id delegate = [self delegate];
 
-    @try {
+    NS_DURING {
         if ([delegate respondsToSelector:@selector(toolbar:willSetSizeMode:)])
             [delegate toolbar:self willSetSizeMode:sizeMode];
         [super setSizeMode:sizeMode];
-    } @finally {
+    } NS_HANDLER {
         _isUpdatingSizeMode = NO;
-    }
+        [localException raise];
+    } NS_ENDHANDLER;
+    _isUpdatingSizeMode = NO;
 
     if ([delegate respondsToSelector:@selector(toolbar:didSetSizeMode:)])
         [delegate toolbar:self didSetSizeMode:sizeMode];
@@ -87,11 +70,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 - (NSToolbarDisplayMode)updatingDisplayMode;
 {
     return _isUpdatingDisplayMode ? _updatingDisplayMode : [self displayMode];
-}
-
-- (BOOL)updatingVisible;
-{
-    return _isUpdatingVisible ? _updatingVisible : [self isVisible];
 }
 
 @end

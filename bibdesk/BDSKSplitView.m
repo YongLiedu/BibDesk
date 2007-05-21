@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 31/10/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,34 +39,23 @@
 #import "BDSKSplitView.h"
 #import "BDSKStatusBar.h"
 #import "NSBezierPath_CoreImageExtensions.h"
-#import "CIImage_BDSKExtensions.h"
 
 #define END_JOIN_WIDTH 3.0f
 #define END_JOIN_HEIGHT 20.0f
 
-@interface BDSKSplitView (Private)
-
-- (float)horizontalFraction;
-- (void)setHorizontalFraction:(float)newFract;
-
-- (float)verticalFraction;
-- (void)setVerticalFraction:(float)newFract;
-
-@end
-
 @implementation BDSKSplitView
 
-+ (CIColor *)startColor{
-    static CIColor *startColor = nil;
++ (NSColor *)startColor{
+    static NSColor *startColor = nil;
     if (startColor == nil)
-        startColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.85 alpha:1.0]] retain];
+        startColor = [[NSColor colorWithCalibratedWhite:0.85 alpha:1.0] retain];
     return startColor;
 }
 
-+ (CIColor *)endColor{
-    static CIColor *endColor = nil;
++ (NSColor *)endColor{
+    static NSColor *endColor = nil;
     if (endColor == nil)
-        endColor = [[CIColor colorWithNSColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]] retain];
+        endColor = [[NSColor colorWithCalibratedWhite:0.95 alpha:1.0] retain];
    return endColor;
 }
 
@@ -79,40 +68,64 @@
 
 - (void)drawBlendedJoinEndAtLeftInRect:(NSRect)rect {
     // this blends us smoothly with the a vertical divider on our left
-    Class svClass = [self class];
-    [[NSBezierPath bezierPathWithRect:rect] fillPathWithColor:[svClass startColor]
-                                                 blendedAtRight:NO
-                                  ofVerticalGradientFromColor:[svClass startColor]
-                                                      toColor:[svClass endColor]];
+    [[NSBezierPath bezierPathWithRect:rect] fillPathWithColor:[[self class] startColor]
+                                               blendedAtRight:NO
+                                  ofVerticalGradientFromColor:[[self class] startColor]
+                                                      toColor:[[self class] endColor]];
 }
 
 - (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
     // this blends us smoothly with the status bar
     [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
                                                                             toColor:[[self class] endColor]
-                                                                         blendedAtTop:NO
+                                                                       blendedAtTop:NO
                                                         ofVerticalGradientFromColor:[BDSKStatusBar lowerColor]
                                                                             toColor:[BDSKStatusBar upperColor]];
 }
 
-- (void)drawDividerInRect:(NSRect)aRect {
-    // Draw gradient
-    [[NSBezierPath bezierPathWithRect:aRect] fillPathVertically:NO == [self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
-    if (drawEnd) {
-        NSRect endRect, ignored;
-        if ([self isVertical]) {
-            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
-            [self drawBlendedJoinEndAtBottomInRect:endRect];
-        } else {
-            NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
-            [self drawBlendedJoinEndAtLeftInRect:endRect];
-        }
-    }
-    // Draw dimple
-    [super drawDividerInRect:aRect];
+- (void)drawRect:(NSRect)rect {
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+		[super drawRect:rect];
+		return;
+	}
+	
+	NSArray *subviews = [self subviews];
+	int i, count = [subviews count];
+	id view;
+	NSRect divRect;
+
+	// draw the dimples 
+	for (i = 0; i < (count-1); i++) {
+		view = [subviews objectAtIndex:i];
+		divRect = [view frame];
+		if ([self isVertical] == NO) {
+			divRect.origin.y = NSMaxY (divRect);
+			divRect.size.height = [self dividerThickness];
+		} else {
+			divRect.origin.x = NSMaxX (divRect);
+			divRect.size.width = [self dividerThickness];
+		}
+		if (NSIntersectsRect(rect, divRect)) {
+			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
+            if (drawEnd) {
+                NSRect endRect, ignored;
+                if ([self isVertical]) {
+                    NSDivideRect(divRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
+                    [self drawBlendedJoinEndAtBottomInRect:endRect];
+                } else {
+                    NSDivideRect(divRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
+                    [self drawBlendedJoinEndAtLeftInRect:endRect];
+                }
+            }
+			[self drawDividerInRect: divRect];
+		}
+	}
 }
 
 - (float)dividerThickness {
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+		return [super dividerThickness];
+	}
 	return 6.0;
 }
 

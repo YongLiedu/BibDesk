@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class BDSKFilter;
 @class BibItem;
-
-/* note that NSCoding support is presently limited in some cases */
 
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
@@ -57,14 +56,11 @@
 - (id)initWithName:(id)aName count:(int)aCount;
 
 /*!
-	@method initLibraryGroup
-	@abstract Initializes and returns a new Library group. 
+	@method initWithAllPublications
+	@abstract Initializes and returns a new All Publications group. 
 	@discussion -
 */
-- (id)initLibraryGroup;
-
-- (id)initWithDictionary:(NSDictionary *)groupDict;
-- (NSDictionary *)dictionaryValue;
+- (id)initWithAllPublications;
 
 /*!
 	@method name
@@ -124,64 +120,11 @@
 - (BOOL)isShared;
 
 /*!
-	@method isURL
-	@abstract Boolean, returns whether the receiver is a URL group. 
+	@method isScratch
+	@abstract Boolean, returns whether the receiver is a scratch group. 
 	@discussion -
 */
-- (BOOL)isURL;
-
-/*!
-	@method isScript
-	@abstract Boolean, returns whether the receiver is a script group. 
-	@discussion -
-*/
-- (BOOL)isScript;
-
-/*!
-	@method isSearch
-	@abstract Boolean, returns whether the receiver is a search group. 
-	@discussion -
-*/
-- (BOOL)isSearch;
-
-/*!
-	@method isExternal
-	@abstract Boolean, returns whether the receiver is an external source group (shared, URL or script). 
-	@discussion -
-*/
-- (BOOL)isExternal;
-
-/*!
-    @method     hasEditableName
-    @abstract   Returns NO by default.  Editable subclasses should override this to allow changing the name of a group.
-*/
-- (BOOL)hasEditableName;
-
-/*!
-    @method     isEditable
-    @abstract   Returns NO by default.  Editable subclasses should override this to allow editing of its properties.
-*/
-- (BOOL)isEditable;
-
-/*!
-    @method     failedDownload
-    @abstract   Method for remote groups.  Returns NO by default.
-*/
-- (BOOL)failedDownload;
-
-/*!
-    @method     isRetrieving
-    @abstract   Method for remote groups.  Returns NO by default.
-*/
-- (BOOL)isRetrieving;
-
-/*!
-    @method     isValidDropTarget
-    @abstract   Some subclasses (e.g. BDSKSharedGroup) are never valid drop targets, while others are generally valid.  Returns NO by default.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (BOOL)isValidDropTarget;
+- (BOOL)isScratch;
 
 /*!
 	@method stringValue
@@ -196,8 +139,6 @@
 	@discussion -
 */
 - (NSNumber *)numberValue;
-
-- (NSString *)toolTip;
 
 /*!
 	@method nameCompare:
@@ -223,12 +164,94 @@
 */
 - (BOOL)containsItem:(BibItem *)item;
 
+/*!
+    @method     hasEditableName
+    @abstract   Returns YES by default.  Non-editable subclasses should override this to prevent changing the name of a group.
+*/
+- (BOOL)hasEditableName;
+
+/*!
+    @method     isEditable
+    @abstract   Returns NO by default.  Editable subclasses should override this to allow editing of its properties.
+*/
+- (BOOL)isEditable;
+
+/*!
+    @method     failedDownload
+    @abstract   Method for remote groups.  Returns NO by default.
+*/
+- (BOOL)failedDownload;
+
+/*!
+    @method     isRetrieving
+    @abstract   Method for remote groups.  Returns NO by default.
+*/
+- (BOOL)isRetrieving;
+
+/*!
+    @method     isValidDropTarget
+    @abstract   Some subclasses (e.g. BDSKSharedGroup) are never valid drop targets, while others are generally valid.  Returns YES by default.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isValidDropTarget;
+
 @end
 
 
-@interface BDSKMutableGroup : BDSKGroup {
+@interface BDSKCategoryGroup : BDSKGroup {
+	NSString *key;
+}
+
+/*!
+	@method initWithName:key:count:
+	@abstract Initializes and returns a new group instance with a name and count. 
+	@discussion This is the designated initializer. 
+	@param aName The name for the group.
+	@param aKey The key for the group.
+	@param count The count for the group.
+*/
+- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount;
+
+/*!
+    @method     initEmptyGroupWithKey:count:
+    @abstract   Initializes and returns a new Empty group for the specified key
+	@param      aKey The key for the group.
+	@param      count The count for the group.
+*/
+- (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount;
+
+/*!
+	@method key
+	@abstract Returns the key of the group.
+	@discussion -
+*/
+- (NSString *)key;
+
+@end
+
+
+@interface BDSKStaticGroup : BDSKGroup {
+	NSMutableArray *publications;
 	NSUndoManager *undoManager;
 }
+
+/*!
+	@method initWithName:publications:
+	@abstract Initializes and returns a new group instance with a name and publications.
+	@discussion This is the designated initializer. 
+	@param aName The name for the static group.
+	@param array The publications for the static group.
+*/
+- (id)initWithName:(id)aName publications:(NSArray *)array;
+
+/*!
+	@method initForLastImport:
+	@abstract Initializes and returns a new Last Import group. 
+	@discussion -
+	@param array The publications for the static group.
+*/
+- (id)initWithLastImport:(NSArray *)array;
 
 /*!
 	@method setName:
@@ -237,6 +260,53 @@
 	@param newName The new name to set.
 */
 - (void)setName:(id)newName;
+
+/*!
+	@method publications
+	@abstract Returns the publications in the group.
+	@discussion -
+*/
+- (NSArray *)publications;
+
+/*!
+	@method setPublications:
+	@abstract Sets the publications of the group.
+	@discussion -
+	@param newPublications The publications to set.
+*/
+- (void)setPublications:(NSArray *)newPublications;
+
+/*!
+	@method addPublication:
+	@abstract Adds a publication to the group.
+	@discussion -
+	@param item The publication to add.
+*/
+- (void)addPublication:(BibItem *)item;
+
+/*!
+	@method addPublicationsFromArray:
+	@abstract Adds publications from the group.
+	@discussion -
+	@param items The publications to add.
+*/
+- (void)addPublicationsFromArray:(NSArray *)items;
+
+/*!
+	@method removePublication:
+	@abstract Removes a publication from the group.
+	@discussion -
+	@param item The publication to remove.
+*/
+- (void)removePublication:(BibItem *)item;
+
+/*!
+	@method removePublicationsInArray:
+	@abstract Removes publications from the group.
+	@discussion -
+	@param items The publications to remove.
+*/
+- (void)removePublicationsInArray:(NSArray *)items;
 
 /*!
 	@method undoManager
@@ -252,5 +322,77 @@
 	@param newUndoManager The new undo manager to set.
 */
 - (void)setUndoManager:(NSUndoManager *)newUndoManager;
+
+@end
+
+
+@interface BDSKSmartGroup : BDSKGroup {
+	BDSKFilter *filter;
+	NSUndoManager *undoManager;
+}
+
+/*!
+	@method initWithFilter:
+	@abstract Initializes and returns a new smart group instance with a filter. 
+	@discussion This is the designated initializer. 
+	@param aFilter The filter for the smart group with. 
+*/
+- (id)initWithFilter:(BDSKFilter *)aFilter;
+
+/*!
+	@method initWithName:count:filter:
+	@abstract Initializes and returns a new group instance with a name, count and filter. 
+	@discussion This is the designated initializer. 
+	@param aName The name for the smart group.
+	@param count The count for the smart group.
+	@param aFilter The filter for the smart group with. 
+*/
+- (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter;
+
+/*!
+	@method setName:
+	@abstract Sets the name for the group.
+	@discussion -
+	@param newName The new name to set.
+*/
+- (void)setName:(id)newName;
+
+/*!
+	@method filter
+	@abstract Returns the filter of the group.
+	@discussion -
+*/
+- (BDSKFilter *)filter;
+
+/*!
+	@method setFilter:
+	@abstract Sets the newFilter for the group.
+	@discussion -
+	@param newFilter The new filter to set.
+*/
+- (void)setFilter:(BDSKFilter *)newFilter;
+
+/*!
+	@method undoManager
+	@abstract Returns the undo manager of the group.
+	@discussion -
+*/
+- (NSUndoManager *)undoManager;
+
+/*!
+	@method setUndoManager:
+	@abstract Sets the undo manager for the group.
+	@discussion -
+	@param newUndoManager The new undo manager to set.
+*/
+- (void)setUndoManager:(NSUndoManager *)newUndoManager;
+
+/*!
+	@method filterItems:
+	@abstract Filters the items uding the receivers filters and updates the count.
+	@discussion -
+	@param items The array of BibItems to filter.
+*/
+- (NSArray *)filterItems:(NSArray *)items;
 
 @end

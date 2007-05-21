@@ -2,7 +2,7 @@
 
 //  Created by Christiaan Hofman on 5/31/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,6 @@
  */
 
 
-@class BDSKEncodingPopUpButton;
-
 @interface BDSKDocumentController : NSDocumentController {
     // stuff for the accessory view for openUsingFilter
     IBOutlet NSView* openUsingFilterAccessoryView;
@@ -44,12 +42,10 @@
 	
 	// stuff for the accessory view for open text encoding 
 	IBOutlet NSView *openTextEncodingAccessoryView;
-	IBOutlet BDSKEncodingPopUpButton *openTextEncodingPopupButton;
+	IBOutlet NSPopUpButton *openTextEncodingPopupButton;
     
-    id mainDocument;
+    BOOL isOpening;
 }
-
-- (id)mainDocument;
 
 /*!
     @method openDocumentUsingFilter:
@@ -68,35 +64,32 @@
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
 
 /*!
-    @method     openDocumentWithContentsOfURL:encoding:
+    @method     openDocumentWithContentsOfFile:encoding:
     @abstract   Creates a new document with given file and string encoding.
     @discussion (comprehensive description)
-    @param      fileURL The file to open
+    @param      fileName The file to open
     @param      encoding File's character encoding
 */
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL encoding:(NSStringEncoding)encoding;
+- (id)openDocumentWithContentsOfFile:(NSString*)fileName encoding:(NSStringEncoding)encoding;
 
 /*!
-    @method     openDocumentWithContentsOfURLUsingPhonyCiteKeys:encoding:
+    @method     openDocumentFromFileUsingPhonyCiteKeys:encoding:
     @abstract   Generates temporary cite keys in order to keep btparse from choking on files exported from Endnote or BookEnds.
     @discussion Uses a regular expression to find and replace empty cite keys, according to a fairly limited pattern.
                 A new, untitled document is created, and a warning about the invalid temporary keys is shown after opening.
-    @param      fileURL The file to open
+    @param      fileName The file to open
     @param      encoding File's character encoding
 */
-- (id)openDocumentWithContentsOfURLUsingPhonyCiteKeys:(NSURL *)fileURL encoding:(NSStringEncoding)encoding;
+- (id)openDocumentFromFileUsingPhonyCiteKeys:(NSString *)fileName encoding:(NSStringEncoding)encoding;
 
 /*!
-    @method     openDocumentWithContentsOfURL:usingFilter:encoding:
+    @method     openDocumentFromFile:usingFilter:encoding:
     @abstract   Applies a filter to the file content before openening a new document.
     @discussion (comprehensive description)
-    @param      fileURL The file to open
+    @param      fileName The file to open
     @param      shellCommand The shell command to use to filter the file content
     @param      encoding File's character encoding
 */
-- (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
-
-
-- (void)handleWindowDidBecomeMainNotification:(NSNotification *)notification;
+- (id)openDocumentFromFile:(NSString*)fileName usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
 
 @end

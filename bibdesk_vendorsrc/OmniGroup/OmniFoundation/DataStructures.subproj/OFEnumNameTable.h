@@ -1,14 +1,13 @@
-// Copyright 2002-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFEnumNameTable.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFEnumNameTable.h 66043 2005-07-25 21:17:05Z kc $
 
 #import <Foundation/NSObject.h>
-#import <Foundation/NSString.h>
 #import <CoreFoundation/CFDictionary.h>
 #import <CoreFoundation/CFArray.h>
 
@@ -43,10 +42,6 @@
 
 // Comparison
 - (BOOL) isEqual: (id)anotherEnumeration;
-
-// Masks
-- (NSString *)copyStringForMask:(unsigned int)mask withSeparator:(unichar)separator;
-- (unsigned int)maskForString:(NSString *)string withSeparator:(unichar)separator;
 
 // Archving (primarily for OAEnumStyleAttribute)
 + (NSString *)xmlElementName;

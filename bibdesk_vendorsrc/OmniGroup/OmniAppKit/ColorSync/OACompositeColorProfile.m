@@ -11,7 +11,7 @@
 #import <AppKit/AppKit.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/ColorSync/OACompositeColorProfile.m 68913 2005-10-03 19:36:19Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/ColorSync/OACompositeColorProfile.m 68913 2005-10-03 19:36:19Z kc $");
 
 @interface OACompositeColorProfile (Private)
 @end

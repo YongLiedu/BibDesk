@@ -11,7 +11,7 @@
 #import <OmniBase/assertions.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableAttributedString-OFExtensions.m 66025 2005-07-25 19:44:44Z kc $");
+RCS_ID("$Header$");
 
 @implementation NSMutableAttributedString (OFExtensions)
 

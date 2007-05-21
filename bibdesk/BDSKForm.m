@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/22/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -83,8 +83,23 @@
 	[super drawRect:rect];
     
 	if (highlight && dragRow != -1) {
+        NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+        float lineWidth = 2.0;
+        
+        NSRect highlightRect = NSInsetRect([self cellFrameAtRow:dragRow column:0], 0.5f * lineWidth, 0.5f * lineWidth);
+        
+        NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:highlightRect radius:4.0];
+        
+        [path setLineWidth:lineWidth];
+        
         [NSGraphicsContext saveGraphicsState];
-        [NSBezierPath drawHighlightInRect:[self cellFrameAtRow:dragRow column:0] radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
+        
+        [[highlightColor colorWithAlphaComponent:0.2] set];
+        [path fill];
+        
+        [[highlightColor colorWithAlphaComponent:0.8] set];
+        [path stroke];
+        
         [NSGraphicsContext restoreGraphicsState];
 	}
 }
@@ -117,7 +132,7 @@
 		while (keepOn) {
 			theEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
 			mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-			isInside = ([[self cellForButtonAtPoint:mouseLoc] isEqual:cell]);
+			isInside = ([self cellForButtonAtPoint:mouseLoc] == cell);
 			switch ([theEvent type]) {
 				case NSLeftMouseDragged:
 					[cell setButtonHighlighted:isInside];
@@ -235,27 +250,10 @@
     return dragSourceCell;
 }
 
-#pragma mark BDSKFieldEditorDelegate protocol
-
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView{
-    return [[self delegate] textViewShouldLinkKeys:textView forFormCell:[self selectedCell]];
-}
-
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key{
-    return [[self delegate] textView:textView isValidKey:key forFormCell:[self selectedCell]];
-}
-
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex{
-    return [[self delegate] textView:aTextView clickedOnLink:link atIndex:charIndex forFormCell:[self selectedCell]];
-}
-
 #pragma mark NSDraggingDestination protocol 
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender{
-    NSDragOperation dragOp = [self draggingUpdated:sender];
-    if (dragOp == NSDragOperationNone && [[self window] respondsToSelector:@selector(draggingEntered:)])
-        dragOp = [[self window] draggingEntered:sender];
-    return dragOp;
+    return [self draggingUpdated:sender];
 }
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender{
@@ -264,65 +262,49 @@
 	id cell;
     NSDragOperation dragOp = NSDragOperationNone;
 	
-	if ([self delegate] == nil) {
-        dragOp = NSDragOperationNone;
+	if (![self delegate]) return NSDragOperationNone;
+	
+	[self getRow:&row column:&column forPoint:mouseLoc];
+	if (cell = [self cellAtRow:row column:0])
+        dragOp = [[self delegate] canReceiveDrag:sender forFormCell:cell];
+	if (dragOp != NSDragOperationNone) {	
+		if (row != dragRow) {
+			[self setNeedsDisplayInRect:[self cellFrameAtRow:row column:0]];
+			if (highlight)
+				[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
+		}
+		dragRow = row;
+		highlight = YES;
 	} else {
-        [self getRow:&row column:&column forPoint:mouseLoc];
-        if (cell = [self cellAtRow:row column:0])
-            dragOp = [[self delegate] canReceiveDrag:sender forFormCell:cell];
-        if (dragOp != NSDragOperationNone) {	
-            if (row != dragRow) {
-                [self setNeedsDisplayInRect:[self cellFrameAtRow:row column:0]];
-                if (highlight)
-                    [self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
-            }
-            dragRow = row;
-            highlight = YES;
-        } else {
-            if (highlight)
-                [self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
-            highlight = NO;
-            dragRow = -1;
-        }
-    }
-    if (dragOp == NSDragOperationNone && [[self window] respondsToSelector:@selector(draggingUpdated:)])
-        dragOp = [[self window] draggingUpdated:sender];
+		if (highlight)
+			[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
+		highlight = NO;
+		dragRow = -1;
+	}
     return dragOp;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender{
-	if (highlight && dragRow != -1)
+	if (highlight)
 		[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
     highlight = NO;
 	dragRow = -1;
 }
 
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender{
-	BOOL accept = dragRow != -1;
-    
-    highlight = NO;
+	highlight = NO;
+	[self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
 	
-    if (accept) {
-        [self setNeedsDisplayInRect:[self cellFrameAtRow:dragRow column:0]];
-    } else if ([[self window] respondsToSelector:@selector(prepareForDragOperation:)]) {
-        accept = [[self window] prepareForDragOperation:sender];
-    }
-	return accept;
+	return (dragRow != -1);
 } 
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender{
-	BOOL accept = dragRow != -1 && [self delegate];
+    if(![self delegate]) return NO;
     
-    if (accept) {
-        id cell = [self cellAtRow:dragRow column:0];
-        accept = [[self delegate] receiveDrag:sender forFormCell:cell];
-	} else if ([[self window] respondsToSelector:@selector(performDragOperation:)]) {
-        accept = [[self window] performDragOperation:sender];
-    }
-    
+	id cell = [self cellAtRow:dragRow column:0];
     dragRow = -1;
 	
-    return accept;
+	return ([[self delegate] receiveDrag:sender forFormCell:cell]);
 }
 
 #pragma mark -

@@ -2,7 +2,7 @@
 //  BibDesk 
 //  Created by Michael McCracken on Sat Jun 01 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@
     IBOutlet NSMatrix *startupBehaviorRadio;
     int prevStartupBehaviorTag;
 	
-    IBOutlet NSPopUpButton *emailTemplatePopup;
 	IBOutlet NSButton* editOnPasteButton;
     IBOutlet NSPopUpButton *checkForUpdatesButton;
     IBOutlet NSButton *warnOnDeleteButton;
@@ -50,13 +49,11 @@
     IBOutlet NSButton *warnOnRenameGroupButton;
     IBOutlet NSButton *warnOnGenerateCiteKeysButton;
     IBOutlet NSTextField *defaultBibFileTextField;
-    IBOutlet NSButton *defaultBibFileButton;
 
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender;
 - (IBAction)changeStartupBehavior:(id)sender;
-- (IBAction)changeEmailTemplate:(id)sender;
 - (IBAction)chooseAutoOpenFile:(id) sender;
 - (IBAction)changeUpdateInterval:(id)sender;
 - (IBAction)changeEditOnPaste:(id)sender;
@@ -66,7 +63,5 @@
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender;
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)handleWarningPrefChanged:(NSNotification *)notification;
-- (void)handleTemplatePrefsChanged:(NSNotification *)notification;
 
 @end

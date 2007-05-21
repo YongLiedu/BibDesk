@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 08/12/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,10 @@
 #import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
 #import "BibPrefController.h"
-#import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
-#import "BibDocument_Actions.h"
 #import "BibItem.h"
 #import "BibEditor.h"
 #import "NSWindowController_BDSKExtensions.h"
-#import "BDSKPublicationsArray.h"
 
 // put it here because IB chokes on it
 @interface BDSKLineNumberTransformer : NSValueTransformer @end
@@ -211,7 +208,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     BDSKErrorEditor *editor = [manager mainEditor];
     
     if(editor == nil && create){
-        editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[[document fileURL] path]];
+        editor = [(BDSKErrorEditor *)[BDSKErrorEditor alloc] initWithFileName:[document fileName]];
         [manager addEditor:editor isMain:YES];
         [editor release];
     }
@@ -239,9 +236,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
     // fileName is nil for paste/drag and author parsing errors; check for a pub first, since that's the best way to edit
     if (pub) {
-        // if we have an error for a pub, it should be from a BibDocument. Otherwise we would have ignored it, see endObservingErrorsForDocument:...
-        BibEditor *pubEditor = [(BibDocument *)[pub owner] editPub:pub];
-        [pubEditor setKeyField:BDSKAuthorString];
+        BibEditor *pubEditor = [[pub document] editPub:pub];
+        [pubEditor makeKeyField:BDSKAuthorString];
     } else if (nil == fileName || [[NSFileManager defaultManager] fileExistsAtPath:fileName]) {
         [editor showWindow:self];
         [editor gotoLine:[errObj lineNumber]];
@@ -295,7 +291,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     
     while (index--) {
         manager = [managers objectAtIndex:index];
-        if([[manager sourceDocument] isEqual:document]){
+        if([manager sourceDocument] == document){
             [manager setSourceDocument:nil];
             [manager removeClosedEditors];
         }
@@ -314,36 +310,23 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 	unsigned index = [self countOfErrors];
     BibItem *pub;
     
-    NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
-     
     while (index--) {
 		pub = [[self objectInErrorsAtIndex:index] publication];
         if(pub && [pubs containsObject:pub])
-            [indexesToRemove addIndex:index];
+            [self removeObjectFromErrorsAtIndex:index];
     }
-    
-    // batch changes
-    [self willChange:NSKeyValueChangeRemoval valuesAtIndexes:indexesToRemove forKey:@"errors"];
-    [errors removeObjectsAtIndexes:indexesToRemove];
-    [self didChange:NSKeyValueChangeRemoval valuesAtIndexes:indexesToRemove forKey:@"errors"];
 }
 
 - (void)removeErrorsForEditor:(BDSKErrorEditor *)editor{
 	unsigned index = [self countOfErrors];
     BDSKErrorObject *errObj;
     
-    NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
-
     while (index--) {
 		errObj = [self objectInErrorsAtIndex:index];
-        if ([[errObj editor] isEqual:editor]) {
-            [indexesToRemove addIndex:index];
+        if ([errObj editor] == editor) {
+            [self removeObjectFromErrorsAtIndex:index];
     	}
     }
-    // batch these; this method is particularly slow (order of minutes) with a large number of errors, when closing the associated document, since using [self removeObjectFromErrorsAtIndex:index] in the loop causes KVO notifications to reload the tableview (although the tooltip rebuild appears to be what kills performance)
-    [self willChange:NSKeyValueChangeRemoval valuesAtIndexes:indexesToRemove forKey:@"errors"];
-    [errors removeObjectsAtIndexes:indexesToRemove];
-    [self didChange:NSKeyValueChangeRemoval valuesAtIndexes:indexesToRemove forKey:@"errors"];
 }
 
 #pragma mark Actions
@@ -365,7 +348,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
             
 			lineNumber = [errObj lineNumber];
 			if(lineNumber == -1)
-				[s appendString:NSLocalizedString(@"Unknown line number", @"Error message for error window")];
+				[s appendString:NSLocalizedString(@"Unknown line number",@"unknown line number for error")];
 			else
 				[s appendFormat:@"%i", lineNumber];
             [s appendString:@"\t\t"];
@@ -421,11 +404,7 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)endObservingErrorsForPublication:(BibItem *)pub{
-    id document = [pub owner];
-    // we can't and shouldn't manage errors from external groups
-    if ([document isDocument] == NO)
-        document = nil;
-    [self endObservingErrorsForDocument:document pasteDragData:nil publication:pub];
+    [self endObservingErrorsForDocument:[pub document] pasteDragData:nil publication:pub];
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
@@ -440,8 +419,8 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 
 #pragma mark TableView tooltips
 
-- (NSString *)tableView:(NSTableView *)tv toolTipForCell:(NSCell *)aCell rect:(NSRectPointer)rect tableColumn:(NSTableColumn *)aTableColumn row:(int)row mouseLocation:(NSPoint)mouseLocation{
-	return [[[errorsController arrangedObjects] objectAtIndex:row] errorMessage];
+- (NSString *)tableView:(NSTableView *)aTableView toolTipForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
+	return [[[errorsController arrangedObjects] objectAtIndex:rowIndex] errorMessage];
 }
 
 @end

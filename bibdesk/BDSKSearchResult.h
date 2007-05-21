@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/12/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,27 +38,18 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BDSKSearchIndex, BDSKFile;
 
 @interface BDSKSearchResult : NSObject <NSCopying>
 {
-    BDSKFile *file;
-    // title of the search result (shown in table)
-    NSString *string;
-    NSAttributedString *attributedString;
-    NSImage *image;
-    NSNumber *score;
+    NSMutableDictionary *dictionary;
+    NSString *comparisonKey;
+    unsigned int hash;
 }
 
-// This class is designed to be used in a hashing container (NSSet, NSDictionary) when you want the isEqual: and hash to be based on file comparison
-- (id)initWithIndex:(BDSKSearchIndex *)anIndex documentRef:(SKDocumentRef)skDocument score:(float)score;
-
-// used by the table cell
-- (NSImage *)image;
-- (NSString *)string;
-- (NSAttributedString *)attributedString;
-- (NSNumber *)score;
-- (NSURL *)URL;
+// This class is designed to be a wrapper object for an NSDictionary that is used in a hashing container (NSSet, NSDictionary) when you want the isEqual: and hash to be based on a specific (string) key.
+- (id)initWithKey:(NSString *)key caseInsensitive:(BOOL)flag;
+- (id)initWithKey:(NSString *)key;
+- (NSString *)comparisonKey;
 
 @end
 

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 18/1/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKStringParser.h"
+#import "BDSKParserProtocol.h"
 
-@interface BDSKJSTORParser : BDSKStringParser {
+@interface BDSKJSTORParser : NSObject <BDSKParser> {
 }
 
 @end

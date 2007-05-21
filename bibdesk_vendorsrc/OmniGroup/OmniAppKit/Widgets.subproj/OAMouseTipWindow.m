@@ -1,4 +1,4 @@
-// Copyright 2002-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -12,7 +12,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import "OAMouseTipView.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAMouseTipWindow.m 79079 2006-09-07 22:35:32Z kc $");
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAMouseTipWindow.m 66852 2005-08-13 03:14:45Z kc $");
 
 #define FADE_OUT_INTERVAL (0.1f)
 #define OFFSET_FROM_MOUSE_LOCATION 10.0
@@ -69,26 +69,18 @@ static OFPreference *enablingPreference;
 {
     NSArray *screens = [NSScreen screens];
     NSScreen *screen = nil;
-    float screenDistance = FLT_MAX;
+    NSRect screenRect;
+    
     unsigned int screenCount = [screens count], screenIndex;
     for(screenIndex = 0; screenIndex < screenCount; screenIndex++) {
-        float thisDistance;
-        NSScreen *thisScreen;
-        NSRect screenRect;
-        
-        thisScreen = [screens objectAtIndex:screenIndex];
-        screenRect = [thisScreen frame];
+        screen = [screens objectAtIndex:screenIndex];
+        screenRect = [screen frame];
         if (NSPointInRect(midPoint, screenRect)) {
-            return thisScreen;
-        }
-        thisDistance = OFSquaredDistanceToFitRectInRect((NSRect){midPoint, {1,1}}, screenRect);
-        if (thisDistance < screenDistance) {
-            screenDistance = thisDistance;
-            screen = thisScreen;
+            return screen;
         }
     }
     
-    return screen;
+    return nil;
 }
 
 + (NSRect)_adjustRect:(NSRect)aFrame toFitScreen:(NSScreen *)screen;
@@ -199,11 +191,6 @@ static OFPreference *enablingPreference;
 + (void)setStyle:(OAMouseTipStyle)aStyle
 {
     [mouseTipInstance setStyle:aStyle];
-}
-
-+ (NSDictionary *)textAttributesForCurrentStyle;
-{
-    return [mouseTipInstance textAttributes];
 }
 
 + (void)setLevel:(int)windowLevel

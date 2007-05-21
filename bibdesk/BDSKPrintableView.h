@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 09/02/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,9 @@ typedef struct _ViewMargins {
 } ViewMargins;
 
 @interface BDSKPrintableView : MultiplePageView {
-    NSScrollView *scrollView;
     BOOL hasMultiplePages;
+    NSScrollView *scrollView;
+    NSClipView *clipView;
     NSTextStorage *textStorage;
     ViewMargins margins;
     

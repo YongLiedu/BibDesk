@@ -14,7 +14,7 @@
                 replaceButton = NSButton; 
                 replaceComboBox = NSComboBox; 
                 searchScopePopUpButton = NSPopUpButton; 
-                searchSelectionMatrix = NSMatrix; 
+                searchSelectionCheckbox = NSButton; 
                 searchTypePopUpButton = NSPopUpButton; 
                 statusBar = BDSKStatusBar; 
             }; 

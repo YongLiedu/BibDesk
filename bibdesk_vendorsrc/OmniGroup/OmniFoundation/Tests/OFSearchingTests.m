@@ -1,4 +1,4 @@
-// Copyright 2003-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -9,10 +9,9 @@
 #import <OmniBase/rcsid.h>
 #import <OmniFoundation/NSData-OFExtensions.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFSearchingTests.m 79087 2006-09-07 23:37:02Z kc $");
+RCS_ID("$Header$");
 
 @interface OFDataSearch : SenTestCase
 {
@@ -65,52 +64,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     [pat1 release];
     [pat2 release];
 }
-
-- (void)testContainsDataInRange
-{
-    NSData *txt1 = [[NSData alloc] initWithBytesNoCopy:"xymoofbarbaz" length:12 freeWhenDone:NO];
-    NSData *txt2 = [[NSData alloc] initWithBytesNoCopy:"ommoonymooof" length:12 freeWhenDone:NO];
-    NSData *txt4 = [[NSData alloc] initWithBytesNoCopy:"moolaflmo"    length:9 freeWhenDone:NO];
-    NSData *txt5 = [[NSData alloc] initWithBytesNoCopy:"om"           length:2 freeWhenDone:NO];
-    
-#define shouldEqualIndex(expr, ix) { unsigned ix_ = (expr); should1(ix_ == ix, ([NSString stringWithFormat:@"%s == %d, expecting %d", #expr, ix_, ix])); }
-    
-    shouldEqualIndex(([txt1 indexOfBytes:"xymoof" length:6 range:(NSRange){0, 12}]), 0);
-    shouldEqualIndex(([txt1 indexOfBytes:"xymoof" length:6 range:(NSRange){1, 11}]), NSNotFound);
-    shouldEqualIndex(([txt1 indexOfBytes:"xymoof" length:6 range:(NSRange){0, 6}]), 0);
-    shouldEqualIndex(([txt1 indexOfBytes:"xymoof" length:6 range:(NSRange){0, 5}]), NSNotFound);
-    
-    shouldEqualIndex(([txt5 indexOfBytes:"om" length:2 range:(NSRange){0,2}]), 0);
-    shouldEqualIndex(([txt5 indexOfBytes:"om" length:3 range:(NSRange){0,2}]), NSNotFound);
-    shouldEqualIndex(([txt4 indexOfBytes:"mo" length:3 range:(NSRange){0,9}]), NSNotFound);
-    shouldEqualIndex(([txt4 indexOfBytes:"mo" length:2 range:(NSRange){0,9}]), 0);
-    shouldEqualIndex(([txt4 indexOfBytes:"mo" length:2 range:(NSRange){1,8}]), 7);
-    shouldEqualIndex(([txt4 indexOfBytes:"mo" length:2 range:(NSRange){7,2}]), 7);
-    shouldEqualIndex(([txt4 indexOfBytes:"mo" length:2 range:(NSRange){8,1}]), NSNotFound);
-    shouldEqualIndex(([txt4 indexOfBytes:"mo" length:2 range:(NSRange){9,0}]), NSNotFound);
-    
-    shouldEqualIndex(([txt2 indexOfBytes:"oo" length:2 range:(NSRange){0,12}]), 3);
-    shouldEqualIndex(([txt2 indexOfBytes:"oo" length:2 range:(NSRange){3,9}]), 3);
-    shouldEqualIndex(([txt2 indexOfBytes:"oo" length:2 range:(NSRange){4,8}]), 8);
-    shouldEqualIndex(([txt2 indexOfBytes:"oo" length:2 range:(NSRange){8,4}]), 8);
-    shouldEqualIndex(([txt2 indexOfBytes:"oo" length:2 range:(NSRange){9,3}]), 9);
-    shouldEqualIndex(([txt2 indexOfBytes:"oo" length:2 range:(NSRange){10,2}]), NSNotFound);
-    shouldEqualIndex(([txt2 indexOfBytes:"oo" length:2 range:(NSRange){12,0}]), NSNotFound);
-    
-    shouldEqualIndex(([[NSData data] indexOfBytes:"x" length:1 range:(NSRange){0,0}]), NSNotFound);
-    shouldEqualIndex(([[NSData data] indexOfBytes:"x" length:0 range:(NSRange){0,0}]), 0);
-    shouldEqualIndex(([txt1 indexOfBytes:"f" length:0 range:(NSRange){3,6}]), 3);
-    shouldEqualIndex(([txt1 indexOfBytes:"f" length:1 range:(NSRange){3,6}]), 5);
-    
-    shouldRaise(([[NSData data] indexOfBytes:"x" length:0 range:(NSRange){0,1}]));
-    shouldRaise(([[NSData data] indexOfBytes:"x" length:0 range:(NSRange){1,0}]));
-    
-    [txt1 release];
-    [txt2 release];
-    [txt4 release];
-    [txt5 release];
-}
-
 
 @end
 

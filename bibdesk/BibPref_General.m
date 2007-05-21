@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Sat Jun 01 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,42 +36,24 @@
 
 #import "BibPref_General.h"
 #import "BDSKUpdateChecker.h"
-#import "BDSKTemplate.h"
-#import "BDAlias.h"
+
 
 @implementation BibPref_General
 
-- (void)awakeFromNib{
-    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnDeleteKey]];
-    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRemovalFromGroupKey]];
-    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnRenameGroupKey]];
-    [OFPreference addObserver:self selector:@selector(handleWarningPrefChanged:) forPreference:[OFPreference preferenceForKey:BDSKWarnOnCiteKeyChangeKey]];
-    [OFPreference addObserver:self selector:@selector(handleTemplatePrefsChanged:) forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
-    [self handleTemplatePrefsChanged:nil];
-}
-
 - (void)updateUI{
     [startupBehaviorRadio selectCellWithTag:[[defaults objectForKey:BDSKStartupBehaviorKey] intValue]];
-    if([[defaults objectForKey:BDSKStartupBehaviorKey] intValue] != 3){
+    if([[defaults objectForKey:BDSKStartupBehaviorKey] intValue] != 3)
         [defaultBibFileTextField setEnabled:NO];
-        [defaultBibFileButton setEnabled:NO];
-    }else{
-        [defaultBibFileTextField setEnabled:YES];
-        [defaultBibFileButton setEnabled:YES];
-	}
-    
-    NSData *aliasData = [defaults objectForKey:BDSKDefaultBibFileAliasKey];
-    BDAlias *alias;
-    if([aliasData length] && (alias = [BDAlias aliasWithData:aliasData]))
-        [defaultBibFileTextField setStringValue:[[alias fullPath] stringByAbbreviatingWithTildeInPath]];
     else
-        [defaultBibFileTextField setStringValue:@""];
+        [defaultBibFileTextField setEnabled:YES];
+	
+    [defaultBibFileTextField setStringValue:[[defaults objectForKey:BDSKDefaultBibFilePathKey] stringByAbbreviatingWithTildeInPath]];
 	
     prevStartupBehaviorTag = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
     
     [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
     
-    [checkForUpdatesButton selectItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]];
+    [checkForUpdatesButton selectItemAtIndex:[checkForUpdatesButton indexOfItemWithTag:[defaults integerForKey:BDSKUpdateCheckIntervalKey]]];
 
     [warnOnDeleteButton setState:([defaults boolForKey:BDSKWarnOnDeleteKey] == YES) ? NSOnState : NSOffState];
 
@@ -81,6 +63,10 @@
     
     [warnOnGenerateCiteKeysButton setState:([defaults boolForKey:BDSKWarnOnCiteKeyChangeKey] == YES) ? NSOnState : NSOffState];
     
+}
+
+- (IBAction)toggleAutoCheckForUpdates:(id)sender{
+    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKAutoCheckForUpdatesKey];
 }
 
 // tags correspond to BDSKUpdateCheckInterval enum
@@ -99,23 +85,20 @@
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender{
-    BDAlias *alias = [BDAlias aliasWithPath:[[sender stringValue] stringByStandardizingPath]];
-    if(alias)
-        [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
-    [defaults autoSynchronize];
+    [defaults setObject:[[sender stringValue] stringByExpandingTildeInPath] forKey:BDSKDefaultBibFilePathKey];
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{
     int n = [[sender selectedCell] tag];
     [defaults setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
-    [self valuesHaveChanged];
+    [self updateUI];
     if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
         [self chooseAutoOpenFile:nil];
 }
 
 -(IBAction) chooseAutoOpenFile:(id) sender {
     NSOpenPanel * openPanel = [NSOpenPanel openPanel];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
     [openPanel beginSheetForDirectory:nil 
@@ -131,73 +114,41 @@
     if (returnCode == NSCancelButton)
         return;
     
-    BDAlias *alias = [BDAlias aliasWithURL:[sheet URL]];
-    [defaultBibFileTextField setStringValue:[[[sheet URL] path] stringByAbbreviatingWithTildeInPath]];    
+    NSString * path = [[sheet filenames] objectAtIndex: 0];
+    [defaultBibFileTextField setStringValue:[path stringByAbbreviatingWithTildeInPath]];    
     
-    [defaults setObject:[alias aliasData] forKey:BDSKDefaultBibFileAliasKey];
+    [defaults setObject:path forKey:BDSKDefaultBibFilePathKey];
+    [defaults setObject:path forKey:@"NSOpen"]; // -- what did this do?
     [defaults setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
-    [self valuesHaveChanged];
-}
-
-- (IBAction)changeEmailTemplate:(id)sender{
-    int index = [sender indexOfSelectedItem];
-    NSString *style = index == 0 ? @"" : [sender titleOfSelectedItem];
-    if ([style isEqualToString:[defaults stringForKey:BDSKEmailTemplateKey]] == NO) {
-        [defaults setObject:style forKey:BDSKEmailTemplateKey];
-        [defaults autoSynchronize];
-    }
+    [self updateUI];
 }
 
 - (IBAction)changeEditOnPaste:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)changeWarnOnDelete:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnDeleteKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRemovalFromGroupKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changeWarnOnRenameGroup:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnRenameGroupKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changeWarnOnGenerateCiteKeys:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKWarnOnCiteKeyChangeKey];
-    [defaults autoSynchronize];
 }
 
 - (void)dealloc{
-    [OFPreference removeObserver:self forPreference:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
-}
-
-- (void)handleWarningPrefChanged:(NSNotification *)notification {
-    [self valuesHaveChanged];
-}
-
-- (void)handleTemplatePrefsChanged:(NSNotification *)notification {
-    NSString *currentStyle = [defaults stringForKey:BDSKEmailTemplateKey];
-    NSMutableArray *styles = [NSMutableArray arrayWithArray:[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat]];
-    [emailTemplatePopup removeAllItems];
-    [emailTemplatePopup addItemWithTitle:NSLocalizedString(@"Default BibTeX Format", @"Popup menu title for email format")];
-    [emailTemplatePopup addItemsWithTitles:styles];
-    if ([NSString isEmptyString:currentStyle]) {
-        [emailTemplatePopup selectItemAtIndex:0];
-    } else if ([styles containsObject:currentStyle]) {
-        [emailTemplatePopup selectItemWithTitle:currentStyle];
-    } else {
-        [emailTemplatePopup selectItemAtIndex:0];
-        [defaults setObject:[styles objectAtIndex:0] forKey:BDSKEmailTemplateKey];
-        [defaults autoSynchronize];
-    }
 }
 
 @end

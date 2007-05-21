@@ -5,7 +5,7 @@
 //  Created by Adam Maxwell on Fri Mar 31 2006.
 //  Copyright (c) 2006 Adam R. Maxwell. All rights reserved.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,9 @@
 {
     [super awakeFromNib];
     
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+        return;
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleClientConnectionsChanged:) name:BDSKClientConnectionsChangedNotification object:nil];
     
@@ -80,29 +83,48 @@
 
 - (void)updateUI
 {
-    [enableSharingButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
-    [enableBrowsingButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
-    [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
-    [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
     
-    [sharedNameField setStringValue:[BDSKSharingServer sharingName]];
-    NSString *statusMessage = nil;
-    if([defaults boolForKey:BDSKShouldShareFilesKey]){
-        unsigned int number = [[BDSKSharingServer defaultServer] numberOfConnections];
-        if(number == 1)
-            statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
-        else
-            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected", @"Bonjour sharing is on status message, multiple connections"), number];
-    }else{
-        statusMessage = NSLocalizedString(@"Off", @"Bonjour sharing is off status message");
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        
+        NSEnumerator *viewE = [[controlBox subviews] objectEnumerator];
+        id view;
+        NSString *disabledTip = NSLocalizedString(@"Bonjour sharing is only supported on Mac OS X Tiger at this time.", @"");
+        while(view = [viewE nextObject]){
+            if([view isKindOfClass:[NSControl class]]){
+                [view setEnabled:NO];
+                [view setToolTip:disabledTip];
+            }
+        }
+        
+        NSBeginAlertSheet(NSLocalizedString(@"Not Supported on Panther", @""), nil, nil, nil, [[BDSKPreferenceController sharedPreferenceController] window], nil, NULL, NULL, NULL, NSLocalizedString(@"Sharing via Bonjour is only supported on Mac OS X 10.4 and later systems.", @""));
+        
+    } else {
+    
+        [enableSharingButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
+        [enableBrowsingButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
+        [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
+        [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
+        
+        [sharedNameField setStringValue:[BDSKSharingServer sharingName]];
+        NSString *statusMessage = nil;
+        if([defaults boolForKey:BDSKShouldShareFilesKey]){
+            unsigned int number = [[BDSKSharingServer defaultServer] numberOfConnections];
+            if(number == 1)
+                statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
+            else
+                statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected", @"Bonjour sharing is on status message, multiple connections"), number];
+        }else{
+            statusMessage = NSLocalizedString(@"Off", @"Bonjour sharing is off status message");
+        }
+        [statusField setStringValue:statusMessage];
+        
     }
-    [statusField setStringValue:statusMessage];
 }
 
 - (IBAction)togglePassword:(id)sender
 {
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKSharingRequiresPasswordKey];
-    [self valuesHaveChanged];
+    [self updateUI];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 
@@ -117,14 +139,13 @@
 {
     [defaults setObject:[sender stringValue] forKey:BDSKSharingNameKey];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:self];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (IBAction)toggleBrowsing:(id)sender
 {
     BOOL flag = ([sender state] == NSOnState);
     [defaults setBool:flag forKey:BDSKShouldLookForSharedFilesKey];
-    [defaults autoSynchronize];
     if(flag == YES)
         [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
     else
@@ -140,7 +161,7 @@
 
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
     
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 @end

@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/20/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKStringParser.h"
+#import "BDSKParserProtocol.h"
 
-@interface BDSKWebOfScienceParser : BDSKStringParser {
+@interface BDSKWebOfScienceParser : NSObject <BDSKParser> {
 
 }
 

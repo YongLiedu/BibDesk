@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on 2/21/05.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2005
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -42,18 +42,13 @@
 @interface MacroWindowController : NSWindowController {
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;
-    IBOutlet NSButton *addButton;
-    IBOutlet NSButton *removeButton;
     BDSKMacroResolver *macroResolver;
     NSMutableArray *macros;
 	BDSKComplexStringFormatter *tableCellFormatter;
 	MacroTableViewWindowController *macroTextFieldWC;
-    BOOL isEditable;
 }
 
 - (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
-
-- (BDSKMacroResolver *)macroResolver;
 
 - (void)refreshMacros;
 
@@ -68,7 +63,6 @@
 - (BOOL)editSelectedCellAsMacro;
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif;
-- (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif;
 
 @end
 

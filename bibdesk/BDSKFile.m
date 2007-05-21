@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 08/17/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -40,25 +40,12 @@
 #import <OmniBase/assertions.h>
 #import "NSURL_BDSKExtensions.h"
 
-// private subclasses returned by -[BDSKFile init...] methods
-
-@interface BDSKFSRefFile : BDSKFile <NSCopying>
-{
-    const FSRef *fileRef;
-    UInt32 hash;
-}
-@end
-
-@interface BDSKURLFile : BDSKFile
-{
-    NSURL *fileURL;
-    unsigned int hash;
-}
-@end
-
 @interface NSURL (BDSKPathEquality)
 - (BOOL)isEqualToFileURL:(NSURL *)other;
 @end
+
+// private subclasses returned by -[BDSKFile init...] methods
+@class BDSKURLFile, BDSKFSRefFile;
 
 // singleton returned by -[BDSKFile allocWithZone:]
 static BDSKFile *defaultPlaceholderFile = nil;
@@ -204,6 +191,13 @@ static Class BDSKFileClass = Nil;
 #pragma mark -
 #pragma mark NSURL-based concrete subclass
 
+@interface BDSKURLFile : BDSKFile
+{
+    NSURL *fileURL;
+    unsigned int hash;
+}
+@end
+
 @implementation BDSKURLFile
 
 + (id)allocWithZone:(NSZone *)aZone
@@ -274,6 +268,13 @@ static Class BDSKFileClass = Nil;
 
 #pragma mark -
 #pragma mark FSRef-based concrete subclass
+
+@interface BDSKFSRefFile : BDSKFile <NSCopying>
+{
+    const FSRef *fileRef;
+    UInt32 hash;
+}
+@end
 
 @implementation BDSKFSRefFile
 

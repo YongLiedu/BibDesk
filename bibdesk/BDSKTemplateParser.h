@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 5/17/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,6 @@ The keys should be valid key paths (i.e. only letters and dots) and spaces are n
 
 @interface NSObject (BDSKTemplateParser)
 - (NSString *)stringDescription;
-- (BOOL)isNotEmpty;
 @end
 
 

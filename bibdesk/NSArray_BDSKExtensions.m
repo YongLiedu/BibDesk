@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 12/21/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -46,129 +46,24 @@
     return [self count] ? [self objectAtIndex:0] : nil;
 }
 
-- (NSArray *)arrayDroppingFirstObject;
-{
-    return [self count] ? [self subarrayWithRange:NSMakeRange(1, [self count] - 1)] : self;
-}
-
-- (NSArray *)objectsAtIndexSpecifiers:(NSArray *)indexes;
-{
-    NSMutableArray *array = [NSMutableArray array];
-    NSEnumerator *isEnum = [indexes objectEnumerator];
-    NSIndexSpecifier *is;
-    while(is = [isEnum nextObject])
-        [array addObject:[self objectAtIndex:[is index]]];
-    return array;
-}
-
-/* theSelector should be either indexOfObject:inRange: or indexOfObjectIdenticalTo:inRange */
-static inline 
-NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *objectsToFind, SEL theSelector)
+// this may give unexpected results if you have multiple instances of an object in an array; it will return only the lowest index
+- (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
 {
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
     unsigned index;
-    NSEnumerator *objEnum = [objectsToFind objectEnumerator];
+    NSEnumerator *objEnum = [objects objectEnumerator];
 	id obj;
-    unsigned count = [arrayToSearch count];
-    
-    NSRange range = NSMakeRange(0, count);
-    
-    typedef unsigned int (*indexIMP)(id, SEL, id, NSRange);
-    indexIMP indexOfObjectInRange = (indexIMP)[arrayToSearch methodForSelector:theSelector];
-    
     while(obj = [objEnum nextObject]){
-        
-        // see if we have the first occurrence of this object
-        index = indexOfObjectInRange(arrayToSearch, theSelector, obj, range);
-        
-        while(index != NSNotFound){ 
-            [indexes addIndex:index];
-            
-            // shift search range to the right
-            range.location = index + 1;
-            range.length = count - index - 1;
-            
-            // NSArray seems to handle out-of-range here, but we'll be careful anyway
-            index = NSMaxRange(range) < count ? indexOfObjectInRange(arrayToSearch, theSelector, obj, range) : NSNotFound;
-        }
-        
-        // resetting to max range is always valid
-        range.location = 0;
-        range.length = count;
+        index = [self indexOfObjectIdenticalTo:obj];
+        if(index == NSNotFound) [NSException raise:NSInvalidArgumentException format:@"Object %@ does not exist in %@", obj, self];
+        [indexes addIndex:index];
     }
-    return indexes;        
-}
-
-- (NSIndexSet *)indexesOfObjects:(NSArray *)objects;
-{
-    return __BDIndexesOfObjectsUsingSelector(self, objects, @selector(indexOfObject:inRange:));
-}
-    
-- (NSIndexSet *)indexesOfObjectsIdenticalTo:(NSArray *)objects;
-{
-    return __BDIndexesOfObjectsUsingSelector(self, objects, @selector(indexOfObjectIdenticalTo:inRange:));
-}
-
-- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)sortDescriptors;
-{
-    NSMutableArray *array = [self mutableCopy];
-    [array mergeSortUsingDescriptors:sortDescriptors];
-    return [array autorelease];
+    return indexes;
 }
 
 @end
-
-#pragma mark -
-#pragma mark NSSortDescriptor subclass performance improvements
-
-@interface NSSortDescriptor (Mergesort)
-
-- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
-
-@end
-
-@implementation NSSortDescriptor (Mergesort)
-
-// The objects an NSSortDescriptor receives in compareObject:toObject: are not the objects that will be compared; you need to call valueForKeyPath: on them.
-// Unfortunately, this is really inefficient, and also precludes caching on the data end, since the sort descriptor would then call valueForKeyPath: again.
-// Hence, we add this method to compare the results of valueForKeyPath:, which expects the objects that will be passed to the comparator selector directly.
-// This gives subclasses an override point that still allows data-side caching of valueForKeyPath: for efficiency.
-- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
-{    
-    
-    typedef NSComparisonResult (*compareIMP)(id, SEL, id);    
-
-    SEL theSelector = [self selector];
-    BOOL isAscending = [self ascending];
-    compareIMP comparator = (compareIMP)[object1 methodForSelector:theSelector];
-    NSComparisonResult result = comparator(object1, theSelector, object2);
-    
-    return isAscending ? result : (result *= -1);
-}
-
-@end
-
-#pragma mark -
 
 @implementation NSMutableArray (BDSKExtensions)
-
-- (void)addNonDuplicateObjectsFromArray:(NSArray *)otherArray;
-{
-    NSEnumerator *objEnum = [otherArray objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject]){
-        if([self containsObject:object] == NO)
-            [self addObject:object];
-    }
-}
-
-- (void)addObjectsByMakingObjectsFromArray:(NSArray *)otherArray performSelector:(SEL)selector;
-{
-    NSEnumerator *objEnum = [otherArray objectEnumerator];
-    id object;
-    while(object = [objEnum nextObject])
-        [self addObject:[object performSelector:selector]];
-}
 
 - (void)sortUsingSelector:(SEL)comparator ascending:(BOOL)ascend;
 {
@@ -232,7 +127,43 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
         [self insertObject:(id)CFArrayGetValueAtIndex((CFArrayRef)objects, idx) inArraySortedUsingDescriptors:sortDescriptors];
 }
 
-#pragma mark Merge sort
+- (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
+{
+    [self setArray:[self sortedArrayUsingMergesortWithDescriptors:sortDescriptors]];
+}
+
+@end
+
+@interface NSSortDescriptor (Mergesort)
+
+- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
+
+@end
+
+#pragma mark -
+#pragma mark NSSortDescriptor subclass performance improvements
+
+
+@implementation NSSortDescriptor (Mergesort)
+
+/* The objects an NSSortDescriptor receives in compareObject:toObject: are not the objects that will be compared; you need to call valueForKeyPath: on them.  Unfortunately, this is really inefficient, and also precludes caching on the data end, since the sort descriptor would then call valueForKeyPath: again.  Hence, we add this method to compare the results of valueForKeyPath:, which expects the objects that will be passed to the comparator selector directly.  This gives subclasses an override point that still allows data-side caching of valueForKeyPath: for efficiency.
+*/
+- (NSComparisonResult)compareEndObject:(id)object1 toEndObject:(id)object2;
+{    
+    
+    typedef NSComparisonResult (*compareIMP)(id, SEL, id);    
+
+    SEL theSelector = [self selector];
+    BOOL isAscending = [self ascending];
+    compareIMP comparator = (compareIMP)[object1 methodForSelector:theSelector];
+    NSComparisonResult result = comparator(object1, theSelector, object2);
+    
+    return isAscending ? result : (result *= -1);
+}
+
+@end
+
+@implementation NSArray (Mergesort)
 
 // statics used to call an Obj-C method from the BSD sort comparator
 static id __sort = nil;
@@ -321,7 +252,7 @@ static inline void __BDClearStatics()
         sortingLock = [[NSLock alloc] init];
 }
 
-- (void)mergeSortUsingDescriptors:(NSArray *)sortDescriptors;
+- (id)sortedArrayUsingMergesortWithDescriptors:(NSArray *)descriptors;
 {
     [sortingLock lock];
     NSZone *zone = [self zone];
@@ -331,7 +262,7 @@ static inline void __BDClearStatics()
     BDSortCacheValue *cache = (BDSortCacheValue *)NSZoneMalloc(zone, count * size);
     BDSortCacheValue aValue;
     
-    unsigned int i, sortIdx = 0, numberOfDescriptors = [sortDescriptors count];
+    unsigned int i, sortIdx = 0, numberOfDescriptors = [descriptors count];
     
     // first "equal range" is considered to be the entire array
     NSRange *equalRanges = (NSRange *)NSZoneMalloc(zone, 1 * sizeof(NSRange));
@@ -343,7 +274,7 @@ static inline void __BDClearStatics()
         
         // we add the actual object to the cache, which is basically a trivial dictionary
         // mergesort/qsort will sort the array of structures for us, so sortValue and object stay matched up
-        aValue.object = [[self objectAtIndex:i] retain];
+        aValue.object = [self objectAtIndex:i];
         
         // this is handled later, per-key, so just initialize it
         aValue.sortValue = nil;
@@ -359,7 +290,7 @@ static inline void __BDClearStatics()
         unsigned rangeIdx;
         
         // setup the statics for this descriptor, so we can use the sort functions
-        __BDSetupStaticsForDescriptor([sortDescriptors objectAtIndex:sortIdx]);
+        __BDSetupStaticsForDescriptor([descriptors objectAtIndex:sortIdx]);
         
         NSString *keyPath = [__sort key];
         
@@ -398,15 +329,92 @@ static inline void __BDClearStatics()
     if(equalRanges) NSZoneFree(zone, equalRanges);
     
     // our array of structures is now sorted correctly, so we just loop through it and create an array with the contents
-    [self removeAllObjects];
+    NSMutableArray *new = [[NSMutableArray alloc] initWithCapacity:count];
     for(i = 0; i < count; i++){
         aValue = cache[i];
-        [self addObject:aValue.object];
-        [aValue.object release];
+        [new addObject:aValue.object];
     }
     
     NSZoneFree(zone, cache);
     [sortingLock unlock];
+    return [new autorelease];
+}
+
+@end
+
+#pragma mark -
+#pragma mark Posing Classes
+
+@interface BDSKArray : NSArray @end
+
+#import <OmniBase/assertions.h>
+
+@implementation BDSKArray
+
+/* ARM:  Since Foundation implements objectsAtIndexes: on 10.4+, we just ignore this implementation, which is crude anyway.  We could also implement this using a different method name in a category, e.g. "objectsAtArrayIndexes:", but that's annoying to maintain, and we'd have to check a variable each time to get the 10.4 implementation.  What I really want is a way to conditionally add a category, but can't figure out how to do that.
+*/
+
++ (void)performPosing;
+{
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+        class_poseAs(self, NSClassFromString(@"NSArray"));
+}
+
+- (NSArray *)objectsAtIndexes:(NSIndexSet *)indexes;
+{
+    OBASSERT(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3);
+    NSParameterAssert(indexes != nil);
+    
+    // could be more clever/efficient by using getObjects:range:
+    unsigned index;
+    index = [indexes firstIndex];
+    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[indexes count]];
+    
+    while(index != NSNotFound){
+        [array addObject:(id)CFArrayGetValueAtIndex((CFArrayRef)self, index)];
+        index = [indexes indexGreaterThanIndex:index];
+    }
+    
+    return [array autorelease];
+}      
+
+@end
+
+@interface BDSKMutableArray : NSMutableArray @end
+
+@implementation BDSKMutableArray
+
++ (void)performPosing;
+{
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+        class_poseAs(self, NSClassFromString(@"NSMutableArray"));
+}
+
+- (void)insertObjects:(NSArray *)objects atIndexes:(NSIndexSet *)indexes
+{
+    OBASSERT(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3);
+	OBASSERT([objects count] == [indexes count]);
+    NSParameterAssert(indexes != nil);
+
+    unsigned index = [indexes firstIndex];
+    unsigned i = 0;
+    while (index != NSNotFound) {
+        [self insertObject:[objects objectAtIndex:i++] atIndex:index];
+        index = [indexes indexGreaterThanIndex:index];
+    }
+}
+
+- (void)removeObjectsAtIndexes:(NSIndexSet *)indexes;
+{
+    OBASSERT(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3);
+    NSParameterAssert(indexes != nil);
+
+    // remove from the end of the array; removing from the beginning will change the indexing
+    unsigned index = [indexes lastIndex];
+    while (index != NSNotFound) {
+        [self removeObjectAtIndex:index];
+        index = [indexes indexLessThanIndex:index];
+    }
 }
 
 @end

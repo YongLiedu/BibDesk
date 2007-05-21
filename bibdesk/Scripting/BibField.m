@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 27/11/04.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  */
 
 #import "BibField.h"
-#import "BDSKOwnerProtocol.h"
+#import "BibDocument.h"
 
 /* cmh
 A wrapper object around the fields to access them in AppleScript. 
@@ -76,7 +76,7 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@: {%@ = %@}",[self class], [self name], [self value]];
+    return [NSString stringWithFormat:@"{%@ = %@}",[self name], [self value]];
 }
 
 - (NSString *)name {
@@ -106,9 +106,8 @@ A wrapper object around the fields to access them in AppleScript.
 
 - (void)setBibTeXString:(NSString *)newValue {
     NS_DURING
-		NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[[bibItem owner] macroResolver]];
+		NSString *value = [NSString stringWithBibTeXString:newValue macroResolver:[[bibItem document] macroResolver]];
 		[bibItem setField:name toValue:value];
-        [[bibItem undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     NS_HANDLER
 		NSBeep();
     NS_ENDHANDLER

@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -13,7 +13,7 @@
 #import <OmniBase/assertions.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniBase/OBUtilities.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniBase/OBUtilities.m 68913 2005-10-03 19:36:19Z kc $")
 
 static void _OBRegisterMethod(IMP methodImp, Class class, const char *methodTypes, SEL selector)
 {
@@ -44,24 +44,18 @@ IMP OBRegisterInstanceMethodWithSelector(Class aClass, SEL oldSelector, SEL newS
 
 IMP OBReplaceMethodImplementation(Class aClass, SEL oldSelector, IMP newImp)
 {
-    struct objc_method *localMethod, *superMethod;
+    struct objc_method *thisMethod;
     IMP oldImp = NULL;
     extern void _objc_flush_caches(Class);
 
-    if ((localMethod = class_getInstanceMethod(aClass, oldSelector))) {
-	oldImp = localMethod->method_imp;
-	superMethod = aClass->super_class ? class_getInstanceMethod(aClass->super_class, oldSelector) : NULL;
+    if ((thisMethod = class_getInstanceMethod(aClass, oldSelector))) {
+        oldImp = thisMethod->method_imp;
 
-	if (superMethod == localMethod) {
-	    // We are inheriting this method from the superclass.  We do *not* want to clobber the superclass's Method structure as that would replace the implementation on a greater scope than the caller wanted.  In this case, install a new method at this class and return the superclass's implementation as the old implementation (which it is).
-	    _OBRegisterMethod(newImp, aClass, localMethod->method_types, oldSelector);
-	} else {
-	    // Replace the method in place
-	    localMethod->method_imp = newImp;
-	}
-	
-	// Flush the method cache
-	_objc_flush_caches(aClass);
+        // Replace the method in place
+        thisMethod->method_imp = newImp;
+
+        // Flush the method cache
+        _objc_flush_caches(aClass);
     }
 
     return oldImp;
@@ -86,26 +80,6 @@ IMP OBReplaceMethodImplementationWithSelectorOnClass(Class destClass, SEL oldSel
 
     return OBReplaceMethodImplementation(destClass, oldSelector, newMethod->method_imp);
 }
-
-// Returns the class in the inheritance chain of 'cls' that actually implements the given selector, or Nil if it isn't implemented
-Class OBClassImplementingMethod(Class cls, SEL sel)
-{
-    Method method = class_getInstanceMethod(cls, sel);
-    if (!method)
-	return Nil;
-
-    // *Some* class must implement it
-    Class superClass;
-    while ((superClass = cls->super_class)) {
-	Method superMethod = class_getInstanceMethod(superClass, sel);
-	if (superMethod != method)
-	    return cls;
-	cls = superClass;
-    }
-    
-    return cls;
-}
-
 
 void OBRequestConcreteImplementation(id self, SEL _cmd)
 {

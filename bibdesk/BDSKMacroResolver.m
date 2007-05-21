@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/20/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -43,11 +43,8 @@
 #import "NSDictionary_BDSKExtensions.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
-#import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import <OmniFoundation/OFPreference.h>
-#import "NSObject_BDSKExtensions.h"
-#import "NSError_BDSKExtensions.h"
 
 
 @interface BDSKGlobalMacroResolver : BDSKMacroResolver {
@@ -72,7 +69,7 @@
 
 @implementation BDSKMacroResolver
 
-static BDSKGlobalMacroResolver *defaultMacroResolver = nil; 
+static BDSKGlobalMacroResolver *defaultMacroResolver; 
 
 + (id)defaultMacroResolver{
     if(defaultMacroResolver == nil)
@@ -81,30 +78,30 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 }
 
 - (id)init{
-    self = [self initWithOwner:nil];
+    self = [self initWithDocument:nil];
     return self;
 }
 
-- (id)initWithOwner:(id<BDSKOwner>)anOwner{
+- (id)initWithDocument:(BibDocument *)aDocument{
     if (self = [super init]) {
         macroDefinitions = nil;
-        owner = anOwner;
+        document = aDocument;
     }
     return self;
 }
 
 - (void)dealloc {
     [macroDefinitions release];
-    owner = nil;
+    document = nil;
     [super dealloc];
 }
 
-- (id<BDSKOwner>)owner{
-    return owner;
+- (BibDocument *)document{
+    return document;
 }
 
 - (NSUndoManager *)undoManager{
-    return [owner undoManager];
+    return [document undoManager];
 }
 
 - (NSString *)bibTeXString{
@@ -114,19 +111,31 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     // bibtex requires that macros whose definitions contain macros are ordered in the document after the macros on which they depend
     NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
     NSMutableArray *orderedMacros = [NSMutableArray arrayWithCapacity:[macros count]];
+    NSEnumerator *macroEnum = [macros objectEnumerator];
+    NSString *macro;
     
-    [self performSelector:@selector(addMacro:toArray:) withObjectsFromArray:macros withObject:orderedMacros];
+    while (macro = [macroEnum nextObject])
+        [self addMacro:macro toArray:orderedMacros];
     
     BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableString *macroString = [NSMutableString string];
-    NSEnumerator *macroEnum = [orderedMacros objectEnumerator];
-    NSString *macro;
+    macroEnum = [orderedMacros objectEnumerator];
     NSString *value;
     
     while (macro = [macroEnum nextObject]){
 		value = [macroDefinitions objectForKey:macro];
 		if(shouldTeXify){
-            value = [value stringByTeXifyingString];
+			
+			@try{
+				value = [value stringByTeXifyingString];
+			}
+            @catch(id localException){
+				if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
+                    NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat:NSLocalizedString(@"Character \"%@\" in the macro %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], macro] userInfo:[NSDictionary dictionary]];
+                    @throw exception;
+				} else 
+                    @throw;
+            }							
 		}                
         [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];
     }
@@ -137,7 +146,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     if ([macroDef isComplex] == NO) 
         return NO;
     
-    OBASSERT([[(BDSKComplexString *)macroDef macroResolver] isEqual:self]);
+    OBASSERT([(BDSKComplexString *)macroDef macroResolver] == self);
     
     NSEnumerator *nodeE = [[macroDef nodes] objectEnumerator];
     BDSKStringNode *node;
@@ -158,7 +167,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     return NO;
 }
 
-#pragma mark Macros management
+#pragma mark BDSKMacroResolver protocol
 
 // used for autocompletion; returns global macro definitions + local (document) definitions
 - (NSDictionary *)allMacroDefinitions {
@@ -188,12 +197,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     [[[self undoManager] prepareWithInvocationTarget:self]
         changeMacroKey:newKey to:oldKey];
     NSString *val = [macroDefinitions valueForKey:oldKey];
-    
-    // retain in case these go away with removeObjectForKey:
-    [[val retain] autorelease]; 
-    [[oldKey retain] autorelease];
+    [val retain]; // so the next line doesn't kill it
     [macroDefinitions removeObjectForKey:oldKey];
-    [macroDefinitions setObject:val forKey:newKey];
+    [macroDefinitions setObject:[val autorelease] forKey:newKey];
 	
     [self synchronize];
     
@@ -303,8 +309,15 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         BDSKStringNode *node;
         
         while(node = [nodeE nextObject]){
-            if([node type] == BSN_MACRODEF)
-                [self addMacro:[node value] toArray:array];
+            if([node type] != BSN_MACRODEF)
+                continue;
+            
+            NSString *key = [node value];
+            
+            if([array containsObject:key])
+                continue;
+            
+            [self addMacro:key toArray:array];
         }
     }
     [array addObject:macroKey];
@@ -315,8 +328,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 @implementation BDSKGlobalMacroResolver
 
-- (id)initWithOwner:(id<BDSKOwner>)anOwner{
-    if (self = [super initWithOwner:nil]) {
+- (id)initWithDocument:(BibDocument *)aDocument{
+    if (self = [super initWithDocument:nil]) {
         // store system-defined macros for the months.
         // we grab their localized versions for display.
         NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]

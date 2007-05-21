@@ -105,14 +105,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</property>
 			<property name="document" code="docu" type="document" access="r"
 				description="The document whose contents are being displayed in the window."/>
-			<property name="publication" code="bibi" type="publication" access="r"
-				description="The publication whose details are being displayed in the window. Only for publication detail windows.">
-				<cocoa key="publication"/>
-			</property>
-			<property name="author" code="auth" type="author" access="r"
-				description="The author whose details are being displayed in the window. Only for author detail windows.">
-				<cocoa key="author"/>
-			</property>
 			<responds-to name="close">
 				<cocoa method="handleCloseScriptCommand:"/>
 			</responds-to>
@@ -124,8 +116,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			</responds-to>
 		</class>
         
-		<command name="open" code="aevtodoc" description="Open a document.">
+		<command name="open" code="aevtodoc"
+			description="Open a document.">
 			<direct-parameter description="The file(s) to be opened.">
+				<type type="file"/>
 				<type type="file" list="yes"/>
 			</direct-parameter>
 			<!--
@@ -339,11 +333,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<cocoa class="NSColor"/>
 		</value-type>
 
-        <!--
-            According to the documentation and standard examples, the code for rich txt should be "ctxt".
-            However this is a mistake, as ctxt corresponds to type "text", which is the recommended type for strings.
-        -->
-		<class name="rich text" plural="rich text" code="ricT"
+		<class name="rich text" plural="rich text" code="ctxt"
 			description="Rich (styled) text">
 			<cocoa class="NSTextStorage"/>
 			<!-- this "type" element and the ones that follow, while they
@@ -486,10 +476,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
 			<element type="window" access="r">
 				<cocoa key="orderedWindows"/>
 			</element>
-			<element type="macro" access="r"
-				description="The global macros.">
-				<cocoa key="macros"/>
-			</element>
 			<element type="script hook" access="r"
 				description="The script hook rules known by Bibdesk.">
 				<cocoa key="scriptHooks"/>
@@ -544,10 +530,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="Authors of publications in the bibliography">
 				<cocoa key="authors"/>
 			</element>
-			<element type="macro" access="r"
-				description="Macros defined in the bibliography">
-				<cocoa key="macros"/>
-			</element>
 			<property name="name" code="pnam" type="text" access="r"
 				description="The document's name.">
 				<cocoa key="displayName"/>
@@ -566,7 +548,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>
 			<property name="filter field" code="filt" type="text"
 			description="Only publications matching this property will be displayed">
-				<cocoa key="searchString"/>
+				<cocoa key="filterField"/>
 			</property>
 			<property name="selection" code="sele"
 				description="The selected publications.">
@@ -695,7 +677,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
             </property>
             <property name="document" code="docu" type="document" access="r"
                 description="The bibliography containing this publication record.">
-                <cocoa key="owner"/>
+                <cocoa key="document"/>
             </property>  
             <responds-to name="show">
                 <cocoa method=""/>
@@ -744,23 +726,6 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <responds-to name="show">
                 <cocoa method=""/>
             </responds-to>
-        </class>
-        
-        <class name="macro" plural="macros" code="bmcr" inherits="item"
-			description="A macro of a document or a global macro.">
-            <cocoa class="BDSKMacro"/>
-            <property name="value" code="fldv" type="text"
-                description="The value of the macro">
-                <cocoa key="value"/>
-            </property>  
-            <property name="name" code="pnam" type="text"
-                description="The name of the macro">
-                <cocoa key="name"/>
-            </property>  
-            <property name="BibTeX string" code="BTeX" type="text"
-                description="The value of the macro as raw BibTeX">
-                <cocoa key="bibTeXString"/>
-            </property>  
         </class>
         
         <class name="field" plural="fields" code="bfld" inherits="item"

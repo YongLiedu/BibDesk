@@ -1,6 +1,6 @@
 // BDSKComplexString.h
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,10 @@
 
 @class BDSKMacroResolver;
 
+@interface NSObject (NSKeyedUnarchiverComplexStringDelegate)
+- (BDSKMacroResolver *)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver;
+@end
+
 /* BDSKComplexString is a string that may be a concatenation of strings, 
     some of which are macros.
    It's a concrete subclass of NSString, which means it can be used 
@@ -58,9 +62,6 @@
   BOOL complex;
   BOOL inherited;
 }
-
-+ (BDSKMacroResolver *)macroResolverForUnarchiving;
-+ (void)setMacroResolverForUnarchiving:(BDSKMacroResolver *)aMacroResolver;
 
 /*!
     @method     macroResolver
@@ -238,9 +239,5 @@
     @result     (description)
 */
 - (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number;
-
-- (NSString *)stringByPrependingString:(NSString *)string;
-
-- (NSString *)replacementStringByAppendingString:(NSString *)string;
 
 @end

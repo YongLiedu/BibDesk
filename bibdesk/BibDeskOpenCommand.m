@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on 14.09.04.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
  */
 
 #import "BibDeskOpenCommand.h"
-#import "BibDocument_Actions.h"
 #import "BibItem+Scripting.h"
 #import "BibAuthor.h"
 
@@ -78,20 +77,18 @@ It can be used with
 		if ([dPO isKindOfClass:[BibItem class]]) {
 			// we want to open a publication
 			BibItem * pub = (BibItem*)dPO;
-            // only publications belonging to a BibDocument are scriptable
-			[(BibDocument *)[pub owner] editPub:pub];
+			[[pub document] editPub:pub];
 		}
 		else if ([dPO isKindOfClass:[BibAuthor class]]) {
 			// we want to open an author
 			BibAuthor * author = (BibAuthor *) dPO;
-            // only publications belonging to a BibDocument are scriptable
-            BibDocument *doc = (BibDocument *)[[author publication] owner];
+            BibDocument *doc = [[author publication] document];
             [doc showPerson:author];
 		}
 		else {
 			// give up
 			[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-			[self setScriptErrorString:NSLocalizedString(@"The 'open' command was used on an object that BibDesk cannot open. BibDesk is able to open (windows for) authors and publications.", @"Error description")];
+			[self setScriptErrorString:NSLocalizedString(@"Error message for AppleScript open command when a direct parameter is passed that we can't handle.", @"The 'open' command was used on an object that BibDesk cannot open. BibDesk is able to open (windows for) authors and publications.")];
 			return nil;
 		}
 	} // while

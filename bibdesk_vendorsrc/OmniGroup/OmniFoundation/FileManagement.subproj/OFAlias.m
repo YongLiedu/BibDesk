@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/FileManagement.subproj/OFAlias.m 66265 2005-07-29 04:07:59Z bungi $");
+RCS_ID("$Header$");
 
 // We may want to store the path verbatim as well as the alias.
 

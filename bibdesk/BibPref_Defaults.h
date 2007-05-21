@@ -1,7 +1,7 @@
 // BibPref_Defaults 
 // Created Michael McCracken, 2002 
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,9 +46,10 @@
     IBOutlet NSWindow* globalMacroFileSheet;
     IBOutlet NSTableView* globalMacroFilesTableView;
     IBOutlet NSTableView* defaultFieldsTableView;
+    IBOutlet NSMatrix* RSSDescriptionFieldMatrix;
+    IBOutlet NSTextField* RSSDescriptionFieldTextField;
     IBOutlet NSButton *editGlobalMacroDefsButton;
     IBOutlet NSMenu *fieldTypeMenu;
-    IBOutlet NSPopUpButton *pdfViewerPopup;
     NSMutableArray *customFieldsArray;
     NSMutableSet *customFieldsSet;
     NSMutableArray *globalMacroFiles;
@@ -58,6 +59,7 @@
 - (IBAction)delSelectedDefaultField:(id)sender;
 - (IBAction)addDefaultField:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
+- (IBAction)RSSDescriptionFieldChanged:(id)sender;
 - (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)showMacrosWindow:(id)sender;
@@ -65,7 +67,6 @@
 - (IBAction)closeMacroFileWindow:(id)sender;
 - (IBAction)addGlobalMacroFile:(id)sender;
 - (IBAction)delGlobalMacroFiles:(id)sender;
-- (IBAction)changeDefaultPDFViewer:(id)sender;
 
 @end
 

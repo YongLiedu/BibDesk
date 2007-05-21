@@ -7,8 +7,7 @@
         }, 
         {
             ACTIONS = {
-                changeAlternateDragCopyFormat = id; 
-                changeDefaultDragCopyFormat = id; 
+                changeCopyBehavior = id; 
                 changePrependTilde = id; 
                 changeSeparateCite = id; 
                 citeStringFieldChanged = id; 
@@ -17,13 +16,23 @@
             CLASS = "BibPref_Cite"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                alternateDragCopyPopup = NSPopUpButton; 
                 citeBehaviorLine = NSTextField; 
                 citeBracketRadio = NSMatrix; 
                 citeStringField = NSTextField; 
-                defaultDragCopyPopup = NSPopUpButton; 
+                dragCopyRadio = NSMatrix; 
                 prependTildeCheckButton = NSButton; 
                 separateCiteCheckButton = NSButton; 
+            }; 
+            SUPERCLASS = OAPreferenceClient; 
+        }, 
+        {
+            ACTIONS = {changeStartupBehavior = id; }; 
+            CLASS = "BibPref_Startup"; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                defaultBibFileField = NSTextField; 
+                openSheetAccessoryView = NSView; 
+                startupBehaviorRadio = NSMatrix; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

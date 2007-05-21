@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/23/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,6 @@ static CFMutableSetRef nonretainedScrollviews = NULL;
 @implementation BDSKZoomablePDFView
 
 /* For genstrings:
-    NSLocalizedStringFromTable(@"Auto", @"ZoomValues", @"Zoom popup entry")
     NSLocalizedStringFromTable(@"10%", @"ZoomValues", @"Zoom popup entry")
     NSLocalizedStringFromTable(@"25%", @"ZoomValues", @"Zoom popup entry")
     NSLocalizedStringFromTable(@"50%", @"ZoomValues", @"Zoom popup entry")
@@ -251,10 +250,6 @@ static float BDSKScaleMenuFontSize = 11.0;
 
     return menu;
 }
-
-// Fix a bug in Tiger's PDFKit, tooltips lead to a crash when you reload a PDFDocument in a PDFView
-// see http://www.cocoabuilder.com/archive/message/cocoa/2007/3/12/180190
-- (void)scheduleAddingToolips {}
     
 #pragma mark Popup button
 
@@ -269,7 +264,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         id curItem;
 
         // create it        
-        scalePopUpButton = [[BDSKHeaderPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
+        scalePopUpButton = [[NSClassFromString(@"BDSKHeaderPopUpButton") allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         
         NSControlSize controlSize = [[scrollView horizontalScroller] controlSize];
         [[scalePopUpButton cell] setControlSize:controlSize];
@@ -302,6 +297,11 @@ static float BDSKScaleMenuFontSize = 11.0;
         // put it in the scrollview
         [scrollView addSubview:scalePopUpButton];
         [scalePopUpButton release];
+        
+        NSRect frameRect = [scrollView frame];
+        frameRect.origin.y += 3;
+        frameRect.size.height -= 3;
+        [scrollView setFrame:frameRect];
     }
 }
 
@@ -340,19 +340,16 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)setScaleFactor:(float)newScaleFactor adjustPopup:(BOOL)flag {
     
 	if (flag) {
-		if (newScaleFactor < 0.01) {
-            newScaleFactor = 0.0;
-        } else {
-            unsigned cnt = 1, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-            
-            // We only work with some preset zoom values, so choose one of the appropriate values
-            while (cnt < numberOfDefaultItems - 1 && newScaleFactor > 0.5 * (BDSKDefaultScaleMenuFactors[cnt] + BDSKDefaultScaleMenuFactors[cnt + 1])) cnt++;
-            [scalePopUpButton selectItemAtIndex:cnt];
-            newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
-        }
+		unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+		
+		// We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
+		while (cnt < numberOfDefaultItems && newScaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+		if (cnt == numberOfDefaultItems) cnt--;
+		[scalePopUpButton selectItemAtIndex:cnt];
+		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
     }
     
-    if(newScaleFactor < 0.01)
+    if(fabs(newScaleFactor) < 0.01)
         [self setAutoScales:YES];
     else
         [super setScaleFactor:newScaleFactor];
@@ -474,19 +471,19 @@ static float BDSKScaleMenuFontSize = 11.0;
         
         // Now we'll just adjust the horizontal scroller size and set the button size and location.
         // Set it based on our frame, not the scroller's frame, since this gets called repeatedly.
-        horizScrollerFrame.size.width = NSWidth([scrollView frame]) - NSWidth(buttonFrame) - scrollerWidth - 1.0;
+        horizScrollerFrame.size.width = NSWidth([scrollView frame]) - NSWidth(buttonFrame) - scrollerWidth;
         [horizScroller setFrameSize:horizScrollerFrame.size];
     }
-    buttonFrame.size.height = scrollerWidth - 1.0;
+    buttonFrame.size.height = scrollerWidth;
 
     // @@ resolution independence: 2.0 may not work
     if ([scrollView isFlipped]) {
         buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMaxY([scrollView frame]) - NSHeight(buttonFrame);            
+        buttonFrame.origin.y = NSMaxY([scrollView frame]) - NSHeight(buttonFrame) - 2.0;            
     }
     else {
         buttonFrame.origin.x = NSMaxX([scrollView frame]) - scrollerWidth - NSWidth(buttonFrame);
-        buttonFrame.origin.y = NSMinY([scrollView frame]);
+        buttonFrame.origin.y = NSMinY([scrollView frame]) + 2.0;
     }
     [scalePopUpButton setFrame:buttonFrame];
 }

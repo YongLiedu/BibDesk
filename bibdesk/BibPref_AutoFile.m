@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Wed Oct 08 2003.
 /*
- This software is Copyright (c) 2003,2004,2005,2006,2007
+ This software is Copyright (c) 2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 
 #define MAX_PREVIEW_WIDTH	501.0
 #define MAX_FORMAT_WIDTH	288.0
-#define USE_DOCUMENT_FOLDER NSLocalizedString(@"Use Document Folder", @"Placeholder string for Papers Folder")
+#define USE_DOCUMENT_FOLDER NSLocalizedString(@"Use Document Folder",@"")
 
 @interface BDSKFolderPathFormatter : NSFormatter @end
 
@@ -53,7 +53,7 @@
 
 // these should correspond to the items in the popups set in IB
 static NSString *presetFormatStrings[] = {@"%L", @"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%e"};
-static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
+static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (void)dealloc{
     [coloringEditor release];
@@ -88,7 +88,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	
     [filePapersAutomaticallyCheckButton setState:[defaults boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
     [useRelativePathCheckButton setState:[defaults boolForKey:BDSKAutoFileUsesRelativePathKey] ? NSOnState : NSOffState];
-    [warnOnMoveFolderCheckButton setState:[defaults boolForKey:BDSKWarnOnMoveFolderKey] ? NSOnState : NSOffState];
 
     if ([NSString isEmptyString:papersFolder]) {
 		[papersFolderLocationTextField setStringValue:USE_DOCUMENT_FOLDER];
@@ -141,7 +140,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 
 - (IBAction)setPapersFolderPathFromTextField:(id)sender{
     [defaults setObject:[[sender stringValue] stringByStandardizingPath] forKey:BDSKPapersFolderPathKey];
-    [self valuesHaveChanged];
+    [self updateUI];
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
@@ -151,7 +150,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[openPanel setCanChooseDirectories:YES];
 	[openPanel setCanCreateDirectories:YES];
 	[openPanel setResolvesAliases:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
     [openPanel beginSheetForDirectory:nil 
 								 file:nil
 								types:nil
@@ -166,65 +165,54 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		NSString *path = [[sheet filenames] objectAtIndex: 0];
 		[defaults setObject:path forKey:BDSKPapersFolderPathKey];
 	}
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)clearPapersFolderLocationAction:(id)sender{
 	if ([sender state] == NSOnState) {
         [defaults setBool:NO forKey:BDSKAutoFileUsesRelativePathKey];
 		[self choosePapersFolderLocationAction:sender];
-        [defaults autoSynchronize];
 	} else {
 		[defaults setObject:@"" forKey:BDSKPapersFolderPathKey];
-		[self valuesHaveChanged];
+		[self updateUI];
 	}
 }
 
 - (IBAction)toggleUseRelativePathAction:(id)sender{
 	[defaults setBool:([useRelativePathCheckButton state] == NSOnState)
 			   forKey:BDSKAutoFileUsesRelativePathKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{
 	[defaults setBool:([filePapersAutomaticallyCheckButton state] == NSOnState)
 			   forKey:BDSKFilePapersAutomaticallyKey];
-    [defaults autoSynchronize];
-}
-
-- (IBAction)toggleWarnOnMoveFolderAction:(id)sender{
-	[defaults setBool:([warnOnMoveFolderCheckButton state] == NSOnState)
-			   forKey:BDSKWarnOnMoveFolderKey];
-    [defaults autoSynchronize];
 }
 
 // presently just used to display the warning if the path for autofile was invalid
 - (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error{
     if(error != nil)
-        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @"Message in alert dialog when entering invalid entry"), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
+        NSBeginAlertSheet(NSLocalizedString(@"Invalid Entry", @""), nil, nil, nil, [controlBox window], nil, NULL, NULL, NULL, error);
     return NO;
 }
 
 #pragma mark Local-Url format stuff
 
 - (IBAction)localUrlHelp:(id)sender{
-    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"AutoFiling" inBook:helpBookName];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"AutoFile" inBook:@"BibDesk Help"];
 }
 
 - (IBAction)formatHelp:(id)sender{
-    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"AutogenerationFormatSyntax" inBook:helpBookName];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"Autogeneration-Format-Syntax" inBook:@"BibDesk Help"];
 }
 
 - (IBAction)changeLocalUrlLowercase:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKLocalUrlLowercaseKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)setFormatCleanOption:(id)sender{
 	[defaults setInteger:[[sender selectedCell] tag] forKey:BDSKLocalUrlCleanOptionKey];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)localUrlFormatAdd:(id)sender{
@@ -249,11 +237,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[self localUrlFormatChanged:sender];
 	
 	// select the 'arbitrary' numbers
-	if ([newSpecifier isEqualToString:@"%0"] || [newSpecifier isEqualToString:@"%%"]) {
+	if ([newSpecifier isEqualToString:@"%0"]) {
 		selRange.location -= 1;
 		selRange.length = 1;
 	}
-	else if ([newSpecifier isEqualToString:@"%f{}0"] || [newSpecifier isEqualToString:@"%s{}[][][]0"] || [newSpecifier isEqualToString:@"%c{}"] || [newSpecifier isEqualToString:@"%i{}0"]) {
+	else if ([newSpecifier isEqualToString:@"%f{}0"] || [newSpecifier isEqualToString:@"%s{}[][][]0"] || [newSpecifier isEqualToString:@"%c{}"]) {
 		selRange.location += 1;
 		selRange.length = 0;
 	}
@@ -301,7 +289,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		}
 	}
 	[[NSApp delegate] setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-    [self valuesHaveChanged];
+	[self updateUI];
 }
 
 #pragma mark Format sheet stuff
@@ -329,12 +317,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set local-url format is valid, so we can keep it 
-		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
+		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to last valid autogeneration format");
 	}
 	
-	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format", @"Message in alert dialog when entering invalid Local-Url format") 
-										 defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
-									   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
+	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format",@"") 
+										 defaultButton:NSLocalizedString(@"Keep Editing", @"Keep Editing") 
+									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format") 
 										   otherButton:otherButton
 							 informativeTextWithFormat:@"%@", error];
 	int rv = [alert runSheetModalForWindow:formatSheet];
@@ -364,11 +352,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	NSString *msg = [sender toolTip];
 	
 	if ([NSString isEmptyString:msg]) {
-		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.", @"Informative text in alert dialog");
+		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@"");
 	}
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format", @"Message in alert dialog when entering invalid Local-Url format") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
 								   alternateButton:nil 
 									   otherButton:nil 
 						 informativeTextWithFormat:@"%@", msg];
@@ -379,8 +367,14 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:(NSString *)message{
-    [formatWarningButton setToolTip:set ? message : nil];
-	[formatWarningButton setHidden:set == NO];
+	if(set){
+		[formatWarningButton setImage:[NSImage cautionIconImage]];
+		[formatWarningButton setToolTip:message];
+	}else{
+		[formatWarningButton setImage:nil];
+		[formatWarningButton setToolTip:nil];
+	}
+	[formatWarningButton setEnabled:set];
 	[formatSheetField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?
 }
 
@@ -412,11 +406,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
     NS_ENDHANDLER
     if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
         if(error)
-            *error = [NSString stringWithFormat:NSLocalizedString(@"The directory \"%@\" does not exist.", @"Error description"), pathString];
+            *error = [NSString stringWithFormat:NSLocalizedString(@"The directory \"%@\" does not exist.", @""), pathString];
         return NO;
     } else if(isDir == NO){
         if(error)
-            *error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is not a directory.", @"Error description"), pathString];
+            *error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is not a directory.", @""), pathString];
         return NO;
     } else
 	    *obj = string;

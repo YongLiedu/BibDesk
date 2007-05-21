@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 3/20/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,17 @@
 #import <Cocoa/Cocoa.h>
 
 @class BibDocument;
-@protocol BDSKOwner;
 
 @interface BDSKMacroResolver : NSObject {
     NSMutableDictionary *macroDefinitions;
-    id<BDSKOwner>owner;
+    BibDocument *document;
 }
 
 + (id)defaultMacroResolver;
 
-- (id)initWithOwner:(id<BDSKOwner>)anOwner;
+- (id)initWithDocument:(BibDocument *)aDocument;
 
-- (id<BDSKOwner>)owner;
+- (BibDocument *)document;
 - (NSUndoManager *)undoManager;
 - (NSString *)bibTeXString;
 - (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey;

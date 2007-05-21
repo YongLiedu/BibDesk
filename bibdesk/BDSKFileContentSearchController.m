@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 10/06/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,29 @@
 #import "BibPrefController.h"
 #import "NSImage+Toolbox.h"
 #import <Carbon/Carbon.h>
+#import "BDSKSearchResult.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKTextWithIconCell.h"
 #import "NSAttributedString_BDSKExtensions.h"
-#import "BDSKSearch.h"
-#import "BDSKLevelIndicatorCell.h"
-#import "BibDocument_Search.h"
+
+// keys are NSDocument objects; compare using pointer equality, use NSObject retain/release
+const CFDictionaryKeyCallBacks BDSKNSRetainedPointerDictionaryKeyCallbacks = {
+    0,    // version
+    OFNSObjectRetain,  // retain
+    OFNSObjectRelease, // release
+    OFNSObjectCopyDescription,
+    NULL, // equal (use pointer equality): note that KVO isa-swizzling will cause grief here if we aren't careful
+    NULL, // hash  (hash of pointer)
+};
+
+// values are NSObject subclass instances
+const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks = {
+    0,    // version
+    OFNSObjectRetain,  // retain
+    OFNSObjectRelease, // release
+    OFNSObjectCopyDescription,
+    NULL, // equal (use pointer equality)
+};
 
 // Overrides attributedStringValue since we return an attributed string; normally, the cell uses the font of the attributed string, rather than the table's font, so font changes are ignored.  This means that italics and bold in titles will be lost until the search string changes again, but that's not a great loss.
 @interface BDSKFileContentTextWithIconCell : BDSKTextWithIconCell
@@ -70,19 +87,31 @@
     self = [super init];
     if(!self) return nil;
     
+    [self setMaxValueWithDouble:0];
+    [self setMinValueWithDouble:0];
+    
+    // this is a pointer to the current index; retained only by the indexDictionary
+    currentSearchIndex = nil;
+    
     results = [[NSMutableArray alloc] initWithCapacity:10];
     
-    canceledSearch = NO;
-        
+    currentSearchKey = [[NSString alloc] initWithString:@""];
+    
+    // to be used for storing references to documents and associated index/mutable data objects
+    indexDictionary = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &BDSKNSRetainedPointerDictionaryKeyCallbacks, &BDSKNSRetainedPointerDictionaryValueCallbacks);
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDocumentCloseNotification:) name:BDSKDocumentWindowWillCloseNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     
-    NSParameterAssert([aDocument conformsToProtocol:@protocol(BDSKSearchContentView)]);
+    // this lock is used any time the mutable indexDictionary ivar is accessed
+    dictionaryLock = [[NSLock alloc] init];
+    
+    // flag set from UI or before deallocating the current index
+    searchCanceled = NO;
+ 
+    OBPRECONDITION(aDocument);
     [self setDocument:aDocument];
-    
-    searchIndex = [[BDSKSearchIndex alloc] initWithDocument:aDocument];
-    search = [[BDSKSearch alloc] initWithIndex:searchIndex delegate:self];
-    searchFieldDidEndEditing = NO;
-    
+
     return self;
 }
     
@@ -90,23 +119,30 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+	[statusBar unbind:@"stringValue"];
+    [self cancelCurrentSearch:nil]; // before releasing the dictionary
     [searchContentView release];
+    CFRelease(indexDictionary);
+    [dictionaryLock release];
     [results release];
-    [search release];
+    if(currentSearch) CFRelease(currentSearch);
+    [currentSearchKey release];
     [super dealloc];
 }
 
 - (void)awakeFromNib
 {
+    [objectController setContent:self];
     [tableView setTarget:self];
     [tableView setDoubleAction:@selector(tableAction:)];
     
-    BDSKLevelIndicatorCell *cell = [[BDSKLevelIndicatorCell alloc] initWithLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle];
+    NSLevelIndicatorCell *cell = [[tableView tableColumnWithIdentifier:@"score"] dataCell];
+    OBASSERT([cell isKindOfClass:[NSLevelIndicatorCell class]]);
+    [cell setLevelIndicatorStyle:NSRelevancyLevelIndicatorStyle]; // the default one makes the tableview unusably slow
     [cell setEnabled:NO]; // this is required to make it non-editable
-    [cell setMaxHeight:17.0 * 0.7];
-    [cell setMaxValue:5.0];
-    [[tableView tableColumnWithIdentifier:@"score"] setDataCell:cell];
-    [cell release];
+    
+    [spinner setUsesThreadedAnimation:NO];
+    [spinner setDisplayedWhenStopped:NO];
     
     // set up the image/text cell combination
     BDSKTextWithIconCell *textCell = [[BDSKFileContentTextWithIconCell alloc] init];
@@ -114,6 +150,11 @@
     [textCell setDrawsHighlight:NO];
     [[tableView tableColumnWithIdentifier:@"name"] setDataCell:textCell];
     [textCell release];
+        
+    // preserve sort behavior between launches (set in windowWillClose:)
+    NSData *sortDescriptorData = [[NSUserDefaults standardUserDefaults] dataForKey:BDSKFileContentSearchSortDescriptorKey];
+    if(sortDescriptorData != nil)
+        [resultsArrayController setSortDescriptors:[NSUnarchiver unarchiveObjectWithData:sortDescriptorData]];
     
     OBPRECONDITION([[tableView enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -122,18 +163,17 @@
                                                object:[[tableView enclosingScrollView] contentView]];    
 
     // Do custom view setup 
-    [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask | BDSKMaxYEdgeMask];
-    [topBarView setColor:[NSColor colorWithCalibratedWhite:0.6 alpha:1.0] forEdge:NSMaxYEdge];
-
+    [topBarView setEdges:BDSKMinXEdgeMask | BDSKMaxXEdgeMask];
+    [topBarView setEdgeColor:[NSColor windowFrameColor]];
+    [topBarView adjustSubviews];
+    [statusBar toggleBelowView:[tableView enclosingScrollView] offset:0.0];
+    statusBar = nil;
+    
     // we might remove this, so keep a retained reference
     searchContentView = [[[self window] contentView] retain];
 
     // @@ workaround: the font from prefs seems to be overridden by the nib; maybe bindings issue?
     [tableView changeFont:nil];
-    
-    [indexProgressBar setMaxValue:100.0];
-    [indexProgressBar setMinValue:0.0];
-    [indexProgressBar setDoubleValue:[searchIndex progressValue]];
 }    
 
 - (NSString *)windowNibName
@@ -150,7 +190,13 @@
 
 - (NSArray *)titlesOfSelectedItems
 {
-    return [[resultsArrayController selectedObjects] valueForKey:@"string"];
+    return [[resultsArrayController selectedObjects] valueForKey:@"title"];
+}
+
+- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
+    
+    if([aCell isKindOfClass:[OATextWithIconCell class]])
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
 }
 
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note
@@ -162,101 +208,80 @@
 #pragma mark -
 #pragma mark Actions
 
-- (IBAction)tableAction:(id)sender
+- (void)tableAction:(id)sender
 {
-    int row = [tableView clickedRow];
+    int row = [tableView selectedRow];
     if(row == -1)
         return;
     
     BOOL isDir;
-    NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] URL];
+    NSURL *fileURL = [[[resultsArrayController arrangedObjects] objectAtIndex:row] valueForKey:@"url"];
     
     OBASSERT(fileURL);
-    OBASSERT(searchField);
+    OBASSERT(currentSearchKey);
 
     if(![[NSFileManager defaultManager] fileExistsAtPath:[fileURL path] isDirectory:&isDir]){
-        NSBeginAlertSheet(NSLocalizedString(@"File Does Not Exist", @"Message in alert dialog when file could not be found"),
+        NSBeginAlertSheet(NSLocalizedString(@"File Does Not Exist", @""),
                           nil /*default button*/,
                           nil /*alternate button*/,
                           nil /*other button*/,
-                          [tableView window],nil,NULL,NULL,NULL,NSLocalizedString(@"The file at \"%@\" no longer exists.", @"Informative text in alert dialog "), [fileURL path]);
+                          [tableView window],nil,NULL,NULL,NULL,NSLocalizedString(@"The file at \"%@\" no longer exists.", @""), [fileURL path]);
+        return;
     } else if(isDir){
         // just open it with the Finder; we shouldn't have folders in our index, though
         [[NSWorkspace sharedWorkspace] openURL:fileURL];
-    } else if(![[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:[searchField stringValue]]){
-        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @"Message in alert dialog when unable to open file"),
+        return;
+    } else if(![[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:currentSearchKey]){
+        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""),
                           nil /*default button*/,
                           nil /*alternate button*/,
                           nil /*other button*/,
-                          [tableView window],nil,NULL,NULL,NULL,NSLocalizedString(@"I was unable to open the file at \"%@.\"  You may wish to check permissions on the file or directory.", @"Informative text in alert dialog "), [fileURL path]);
+                          [tableView window],nil,NULL,NULL,NULL,NSLocalizedString(@"I was unable to open the file at \"%@.\"  You may wish to check permissions on the file or directory.", @""), [fileURL path]);
+        return;
     }
 }
 
-- (void)setSearchField:(NSSearchField *)aSearchField
+- (BOOL)hasIndexForCurrentDocument
 {
-    if (nil != searchField) {
-        // disconnect the current searchfield
-        [searchField setTarget:nil];
-        [searchField setDelegate:nil];  
-    }
+    id document = [self document];
+    OBASSERT(document);
     
-    searchField = aSearchField;
+    if(!document) return NO;
     
-    if (nil != searchField) {
-        [searchField setTarget:self];
-        [searchField setDelegate:self];
-        [self search:searchField];
-    }     
-}
-
-- (void)controlTextDidEndEditing:(NSNotification *)aNotification
-{
-    // we get this message with an empty string when committing an edit, or with a non-empty string after clearing the searchfield (use it to see if this was a cancel action so we can handle it slightly differently in search:)
-    if ([[aNotification object] isEqual:searchField])
-        searchFieldDidEndEditing = YES;
+    if(CFDictionaryGetValueIfPresent(indexDictionary, document, (const void **)&currentSearchIndex))
+        return YES;
+    
+    currentSearchIndex = [[BDSKSearchIndex alloc] initWithDocument:document];
+    CFDictionaryAddValue(indexDictionary, document, currentSearchIndex);
+    [currentSearchIndex release];
+    
+    return YES;
 }
 
 - (IBAction)search:(id)sender
 {
-    if ([NSString isEmptyString:[searchField stringValue]]) {
-        // iTunes/Mail swap out their search view when clearing the searchfield, so we follow suit.  If the user clicks the cancel button, we want the searchfield to lose first responder status, but this doesn't happen by default (maybe depends on whether it sends immediately?  Xcode seems to work correctly).  Don't clear the array when restoring document state, since we may need the array controller's selected objects.
-
-        // we get a search: action after the cancel/controlTextDidEndEditing: combination, so see if this was a cancel action
-        if (searchFieldDidEndEditing)
-            [[searchContentView window] makeFirstResponder:nil];
-
-        [self restoreDocumentState];
-    } else {
-        
-        searchFieldDidEndEditing = NO;
-        // empty array; this takes care of updating the table for us
-        [self setResults:[NSArray array]];        
-        [stopButton setEnabled:YES];
-        // set before starting the search, or we can end up updating with it == YES
-        canceledSearch = NO;
-        
-        // may be hidden if we called restoreDocumentState while indexing
-        if ([searchIndex isIndexing] && [progressView isHiddenOrHasHiddenAncestor]) {
-            [progressView setHidden:NO];
-            // setHidden:NO doesn't seem to apply to subviews
-            [indexProgressBar setHidden:NO];
-        }
-        
-        [search searchForString:BDSKSearchKitExpressionWithString([searchField stringValue])  withOptions:kSKSearchOptionDefault];
+    [currentSearchKey autorelease];
+    currentSearchKey = [[sender stringValue] copy];
+    
+    if(![self hasIndexForCurrentDocument]){
+        [self setResults:[NSArray array]];
+        return;
     }
+    
+    searchCanceled = NO;    
+    [self rebuildResultsWithNewSearch:currentSearchKey];
 }
 
-- (void)restoreDocumentState
+- (void)updateSearchIfNeeded
+{
+    if([searchContentView window] && [self document] && [currentSearchKey isEqualToString:@""] == NO)
+        [self rebuildResultsWithNewSearch:currentSearchKey];
+}
+
+- (void)restoreDocumentState:(id)sender
 {
     [self saveSortDescriptors];
     [self cancelCurrentSearch:nil];
-    
-    // disconnect the searchfield
-    [self setSearchField:nil];
-    
-    // hide this so it doesn't flash during the transition
-    [progressView setHidden:YES];
-    
     [[self document] restoreDocumentStateByRemovingSearchView:[self searchContentView]];
 }
 
@@ -276,73 +301,241 @@
     return results;
 }
 
-- (NSData *)sortDescriptorData
+- (void)setMaxValueWithDouble:(double)doubleValue
 {
-    [self window];
-    return [NSArchiver archivedDataWithRootObject:[resultsArrayController sortDescriptors]];
+    [maxValue autorelease];
+    maxValue = [[NSNumber alloc] initWithDouble:doubleValue];
 }
 
-- (void)setSortDescriptorData:(NSData *)data
+- (void)setMinValueWithDouble:(double)doubleValue
 {
-    [self window];
-    [resultsArrayController setSortDescriptors:[NSUnarchiver unarchiveObjectWithData:data]];
+    [minValue autorelease];
+    minValue = [[NSNumber alloc] initWithDouble:doubleValue];
+}
+
+- (NSNumber *)maxValue
+{
+    return maxValue;
+}
+
+- (NSNumber *)minValue
+{
+    return minValue;
 }
 
 #pragma mark -
 #pragma mark SearchKit methods
 
-- (void)search:(BDSKSearch *)aSearch didUpdateWithResults:(NSArray *)anArray;
+- (void)cancelCurrentSearch:(id)sender
 {
-    if ([search isEqual:aSearch]) {
-        
-        // don't reset the array
-        if (NO == canceledSearch)
-            [self setResults:anArray];
-        [indexProgressBar setDoubleValue:[searchIndex progressValue]];
-    }
-}
-
-- (void)search:(BDSKSearch *)aSearch didFinishWithResults:(NSArray *)anArray;
-{
-    if ([search isEqual:aSearch]) {
-        [stopButton setEnabled:NO];
-        
-        // don't reset the array if we canceled updates
-        if (NO == canceledSearch)
-            [self setResults:anArray];
-        [indexProgressBar setDoubleValue:[searchIndex progressValue]];
-        
-        // hides progress bar and text
-        [progressView setHidden:YES];
-    }
-}
-
-- (IBAction)cancelCurrentSearch:(id)sender
-{
-    [search cancel];
-    [stopButton setEnabled:NO];
+    OBASSERT([NSThread inMainThread]);
     
-    // this will cancel updates to the tableview
-    canceledSearch = YES;
+    if(currentSearch != NULL){
+        SKSearchCancel(currentSearch);
+        CFRelease(currentSearch);
+        currentSearch = NULL;
+    }
+    // @@ hack: this is required since we're using a delayed perform to re-search, which sets searchCanceled to NO
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    searchCanceled = YES;
+    [spinner stopAnimation:nil];
 }    
+
+- (void)rebuildResultsWithNewSearch:(NSString *)searchString
+{        
+    OBASSERT([NSThread inMainThread]);
+    
+    if([NSString isEmptyString:searchString]){
+        [NSObject cancelPreviousPerformRequestsWithTarget:self];
+        [spinner stopAnimation:self];
+        // iTunes/Mail swap out their search view when clearing the searchfield. don't clear the array, though, since we may need the array controller's selected objects
+        [self restoreDocumentState:self];
+    } else {
+    
+        // empty array; this takes care of updating the table for us
+        [self setResults:[NSArray array]];
+
+        [spinner startAnimation:self];
+        
+        SKIndexRef index = [currentSearchIndex index];
+            
+        // flushing a null index will cause a crash, so wait until the index is created
+        if(index == NULL){
+            [self performSelector:_cmd withObject:searchString afterDelay:0.1];
+        } else {
+            [stopButton setEnabled:YES];
+            [self setMaxValueWithDouble:0];
+            [self setMinValueWithDouble:0];
+            [self rebuildResultsWithCurrentString:searchString];
+        }
+    }
+}
+
+- (void)rebuildResultsWithCurrentString:(NSString *)searchString
+{
+    
+    if(currentSearch != NULL){
+        SKSearchCancel(currentSearch);
+        CFRelease(currentSearch);
+        currentSearch = NULL;
+    }
+    
+    SKIndexRef index = [currentSearchIndex index];
+    
+    NSAssert(index != NULL, @"Attempt to flush a null index");
+    SKIndexFlush(index);
+    
+    // While we're indexing, we need to create a new search object every time we update, or else no new results show up.
+    currentSearch = SKSearchCreate(index, (CFStringRef)searchString, kSKSearchOptionDefault);
+
+    // Prepare for all of the documents in the index to match; alternately, we could fetch them incrementally if(incomplete == TRUE)
+    CFIndex maxResults = SKIndexGetDocumentCount(index);
+    
+    NSZone *zone = [self zone];
+    
+    SKDocumentID *documentIDs = (SKDocumentID *)NSZoneCalloc(zone, maxResults, sizeof(SKDocumentID));
+    float *scores = (float *)NSZoneCalloc(zone, maxResults, sizeof(float));
+    CFIndex actualResults = 0;
+    
+    SKSearchFindMatches(currentSearch, maxResults, documentIDs, scores, 10, &actualResults);
+    
+    if(actualResults > 0){
+    
+        SKDocumentRef *skDocuments = (SKDocumentRef *)NSZoneCalloc(zone, actualResults, sizeof(SKDocumentRef));
+        SKIndexCopyDocumentRefsForDocumentIDs(index, actualResults, documentIDs, skDocuments);
+
+        NSMutableSet *newResults = [[NSMutableSet alloc] initWithCapacity:actualResults];
+        
+        BDSKSearchResult *searchResult;
+        SKDocumentRef skDocument;
+        CFURLRef url;
+        
+        // level indicator value is supposed to be a float, so we don't have to change the type
+        float score;
+        
+        // level indicator min/max values are supposed to be doubles
+        double tmpMax = [maxValue doubleValue];
+        double tmpMin = [minValue doubleValue];
+        NSString *pathKey;
+        
+        // get a pointer we can safely increment, since we need to free this memory later, so we need to keep a pointer to the beginning of each array
+        float *scoreIdx = scores;
+        SKDocumentRef *skDocumentIdx = skDocuments;
+        CFDictionaryRef properties;
+        NSString *title;
+        
+        while(searchCanceled == NO && actualResults--){
+            
+            // get the next URL from the array
+            skDocument = *skDocumentIdx++;
+            OBASSERT(skDocument);
+            
+            url = SKDocumentCopyURL(skDocument);
+            OBASSERT(url);
+            
+            // the table column is bound to the dictionary with an empty key path; the OATextIconCell is smart enough to recognize that it has a dictionary object value and ask for its keys
+            
+            // two files can't have the same path, so this should be a reasonable key for uniqueness testing
+            pathKey = [(NSURL *)url path];
+            searchResult = [[BDSKSearchResult alloc] initWithKey:pathKey];
+            
+            [searchResult setValue:(NSURL *)url forKey:@"url"];
+            [searchResult setValue:[NSImage imageForURL:(NSURL *)url] forKey:OATextWithIconCellImageKey];
+            CFRelease(url);
+            
+            // get our custom properties so we can display the item's title in the table, if possible
+            properties = SKIndexCopyDocumentProperties(index, skDocument);
+            if(properties == NULL || CFDictionaryGetValueIfPresent(properties, CFSTR("title"), (const void **)&title) == FALSE)
+                title = pathKey;
+            OBASSERT(pathKey);
+            
+            NSDictionary *attrs = [[NSDictionary alloc] initWithObjectsAndKeys:[tableView font], NSFontAttributeName, nil];
+            NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithTeXString:title attributes:attrs collapseWhitespace:NO];
+            [attrs release];
+            [searchResult setValue:attributedTitle forKey:OATextWithIconCellStringKey];
+            [searchResult setValue:title forKey:@"title"];
+            [attributedTitle release];
+
+            if(properties) CFRelease(properties);
+            CFRelease(skDocument);
+            
+            // get the next score from the array; @@ hopefully the URL and score correspond, although it's not clear from the documentation
+            score = *scoreIdx++;
+            
+            // these scores are arbitrarily scaled, so we'll keep track of the search kit's max/min values
+            tmpMax = MAX(score, tmpMax);
+            tmpMin = MIN(score, tmpMin);
+            
+            // the score for this object
+            [searchResult setValue:[NSNumber numberWithFloat:score] forKey:@"score"];
+            
+            [newResults addObject:searchResult];
+            [searchResult release];
+        }
+        
+        [self setMaxValueWithDouble:tmpMax];
+        [self setMinValueWithDouble:tmpMin];
+        
+        // If we already have search matches, we need to preserve the entries we've already added in a bindings-compatible manner.  Since the objects in the set test for uniqueness by comparing file paths and work with KVC, we avoid duplicating results in the table, and the details of preserving selection and sorting will be nicely handled by the array controller.
+        NSMutableArray *kvResults = [self mutableArrayValueForKey:@"results"];
+        NSMutableSet *currentResults = [[NSMutableSet alloc] initWithArray:results];
+        [newResults minusSet:currentResults];
+        [kvResults addObjectsFromSet:newResults];
+        
+        [currentResults release];
+        [newResults release];
+        
+        NSZoneFree(zone, skDocuments);
+
+    }
+    
+    NSZoneFree(zone, documentIDs);
+    NSZoneFree(zone, scores);
+    
+    if(searchCanceled || ![currentSearchIndex isIndexing]){
+        [spinner stopAnimation:nil];
+        [stopButton setEnabled:NO];
+    } else if([currentSearchIndex isIndexing])
+        [self performSelector:_cmd withObject:searchString afterDelay:1];
+    
+}
 
 #pragma mark -
 #pragma mark Document interaction
 
-- (void)stopSearching
+- (void)handleDocumentCloseNotification:(NSNotification *)notification
 {
-    // cancel the search
-    [self cancelCurrentSearch:nil];
+    id document = [notification object];
+    BDSKSearchIndex *index = nil;
+    [dictionaryLock lock];
+    if(CFDictionaryGetValueIfPresent(indexDictionary, document, (const void **)&index) && index == currentSearchIndex)
+        [self cancelCurrentSearch:nil];
+    // cancel is required to terminate the run loop of the asynchronous index object and dispose of it
+    [index cancel];
+    CFDictionaryRemoveValue(indexDictionary, document);
+    [dictionaryLock unlock];
     
-    // stops the search index runloop so it will release the document
-    [searchIndex cancel];
-    [searchIndex release];
-    searchIndex = nil;
+    // necessary, otherwise we end up creating a retain cycle
+    if(document == currentDocument){
+        [self setDocument:nil];
+        [objectController setContent:nil];
+	}
+}
+
+// As long as this window is main, [NSDocumentController currentDocument] returns nil, so we have to keep track of the document manually; since this is an inspector (though not a panel yet), it needs to track which document is main
+- (void)windowDidBecomeMain:(NSNotification *)notification
+{
+    NSWindow *window = [notification object];
+    NSDocument *document = [[NSDocumentController sharedDocumentController] documentForWindow:window];
+    if(document != nil) // BibEditors have no document, so we shouldn't set it from them
+        [self setDocument:document];
 }
 
 - (void)saveSortDescriptors
 {
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[self sortDescriptorData] forKey:BDSKFileContentSearchSortDescriptorKey];
+    NSData *sortDescriptorData = [NSArchiver archivedDataWithRootObject:[resultsArrayController sortDescriptors]];
+    OBPRECONDITION(sortDescriptorData);
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:sortDescriptorData forKey:BDSKFileContentSearchSortDescriptorKey];
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -353,6 +546,24 @@
 - (void)handleApplicationWillTerminate:(NSNotification *)notification
 {
     [self saveSortDescriptors];
+}
+
+// We care about the document accessor and KVO because our window's title is bound to its file name
+- (void)setDocument:(NSDocument *)document
+{
+    if(document != nil)
+        NSParameterAssert([document conformsToProtocol:@protocol(BDSKSearchContentView)]);
+
+    // @@ ok to retain as long as handleDocumentCloseNotification: comes first
+    if (document != currentDocument) {
+        [currentDocument release];
+        currentDocument = [document retain];
+    }
+}    
+
+- (NSDocument *)document
+{
+    return currentDocument;
 }
 
 #pragma mark TableView delegate

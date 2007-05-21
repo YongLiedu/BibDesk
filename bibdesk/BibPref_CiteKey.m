@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 11/4/04.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
 
 // these should correspond to the items in the popups set in IB
 static NSString *presetFormatStrings[] = {@"%a1:%Y%u2", @"%a1:%Y%u0", @"%a33%y%m", @"%a1%Y%t15"};
-static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%s{}[][][]0", @"%c{}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
+static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%s{}[][][]0", @"%c{}", @"%u0", @"%U0", @"%n0", @"%0"};
 
 - (void)dealloc{
     [coloringEditor release];
@@ -117,28 +117,25 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)citeKeyHelp:(id)sender{
-    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"CitationKeys" inBook:helpBookName];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"Citation-Keys" inBook:@"BibDesk Help"];
 }
 
 - (IBAction)formatHelp:(id)sender{
-    NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"AutogenerationFormatSyntax" inBook:helpBookName];
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"Autogeneration-Format-Syntax" inBook:@"BibDesk Help"];
 }
 
 - (IBAction)changeCiteKeyAutogenerate:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyAutogenerateKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)changeCiteKeyLowercase:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyLowercaseKey];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 - (IBAction)setFormatCleanOption:(id)sender{
 	[defaults setInteger:[[sender selectedCell] tag] forKey:BDSKCiteKeyCleanOptionKey];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
@@ -163,11 +160,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[self citeKeyFormatChanged:sender];
 	
 	// select the 'arbitrary' numbers
-	if ([newSpecifier isEqualToString:@"%0"] || [newSpecifier isEqualToString:@"%%"]) {
+	if ([newSpecifier isEqualToString:@"%0"]) {
 		selRange.location -= 1;
 		selRange.length = 1;
 	}
-	else if ([newSpecifier isEqualToString:@"%f{}0"] || [newSpecifier isEqualToString:@"%s{}[][][]0"] || [newSpecifier isEqualToString:@"%c{}"] || [newSpecifier isEqualToString:@"%i{}0"]) {
+	else if ([newSpecifier isEqualToString:@"%f{}0"] || [newSpecifier isEqualToString:@"%s{}[][][]0"] || [newSpecifier isEqualToString:@"%c{}"]) {
         selRange.location += 1;
 		selRange.length = 0;
 	}
@@ -211,7 +208,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		}
 	}
 	[[NSApp delegate] setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-	[self valuesHaveChanged];
+	[self updateUI];
 }
 
 #pragma mark Format sheet stuff
@@ -239,12 +236,12 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	formatString = [defaults stringForKey:BDSKCiteKeyFormatKey];
 	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:NULL]) {
 		// The currently set cite-key format is valid, so we can keep it 
-		otherButton = NSLocalizedString(@"Revert to Last", @"Button title");
+		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to last valid autogeneration format");
 	}
 	
-	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format", @"Message in alert dialog when entering invalid cite key format") 
-										 defaultButton:NSLocalizedString(@"Keep Editing", @"Button title") 
-									   alternateButton:NSLocalizedString(@"Revert to Default", @"Button title") 
+	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format",@"") 
+										 defaultButton:NSLocalizedString(@"Keep Editing", @"Keep Editing") 
+									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to default autogeneration format") 
 										   otherButton:otherButton
 							 informativeTextWithFormat:@"%@", error];
 	int rv = [alert runSheetModalForWindow:formatSheet];
@@ -274,11 +271,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	NSString *msg = [sender toolTip];
 	
 	if ([NSString isEmptyString:msg]) {
-		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.", @"Informative text in alert dialog");
+		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@"");
 	}
 	
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format", @"Message in alert dialog when entering invalid cite key format") 
-									 defaultButton:NSLocalizedString(@"OK", @"Button title") 
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Cite Key Format",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
 								   alternateButton:nil 
 									   otherButton:nil 
 						 informativeTextWithFormat:@"%@", msg];
@@ -289,8 +286,14 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:(NSString *)message{
-    [formatWarningButton setToolTip:set ? message : nil];
-	[formatWarningButton setHidden:set == NO];
+	if(set){
+		[formatWarningButton setImage:[NSImage cautionIconImage]];
+		[formatWarningButton setToolTip:message];
+	}else{
+		[formatWarningButton setImage:nil];
+		[formatWarningButton setToolTip:nil];
+	}
+	[formatWarningButton setEnabled:set];
 	[formatSheetField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?
 }
 

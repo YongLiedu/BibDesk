@@ -2,17 +2,6 @@
 @c This is the manual for BibDesk.
 
 @c ======================================================================================
-@c Localization Notes
-@c ======================================================================================
-@c 
-@c Localization starts after "The content of the Help Pages starts here...".
-@c Command names start with '@' and should not be localized.
-@c Lines starting with @c, such as this one, are comments and should not be localized.
-@c Arguments are written on the line after the command, or as a comma-separated list within braces. 
-@c Most arguments should be localized, but not for @end.
-@c References (first argument of @ref or @xref, or between * and :: in a @menu) should be exactly the same as their target (argument of @node or @anchor). 
-
-@c ======================================================================================
 @c Document info
 @c ======================================================================================
 @c
@@ -73,15 +62,6 @@ Option-Cmd-\key\
 @end ifnothtml
 @end macro
 
-@macro ctrcmd {key}
-@html
-&#8963;&#8984;\key\
-@end html
-@ifnothtml
-Control-Cmd-\key\
-@end ifnothtml
-@end macro
-
 @c Some macros for typesetting menu and button titles.
 
 @macro menutitle {text}
@@ -117,11 +97,10 @@ Control-Cmd-\key\
 @c ======================================================================================
 
 @ifnottex
-@c DO NOT LOCALIZE THE NEXT LINE
 @node Top
 @top BibDesk 
 
-@image{gfx/BibDeskIcon,,, BibDesk}
+@image{gfx/BibDeskIcon}
 @heading About BibDesk
 
 BibDesk @value{VERSION} is a BibTeX editor and reference manager. Because it is a
@@ -146,7 +125,6 @@ about the BibTeX file format.
 * Opening and Importing Files:: Opening new and existing files of different formats
 * Searching Your Database:: Searching references in the BibDesk database
 * Managing References:: Browsing, adding, and editing references
-* Searching External Databases:: Searching external databases
 * Citation Keys::       Automatically generating citation keys
 * AutoFile::            Keeping local copies of articles organized
 * Inserting Citations:: Adding citation commands in your favorite editor
@@ -159,8 +137,6 @@ about the BibTeX file format.
 @heading Online Resources
 @itemize
 @item @uref{http://bibdesk.sourceforge.net, BibDesk Website}
-@item @uref{http://bibdesk.sourceforge.net/wiki/, BibDesk Wiki}
-@item @uref{http://bibdesk.sourceforge.net/wiki/index.php/FAQ, BibDesk FAQ}
 @item @uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
 @item @uref{http://bibdesk.sourceforge.net/manual/, Online Copy of This Manual}
 @end itemize
@@ -183,7 +159,7 @@ about the BibTeX file format.
 
 Portions of BibDesk:
 
-Copyright @copyright{} 2001 - 2007 Michael O. McCracken@*
+Copyright @copyright{} 2001 - 2006 Michael O. McCracken@*
 Copyright @copyright{} many others@*
 
 @c ======================================================================================
@@ -338,7 +314,7 @@ such as @samp{van} or @samp{van den} and suffixes such as @samp{Jr.} or @samp{II
 OK:
 
 @example
-"van den Huevel, Jr., Johan A"
+"van den Huevel, Johan A, Jr."
 @end example
 
 @heading BibTeX Macros
@@ -425,8 +401,7 @@ walks you through a semi-automatic creation process.
 
 The canonical reference for BibTeX itself is Oren Patashnik's
 @uref{http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/btxdoc.pdf, BibTeXing},
-which you may have already as @uref{file:///usr/local/teTeX/share/texmf.tetex/doc/bibtex/base/btxdoc.dvi, btxdoc.dvi} 
-or @uref{file:///usr/local/gwTeX/texmf.texlive/doc/bibtex/base/btxdoc.pdf, btxdoc.pdf} 
+which you may have already as @uref{/usr/local/teTeX/share/texmf.tetex/doc/bibtex/base/btxdoc.dvi, btxdoc.dvi} 
 in your TeX tree. Standard references such as @samp{The LaTeX Companion} are very
 helpful in understanding and debugging BibTeX, and searching the
 @uref{http://www.tex.ac.uk/cgi-bin/texfaq2html, TeX FAQ} is usually a
@@ -592,64 +567,45 @@ You will be offered the choice to do perform this action immediately.
 The quick search field lets you enter sub-strings that might be in
 author names, titles or dates, and the reference view will display
 only matching publications. There are several built-in options. For
-example, ``Any Fields'' (search every field except the pub type at once), and ``Person'',
-which searches Author, Editor, and any other field defined as a ``Person'' field in preferences.
+example, "All Fields" (search every entry except the pub type at once),
+Keywords (search the keywords entries) and Pub Type (search by pub
+type).
 
 @image{gfx/quickSearchField}
 
-The quick search field is configurable using its menu (click on the triangle in the text box).
-The default behavior is to do a simple substring search, but advanced options for Apple's Search Kit
-technology are available as well.  These options are described below.
+The quick search field is configurable by selecting @menutitle{Add Field@dots{}},
+which allows you to add any string you want to the menu. If a
+publication has that field, it will be searched. Adding the field
+"Cite Key" (with that exact capitalization) will allow you to search
+the citation key of publications. ("All Fields" also searches the
+citation key.)
 
 @node Advanced Search Options
 @section Advanced Search Options
 
 @cindex boolean search
-@cindex diacritic accents in search
+@cindex accents in search
+@cindex braces in search
 
-For normal (non-similarity-based) queries, Search Kit discerns the type of query---Boolean, prefix, phrase, and so on---from the syntax of the query itself. Moreover, Search Kit supports multiple query types within a single search. For example, the following query includes Boolean, prefix, and suffix searching:
+BibDesk's quick search field also supports a Boolean search, using
+@samp{+} for @samp{and} or @samp{|} for @samp{or} operators (no quotes), as
+Apple's Help Viewer does in Mac OS X 10.4 and greater.
+Please note that grouping is not supported at this
+time.  If you do not explicitly search for accented characters, the
+search feature will return results with accented characters, so it is
+slightly fuzzy; further, case is ignored unless you explicitly enter
+uppercase letters.  Sound confusing?  
+For example, searching for @samp{Burger,} could return matches containing
+@samp{R. B@ue{}rger} and @samp{J. Burger,} but not @samp{Hamburger.}  Searching for
+@samp{B@ue{}rger} will only return items that match the case and accent exactly,
+such as @samp{R. B@ue{}rger.}
 
-@samp{appl* OR *ing}
-
-This query will return documents containing words that begin with ``appl'' as well as documents that contain words that end with ``ing''.
-
-For similarity searches, specified with the kSKSearchOptionFindSimilar flag in the inSearchOptions parameter, SKSearchCreate ignores all query operators.
-
-The query operators that SKSearchCreate recognizes for non-similarity searching are:
-
-@multitable {searchKitOperators} {}
-@headitem Operator @tab Meaning
-@item AND 
-@tab Boolean AND
-@item & 
-@tab Boolean AND
-@item <space> 
-@tab Boolean AND by default when no other operator is present
-@item OR 
-@tab Boolean inclusive OR
-@item | 
-@tab Boolean inclusive OR
-@item NO 
-@tab Boolean NOT
-@item ! 
-@tab Boolean NOT
-@item * 
-@tab Wildcard for prefix or suffix; surround term with wildcard characters for substring search (default in BibDesk)
-@item (
-@tab Begin logical grouping
-@item )
-@tab End logical grouping
-@end multitable
-
-The operators AND, OR, and NOT are case sensitive.
-
-Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `à', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
-
-Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'.
+As mentioned elsewhere, braces are ignored when searching, so searching
+for @samp{BibDesk} will find @samp{@{B@}ib@{D@}esk} as well as @samp{BibDesk.}  Of course,
+this will not find @samp{bibdesk}, since uppercase letters were used in this
+example.
 
 @node Find and Replace
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{FindAndReplace}
 @section Find and Replace
 
 @cindex searching
@@ -658,32 +614,24 @@ Search Kit further normalizes query strings and indexes by stripping diacritical
 @kindex Shift-Cmd-F
 
 BibDesk supports Find and Replace operations on bibliographies, either on the entire
-file or selected items.  Use the @menutitle{Database Find and Replace@dots{}} item of the 
+file or selected items.  Use the @menutitle{Find and Replace@dots{}} item of the 
 @menutitle{Edit} menu (key shortcut @shiftcmd{F}) to show the find panel.
 
 @image{gfx/findAndReplace}
 
 In this panel, you can enter the name of a field to search (such as Author or Title),
 and choose whether the search is case-sensitive and whether it searches only the
-current selection or all items in the current groups.  The @buttontitle{Find Next} button 
-will highlight eachmatching reference in turn, and the @buttontitle{Replace & Find} button 
-will replace the text in the currently selected entry and highlight the next match.
-The @buttontitle{Replace All} button will replace all entries matching the search, either
-in the current selection or in all the displayed items (depending on the check box).
+current selection or all items.  The @buttontitle{Find Next} button will highlight each
+matching reference in turn, and the @buttontitle{Replace & Find} button will replace
+the text in the currently selected entry and highlight the next match.  The
+@buttontitle{Replace All} button will replace all entries matching the search, either
+in the current selection or the entire file (depending on the check box).
 
 Note that this feature is complementary to the @ref{Quick Search} feature, and does
 not replace it.  For instance, the Find and Replace panel will not match cross-referenced
 (inherited) fields, and does not strip accents or braces.  Further, searching by
 "All Fields" is not possible at this time, since it doesn't make sense in the context of
 the Find and Replace operation.
-
-@heading Batch-Adding a Field
-
-This panel also allows you to set the value of a field for all (selected) items at once.
-The field will be added if necessary.  Check the "Overwrite or Add this field" button 
-to the right of the field name, and enter the value to set in the "Replace with" field.
-Then hit the @buttontitle{Replace All} button to set this field in all the currently 
-selected or displayed items (depending on your settings).
 
 @heading Regular Expressions
 
@@ -747,7 +695,7 @@ items in your database.
 While the initial search will be somewhat slow as files are indexed, subsequent searches
 will be very fast (although the index will be rebuilt when you close and reopen the document).
 For information on supported search query features (wildcards, Boolean operators), see the
-@uref{http://developer.apple.com/documentation/UserExperience/Reference/SearchKit/index.html, SearchKit Reference}.
+@uref{http://developer.apple.com/documentation/UserExperience/Reference/SearchKit/SearchKitReference/chapter_1.2_section_6.html, SearchKit Reference}.
 
 @node Searching With Spotlight
 @section Searching With Spotlight
@@ -774,8 +722,8 @@ to the Spotlight index, but this does not allow you to identify a particular rec
 @heading Topics
 
 @menu
-* Adding New References::           
-* Importing References::           
+* Adding References::           
+* Adding References From Text Sources::           
 * Editing References::          
 * Deleting References::    
 * Browsing References::       
@@ -789,11 +737,10 @@ to the Spotlight index, but this does not allow you to identify a particular rec
 
 @c --------------------------------------------------------------------------------------
 
-@node Adding New References
-@section Adding New References
+@node Adding References
+@section Adding References
 @abstract{How to add new references to a database.}
 
-@cindex adding references
 @kindex Cmd-N
 
 New references are added to the bibliography 
@@ -801,38 +748,13 @@ with @menutitle{New Reference} from the @menutitle{Publication} menu, the keyboa
 shortcut @cmd{N}, or the @buttontitle{New Reference} toolbar button.
 Any of these commands will open an editor window with fields for various reference types.
 
-@node Importing References
-@section Importing References
-@abstract{How to add existing references to a database.}
-
-@cindex importing references
-
-There are many ways to add existing reference items to a BibDesk database.
-@itemize @bullet
-@item @ref{Drag and Drop} or @ref{Copy and Paste} formatted text on the database window.
-@item @ref{Drag and Drop} or @ref{Copy and Paste} formatted text files on the database window.
-@item @ref{Drag and Drop} or @ref{Copy and Paste} files or URLs to link on the database window.
-@item @ref{Drag and Drop} or @ref{Copy and Paste} on a detail editor window.
-@item @ref{Drag and Drop}, @ref{Copy and Paste}, or @menutitle{Merge In} items from @ref{External Groups}.
-@item Copy text to clipboard and choose @ref{Adding References From Text Sources, @menutitle{New Publications from Clipboard}}.
-@item Choose @ref{Adding References From Text Sources, @menutitle{New Publications from File}} to import from a file.
-@item Choose @ref{Adding References From Text Sources, @menutitle{New Publications from Web}} to import from a web source.
-@item Select formatted text and choose @menutitle{Add to Bibliography} from @ref{Services, System Services}.
-@item Open other file and @ref{Drag and Drop} or @ref{Copy and Paste} between database windows.
-@item Choose @ref{Importing From Other Programs, @menutitle{Open Using Temporary Cite Keys}} to fix bibtex with missing cite keys.
-@item Choose @ref{Opening a File, @menutitle{Open Using Filter}} to preprocess data.
-@end itemize
-
-Here @samp{formatted text} means bibliography data in any of a number of formats that BibDesk can recognize.
-This includes BibTeX, RIS, Medline (PubMed), MARC, JSTOR, and ISI Web of Science. 
-
-More details are given in the following sections.
+To add existing references to BibDesk, a variety of methods are outlined in
+the following sections.
 
 @menu
 * Drag and Drop::
 * Copy and Paste::
 * Services::
-* Adding References From Text Sources::           
 @end menu
 
 
@@ -842,29 +764,18 @@ More details are given in the following sections.
 @cindex drag and drop
 @cindex add to bibliography
 
-References can also be added to a bibliography by dragging entries
-from a text source (text editor, web browser) into BibDesk's main publicationslist.
-The text can be BibTeX, RIS (Reference Manager), MARC, JSTOR or ISI Web Of Science formatted text.
+References can also be added to a bibliography by dragging an entry
+from a text source (text editor, web browser) into BibDesk's main publications
+list.  The text can be BibTeX, RIS (Reference Manager), JSTOR or ISI Web Of Science formatted text.
 Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
-
-You can also drag a file containing formatted text in any of these formats and drop them into BibDesk's
-main publications list. 
-
-You can easily add a new bibliography item that links to a file, such as a PDF file.
-Just drag the file from a Finder window (or anywhere else) and drop it into BibDesk's
-main publications list. Similarly, you can add a new bibliography item linking to a remote URL
-by dropping a @samp{webloc} file on the main publications list. 
 
 References can be dragged from the main publications list (or another source)
 and dropped on an editor window, as well, which will
 only set non-empty fields of the publication; this can be quite useful when you are 
 entering a number of items from a common source.  If you do want to overwrite all fields
 when dragging to an editor, simply hold down the option key while you drag.
-
-Moreover, references can be dragged from one publication list and dropped on another,
-to easily copy items between documents. 
 
 @node Copy and Paste
 @subsection Copy and Paste
@@ -874,10 +785,7 @@ to easily copy items between documents.
 
 References can be added to a publications list by copying them from another
 source and pasting them into BibDesk's main window.  The text being pasted must
-be BibTeX, RIS (Reference Manager), MARC, JSTOR or ISI Web Of Science formatted text, or an error will occur.
-
-Furthermore, everything that can be @ref{Drag and Drop, dragged and dropped} on a BibDesk window can also
-be added using Copy and Paste. 
+be BibTeX, RIS (Reference Manager), JSTOR or ISI Web Of Science formatted text, or an error will occur.
 
 @node Services
 @subsection Services
@@ -894,10 +802,10 @@ that supports Services (such as OmniWeb), and choose the @menutitle{Add to Bibli
 menu item of BibDesk's @menutitle{Services} submenu.
 The selected text will be added to the frontmost document in BibDesk automatically.
 
+@c --------------------------------------------------------------------------------------
+
 @node Adding References From Text Sources
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{AddingReferencesFromTextSources}
-@subsection Adding References From Text Sources
+@section Adding References From Text Sources
 @abstract{Adding new references from text sources.}
 
 @cindex creating references, from pasteboard
@@ -919,13 +827,8 @@ to add references from an arbitrary text file, or the
 @menutitle{Add New Publications from Web} menu item (key shortcut @cmd{L}), 
 to add publactions from a website. 
 
-If the clipboard or the file contains formatted text that BibDesk can understand, 
-such as BibTeX, RIS, Medline (PubMed), MARC, JSTOR, and ISI Web of Science formatted text, 
-Bibdesk will parse the text and the new references are immediately added to the database 
-instead of openingthe sheet to do it by hand. 
-
 Examples of reference sources that this would be convenient for are
-emails, conference proceedings web sites, and the text from a list of
+emails, conference proceedings web sites, and the text from a list of
 citations at the end of a publication.
 
 When the sheet opens, it loads the data on the clipboard into the
@@ -964,9 +867,7 @@ You can make adding data faster by double-clicking the name of
 the field you want the selected text to fill and it will be added for
 you. You can also use the key shortcuts @cmd{&#0048} through @cmd{9} or 
 @optcmd{&#0048} through @optcmd{9} to copy the selected text over to the 
-corresponding field. If you hold down the Control key at the same time, 
-the selected text will be appended to the field value. 
-Alternatively, you can type @cmd{=} to temporarily 
+corresponding field. Alternatively, you can type @cmd{=} to temporarily 
 move to the table to select a field to fill. After that, start typing 
 the field name or use the arrow keys to find the field and hit the 
 Enter key to fill it and return to what you were doing. Use the 
@@ -993,16 +894,11 @@ You can then fill in the appropriate fields for your reference. The
 type pop-up menu lets you choose from the canonical BibTeX publication
 types (e.g., article, book, phdthesis). Field titles highlighted in
 red represent required fields for the chosen reference type (article
-in the case of the above screenshot). 
-
-Fields can be added with the @menutitle{+} button in the status bar. 
-You can also add or remove field using the appropriate menu item in the 
-action pop-up menu in the status bar (the button with the little gear icon.) 
-You can also change the name of any custom field using the action menu. 
-This can also be done by double-clicking the field name. 
-Note that this is not allowed for standard fields.  
-Also, BibDesk verifies that cite keys are unique before committing 
-a reference to the bibliography.
+in the case of the above screenshot). Fields can be added and removed
+with the plus and minus buttons to the right of the reference-type
+pop-up menu.  Also, BibDesk verifies that
+cite keys are unique before committing a reference to the
+bibliography.
 
 When editing, you can use a key sequence (@opt{}-esc) to pop up a list
 of similar items in your bibliography for autocompletion, just as you
@@ -1198,7 +1094,7 @@ item for editing.
 
 References can be deleted by selecting the reference and choosing
 @menutitle{Delete} from the @menutitle{Edit} menu or pressing the @buttontitle{Delete}
-key. When a group other than the "Library" group is selected, 
+key. When a group other than the "All Publications" group is selected, 
 the selected items will be removed from any currently selected smart group, 
 they will not be deleted from the database. You can force them to be deleted from the 
 database by holding the @buttontitle{Option} key down while choosing @menutitle{Delete}. 
@@ -1213,7 +1109,7 @@ pressing the @buttontitle{Delete} button will remove any selected smart groups.
 
 The @menutitle{Cut} menu item, with keyboard shortcut @cmd{X}, copies the selected publications before deleting them. 
 As for the @menutitle{Delete} menu item, this will remove items from selected smart groups 
-when the "Library" group is not selected, while holding down the @buttontitle{Option} key 
+when the "All Publications" group is not selected, while holding down the @buttontitle{Option} key 
 will always delete the items from the database. 
 
 @c --------------------------------------------------------------------------------------
@@ -1261,22 +1157,6 @@ Normally, the Title column will display the content of a Title field, if it exis
 For inbook type items, the Title refers to the title of the whole work. 
 Therefore the Chapter field is added to the title displayed in the Title column. 
 If this is empty, the Pages field is used, if available. 
-
-@subheading Authors and Editors 
-@cindex Authors and Editors
-
-You have the option of showing Authors together or separately.  If you simply
-select 'Author' you will get all the authors connected by 'and', if you choose 
-First Author, well, you just get the First Author.
-
-References can have both Authors and Editors.  Most of the time the Authors are of primary
-interest, but some books don't have Authors, just Editors.  If you select one of the Author
-options (eg First Author) and there is only an Editor, then the field will be blank.
-To avoid this choose the equivalent Author or Editor column (eg First Author or Editor),
-and the Editors will only be shown if there are no Authors.
-
-In some academic fields the last author is the head of the lab, and users find it convenient
-to sort their papers by the last author.  This can be done by adding the Last Author [or Editor] field.
 
 @subheading Container 
 @cindex Container
@@ -1459,34 +1339,31 @@ current group field).
 @section Grouping References
 @abstract{Ways of grouping references in a database.}
 
-@cindex group
-
 @heading Grouping References
 
 BibDesk offers a variety of ways to browse, organize, and search your bibliographic database.
-BibDesk allows you to group references in a BibTeX file, similar to the way in which Apple
-Mail allows you to group messages in folders, or iTunes in playlists.  
-Field Groups, Smart Groups and Static Groups are the easiest way to keep a large file separated 
-into distinct categories without managing many small files scattered around your hard drive.
+Field Groups and Smart Groups are the easiest way to keep a large file separated into distinct
+categories without managing many small files scattered around your hard drive.
 
 @menu
-* Field Groups::     Grouping references based on a particular field.
-* Smart Groups::     Grouping references based on specific criteria.
-* Static Groups::    Grouping arbitrary sets of references.
-* External Groups::  Importing groups of items from an external source.
+* Field Groups::  Grouping references based on a particular field.
+* Smart Groups::  Grouping references based on specific criteria.
 @end menu
 
 @node Field Groups
 @subsection Field Groups
 
-@cindex field group
+@cindex group
+@cindex smart group
 
 @subheading Features
 
-Field Groups groups organize entries based on the contents of a certain field, 
-the @samp{group field,} such as the @samp{Group} or @samp{Keywords} field.
+BibDesk allows you to group references in a BibTeX file, similar to the way in which Apple
+Mail allows you to group messages in folders, or iTunes in playlists.  
+Since the BibTeX file format doesn't provide a way to store metadata such as group information,
+BibDesk's groups are based on the contents of a certain field, such as the @samp{Group} field.
 
-In order to select a field to use as a group field, use the popup menu at the top of the list
+In order to select a field to use as a group source, use the popup menu at the top of the list
 on the left-hand side of BibDesk's window.  Add a BibTeX field name to this menu, or use one
 of the existing options.  When you choose a group field from the popup menu, a list of all
 possible groups is constructed, using the contents of the selected field for all entries in
@@ -1498,15 +1375,10 @@ Suppose you use the @samp{Keywords} field to group entries.  If you
 have an entry with @samp{Keywords = @{models, constitutive relation, cohesion@}}
 and another entry with @samp{Keywords = @{Models, constitutive, stress, cohesion@}},
 your group list will show 6 groups: 
-@samp{models, constitutive relation, cohesion, Models, constitutive, stress}.
-A few points to note:  groups are case-sensitive, and partial matches are not accepted, and
+@samp{models, constitutive relation, cohesion, Models, constitutive, stress}.  A
+few points to note:  groups are case-sensitive, and partial matches are not accepted, and
 one group (cohesion) will have two entries visible when it is selected in the group list.
 Separators that are recognized for groups are @samp{;:,} and @samp{and}, at present.
-@samp{and} will be ignored as separator when the entry contains any of the separator characters. 
-The separator characters can be changed with a hidden preference using Terminal.app. 
-To change it to, say, @samp{;,}, quit BibDesk and enter the following command in Terminal (exclude double quotes): 
-``@code{defaults write -app BibDesk BDSKGroupFieldSeparatorCharactersKey ';,'}''
-then hit return.
 
 You can add entries or files to a group via drag-and-drop by dragging the selected files to a
 particular group's icon.  New items created in BibDesk are added to the presently selected group, 
@@ -1516,14 +1388,14 @@ using @samp{Journal} as a group, and adding publications to that group!).
 The default group separator is a semicolon followed by a single space @samp{; }, but this can be
 changed with a hidden preference using Terminal.app.  To change the separator to a comma
 followed by a single space, quit BibDesk and enter the following command in Terminal (exclude double quotes): 
-``@code{defaults write -app BibDesk BDSKDefaultGroupFieldSeparatorKey ', '}''
+``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKDefaultGroupFieldSeparatorKey ', '}''
 then hit return.
 
 @subheading Editing
 
-Field groups can be edited:  Changing the name of the group, will change the current value of
-the current group field for all the items in the group.  In the case of authors, they will be matched 
-using fuzzy logic, so be sure that you really want to change the author name for all items in the group!
+Groups can be edited, which will change the relevant field for all items in the group.  
+In the case of authors, they will be matched using fuzzy logic, so
+be sure that you really want to change the author name for all items in the group!
 
 For authors, you can get more info about the author using the command @menutitle{Get Info} 
 (@cmd{I}) from the @menutitle{File} menu. 
@@ -1557,44 +1429,29 @@ consistent across versions of BibDesk.  Some BibTeX editors may not preserve the
 field, unfortunately (early versions of BibDesk didn't preserve it, either).
 
 Text-based fields are compared case-insensitively, for the criteria specified.  The BibDesk @samp{Date-Modified}
-and @samp{Date-Created} fields are handled specially.  You can enter date ranges in various convenient ways.  
-Date comparisons are automatically updated several times per day, so the relative comparison should
+and @samp{Date-Created} fields are handled specially, and only @samp{comes before} and @samp{comes after} are
+allowable comparisons.  Date comparisons are updated several times per day, so the relative comparison should
 always be true.
 
-@node Static Groups
-@subsection Static Groups
+@subheading Notes
 
-@cindex static group
-@kindex Control-Cmd-G
+To enter a date, you should use a fixed date in your system's short date format (see the
+International pane of System Preferences), or a relative date such as ``ten days ago.''
+The following are examples of supported expressions:
 
-BibDesk supports static groups that contain an arbitrary set of items.  To add a static group, 
-use the command @menutitle{New Static Group} (@ctrcmd{G}) from the @menutitle{File} menu.  
-To add publications to the group, just drag the items and drop them on the group. 
+@itemize
+@item @samp{an hour ago}
+@item @samp{a week ago}
+@item @samp{15 days ago}
+@item @samp{one day ago}
+@item @samp{a fortnight ago}
+@item @samp{last Tuesday at dinner}
+@end itemize
 
-@node External Groups
-@subsection External Groups
-
-@cindex external group
-
-BibDesk can automatically fetch publications from external sources.  There are four types of external groups.  
-
-Shared Groups contain items that others share on your local network.  
-They are fetched using Bonjour.  This is similar to sharing of music files in iTunes.  
-You can turn on sharing in the @ref{Sharing Preferences,Sharing Preferences}.  
-
-External File Groups get their items from a remote URL on the internet or from a local file on your computer. 
-
-Script Groups generate their items using a script, either a shell script or an AppleScript.  
-For example, the script can download content from a remote location and parse the content to get the items.  
-The script should return valid BibTeX. 
-
-@ref{Searching External Databases, Search Groups} contain items obtained from searching an external database, 
-such as PubMed or libraries allowing z39.50 searches. 
-
-Items in external groups are not included in the Library and can not be edited.  
-You can add external items to your Library by dragging them to the Library group.  
-You can also use the @menutitle{Merge In External Publications} menu item in the 
-@menutitle{File} menu. This wil only add items that are not yet in your Library. 
+Digits 1--10 are recognized as words @samp{one}@dots{}@samp{ten}, but you need to use numerals for anything higher 
+(e.g. @samp{twenty days ago} will not work, but @samp{20 days ago} will work).  You can also use 
+@samp{one week from tomorrow} and so forth, but that's not likely to be much use with @samp{Date-Modified} 
+and @samp{Date-Created}.
 
 @c --------------------------------------------------------------------------------------
 
@@ -1617,201 +1474,7 @@ provide the necessary AppleScript commands for their favorite software.
 
 @c ======================================================================================
 
-@node Searching External Databases
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{SearchingExternalDatabases}
-@chapter Searching External Databases
-@abstract{How to search external databases.}
-
-@cindex search
-@cindex search group
-
-With BibDesk, you can search the 
-@uref{http://www.ncbi.nlm.nih.gov/Database/index.html,NCBI's Entrez set of databases}
-and the catalogs at many 
-@uref{http://targettest.indexdata.com/,research libraries using the z39.50 protocol}.
-
-To search these databases, select @menutitle{New Search Group} 
-from the @menutitle{File} menu and select the desired search from 
-the menu that appears.
-
-@menu
-* Syntax for Z39.50 Searching::
-* Syntax for Entrez Searching::
-@end menu
-
-@c --------------------------------------------------------------------------------------
-
-@node Syntax for Z39.50 Searching
-@section Syntax for Z39.50 Searching
-@abstract{Syntax for searching z39.50 databases}
-
-@cindex z39.50
-
-To search a z39.50 database, simply enter one or more terms into the  
-z39.50 search field:
-@example
-morgenthau politics
-@end example
-This will return all records that contain both @samp{morgenthau} and  
-@samp{politics}. These search terms can appear in any field, 
-and all the words are matched (each token is implicitly AND-ed.) 
-
-To search for a phrase, put it in quotes:
-@example
-morgenthau "politics among"
-@end example
-To search in a particular field (see below for valid fields), enter a  
-string of the following kind into the z39.50 search field:
-@example
-foo=SearchForMe
-@end example
-where @samp{foo} is an index specifying the fields of database records to
-be searched, and @samp{SearchForMe} is the text string of interest. 
-
-For example, a search for works written by Sewall Wright can be
-conducted as follows:
-@example
-au="Wright, Sewall"
-@end example
-The indexes available in BibDesk are represented in the table
-below. If a search supports relations, operators such as @samp{>}, @samp{<},
-@samp{<>}, @samp{<=}, and @samp{>=} can be used, for instance, to search for works
-published after a certain year. Note that, though the use of relations
-is supported in BibDesk, many z39.50 servers do not support them.
-
-For more information about MARC fields that are searched, consult OCLC's 
-@uref{http://www.oclc.org/bibformats/default.htm,Bibliographic Formats and Standards} pages.
-
-Boolean operators may be used to search several indexes at once, as in:
-@example
-au="Wright, Sewall" and ti="livestock breeding"
-@end example
-which will find works by Wright with the phrase @samp{livestock breeding}
-in the title. When different indexes are used, Boolean operators must be included. 
-
-@multitable {Index} {Conference as author name} {This includes a variety of different types of dates associated with the item; if you are looking for a publication date in particular, use "dp". Supports relations.}
-@headitem Index @tab Meaning 
-@item au @tab Personal author name 
-@tab Name of a person; will not search corporate authors. See note for @samp{af} below.
-@item ti @tab Title 
-@tab 
-@item isbn @tab ISBN 
-@tab International Standard Book Number
-@item issn @tab ISSN 
-@tab International Standard Serial Number
-@item cc @tab Local classification number
- @tab Call number of the item in the library being queried 
-@item su @tab Subject key words 
-@tab Includes persons, corporate bodies, and meetings as subjects; includes places
-as subjects; and also includes topical terms from the LCSH controlled
-vocabulary.
-@item date @tab Date 
-@tab This includes a
-variety of different types of dates associated with the item; if you
-are looking for a publication date in particular, use @samp{dp}. Supports relations.
-@item dp @tab Date of publication 
-@tab Supports relations.
-@item da @tab Acquisition date 
-@tab Date on which item was acquired by library being queried. Supports relations.
-@item la @tab Language code 
-@tab Language codes are defined by each library.
-@item ab @tab Abstract 
-@tab Library records rarely include abstracts.
-@item note @tab Note 
-@tab May include table of contents notes.
-@item af @tab Conference as author name 
-@tab For instance, the
-Proceedings of the Philosophy of Science Association Meeting for a
-given year might have @samp{Philosophy of Science Association} as its
-author. Contrast with @samp{au}, personal author name
-@end multitable
-
-@c --------------------------------------------------------------------------------------
-
-@node Syntax for Entrez Searching
-@section Syntax for Entrez Searching
-@abstract{Syntax for searching Entrez databases}
-
-@cindex Entrez
-@cindex Searching PubMed
-
-Entrez databases use a search syntax closer to natural language than
-does z39.50 databases. Enter key words, and the Entrez server will
-generate a custom set of search results based on its retrieval
-algorithms. Note that when searching PubMed for personal author  
-names, @samp{,}
-should not be entered between first names and last initials, and that
-first initials (as opposed to first names) are typically used, as in
-@samp{wright s} or @samp{fisher ra}.
-
-For more focused searching, Entrez allows terms to be combined using
-Boolean operators. According to the Entrez documentation, available at
-@uref{http://www.ncbi.nlm.nih.gov/books/bv.fcgi?rid=helpentrez.section.EntrezHelp.Boolean_Operators,Boolean Operators},
-these must be entered as follows.
-
-@multitable {AND:} {}
-@item @samp{AND:}
-@tab Combine two search terms together to find all documents that contain BOTH terms.
-@item @samp{OR:}
-@tab Combine two search terms together to find all documents that contain EITHER term.
-@item @samp{NOT:}
-@tab Combine two search terms together to find all documents that contain search term 1 BUT NOT search term 2.
-@end multitable
-
-The Entrez search rules and syntax for using Boolean operators
-are:
-@itemize
-@item Boolean operators AND, OR, NOT must be entered in UPPERCASE
-(e.g., promoters OR response elements).
-@item Entrez processes all Boolean operators in a left-to-right
-sequence. The order in which Entrez processes a search statement can
-be changed by enclosing individual concepts in parentheses. The terms
-inside the parentheses are processed first as a unit and then
-incorporated into the overall strategy. For example, the search
-statement: @samp{g1p3 AND (response element OR promoter)} is processed by
-Entrez by OR-ing the terms @samp{response element OR promoter} first and then
-AND-ing the resulting set of @samp{documents with g1p3}.
-@end itemize
-Another way in which searches can be focused in PubMed is by the use
-of extensions to the search terms. For instance, to search for @samp{random
-genetic drift} in the MeSH terms field only, enter the following:
-@example
-random genetic drift [hm]
-@end example
-into the search field. Note that the extension appears in brackets
-after the search key (@samp{random genetic drift,} in this case).
-
-Other useful extensions include the following.
-
-@multitable {lastau} {language (use the first three letters of the language's name, but not that "ja" means "japanese".)}
-@headitem Extension @tab Meaning
-@item au 
-@tab Author
-@item 1au 
-@tab First author
-@item lastau 
-@tab Last author name
-@item la 
-@tab Language (use the first three letters of the language's name, but note that "ja" means "japanese".)
-@item sh 
-@tab MeSH Subheadings
-@item dp 
-@tab Publication date in YYYY/MM/DD format. Month and day are optional.
-@item ti 
-@tab Title
-@item tiab 
-@tab Title or abstract
-@end multitable
-
-Complete documentation of the extensions is provided at 
-@uref{http://www.ncbi.nlm.nih.gov/books/bv.fcgi?rid=helppubmed.section.pubmedhelp.Search_Field_Descrip, Search Field Description and Tags}.
-
-@c ======================================================================================
-
 @node Citation Keys
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{CitationKeys}
 @chapter Citation Keys
 @abstract{Controlling the automatic generation of citation keys.}
 
@@ -1885,8 +1548,6 @@ The syntax of the format is described in more detail in
 @c ======================================================================================
 
 @node AutoFile
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{AutoFiling}
 @chapter AutoFile
 @abstract{Automatically file papers.}
 
@@ -2022,7 +1683,6 @@ want to use the Custom Citation Strings Drawer.
 * The Custom Citation Strings Drawer::  
 * Autocompletion::              
 * System Service::              
-* Inserting Formatted Bibliographies::
 @end menu
 
 @c --------------------------------------------------------------------------------------
@@ -2097,7 +1757,8 @@ Note that on laptop keyboards, the "fn" key must
 be used to get the actual F5 key behavior with the default keyboard
 preferences.  Alternatives are to use option-escape, which will also
 trigger autocompletion, or to set up a key binding for the
-@code{complete:} selector.
+@code{complete:} selector (TextExtras can be used for this, but see
+the caveat below).
 
 @subheading Bonus feature: reference completion
 
@@ -2111,7 +1772,9 @@ characters, so the more you type, the fewer options you'll be presented with in 
 @subheading Caveats and known issues
 
 There is a conflict with the @uref{http://www.lorax.com/FreeStuff/TextExtras.html, TextExtras 1.7}
-input manager, so make sure you have the latest TextExtras installed.
+input manager at present.  The author of TextExtras is aware of the issue and working on a fix, 
+but the only solution at present is to remove TextExtras or install an unsupported 
+@uref{http://bibdesk.sourceforge.net/TextExtras_1.7BDSK.dmg, modified version}.
 
 By default, @uref{http://itexmac.sourceforge.net, iTeXMac 1.3} does not support the keybinding for
 autocompletion, but it can easily be made to work by adding a @code{complete:} keybinding to 
@@ -2130,8 +1793,9 @@ to provide similar functionality.  It can be obtained from
 For @uref{http://www.lyx.org/, LyX} users, Mark Reid has written an AppleScript to push BibDesk citations
 to LyX, and his script is available at @uref{http://www.threewordslong.com/projects/misc/bibdesktolyx/}.
 
-BibDesk also provides a Distributed Objects API for developers to search for publications.  
-See the @uref{http://bibdesk.sourceforge.net/wiki/index.php/Other_Applications, BibDesk Wiki} for details and examples.
+Users who develop similar functionality for other applications are encouraged to post their 
+scripts and e-mail a link to @uref{mailto:bibdesk-users@@lists.sourceforge.net}
+for inclusion here.
 
 @c --------------------------------------------------------------------------------------
 
@@ -2206,27 +1870,6 @@ the key for you. For instance, in our example , selecting
 ``CasO'' and invoking the @menutitle{Complete Cite Key}
 service would insert ``CasObe00''.
 
-@c --------------------------------------------------------------------------------------
-
-@node Inserting Formatted Bibliographies
-@section Inserting Formatted Bibliographies
-@abstract{Inserting Formatted Bibliographies}
-
-@cindex formatted bibliograhy
-@cindex copy and paste
-
-If you don't use LaTeX, but a wysiwyg editor such as Word, you can still use BibDesk 
-to manage your bibliography data and insert formatted bibliographies from BibDesk 
-in a text. 
-@itemize @bullet
-@item You can @ref{Inserting Citations, Drag and Drop or Copy and Paste} items from the main Bibdesk database window. 
-Set your @ref{Citation Preferences,Citation Preferences} to get formatted bibliographies instead of LaTeX or BibTeX.
-@item You can use the @menutitle{Copy As} menu to copy bibliography data in many different formats, including highly customizable @ref{Templates}.
-@item Copy and Paste formatted text from the @ref{Previewing Typeset Output, Previewer}.
-@item @ref{Services, System Services} can also be used to get formatted text, using highly customizable @ref{Templates}.
-@end itemize
-
-
 @c ======================================================================================
 
 @node Templates
@@ -2260,11 +1903,12 @@ in the @ref{System Service} help topic.
 Templates allow you to export your database to a large variety of formats. It also allows you to 
 customize to a great extent how the data is exported.
 
-To export using templates, choose the @menutitle{Export@dots{}} menu item, which can be found 
-under the @menutitle{File} menu. You can choose the template from the @buttontitle{File Format} 
-popup button. You can either export the whole database, or just the references which you have selected. 
+To export using templates, choose one of the menu items in one of the @menutitle{Export} menus, 
+which can be found under the @menutitle{File} menu. You can either export the whole database, 
+or just the references which you have selected.
 
 BibDesk provides several default templates, for export to HTML, RSS, Rich Text (RTF, RTFD) and to windows Doc format. 
+To use them, just choose the corresponding item from the export submenu.  
 
 In order to use a non-default template the last menu item @menutitle{Using Template} should be chosen. 
 This allows you to choose a template from a popup button in the save dialog window. 
@@ -2340,8 +1984,6 @@ from the @menutitle{BibDesk} menu, or press the key shortcut @cmd{,} (Command
 @c --------------------------------------------------------------------------------------
 
 @node General Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{GeneralPreferences}
 @section General
 @abstract{Configuring Startup behavior}
 
@@ -2363,10 +2005,6 @@ automatically at startup.
 open the edit window for an item you have pasted or dragged in. 
 See @ref{Getting More Help} for information on the Error panel.
 
-@prefitem{Emailing Bibliography Information} This preference lets you choose the format that is 
-used to generate an emailed representation. You can either choose the default format, which is 
-a cleaned BibTeX string, or a custom text template.
-
 @prefitem{Warnings} These options allow you to activate or deactivate warnings before 
 deleting items, removing items from a group, renaming groups, or generating cite keys. 
 These warnings can also be deactivated from the warning dialog. 
@@ -2374,8 +2012,6 @@ These warnings can also be deactivated from the warning dialog.
 @c --------------------------------------------------------------------------------------
 
 @node Display Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{DisplayPreferences}
 @section Display
 @abstract{Configuring Overall Appearance}
 
@@ -2390,25 +2026,22 @@ This preference pane lets you control the overall appearance of the main window.
 @prefitem{Words to ignore for sorting} In the table, you can add a custom set of words, such as 'the' and 'a', 
 that will be ignored when sorting the table.
 
-@prefitem{Preview Pane Display} Select what you want the lower preview pane of the main browser window to show. 
-You can limit the maximal number of items to be shown in the lower pane. Note that generating the 
-preview can be slow when many items are chosen. For PDF and Text you need to enable TeX previewing in the 
-@ref{Preview Preferences,Preview Preferences}.
-
 @prefitem{Fonts} Choose the interface element for which you want to change the font. 
 Pressing the font button to the right will call the system's font panel, from which you can 
 change the font for the selected element. You can also change the fonts directly from the 
 interface elements themselves. Call the font panel using @menutitle{View > Show Fonts} 
 in the main menu, or from the contextual menu of the interface element. 
 
-@prefitem{Name Display} You can change the way names are displayed in the 'Author' column and in
-the lower preview pane of the main browser window (in Details view).
+@prefitem{Content} Select what you want the lower preview pane of the main browser window to show. 
+You can limit the maximal number of items to be shown in the lower pane. Note that generating the 
+preview can be slow when many items are chosen. 
+
+@prefitem{Name display} You can change the way names are displayed in the 'Author' column and in
+the lower preview pane of the main browser window.
 
 @c --------------------------------------------------------------------------------------
 
 @node Citation Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{CitationPreferences}
 @section Citation
 @abstract{Configuring Dragging and Citation Commands}
 
@@ -2420,13 +2053,20 @@ to other applcations from BibDesk.
 
 @image{gfx/citationPrefs}
 
-@prefitem{Copying and Dragging} This controls what gets dropped (or copied) on a drag (or copy). 
-The alternate default format is used when the Option key is held down during the drag (or copy). 
+@prefitem{Copying and Dragging} This controls what gets dropped (or copied) on a drag (or copy).
+
+@itemize
+@item BibTeX entry means the whole entry like: @code{@@misc@{key, author="" , @dots{} @}}.
+@item TeX Citation means: @code{\cite@{cite-key@}}
+@item PDF Description means the contents of the PDF Preview pane as a page of PDF.
+@item RTF Description means the contents of the RTF Preview pane.
+@item LaTeX Description means a LaTeX representation of the items.
+@end itemize
 
 @prefitem{Cite Command Style} This lets you define the default cite command style that is used when dragging TeX cite commands from the publication table.
 
 @itemize
-@item The citation text field lets you change the string that is used when dragging from the publications table to whatever you like (e.g. citep or citet ...).
+@item The citation text field lets you change the string that is used when dragging from the publications table to whatever you like (e.g. citep or citet ...)
 @item Bracket Style lets you choose to use square brackets for copy/paste and dragging citations, for compatibility with ConTeXt.
 @item Separate Citations lets you choose whether to have bibdesk drop strings like \cite@{key1,key2@} or \cite@{key1@} \cite@{key2@} when multiple items are involved.
 @item Prepend a tilde lets you add an extra tilde before the command name.
@@ -2435,8 +2075,6 @@ The alternate default format is used when the Option key is held down during the
 @c --------------------------------------------------------------------------------------
 
 @node Preview Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{PreviewPreferences}
 @section Preview
 @abstract{Configuring the Preview Settings}
 
@@ -2477,8 +2115,6 @@ modify the template and TeX command appropriately.
 @c --------------------------------------------------------------------------------------
 
 @node Sharing Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{SharingPreferences}
 @section Sharing
 @abstract{Sharing bilbliographies over the network.}
 
@@ -2507,8 +2143,6 @@ sharing password.  The password is stored in your keychain, and is never transmi
 @c --------------------------------------------------------------------------------------
 
 @node Completion Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{CompletionPreferences}
 @section Completion
 @abstract{Autocompletion of citation commands in other applications.}
 
@@ -2543,8 +2177,6 @@ feature once it is set up.
 @c --------------------------------------------------------------------------------------
 
 @node Files Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{FilesPreferences}
 @section Files
 @abstract{Configuring Saving and Reading Defaults}
 
@@ -2662,8 +2294,6 @@ they will show up on a subsequent edit.
 @c --------------------------------------------------------------------------------------
 
 @node Template Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{TemplatePreferences}
 @section Templates
 @abstract{Configuring Templates for Export and Services}
 
@@ -2707,15 +2337,15 @@ their original content by clicking this button. Be careful though, as you can no
 @c --------------------------------------------------------------------------------------
 
 @node Default Fields Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{DefaultFieldsPreferences}
 @section Default Fields
 @abstract{Configuring the Default Fields}
 
 @cindex default fields
 
 The Defaults pane lets you add new default BibTeX fields, that will be added to all entries. 
-You can also edit BibDesk's global macro definitions for all files.
+You can also control which field 
+will be used for the description of RSS feeds, and edit BibDesk's global macro definitions
+for all files.
 
 @image{gfx/defaultsPrefs}
 
@@ -2729,6 +2359,10 @@ you if you have read the cited paper. Choose @samp{Rating} if it should hold a r
 Select the check box in the last column if you would like to add the field by default to 
 every entry when a file is opened or a new publication is made. Select this to avoid adding 
 them every time by hand. This setting is not relevant for boolean and rating fields.
+
+@prefitem{Field to Use for RSS Description} This field will be used as the text that
+shows up as the headline of each item in the RSS feed. By default it is the Rss-description field, 
+but you can also supply here your own custom field. 
 
 @prefitem{Custom BibTeX Types and Fields} Clicking the button allows you to add new types and add new fields 
 to existing fields. 
@@ -2755,7 +2389,7 @@ after clicking the @buttontitle{Files@dots{}} button.
 @cindex type info
 
 The TypeInfo Editor allows you to add and manage custom types and fields to BibDesk. 
-You can add new types, add new fields to existing types, or change the order in which 
+You can add new types, add new fields to existing types, or chnage the order in which 
 BibDesk presents the types and fields. 
 
 You can open the TypeInfo Editor by choosing the @buttontitle{Edit...} button 
@@ -2783,6 +2417,12 @@ remove all the fields for new custom types, but not the types themselves.
 When you are done editing, you should choose the @buttontitle{OK} button 
 to save your edits. If you choose the @buttontitle{Cancel} button, 
 your changes will be lost. 
+
+@subheading Note
+
+If you simply close the editor window, without choosing the @buttontitle{OK} or 
+@buttontitle{Cancel} button, your changes will @emph{not} be saved, even though 
+they will show up on a subsequent edit.
 
 
 @node Editing Global Macro Definitions
@@ -2837,18 +2477,18 @@ files (@samp{.bst} extension). To add files from which global macros are read, c
 By default, the main table shows the name of the field in the headers of the column, 
 and for the @samp{Local-Url} and @samp{Url} fields it shows a small file icon and a 
 @samp{@@} symbol respecitively. Sometimes you might want more columns to show images 
-in the header to identify the column, for example if you have added custom 
+in the header tom identify the column, for example if you have added custom 
 Local File or Remote URL fields in the @ref{Custom Types and Fields}. 
 
 
 You can add your own custom image to use in the table column header. Let's say you have added 
 a custom Remote URL field called @samp{Citeseerurl}, and you want the header for the 
-corresponding column to show an image which you have put at the location 
+corresponding column to a show an image which you have put at the location 
 @samp{/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png}. For Bibdesk to use this image, 
 quit BibDesk and enter the following command in Terminal (exclude the outer double quotes): 
-``@code{defaults write -app BibDesk BDSKTableHeaderImages -dict-add 
-Citeseerurl "/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png"}''
-then hit return. You can add as many field name/image path pairs as you like 
+``@code{defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKTableHeaderImages 
+'@{Citeseerurl = "/Users/YourName/Library/Application Support/BibDesk/CiteSeer.png"; @}'}''
+then hit return. You can add as many ``@code{Fieldname = "value";}'' pairs as you like 
 inside the braces. 
 
 Similarly, you can also replace the default field name by a title of your own choice, 
@@ -2859,8 +2499,6 @@ header instead of the image path.
 @c --------------------------------------------------------------------------------------
 
 @node Crossref Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{CrossrefPreferences}
 @section Crossref
 @abstract{Configuring Crossref support}
 
@@ -2879,13 +2517,6 @@ get all of the necessary information from its parent reference.
 
 Since this alters your bibliography, the features is off by default, even though existing
 entries won't be overwritten.
-
-Similarly, a hidden preference exists to write certain fields as an empty string, and is specified
-in the Terminal (excluding outer double quotes) as 
-``@code{defaults write -app BibDesk BDSKFieldsToWriteIfEmpty '(Key)'}'',
-where the value in parentheses can be a comma separated, capitalized list of field names.  These
-must also be default fields in the Defaults preference pane.  This can be used to prevent an item
-from inheriting its parent value.
 
 @prefitem{Overwrite the Booktitle} Always overwrite the @samp{Booktitle} field when duplicating 
 the Title field, even if it is not empty.
@@ -2906,8 +2537,6 @@ BibDesk will warn you when you try to edit an inherited field.
 @c --------------------------------------------------------------------------------------
 
 @node Cite Key Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{CiteKeyPreferences}
 @section Cite Key
 @abstract{Configuring the Cite Key Autogeneration Feature}
 
@@ -2959,8 +2588,6 @@ also remove the braces.
 @c --------------------------------------------------------------------------------------
 
 @node AutoFile Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{AutoFilePreferences}
 @section AutoFile
 @abstract{Configuring the AutoFile feature}
 
@@ -3034,8 +2661,6 @@ only ASCII characters; accented characters are converted if possible.
 @c --------------------------------------------------------------------------------------
 
 @node Script Hook Preferences
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{ScriptHookPreferences}
 @section Script Hooks
 @abstract{Configuring Script Hooks}
 
@@ -3200,23 +2825,15 @@ of the "Aid" field is set in the editor.
             <span class="aslangkeyword">repeat with</span> <span class="asvariable">aPub</span> <span class="aslangkeyword">in</span> <span class="asvariable">thePubs</span>
                 <span class="aslangkeyword">tell</span> <span class="asvariable">aPub</span>
                     <span class="ascomment">-- check that we can set the field</span>
-                    <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">yes</span>
-                    <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
-                        <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">no</span>
-                    <span class="aslangkeyword">else</span>
-                        <span class="aslangkeyword">repeat with</span> <span class="asvariable">aField</span> <span class="aslangkeyword">in</span> <span class="asvariable">theRequiredFields</span>
-                            <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">aField</span> <span class="aslangkeyword">is</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then</span>
-                                <span class="aslangkeyword">set</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">no</span>
-                            <span class="aslangkeyword">end if</span>
-                        <span class="aslangkeyword">end repeat</span>
-                    <span class="aslangkeyword">end if</span>
-                    <span class="aslangkeyword">if</span> <span class="asvariable">shouldSet</span> <span class="aslangkeyword">then</span>
-                        <span class="ascomment">-- generate a new value for the field</span>
-                        <span class="aslangkeyword">set</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span>
-                        <span class="aslangkeyword">set</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">parse format</span> <span class="asvariable">theFormatString</span> <span class="asappkeyword">for</span> <span class="asvariable">theField</span>
-                        <span class="aslangkeyword">if</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
-                            <span class="aslangkeyword">set</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asvariable">newValue</span>
-                        <span class="aslangkeyword">end if</span>
+                    <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then return</span>
+                    <span class="aslangkeyword">repeat with</span> <span class="asvariable">aField</span> <span class="aslangkeyword">in</span> <span class="asvariable">theRequiredFields</span>
+                        <span class="aslangkeyword">if</span> <span class="asoperator">(</span><span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvariable">aField</span> <span class="aslangkeyword">is</span> <span class="asvalue">""</span><span class="asoperator">)</span> <span class="aslangkeyword">then return</span>
+                    <span class="aslangkeyword">end repeat</span>
+                    <span class="ascomment">-- generate a new value for the field</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">field</span> <span class="asvariable">theFieldToSet</span>
+                    <span class="aslangkeyword">set</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">parse format</span> <span class="asvariable">theFormatString</span> <span class="asappkeyword">for</span> <span class="asvariable">theField</span>
+                    <span class="aslangkeyword">if</span> <span class="asvariable">newValue</span> <span class="aslangkeyword">is not</span> <span class="asvalue">""</span> <span class="aslangkeyword">then</span>
+                        <span class="aslangkeyword">set</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asvariable">theField</span> <span class="aslangkeyword">to</span> <span class="asvariable">newValue</span>
                     <span class="aslangkeyword">end if</span>
                 <span class="aslangkeyword">end tell</span>
             <span class="aslangkeyword">end repeat</span>
@@ -3225,10 +2842,6 @@ of the "Aid" field is set in the editor.
 <span class="aslangkeyword">end using terms from</span>
 @end html
 @ifnothtml
-@b{property} theFieldToSet : "Url"
-@b{property} theFormatString : "http://dx.doi.org/%f@{Aid@}"
-@b{property} theRequiredFields : @{"Aid"@}
-
 @b{using terms from} application "BibDesk"
     @b{on} perform BibDesk action with publications thePubs for script hook theScriptHook
         @b{tell} application "BibDesk"
@@ -3241,23 +2854,15 @@ of the "Aid" field is set in the editor.
             @b{repeat with} aPub @b{in} thePubs
                 @b{tell} aPub
                     @i{-- check that we can set the field}
-                    @b{set} shouldSet @b{to} yes
-                    @b{if} (value @b{of} field  theFieldToSet @b{is not} "") @b{then}
-                        @b{set} shouldSet @b{to} no
-                    @b{else}
-                        @b{repeat with} aField @b{in} theRequiredFields
-                            @b{if} (value @b{of} field aField @b{is} "") @b{then}
-                                @b{set} shouldSet @b{to} no
-                            @b{end if}
-                        @b{end repeat}
-                    @b{end if}
-                    @b{if} shouldSet @b{then}
-                        @i{-- generate a new value for the field}
-                        @b{set} theField @b{to} field theFieldToSet
-                        @b{set} newValue @b{to} parse format theFormatString for theField
-                        @b{if} newValue @b{is not} "" @b{then}
-                            @b{set the} value @b{of} theField @b{to} newValue
-                        @b{end if}
+                    @b{if} (value @b{of} field  theFieldToSet @b{is not} "") @b{then return}
+                    @b{repeat with} aField @b{in} theRequiredFields
+                        @b{if} (value @b{of} field  aField @b{is} "") @b{then return}
+                    @b{end repeat}
+                    @i{-- generate a new value for the field}
+                    @b{set} theField @b{to} field theFieldToSet
+                    @b{set} newValue @b{to} parse format theFormatString for theField
+                    @b{if} newValue @b{is not} "" @b{then}
+                        @b{set the} value @b{of} theField @b{to} newValue
                     @b{end if}
                 @b{end tell}
             @b{end repeat}
@@ -3288,9 +2893,6 @@ It exports an RSS representation of the document in the same folder as the BibTe
 
 @example
 @html
-<span class="aslangkeyword">property</span> <span class="asvariable">theTemplateName</span> <span class="asoperator">:</span> <span class="asvalue">"Default RSS template"</span>
-<span class="aslangkeyword">property</span> <span class="asvariable">theFileExtension</span> <span class="asoperator">:</span> <span class="asvalue">".rss"</span>
-
 <span class="aslangkeyword">using terms from</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
     <span class="aslangkeyword">on</span> <span class="asappkeyword">perform BibDesk action with publications</span> <span class="asvariable">thePubs</span> <span class="asappkeyword">for script hook</span> <span class="asvariable">theScriptHook</span>
         <span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"BibDesk"</span>
@@ -3310,7 +2912,7 @@ It exports an RSS representation of the document in the same folder as the BibTe
                     <span class="aslangkeyword">set</span> <span class="asappkeyword">AppleScript</span><span class="asvalue">'s</span> <span class="asappkeyword">text item delimiters</span> <span class="aslangkeyword">to</span> <span class="asvalue">"."</span>
                     <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asappkeyword">text items</span> <span class="asvalue">1</span> <span class="aslangkeyword">thru</span> <span class="asvalue">-2</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">string</span>
                 <span class="aslangkeyword">end if</span>
-                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFileExtension</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvalue">".rss"</span>
                 <span class="ascomment">-- create the RSS file if necessary</span>
                 <span class="aslangkeyword">if</span> <span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span> <span class="asappkeyword">exists</span> <span class="aslangkeyword">then</span>
                     <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asappkeyword">file</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">of</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
@@ -3320,16 +2922,13 @@ It exports an RSS representation of the document in the same folder as the BibTe
             <span class="aslangkeyword">end tell</span>
             <span class="ascomment">-- now export as RSS</span>
             <span class="aslangkeyword">tell</span> <span class="asvariable">theDocument</span>
-                <span class="asappkeyword">export using template</span> <span class="asvariable">theTemplateName</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
+                <span class="asappkeyword">export using template</span> <span class="asvalue">"Default RSS template"</span> <span class="asappkeyword">to</span> <span class="asvariable">theFile</span>
             <span class="aslangkeyword">end tell</span>
         <span class="aslangkeyword">end tell</span>
     <span class="aslangkeyword">end</span> <span class="asappkeyword">perform BibDesk action with publications</span>
 <span class="aslangkeyword">end using terms from</span>
 @end html
 @ifnothtml
-@b{property} theTemplateName : "Default RSS template"
-@b{property} theFileExtension : ".rss"
-
 @b{using terms from} application "BibDesk"
     @b{on} perform BibDesk action with publications thePubs for script hook theScriptHook
         @b{tell} application "BibDesk"
@@ -3349,17 +2948,17 @@ It exports an RSS representation of the document in the same folder as the BibTe
                     @b{set} AppleScript's text item delimiters @b{to} "."
                     @b{set} theFileName @b{to} text item 1 @b{thru} -2 of theFileName as string
                 @b{end if}
-                @b{set} theFileName @b{to} theFileName & theTemplateName
+                @b{set} theFileName @b{to} theFileName & ".rss"
                 @i{-- create the RSS file if necessary}
                 @b{if} file theFileName @b{of} folder theFolder exists @b{then}
                     @b{set} theFile @b{to} (file theFileName @b{of} folder theFolder) @b{as} alias
                 @b{else} 
-                    @b{set} theFile @b{to} (make new file with properties @{name:theFileName@} at folder theFolder) @b{as} alias
+                    @b{set} theFile @b{to} (make new file with properties {name:theFileName} at folder theFolder) @b{as} alias
                 @b{end if} 
             @b{end tell} 
             @i{-- now export as RSS}
             @b{tell} theDocument
-                export using template theFileExtension to theFile
+                export using template "Default RSS template" to theFile
             @b{end tell} 
         @b{end tell}
     @b{end} perform BibDesk action with publications
@@ -3495,8 +3094,6 @@ Note: for BibTeX, it is also necessary to enclose the accent sequence in braces
 @c ======================================================================================
 
 @node Autogeneration Format Syntax
-@c DO NOT LOCALIZE THE NEXT LINE
-@anchor{AutogenerationFormatSyntax}
 @appendix Autogeneration Format Syntax
 @abstract{The syntax of the format used for Cite Key and Local-Url AutoGeneration.}
 
@@ -3585,7 +3182,7 @@ Possible format specifiers are given in the table below.
 
 @c End of macro definitions
 
-@multitable {@b{%s\{}\i{Field}\b{[][][]\}0}} {Arbitrary field as initials, e.g. @samp{JCIS} for @samp{J. of Colloid and Interface Science}, with (optional) length of words to ignore}
+@multitable {@b{%s\{}\i{Field}\b{[][][]\}0}} {Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)}
 @headitem Specifier @tab Replaced content description
 @item @specparam{%a, [][]00}
 @tab Author last names, with (optional) maximal number of authors and number of characters
@@ -3607,6 +3204,7 @@ Possible format specifiers are given in the table below.
 @tab Month as decimal number
 @item @specparam{%k, [/]0 }
 @tab Keywords concatenated together, with (optional) maximal number of keywords. 
+Keywords must be separated by one of ;:, (semicolon, colon, or comma)
 @item @spec{%l}
 @tab File name of the linked file, without extension
 @item @spec{%L}
@@ -3681,9 +3279,6 @@ The cite key format can contain, apart from the specifiers, only unaccented
 alphanumeric characters (a-zA-Z0-9), (semi-)colons (:;), dashes (-), slashes (/) or periods (.). 
 Any generated part of the cite key will be converted to contain only those characters. 
 For example, accents are removed and spaces will be converted to dashes. 
-
-Keywords are, by default, separated by one of ;:, (semicolon, colon, or comma.) 
-The precise way keywords are separated and how to change these defaults is described in @ref{Field Groups}. 
 
 The format for the local-url can contain any character apart from colons (:). 
 To use an explicit percent character, use the escape specifier @spec{%%} 
@@ -3937,28 +3532,6 @@ template for empty condition
 </$conditionKey?>
 @end example
 
-Instead of checking for an empty value, you can also check for fixed values. 
-@example
-<$conditionKey=firstValue?>
-template for match to firstValue
-<?$conditionKey=secondValue?>
-template for match to secondValue
-...
-<?$conditionKey?>
-template for no match
-</$conditionKey?>
-@end example
-
-Or you can match on substrings.
-@example
-<$conditionKey~matchValue?>
-template for substring match
-</$conditionKey?>
-@end example
-
-In these conditions the alternate template tags (starting with @code{<?$}) are optional. 
-There can be an arbitrary number of alternate matches. Matches are case insensitive.
-
 As for collection template tags, if a condition template tag appears by itself on a further empty line, 
 this whole line will be ignored, including the newline at the end of the line. Moreover you can use 
 key paths as well, as long as the combined key path returns a value key.
@@ -4046,8 +3619,6 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item dateModified
 @tab 
-@item currentDate
-@tab 
 @item itemIndex
 @tab 
 @item fileOrder
@@ -4092,18 +3663,6 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @end multitable
 
-@subheading Macro
-
-@multitable {value} {}
-@headitem Key @tab Description
-@item name
-@tab 
-@item value
-@tab 
-@item bibTeXString
-@tab 
-@end multitable
-
 
 @heading Collection keys
 
@@ -4115,8 +3674,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @headitem Key @tab Description
 @item publications
 @tab 
-@item macros
-@tab 
 @end multitable
 
 @subheading Publication
@@ -4124,13 +3681,13 @@ Below are lists of collection keys that could be used in BibDesk export template
 @multitable {optionalFields} {}
 @headitem Key @tab Description
 @item requiredFields
-@tab Drops already used fields
+@tab 
 @item optionalFields
-@tab Drops already used fields
+@tab 
 @item defaultFields
-@tab Drops already used fields
+@tab 
 @item allFields
-@tab Drops already used fields
+@tab 
 @item persons.FieldName
 @tab FieldName can be Author or Editor
 @item authors
@@ -4160,10 +3717,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item lowercaseFirst
 @tab 
-@item lowercaseFirst
-@tab 
-@item titleCapitalizedString
-@tab 
 @end multitable
 
 @subheading Cleaning
@@ -4173,10 +3726,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item htmlString
 @tab 
 @item xmlString
-@tab 
-@item csvString
-@tab 
-@item tsvString
 @tab 
 @item stringByRemovingTeX
 @tab 
@@ -4208,19 +3757,13 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item stringByAppendingDoubleSpaceIfNotEmpty
 @tab 
-@item stringByPrependingSpaceIfNotEmpty
-@tab 
 @item stringByAppendingCommaAndSpaceIfNotEmpty
 @tab 
-@item stringByAppendingFullStopAndSpaceIfNotEmpty
+@item stringByPrependingSpaceIfNotEmpty
 @tab 
 @item stringByAppendingCommaIfNotEmpty
 @tab 
 @item stringByAppendingFullStopIfNotEmpty
-@tab 
-@item stringByPrependingCommaAndSpaceIfNotEmpty
-@tab 
-@item stringByPrependingFullStopAndSpaceIfNotEmpty
 @tab 
 @item parenthesizedStringIfNotEmpty
 @tab 
@@ -4296,8 +3839,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item @@distinctUnionOfArrays
 @tab 
-@item @@arrayDroppingFirstObject
-@tab 
 @end multitable
 
 
@@ -4324,8 +3865,6 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item @@componentsJoinedByComma
 @tab 
-@item @@componentsJoinedByAnd
-@tab 
 @item @@componentsJoinedByCommaAndAnd
 @tab 
 @end multitable
@@ -4339,14 +3878,14 @@ Below are lists of collection keys that could be used in BibDesk export template
 
 @multitable @columnfractions .12 .88
 @item Portions of BibDesk
-@item @tab Copyright @copyright{} 2001 - 2007 Michael O. McCracken@*
-@item @tab Copyright @copyright{} 2002 - 2007 Adam Maxwell@*
-@item @tab Copyright @copyright{} 2002 - 2007 Christiaan Hofman@* 
+@item @tab Copyright @copyright{} 2001 - 2006 Michael O. McCracken@*
+@item @tab Copyright @copyright{} 2002 - 2006 Adam Maxwell@*
+@item @tab Copyright @copyright{} 2002 - 2006 Christiaan Hofman@* 
 @item @tab Copyright @copyright{} many others.@*
 @item @tab
 @item Portions of this manual
-@item @tab Copyright @copyright{} 2001 - 2007 Michael O. McCracken (manual)@*
-@item @tab Copyright @copyright{} 2002 - 2007 Adam Maxwell@*
-@item @tab Copyright @copyright{} 2002 - 2007 Christiaan Hofman@* 
+@item @tab Copyright @copyright{} 2001 - 2006 Michael O. McCracken (manual)@*
+@item @tab Copyright @copyright{} 2002 - 2006 Adam Maxwell@*
+@item @tab Copyright @copyright{} 2002 - 2006 Christiaan Hofman@* 
 @item @tab Copyright @copyright{} many others.@*
 @end multitable

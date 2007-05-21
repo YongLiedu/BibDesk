@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 28/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -119,7 +119,7 @@
 						dragImage = [[NSImage alloc] initWithSize:imageSize];
 						[dragImage lockFocus];
 						[image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
-						[dragImage unlockFocus];
+						[dragImage lockFocus];
 
 						[self dragImage:dragImage at:NSMakePoint(mouseLoc.x - 0.5f * imageSize.width, mouseLoc.y - 0.5f * imageSize.height) offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES]; 
 						[dragImage release];
@@ -157,7 +157,7 @@
 	
 	if (highlight == NO) return;
 	
-	[[NSColor alternateSelectedControlColor] set];
+	[[NSColor selectedControlColor] set];
 	[NSBezierPath setDefaultLineWidth:2.0];
 	[NSBezierPath strokeRoundRectInRect:NSInsetRect(aRect, 2.0, 2.0) radius:5.0];
 }

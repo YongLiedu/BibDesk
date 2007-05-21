@@ -1,11 +1,11 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniBase/macros.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniBase/macros.h 68913 2005-10-03 19:36:19Z kc $
 
 #import <Foundation/NSAutoreleasePool.h>
 #import <OmniBase/SystemType.h>
@@ -21,20 +21,16 @@
 #import <errno.h>
 #define OMNI_ERRNO() errno
 
+
+// It might be good to put some exception handling in this.
+
 #define OMNI_POOL_START				\
 do {						\
     NSAutoreleasePool *__pool;			\
     __pool = [[NSAutoreleasePool alloc] init];	\
-    @try {
+    {
 
-#define OMNI_POOL_END \
-    } @catch (NSException *__exc) { \
-	[__exc retain]; \
-	[__pool release]; \
-	__pool = nil; \
-	[__exc autorelease]; \
-	[__exc raise]; \
-    } @finally { \
-	[__pool release]; \
-    } \
+#define OMNI_POOL_END	\
+    }			\
+    [__pool release];	\
 } while(0)

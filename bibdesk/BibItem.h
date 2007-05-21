@@ -1,7 +1,7 @@
 // BibItem.h
 // Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2001,2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@
 
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
-#import "BDSKFormatParser.h"
 
 enum {
     BDSKNoCrossrefError,
@@ -49,8 +48,8 @@ enum {
     BDSKIsCrossreffedCrossrefError
 };
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate, BDSKPublicationsArray, BDSKMacroResolver;
-@protocol BDSKParseableItem, BDSKOwner;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKFieldCollection, BDSKTemplate;
+@protocol BDSKParseableItem;
 
 /*!
 @class BibItem
@@ -68,17 +67,12 @@ enum {
 	NSCalendarDate *dateAdded;
 	NSCalendarDate *dateModified;
 	NSMutableDictionary *groups;
-    NSNumber * fileOrder;
     BOOL hasBeenEdited;
 	BOOL needsToBeFiled;
-	id<BDSKOwner> owner;
+	BibDocument *document;
     BDSKFieldCollection *templateFields;
     int currentIndex;
     BOOL spotlightMetadataChanged;
-    NSMutableDictionary *cachedURLs;
-    BOOL isImported;
-    float searchScore;
-    NSURL *identifierURL;
 }
 
 /*!
@@ -90,17 +84,23 @@ enum {
 - (id)init;
 
 /*!
-     @method initWithType:fileType:citeKey:pubFields:createdDate:
+     @method initWithType:fileType:pubFields:createdDate:
      @abstract Initializes an alloc'd BibItem to a type and allows to set the authors. This is the designated intializer.
      @discussion This lets you set the type and the Authors array at initialization time. Call it with an empty array for authArray if you don't want to do that -<em>Don't use nil</em> The authors array is kept up but isn't used much right now. This will change. The createdDate should be nil when the BibItem is not newly added, such as in a parser. 
      @param fileType A string representing which kind of file this item was read from.
-     @param key The cite key. Pass nil to generate the cite key.
      @param type A string representing the type of entry this item is - used to make the BibItem have the right entries in its dictionary.
      @param fieldsDict The dictionary of fields to initialize the item with.
      @param isNew Boolean determines if the item is new for the BibTeX document. Determines if the date-added should be set. Should be YES unless when reading the BibTeX source file.
      @result The receiver, initialized to type and containing authors authArray.
 */
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType citeKey:(NSString *)key pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict isNew:(BOOL)isNew;
+
+/*!
+    @method makeType
+    @abstract Setup the type of a BibItem.
+    @discussion Rearranges the dictionary for the current type. Currently it keeps all the fields that have any text in them, so changing from one type to another with all fields filled in will give you the union of their entries.
+*/
+- (void)makeType;
 
 /*!
     @method dealloc
@@ -108,8 +108,8 @@ enum {
 */
 - (void)dealloc;
 
-- (id<BDSKOwner>)owner;
-- (void)setOwner:(id<BDSKOwner>)newOwner;
+- (BibDocument *)document;
+- (void)setDocument:(BibDocument *)newDocument;
 
 - (NSUndoManager *)undoManager;
 
@@ -121,12 +121,10 @@ enum {
 
 - (BOOL)isEqual:(BibItem *)aBI;
 - (BOOL)isEqualToItem:(BibItem *)aBI;
-- (BOOL)isEquivalentToItem:(BibItem *)aBI;
 - (BOOL)isIdenticalToItem:(BibItem *)aBI;
 
 // accessors for fileorder
 - (NSNumber *)fileOrder;
-- (void)setFileOrder:(NSNumber *)newOrder;
 
 - (NSString *)fileType;
 - (void)setFileType:(NSString *)someFileType;
@@ -134,6 +132,7 @@ enum {
 
 /* Methods for handling people objects (BibAuthors) which may be any people type (Author, Editor, etc.)
 */
+- (void)rebuildPeople;
 - (void)rebuildPeopleIfNeeded;
 - (NSSet *)allPeople;
 - (int)numberOfPeople;
@@ -209,7 +208,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(unsigned int)index;
+- (BibAuthor *)authorAtIndex:(int)index;
 
 /*!
     @method authorAtIndex:inherit:
@@ -219,11 +218,14 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
+- (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit;
 
-- (BibAuthor *)firstAuthor;
-- (BibAuthor *)secondAuthor;
-- (BibAuthor *)thirdAuthor;
+/*!
+    @method     lastAuthor
+    @abstract   Returns the last author in the array of authors.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
 - (BibAuthor *)lastAuthor;
 
 /*!
@@ -321,7 +323,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index;
+- (BibAuthor *)authorOrEditorAtIndex:(int)index;
 
 /*!
     @method authorOrEditorAtIndex:inherit:
@@ -331,12 +333,7 @@ enum {
     @discussion zero-based indexing
     
 */
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit;
-
-- (BibAuthor *)firstAuthorOrEditor;
-- (BibAuthor *)secondAuthorOrEditor;
-- (BibAuthor *)thirdAuthorOrEditor;
-- (BibAuthor *)lastAuthorOrEditor;
+- (BibAuthor *)authorOrEditorAtIndex:(int)index inherit:(BOOL)inherit;
 
 /*!
     @method crossrefParent
@@ -517,8 +514,6 @@ enum {
 */
 - (void)setField:(NSString *)field toStringValue:(NSString *)value;
 
-- (id)displayValueOfField:(NSString *)field;
-
 /*!
     @method     setHasBeenEdited:
     @abstract   Must be set to YES if the BibItem has been edited externally.
@@ -655,12 +650,11 @@ enum {
 - (BOOL)matchesSubstring:(NSString *)substring withOptions:(unsigned)searchOptions inField:(NSString *)field removeDiacritics:(BOOL)flag;
 
 - (NSDictionary *)searchIndexInfo;
-- (NSDictionary *)metadataCacheInfoForUpdate:(BOOL)update;
-- (id)completionObject;
+- (NSDictionary *)metadataCacheInfo;
 
 /*!
     @method bibTeXString
-    @abstract  returns the bibtex source for this bib item.  Is TeXified based on default preferences for the application.
+ @abstract  returns the bibtex source for this bib item.  Is TeXified based on default preferences for the application.
     @discussion «discussion»
     
 */
@@ -676,16 +670,22 @@ enum {
 - (NSString *)bibTeXStringDroppingInternal:(BOOL)drop;
 
 /*!
-    @method     bibTeXStringDroppingInternal:texify:
-    @abstract   Returns a BibTeX value optionally without internal fields, optionally teXified (converted to TeX)
+    @method     bibTeXStringByExpandingMacros
+    @abstract   Returns the BibTeX value of this bib item with macros expanded.  It is TeXified based on default prefs for the application.
     @discussion (comprehensive description)
-    @param      drop Boolean determines whether internal fields are dropped. 
-    @param      shouldTeXify Boolean determines whether accented characters are converted to TeX.
     @result     (description)
 */
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop texify:(BOOL)shouldTeXify;
+- (NSString *)bibTeXStringByExpandingMacros;
 
-- (NSData *)bibTeXDataDroppingInternal:(BOOL)drop encoding:(NSStringEncoding)encoding error:(NSError **)outError;
+
+/*!
+    @method     bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields
+    @abstract   Returns a BibTeX value with macros unexpanded, deTeXified (not converted to TeX), without internal fields
+                such as Local-Url.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields;
 
 /*!
     @method     RISStringValue
@@ -815,10 +815,20 @@ enum {
     @abstract   attempts to return a path to the local file linked through the field, relative to the base parameter
     @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.
     @param      field the field name linking the local file.
+    @param      base a path to serve as the base for resolving the relative path.
 	@param      inherit Boolean, if set follows the Crossref to find inherited date.
     @result     a complete path with no tildes, or nil if an error occurred.
 */
-- (NSString *)localFilePathForField:(NSString *)field inherit:(BOOL)inherit;
+- (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit;
+
+/*!
+    @method     smallImageForURLField:
+    @abstract   Returns a 16x16 image for a URL field (local or remote)
+    @discussion (comprehensive description)
+    @param      field (description)
+    @result     (description)
+*/
+- (NSImage *)smallImageForURLField:(NSString *)field;
 
 /*!
     @method     imageForURLField:
@@ -831,7 +841,7 @@ enum {
 
 // NSURL equivalents of the localFilePath... methods
 - (NSURL *)localFileURLForField:(NSString *)field;
-- (NSURL *)localFileURLForField:(NSString *)field inherit:(BOOL)inherit;
+- (NSURL *)localFileURLForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit;
 
 /*!
     @method suggestedLocalUrl
@@ -865,6 +875,13 @@ enum {
 - (void)setNeedsToBeFiled:(BOOL)flag;
 
 /*!
+    @method     autoFilePaperAfterDelay
+    @abstract   Workaround for a Finder issue that causes drag-and-drop from the Finder to stall when we use autofile (due to getting/setting the file comment string).
+    @discussion (comprehensive description)
+*/
+- (void)autoFilePaperAfterDelay;
+
+/*!
     @method autoFilePaper
     @abstract Automatically file a paper when all necessary fields are set, otherwise flags to be filed. Does nothing when the preference is set to not file automatically.  
     @discussion - 
@@ -886,14 +903,6 @@ enum {
 - (int)replaceGroup:(BDSKGroup *)group withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation;
 - (void)invalidateGroupNames;
 
-- (BOOL)isImported;
-- (void)setImported:(BOOL)flag;
-
-- (NSURL *)identifierURL;
-- (void)setSearchScore:(float)val;
-- (float)searchScore;
-- (NSString *)skimNotesForLocalURL;
-
 @end
 
 @class PDFMetadata;
@@ -905,4 +914,3 @@ enum {
 @end
 
 extern const CFSetCallBacks BDSKBibItemEqualityCallBacks;
-extern const CFSetCallBacks BDSKBibItemEquivalenceCallBacks;

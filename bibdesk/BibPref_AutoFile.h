@@ -5,7 +5,7 @@
 //  Created by Michael McCracken on Wed Oct 08 2003.
 
 /*
- This software is Copyright (c) 2003,2004,2005,2006,2007
+ This software is Copyright (c) 2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,6 @@
 	IBOutlet NSButton* clearPapersFolderLocationButton;
 	IBOutlet NSButton* useRelativePathCheckButton;
 	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
-	IBOutlet NSButton* warnOnMoveFolderCheckButton;
     IBOutlet NSTextField *formatField;
     IBOutlet NSTextField *formatSheetField;
     IBOutlet NSPopUpButton *formatPresetPopUp;
@@ -71,7 +70,6 @@
 - (IBAction)clearPapersFolderLocationAction:(id)sender;
 - (IBAction)toggleUseRelativePathAction:(id)sender;
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender;
-- (IBAction)toggleWarnOnMoveFolderAction:(id)sender;
 - (IBAction)localUrlFormatChanged:(id)sender;
 - (IBAction)changeLocalUrlLowercase:(id)sender;
 - (IBAction)setFormatCleanOption:(id)sender;

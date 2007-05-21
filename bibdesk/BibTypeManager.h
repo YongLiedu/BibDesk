@@ -4,7 +4,7 @@
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,6 @@
 #define FILE_TYPES_KEY                        @"FileTypes"
 #define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY     @"BibTeXFieldNamesForPubMedTags"
 #define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY     @"BibTeXTypesForPubMedTypes"
-#define BIBTEX_FIELDS_FOR_MARC_TAGS_KEY       @"BibTeXFieldNamesForMARCTags"
 #define BIBTEX_FIELDS_FOR_JSTOR_TAGS_KEY      @"BibTeXFieldNamesForJSTORTags"
 #define FIELD_DESCRIPTIONS_FOR_JSTOR_TAGS_KEY @"FieldDescriptionsForJSTORTags"
 #define BIBTEX_FIELDS_FOR_WOS_TAGS_KEY        @"BibTeXFieldNamesForWebOfScienceTags"
@@ -58,11 +57,6 @@
 #define MODS_GENRES_FOR_BIBTEX_TYPES_KEY      @"MODSGenresForBibTeXType"
 #define BIBTEX_TYPES_FOR_DC_TYPES_KEY         @"BibTeXTypesForDublinCoreTypes"
 #define BIBTEX_FIELDS_FOR_DC_TERMS_KEY        @"BibTeXFieldNamesForDublinCoreTerms"
-#define BIBTEX_FIELDS_FOR_REFER_TAGS_KEY     @"BibTeXFieldNamesForReferTags"
-#define BIBTEX_TYPES_FOR_REFER_TYPES_KEY     @"BibTeXTypesForReferTypes"
-#define BIBTEX_TYPES_FOR_HCITE_TYPES_KEY     @"BibTeXTypesForHCiteTypes"
-
-@class OFCharacterSet;
 
 @interface BibTypeManager : NSObject {
 	NSDictionary *fileTypesDict;
@@ -70,7 +64,6 @@
 	NSDictionary *typesForFileTypeDict;
 	NSDictionary *fieldNameForPubMedTagDict;
 	NSDictionary *bibtexTypeForPubMedTypeDict;
-	NSDictionary *fieldNamesForMARCTagDict;
 	NSDictionary *fieldNameForJSTORTagDict;
 	NSDictionary *fieldDescriptionForJSTORTagDict;
     NSDictionary *fieldNameForWebOfScienceTagDict;
@@ -78,9 +71,6 @@
     NSDictionary *bibtexTypeForWebOfScienceTypeDict;
     NSDictionary *bibtexTypeForDublinCoreTypeDict;
     NSDictionary *fieldNameForDublinCoreTermDict;
-    NSDictionary *fieldNameForReferTagDict;
-    NSDictionary *bibtexTypeForReferTypeDict;
-    NSDictionary *bibtexTypeForHCiteTypeDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
 	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
@@ -93,8 +83,6 @@
 	NSCharacterSet *strictInvalidRemoteUrlCharSet;
 	NSCharacterSet *invalidGeneralCharSet;
 	NSCharacterSet *strictInvalidGeneralCharSet;
-	NSCharacterSet *separatorCharSet;
-	OFCharacterSet *separatorOFCharSet;
     
     NSMutableSet *localFileFieldsSet;
     NSMutableSet *remoteURLFieldsSet;
@@ -102,10 +90,8 @@
     NSMutableSet *ratingFieldsSet;
     NSMutableSet *triStateFieldsSet;
     NSMutableSet *booleanFieldsSet;
-    NSMutableSet *citationFieldsSet;
-    NSMutableSet *personFieldsSet;
-    NSMutableSet *singleValuedGroupFieldsSet;
-    NSMutableSet *invalidGroupFieldsSet;
+    NSMutableSet *singleValuedGroupFields;
+    NSMutableSet *invalidGroupFields;
 }
 + (BibTypeManager *)sharedManager;
 
@@ -120,7 +106,6 @@
 - (void)setMODSGenresForBibTeXTypeDict:(NSDictionary *)newNames;
 - (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames;
 - (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames;
-- (void)setFieldNamesForMARCTagDict:(NSDictionary *)newNames;
 - (void)setFileTypesDict:(NSDictionary *)newTypes;
 - (void)setFieldsForTypesDict:(NSDictionary *)newFields;
 - (void)setTypesForFileTypeDict:(NSDictionary *)newTypes;
@@ -131,10 +116,6 @@
 - (void)setBibtexTypeForWebOfScienceTypeDict:(NSDictionary *)dict;
 - (void)setBibtexTypeForDublinCoreTypeDict:(NSDictionary *)dict;
 - (void)setFieldNameForDublinCoreTermDict:(NSDictionary *)dict;
-- (void)setBibtexTypeForReferTypeDict:(NSDictionary *)newNames;
-- (void)setFieldNameForReferTagDict:(NSDictionary *)newNames;
-- (void)setBibtexTypeForHCiteTypeDict:(NSDictionary *)newBibtexTypeForHCiteTypeDict;
-
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
 - (NSSet *)allFieldNames;
@@ -142,22 +123,12 @@
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
-- (NSSet *)invalidGroupFieldsSet;
-- (NSSet *)singleValuedGroupFieldsSet;
+- (NSSet *)invalidGroupFields;
+- (NSSet *)singleValuedGroupFields;
 - (NSArray *)bibTypesForFileType:(NSString *)fileType;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
 - (NSString *)bibtexTypeForWebOfScienceType:(NSString *)type;
-- (NSString *)bibtexTypeForReferType:(NSString *)type;
-
-/*!
-    @method     bibtexTypeForHCiteType:
-    @abstract   translates between common types used in hCite and bibtex types
-    @discussion 
-    @param      type -- a string representing a type
-    @result     a bibtex type
-*/
-- (NSString *)bibtexTypeForHCiteType:(NSString *)type;
 
 
 /*!
@@ -179,16 +150,18 @@
 - (NSString *)bibtexTypeForDublinCoreType:(NSString *)type;
 
 
+- (BOOL)isURLField:(NSString *)field;
+- (BOOL)isRemoteURLField:(NSString *)field;
+- (BOOL)isLocalFileField:(NSString *)field;    
 - (NSSet *)localFileFieldsSet;
-- (NSSet *)remoteURLFieldsSet;
 - (NSSet *)allURLFieldsSet;
 - (NSSet *)noteFieldsSet;
+
 - (NSSet *)personFieldsSet;
-- (NSSet *)booleanFieldsSet;
-- (NSSet *)triStateFieldsSet;
-- (NSSet *)ratingFieldsSet;
-- (NSSet *)citationFieldsSet;
-- (NSSet *)numericFieldsSet;
+- (BOOL)isRatingField:(NSString *)field;
+- (BOOL)isTriStateField:(NSString *)field;
+- (BOOL)isBooleanField:(NSString *)field;
+- (BOOL)isNoteField:(NSString *)field;
 
 /*!
     @method     RISTagForBibTeXFieldName:
@@ -209,9 +182,7 @@
     @result     (description)
 */
 - (NSString *)RISTypeForBibTeXType:(NSString *)type;
-
-- (NSDictionary *)fieldNamesForMARCTag:(NSString *)name;
-
+  
 - (NSString *)fieldNameForJSTORTag:(NSString *)tag;
 
 - (NSString *)fieldNameForJSTORDescription:(NSString *)name;
@@ -219,7 +190,6 @@
 - (NSString *)fieldNameForWebOfScienceTag:(NSString *)tag;
 
 - (NSString *)fieldNameForWebOfScienceDescription:(NSString *)name;
-- (NSString *)fieldNameForReferTag:(NSString *)tag;
 
     /*!
               @method     MODSGenresForBibTeXType:
@@ -278,25 +248,4 @@
 */
 - (NSCharacterSet *)fragileCiteKeyCharacterSet;
 
-- (NSCharacterSet *)separatorCharacterSetForField:(NSString *)fieldName;
-- (OFCharacterSet *)separatorOFCharacterSetForField:(NSString *)fieldName;
-
-@end
-
-@interface NSString (BDSKTypeExtensions)
-
-- (BOOL)isBooleanField;
-- (BOOL)isTriStateField;
-- (BOOL)isRatingField;
-- (BOOL)isLocalFileField;
-- (BOOL)isRemoteURLField;
-- (BOOL)isPersonField;
-- (BOOL)isURLField;
-- (BOOL)isCitationField;
-- (BOOL)isNoteField;
-- (BOOL)isNumericField;
-// isSingleValuedField checks invalid group fields and single valued group fields; single valuedGroupFields doesn't include the invalid ones, which are single valued as well
-- (BOOL)isSingleValuedField;
-- (BOOL)isInvalidGroupField;
-- (BOOL)isSingleValuedGroupField;
 @end

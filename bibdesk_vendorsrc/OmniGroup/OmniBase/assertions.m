@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniBase/assertions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniBase/assertions.m 68913 2005-10-03 19:36:19Z kc $")
 
 #ifdef OMNI_ASSERTIONS_ON
 #warning (Assertions enabled.  To disable, undefine OMNI_ASSERTIONS_ON.)
@@ -26,18 +26,14 @@ static void OBLogAssertionFailure(const char *type, const char *expression, cons
 
 // Some machines (NT, at least) lose the last stack frame when you call abort(), which makes it difficult to debug assertion failures.  We'll call OBAbort() instead of abort() so that you can set a breakpoint on OBAbort() and not lose the stack frame.
 
-#if defined(DEBUG) || defined(OMNI_ASSERTIONS_ON)
-
-#import <unistd.h> // For write()
+#ifdef DEBUG
 
 static void OBAbort(const char *type, const char *expression, const char *file, unsigned int lineNumber)
 {
     OBLogAssertionFailure(type, expression, file, lineNumber);
 
+    fprintf(stderr, "Aborting (presumably due to assertion failure).\n");
     fflush(stderr);
-    const char *s = "Aborting (presumably due to assertion failure).\n";
-    write(2, s, strlen(s));
-    
     abort();
 }
 
@@ -64,7 +60,7 @@ void OBSetAssertionFailureHandler(OBAssertionFailureHandler handler)
 
 void OBAssertFailed(const char *type, const char *expression, const char *file, unsigned int lineNumber)
 {
-     currentAssertionHandler(type, expression, file, lineNumber);
+    currentAssertionHandler(type, expression, file, lineNumber);
 }
 
 #endif

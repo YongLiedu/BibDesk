@@ -1,11 +1,11 @@
-// Copyright 1998-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1998-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OFController.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OFController.h 66043 2005-07-25 21:17:05Z kc $
 
 #import <OmniFoundation/OFObject.h>
 
@@ -55,8 +55,6 @@ typedef enum _OFControllerTerminateReply {
 
 - (void)willTerminate;
 - (void)gotPostponedTerminateResult:(BOOL)isReadyToTerminate;
-
-- (NSString *)copySymbolicBacktrace;
 
 @end
 

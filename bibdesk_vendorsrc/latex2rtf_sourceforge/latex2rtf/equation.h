@@ -11,9 +11,6 @@
 #define EQN_DISPLAYMATH   13  /* \begin{displaymath} ... \end{displaymath} */
 #define EQN_DOLLAR_DOLLAR 14  /* \begin{displaymath} ... \end{displaymath} */
 #define EQN_NO_NUMBER     15	/* \nonumber */
-#define EQN_ENSUREMATH    16	/* \ensuremath */
-#define EQN_ALIGN         17	/* align environment */
-#define EQN_ALIGN_STAR    18	/* align* environment */
 
 #define LEFT_RIGHT 1
 #define RIGHT_LEFT 2
@@ -22,21 +19,17 @@
 #define LEFT_LEFT 5
 #define RIGHT_RIGHT 6
 
-void CmdEquation(int code);
-void CmdFraction(int code);
-void CmdRoot(int code);
-void CmdLim(int code);
-void CmdIntegral(int code);
-void CmdSuperscript(int code);
-void CmdSubscript(int code);
-void CmdNonumber(int code);
-void CmdArray(int code);
-void CmdLeftRight(int code);
-void CmdMatrix(int code);
-void CmdStackrel(int code);
-void CmdArrows(int code);
-void WriteLatexAsBitmap(char *pre, char *eq, char *post);
-int  script_shift(void);
-int  script_size(void);
-void CmdEnsuremath(int code);
-void CmdOverLine(int code);
+void			CmdEquation(int code);
+void            CmdFraction(int code);
+void            CmdRoot(int code);
+void            CmdLim(int code);
+void            CmdIntegral(int code);
+void            CmdSuperscript(int code);
+void            CmdSubscript(int code);
+void            CmdNonumber(int code);
+void			CmdArray(int code);
+void			CmdLeftRight(int code);
+void			CmdMatrix(int code);
+void			CmdStackrel(int code);
+void			CmdArrows(int code);
+void			WriteLatexAsBitmap(char *pre, char *eq, char *post);

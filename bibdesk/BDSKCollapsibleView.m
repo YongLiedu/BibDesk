@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 27/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,25 +46,11 @@
 	if (self) {
 		collapseEdges = BDSKMinXEdgeMask | BDSKMinYEdgeMask;
 		minSize = NSZeroSize;
+		contentView = [[NSView alloc] initWithFrame:[self contentRect]];
+		[super addSubview:contentView];
+		[contentView release];
     }
     return self;
-}
-
-- (id)initWithCoder:(NSCoder *)decoder {
-	if (self = [super initWithCoder:decoder]) {
-		collapseEdges = [decoder decodeIntForKey:@"collapseEdges"];
-		minSize.width = [decoder decodeFloatForKey:@"minSize.width"];
-		minSize.height = [decoder decodeFloatForKey:@"minSize.height"];
-	}
-	return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder {
-  [super encodeWithCoder:coder];
-  [coder encodeInt:collapseEdges forKey:@"collapseEdges"];
-  [coder encodeFloat:minSize.width forKey:@"minSize.width"];
-  [coder encodeFloat:minSize.height forKey:@"minSize.height"];
-  // NSView should handle encoding of contentView as it is a subview
 }
 
 - (NSSize)minSize {
@@ -87,6 +73,20 @@
 	}
 }
 
+- (id)contentView {
+	return contentView;
+}
+
+- (void)setContentView:(NSView *)aView {
+	if (aView != contentView) {
+		[contentView removeFromSuperview];
+		[super addSubview:aView]; // replaceSubview:with: does not work, as it calls [self addSubview:]
+		contentView = aView;
+		[contentView setFrame:[self contentRect]];
+		[self setNeedsDisplay:YES];
+	}
+}
+
 - (NSRect)contentRect {
 	NSRect rect = [self bounds];
 	if (rect.size.width < minSize.width) {
@@ -100,6 +100,36 @@
 		rect.size.height = minSize.height;
 	}
 	return rect;
+}
+
+- (void)resizeSubviewsWithOldSize:(NSSize)size {
+	[contentView setFrame:[self contentRect]];
+}
+
+- (void)resizeWithOldSuperviewSize:(NSSize)oldSize {
+	[super resizeWithOldSuperviewSize:oldSize];
+	[contentView setFrame:[self contentRect]];
+}
+
+- (void)addSubview:(NSView *)aView {
+	NSRect frame = [aView frame];
+	frame = [contentView convertRect:frame fromView:self];
+	[aView setFrame:frame];
+	[contentView addSubview:aView];
+}
+
+- (void)addSubview:(NSView *)aView positioned:(NSWindowOrderingMode)place relativeTo:(NSView *)otherView {
+	NSRect frame = [aView frame];
+	frame = [contentView convertRect:frame fromView:self];
+	[aView setFrame:frame];
+	[contentView addSubview:aView positioned:place relativeTo:otherView];
+}
+
+- (void)replaceSubview:(NSView *)aView with:(NSView *)newView {
+	NSRect frame = [aView frame];
+	frame = [contentView convertRect:frame fromView:self];
+	[aView setFrame:frame];
+	[contentView replaceSubview:aView with:newView];
 }
 
 @end

@@ -9,7 +9,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFMainThreadLockTest.m 66043 2005-07-25 21:17:05Z kc $");
+RCS_ID("$Header$");
 
 @interface TestObject : NSObject
 + (void)grabMainThreadLock;

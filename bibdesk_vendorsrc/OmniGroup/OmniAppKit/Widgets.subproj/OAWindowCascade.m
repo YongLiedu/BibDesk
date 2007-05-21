@@ -12,7 +12,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAWindowCascade.m 66348 2005-08-01 23:54:36Z bungi $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAWindowCascade.m 66348 2005-08-01 23:54:36Z bungi $")
 
 // #define DEBUG_CASCADE
 #define WINDOW_TILE_STEP (20.0)

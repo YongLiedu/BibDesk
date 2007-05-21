@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/3/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@
 #import "BDSKFilterController.h"
 #import "BDSKConditionController.h"
 #import "BDSKConditionsView.h"
-#import "NSArray_BDSKExtensions.h"
 
 
 @implementation BDSKFilterController
@@ -57,10 +56,8 @@
     self = [super init];
     if (self) {
 		filter = [aFilter retain];
-		conditionControllers = [[NSMutableArray alloc] initWithCapacity:[[filter conditions] count]];
-		conjunction = [filter conjunction];
-        editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
-        undoManager = nil;
+		[self setConditionControllers:[NSMutableArray arrayWithCapacity:[[filter conditions] count]]];
+		[self setConjunction:[filter conjunction]];
     }
     return self;
 }
@@ -72,10 +69,6 @@
     filter  = nil;
     [conditionControllers release];
     conditionControllers = nil;
-    [undoManager release];
-    undoManager = nil;
-    CFRelease(editors);
-    editors = nil;
     [super dealloc];
 }
 
@@ -97,16 +90,17 @@
         [conditionsView addView:[controller view]];
 	}
 	
+	[ownerController setContent:self]; // fix for binding-to-nib-owner bug
 	[self updateUI];
 }
 
 - (void)updateUI {
 	if ([conditionControllers count] == 1) {
-		[messageStartTextField setStringValue:NSLocalizedString(@"Match the following condition:", @"Label for smart group editor")];
+		[messageStartTextField setStringValue:NSLocalizedString(@"Match the following condition:", @"")];
 		[conjunctionPopUp setHidden:YES];
 		[messageEndTextField setHidden:YES];
 	} else {
-		[messageStartTextField setStringValue:NSLocalizedString(@"Match", @"Beginning of label for smart group editor")];
+		[messageStartTextField setStringValue:NSLocalizedString(@"Match", @"")];
 		[conjunctionPopUp setHidden:NO];
 		[messageEndTextField setHidden:NO];
         [[messageStartTextField superview] setNeedsDisplayInRect:[messageStartTextField frame]];
@@ -115,17 +109,24 @@
 }
 
 - (IBAction)dismiss:(id)sender {
-    if ([sender tag] == NSOKButton && [self commitEditing]) {
+    if ([sender tag] == NSOKButton) {
+        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:1];
+        NSEnumerator *cEnum = [conditionControllers objectEnumerator];
+        BDSKConditionController *controller = nil;
         
-        NSMutableArray *conditions = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
+        if (![[self window] makeFirstResponder:[self window]])
+            [[self window] endEditingFor:nil];
         
-        [conditions addObjectsByMakingObjectsFromArray:conditionControllers performSelector:@selector(condition)];
+        while (controller = [cEnum nextObject]) {
+            [conditions addObject:[controller condition]];
+        }
         [filter setConditions:conditions];
         [filter setConjunction:[self conjunction]];
         
-        [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Undo action name")];
+        [[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Edit smart group")];
 	}
     
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSWindowWillCloseNotification object:[self window]];
     [super dismiss:sender];
 }
 
@@ -135,18 +136,12 @@
 
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
 	unsigned int index = [conditionControllers indexOfObject:aConditionController];
-	if (index == NSNotFound) 
-		index = [conditionControllers count] - 1;
-	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
-    [self insertConditionController:newController atIndex:index + 1];
-}
-
-- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)index {
-    [[[self undoManager] prepareWithInvocationTarget:self] removeConditionControllerAtIndex:index];
-	
     unsigned int count = [conditionControllers count];
-    [conditionControllers insertObject:newController atIndex:index];
-    [conditionsView insertView:[newController view] atIndex:index];
+	if (index == NSNotFound) 
+		index = count - 1;
+	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
+    [conditionControllers insertObject:newController atIndex:index + 1];
+    [conditionsView insertView:[newController view] atIndex:index + 1];
     [newController setCanRemove:(count > 0)];
 	if (count == 1) {
         [[conditionControllers objectAtIndex:0] setCanRemove:YES];
@@ -156,17 +151,8 @@
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
-	unsigned int index = [conditionControllers indexOfObject:aConditionController];
-    [self removeConditionControllerAtIndex:index];
-}
-
-- (void)removeConditionControllerAtIndex:(unsigned int)index {
-    BDSKConditionController *aConditionController = [conditionControllers objectAtIndex:index];
-    
-    [[[self undoManager] prepareWithInvocationTarget:self] insertConditionController:aConditionController atIndex:index];
-    
-    [conditionsView removeView:[aConditionController view]];
 	[conditionControllers removeObject:aConditionController]; 
+    [conditionsView removeView:[aConditionController view]];
 	if ([conditionControllers count] == 1) {
         [[conditionControllers objectAtIndex:0] setCanRemove:NO];
         [self updateUI];
@@ -181,48 +167,23 @@
     return [[conditionControllers copy] autorelease];
 }
 
+- (void)setConditionControllers:(NSArray *)newConditionControllers {
+    if (conditionControllers != newConditionControllers) {
+        [conditionControllers release];
+        conditionControllers = [newConditionControllers mutableCopy];
+    }
+}
+
 - (BDSKConjunction)conjunction {
     return conjunction;
 }
 
 - (void)setConjunction:(BDSKConjunction)newConjunction {
-    [[[self undoManager] prepareWithInvocationTarget:self] setConjunction:conjunction];
 	conjunction = newConjunction;
 }
 
-#pragma mark NSEditorRegistration
-
-- (void)objectDidBeginEditing:(id)editor {
-    if (CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor) == -1)
-		CFArrayAppendValue((CFMutableArrayRef)editors, editor);		
-}
-
-- (void)objectDidEndEditing:(id)editor {
-    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (index != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
-}
-
-- (BOOL)commitEditing {
-    CFIndex index = CFArrayGetCount(editors);
-    
-	while (index--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
-			return NO;
-    
-    return YES;
-}
-
-#pragma mark Undo support
-
-- (NSUndoManager *)undoManager{
-    if(undoManager == nil)
-        undoManager = [[NSUndoManager alloc] init];
-    return undoManager;
-}
-
-- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
-    return [self undoManager];
+- (void)windowWillClose:(NSNotification *)aNotification {
+	[ownerController setContent:nil]; // fix for binding-to-nib-owner bug
 }
 
 @end

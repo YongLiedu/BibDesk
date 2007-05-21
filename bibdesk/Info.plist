@@ -22,22 +22,6 @@
 				<string>net.sourceforge.bibdesk.bdskcache</string>
 			</array>
 		</dict>
-        <dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>bdsksearch</string>
-			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string>searchDocIcon.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>BibDesk Search Group</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.bdsksearch</string>
-			</array>
-		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
@@ -51,41 +35,10 @@
 			<string>Editor</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>net.sourceforge.bibdesk.bib</string>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
 			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
-			<key>NSExportableAs</key>
-			<array>
-				<string>Minimal BibTeX Database</string>
-				<string>RIS/Medline File</string>
-				<string>Amsrefs LTB</string>
-				<string>EndNote XML</string>
-				<string>MODS XML</string>
-				<string>Atom XML</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>bib</string>
-			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string>bibDocIcon.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>Minimal BibTeX Database</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>net.sourceforge.bibdesk.bib</string>
-			</array>
-			<key>LSTypeIsPackage</key>
-			<true/>
-			<key>NSDocumentClass</key>
-			<string>BibDocument</string>
-			<key>NSPersistentStoreTypeKey</key>
-			<string>Binary</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -106,19 +59,10 @@
 			<string>Editor</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>net.sourceforge.bibdesk.ris</string>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
 			</array>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
-			<key>NSExportableAs</key>
-			<array>
-				<string>Minimal BibTeX Database</string>
-				<string>RIS/Medline File</string>
-				<string>Amsrefs LTB</string>
-				<string>EndNote XML</string>
-				<string>MODS XML</string>
-				<string>Atom XML</string>
-			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -148,75 +92,41 @@
 			</array>
 			<key>NSExportableTypes</key>
 			<array>
-				<string>net.sourceforge.bibdesk.bib</string>
-				<string>net.sourceforge.bibdesk.ris</string>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>ltb</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>Amsrefs LTB</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>LSTypeIsPackage</key>
-			<true/>
-			<key>NSPersistentStoreTypeKey</key>
-			<string>Binary</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>xml</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>EndNote XML</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>LSTypeIsPackage</key>
-			<true/>
-			<key>NSPersistentStoreTypeKey</key>
-			<string>Binary</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>mod</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>MODS XML</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>LSTypeIsPackage</key>
-			<true/>
-			<key>NSPersistentStoreTypeKey</key>
-			<string>Binary</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>atom</string>
-			</array>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
-				<string>application/atom+xml</string>
+				<string>application/x-Inst-for-Scientific-Info</string>
 			</array>
 			<key>CFBundleTypeName</key>
-			<string>Atom XML</string>
+			<string>Web of Science File</string>
 			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>LSTypeIsPackage</key>
-			<true/>
-			<key>NSPersistentStoreTypeKey</key>
-			<string>Binary</string>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>net.sourceforge.bibdesk.webofscience</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>BibDocument</string>
+			<key>NSExportableAs</key>
+			<array>
+				<string>BibTeX Database</string>
+				<string>RIS/Medline File</string>
+			</array>
+			<key>NSExportableTypes</key>
+			<array>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+				<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
+			</array>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>BibDesk</string>
 	<key>CFBundleGetInfoString</key>
-	<string>BibDesk 1.3.5 (v${CURRENT_PROJECT_VERSION}), Copyright 2001-07 Michael O. McCracken.</string>
+	<string>BibDesk 1.2.11 (v${CURRENT_PROJECT_VERSION}), Copyright 2001-06 Michael O. McCracken.</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -232,7 +142,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.3.5</string>
+	<string>1.2.11</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
@@ -240,11 +150,11 @@
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2001-07 Michael O. McCracken.</string>
+	<string>Copyright 2001-06 Michael O. McCracken.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
-	<string>BDSKApplication</string>
+	<string>OAApplication</string>
 	<key>NSServices</key>
 	<array>
 		<dict>
@@ -380,8 +290,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>OFControllerClass</key>
-	<string>BDSKController</string>
 	<key>OFRegistrations</key>
 	<dict>
 		<key>OAPreferenceController</key>
@@ -396,8 +304,6 @@
 				<dict>
 					<key>AutoFile uses relative path</key>
 					<false/>
-					<key>BDSKWarnOnMoveFolderKey</key>
-					<true/>
 					<key>File papers into the papers folder automatically</key>
 					<false/>
 					<key>Local-Url Clean Braces or TeX</key>
@@ -412,7 +318,7 @@
 					<string>~/Documents/Papers</string>
 				</dict>
 				<key>helpURL</key>
-				<string>AutoFilePreferences</string>
+				<string>AutoFile-Preferences</string>
 				<key>icon</key>
 				<string>autofile.tiff</string>
 				<key>identifier</key>
@@ -422,9 +328,9 @@
 				<key>ordering</key>
 				<string>9</string>
 				<key>shortTitle</key>
-				<string>AutoFile [SHORT]</string>
+				<string>AutoFile</string>
 				<key>title</key>
-				<string>AutoFile [LONG]</string>
+				<string>AutoFile</string>
 			</dict>
 			<key>BibPref_Cite</key>
 			<dict>
@@ -434,11 +340,6 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>BDSKDragCopyTypesKey</key>
-					<array>
-						<integer>1</integer>
-						<integer>0</integer>
-					</array>
 					<key>Citation End Bracket</key>
 					<string>}</string>
 					<key>Citation Start Bracket</key>
@@ -455,13 +356,15 @@
 						<string>citeyear</string>
 						<string>citeauthor</string>
 					</array>
+					<key>Drag and Copy</key>
+					<integer>1</integer>
 					<key>Edit on Paste</key>
 					<false/>
 					<key>Separate Cite</key>
 					<false/>
 				</dict>
 				<key>helpURL</key>
-				<string>CitationPreferences</string>
+				<string>Citation-Preferences</string>
 				<key>icon</key>
 				<string>citation.tiff</string>
 				<key>identifier</key>
@@ -471,9 +374,9 @@
 				<key>ordering</key>
 				<string>2</string>
 				<key>shortTitle</key>
-				<string>Citation [SHORT]</string>
+				<string>Citation</string>
 				<key>title</key>
-				<string>Citation [LONG]</string>
+				<string>Citation Behavior</string>
 			</dict>
 			<key>BibPref_CiteKey</key>
 			<dict>
@@ -495,7 +398,7 @@
 					<false/>
 				</dict>
 				<key>helpURL</key>
-				<string>CiteKeyPreferences</string>
+				<string>Citation-Keys</string>
 				<key>icon</key>
 				<string>key.tiff</string>
 				<key>identifier</key>
@@ -505,9 +408,9 @@
 				<key>ordering</key>
 				<string>8</string>
 				<key>shortTitle</key>
-				<string>Cite Key [SHORT]</string>
+				<string>Cite Key</string>
 				<key>title</key>
-				<string>Cite Key [LONG]</string>
+				<string>Cite Key Format</string>
 			</dict>
 			<key>BibPref_Crossref</key>
 			<dict>
@@ -534,7 +437,7 @@
 					<true/>
 				</dict>
 				<key>helpURL</key>
-				<string>CrossrefPreferences</string>
+				<string>Crossref-Preferences</string>
 				<key>icon</key>
 				<string>crossref.tiff</string>
 				<key>identifier</key>
@@ -544,9 +447,9 @@
 				<key>ordering</key>
 				<string>7</string>
 				<key>shortTitle</key>
-				<string>Crossref [SHORT]</string>
+				<string>Crossref</string>
 				<key>title</key>
-				<string>Crossref [LONG]</string>
+				<string>Crossref</string>
 			</dict>
 			<key>BibPref_Defaults</key>
 			<dict>
@@ -556,8 +459,6 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>BDSKDefaultViewersKey</key>
-					<dict/>
 					<key>BDSKGlobalMacroDefinitionsKey</key>
 					<dict/>
 					<key>BDSKGlobalMacroFilesKey</key>
@@ -570,22 +471,14 @@
 					<array>
 						<string>Read</string>
 					</array>
-					<key>Citation fields</key>
-					<array>
-						<string>Cited-By</string>
-						<string>Cites</string>
-					</array>
-                    <key>Person fields</key>
-                    <array>
-                        <string>Author</string>
-                        <string>Editor</string>
-                    </array>
 					<key>Default Fields</key>
 					<array>
 						<string>Keywords</string>
 						<string>Local-Url</string>
 						<string>Url</string>
 					</array>
+					<key>Field to use as Description in RSS</key>
+					<string>Rss-Description</string>
 					<key>Local File Fields</key>
 					<array>
 						<string>Local-Url</string>
@@ -606,7 +499,7 @@
 					<array/>
 				</dict>
 				<key>helpURL</key>
-				<string>DefaultFieldsPreferences</string>
+				<string>Default-Fields-Preferences</string>
 				<key>icon</key>
 				<string>defaults.tiff</string>
 				<key>identifier</key>
@@ -616,9 +509,9 @@
 				<key>ordering</key>
 				<string>6</string>
 				<key>shortTitle</key>
-				<string>Defaults [SHORT]</string>
+				<string>Defaults</string>
 				<key>title</key>
-				<string>Defaults [LONG]</string>
+				<string>Defaults</string>
 			</dict>
 			<key>BibPref_Display</key>
 			<dict>
@@ -628,8 +521,6 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>BDSKAuthorNameDisplayKey</key>
-					<integer>3</integer>
 					<key>BDSKEditorFontNameKey</key>
 					<string>Helvetica</string>
 					<key>BDSKEditorFontSizeKey</key>
@@ -656,6 +547,12 @@
 					<real>0.0</real>
 					<key>BDSKPreviewTemplateStyleKey</key>
 					<string>Default RSS template</string>
+					<key>BDSKShouldAbbreviateFirstNamesKey</key>
+					<true/>
+					<key>BDSKShouldDisplayFirstNamesKey</key>
+					<true/>
+					<key>BDSKShouldDisplayLastNameFirstKey</key>
+					<false/>
 					<key>BDSKSortGroupsDescendingKey</key>
 					<false/>
 					<key>BDSKSortGroupsKey</key>
@@ -671,12 +568,12 @@
 					<key>Maximum Number of Items in Preview Pane</key>
 					<integer>0</integer>
 					<key>Preview Pane Displays What?</key>
-					<integer>0</integer>
+					<integer>1</integer>
 					<key>Terms ignored when sorting</key>
 					<array/>
 				</dict>
 				<key>helpURL</key>
-				<string>DisplayPreferences</string>
+				<string>Display-Preferences</string>
 				<key>icon</key>
 				<string>display.tiff</string>
 				<key>identifier</key>
@@ -686,9 +583,9 @@
 				<key>ordering</key>
 				<string>1</string>
 				<key>shortTitle</key>
-				<string>Display [SHORT]</string>
+				<string>Display</string>
 				<key>title</key>
-				<string>Display [LONG]</string>
+				<string>Display</string>
 			</dict>
 			<key>BibPref_Export</key>
 			<dict>
@@ -708,7 +605,7 @@
 					</data>
 				</dict>
 				<key>helpURL</key>
-				<string>TemplatePreferences</string>
+				<string>Template-Preferences</string>
 				<key>icon</key>
 				<string>exportPrefs.tiff</string>
 				<key>identifier</key>
@@ -718,9 +615,9 @@
 				<key>ordering</key>
 				<string>5</string>
 				<key>shortTitle</key>
-				<string>Templates [SHORT]</string>
+				<string>Templates</string>
 				<key>title</key>
-				<string>Templates [LONG]</string>
+				<string>Template Files</string>
 			</dict>
 			<key>BibPref_Files</key>
 			<dict>
@@ -730,12 +627,12 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>Auto-save as RSS</key>
+					<false/>
 					<key>BDSKAutosaveTimeIntervalKey</key>
 					<integer>300</integer>
 					<key>BDSKShouldAutosaveDocumentKey</key>
 					<false/>
-					<key>BDSKStringEncodingsKey</key>
-					<array/>
 					<key>Default string encoding for opening and saving</key>
 					<integer>1</integer>
 					<key>Load files in background</key>
@@ -754,7 +651,7 @@
 					<true/>
 				</dict>
 				<key>helpURL</key>
-				<string>FilesPreferences</string>
+				<string>Files-Preferences</string>
 				<key>icon</key>
 				<string>genericBibDocIcon.tiff</string>
 				<key>identifier</key>
@@ -764,9 +661,9 @@
 				<key>ordering</key>
 				<string>3</string>
 				<key>shortTitle</key>
-				<string>Files [SHORT]</string>
+				<string>Files</string>
 				<key>title</key>
-				<string>Files [LONG]</string>
+				<string>Opening and Saving</string>
 			</dict>
 			<key>BibPref_General</key>
 			<dict>
@@ -780,64 +677,23 @@
 					<string>http://citeseer.ist.psu.edu/</string>
 					<key>BDSKCurrentGroupFieldKey</key>
 					<string>Keywords</string>
-					<key>BDSKDefaultBibFileAliasKey</key>
-					<data></data>
 					<key>BDSKDefaultGroupFieldSeparatorKey</key>
 					<string>; </string>
-					<key>BDSKEmailTemplateKey</key>
-					<string></string>
 					<key>BDSKGroupFieldsKey</key>
 					<array>
 						<string>Keywords</string>
 						<string>Group</string>
 					</array>
-					<key>BDSKGroupFieldSeparatorCharactersKey</key>
-					<string>,:;</string>
 					<key>BDSKIntersectGroupsKey</key>
 					<false/>
 					<key>BDSKReadExtendedAttributesKey</key>
 					<false/>
-                    <key>BDSKSearchGroupBookmarksKey</key>
-                    <array>
-                        <dict>
-                            <key>database</key>
-                            <string>pubmed</string>
-                            <key>label</key>
-                            <string>PubMed</string>
-                            <key>name</key>
-                            <string>PubMed</string>
-                            <key>type</key>
-                            <string>entrez</string>
-                        </dict>
-                        <dict>
-                            <key>database</key>
-                            <string>Voyager</string>
-                            <key>host</key>
-                            <string>z3950.loc.gov</string>
-                            <key>label</key>
-                            <string>Library of Congress</string>
-                            <key>name</key>
-                            <string>Library of Congress</string>
-                            <key>options</key>
-                            <dict>
-                                <key>recordSyntax</key>
-                                <string>US MARC</string>
-                                <key>resultEncoding</key>
-                                <string>marc-8</string>
-                            </dict>
-                            <key>port</key>
-                            <string>7090</string>
-                            <key>type</key>
-                            <string>zoom</string>
-                        </dict>
-					</array>
-                    <key>BDSKShouldUsePDFMetadata</key>
+					<key>BDSKShouldUsePDFMetadata</key>
 					<false/>
 					<key>BDSKShouldWritePDFMetadata</key>
 					<false/>
-					<key>BDSKSpotlightVersionInfo</key>
-                    <dict>
-                    </dict>
+					<key>BDSKShouldWritePDFMetadata</key>
+					<false/>
 					<key>BDSKUpdateCheckIntervalKey</key>
 					<integer>1</integer>
 					<key>BDSKUpdateCheckLastDateKey</key>
@@ -854,6 +710,10 @@
 					<true/>
 					<key>BibEditor window autosave name</key>
 					<string></string>
+					<key>BlueComponentColor of alternating rows Key</key>
+					<string>1.010918794815856e-310</string>
+					<key>Check for updates when starting</key>
+					<true/>
 					<key>Check spelling continuously while editing</key>
 					<false/>
 					<key>Column Widths by Name</key>
@@ -882,8 +742,6 @@
 						<real>50</real>
 						<key>Local-Url</key>
 						<real>18</real>
-						<key>Publication Date</key>
-						<real>50</real>
 						<key>Rating</key>
 						<real>70</real>
 						<key>Read</key>
@@ -894,9 +752,15 @@
 						<real>23</real>
 					</dict>
 					<key>Current Publication Type String</key>
-					<string>article</string>
+					<string>Inproceedings</string>
+					<key>Current Quick Search Key</key>
+					<string>Keywords</string>
+					<key>Current Quick Search Text Dictionary</key>
+					<dict/>
 					<key>Default Bib File</key>
 					<string></string>
+					<key>GreenComponentColor of alternating rows Key</key>
+					<string>1.093888830242598e-310</string>
 					<key>Last Open FileNames</key>
 					<array/>
 					<key>Last field for find and replace</key>
@@ -905,14 +769,17 @@
 					<string>0</string>
 					<key>NSToolbar Configuration OAPreferences</key>
 					<string></string>
-					<key>Open using filter command history</key>
-					<array/>
 					<key>Preview PDF Scale Factor</key>
 					<real>1</real>
 					<key>Preview RTF Scale Factor</key>
 					<real>1</real>
-                    <key>BDSKSearchMenuTagKey</key>
-                    <integer>0</integer>
+					<key>Quick Search Keys</key>
+					<array>
+						<string>Keywords</string>
+						<string>Pub Type</string>
+					</array>
+					<key>RedComponentColor of alternating rows Key</key>
+					<string>1.156487706076073e-310</string>
 					<key>Saved size of BibEditor document snoop drawer</key>
 					<string></string>
 					<key>Show Editor Status Bar</key>
@@ -932,7 +799,7 @@
 						<string>BibTeX Type</string>
 						<string>Cite Key</string>
 						<string>Title</string>
-						<string>Publication Date</string>
+						<string>Date</string>
 						<string>1st Author</string>
 						<string>2nd Author</string>
 						<string>3rd Author</string>
@@ -943,11 +810,9 @@
 					<integer>0</integer>
 					<key>View-by Field</key>
 					<string>Author</string>
-                    <key>BDSKShouldShowWebGroup</key>
-                    <false/>
 				</dict>
 				<key>helpURL</key>
-				<string>GeneralPreferences</string>
+				<string>General-Preferences</string>
 				<key>icon</key>
 				<string>startup.tiff</string>
 				<key>identifier</key>
@@ -957,9 +822,9 @@
 				<key>ordering</key>
 				<string>0</string>
 				<key>shortTitle</key>
-				<string>General [SHORT]</string>
+				<string>General</string>
 				<key>title</key>
-				<string>General [LONG]</string>
+				<string>General Application Behavior</string>
 			</dict>
 			<key>BibPref_InputManager</key>
 			<dict>
@@ -973,7 +838,7 @@
 					<true/>
 				</dict>
 				<key>helpURL</key>
-				<string>AutocompletionPreferences</string>
+				<string>Autocompletion-Preferences</string>
 				<key>icon</key>
 				<string>inputmanager.tiff</string>
 				<key>identifier</key>
@@ -983,9 +848,9 @@
 				<key>ordering</key>
 				<string>91</string>
 				<key>shortTitle</key>
-				<string>Completion [SHORT]</string>
+				<string>Completion</string>
 				<key>title</key>
-				<string>Completion [LONG]</string>
+				<string>Autocompletion Plugin</string>
 			</dict>
 			<key>BibPref_ScriptHooks</key>
 			<dict>
@@ -999,7 +864,7 @@
 					<dict/>
 				</dict>
 				<key>helpURL</key>
-				<string>ScriptHookPreferences</string>
+				<string>Script-Hook-Preferences</string>
 				<key>icon</key>
 				<string>scripthook.tiff</string>
 				<key>identifier</key>
@@ -1009,9 +874,9 @@
 				<key>ordering</key>
 				<string>92</string>
 				<key>shortTitle</key>
-				<string>Script Hooks [SHORT]</string>
+				<string>Script Hooks</string>
 				<key>title</key>
-				<string>Script Hooks [LONG]</string>
+				<string>Script Hooks</string>
 			</dict>
 			<key>BibPref_Sharing</key>
 			<dict>
@@ -1031,7 +896,7 @@
 					<false/>
 				</dict>
 				<key>helpURL</key>
-				<string>SharingPreferences</string>
+				<string>Sharing-Preferences</string>
 				<key>icon</key>
 				<string>networkIcon.tiff</string>
 				<key>identifier</key>
@@ -1041,9 +906,9 @@
 				<key>ordering</key>
 				<string>5</string>
 				<key>shortTitle</key>
-				<string>Sharing [SHORT]</string>
+				<string>Sharing</string>
 				<key>title</key>
-				<string>Sharing [LONG]</string>
+				<string>Sharing Files</string>
 			</dict>
 			<key>BibPref_TeX</key>
 			<dict>
@@ -1054,18 +919,18 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>BibTeX Binary Path</key>
-					<string>/usr/texbin/bibtex</string>
+					<string>/usr/local/teTeX/bin/powerpc-apple-darwin-current/bibtex</string>
 					<key>BibTeX Style</key>
 					<string>abbrv</string>
 					<key>Character encoding for TeX preview file</key>
 					<integer>1</integer>
 					<key>TeX Binary Path</key>
-					<string>/usr/texbin/pdflatex</string>
+					<string>/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex</string>
 					<key>Uses TeX</key>
 					<false/>
 				</dict>
 				<key>helpURL</key>
-				<string>PreviewPreferences</string>
+				<string>Preview-Preferences</string>
 				<key>icon</key>
 				<string>preview.tiff</string>
 				<key>identifier</key>
@@ -1075,9 +940,9 @@
 				<key>ordering</key>
 				<string>4</string>
 				<key>shortTitle</key>
-				<string>Preview [SHORT]</string>
+				<string>Preview</string>
 				<key>title</key>
-				<string>Preview [LONG]</string>
+				<string>TeX - Typeset Preview</string>
 			</dict>
 		</dict>
 	</dict>
@@ -1095,7 +960,7 @@
 			<key>UTTypeIconFile</key>
 			<string>bibDocIcon.icns</string>
 			<key>UTTypeIdentifier</key>
-			<string>net.sourceforge.bibdesk.bib</string>
+			<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -1114,7 +979,7 @@
 			<key>UTTypeIconFile</key>
 			<string>risDocIcon.icns</string>
 			<key>UTTypeIdentifier</key>
-			<string>net.sourceforge.bibdesk.ris</string>
+			<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
 			<key>UTTypeReferenceURL</key>
 			<string>http://www.refman.com/support/risformat_intro.asp</string>
 			<key>UTTypeTagSpecification</key>
@@ -1128,14 +993,13 @@
 				<key>public.mime-type</key>
 				<array>
 					<string>application/x-Research-Info-Systems</string>
-                    <string>application/x-endnote-refer</string>
 				</array>
 			</dict>
 		</dict>
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.data</string>
+				<string>public.plain-text</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>BibDesk Item</string>
@@ -1148,25 +1012,6 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>bdskcache</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.data</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>BibDesk Search Group</string>
-			<key>UTTypeIconFile</key>
-			<string>searchGroupIcon.icns</string>
-			<key>UTTypeIdentifier</key>
-			<string>net.sourceforge.bibdesk.bdsksearch</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>bdsksearch</string>
 				</array>
 			</dict>
 		</dict>

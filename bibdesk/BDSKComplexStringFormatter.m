@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Mon Jul 22 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -145,7 +145,7 @@
             [self setParsedString:string];
             if([string isStringTeXQuotingBalancedWithBraces:YES connected:NO] == NO)
                 // not really a complex string exception, but we'll handle it the same way
-                @throw [NSException exceptionWithName:BDSKComplexStringException reason:NSLocalizedString(@"Unbalanced braces", @"Exception description") userInfo:nil];
+                @throw [NSException exceptionWithName:BDSKComplexStringException reason:NSLocalizedString(@"Unbalanced braces", @"") userInfo:nil];
         }
 
     }

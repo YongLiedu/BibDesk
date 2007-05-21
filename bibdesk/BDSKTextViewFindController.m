@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 4/6/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 	}
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
     if ([menuItem action] == @selector(performFindPanelAction:)) {
 		switch ([menuItem tag]) {
 			case NSFindPanelActionShowFindPanel:
@@ -128,12 +128,12 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-    if ([[aNotification object] isEqual:searchTextForm]) {
+    if ([aNotification object] == searchTextForm) {
         // validate the search string as a regex
         AGRegex *regex = [AGRegex regexWithPattern:[[searchTextForm cellAtIndex:0] stringValue]];
         if (regex == nil) {
             NSBeep();
-            [findTypePopUp selectItemWithTag:0];
+            [findTypePopUp selectItemAtIndex:[findTypePopUp indexOfItemWithTag:0]];
         }
     }
 }

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 19/12/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,6 @@
 @interface NSObject (BDSKFieldEditorDelegate)
 - (NSRange)textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange;
 - (BOOL)textViewShouldAutoComplete:(NSTextView *)textView;
-- (BOOL)textViewShouldLinkKeys:(NSTextView *)textView;
-- (BOOL)textView:(NSTextView *)textView isValidKey:(NSString *)key;
 @end
 
 @interface NSControl (NSControlBDSKFieldEditorDelegate)

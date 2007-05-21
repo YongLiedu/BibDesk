@@ -1,4 +1,4 @@
-// Copyright 2005-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -7,11 +7,10 @@
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
-#define STEnableDeprecatedAssertionMacros
 #import <SenTestingKit/SenTestingKit.h>
 #import <OmniFoundation/NSError-OFExtensions.h>
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/Tests/OFErrorExtensionTests.m 79087 2006-09-07 23:37:02Z kc $");
+RCS_ID("$Header$");
 
 @interface OFErrorExtensionTests : SenTestCase
 @end
@@ -22,27 +21,25 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 {
     NSError *error = nil;
     
-    OFError(&error, foo, @"some reason");
+    OFError(&error, foo, nil);
     should(error != nil);
     shouldBeEqual([error domain], @"com.omnigroup.framework.OmniFoundation.UnitTests.ErrorDomain.foo");
     should([error code] == 0);
-    shouldBeEqual([error localizedDescription], @"some reason");
 }
 
 - (void)testUnderlyingError;
 {
     NSError *error = nil;
     
-    OFErrorWithInfo(&error, foo, nil);
-    OFErrorWithInfo(&error, bar, nil);
+    OFError(&error, foo, nil);
+    OFError(&error, bar, nil);
     
     should(error != nil);
     shouldBeEqual([error domain], @"com.omnigroup.framework.OmniFoundation.UnitTests.ErrorDomain.bar");
     should([error code] == 0);
 
     should([error userInfo] != nil);
-    should([[error userInfo] count] == 2);
-    should([[error userInfo] valueForKey:OFFileNameAndNumberErrorKey] != nil);
+    should([[error userInfo] count] == 1);
     
     NSError *underlyingError = [[error userInfo] valueForKey:NSUnderlyingErrorKey];
     should(underlyingError != nil);
@@ -54,50 +51,39 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 - (void)testSingleKeyValue;
 {
     NSError *error = nil;
-    OFErrorWithInfo(&error, foo, @"MyKey", @"MyValue", nil);
-    should([[error userInfo] count] == 2);
-    should([[error userInfo] valueForKey:OFFileNameAndNumberErrorKey] != nil);
+    OFError(&error, foo, @"MyKey", @"MyValue", nil);
+    should([[error userInfo] count] == 1);
     should([[[error userInfo] valueForKey:@"MyKey"] isEqual:@"MyValue"]);
 }
 
 - (void)testMultipleKeyValue;
 {
     NSError *error = nil;
-    OFErrorWithInfo(&error, foo, @"MyKey1", @"MyValue1", @"MyKey2", @"MyValue2", nil);
-    should([[error userInfo] count] == 3);
-    should([[error userInfo] valueForKey:OFFileNameAndNumberErrorKey] != nil);
+    OFError(&error, foo, @"MyKey1", @"MyValue1", @"MyKey2", @"MyValue2", nil);
+    should([[error userInfo] count] == 2);
     should([[[error userInfo] valueForKey:@"MyKey1"] isEqual:@"MyValue1"]);
     should([[[error userInfo] valueForKey:@"MyKey2"] isEqual:@"MyValue2"]);
-}
-
-- (void)testFileAndLineNumber;
-{
-    NSError *error = nil;
-    OFErrorWithInfo(&error, foo, nil);
-    NSString *expectedFileAndLineNumber = [NSString stringWithFormat:@"%s:%d", __FILE__, __LINE__-1];
-    
-    should([[[error userInfo] valueForKey:OFFileNameAndNumberErrorKey] isEqual:expectedFileAndLineNumber]);
 }
 
 - (void)testCausedByUserCancelling_Not;
 {
     NSError *error = nil;
-    OFErrorWithInfo(&error, foo, nil);
+    OFError(&error, foo, nil);
     shouldnt([error causedByUserCancelling]);
 }
 
 - (void)testCausedByUserCancelling_Direct;
 {
     NSError *error = nil;
-    OFErrorWithInfo(&error, foo, OFUserCancelledActionErrorKey, [NSNumber numberWithBool:YES], nil);
+    OFError(&error, foo, OFUserCancelledActionErrorKey, [NSNumber numberWithBool:YES], nil);
     should([error causedByUserCancelling]);
 }
 
 - (void)testCausedByUserCancelling_Indirect;
 {
     NSError *error = nil;
-    OFErrorWithInfo(&error, foo, OFUserCancelledActionErrorKey, [NSNumber numberWithBool:YES], nil);
-    OFErrorWithInfo(&error, bar, nil);
+    OFError(&error, foo, OFUserCancelledActionErrorKey, [NSNumber numberWithBool:YES], nil);
+    OFError(&error, bar, nil);
     should([error causedByUserCancelling]);
 }
 

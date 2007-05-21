@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 05/04/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,19 +38,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface BDSKSpotlightCircle : NSObject
-{
-    NSPoint center;
-    float radius;
-}
-- (id)initWithCenterPoint:(NSPoint)p radius:(float)r;
-- (float)radius;
-- (NSPoint)center;
-@end
-
 @protocol BDSKSpotlightViewDelegate <NSObject>
 
-- (NSArray *)highlightCirclesInScreenCoordinates;
+- (NSArray *)highlightRectsInScreenCoordinates;
 - (BOOL)isSearchActive;
 
 @end

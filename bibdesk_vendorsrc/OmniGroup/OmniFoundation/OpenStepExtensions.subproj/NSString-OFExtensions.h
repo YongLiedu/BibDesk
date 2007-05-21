@@ -1,11 +1,11 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.h 68595 2005-09-21 21:13:13Z wiml $
 
 #import <Foundation/NSString.h>
 
@@ -95,7 +95,7 @@ Currently the only way to create strings with deferred bytes/characters is using
 - (unsigned int)hexValue;
 
 - (NSString *)stringByUppercasingAndUnderscoringCaseChanges;
-- (NSString *)stringByRemovingSurroundingWhitespace;  // New code should probably use -stringByTrimmingCharactersInSet: instead
+- (NSString *)stringByRemovingSurroundingWhitespace;
 - (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
 - (NSString *)stringByRemovingWhitespace;
 - (NSString *)stringByRemovingCharactersInOFCharacterSet:(OFCharacterSet *)removeSet;

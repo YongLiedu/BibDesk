@@ -16,7 +16,7 @@
 
 #import "OFXMLBuffer.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/XML/OFXMLFrozenElement.m 66265 2005-07-29 04:07:59Z bungi $");
+RCS_ID("$Header$");
 
 #define SAFE_ALLOCA_SIZE (8 * 8192)
 

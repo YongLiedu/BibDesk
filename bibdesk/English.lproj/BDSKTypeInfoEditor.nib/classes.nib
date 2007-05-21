@@ -4,6 +4,7 @@
             ACTIONS = {dismiss = id; }; 
             CLASS = BDSKSheetController; 
             LANGUAGE = ObjC; 
+            OUTLETS = {}; 
             SUPERCLASS = NSWindowController; 
         }, 
         {
@@ -11,7 +12,6 @@
                 addOptional = id; 
                 addRequired = id; 
                 addType = id; 
-                changeCanEditDefaultTypes = id; 
                 removeOptional = id; 
                 removeRequired = id; 
                 removeType = id; 
@@ -24,7 +24,6 @@
                 addOptionalButton = NSButton; 
                 addRequiredButton = NSButton; 
                 addTypeButton = NSButton; 
-                canEditDefaultTypesButton = NSButton; 
                 optionalTableView = NSTableView; 
                 removeOptionalButton = NSButton; 
                 removeRequiredButton = NSButton; 

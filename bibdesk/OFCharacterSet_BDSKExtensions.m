@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/02/06.
 /*
- This software is Copyright (c) 2006,2006,2007
+ This software is Copyright (c) 2006,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,14 +41,14 @@
 @implementation OFCharacterSet (BDSKExtensions)
 
 static OFCharacterSet *curlyBraceCharacterSet = nil;
-static OFCharacterSet *commaCharacterSet = nil;
+static OFCharacterSet *autocompletePunctuationCharacterSet = nil;
 static OFCharacterSet *newlineCharacterSet = nil;
 static OFCharacterSet *whitespaceCharacterSet = nil;
 
 + (void)didLoad;
 {
     curlyBraceCharacterSet = [[OFCharacterSet alloc] initWithString:@"{}"];
-    commaCharacterSet = [[OFCharacterSet alloc] initWithString:@","];
+    autocompletePunctuationCharacterSet = [[OFCharacterSet alloc] initWithString:@",:;"];
         
     // character set with all newline characters (including the weird Unicode ones)
     // character set with all newline characters (including the weird Unicode ones)
@@ -68,9 +68,9 @@ static OFCharacterSet *whitespaceCharacterSet = nil;
     return curlyBraceCharacterSet; 
 }    
 
-+ (OFCharacterSet *)commaCharacterSet;
++ (OFCharacterSet *)autocompletePunctuationCharacterSet;
 {
-    return commaCharacterSet;
+    return autocompletePunctuationCharacterSet;
 }
 
 + (OFCharacterSet *)newlineCharacterSet;

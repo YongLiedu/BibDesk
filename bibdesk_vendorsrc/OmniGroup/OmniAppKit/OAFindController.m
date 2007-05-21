@@ -18,7 +18,7 @@
 #import "OARegExFindPattern.h"
 #import "OAWindowCascade.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OAFindController.m 66852 2005-08-13 03:14:45Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OAFindController.m 66852 2005-08-13 03:14:45Z kc $")
 
 static NSString *OAFindPanelTitle = @"Find";
 

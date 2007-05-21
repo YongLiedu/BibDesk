@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 07/29/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ enum {
     @param      dateString (description)
     @result     (description)
 */
-- (id)initWithMonthDayYearString:(NSString *)dateString;
+- (NSDate *)initWithMonthDayYearString:(NSString *)dateString;
 + (id)dateWithColloquialString:(NSString *)string;
 
 @end

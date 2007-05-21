@@ -25,7 +25,7 @@ This file is available from http://sourceforge.net/projects/latex2rtf/
 #include <stdlib.h>
 #include "main.h"
 #include "convert.h"
-#include "fonts.h"
+#include "l2r_fonts.h"
 #include "commands.h"
 #include "funct1.h"
 #include "tables.h"
@@ -35,7 +35,6 @@ This file is available from http://sourceforge.net/projects/latex2rtf/
 #include "counters.h"
 #include "util.h"
 #include "lengths.h"
-#include "preamble.h"
 
 typedef struct TabularT {
     int n;                      /* number of columns */
@@ -231,9 +230,9 @@ static void TabularGetRow(char *table, char **row, char **next_row, int *height)
 
 /******************************************************************************
  purpose:  scan and duplicate the next row from a tabular environment and any height changes
-            e.g.   the & cell & is & here \\[2pt]
-                   but & then & it & died \\
-            will return "the & cell & is & here" and height should be 40 (twips)
+ 			e.g.   the & cell & is & here \\[2pt]
+ 			       but & then & it & died \\
+ 			will return "the & cell & is & here" and height should be 40 (twips)
  ******************************************************************************/
 {
     char *s, *dimension, *dim_start;
@@ -783,13 +782,13 @@ static void TabularMeasureRow(TabularT tabular, char *this_row, char *next_row, 
 void CmdTabular(int code)
 
 /******************************************************************************
- purpose:   \begin{tabular}[pos]{cols}          ... \end{tabular}
-            \begin{tabular*}{width}[pos]{cols}  ... \end{tabular*}
-            \begin{array}[pos]{cols}            ... \end{array}
+ purpose: 	\begin{tabular}[pos]{cols}          ... \end{tabular}
+ 			\begin{tabular*}{width}[pos]{cols}  ... \end{tabular*}
+ 			\begin{array}[pos]{cols}            ... \end{array}
  ******************************************************************************/
 {
     int true_code, this_height, next_height, first_row, begins, ends;
-    char *end=NULL, *begin=NULL, *this_row, *next_row, *next_row_start, *row_start;
+    char *end, *begin, *this_row, *next_row, *next_row_start, *row_start;
     char *table = NULL;
     char *cols = NULL;
     char *pos = NULL;
@@ -935,28 +934,10 @@ static int TabbingColumnPosition(int n, int total)
     return colWidth * (n + 1);
 }
 
-/******************************************************************************
- purpose:  simple minded way to skip \verb#contents$# in cell
- ******************************************************************************/
-static char *skip_verb(char *s)
-{
-    char endchar;
-    diagnostics(6,"before verb <<%s>>",s);
-    if (s && strncmp(s,"verb",4)==0){
-        s+=4;
-        endchar = *s;
-        s++;
-        while (*s && *s!= endchar) s++;
-        if (*s) s++;
-    }
-    diagnostics(6,"after  verb <<%s>>",s);
-    return s;
-}
-
 static void TabbingNextCellEnd(char *t, char **cell_end, char **next_cell)
 
 /******************************************************************************
- purpose:  find the end of this tabbing cell
+ purpose:  find the next ampersand while avoiding \&
  ******************************************************************************/
 {
     char *s;
@@ -973,18 +954,11 @@ static void TabbingNextCellEnd(char *t, char **cell_end, char **next_cell)
 
         if (*s == '\\') {
             s++;
-            s = skip_verb(s);
             if (*s == '=' || *s == '>' || *s == '<' || *s == '\'' || *s == '`') {
                 *cell_end = s - 1;
                 *next_cell = s + 1;
                 return;
             }
-        }
-        
-        if (*s == '\0') {
-            *cell_end = s;
-            *next_cell = s;
-            return;
         }
         s++;
     }
@@ -1018,7 +992,6 @@ static char *TabbingNextCell(char *cell_start, char **cell_end)
 
     dup2 = strdup_noendblanks(dup);
     free(dup);
-    diagnostics(4,"next cell = [[%s]]", dup);
     return dup2;
 }
 
@@ -1104,17 +1077,10 @@ static void TabbingGetRow(char *table, char **row, char **next_row)
         s++;
     }
 
-    if (*s == '\\' && slash) {  /* line ends with \\ */
-        row_chars--;
-        
-        if (*(s+1)=='[') {  /* skip optional height parameter */
-        	s++;
-        	while (*s != '\0' && *s != ']') s++;
-        }
-    }
-
     if (*s != '\0')
         *next_row = s + 1;
+    if (*s == '\\' && slash)
+        row_chars--;
 
     arow = (char *) malloc((row_chars + 1) * sizeof(char));
     strncpy(arow, table, row_chars);
@@ -1127,7 +1093,7 @@ static void TabbingGetRow(char *table, char **row, char **next_row)
 static void TabbingGetColumnAlignments(char *row, char *align, int *n, int *next_left)
 
 /******************************************************************************
- purpose:   scan one row of tabbing environment to obtain column alignments
+ purpose: 	scan one row of tabbing environment to obtain column alignments
  ******************************************************************************/
 {
     int i;
@@ -1146,8 +1112,6 @@ static void TabbingGetColumnAlignments(char *row, char *align, int *n, int *next
         }
 
         row++;
-        row = skip_verb(row);
-        
         switch (*row) {
 
             case '=':
@@ -1193,7 +1157,7 @@ static void TabbingGetColumnAlignments(char *row, char *align, int *n, int *next
 void CmdTabbing(int code)
 
 /******************************************************************************
- purpose:   \begin{tabbing} ... \end{tabbing}
+ purpose: 	\begin{tabbing} ... \end{tabbing}
  ******************************************************************************/
 {
     int n, n_total, next_left;
@@ -1259,50 +1223,36 @@ void CmdTabbing(int code)
 void CmdTable(int code)
 
 /******************************************************************************
- purpose: handles the \begin{table} ... \end{table} codes.  The primary use is
-          to properly handle the spacing before and after the table.  It is 
-          slightly more complicated because the endfloat package suppresses 
-          inserting a table in the text, but does it later when the file.ttt 
-          is read.  g_endfloat_tables is set to true during this phase --- 
-          otherwise it is always false (most notably when the endfloat package
-          is not being used.)
+ purpose: converts the LaTex-Table to a similar Rtf-style
+	  this converting is only partially
+	  so the user has to convert some part of the Table-environment by hand
+parameter: type of array-environment
  ******************************************************************************/
 {
     char *location, *table_contents;
-    static char     oldalignment;
-    char *endtable = ((code & ~ON) == TABLE) ? "\\end{table}" : "\\end{table*}";
+    char endtable[] = "\\end{table}";
+	static char     oldalignment;
 
     if (code & ON) {
+		CmdEndParagraph(0);
+		oldalignment = alignment;
+		alignment = JUSTIFIED;
+
+		CmdVspace(VSPACE_BIG_SKIP);
+		CmdStartParagraph(0);
+
         location = getBracketParam();
-        if (location) free(location);
+        if (location)
+            free(location);
 
-        CmdEndParagraph(0);
-        oldalignment = alignment;
-        alignment = JUSTIFIED;
-
-        CmdVspace(VSPACE_BIG_SKIP);
+        if (GetTexMode() != MODE_VERTICAL)
+            CmdEndParagraph(0);
         CmdIndent(INDENT_NONE);
 
         g_processing_table = TRUE;
         table_contents = getTexUntil(endtable, TRUE);
         g_table_label = ExtractLabelTag(table_contents);
-        if (g_endfloat_tables) {
-            if (g_endfloat_markers) {
-                alignment = CENTERED;
-                CmdStartParagraph(0);
-                incrementCounter("endfloattable");  /* two separate counters */
-                fprintRTF("[");                     /* one for tables and one for */
-                ConvertBabelName("TABLENAME");      /* endfloat tables */
-                fprintRTF(" ");
-                if (g_document_type != FORMAT_ARTICLE)
-                    fprintRTF("%d.", getCounter("chapter"));
-                fprintRTF("%d about here]", getCounter("endfloattable"));
-            }
-        } else {
-            CmdStartParagraph(0);
-            ConvertString(table_contents);
-        }
-        
+        ConvertString(table_contents);
         ConvertString(endtable);
         free(table_contents);
     } else {
@@ -1311,9 +1261,9 @@ void CmdTable(int code)
             CmdEndParagraph(0);
         if (g_table_label)
             free(g_table_label);
-        alignment = oldalignment;
-        CmdEndParagraph(0);
-        CmdVspace(VSPACE_BIG_SKIP);
+		alignment = oldalignment;
+		CmdEndParagraph(0);
+		CmdVspace(VSPACE_BIG_SKIP);
     }
 }
 

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 21/11/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,6 @@
 - (void)replacementMouseDown:(NSEvent *)theEvent;
 @end
 
-@interface NSTableView (NSTableHeaderViewMenu)
-- (NSMenu *)menuForTableHeaderColumn:(NSTableColumn *)aTableColumn;
+@interface NSObject (NSTableViewBDSKExtendedDelegate)
+- (NSMenu *)tableView:(NSTableView *)aTableView menuForTableHeaderColumn:(NSTableColumn *)aTableColumn;
 @end

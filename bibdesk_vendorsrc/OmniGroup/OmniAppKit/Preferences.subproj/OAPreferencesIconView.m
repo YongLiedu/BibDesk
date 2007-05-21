@@ -18,7 +18,7 @@
 #import "OAPreferenceClientRecord.h"
 #import "OAPreferenceController.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferencesIconView.m 68913 2005-10-03 19:36:19Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferencesIconView.m 68913 2005-10-03 19:36:19Z kc $")
 
 @interface OAPreferencesIconView (Private)
 @end

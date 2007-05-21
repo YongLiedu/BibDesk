@@ -1,4 +1,4 @@
-// Copyright 1999-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -14,7 +14,7 @@
 #import <OmniFoundation/OFCharacterSet.h>
 
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFPathExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFPathExtensions.m 68913 2005-10-03 19:36:19Z kc $")
 
 @implementation NSString (OFPathExtensions)
 
@@ -38,7 +38,7 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
     return [NSOpenStepRootDirectory() substringToIndex:1];
 }
 
-NSArray *OFCommonRootPathComponents(NSString *filename, NSString *otherFilename, NSArray **componentsLeft, NSArray **componentsRight)
++ (NSString *)commonRootPathOfFilename:(NSString *)filename andFilename:(NSString *)otherFilename;
 {
     int minLength, i;
     NSArray *filenameArray, *otherArray;
@@ -49,63 +49,41 @@ NSArray *OFCommonRootPathComponents(NSString *filename, NSString *otherFilename,
     minLength = MIN([filenameArray count], [otherArray count]);
     resultArray = [NSMutableArray arrayWithCapacity:minLength];
 
-    for (i = 0; i < minLength; i++) {
+    for (i = 0; i < minLength; i++)
         if ([[filenameArray objectAtIndex:i] isEqualToString:[otherArray objectAtIndex:i]])
             [resultArray addObject:[filenameArray objectAtIndex:i]];
-        else
-            break;
-    }
         
     if ([resultArray count] == 0)
         return nil;
 
-    if (componentsLeft)
-        *componentsLeft = [filenameArray subarrayWithRange:(NSRange){i, [filenameArray count] - i}];
-    if (componentsRight)
-        *componentsRight = [otherArray subarrayWithRange:(NSRange){i, [otherArray count] - i}];
-    
-    return resultArray;
-}
-
-+ (NSString *)commonRootPathOfFilename:(NSString *)filename andFilename:(NSString *)otherFilename;
-{
-    NSArray *components = OFCommonRootPathComponents(filename, otherFilename, NULL, NULL);
-    return components? [NSString pathWithComponents:components] : nil;
+    return [NSString pathWithComponents:resultArray];
 }
 
 - (NSString *)relativePathToFilename:(NSString *)otherFilename;
 {
-    NSArray *commonRoot, *myUniquePart, *otherUniquePart;
+    NSString *commonRoot, *myUniquePart, *otherUniquePart;
     int numberOfStepsUp, i;
+    NSMutableString *stepsUpString;
 
-    otherFilename = [otherFilename stringByStandardizingPath];
-    commonRoot = OFCommonRootPathComponents([self stringByStandardizingPath], otherFilename, &myUniquePart, &otherUniquePart);
-    if (commonRoot == nil || [commonRoot count] == 0)
+    commonRoot = [[NSString commonRootPathOfFilename:self andFilename:otherFilename] stringByAppendingString:[NSString pathSeparator]];
+    if (commonRoot == nil)
         return otherFilename;
     
-    numberOfStepsUp = [myUniquePart count];
-    if (numberOfStepsUp == 0)
-        return [NSString pathWithComponents:otherUniquePart];
-    if ([[myUniquePart lastObject] isEqualToString:@""])
-        numberOfStepsUp --;
-    if (numberOfStepsUp == 0)
-        return [NSString pathWithComponents:otherUniquePart];
-    
-    NSMutableArray *stepsUpArray = [[otherUniquePart mutableCopy] autorelease];
+    myUniquePart = [[self stringByStandardizingPath] stringByRemovingPrefix:commonRoot];
+    otherUniquePart = [[otherFilename stringByStandardizingPath] stringByRemovingPrefix:commonRoot];
+
+    numberOfStepsUp = [[myUniquePart pathComponents] count];
+    if (![self hasSuffix:[NSString pathSeparator]])
+        numberOfStepsUp--; // Assume we're not a directory unless we end in /. May result in incorrect paths, but we can't do much about it.
+
+    stepsUpString = [NSMutableString stringWithCapacity:(numberOfStepsUp * 3)];
     for (i = 0; i < numberOfStepsUp; i++) {
-        NSString *steppingUpPast = [myUniquePart objectAtIndex:i];
-        if ([steppingUpPast isEqualToString:@".."]) {
-            if ([[stepsUpArray objectAtIndex:0] isEqualToString:@".."])
-                [stepsUpArray removeObjectAtIndex:0];
-            else {
-                // Gack! Just give up.
-                return nil;
-            }
-        } else
-            [stepsUpArray insertObject:@".." atIndex:0];
+        [stepsUpString appendString:@".."];
+        [stepsUpString appendString:[NSString pathSeparator]];
     }
 
-    return [[NSString pathWithComponents:stepsUpArray] stringByStandardizingPath];
+    return [[stepsUpString stringByAppendingString:otherUniquePart] stringByStandardizingPath];
 }
+
 
 @end

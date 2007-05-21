@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 09/23/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
  */
 
 #import "BDSKShellCommandFormatter.h"
-#import "NSString_BDSKExtensions.h"
 
 
 @implementation BDSKShellCommandFormatter
@@ -51,10 +50,10 @@
     return command;
 }
 
-+ (NSArray *)argumentsFromCommand:(NSString *)command;
++ (NSString *)argumentsFromCommand:(NSString *)command;
 {
     NSRange spaceRange = [command rangeOfString:@" "];
-    return (spaceRange.length) ? [[command substringFromIndex:spaceRange.location + 1] shellScriptArgumentsArray] : [NSArray array];
+    return (spaceRange.length) ? [command substringFromIndex:spaceRange.location + 1] : nil;
 }    
 
 + (BOOL)isValidExecutableCommand:(NSString *)command;
@@ -77,7 +76,7 @@
         return YES;
     } else {
         if (obj) *obj = nil;
-        if (error) *error = [NSString stringWithFormat:NSLocalizedString(@"File \"%@\" does not exist or is not executable.", @"Error description"), [[self class] pathByRemovingArgumentsFromCommand:string]];
+        if (error) *error = [NSString stringWithFormat:NSLocalizedString(@"File \"%@\" does not exist or is not executable.", @""), [[self class] pathByRemovingArgumentsFromCommand:string]];
         return NO;
     }
 }

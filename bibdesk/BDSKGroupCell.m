@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 26/10/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,9 @@
 #import <OmniBase/OBUtilities.h>
 #import "NSImage+Toolbox.h"
 #import "NSGeometry_BDSKExtensions.h"
-#import "NSParagraphStyle_BDSKExtensions.h"
 
+static NSMutableParagraphStyle *BDSKGroupCellStringParagraphStyle = nil;
+static NSMutableParagraphStyle *BDSKGroupCellCountParagraphStyle = nil;
 static NSLayoutManager *layoutManager = nil;
 static CFMutableDictionaryRef integerStringDictionary = NULL;
 
@@ -63,6 +64,10 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 {
     OBINITIALIZE;
     
+    BDSKGroupCellStringParagraphStyle = [[NSMutableParagraphStyle alloc] init];
+    [BDSKGroupCellStringParagraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
+    BDSKGroupCellCountParagraphStyle = [[NSMutableParagraphStyle alloc] init];
+    [BDSKGroupCellCountParagraphStyle setLineBreakMode:NSLineBreakByClipping];
     layoutManager = [[NSLayoutManager alloc] init];
     [layoutManager setTypesetterBehavior:NSTypesetterBehavior_10_2_WithCompatibility];
     
@@ -74,10 +79,13 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 }
 
 - (id)init {
-    if (self = [super initTextCell:[[[BDSKGroup alloc] initWithName:@"" count:0] autorelease]]) {
+    if (self = [super initTextCell:@""]) {
         
+        [self setImagePosition:NSImageLeft];
         [self setEditable:YES];
         [self setScrollable:YES];
+        
+		[self setDrawsHighlight:NO];
         
         label = [[NSMutableAttributedString alloc] initWithString:@""];
         countString = [[NSMutableAttributedString alloc] initWithString:@""];
@@ -93,6 +101,10 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 - (id)initWithCoder:(NSCoder *)coder {
 	if (self = [super initWithCoder:coder]) {
+		// we need to do these two because OATextWithIconCell does in subclass NSCoding, so super uses the one from NSTextFieldCell
+		_oaFlags.drawsHighlight = [coder decodeIntForKey:@"drawsHighlight"];
+		[self setImagePosition:NSImageLeft];
+        
         // recreates the dictionary
         countAttributes = [[NSMutableDictionary alloc] initWithCapacity:5];
         [self recacheCountAttributes];
@@ -106,6 +118,7 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
 	[super encodeWithCoder:encoder];
+	[encoder encodeInt:_oaFlags.drawsHighlight forKey:@"drawsHighlight"];
 }
 
 // NSCopying
@@ -113,6 +126,9 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 - (id)copyWithZone:(NSZone *)zone {
     BDSKGroupCell *copy = [super copyWithZone:zone];
 
+    copy->groupValue = [groupValue retain];
+    copy->_oaFlags.drawsHighlight = _oaFlags.drawsHighlight;
+    
     // count attributes are shared between this cell and all copies, but not with new instances
     copy->countAttributes = [countAttributes retain];
     copy->label = [label mutableCopy];
@@ -122,6 +138,7 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 }
 
 - (void)dealloc {
+    [groupValue release];
     [label release];
     [countString release];
     [countAttributes release];
@@ -130,14 +147,17 @@ NSString *BDSKGroupCellCountKey = @"numberValue";
 
 - (NSColor *)highlightColorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 {
-    return nil;
+    if (!_oaFlags.drawsHighlight)
+        return nil;
+    else
+        return [super highlightColorWithFrame:cellFrame inView:controlView];
 }
 
 - (NSColor *)textColor;
 {
-    if (settingUpFieldEditor)
-        return [NSColor textColor];
-    else if (_cFlags.highlighted)
+    if (_oaFlags.settingUpFieldEditor)
+        return [NSColor blackColor];
+    else if (!_oaFlags.drawsHighlight && _cFlags.highlighted)
         return [NSColor textBackgroundColor];
     else
         return [super textColor];
@@ -161,14 +181,23 @@ static NSString *stringWithInteger(int count)
     return (NSString *)string;
 }
 
+// BDSKGroup and NSString respond to these messages (see global keys in this file)
+
 - (void)setObjectValue:(id <NSObject, NSCopying>)obj {
-    // we should not set a derived value such as the group name here, otherwise NSTableView will call tableView:setObjectValue:forTableColumn:row: whenever a cell is selected
-    OBASSERT([obj isKindOfClass:[BDSKGroup class]]);
+    OBASSERT(obj == nil || [obj respondsToSelector:@selector(stringValue)]);
+    OBASSERT(obj == nil || [obj respondsToSelector:@selector(count)]);
     
-    [super setObjectValue:obj];
-    
-    [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:obj == nil ? @"" : [(BDSKGroup *)obj stringValue]];
-    [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([(BDSKGroup *)obj count])];
+    if(obj != groupValue){
+        [groupValue release];
+        groupValue = [obj retain];
+        
+        NSString *stringValue = [groupValue stringValue];
+        // super's object value needs to be an NSString
+        [super setObjectValue:stringValue];
+        [label replaceCharactersInRange:NSMakeRange(0, [label length]) withString:stringValue];
+
+        [countString replaceCharactersInRange:NSMakeRange(0, [countString length]) withString:stringWithInteger([groupValue count])];
+    }
 }
 
 #pragma mark Drawing
@@ -184,16 +213,20 @@ NSRect ignored, imageRect, textRect, countRect; \
 \
 NSSize imageSize = NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1); \
 NSSize countSize = NSZeroSize; \
-BOOL failedDownload = [[self objectValue] failedDownload]; \
-BOOL isRetrieving = [[self objectValue] isRetrieving]; \
+BOOL failedDownload = [groupValue failedDownload]; \
+BOOL isRetrieving = [groupValue isRetrieving]; \
 BOOL controlViewIsFlipped = [controlView isFlipped]; \
 \
 float countSep = 0.0; \
-if(failedDownload || isRetrieving) { \
+if(failedDownload) { \
     countSize = NSMakeSize(16, 16); \
     countSep = 1.0; \
 } \
-else if([[self objectValue] count] > 0) { \
+else if(isRetrieving) { \
+    countSize = NSMakeSize(16, 16); \
+    countSep = 1.0; \
+} \
+else if([groupValue count] > 0) { \
     countSize = [countString size]; \
     countSep = 0.5f * countSize.height - 0.5; \
 } \
@@ -216,18 +249,6 @@ if (controlViewIsFlipped == NO) \
 textRect.origin.y -= floorf(vOffset); \
 else \
 textRect.origin.y += floorf(vOffset); \
-
-- (NSRect)textRectForBounds:(NSRect)aRect {
-    NSView *controlView = [self controlView];
-    _calculateDrawingRectsAndSizes;
-    return textRect;
-}
-
-- (NSRect)iconRectForBounds:(NSRect)aRect {
-    NSView *controlView = [self controlView];
-    _calculateDrawingRectsAndSizes;
-    return imageRect;
-}
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView {
     /* Shark and sample indicate that we're spending a lot of time in NSAttributedString drawing, if you test by holding down an arrow key and scrolling through the main table */
@@ -254,7 +275,7 @@ textRect.origin.y += floorf(vOffset); \
 	}
 
     // Draw the text
-    [label addAttribute:NSParagraphStyleAttributeName value:[NSParagraphStyle defaultClippingParagraphStyle] range:labelRange];
+    [label addAttribute:NSParagraphStyleAttributeName value:BDSKGroupCellStringParagraphStyle range:labelRange];
     
     // calculate after adding all attributes
     _calculateDrawingRectsAndSizes;
@@ -265,43 +286,66 @@ textRect.origin.y += floorf(vOffset); \
     
     [label drawInRect:textRect];
     
-    if (isRetrieving == NO) {
-        if (failedDownload) {
-            NSImage *cautionImage = [NSImage imageNamed:@"BDSKSmallCautionIcon"];
-            NSSize cautionImageSize = [cautionImage size];
-            NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
-            if(controlViewIsFlipped)
-                [cautionImage drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-            else
-                [cautionImage drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-        } else if (countSize.width > 0) {
-            [NSGraphicsContext saveGraphicsState];
-            [bgColor setFill];
-            [NSBezierPath fillHorizontalOvalAroundRect:NSIntegralRect(countRect)];
-            [NSGraphicsContext restoreGraphicsState];
+    if (failedDownload) {
+        NSImage *cautionImage = [NSImage cautionIconImage];
+        NSSize cautionImageSize = [cautionImage size];
+        NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
+        if(controlViewIsFlipped)
+            [[NSImage cautionIconImage] drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+        else
+            [[NSImage cautionIconImage] drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+    } else if (countSize.width > 0 && isRetrieving == NO) {
+        [NSGraphicsContext saveGraphicsState];
+		[bgColor setFill];
+		[NSBezierPath fillHorizontalOvalAroundRect:NSIntegralRect(countRect)];
+        [NSGraphicsContext restoreGraphicsState];
 
-            [countString drawInRect:countRect];
-        }
+		[countString drawInRect:countRect];
     }
-    
+    	
     // Draw the image
     imageRect = BDSKCenterRect(imageRect, imageSize, controlViewIsFlipped);
-    [NSGraphicsContext saveGraphicsState];
-    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
 	if (controlViewIsFlipped)
-		[[[self objectValue] icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
+		[[groupValue icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
 	else
-		[[[self objectValue] icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    [NSGraphicsContext restoreGraphicsState];
+		[[groupValue icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    
 }
 
 - (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
 {
     _calculateDrawingRectsAndSizes;
     
-    settingUpFieldEditor = YES;
+    _oaFlags.settingUpFieldEditor = YES;
     [super selectWithFrame:textRect inView:controlView editor:textObj delegate:anObject start:selStart length:selLength];
-    settingUpFieldEditor = NO;
+    _oaFlags.settingUpFieldEditor = NO;
+}
+
+- (NSCellImagePosition)imagePosition;
+{
+    return _oaFlags.imagePosition;
+}
+
+- (void)setImagePosition:(NSCellImagePosition)aPosition;
+{
+    _oaFlags.imagePosition = aPosition;
+}
+
+- (BOOL)drawsHighlight;
+{
+    return _oaFlags.drawsHighlight;
+}
+
+- (void)setDrawsHighlight:(BOOL)flag;
+{
+    _oaFlags.drawsHighlight = flag;
+}
+
+- (NSRect)textRectForFrame:(NSRect)aRect inView:(NSView *)controlView;
+{
+    _calculateDrawingRectsAndSizes;
+    
+    return textRect;
 }
 
 @end
@@ -320,9 +364,10 @@ textRect.origin.y += floorf(vOffset); \
     [countAttributes setObject:countFont forKey:NSFontAttributeName];
     [countAttributes setObject:font forKey:@"NSOriginalFont"];
     [countAttributes setObject:[NSNumber numberWithFloat:-1.0] forKey:NSKernAttributeName];
-    [countAttributes setObject:[NSParagraphStyle defaultClippingParagraphStyle] forKey:NSParagraphStyleAttributeName];
+    [countAttributes setObject:BDSKGroupCellCountParagraphStyle forKey:NSParagraphStyleAttributeName];
 
 	[font release];
 }
+
 
 @end

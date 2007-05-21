@@ -4,7 +4,7 @@
 //
 //  Created by Sven-S. Porst on Wed Jul 21 2004.
 /*
- This software is Copyright (c) 2004,2005,2006,2007
+ This software is Copyright (c) 2004,2005,2006
  Sven-S. Porst. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -56,5 +56,5 @@
 
 @interface BibItem (Finding)
 - (BOOL) matchesString:(NSString*) searchterm;
-- (NSString *) stringForCompletion;
+- (id) objectForCompletion;
 @end

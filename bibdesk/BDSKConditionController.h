@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 17/3/05.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,10 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKCondition.h"
 
-@class BDSKFilterController, BDSKRatingButton;
+@class BDSKFilterController;
 
 
-@interface BDSKConditionController : NSWindowController {
+@interface BDSKConditionController : NSObject {
 	IBOutlet NSComboBox *keyComboBox;
 	IBOutlet NSPopUpButton *comparisonPopUp;
     IBOutlet NSPopUpButton *dateComparisonPopUp;
@@ -53,14 +53,12 @@
     IBOutlet NSTextField *toDateTextField;
     IBOutlet NSTextField *agoText;
     IBOutlet NSPopUpButton *periodPopUp;
-    IBOutlet NSButton *booleanButton;
-    IBOutlet NSButton *triStateButton;
-    IBOutlet BDSKRatingButton *ratingButton;
     IBOutlet NSBox *comparisonBox;
     IBOutlet NSBox *valueBox;
 	IBOutlet NSView *view;
 	IBOutlet NSButton *addButton;
 	IBOutlet NSButton *removeButton;
+	IBOutlet NSObjectController *ownerController;
 	BDSKFilterController *filterController;
 	BDSKCondition *condition;
 	NSMutableArray *keys;
@@ -72,7 +70,6 @@
 - (NSView *)view;
 - (IBAction)addNewCondition:(id)sender;
 - (IBAction)removeThisCondition:(id)sender;
-- (IBAction)changeRating:(id)sender;
 - (BDSKCondition *)condition;
 - (BOOL)canRemove;
 - (void)setCanRemove:(BOOL)flag;

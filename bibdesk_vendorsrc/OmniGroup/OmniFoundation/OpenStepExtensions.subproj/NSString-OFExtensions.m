@@ -1,28 +1,29 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
-#import "NSString-OFExtensions.h"
+#import <OmniFoundation/NSString-OFExtensions.h>
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
+
+#import <OmniFoundation/OFStringDecoder.h>
+#import <OmniFoundation/OFStringScanner.h>
+#import <OmniFoundation/OFRegularExpression.h>
+#import <OmniFoundation/OFRegularExpressionMatch.h>
+#import <OmniFoundation/NSData-OFExtensions.h>
+#import <OmniFoundation/NSMutableString-OFExtensions.h>
+#import <OmniFoundation/NSThread-OFExtensions.h>
+#import <OmniFoundation/NSFileManager-OFExtensions.h>
+#import "NSObject-OFExtensions.h"
+#import "OFStringScanner.h"
+
 #import <math.h>
 
-#import "NSData-OFExtensions.h"
-#import "NSMutableString-OFExtensions.h"
-#import "NSThread-OFExtensions.h"
-#import "NSFileManager-OFExtensions.h"
-#import "NSObject-OFExtensions.h"
-#import "OFRegularExpression.h"
-#import "OFRegularExpressionMatch.h"
-#import "OFStringDecoder.h"
-#import "OFStringScanner.h"
-#import "OFUtilities.h"
-
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.m 79089 2006-09-07 23:41:01Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.m 67680 2005-08-31 01:18:49Z wiml $")
 
 /* Character sets & variables used for URI encoding */
 static OFCharacterSet *AcceptableCharacterSet;
@@ -228,11 +229,11 @@ OmniFoundation_PRIVATE_EXTERN unsigned int OFByteForDeferredDecodedCharacter(uni
 
     if (aCharacter <= 0xFFFF) {
         utf16[0] = (unichar)aCharacter;
-        result = [[self alloc] initWithCharacters:utf16 length:1];
+        result = [[NSString alloc] initWithCharacters:utf16 length:1];
     } else {
         /* Convert Unicode characters in supplementary planes into pairs of UTF-16 surrogates */
         OFCharacterToSurrogatePair(aCharacter, utf16);
-        result = [[self alloc] initWithCharacters:utf16 length:2];
+        result = [[NSString alloc] initWithCharacters:utf16 length:2];
     }
     return [result autorelease];
 }
@@ -261,17 +262,7 @@ OmniFoundation_PRIVATE_EXTERN unsigned int OFByteForDeferredDecodedCharacter(uni
 
 + (NSString *)stringWithFourCharCode:(FourCharCode)code;
 {
-    union {
-        uint32_t i;
-        UInt8 c[4];
-    } buf;
-
-    buf.i = CFSwapInt32HostToBig(code);
-    
-    // UTCreateStringForOSType()/UTGetOSTypeFromString() uses MacOSRoman encoding, so we'll do that too.
-    NSString *string = [[NSString alloc] initWithBytes:buf.c length:4 encoding:NSMacOSRomanStringEncoding];
-    [string autorelease];
-    return string;
+     return [NSString stringWithCString:(const char *)&code length:4];
 }
 
 + (NSString *)horizontalEllipsisString;
@@ -461,7 +452,7 @@ OmniFoundation_PRIVATE_EXTERN unsigned int OFByteForDeferredDecodedCharacter(uni
 - (BOOL)boolValue;
 {
     // Should maybe later add a configurable dictionary that contains the valid YES and NO values
-    if (([self caseInsensitiveCompare:@"YES"] == NSOrderedSame) || ([self caseInsensitiveCompare:@"Y"]  == NSOrderedSame) || [self isEqualToString:@"1"] || ([self caseInsensitiveCompare:@"true"] == NSOrderedSame))
+    if ([self isEqualToString:@"YES"] || [self isEqualToString:@"Y"] || [self isEqualToString:@"yes"] || [self isEqualToString:@"y"] || [self isEqualToString:@"1"])
         return YES;
     else
         return NO;
@@ -519,12 +510,20 @@ OmniFoundation_PRIVATE_EXTERN unsigned int OFByteForDeferredDecodedCharacter(uni
 
 - (FourCharCode)fourCharCodeValue;
 {
+    char *chars; //[4]
     FourCharCode code;
     
-    if (OFGet4CCFromPlist(self, (uint32_t *)&code))
-        return code;
-    else
-        return 0; // sigh.
+    OBASSERT([self length] >= 4);
+    
+    chars = (char*)[[self substringWithRange:NSMakeRange(0, 4)] cString];
+    
+    code = 0;
+    code += chars[0] << 24;
+    code += chars[1] << 16;
+    code += chars[2] << 8;
+    code += chars[3];
+    
+    return code;
 }
 
 #define MAX_HEX_TEXT_LENGTH 40
@@ -666,18 +665,23 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
 
 - (NSString *)stringByRemovingSurroundingWhitespace;
 {
-    NSCharacterSet *nonWhitespace = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
+    static NSCharacterSet *nonWhitespace = nil;
     NSRange firstValidCharacter, lastValidCharacter;
+
+    if (!nonWhitespace) {
+        nonWhitespace = [[[NSCharacterSet characterSetWithCharactersInString:
+            @" \t\r\n"] invertedSet] retain];
+    }
     
     firstValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace];
     if (firstValidCharacter.length == 0)
-        return @"";
+	return @"";
     lastValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch];
-    
-    if (firstValidCharacter.location == 0 && NSMaxRange(lastValidCharacter) == [self length])
-        return [[self copy] autorelease];
+
+    if (firstValidCharacter.location == 0 && lastValidCharacter.location == [self length] - 1)
+	return [[self retain] autorelease];
     else
-	return [self substringWithRange:NSMakeRange(firstValidCharacter.location, NSMaxRange(lastValidCharacter)-firstValidCharacter.location)];
+	return [self substringWithRange:NSUnionRange(firstValidCharacter, lastValidCharacter)];
 }
 
 - (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
@@ -1178,7 +1182,7 @@ static NSString *_variableSubstitutionInDictionary(NSString *key, void *context)
 {
     NSRange aRange;
 
-    aRange = [self rangeOfString:prefix options:NSAnchoredSearch];
+    aRange = [self rangeOfString:prefix];
     if ((aRange.length == 0) || (aRange.location != 0))
         return [[self retain] autorelease];
     return [self substringFromIndex:aRange.location + aRange.length];
@@ -1471,20 +1475,19 @@ static inline unichar hexDigit(unichar digit)
 	return 10 + digit - 'a';
 }
 
-static inline int_fast16_t valueOfHexPair(unichar highNybble, unichar lowNybble)
+static inline int valueOfHexPair(unichar highNybble, unichar lowNybble)
 {
-    uint_fast8_t hnValue, lnValue;
+    short hnValue, lnValue;
     
-    static const uint_fast8_t hexValues[103] =
+    static const short hexValues[103] =
     {
-#define XX 0x81   /* Must be distinct from any valid entry. used to use -1, but 0x81 fits in a char. */
-          XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,
-          XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,
-          XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,
-        0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,  XX,  XX,  XX,  XX,  XX,  XX,
-          XX,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,
-          XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,  XX,
-          XX,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+        0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF
     };
     
     if (highNybble > 'f' || lowNybble > 'f')
@@ -1492,9 +1495,9 @@ static inline int_fast16_t valueOfHexPair(unichar highNybble, unichar lowNybble)
 
     hnValue = hexValues[highNybble];
     lnValue = hexValues[lowNybble];
-    if (hnValue == XX || lnValue == XX)
+    if (hnValue == -1 || lnValue == -1)
         return -1;
-#undef XX
+
     return ( hnValue & 0xF0 ) | ( lnValue & 0x0F );
 }
 
@@ -2088,7 +2091,7 @@ static const char qpNonSpecials[128] = {
 
     charsetName = CFStringConvertEncodingToIANACharSetName(bestEncoding);
     // Hack for UTF16BE/UTF16LE.
-    // Note that this doesn't screw up our byte count because we remove two bytes here but add two bytes in the encoding name.
+    // Note that this doesn't crew up our byte count because we remove two bytes here but add two bytes in the encoding name.
     // We might still come out ahead because BASE64 is like that.
     if ([(NSString *)charsetName isEqualToString:@"UTF-16"] && CFDataGetLength(convertedBytes) >= 2) {
         UInt8 maybeBOM[2];
@@ -2282,33 +2285,14 @@ char *OFShortASCIIDecimalStringFromDouble(double value, double eDigits, BOOL all
     /* Convert the floating-point number into a decimal-floating-point format: value = mantissa * 10 ^ shift */  
     double eDigitsLeftOfDecimal = log(value);
     double digitsRightOfDecimal = ( eDigits - eDigitsLeftOfDecimal ) / log(10);
-    double fltShift = ceil(digitsRightOfDecimal);
+    double fltShift = floor(digitsRightOfDecimal); // TODO: Should we be using ceil() here?
     int shift = fltShift;  // Integer version of fltShift
     double mantissa = value * pow(10.0, fltShift);
-    double mAcceptableSlop = pow(10.0, fltShift - digitsRightOfDecimal);
-    OBINVARIANT(mAcceptableSlop >= 1.0);
-    OBINVARIANT(mAcceptableSlop < 10.0);
     
     /* Round to the nearest *decimal* digit within the precision of the original number */
-    unsigned long decimalMantissaL, decimalMantissaU, decimalMantissaV;
-    decimalMantissaL = ceil(mantissa - 0.5 * mAcceptableSlop);
-    decimalMantissaU = floor(mantissa + 0.5 * mAcceptableSlop);
-    
-    /* Any mantissa in the range [decimalMantissaL ... decimalMantissaU] inclusive will produce an acceptable result. Check to see if one of them has a shorter representation than the others. */
-    unsigned int lastDigit = decimalMantissaL % 10;
-    if (lastDigit == 0) {
-        decimalMantissaV = decimalMantissaL;
-    } else if ( (10 - lastDigit) <= (unsigned int)(decimalMantissaU - decimalMantissaL) ) {
-        decimalMantissaV = decimalMantissaL + ( 10 - lastDigit );
-    } else {
-        decimalMantissaV = nearbyint(mantissa);
-    }
-    // printf("\t%lu\t%lu\t%lu\n", decimalMantissaL, decimalMantissaV, decimalMantissaU);
-    
-    /* Convert to a string of ASCII decimal digits. */
     char *decimalMantissa;
     int decimalMantissaDigits;
-    decimalMantissaDigits = asprintf(&decimalMantissa, "%lu", decimalMantissaV);
+    decimalMantissaDigits = asprintf(&decimalMantissa, "%lu", (unsigned long)(floor(0.5 + mantissa)));
     
     // printf("e-digits left of dp: %f\ntotal e-digits precision: %f\ndecimal digits right of point: %f (shift=%d)\nmantissa chopped to decimal: \"%s\" (%d chars)\n", eDigitsLeftOfDecimal, eDigits, digitsRightOfDecimal, shift, decimalMantissa, decimalMantissaDigits);
     

@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 9/4/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -45,14 +45,4 @@
 - (IBAction)hideWindow:(id)sender;
 - (IBAction)toggleShowingWindow:(id)sender;
 
-- (void)setWindowFrameAutosaveNameOrCascade:(NSString *)name;
-- (void)setWindowFrameAutosaveNameOrCascade:(NSString *)name setFrame:(NSRect)frameRect;
-
-@end
-
-// Allows the window's delegate (usually an NSWindowController) to
-// override the representedFilename of the window.  Can return nil
-// to use the window's default representedFilename, or @"" for nothing.
-@interface NSObject (BDSKWindowDelegate)
-- (NSString *)representedFilenameForWindow:(NSWindow *)aWindow;
 @end

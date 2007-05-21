@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 8/11/06.
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@
 {
     OFScheduler *scheduler;
     NSString *selectedItem = nil;
-    unsigned int selectedIndex, foundIndex;
+    int selectedIndex, foundIndex;
     unsigned int searchStringLength;
     unsigned int selectedItemLength;
     NSRange range;

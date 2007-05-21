@@ -1,4 +1,4 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
@@ -13,10 +13,9 @@
 #import <OmniFoundation/OmniFoundation.h>
 
 #import "NSOutlineView-OAExtensions.h"
-#import "NSView-OAExtensions.h"
 #import "OATypeAheadSelectionHelper.h"
 
-RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTableView-OAExtensions.m 79079 2006-09-07 22:35:32Z kc $")
+RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTableView-OAExtensions.m 68516 2005-09-19 22:07:59Z rachael $")
 
 @interface NSTableView (OAExtensionsPrivate)
 - (BOOL)_copyToPasteboard:(NSPasteboard *)pasteboard;
@@ -38,7 +37,6 @@ RCS_ID("$Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceR
 
 @implementation NSTableView (OAExtensions)
 
-static IMP originalKeyDown;
 static IMP originalMouseDown;
 static IMP originalTextDidEndEditing;
 static IMP originalDragImageForRows;
@@ -52,7 +50,6 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
 
 + (void)didLoad;
 {
-    originalKeyDown = OBReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(_replacementKeyDown:));
     originalMouseDown = OBReplaceMethodImplementationWithSelector(self, @selector(mouseDown:), @selector(_replacementMouseDown:));
     originalTextDidEndEditing = OBReplaceMethodImplementationWithSelector(self, @selector(textDidEndEditing:), @selector(_replacementTextDidEndEditing:));
     originalDragImageForRows = OBReplaceMethodImplementationWithSelector(self, @selector(dragImageForRows:event:dragImageOffset:), @selector(_replacementDragImageForRows:event:dragImageOffset:));
@@ -60,37 +57,6 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
 
 
 // NSTableView method replacements
-
-- (void)_replacementKeyDown:(NSEvent *)theEvent;
-{
-    NSString *characters = [theEvent characters];
-    unichar firstCharacter = [characters characterAtIndex:0];
-    
-    // See if there's an item whose title matches what the user is typing.
-    // This can only be activated, initially, by typing an alphanumeric character.  This means it's smart enough to know when the user is, say, pressing space emulate a double-click, or pressing space separating two search string words.
-    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableTypeAheadSelection"] &&   
-        [_dataSource respondsToSelector:@selector(tableView:objectValueForTableColumn:row:)]) {
-        NSTableColumn *typeAheadColumn;
-        
-        typeAheadColumn = [self _typeAheadSelectionColumn];
-        if (typeAheadColumn != nil && ([[NSCharacterSet alphanumericCharacterSet] characterIsMember:firstCharacter] || ([TypeAheadHelper isProcessing] && ![[NSCharacterSet controlCharacterSet] characterIsMember:firstCharacter]))) {
-            if (TypeAheadHelper == nil)
-                TypeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
-            
-            // make sure the helper is cached against us (not some other instance), but don't recache on every keyDown either.
-            if ([TypeAheadHelper dataSource] != self || ![TypeAheadHelper isProcessing])
-                [TypeAheadHelper setDataSource:self];
-            
-            [TypeAheadHelper processKeyDownCharacter:firstCharacter];
-            return;
-        }
-    }
-    
-    if ([self _processKeyDownCharacter:firstCharacter])
-        return;
-    
-    [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
-}
 
 - (void)_replacementMouseDown:(NSEvent *)event;
 {
@@ -103,18 +69,19 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
 
 - (void)_replacementTextDidEndEditing:(NSNotification *)notification;
 {
+    // ARM:  the original implementation of this only checked for NSReturnTextMovement, and we need to check for NSTabTextMovement as well
     int textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
-    if ((textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && ![self _shouldEditNextItemWhenEditingEnds]) {
+    if ( (textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && ![self _shouldEditNextItemWhenEditingEnds]) {
         // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.
         NSMutableDictionary *newUserInfo;
         NSNotification *newNotification;
-
+        
         newUserInfo = [NSMutableDictionary dictionaryWithDictionary:[notification userInfo]];
         [newUserInfo setObject:[NSNumber numberWithInt:NSIllegalTextMovement] forKey:@"NSTextMovement"];
-        newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];
+        newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];        
         originalTextDidEndEditing(self, _cmd, newNotification);
-
-        // For some reason we lose firstResponder status when we do the above.
+        
+        // For some reason we lose firstResponder status when when we do the above.
         [[self window] makeFirstResponder:self];
     } else {
         originalTextDidEndEditing(self, _cmd, notification);
@@ -292,7 +259,7 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
     point = [self convertPoint:[event locationInWindow] fromView:nil];
     rowIndex = [self rowAtPoint:point];
     // Christiaan M. Hofman: fixed bug in following line
-    columnIndex = [self columnAtPoint:point]; 
+	columnIndex = [self columnAtPoint:point]; 
     if (rowIndex >= 0 && columnIndex >= 0) {
         if (![self isRowSelected:rowIndex])
             [self selectRow:rowIndex byExtendingSelection:NO];
@@ -442,6 +409,41 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
         [_dataSource tableView:self insertNewline:sender];
 }
 
+- (void)keyDown:(NSEvent *)theEvent;
+{
+    NSString *characters;
+    unichar firstCharacter;
+    unsigned int modifierFlags;
+
+    characters = [theEvent characters];
+    modifierFlags = [theEvent modifierFlags];
+    firstCharacter = [characters characterAtIndex:0];
+
+    // See if there's an item whose title matches what the user is typing.
+    // This can only be activated, initially, by typing an alphanumeric character.  This means it's smart enough to know when the user is, say, pressing space emulate a double-click, or pressing space separating two search string words.
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableTypeAheadSelection"]) {
+        NSTableColumn *typeAheadColumn;
+
+        typeAheadColumn = [self _typeAheadSelectionColumn];
+        if (typeAheadColumn != nil && ([[NSCharacterSet alphanumericCharacterSet] characterIsMember:firstCharacter] || ([TypeAheadHelper isProcessing] && ![[NSCharacterSet controlCharacterSet] characterIsMember:firstCharacter]))) {
+            if (TypeAheadHelper == nil)
+                TypeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
+
+            // make sure the helper is cached against us (not some other instance), but don't recache on every keyDown either.
+            if ([TypeAheadHelper dataSource] != self || ![TypeAheadHelper isProcessing])
+                [TypeAheadHelper setDataSource:self];
+
+            [TypeAheadHelper processKeyDownCharacter:firstCharacter];
+            return;
+        }
+    }
+
+    if ([self _processKeyDownCharacter:firstCharacter])
+        return;
+
+    [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
+}
+
 - (void)insertTab:(id)sender;
 {
     [[self window] selectNextKeyView:nil];
@@ -450,38 +452,6 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
 - (void)insertBacktab:(id)sender;
 {
     [[self window] selectPreviousKeyView:nil];
-}
-
-// NSResponder subclass
-
-- (void)scrollPageDown:(id)sender
-{
-    [self scrollDownByPages:1.0];
-}
-
-- (void)scrollPageUp:(id)sender
-{
-    [self scrollDownByPages:-1.0];
-}
-
-- (void)scrollLineDown:(id)sender
-{
-    [self scrollDownByLines:1.0];
-}
-
-- (void)scrollLineUp:(id)sender
-{
-    [self scrollDownByLines:-1.0];
-}
-
-- (void)scrollToBeginningOfDocument:(id)sender
-{
-    [self scrollToTop];
-}
-
-- (void)scrollToEndOfDocument:(id)sender
-{
-    [self scrollToEnd];
 }
 
 // Actions
@@ -644,9 +614,7 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
 
     visibleItemLabels = [NSMutableArray arrayWithCapacity:[self numberOfRows]];
     for (row = 0; row < [self numberOfRows]; row++) {
-        id typeAheadLabel = [self _typeAheadLabelForRow:row];
-        if (typeAheadLabel)
-            [visibleItemLabels addObject:typeAheadLabel];
+        [visibleItemLabels addObject:[self _typeAheadLabelForRow:row]];
     }
 
     return [NSArray arrayWithArray:visibleItemLabels] ;
@@ -693,7 +661,13 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
 
 - (NSString *)_typeAheadLabelForRow:(int)row;
 {
-    id cellValue = [_dataSource tableView:self objectValueForTableColumn:[self _typeAheadSelectionColumn] row:row];
+    id cellValue;
+
+    // timo - 9/16/2003 -  Steve Gehrman (sgehrman@cocoatech.com) submitted this patch which fixes a crasher for NSTableView subclasses (i.e. NSOutlineView) whose dataSources don't respond to tableView:objectValueForTableColumn:row:
+    if (![_dataSource respondsToSelector:@selector(tableView:objectValueForTableColumn:row:)])
+        return nil;
+        
+    cellValue = [_dataSource tableView:self objectValueForTableColumn:[self _typeAheadSelectionColumn] row:row];
     if ([cellValue isKindOfClass:[NSString class]])
         return cellValue;
     else if ([cellValue isKindOfClass:[NSAttributedString class]])
@@ -701,22 +675,18 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
     else if ([cellValue respondsToSelector:@selector(stringValue)])
         return [cellValue stringValue];
     else
-        return @"";
+        return nil;
 }
 
 - (BOOL)_processKeyDownCharacter:(unichar)character;
 {
-    switch (character) {
-        case ' ':
-        {
-            SEL doubleAction;
+    if (character == ' ') {
+        SEL doubleAction;
 
-            // Emulate a double-click
-            doubleAction = [self doubleAction];
-            if (doubleAction != NULL && [self sendAction:doubleAction to:[self target]])
-                return YES; // We've performed our action
-            break;
-        }
+        // Emulate a double-click
+        doubleAction = [self doubleAction];
+        if (doubleAction != NULL && [self sendAction:doubleAction to:[self target]])
+            return YES; // We've performed our action
     }
     return NO;
 }

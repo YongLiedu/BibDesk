@@ -1,11 +1,6 @@
 {
     IBClasses = (
         {
-            CLASS = BDSKEncodingPopUpButton; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButton; 
-        }, 
-        {
             ACTIONS = {
                 changeBibTexBinPath = id; 
                 changeDefaultTeXEncoding = id; 
@@ -21,7 +16,7 @@
             OUTLETS = {
                 bibTeXStyleField = NSComboBox; 
                 bibtexBinaryPathField = NSTextField; 
-                encodingPopUpButton = BDSKEncodingPopUpButton; 
+                encodingPopUpButton = NSPopUpButton; 
                 texBinaryPathField = NSTextField; 
                 usesTeXButton = NSButton; 
             }; 

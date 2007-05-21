@@ -54,7 +54,7 @@ correctly, as well as vertical and horizontal space.
 #include "commands.h"
 #include "chars.h"
 #include "funct1.h"
-#include "fonts.h"
+#include "l2r_fonts.h"
 #include "stack.h"
 #include "tables.h"
 #include "equation.h"
@@ -192,13 +192,11 @@ globals: fTex, fRtf and all global flags for convert (see above)
     char cNext;
     int mode, count, pending_new_paragraph;
 
-    diagnostics(4, "Entering Convert ret = %d", ret);
+    diagnostics(3, "Entering Convert ret = %d", ret);
     RecursionLevel++;
     PushLevels();
 
     while ((cThis = getTexChar()) && cThis != '\0') {
-
-        mode = GetTexMode();
 
         if (cThis == '\n')
             diagnostics(5, "Current character is '\\n' mode = %d ret = %d level = %d", GetTexMode(), ret,
@@ -206,6 +204,8 @@ globals: fTex, fRtf and all global flags for convert (see above)
         else
             diagnostics(5, "Current character is '%c' mode = %d ret = %d level = %d", cThis, GetTexMode(), ret,
               RecursionLevel);
+
+        mode = GetTexMode();
 
         pending_new_paragraph--;
 
@@ -298,6 +298,14 @@ globals: fTex, fRtf and all global flags for convert (see above)
                     ungetTexChar(cNext);
                     CmdEquation(EQN_DOLLAR | ON);
                 }
+
+                /* 
+                   Formulas need to close all Convert() operations when they end This works for \begin{equation} but
+                   not $$ since the BraceLevel and environments don't get pushed properly.  We do it explicitly here. */
+                /* 
+                   if (GetTexMode() == MODE_MATH || GetTexMode() == MODE_DISPLAYMATH) PushBrace(); else { ret =
+                   RecursionLevel - PopBrace(); if (ret > 0) { ret--; RecursionLevel--; diagnostics(5, "Exiting Convert 
+                   via Math ret = %d", ret); return; } } */
                 break;
 
             case '&':
@@ -307,9 +315,7 @@ globals: fTex, fRtf and all global flags for convert (see above)
                 }
 
                 if (GetTexMode() == MODE_MATH || GetTexMode() == MODE_DISPLAYMATH) {    /* in eqnarray */
-                    if (g_processing_fields) fprintRTF("}}}{\\fldrslt }}");
-					fprintRTF("\\tab ");
-                    if (g_processing_fields) fprintRTF("{{\\field{\\*\\fldinst{ EQ ");
+                    fprintRTF("\\tab ");
                     g_equation_column++;
                     break;
                 }
@@ -570,7 +576,7 @@ globals: fTex, fRtf, command-functions have side effects or recursive calls;
 {
     char cCommand[MAXCOMMANDLEN];
     int i, mode;
-    int cThis,cNext;
+    int cThis;
 
 
     cThis = getTexChar();
@@ -579,14 +585,6 @@ globals: fTex, fRtf, command-functions have side effects or recursive calls;
     diagnostics(5, "Beginning TranslateCommand() \\%c", cThis);
 
     switch (cThis) {
-        case 'a':
-            if (!g_processing_tabbing) break;
-            cNext = getTexChar();
-            if (cNext=='=' ) {CmdMacronChar(0); return;}
-            if (cNext=='\'') {CmdRApostrophChar(0); return;}
-            if (cNext=='`' ) {CmdLApostrophChar(0); return;}
-            ungetTexChar(cNext);
-            break;
         case '}':
             if (mode == MODE_VERTICAL)
                 SetTexMode(MODE_HORIZONTAL);
@@ -822,9 +820,7 @@ globals: fTex, fRtf, command-functions have side effects or recursive calls;
 
     if (CallCommandFunc(cCommand)) {    /* call handling function for command */
         if (strcmp(cCommand, "end") == 0) {
-    		diagnostics(5, "before PopBrace()");
             ret = RecursionLevel - PopBrace();
-    		diagnostics(5, "after PopBrace(), ret=%d",ret);
             fprintRTF("}");
         }
         return;

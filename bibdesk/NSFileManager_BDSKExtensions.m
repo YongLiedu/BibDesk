@@ -5,7 +5,7 @@
 //  Created by Adam Maxwell on 07/08/05.
 //
 /*
- This software is Copyright (c) 2005,2006,2007
+ This software is Copyright (c) 2005,2006
  Adam Maxwell. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 #import "BibPrefController.h"
 #import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
-#import "NSObject_BDSKExtensions.h"
+#import "FSCopyObject.h"
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -119,7 +119,7 @@ typedef struct WLDragMapEntryStruct
         NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleExecutableKey];
         
         if(appName == nil)
-            [NSException raise:NSObjectNotAvailableException format:NSLocalizedString(@"Unable to find CFBundleIdentifier for %@", @"Exception message"), [NSApp description]];
+            [NSException raise:NSObjectNotAvailableException format:NSLocalizedString(@"Unable to find CFBundleIdentifier for %@", @""), [NSApp description]];
         
         path = [[path stringByAppendingPathComponent:appName] copy];
         
@@ -191,25 +191,24 @@ typedef struct WLDragMapEntryStruct
 }
 
 - (NSString *)uniqueFilePath:(NSString *)path createDirectory:(BOOL)create{
-    @synchronized(self){
-        NSString *basePath = [path stringByDeletingPathExtension];
-        NSString *extension = [path pathExtension];
-        int i = 0;
-        
-        if(![extension isEqualToString:@""])
-            extension = [@"." stringByAppendingString:extension];
-        
-        while([self fileExistsAtPath:path])
-            path = [NSString stringWithFormat:@"%@-%i%@", basePath, ++i, extension];
-        
-        if(create)
-            [self createDirectoryAtPath:path attributes:nil];
-    }
+	NSString *basePath = [path stringByDeletingPathExtension];
+    NSString *extension = [path pathExtension];
+	int i = 0;
+	
+	if(![extension isEqualToString:@""])
+		extension = [@"." stringByAppendingString:extension];
+	
+	while([self fileExistsAtPath:path])
+		path = [NSString stringWithFormat:@"%@-%i%@", basePath, ++i, extension];
+	
+	if(create)
+		[self createDirectoryAtPath:path attributes:nil];
+	
 	return path;
 }
 
 // note: IC is not thread safe
-- (NSURL *)downloadFolderURL;
+- (NSURL *)internetConfigDownloadURL;
 {
     NSAssert([NSThread inMainThread], @"InternetConfig is not thread safe");
     OSStatus err;
@@ -217,43 +216,32 @@ typedef struct WLDragMapEntryStruct
 	ICAttr junk = 0;
 	ICFileSpec spec;
     
-	static CFURLRef pathURL = NULL;
+	CFURLRef pathURL = NULL;
+	long size = sizeof(ICFileSpec);
+    FSRef pathRef;
+	
+	err = ICStart(&inst, 'BDSK');
+	
+	if (err == noErr)
+	{
+		//Get the downloads folder
+		err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
+        
+        // convert FSSpec to FSRef
+        err = FSpMakeFSRef(&(spec.fss), &pathRef);
+        
+        if(err == noErr)
+            pathURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
+        
+		ICStop(inst);
+	}
     
-    
-    if (NULL == pathURL) {
-        long size = sizeof(ICFileSpec);
-        FSRef pathRef;
-        
-        err = ICStart(&inst, 'BDSK');
-        
-        if (noErr == err)
-            err = ICBegin(inst, icReadOnlyPerm);
-        
-        if (err == noErr)
-        {
-            //Get the downloads folder
-            err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
-            
-            if (noErr == err) {
-                ICEnd(inst);
-                ICStop(inst);
-            }
-            
-            // convert FSSpec to FSRef
-            err = FSpMakeFSRef(&(spec.fss), &pathRef);
-            
-            if(err == noErr)
-                pathURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
-            
-
-        }
-    }
-    return (NSURL *)pathURL;
+    return [(id)pathURL autorelease];
 }
 
-- (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
+- (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{
     NSString *targetPath = [[self currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:fileName];
-    NSString *sourcePath = [[[NSBundle mainBundle] sharedSupportPath] stringByAppendingPathComponent:fileName];
+    NSString *sourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:fileName];
     if ([self fileExistsAtPath:targetPath]) {
         if (overwrite == NO)
             return NO;
@@ -322,12 +310,12 @@ typedef struct WLDragMapEntryStruct
     }
     
     if(NO == success && error != nil)
-        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"Error description") forKey:NSLocalizedDescriptionKey]];
+        *error = [NSError errorWithDomain:@"NSCocoaErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"") forKey:NSLocalizedDescriptionKey]];
     
     if(YES == success){
         success = (noErr == FSDeleteObject(&fileRef));
         if(NO == success && error != nil)
-            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"Error description") forKey:NSLocalizedDescriptionKey]];
+            *error = [NSError errorWithDomain:@"NSCocoaErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"") forKey:NSLocalizedDescriptionKey]];
     }
     
     return success;
@@ -438,21 +426,87 @@ static OSType finderSignatureBytes = 'MACS';
     return success;
 }
 
-// using AESendMessage for this will cause problems when we use it during a drop from Finder
+// Gets the Finder comment (Spotlight comment) field via the Finder; this method takes 0.01s to execute, vs. 0.5s for NSAppleScript
+// Based on setComment:forPath: and http://developer.apple.com/samplecode/MoreAppleEvents/MoreAppleEvents.html (which is dated)
 - (NSString *)commentForURL:(NSURL *)fileURL;
 {
     NSParameterAssert([fileURL isFileURL]);
     
-    MDItemRef mdItem = NULL;
-    CFStringRef path = (CFStringRef)[fileURL path];
-    NSString *theComment = nil;
+    OSErr err;
+    AEDesc fileDesc, builtEvent, replyEvent;
     
-    if (path && (mdItem = MDItemCreate(CFGetAllocator(path), path))) {
-        theComment = (NSString *)MDItemCopyAttribute(mdItem, kMDItemFinderComment);
-        CFRelease(mdItem);
-        [theComment autorelease];
+    // create the format by modifying Omni's setComment:forPath: method and looking at the events in the debugger
+    const char *eventFormat = 
+        "'----': 'obj '{ "
+        "  form: enum(prop), "
+        "  seld: type(comt), "
+        "  want: type(prop), "
+        "  from: 'obj '{ " 
+        "      form: enum(indx), "
+        "      want: type(file), " 
+        "      seld: @,"
+        "      from: null() "
+        "              }"
+        "             } ";
+    
+    // pass a file URL, encoding as UTF8 after http://developer.apple.com/technotes/tn/tn2022.html
+    NSData *URLData = [[fileURL absoluteString] dataUsingEncoding:NSUTF8StringEncoding];
+    AEInitializeDesc(&fileDesc);
+    err = AECreateDesc(typeFileURL, [URLData bytes], [URLData length], &fileDesc);
+    
+    AEInitializeDesc(&builtEvent);
+    AEInitializeDesc(&replyEvent);
+    AEBuildError error;
+
+    if(noErr == err)
+        err = AEBuildAppleEvent(kAECoreSuite, kAEGetData,
+                                typeApplSignature, &finderSignatureBytes, sizeof(finderSignatureBytes),
+                                kAutoGenerateReturnID, kAnyTransactionID,
+                                &builtEvent, &error,
+                                eventFormat,
+                                &fileDesc);
+    
+    AEDisposeDesc(&fileDesc);
+    
+    if(noErr == err)
+        err = AESendMessage(&builtEvent, &replyEvent, kAEWaitReply, kAEDefaultTimeout);
+    AEDisposeDesc(&builtEvent);
+    
+	AEDesc replyDesc;
+    AEInitializeDesc(&replyDesc);
+    
+    if(noErr == err)
+        err = AEGetParamDesc(&replyEvent, keyDirectObject, typeUnicodeText, &replyDesc);
+    AEDisposeDesc(&replyEvent);
+    
+    AEDesc utf8TextDesc;
+    AEInitializeDesc(&utf8TextDesc);
+    
+    if(noErr == err)
+        err = AECoerceDesc(&replyDesc, typeUTF8Text, &utf8TextDesc);
+    AEDisposeDesc(&replyDesc);
+    
+    CFStringRef comment = NULL;
+    if(noErr == err){
+        Size dataSize = AEGetDescDataSize(&utf8TextDesc);
+        CFIndex bufSize = dataSize;
+        UInt8 *buf = (UInt8 *)NSZoneMalloc(NULL, bufSize * sizeof(UInt8));
+        if(NULL != buf){
+            err = AEGetDescData(&utf8TextDesc, buf, dataSize);
+            if(noErr == err)
+                comment = CFStringCreateWithBytes(CFAllocatorGetDefault(), buf, bufSize, kCFStringEncodingUTF8, FALSE);
+            
+            NSZoneFree(NULL, buf);
+        }
     }
-    return theComment;
+    AEDisposeDesc(&utf8TextDesc);    
+    
+    if (err != noErr) {
+        NSLog(@"AESend() --> %d", err);
+        if(GetMacOSStatusErrorString != NULL) 
+            NSLog(@"Error was %s", GetMacOSStatusErrorString(err));
+    }
+    return [(id)comment autorelease];
 }
 
 - (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;
@@ -472,9 +526,14 @@ static OSType finderSignatureBytes = 'MACS';
     NSString *comment = [self commentForURL:srcURL];
     FSRef newObjectRef;
     
-
-    // unfortunately, FSCopyObjectSync does not copy Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
-    err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
+    if(success){
+        // FSCopyObjectSync is only available on 10.4.  We use it on 10.4, though, because FSCopyObject loses xattrs rdar://problem/4531816
+        // unfortunately, neither function copies Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
+        if(FSCopyObjectSync != NULL)
+            err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
+        else
+            err = FSCopyObject(&srcFileRef, &dstDirRef, 0 /*recurse all directories*/, kFSCatInfoNone, kDupeActionStandard, NULL, FALSE, FALSE, NULL, NULL, &newObjectRef, NULL);
+    }
     
     // set the file comment if necessary
     if(noErr == err && nil != comment){
@@ -492,7 +551,7 @@ static OSType finderSignatureBytes = 'MACS';
         if(GetMacOSStatusCommentString != NULL && noErr != err)
             errorMessage = [NSString stringWithUTF8String:GetMacOSStatusCommentString(err)];
         if(nil == errorMessage)
-            errorMessage = NSLocalizedString(@"Unable to copy file.", @"Error description");
+            errorMessage = NSLocalizedString(@"Unable to copy file.", @"");
         *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObject:errorMessage forKey:NSLocalizedDescriptionKey]];
     }
     
@@ -524,7 +583,7 @@ static OSType finderSignatureBytes = 'MACS';
     }
 
     if(dirExists == NO && anError != nil){
-        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @"Error description"), NSLocalizedDescriptionKey, nil]];
+        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @""), NSLocalizedDescriptionKey, nil]];
     }
         
     return cachePath;
@@ -717,6 +776,8 @@ static OSType finderSignatureBytes = 'MACS';
 {
     NSMutableData *result;
     WLDragMapHeaderStruct header;
+    NSEnumerator *enumerator = [entries objectEnumerator];
+    WLDragMapEntry *entry;
     
     // zero the structure
     memset(&header, 0, sizeof(WLDragMapHeaderStruct));
@@ -726,7 +787,8 @@ static OSType finderSignatureBytes = 'MACS';
     
     result = [NSMutableData dataWithBytes:&header length:sizeof(WLDragMapHeaderStruct)];
     
-    [result performSelector:@selector(appendData:) withObjectsByMakingObjectsFromArray:entries performSelector:@selector(entryData)];
+    while (entry = [enumerator nextObject])
+        [result appendData:[entry entryData]];
     
     return result;
 }
@@ -746,7 +808,7 @@ static OSType finderSignatureBytes = 'MACS';
     Handle dataHandle;
     PtrToHand(data, &dataHandle, [contentData length]);
     Str255 dst;
-    CFStringGetPascalString(CFSTR("OFResourceForkData"), dst, 256, kCFStringEncodingASCII);
+    CopyCStringToPascal("OFResourceForkData", dst);
     AddResource(dataHandle, resType, resID, dst);
     
     UpdateResFile(refNum);

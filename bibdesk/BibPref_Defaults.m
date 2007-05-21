@@ -1,7 +1,7 @@
 // BibPref_Defaults.m
 // Created by Michael McCracken, 2002
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,6 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BibTeXParser.h"
 #import "BDSKMacroResolver.h"
-#import "NSArray_BDSKExtensions.h"
-#import "NSWorkspace_BDSKExtensions.h"
-#import "NSFileManager_BDSKExtensions.h"
-#import "NSMenu_BDSKExtensions.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -49,19 +45,10 @@ enum {
     BDSKRemoteURLType,
     BDSKBooleanType,
     BDSKTriStateType,
-    BDSKRatingType,
-    BDSKCitationType,
-    BDSKPersonType
+    BDSKRatingType
 };
 
-static NSSet *alwaysDisabledFields = nil;
-
 @implementation BibPref_Defaults
-
-+ (void)initialize {
-    if (nil == alwaysDisabledFields)
-        alwaysDisabledFields = [[NSSet alloc] initWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAuthorString, BDSKEditorString, nil];
-}
 
 - (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
 	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
@@ -127,26 +114,6 @@ static NSSet *alwaysDisabledFields = nil;
 			[customFieldsArray addObject:dict];
 			[customFieldsSet addObject:field];
 		}
-        
-		// Add Citation fields
-		e = [[defaults arrayForKey:BDSKCitationFieldsKey] objectEnumerator];
-		type = [NSNumber numberWithInt:BDSKCitationType];
-		while(field = [e nextObject]){
-			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
-			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
-			[customFieldsArray addObject:dict];
-			[customFieldsSet addObject:field];
-		}
-        
-		// Add Person fields
-		e = [[defaults arrayForKey:BDSKPersonFieldsKey] objectEnumerator];
-		type = [NSNumber numberWithInt:BDSKPersonType];
-		while(field = [e nextObject]){
-			isDefault = [NSNumber numberWithBool:[defaultFields containsObject:field]];
-			dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:field, @"field", type, @"type", isDefault, @"default", nil];
-			[customFieldsArray addObject:dict];
-			[customFieldsSet addObject:field];
-		}        
 		
 		// Add any remaining Textual default fields at the beginning
 		e = [defaultFields reverseObjectEnumerator];
@@ -166,34 +133,23 @@ static NSSet *alwaysDisabledFields = nil;
 - (void)awakeFromNib{
     [super awakeFromNib];
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
+    [RSSDescriptionFieldTextField setFormatter:fieldNameFormatter];
     [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
     [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
-    
-    NSWorkspace *sws = [NSWorkspace sharedWorkspace];
-    NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
-    NSString *pdfViewerID = [[defaults dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
-    int i, iMax = [pdfViewers count];
-    int index = 0;
-    
-    for(i = 0; i < iMax; i++){
-        NSDictionary *dict = [pdfViewers objectAtIndex:i];
-        NSString *bundleID = [dict objectForKey:@"bundleID"];
-        NSString *appPath = [sws absolutePathForAppBundleWithIdentifier:bundleID];
-        [pdfViewerPopup insertItemWithTitle:[dict objectForKey:@"name"] atIndex:i + 2];
-        [[pdfViewerPopup itemAtIndex:i + 2] setRepresentedObject:bundleID];
-        [(NSMenuItem *)[pdfViewerPopup itemAtIndex:i + 2] setImageAndSize:[sws iconForFile:appPath]];
-        if([pdfViewerID isEqualToString:bundleID])
-            index = i + 2;
-    }
-    if(index == 0 && [pdfViewerID length]){
-        NSString *name = [[[[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:pdfViewerID] lastPathComponent] stringByDeletingPathExtension];
-        [pdfViewerPopup insertItemWithTitle:name atIndex:2];
-        [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:pdfViewerID];
-        index = 2;
-    }
-    
-    [pdfViewerPopup selectItemAtIndex:index];
+}
+
+- (void)updateButtons{
+	int row = [defaultFieldsTableView selectedRow];
+	if(row == -1){
+		[delSelectedDefaultFieldButton setEnabled:NO];
+		return;
+	}
+	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
+	if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString] || [field isEqualToString:BDSKRatingString])
+		[delSelectedDefaultFieldButton setEnabled:NO];
+	else
+		[delSelectedDefaultFieldButton setEnabled:YES];
 }
 
 - (void)updatePrefs{
@@ -204,8 +160,6 @@ static NSSet *alwaysDisabledFields = nil;
     NSMutableArray *ratingFields = [[NSMutableArray alloc] initWithCapacity:1];
     NSMutableArray *booleanFields = [[NSMutableArray alloc] initWithCapacity:1];
     NSMutableArray *triStateFields = [[NSMutableArray alloc] initWithCapacity:1];
-    NSMutableArray *citationFields = [[NSMutableArray alloc] initWithCapacity:1];
-    NSMutableArray *personFields = [[NSMutableArray alloc] initWithCapacity:1];
 	
 	NSEnumerator *e = [customFieldsArray objectEnumerator];
 	NSDictionary *dict = nil;
@@ -237,12 +191,6 @@ static NSSet *alwaysDisabledFields = nil;
             case BDSKTriStateType:
                 [triStateFields addObject:field];
                 break;
-            case BDSKCitationType:
-                [citationFields addObject:field];
-                break;
-            case BDSKPersonType:
-                [personFields addObject:field];
-                break;
             default:
                 [NSException raise:NSInvalidArgumentException format:@"Attempt to set unrecognized type"];
         }
@@ -253,34 +201,32 @@ static NSSet *alwaysDisabledFields = nil;
     [defaults setObject:ratingFields forKey:BDSKRatingFieldsKey];
     [defaults setObject:booleanFields forKey:BDSKBooleanFieldsKey];
     [defaults setObject:triStateFields forKey:BDSKTriStateFieldsKey];
-    [defaults setObject:citationFields forKey:BDSKCitationFieldsKey];
-    [defaults setObject:personFields forKey:BDSKPersonFieldsKey];
     [defaultFields release];
     [localFileFields release];
     [remoteURLFields release];
     [ratingFields release];
     [booleanFields release];
     [triStateFields release];
-    [citationFields release];
-    [personFields release];
     
 	[defaultFieldsTableView reloadData];
-	[self valuesHaveChanged];
+	[self updateButtons];
 	
-    // !!! notification of these changes is posted by the type manager, which observes the pref keys; this ensures that the type manager gets notified first, so notification observers don't get stale data; as a consequence, if you add another custom field type, the type manager needs to observe it in -init
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKCustomFieldsChangedNotification
+														object:self
+													  userInfo:[NSDictionary dictionary]];
 }
 
 - (void)updateUI{	
-	int row = [defaultFieldsTableView selectedRow];
-	if(row == -1){
-		[delSelectedDefaultFieldButton setEnabled:NO];
-		return;
-	}
-	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	if([alwaysDisabledFields containsObject:field] || [field isEqualToString:BDSKRatingString])
-		[delSelectedDefaultFieldButton setEnabled:NO];
-	else
-		[delSelectedDefaultFieldButton setEnabled:YES];
+	[self updateButtons];
+	
+    if ([[defaults objectForKey:BDSKRSSDescriptionFieldKey] isEqualToString:BDSKRssDescriptionString]) {
+        [RSSDescriptionFieldMatrix selectCellWithTag:0];
+        [RSSDescriptionFieldTextField setEnabled:NO];
+    }else{
+		[RSSDescriptionFieldTextField setStringValue:[defaults objectForKey:BDSKRSSDescriptionFieldKey]];
+        [RSSDescriptionFieldMatrix selectCellWithTag:1];
+        [RSSDescriptionFieldTextField setEnabled:YES];
+    }
 }
 
 - (void)dealloc{
@@ -338,14 +284,14 @@ static NSSet *alwaysDisabledFields = nil;
         NSString *error = nil;
         
         if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
-            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" does not exist.", @"Informative text in alert dialog"), object];
+            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" does not exist.", @""), object];
         } else if (isDir == YES) {
-            error = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a file.", @"Informative text in alert dialog"), object];
+            error = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a file.", @""), object];
         } else if ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame) {
-            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @"Informative text in alert dialog"), object];
+            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @""), object];
         }
         if (error) {
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Macro File", @"Message in alert dialog when adding an invalid global macros file")
+            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Macro File", @"")
                                              defaultButton:nil
                                            alternateButton:nil
                                                otherButton:nil
@@ -354,7 +300,6 @@ static NSSet *alwaysDisabledFields = nil;
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];
             [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-            [defaults autoSynchronize];
         }
         [globalMacroFilesTableView reloadData];
     }
@@ -387,7 +332,6 @@ static NSSet *alwaysDisabledFields = nil;
         [globalMacroFiles addObject:file];
     }
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [defaults autoSynchronize];
     
     [globalMacroFilesTableView reloadData];
     
@@ -418,7 +362,7 @@ static NSSet *alwaysDisabledFields = nil;
         NSString *colID = [tableColumn identifier];
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
         
-        if([alwaysDisabledFields containsObject:field])
+        if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString])
             [cell setEnabled:NO];
         else if([field isEqualToString:BDSKRatingString] &&
                 ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
@@ -429,14 +373,14 @@ static NSSet *alwaysDisabledFields = nil;
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-    if ([[aNotification object] isEqual:defaultFieldsTableView]) {
+    if ([aNotification object] == defaultFieldsTableView) {
         int row = [defaultFieldsTableView selectedRow];
         if(row == -1){
             [delSelectedDefaultFieldButton setEnabled:NO];
             return;
         }
         NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-        if([alwaysDisabledFields containsObject:field] || [field isEqualToString:BDSKRatingString])
+        if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString] || [field isEqualToString:BDSKRatingString])
             [delSelectedDefaultFieldButton setEnabled:NO];
         else
             [delSelectedDefaultFieldButton setEnabled:YES];
@@ -472,69 +416,30 @@ static NSSet *alwaysDisabledFields = nil;
 	[[BDSKTypeInfoEditor sharedTypeInfoEditor] beginSheetModalForWindow:[[self controlBox] window]];
 }
 
-#pragma mark default viewer
-
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void  *)contextInfo{
-    NSString *bundleID;
-    if (returnCode == NSOKButton)
-        bundleID = [[NSBundle bundleWithPath:[panel filename]] bundleIdentifier];
-    else
-        bundleID = [[defaults dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
-    
-    if([bundleID length]){
-        int i, iMax = [pdfViewerPopup numberOfItems] - 2;
-        
-        for(i = 2; i < iMax; i++){
-            if([[[pdfViewerPopup itemAtIndex:i] representedObject] isEqualToString:bundleID]){
-                [pdfViewerPopup selectItemAtIndex:i];
-                break;
-            }
-        }
-        if(i == iMax){
-            NSString *appPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID];
-            NSString *name = [[appPath lastPathComponent] stringByDeletingPathExtension];
-            [pdfViewerPopup insertItemWithTitle:name atIndex:2];
-            [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:bundleID];
-            [(NSMenuItem *)[pdfViewerPopup itemAtIndex:2] setImageAndSize:[[NSWorkspace sharedWorkspace] iconForFile:appPath]];
-            [pdfViewerPopup selectItemAtIndex:2];
-        }
-    }else{
-        [pdfViewerPopup selectItemAtIndex:0];
+- (IBAction)RSSDescriptionFieldChanged:(id)sender{
+    int selTag = [[sender selectedCell] tag];
+    switch(selTag){
+        case 0:
+            // use Rss-Description
+            [defaults setObject:BDSKRssDescriptionString
+                         forKey:BDSKRSSDescriptionFieldKey];
+			break;
+        case 1:
+            [defaults setObject:[[RSSDescriptionFieldTextField stringValue] capitalizedString]
+                         forKey:BDSKRSSDescriptionFieldKey];
+            break;
     }
-    NSMutableDictionary *defaultViewers = [[defaults dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
-    if ([bundleID length])
-        [defaultViewers setObject:bundleID forKey:@"pdf"];
-    else
-        [defaultViewers removeObjectForKey:@"pdf"];
-    [defaults setObject:defaultViewers forKey:BDSKDefaultViewersKey];
-    [defaultViewers release];
+    [self updateUI];
 }
 
-- (IBAction)changeDefaultPDFViewer:(id)sender{
-    if([sender indexOfSelectedItem] == [sender numberOfItems] - 1){
-        NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-        [openPanel setCanChooseDirectories:NO];
-        [openPanel setAllowsMultipleSelection:NO];
-        [openPanel setPrompt:NSLocalizedString(@"Choose Viewer", @"Prompt for Choose panel")];
-        
-        [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                     file:nil 
-                                    types:[NSArray arrayWithObjects:@"app", nil]
-                           modalForWindow:[[self controlBox] window]
-                            modalDelegate:self
-                           didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
-                              contextInfo:NULL];
-    }else{
-        NSString *bundleID = [[sender selectedItem] representedObject];
-        NSMutableDictionary *defaultViewers = [[defaults dictionaryForKey:BDSKDefaultViewersKey] mutableCopy];
-        if ([bundleID length])
-            [defaultViewers setObject:bundleID forKey:@"pdf"];
-        else
-            [defaultViewers removeObjectForKey:@"pdf"];
-        [defaults setObject:defaultViewers forKey:BDSKDefaultViewersKey];
-        [defaultViewers release];
-    }
+- (void)controlTextDidChange:(NSNotification *)aNotification{
+	if ([aNotification object] == RSSDescriptionFieldTextField) {
+		[defaults setObject:[[RSSDescriptionFieldTextField stringValue] capitalizedString]
+					 forKey:BDSKRSSDescriptionFieldKey];
+		[self updateUI];
+	}
 }
+
 
 #pragma mark BST macro methods
 
@@ -563,7 +468,7 @@ static NSSet *alwaysDisabledFields = nil;
     [openPanel setAllowsMultipleSelection:YES];
     [openPanel setResolvesAliases:NO];
     [openPanel setCanChooseDirectories:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Prompt for Choose panel")];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose")];
 
     [openPanel beginSheetForDirectory:@"/usr" 
                                  file:nil 
@@ -578,10 +483,16 @@ static NSSet *alwaysDisabledFields = nil;
     if(returnCode == NSCancelButton)
         return;
     
-    [globalMacroFiles addNonDuplicateObjectsFromArray:[openPanel filenames]];
+    NSEnumerator *fileEnum = [[openPanel filenames] objectEnumerator];
+    NSString *file;
+    
+    while(file = [fileEnum nextObject]){
+        if ([globalMacroFiles containsObject:file] == NO)
+            [globalMacroFiles addObject:file];
+    }
+    
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [defaults autoSynchronize];
 }
 
 - (IBAction)delGlobalMacroFiles:(id)sender{
@@ -591,7 +502,6 @@ static NSSet *alwaysDisabledFields = nil;
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [defaults autoSynchronize];
 }
 
 @end

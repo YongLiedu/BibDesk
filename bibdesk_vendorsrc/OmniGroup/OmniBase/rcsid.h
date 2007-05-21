@@ -5,7 +5,7 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniBase/rcsid.h 69189 2005-10-12 18:02:34Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniBase/rcsid.h 66131 2005-07-27 23:14:19Z wiml $
 //
 // Define a wrapper macro for rcs_id generation that doesn't produce warnings on any platform.  The old hack of rcs_id = (rcs_id, string) is no longer warning free.
 
@@ -13,9 +13,9 @@
 #if __GNUC__ > 2
 
 #define RCS_ID(rcsIdString) \
-	static __attribute__((used, section("__TEXT,rcsid"))) const char rcs_id[] = rcsIdString;
+	static __attribute__((unused,section("__TEXT,rcsid"))) const char rcs_id[] = rcsIdString;
 #define NAMED_RCS_ID(name, rcsIdString) \
-	static __attribute__((used, section("__TEXT,rcsid"))) const char rcs_id_ ## name [] = rcsIdString;
+	static __attribute__((unused,section("__TEXT,rcsid"))) const char rcs_id_ ## name [] = rcsIdString;
 
 #endif
 #endif

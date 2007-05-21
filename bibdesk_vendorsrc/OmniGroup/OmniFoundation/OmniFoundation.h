@@ -1,16 +1,16 @@
-// Copyright 1997-2006 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2005 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/OmniSourceRelease_2006-09-07/OmniGroup/Frameworks/OmniFoundation/OmniFoundation.h 79079 2006-09-07 22:35:32Z kc $
+// $Header: svn+ssh://source.omnigroup.com/Source/svn/Omni/tags/SourceRelease_2005-10-03/OmniGroup/Frameworks/OmniFoundation/OmniFoundation.h 68841 2005-09-29 19:41:45Z bungi $
 
+#import <OmniFoundation/OFAddScriptCommand.h>
 #import <OmniFoundation/OFAsynchronousDOServer.h>
 #import <OmniFoundation/OFAutoreleasedMemory.h>
 #import <OmniFoundation/OFBTree.h>
-#import <OmniFoundation/OFBinding.h>
 #import <OmniFoundation/OFBitField.h>
 #import <OmniFoundation/OFBulkBlockPool.h>
 #import <OmniFoundation/OFBundleRegistry.h>
@@ -54,20 +54,21 @@
 #import <OmniFoundation/OFPreference.h>
 #import <OmniFoundation/OFQueue.h>
 #import <OmniFoundation/OFQueueProcessor.h>
+#import <OmniFoundation/OFRTFGenerator.h>
 #import <OmniFoundation/OFRandom.h>
-#import <OmniFoundation/OFRationalNumber.h>
 #import <OmniFoundation/OFReadWriteLock.h>
 #import <OmniFoundation/OFRegularExpression.h>
 #import <OmniFoundation/OFRegularExpressionMatch.h>
+#import <OmniFoundation/OFRemoveScriptCommand.h>
 #import <OmniFoundation/OFResource.h>
 #import <OmniFoundation/OFResourceFork.h>
 #import <OmniFoundation/OFResultHolder.h>
 #import <OmniFoundation/OFRetainableObject.h>
-#import <OmniFoundation/OFRTFGenerator.h>
 #import <OmniFoundation/OFRunLoopQueueProcessor.h>
 #import <OmniFoundation/OFScheduledEvent.h>
 #import <OmniFoundation/OFScheduler.h>
 #import <OmniFoundation/OFScratchFile.h>
+#import <OmniFoundation/OFScriptPlaceholder.h>
 #import <OmniFoundation/OFSignature.h>
 #import <OmniFoundation/OFSlotManager.h>
 #import <OmniFoundation/OFSparseArray.h>
@@ -93,13 +94,8 @@
 #import <OmniFoundation/OFXMLString.h>
 #import <OmniFoundation/OFZone.h>
 
-// AppleScript
-#import <OmniFoundation/NSScriptClassDescription-OFExtensions.h>
-#import <OmniFoundation/OFAddScriptCommand.h>
-#import <OmniFoundation/OFRemoveScriptCommand.h>
-#import <OmniFoundation/OFScriptPlaceholder.h>
-
 // Formatters
+
 #import <OmniFoundation/OFCapitalizeFormatter.h>
 #import <OmniFoundation/OFDateFormatter.h>
 #import <OmniFoundation/OFMultipleNumberFormatter.h>
@@ -137,7 +133,6 @@
 #import <OmniFoundation/NSObject-OFExtensions.h>
 #import <OmniFoundation/NSProcessInfo-OFExtensions.h>
 #import <OmniFoundation/NSScanner-OFExtensions.h>
-#import <OmniFoundation/NSSet-OFExtensions.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSString-OFPathExtensions.h>
 #import <OmniFoundation/NSThread-OFExtensions.h>

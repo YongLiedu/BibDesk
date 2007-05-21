@@ -4,7 +4,7 @@
 //
 //  Created by Christiaan Hofman on 6/5/06.
 /*
- This software is Copyright (c) 2006,2007
+ This software is Copyright (c) 2006
  Christiaan Hofman. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,6 @@
 - (id)initWithAttributedString:(NSAttributedString *)attributedString attributes:(NSDictionary *)attributes;
 
 - (id)initWithTeXString:(NSString *)string attributes:(NSDictionary *)attributes collapseWhitespace:(BOOL)collapse;
-
-- (NSRect)boundingRectForDrawingInViewWithSize:(NSSize)size;
 
 @end
 

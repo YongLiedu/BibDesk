@@ -2,7 +2,7 @@
 
 //  Created by Michael McCracken on Thu Mar 07 2002.
 /*
- This software is Copyright (c) 2002,2003,2004,2005,2006,2007
+ This software is Copyright (c) 2002,2003,2004,2005,2006
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -79,30 +79,43 @@
 - (void)loadDict;
 
 /*!
- @method copyStringByTeXifyingString:
+ @method stringByTeXifyingString:
  @abstract UTF-8 -> TeX
- @discussion Uses a dictionary to find replacements for candidate special characters.
+ @discussion Uses a dictionary to find replacements for candidate special characters.  Raises an exception named BDSKTeXifyException if an error occurred.
  @param s the string to convert into ASCII TeX encoding
- @result the retained string converted into ASCI TeX encoding
+ @result the string converted into ASCI TeX encoding
 */
+- (NSString *)stringByTeXifyingString:(NSString *)s;
 - (NSString *)copyStringByTeXifyingString:(NSString *)s;
 
 /*!
- @method copyStringByDeTeXifyingString:
+ @method stringByDeTeXifyingString:
  @abstract TeX -> UTF-8
  @discussion Uses a dictionary to find replacements for strings like {\ ... }.
  @param s the string to convert from ASCII TeX encoding
- @result the retained string converted from ASCI TeX encoding
+ @result the string converted from ASCI TeX encoding
 */
+- (NSString *)stringByDeTeXifyingString:(NSString *)s;
 - (NSString *)copyStringByDeTeXifyingString:(NSString *)s;
+
+/*!
+    @method     composedStringFromTeXString:
+    @abstract   Returns a composed string with canonical mapping (Unicode normalization form C) based on a given TeX accent sequence, if possible.  Used as a fallback
+                if CharacterConversion.plist doesn't have a match when deTeXifying a string.
+    @discussion (comprehensive description)
+    @param      texString A TeX accent fragment as {\u g}.
+    @result     (description)
+*/
+- (NSString *)composedStringFromTeXString:(NSString *)texString;
 
 @end
 
 @interface NSString (BDSKConverter)
 
-- (NSString *)copyTeXifiedString;
 - (NSString *)stringByTeXifyingString;
-- (NSString *)copyDeTeXifiedString;
+- (NSString *)initTeXifiedStringWithString:(NSString *)aString;
+
 - (NSString *)stringByDeTeXifyingString;
+- (NSString *)initDeTeXifiedStringWithString:(NSString *)aString;
 
 @end
