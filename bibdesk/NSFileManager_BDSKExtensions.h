@@ -46,6 +46,7 @@
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)applicationsDirectory;
 - (NSURL *)downloadFolderURL;
+- (NSString *)newestLyXPipePath;
 
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite;
 

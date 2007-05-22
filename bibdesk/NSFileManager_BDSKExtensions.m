@@ -42,6 +42,7 @@
 #import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
+#import <OmniFoundation/OFVersionNumber.h>
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -249,6 +250,45 @@ typedef struct WLDragMapEntryStruct
         }
     }
     return (NSURL *)pathURL;
+}
+
+- (NSString *)newestLyXPipePath {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *appSupportPath = [fm applicationSupportDirectory:kUserDomain];
+    NSDirectoryEnumerator *dirEnum = [fm enumeratorAtPath:appSupportPath];
+    NSString *file;
+    NSString *lyxPipePath = nil;
+    OFVersionNumber *version = nil;
+    
+    while (file = [dirEnum nextObject]) {
+        NSString *fullPath = [appSupportPath stringByAppendingPathComponent:file];
+        NSDictionary *fileAttributes = [fm fileAttributesAtPath:fullPath traverseLink:YES];
+        if ([[fileAttributes fileType] isEqualToString:NSFileTypeDirectory]) {
+            [dirEnum skipDescendents];
+            NSString *pipePath = [fullPath stringByAppendingPathComponent:@".lyxpipe.in"];
+            if ([file hasPrefix:@"LyX"] && [fm fileExistsAtPath:pipePath]) {
+                if (version == nil) {
+                    lyxPipePath = pipePath;
+                } else {
+                    OFVersionNumber *fileVersion = nil;
+                    if ([file hasPrefix:@"LyX-"])
+                        fileVersion = [[[OFVersionNumber alloc] initWithVersionString:[file substringFromIndex:4]] autorelease];
+                    else
+                        fileVersion = [[[OFVersionNumber alloc] initWithVersionString:@""] autorelease];
+                    if ([fileVersion compareToVersionNumber:version] == NSOrderedDescending) {
+                        lyxPipePath = pipePath;
+                        version = fileVersion;
+                    }
+                }
+            }
+        }
+    }
+    if (lyxPipePath == nil) {
+        NSString *pipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
+        if ([fm fileExistsAtPath:pipePath])
+            lyxPipePath = pipePath;
+    }
+    return lyxPipePath;
 }
 
 - (BOOL)copyFileFromSharedSupportToApplicationSupport:(NSString *)fileName overwrite:(BOOL)overwrite{

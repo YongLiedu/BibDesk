@@ -328,20 +328,10 @@
     if ([self numberOfSelectedPubs] == 0)
         return NO;
     
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *appSupportPath = [fileManager applicationSupportDirectory:kUserDomain];
-    NSString *lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX-1.4"] stringByAppendingPathComponent:@".lyxpipe.in"];
-    
-    if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-        lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX"] stringByAppendingPathComponent:@".lyxpipe.in"];
-        if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-            lyxPipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
-            if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-               return NO;
-            }
-        }
-    }
-    return YES;
+    if ([[NSFileManager defaultManager] newestLyXPipePath])
+        return YES;
+        
+    return NO;
 }
 
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {

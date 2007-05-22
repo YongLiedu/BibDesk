@@ -492,24 +492,16 @@
     if ([self numberOfSelectedPubs] == 0)
         return;
     
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *appSupportPath = [fileManager applicationSupportDirectory:kUserDomain];
-    NSString *lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX-1.4"] stringByAppendingPathComponent:@".lyxpipe.in"];
+    NSString *lyxPipePath = [[NSFileManager defaultManager] newestLyXPipePath];
     
-    if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-        lyxPipePath = [[appSupportPath stringByAppendingPathComponent:@"LyX"] stringByAppendingPathComponent:@".lyxpipe.in"];
-        if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-            lyxPipePath = [[NSHomeDirectory() stringByAppendingPathComponent:@".lyx"] stringByAppendingPathComponent:@"lyxpipe.in"];
-            if ([fileManager fileExistsAtPath:lyxPipePath] == NO) {
-                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Message in alert dialog when LyX pipe cannot be found")
-                                                 defaultButton:nil
-                                               alternateButton:nil
-                                                   otherButton:nil
-                                    informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"Informative text in alert dialog")];
-                [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
-                return;
-            }
-        }
+    if (lyxPipePath == nil) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to Find LyX Pipe", @"Message in alert dialog when LyX pipe cannot be found")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                            informativeTextWithFormat:NSLocalizedString(@"BibDesk was unable to find the LyX pipe." , @"Informative text in alert dialog")];
+        [alert beginSheetModalForWindow:documentWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+        return;
     }
     
     NSEnumerator *itemEnum = [[self selectedPublications] objectEnumerator];
