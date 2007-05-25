@@ -238,7 +238,9 @@
 	<key>CFBundleVersion</key>
 	<string>v${CURRENT_PROJECT_VERSION}</string>
 	<key>NSAppleScriptEnabled</key>
-	<string>YES</string>
+	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.4.0</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2001-07 Michael O. McCracken.</string>
 	<key>NSMainNibFile</key>
