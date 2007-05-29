@@ -449,20 +449,20 @@
     
 	if ([self numberOfSelectedPubs] == 0) {
 		// no selection
-		s = NSLocalizedString(@"Show Notes For Linked File", @"Menu item title");
+		s = NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title");
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
-		s = NSLocalizedString(@"Show Notes For Linked File", @"Menu item title");
+		s = NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title");
 		[menuItem setTitle:s];
 		selectedBI = [[self selectedPublications] objectAtIndex:0];
 		lurl = [selectedBI localFilePathForField:field];
 		return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
 	}
 	else {
-		s = NSLocalizedString(@"Show Notes For %i Linked Files", @"Menu item title");
+		s = NSLocalizedString(@"Show Skim Notes For %i Linked Files", @"Menu item title");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
 		while(selectedBI = [e nextObject]){

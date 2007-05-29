@@ -730,7 +730,7 @@
     
     if (n > 6) {
 		// Do we really want a gazillion of files open?
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Show Notes For Linked Files", @"Message in alert dialog when showing notes for a lot of linked files")
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Show Skim Notes For Linked Files", @"Message in alert dialog when showing notes for a lot of linked files")
                                          defaultButton:NSLocalizedString(@"No", @"Button title")
                                        alternateButton:NSLocalizedString(@"Open", @"Button title")
                                            otherButton:nil
