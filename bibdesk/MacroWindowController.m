@@ -475,11 +475,10 @@
             if ([fm fileExistsAtPath:file] == NO ||
                 ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame))
                 continue;
-            NSString *fileStr = [NSString stringWithContentsOfFile:file];
+            NSString *fileStr = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding guessEncoding:YES];
             if (fileStr != nil)
                 ok = ok || [self addMacrosFromBibTeXString:fileStr];
         }
-        [NSString stringWithContentsOfFile:file];
         return ok;
     } else
         return NO;

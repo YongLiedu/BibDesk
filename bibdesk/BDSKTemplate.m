@@ -345,7 +345,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 - (NSString *)mainPageString;
 {
     OBASSERT([self isLeaf] == NO);
-    return [NSString stringWithContentsOfURL:[self mainPageTemplateURL]];
+    return [NSString stringWithContentsOfURL:[self mainPageTemplateURL] encoding:NSUTF8StringEncoding error:NULL];
 }
 
 - (NSAttributedString *)mainPageAttributedStringWithDocumentAttributes:(NSDictionary **)docAttributes;
@@ -364,12 +364,12 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     if(nil == theURL)
         theURL = [self defaultItemTemplateURL];
     if(nil != theURL)
-        return [NSString stringWithContentsOfURL:theURL];
+        return [NSString stringWithContentsOfURL:theURL encoding:NSUTF8StringEncoding error:NULL];
     if([type isEqualToString:BDSKTemplateMainPageString] == NO)
         return nil;
     // get the item template from the main page template
     theURL = [self mainPageTemplateURL];
-    return itemTemplateSubstring([NSString stringWithContentsOfURL:theURL]);
+    return itemTemplateSubstring([NSString stringWithContentsOfURL:theURL encoding:NSUTF8StringEncoding error:NULL]);
 }
 
 - (NSAttributedString *)attributedStringForType:(NSString *)type;
@@ -387,7 +387,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 - (NSString *)scriptPath;
 {
     OBASSERT([self isLeaf] == NO);
-    return [NSString stringWithContentsOfURL:[self scriptURL]];
+    return [NSString stringWithContentsOfURL:[self scriptURL] encoding:NSUTF8StringEncoding error:NULL];
 }
 
 - (NSURL *)mainPageTemplateURL;
