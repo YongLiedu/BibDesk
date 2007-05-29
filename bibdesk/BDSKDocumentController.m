@@ -450,7 +450,7 @@
 - (Class)documentClassForType:(NSString *)documentTypeName
 {
 	Class docClass = [super documentClassForType:documentTypeName];
-    if (docClass == nil && [[BDSKTemplate allStyleNames] containsObject:documentTypeName]) {
+    if (docClass == Nil && [[BDSKTemplate allStyleNames] containsObject:documentTypeName]) {
         docClass = [BibDocument class];
     }
     return docClass;
