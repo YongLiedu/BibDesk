@@ -478,7 +478,6 @@
 		F9022DBE0758088000C3F701 /* Action.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA30758088000C3F701 /* Action.tiff */; };
 		F9022DBF0758088000C3F701 /* Add_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA40758088000C3F701 /* Add_Pressed.tiff */; };
 		F9022DC00758088000C3F701 /* Add.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA50758088000C3F701 /* Add.tiff */; };
-		F9022DC10758088000C3F701 /* ArrowPointingDown.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA60758088000C3F701 /* ArrowPointingDown.tiff */; };
 		F9022DC20758088000C3F701 /* autofile.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA70758088000C3F701 /* autofile.tiff */; };
 		F9022DC30758088000C3F701 /* bibDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA80758088000C3F701 /* bibDocIcon.icns */; };
 		F9022DC40758088000C3F701 /* citation.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA90758088000C3F701 /* citation.tiff */; };
@@ -1490,7 +1489,6 @@
 		F9022DA30758088000C3F701 /* Action.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Action.tiff; path = Images/Action.tiff; sourceTree = "<group>"; };
 		F9022DA40758088000C3F701 /* Add_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add_Pressed.tiff; path = Images/Add_Pressed.tiff; sourceTree = "<group>"; };
 		F9022DA50758088000C3F701 /* Add.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add.tiff; path = Images/Add.tiff; sourceTree = "<group>"; };
-		F9022DA60758088000C3F701 /* ArrowPointingDown.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ArrowPointingDown.tiff; path = Images/ArrowPointingDown.tiff; sourceTree = "<group>"; };
 		F9022DA70758088000C3F701 /* autofile.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = autofile.tiff; path = Images/autofile.tiff; sourceTree = "<group>"; };
 		F9022DA80758088000C3F701 /* bibDocIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = bibDocIcon.icns; path = Images/bibDocIcon.icns; sourceTree = "<group>"; };
 		F9022DA90758088000C3F701 /* citation.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = citation.tiff; path = Images/citation.tiff; sourceTree = "<group>"; };
@@ -2398,7 +2396,6 @@
 				F9022DA50758088000C3F701 /* Add.tiff */,
 				F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */,
 				F9DE8E9708801F13006F0427 /* ArrowImage_Pressed.tiff */,
-				F9022DA60758088000C3F701 /* ArrowPointingDown.tiff */,
 				F9022DA70758088000C3F701 /* autofile.tiff */,
 				3DFF355E0816B5460052F37C /* back_small.tiff */,
 				F9022DA80758088000C3F701 /* bibDocIcon.icns */,
@@ -3518,7 +3515,6 @@
 				F9022DBE0758088000C3F701 /* Action.tiff in Resources */,
 				F9022DBF0758088000C3F701 /* Add_Pressed.tiff in Resources */,
 				F9022DC00758088000C3F701 /* Add.tiff in Resources */,
-				F9022DC10758088000C3F701 /* ArrowPointingDown.tiff in Resources */,
 				F9022DC20758088000C3F701 /* autofile.tiff in Resources */,
 				F9022DC30758088000C3F701 /* bibDocIcon.icns in Resources */,
 				F9022DC40758088000C3F701 /* citation.tiff in Resources */,
