@@ -50,14 +50,43 @@
 	static NSImage *scrollArrowRightImage = nil;
 	static NSImage *scrollArrowRightPressedImage = nil;
 	
-	if (scrollArrowLeftImage == nil)
-		scrollArrowLeftImage = [[NSImage imageNamed:@"ScrollArrowLeft"] retain];
-	if (scrollArrowLeftPressedImage == nil)
-		scrollArrowLeftPressedImage = [[NSImage imageNamed:@"ScrollArrowLeft_Pressed"] retain];
-	if (scrollArrowRightImage == nil)
-		scrollArrowRightImage = [[NSImage imageNamed:@"ScrollArrowRight"] retain];
-	if (scrollArrowRightPressedImage == nil)
-		scrollArrowRightPressedImage = [[NSImage imageNamed:@"ScrollArrowRight_Pressed"] retain];
+	if (scrollArrowLeftImage == nil) {
+        NSBezierPath *path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(0.0, 3.5)];
+        [path lineToPoint:NSMakePoint(5.0, 0.5)];
+        [path lineToPoint:NSMakePoint(5.0, 6.5)];
+        [path closePath];
+        
+		scrollArrowLeftImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
+        [scrollArrowLeftImage lockFocus];
+        [[NSColor colorWithDeviceWhite:0.25 alpha:0.75] setFill];
+        [path fill];
+        [scrollArrowLeftImage unlockFocus];
+        
+		scrollArrowLeftPressedImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
+        [scrollArrowLeftPressedImage lockFocus];
+        [[NSColor colorWithDeviceWhite:0.0 alpha:0.75] setFill];
+        [path fill];
+        [scrollArrowLeftPressedImage unlockFocus];
+        
+        path = [NSBezierPath bezierPath];
+        [path moveToPoint:NSMakePoint(6.0, 3.5)];
+        [path lineToPoint:NSMakePoint(1.0, 0.5)];
+        [path lineToPoint:NSMakePoint(1.0, 6.5)];
+        [path closePath];
+        
+		scrollArrowRightImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
+        [scrollArrowRightImage lockFocus];
+        [[NSColor colorWithDeviceWhite:0.25 alpha:0.75] setFill];
+        [path fill];
+        [scrollArrowRightImage unlockFocus];
+        
+		scrollArrowRightPressedImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
+        [scrollArrowRightPressedImage lockFocus];
+        [[NSColor colorWithDeviceWhite:0.0 alpha:0.75] setFill];
+        [path fill];
+        [scrollArrowRightPressedImage unlockFocus];
+	}
 	
 	if (button == BDSKScrollLeftButton) {
 		if (highlighted)
