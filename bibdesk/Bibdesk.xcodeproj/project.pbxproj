@@ -755,10 +755,6 @@
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B808B1572600AAC9A9 /* BDSKScrollableTextFieldCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */; };
 		F9EF21B908B1572600AAC9A9 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */; };
-		F9EF21D708B1575E00AAC9A9 /* ScrollArrowLeft_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9EF21C708B1575D00AAC9A9 /* ScrollArrowLeft_Pressed.tiff */; };
-		F9EF21D808B1575E00AAC9A9 /* ScrollArrowLeft.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9EF21C808B1575D00AAC9A9 /* ScrollArrowLeft.tiff */; };
-		F9EF21D908B1575E00AAC9A9 /* ScrollArrowRight_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9EF21C908B1575D00AAC9A9 /* ScrollArrowRight_Pressed.tiff */; };
-		F9EF21DA08B1575F00AAC9A9 /* ScrollArrowRight.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */; };
 		F9F0C95009A95725004BBE5E /* PDFMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = F91F284609A661A700419960 /* PDFMetadata.h */; };
 		F9F5E20D0AE307C0007EBB31 /* NSError_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */; };
 		F9F5E20E0AE307C0007EBB31 /* NSError_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F5E20C0AE307C0007EBB31 /* NSError_BDSKExtensions.m */; };
@@ -1794,10 +1790,6 @@
 		F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextField.m; sourceTree = "<group>"; };
 		F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextFieldCell.h; sourceTree = "<group>"; };
 		F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextFieldCell.m; sourceTree = "<group>"; };
-		F9EF21C708B1575D00AAC9A9 /* ScrollArrowLeft_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ScrollArrowLeft_Pressed.tiff; path = Images/ScrollArrowLeft_Pressed.tiff; sourceTree = "<group>"; };
-		F9EF21C808B1575D00AAC9A9 /* ScrollArrowLeft.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ScrollArrowLeft.tiff; path = Images/ScrollArrowLeft.tiff; sourceTree = "<group>"; };
-		F9EF21C908B1575D00AAC9A9 /* ScrollArrowRight_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ScrollArrowRight_Pressed.tiff; path = Images/ScrollArrowRight_Pressed.tiff; sourceTree = "<group>"; };
-		F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ScrollArrowRight.tiff; path = Images/ScrollArrowRight.tiff; sourceTree = "<group>"; };
 		F9F0856808247BC800812F2A /* postprocess-nontitle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = "postprocess-nontitle.py"; path = "BibDesk Help/postprocess-nontitle.py"; sourceTree = "<group>"; };
 		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = inputmanager/BibDeskInputManager.xcodeproj; sourceTree = "<group>"; };
 		F9F5E20B0AE307C0007EBB31 /* NSError_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSError_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -2440,10 +2432,6 @@
 				F9022DB90758088000C3F701 /* rss.tiff */,
 				CE11B0050AE8FD53008C47AC /* scriptFolderIcon.tiff */,
 				F93840890906DD1F00FC37F2 /* scripthook.tiff */,
-				F9EF21C708B1575D00AAC9A9 /* ScrollArrowLeft_Pressed.tiff */,
-				F9EF21C808B1575D00AAC9A9 /* ScrollArrowLeft.tiff */,
-				F9EF21C908B1575D00AAC9A9 /* ScrollArrowRight_Pressed.tiff */,
-				F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */,
 				F945240B0B4B15A6000A5E12 /* searchDocIcon.icns */,
 				CE7F5E470B3F5F1800A919D0 /* searchFolderIcon.tiff */,
 				CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */,
@@ -3552,10 +3540,6 @@
 				3D7C78E2084F4A3A0026D861 /* crossref.tiff in Resources */,
 				F9DE8E56087F81A4006F0427 /* cacheDoc.icns in Resources */,
 				F9DE8E9808801F13006F0427 /* ArrowImage_Pressed.tiff in Resources */,
-				F9EF21D708B1575E00AAC9A9 /* ScrollArrowLeft_Pressed.tiff in Resources */,
-				F9EF21D908B1575E00AAC9A9 /* ScrollArrowRight_Pressed.tiff in Resources */,
-				F9EF21DA08B1575F00AAC9A9 /* ScrollArrowRight.tiff in Resources */,
-				F9EF21D808B1575E00AAC9A9 /* ScrollArrowLeft.tiff in Resources */,
 				F938408A0906DD1F00FC37F2 /* scripthook.tiff in Resources */,
 				F97BEBB5090886E50063504B /* genericFolderIcon.tiff in Resources */,
 				F97BF344090B19520063504B /* smartFolderIcon.tiff in Resources */,
