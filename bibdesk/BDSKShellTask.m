@@ -215,7 +215,7 @@ volatile int caughtSignal = 0;
                 [stdoutData appendData:remainingData];
             
         } else {
-            NSLog(@"Failed to launch task or task exited without accepting input.  Termination status was %d", [task terminationStatus]);
+            NSLog(@"Failed to launch task at \"%@\" or it exited without accepting input.  Termination status was %d", executablePath, [task terminationStatus]);
         }
     }
     @catch(id exception){
