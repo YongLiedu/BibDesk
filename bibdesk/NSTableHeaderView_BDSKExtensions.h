@@ -42,7 +42,3 @@
 @interface NSTableHeaderView (BDSKExtensions)
 - (void)replacementMouseDown:(NSEvent *)theEvent;
 @end
-
-@interface NSTableView (NSTableHeaderViewMenu)
-- (NSMenu *)menuForTableHeaderColumn:(NSTableColumn *)aTableColumn;
-@end
