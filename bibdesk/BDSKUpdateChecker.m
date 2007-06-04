@@ -163,10 +163,7 @@
 
     // check for network availability and display a warning if it's down
     NSError *error = nil;
-    if([self downloadPropertyListFromServer:&error] == NO) {
-        NSError *networkError = nil;
-        if ([self checkForNetworkAvailability:&networkError] == NO)
-            error = networkError;
+     if([self checkForNetworkAvailability:&error] == NO || [self downloadPropertyListFromServer:&error] == NO) {
         
         // display a warning based on the error and bail out now
         [NSApp presentError:error];
