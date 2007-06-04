@@ -39,6 +39,7 @@
 #import "BDSKUpdateChecker.h"
 #import "BDSKReadMeController.h"
 #import "NSError_BDSKExtensions.h"
+#import <SystemConfiguration/SystemConfiguration.h>
 
 #define PROPERTY_LIST_URL @"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"
 #define DOWNLOAD_URL @"http://bibdesk.sourceforge.net/"
@@ -424,19 +425,24 @@
 
 - (BOOL)checkForNetworkAvailability:(NSError **)error;
 {
-    CFURLRef theURL = (CFURLRef)[self propertyListURL];
-    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
+    BOOL networkAvailable = NO;
+    SCNetworkConnectionFlags flags;
     
-    NSString *details;
-    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
-    CFRelease(diagnostic);
-    [details autorelease];
+    if( SCNetworkCheckReachabilityByName([[[self propertyListURL] host] UTF8String], &flags) ){
+        networkAvailable = !(flags & kSCNetworkFlagsConnectionRequired) && (flags & kSCNetworkFlagsReachable);
+    }
     
-    BOOL success;
-    
-    if (kCFNetDiagnosticConnectionUp == status) {
-        success = YES;
-    } else {
+    if (NO == networkAvailable) {
+        
+        CFURLRef theURL = (CFURLRef)[self propertyListURL];
+        CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
+        
+        NSString *details;
+        // CFNetDiagnosticCopyNetworkStatusPassively incorrectly reports the network is down when connecting via modem
+        (void)CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
+        CFRelease(diagnostic);
+        [details autorelease];
+
         if (nil == details) details = NSLocalizedString(@"Unknown network error", @"Error description");
         
         // This error contains all the information needed for NSErrorRecoveryAttempting.  
@@ -447,10 +453,9 @@
             [*error setValue:NSLocalizedString(@"Would you like to ignore this problem or attempt to diagnose it?  You may also open the Console log to check for errors.", @"Error informative text") forKey:NSLocalizedRecoverySuggestionErrorKey];
             [*error setValue:[NSArray arrayWithObjects:NSLocalizedString(@"Ignore", @"Button title"), NSLocalizedString(@"Diagnose", @"Button title"), NSLocalizedString(@"Open Console", @"Button title"), nil] forKey:NSLocalizedRecoveryOptionsErrorKey];
         }
-        success = NO;
     }
     
-    return success;
+    return networkAvailable;
 }
 
 - (void)checkForUpdatesInBackground;
