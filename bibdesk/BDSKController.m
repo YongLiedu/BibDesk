@@ -114,7 +114,10 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
         @try {
             stack = [BDSKShellTask executeBinary:@"/usr/bin/atos" inDirectory:nil withArguments:args environment:nil inputString:nil];
         }
-        @catch (id exception) {}
+        @catch (id exception) {
+            NSLog(@"caught %@ while getting stack trace from %@", exception, self);
+            stack = [NSString stringWithFormat:@"caught \"%@\" while running atos on stack trace\n%@", exception, [[self userInfo] objectForKey:NSStackTraceKey]];
+        }
     } else if (stack == nil) {
         stack = [NSString stringWithFormat:@"No stack trace for exception %@", self];
     }
