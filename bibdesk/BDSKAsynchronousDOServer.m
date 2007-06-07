@@ -65,6 +65,11 @@
         
         mainThreadConnection = [[NSConnection alloc] initWithReceivePort:port1 sendPort:port2];
         [mainThreadConnection setRootObject:self];
+        
+        /* See http://mjtsai.com/blog/2003/08/23/nsobjectinaccessibleexcep/ and this caveat in the docs:
+           If an NSConnection object exists that uses the same ports, but switched in role, then the new NSConnection object communicates with it. Messages sent to a proxy held by either connection are forwarded through the other NSConnection object. This rule applies both within and across address spaces.
+            */
+        [mainThreadConnection enableMultipleThreads];
        
         // set up flags
         memset(&serverFlags, 0, sizeof(serverFlags));
@@ -153,6 +158,9 @@
         if(localThreadConnection == nil)
             @throw @"Unable to get default connection";
         [localThreadConnection setRootObject:self];
+        
+        // see comments in -init
+        [localThreadConnection enableMultipleThreads];
         
         serverOnMainThread = [[localThreadConnection rootProxy] retain];
         [serverOnMainThread setProtocolForProxy:[self protocolForMainThread]];
