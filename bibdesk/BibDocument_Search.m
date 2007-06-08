@@ -371,35 +371,36 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [searchField setTarget:self];
     [searchField setDelegate:self];
     
-    NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
-    
-    if([titlesToSelect count]){
+    // _restoreDocumentStateByRemovingSearchView may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list.  Otherwise, select the pubs corresponding to the file content selection.
+    if ([[searchField stringValue] isEqualToString:@""]) {
+        [self hideSearchButtonView];
         
-        // clear current selection (just in case)
-        [tableView deselectAll:nil];
-        
-        // we match based on title, since that's all the index knows about the BibItem at present
-        NSMutableArray *pubsToSelect = [NSMutableArray array];
-        NSEnumerator *pubEnum = [shownPublications objectEnumerator];
-        BibItem *item;
-        while(item = [pubEnum nextObject])
-            if([titlesToSelect containsObject:[item displayTitle]]) 
-                [pubsToSelect addObject:item];
-        [self selectPublications:pubsToSelect];
-        [tableView scrollRowToCenter:[tableView selectedRow]];
-        
-        // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
-        if ([[documentWindow firstResponder] isEqual:[searchField currentEditor]] == NO)
-            [documentWindow makeFirstResponder:(NSResponder *)tableView];
-    }
-    
-    [mainBox setNeedsDisplay:YES];
-    
-    // _restoreDocumentStateByRemovingSearchView may be called after the user clicks a different search type, without changing the searchfield; in that case, we want to leave the search button view in place, and refilter the list
-    if ([[searchField stringValue] isEqualToString:@""])
-        [self hideSearchButtonView];  
-    else
+        // have to hide the search view before trying to select anything
+        NSArray *titlesToSelect = [fileSearchController titlesOfSelectedItems];
+
+        if([titlesToSelect count]){
+            
+            // clear current selection (just in case)
+            [tableView deselectAll:nil];
+            
+            // we match based on title, since that's all the index knows about the BibItem at present
+            NSMutableArray *pubsToSelect = [NSMutableArray array];
+            NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+            BibItem *item;
+            while(item = [pubEnum nextObject])
+                if([titlesToSelect containsObject:[item displayTitle]]) 
+                    [pubsToSelect addObject:item];
+            [self selectPublications:pubsToSelect];
+            [tableView scrollRowToCenter:[tableView selectedRow]];
+            
+            // if searchfield doesn't have focus (user clicked cancel button), switch to the tableview
+            if ([[documentWindow firstResponder] isEqual:[searchField currentEditor]] == NO)
+                [documentWindow makeFirstResponder:(NSResponder *)tableView];
+        }
+    } else {
+        [mainBox setNeedsDisplay:YES];
         [searchButtonController selectItemWithIdentifier:BDSKAllFieldsString];
+    }
 }
 
 #pragma mark Find panel
