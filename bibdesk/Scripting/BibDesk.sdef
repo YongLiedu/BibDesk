@@ -335,7 +335,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<cocoa name="NSTextSuite"/>
 
-		<value-type name="color" code="cRGB">
+		<value-type name="color" code="colr">
 			<cocoa class="NSColor"/>
 		</value-type>
 
