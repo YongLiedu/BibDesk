@@ -651,7 +651,12 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         [autoCompletionDict setObject:nameSet forKey:BDSKAuthorString];
         [nameSet release];
     }
-    [nameSet addObjectsFromArray:names];
+    unsigned i, iMax = [names count];
+    NSString *name;
+    for (i = 0; i < iMax; i++) {
+        name = [names objectAtIndex:i];
+        [nameSet addObject:([name isComplex] ? [NSString stringWithString:name] : name)];
+    }
 }
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
