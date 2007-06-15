@@ -42,7 +42,7 @@
 
 - (IBAction)remove:(id)sender;
 {
-    [fileArrayController removeSelectedObjects:[fileArrayController selectedObjects]];
+    [fileArrayController remove:self];
 }
 
 - (IBAction)selectAllDocuments:(id)sender;
@@ -137,8 +137,14 @@
             NSMutableArray *URLs = [NSMutableArray array];
             NSEnumerator *e = [newFiles objectEnumerator];
             NSString *path;
-            while (path = [e nextObject]) 
-                [URLs addObject:[NSURL fileURLWithPath:path]];
+            BOOL isDir;
+            while ((path = [e nextObject])) {
+                if (([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && NO == isDir)) {
+                    [URLs addObject:[NSURL fileURLWithPath:path]];
+                } else if ([[NSWorkspace sharedWorkspace] isFilePackageAtPath:path]) {
+                    [URLs addObject:[NSURL fileURLWithPath:path]];
+                }
+            }
             [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:URLs];
         }
         return YES;
