@@ -180,51 +180,6 @@ static void createTemporaryDirectory()
         [metadataMessageQueue startBackgroundProcessors:1];
         canWriteMetadata = 1;
 				
-		NSString *formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-		NSString *error = nil;
-		int button = 0;
-		
-		if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
-			[self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-		}else{
-			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format"), 
-											 @"%@",
-											 NSLocalizedString(@"Go to Preferences", @"Button title"), 
-											 NSLocalizedString(@"Revert to Default", @"Button title"), 
-											 nil, [error safeFormatString], nil);
-			if (button == NSAlertAlternateReturn){
-				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
-                [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
-				[self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-			}else{
-				[[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_CiteKey"];
-			}
-		}
-		
-		formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
-		error = nil;
-		
-		if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
-			[self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-		}else{
-			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @"Message in alert dialog when detecting invalid Local-Url format"), 
-											 @"%@",
-											 NSLocalizedString(@"Go to Preferences", @"Button title"), 
-											 NSLocalizedString(@"Revert to Default", @"Button title"), 
-											 nil, [error safeFormatString], nil);
-			if (button == NSAlertAlternateReturn){
-				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
-				[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
-				[self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
-			}else{
-				[[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
-			}
-		}
-		
 		NSMutableArray *defaultFields = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey] mutableCopy];
 		if(![defaultFields containsObject:BDSKUrlString]){
 			[defaultFields insertObject:BDSKUrlString atIndex:0];
@@ -256,14 +211,6 @@ static void createTemporaryDirectory()
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:ratingFields forKey:BDSKRatingFieldsKey];
 		}
 		[ratingFields release];
-        
-        // register server for cite key completion
-        completionConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
-        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKCompletionServer)];
-        [completionConnection setRootObject:checker];
-        
-        if ([completionConnection registerName:BIBDESK_SERVER_NAME] == NO)
-            NSLog(@"failed to register completion connection; another BibDesk process must be running");  
     }
     return self;
 }
@@ -313,13 +260,72 @@ static void createTemporaryDirectory()
     }    
 }
 
+- (void)checkFormatStrings {
+    NSString *formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
+    NSString *error = nil;
+    int button = 0;
+    
+    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+        [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+    }else{
+        button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @"Message in alert dialog when detecting invalid cite key format"), 
+                                         @"%@",
+                                         NSLocalizedString(@"Go to Preferences", @"Button title"), 
+                                         NSLocalizedString(@"Revert to Default", @"Button title"), 
+                                         nil, [error safeFormatString], nil);
+        if (button == NSAlertAlternateReturn){
+            formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+            [self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+        }else{
+            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_CiteKey"];
+        }
+    }
+    
+    formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+    error = nil;
+    
+    if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
+        [self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+    }else{
+        button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @"Message in alert dialog when detecting invalid Local-Url format"), 
+                                         @"%@",
+                                         NSLocalizedString(@"Go to Preferences", @"Button title"), 
+                                         NSLocalizedString(@"Revert to Default", @"Button title"), 
+                                         nil, [error safeFormatString], nil);
+        if (button == NSAlertAlternateReturn){
+            formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
+            [self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+        }else{
+            [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+            [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+        }
+    }
+
+}
+
+
 #pragma mark Application delegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
+    // validate the Cite Key and LocalUrl format strings
+    [self checkFormatStrings];
     
     // register services
     [NSApp setServicesProvider:self];
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObject:NSStringPboardType] returnTypes:[NSArray arrayWithObject:NSStringPboardType]];
+    
+    // register server for cite key completion
+    completionConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
+    NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKCompletionServer)];
+    [completionConnection setRootObject:checker];
+    
+    if ([completionConnection registerName:BIBDESK_SERVER_NAME] == NO)
+        NSLog(@"failed to register completion connection; another BibDesk process must be running");  
     
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey]])
