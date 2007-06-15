@@ -66,7 +66,7 @@ static float GROUP_ROW_HEIGHT = 28.0;
 
 - (NSArray *)currentPublications;
 - (void)setCurrentPublications:(NSArray *)pubs;
-- (NSArray *)treeNodesWithCurrentPublications;
+- (NSArray *)copyTreeNodesWithCurrentPublications;
 - (void)doSearch;
 - (void)makeNewIndex;
 
@@ -407,12 +407,14 @@ static NSString *titleStringWithPub(BibItem *pub)
     return [NSString stringWithFormat:@"%@ (%@)", [pub displayTitle], [pub pubAuthorsForDisplay]];
 }
 
-- (NSArray *)treeNodesWithCurrentPublications;
+// caller is reponsible for releasing the array, since the autorelease pool on the main thread may pop before the invocation's return value is requested
+- (NSArray *)copyTreeNodesWithCurrentPublications;
 {
     NSAssert([NSThread inMainThread], @"method must be called from the main thread");
+
     NSEnumerator *pubE = [[self currentPublications] objectEnumerator];
     BibItem *pub;
-    NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[self currentPublications] count]];
+    NSMutableArray *nodes = [[NSMutableArray alloc] initWithCapacity:[[self currentPublications] count]];
     while (pub = [pubE nextObject]) {
         BDSKTreeNode *theNode = [[BDSKTreeNode alloc] init];
 
@@ -457,11 +459,13 @@ static NSComparisonResult scoreComparator(id obj1, id obj2, void *context)
 {
     // get the root nodes array on the main thread, since it uses BibItem methods
     NSArray *treeNodes = nil;
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(treeNodesWithCurrentPublications)]];
+    NSMethodSignature *ms = [self methodSignatureForSelector:@selector(copyTreeNodesWithCurrentPublications)];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:ms];
     [invocation setTarget:self];
-    [invocation setSelector:@selector(treeNodesWithCurrentPublications)];
+    [invocation setSelector:@selector(copyTreeNodesWithCurrentPublications)];
     [invocation performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
     [invocation getReturnValue:&treeNodes];
+    [treeNodes autorelease];
     
     OBPOSTCONDITION([treeNodes count]);
         
