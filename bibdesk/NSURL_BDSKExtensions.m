@@ -39,6 +39,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "CFString_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
+#import "BDSKSkimReader.h"
 
 @implementation NSURL (BDSKExtensions)
 
@@ -309,6 +310,15 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     [attrString addAttribute:NSLinkAttributeName value:self range:NSMakeRange(0, [attrString length])];
     
     return [attrString autorelease];
+}
+
+- (NSString *)textSkimNotes {
+    return [self isFileURL] ? [[BDSKSkimReader sharedReader] textNotesAtURL:self] : nil;
+}
+
+- (NSAttributedString *)richTextSkimNotes {
+    NSData *data = [self isFileURL] ? [[BDSKSkimReader sharedReader] RTFNotesAtURL:self] : nil;
+    return data ? [[[NSAttributedString alloc] initWithRTF:data documentAttributes:NULL] autorelease] : nil;
 }
 
 @end

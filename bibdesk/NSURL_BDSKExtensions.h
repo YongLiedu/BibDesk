@@ -61,6 +61,9 @@
 - (NSAttributedString *)smallIcon;
 - (NSAttributedString *)linkedIcon;
 - (NSAttributedString *)linkedSmallIcon;
+- (NSString *)textSkimNotes;
+- (NSAttributedString *)richTextSkimNotes;
+
 @end
 
 CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL);

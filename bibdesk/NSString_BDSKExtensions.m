@@ -1376,6 +1376,14 @@ static NSString *UTIForPath(NSString *aPath)
     return [[self url] linkedSmallIcon];
 }
 
+- (NSString *)textSkimNotes {
+    return [[self url] textSkimNotes];
+}
+
+- (NSAttributedString *)richTextSkimNotes {
+    return [[self url] richTextSkimNotes];
+}
+
 - (NSString *)titleCapitalizedString {
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];
     NSString *s = nil;

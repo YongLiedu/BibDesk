@@ -4040,6 +4040,10 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item remoteURL
 @tab 
+@item textSkimNotes
+@tab 
+@item richTextSkimNotes
+@tab 
 @item pubDate
 @tab 
 @item dateAdded
@@ -4261,6 +4265,10 @@ Below are lists of collection keys that could be used in BibDesk export template
 @item linkedIcon
 @tab 
 @item linkedSmallIcon
+@tab 
+@item textSkimNotes
+@tab 
+@item richTextSkimNotes
 @tab 
 @item absoluteString
 @tab 

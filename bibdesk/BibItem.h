@@ -748,6 +748,9 @@ enum {
 - (id)editors;
 - (int)itemIndex;
 - (void)setItemIndex:(int)index;
+- (NSCalendarDate *)currentDate;
+- (NSString *)textSkimNotes;
+- (NSAttributedString *)richTextSkimNotes;
 
 /*!
     @method     URLForField:

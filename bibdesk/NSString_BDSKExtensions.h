@@ -448,6 +448,8 @@ An inline buffer is used for speed in accessing each character.
 - (NSAttributedString *)smallIcon;
 - (NSAttributedString *)linkedIcon;
 - (NSAttributedString *)linkedSmallIcon;
+- (NSString *)textSkimNotes;
+- (NSAttributedString *)richTextSkimNotes;
 
 - (NSString *)titleCapitalizedString;
 

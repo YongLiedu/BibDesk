@@ -2379,6 +2379,14 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 
 - (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
 
+- (NSString *)textSkimNotes {
+    return [[self localURL] textSkimNotes];
+}
+
+- (NSAttributedString *)richTextSkimNotes {
+    return [[self localURL] richTextSkimNotes];
+}
+
 #pragma mark -
 #pragma mark URL handling
 
