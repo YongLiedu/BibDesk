@@ -163,12 +163,6 @@ enum {
     [self updateUI];
 }
 
-// no surprises from replacing unseen items!
-- (void)clearFrontDocumentQuickSearch{
-    BibDocument *doc = [[NSDocumentController sharedDocumentController] currentDocument];
-    [doc setSearchString:@""];
-}
-
 - (void)updateUI{
 	if(NO == [self findAsMacro] && [self replaceAsMacro] && FCOperationFindAndReplace == [self operation]){
         [searchScopePopUpButton setEnabled:NO];
@@ -724,8 +718,6 @@ enum {
 		[statusBar setStringValue:NSLocalizedString(@"There were invalid values", @"Status message")];
         return;
     }
-    
-    [self clearFrontDocumentQuickSearch];
    
     // this can change between clicks of the Find button, so we can't cache it
     NSArray *currItems = [self currentFoundItemsInDocument:theDocument];
@@ -795,8 +787,6 @@ enum {
 	}
 	
 	[statusBar startAnimation:nil];
-	
-    [self clearFrontDocumentQuickSearch];
 
     NSArray *publications;
     NSArray *shownPublications = [theDocument displayedPublications];
@@ -919,8 +909,6 @@ enum {
 }
 
 - (NSArray *)currentFoundItemsInDocument:(BibDocument *)theDocument{
-    [self clearFrontDocumentQuickSearch];
-	
 	if([self searchType] == FCTextualSearch)
 		return [self currentStringFoundItemsInDocument:theDocument];
 	else if([self regexIsValid:[self findString]])
@@ -1189,8 +1177,6 @@ enum {
 
 - (unsigned int)findAndReplaceInItems:(NSArray *)arrayOfPubs ofDocument:(BibDocument *)theDocument{
     unsigned number;
-	
-	[self clearFrontDocumentQuickSearch];
 	
 	if(shouldMove == NSMixedState){
 		BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move Linked Files?", @"Message in alert dialog when chnaging local file field")
