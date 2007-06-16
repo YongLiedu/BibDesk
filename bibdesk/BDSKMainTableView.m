@@ -83,6 +83,7 @@
     BDSKImagePopUpButton *cornerViewButton = [[BDSKImagePopUpButton alloc] initWithFrame:cornerViewFrame];
     [cornerViewButton setIconSize:cornerViewFrame.size];
     [cornerViewButton setIconImage:[NSImage imageNamed:@"cornerColumns"]];
+    [cornerViewButton setArrowImage:nil];
     [cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
     [cornerViewButton setShowsMenuWhenIconClicked:YES];
     [[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
@@ -351,9 +352,11 @@
     NSTableColumn *highlightedColumn = [self highlightedTableColumn];
     if([columns containsObject:highlightedColumn] == NO)
         highlightedColumn = nil;
-	
+	NSIndexSet *selectedRows = [self selectedRowIndexes];
+    
     [self removeAllTableColumns];
     [self performSelector:@selector(addTableColumn:) withObjectsFromArray:columns];
+    [self selectRowIndexes:selectedRows byExtendingSelection:NO];
     [self setHighlightedTableColumn:highlightedColumn]; 
     [self tableViewFontChanged:nil];
     [self updateColumnsMenu];
