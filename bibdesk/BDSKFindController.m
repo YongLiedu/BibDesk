@@ -735,7 +735,7 @@ enum {
         indexOfSelectedItem = 0;
     } else {        
         // see if the selected pub is one of the current found items, or just some random item
-        indexOfSelectedItem = [[theDocument displayedPublications] indexOfObjectIdenticalTo:selItem];
+        indexOfSelectedItem = [[theDocument shownPublications] indexOfObjectIdenticalTo:selItem];
         
         // if we're doing a replace & find, we need to replace in this item before we change the selection
         if(replace){
@@ -789,7 +789,7 @@ enum {
 	[statusBar startAnimation:nil];
 
     NSArray *publications;
-    NSArray *shownPublications = [theDocument displayedPublications];
+    NSArray *shownPublications = [theDocument shownPublications];
     
     if([self searchSelection]){
         // if we're only doing a find/replace in the selected publications
@@ -856,7 +856,7 @@ enum {
     NSString *origStr;
     
     // use all shown pubs; not just selection, since our caller is going to change the selection
-    NSArray *publications = [theDocument displayedPublications];
+    NSArray *publications = [theDocument shownPublications];
 
     pubE = [publications objectEnumerator];
     
@@ -890,7 +890,7 @@ enum {
     NSString *origStr;
     
     // use all shown pubs; not just selection, since our caller is going to change the selection
-    NSArray *publications = [theDocument displayedPublications];
+    NSArray *publications = [theDocument shownPublications];
     pubE = [publications objectEnumerator];
     
     while(bibItem = [pubE nextObject]){

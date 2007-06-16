@@ -584,6 +584,10 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     return publications;
 }
 
+- (NSArray *) shownPublications{
+    return shownPublications;
+}
+
 - (void)insertPublications:(NSArray *)pubs atIndexes:(NSIndexSet *)indexes{
     // this assertion is only necessary to preserve file order for undo
     NSParameterAssert([indexes count] == [pubs count]);

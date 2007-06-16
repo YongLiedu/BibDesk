@@ -119,10 +119,6 @@
 	return nil;
 }
 
-- (NSArray*) displayedPublications {
-	return shownPublications;
-}
-
 - (NSArray*) selection { 
     NSMutableArray *selection = [NSMutableArray arrayWithCapacity:[self numberOfSelectedPubs]];
     NSEnumerator *pubE = [[self selectedPublications] objectEnumerator];

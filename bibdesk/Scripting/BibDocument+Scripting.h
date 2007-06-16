@@ -53,8 +53,6 @@
 - (BibAuthor *)valueInAuthorsWithName:(NSString *)name;
 - (BibAuthor *)valueInAuthorsAtIndex:(unsigned int)index;
 
-- (NSArray*) displayedPublications;
-
 - (NSArray*) selection;
 - (void) setSelection: (NSArray*) newSelection;
 
