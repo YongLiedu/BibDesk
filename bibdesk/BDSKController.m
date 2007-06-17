@@ -46,13 +46,26 @@
 - (NSString *)stackTrace;
 @end
 
+@interface BDSKStandardErrorLog : NSObject
+{
+    NSMutableData *stderrData;
+    pthread_rwlock_t stderrLock;
+}
++ (id)sharedLog;
+- (void)startWatching;
+- (NSString *)standardErrorString;
+@end
+
 @implementation BDSKController
 
 - (id)init;
 {
+    log_method();
     self = [super init];
     // Omni adds NSLogOtherExceptionMask for debug builds, which logs complex string exceptions
     [[NSExceptionHandler defaultExceptionHandler] setExceptionHandlingMask:NSLogUncaughtExceptionMask|NSLogUncaughtSystemExceptionMask|NSLogUncaughtRuntimeErrorMask|NSLogTopLevelExceptionMask];
+    // start copying standard error
+    [BDSKStandardErrorLog sharedLog];
     return self;
 }
 
@@ -84,7 +97,7 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
     // log so it's easy to spot in the console, but don't display the exception viewer window
     NSLog(@"%@", [NSString stringWithFormat:@"**** Exception:\n%@\n\n **** Stack Trace:\n%@\n ****", exception, [exception stackTrace]]);
 #else
-    [[BDSKExceptionViewer sharedViewer] performSelectorOnMainThread:@selector(displayString:) withObject:[NSString stringWithFormat:@"Exception:\n%@\n\nStack Trace:\n%@", exception, [exception stackTrace]] waitUntilDone:YES];
+    [[BDSKExceptionViewer sharedViewer] performSelectorOnMainThread:@selector(displayString:) withObject:[NSString stringWithFormat:@"Exception:\n%@\n\nStack Trace:\n%@\n\nStandard Error:\n%@", exception, [exception stackTrace], [[BDSKStandardErrorLog sharedLog] standardErrorString]] waitUntilDone:YES];
 #endif
     handlingException = NO;
     
@@ -123,4 +136,74 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
     }
     return stack;
 }
+@end
+
+@implementation BDSKStandardErrorLog
+
++ (id)sharedLog;
+{
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableStandardErrorCapture"])
+        return nil;
+    
+    static id sharedInstance = nil;
+    @synchronized(@"BDSKStandardErrorLog") {
+        if (nil == sharedInstance)
+            sharedInstance = [[self alloc] init];
+    }
+    return sharedInstance;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        pthread_rwlock_init(&stderrLock, NULL);
+        stderrData = [[NSMutableData alloc] initWithCapacity:8192];
+        [NSThread detachNewThreadSelector:@selector(startWatching) toTarget:self withObject:nil];
+    }
+    return self;
+}
+
+- (oneway void)release {}
+
+#define LOG_BUF_SIZE 1024
+
+// see http://lists.apple.com/archives/cocoa-dev/2004/Jun/msg01395.html
+- (void)startWatching;
+{
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    int pipefds[2];
+    char buf[LOG_BUF_SIZE];
+    
+    int error = pipe(pipefds);
+    if (error < 0)
+        perror("pipe() failed");
+    
+    error = dup2(pipefds[1], 2);
+    if (error < 0)
+        perror("dup2() failed");
+        
+    ssize_t bytesRead = error;
+
+    while (bytesRead >= 0) {
+        
+        bytesRead = read(pipefds[0], buf, LOG_BUF_SIZE);
+
+        if (bytesRead > 0) {
+            pthread_rwlock_wrlock(&stderrLock);
+            [stderrData appendBytes:buf length:bytesRead];
+            pthread_rwlock_unlock(&stderrLock);
+        }
+    }
+    [pool release];
+}
+
+- (NSString *)standardErrorString
+{
+    pthread_rwlock_rdlock(&stderrLock);
+    NSString *str = [[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding];
+    pthread_rwlock_unlock(&stderrLock);
+    return [str autorelease];
+}
+
 @end
