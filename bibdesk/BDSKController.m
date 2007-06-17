@@ -60,7 +60,6 @@
 
 - (id)init;
 {
-    log_method();
     self = [super init];
     // Omni adds NSLogOtherExceptionMask for debug builds, which logs complex string exceptions
     [[NSExceptionHandler defaultExceptionHandler] setExceptionHandlingMask:NSLogUncaughtExceptionMask|NSLogUncaughtSystemExceptionMask|NSLogUncaughtRuntimeErrorMask|NSLogTopLevelExceptionMask];
