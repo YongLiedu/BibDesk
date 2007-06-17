@@ -165,35 +165,26 @@ static NSString *OFControllerAssertionHandlerException = @"OFControllerAssertion
 
 - (oneway void)release {}
 
-#define LOG_BUF_SIZE 1024
+- (void)handleReadNotification:(NSNotification *)note
+{
+    NSData *data = [[note userInfo] objectForKey:NSFileHandleNotificationDataItem];
+    if ([data length]) {
+        pthread_rwlock_wrlock(&stderrLock);
+        [stderrData appendData:data];
+        pthread_rwlock_unlock(&stderrLock);
+    }
+    [[note object] readInBackgroundAndNotify];
+}
 
 // see http://lists.apple.com/archives/cocoa-dev/2004/Jun/msg01395.html
 - (void)startWatching;
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    int pipefds[2];
-    char buf[LOG_BUF_SIZE];
-    
-    int error = pipe(pipefds);
-    if (error < 0)
-        perror("pipe() failed");
-    
-    error = dup2(pipefds[1], 2);
-    if (error < 0)
-        perror("dup2() failed");
-        
-    ssize_t bytesRead = error;
-
-    while (bytesRead >= 0) {
-        
-        bytesRead = read(pipefds[0], buf, LOG_BUF_SIZE);
-
-        if (bytesRead > 0) {
-            pthread_rwlock_wrlock(&stderrLock);
-            [stderrData appendBytes:buf length:bytesRead];
-            pthread_rwlock_unlock(&stderrLock);
-        }
-    }
+    NSPipe *pipe = [NSPipe pipe];
+    dup2([[pipe fileHandleForWriting] fileDescriptor], 2);
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleReadNotification:) name:NSFileHandleReadCompletionNotification object:[pipe fileHandleForReading]];
+    [[pipe fileHandleForReading] readInBackgroundAndNotify];
+    [[NSRunLoop currentRunLoop] run];
     [pool release];
 }
 
