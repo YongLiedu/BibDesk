@@ -827,31 +827,30 @@ http://home.planet.nl/~faase009/GNU.txt
         return NSOrderedDescending;
 }    
 
-static BOOL canCreateFileURL(NSString *aString, BOOL *isURLString)
+static NSURL *CreateFileURL(NSString *aPath, NSString *basePath)
 {
     // default return values
-    BOOL canCreate = NO;
-    *isURLString = NO;
+    NSURL *fileURL = nil;
 
-    if ([aString hasPrefix:@"file://"]) {
-        *isURLString = YES;
-        canCreate = YES;
-    } else if ([aString length]) {
-        unichar ch = [aString characterAtIndex:0];
-        if ('/' == ch || '~' == ch)
-            canCreate = YES;
+    if ([aPath hasPrefix:@"file://"]) {
+        fileURL = [[NSURL alloc] initWithString:aPath];
+    } else if ([aPath length]) {
+        unichar ch = [aPath characterAtIndex:0];
+        if ('/' != ch && '~' != ch)
+            aPath = [basePath stringByAppendingPathComponent:aPath];
+        if (aPath)
+            fileURL = [[NSURL alloc] initFileURLWithPath:[aPath stringByStandardizingPath]];
     }
-    return canCreate;
+    return fileURL;
 }
 
-static NSString *UTIForPath(NSString *aPath)
+static NSString *UTIForPath(NSString *aPath, NSString *basePath)
 {
     BOOL isURLString;
     NSString *theUTI = nil;
+    NSURL *fileURL = nil;
     // !!! We return nil when a file doesn't exist if it's a properly resolvable path/URL, but we have no way of checking existence with a relative path.  Returning nil is preferable, since then nonexistent files will be sorted to the top or bottom and they're easy to find.
-    if (canCreateFileURL(aPath, &isURLString)) {
-        NSURL *fileURL = (isURLString ? [[NSURL alloc] initWithString:aPath] : [[NSURL alloc] initFileURLWithPath:[aPath stringByStandardizingPath]]);
-        
+    if (fileURL = CreateFileURL(aPath, basePath)) {
         // UTI will be nil for a file that doesn't exist, yet had an absolute/resolvable path
         if (fileURL) {
             theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:fileURL error:NULL];
@@ -869,8 +868,12 @@ static NSString *UTIForPath(NSString *aPath)
 }
 
 - (NSComparisonResult)UTICompare:(NSString *)other{
-    NSString *otherUTI = UTIForPath(other);
-    NSString *selfUTI = UTIForPath(self);
+    return [self UTICompare:other basePath:nil];
+}
+
+- (NSComparisonResult)UTICompare:(NSString *)other basePath:(NSString *)basePath{
+    NSString *otherUTI = UTIForPath(other, basePath);
+    NSString *selfUTI = UTIForPath(self, basePath);
     if (nil == selfUTI)
         return (nil == otherUTI ? NSOrderedSame : NSOrderedDescending);
     if (nil == otherUTI)

@@ -2052,7 +2052,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(previousSortKey == nil)
         previousSortKey = [sortKey retain];
     
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.sortDescending], nil];
+    NSString *userInfo = [self fileName];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:[BDSKTableSortDescriptor tableSortDescriptorForIdentifier:sortKey ascending:!docState.sortDescending userInfo:userInfo], [BDSKTableSortDescriptor tableSortDescriptorForIdentifier:previousSortKey ascending:!docState.sortDescending userInfo:userInfo], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
     
 

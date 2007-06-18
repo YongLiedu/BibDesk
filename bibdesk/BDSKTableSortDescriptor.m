@@ -116,6 +116,10 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
 @implementation BDSKTableSortDescriptor
 
 + (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend{
+    return [self tableSortDescriptorForIdentifier:tcID ascending:ascend userInfo:nil];
+}
+
++ (BDSKTableSortDescriptor *)tableSortDescriptorForIdentifier:(NSString *)tcID ascending:(BOOL)ascend userInfo:(id)userInfo{
 
     NSParameterAssert([NSString isEmptyString:tcID] == NO);
     
@@ -213,7 +217,15 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
     }else if([tcID isLocalFileField]){
         
         // compare UTI for file fields so the subsort is more useful
-        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:)];
+        if ([userInfo respondsToSelector:@selector(stringByStandardizingPath)])
+            userInfo = [userInfo stringByStandardizingPath];
+        else
+            userInfo = nil;
+        BOOL isDir = NO;
+        if (userInfo && [[NSFileManager defaultManager] fileExistsAtPath:userInfo isDirectory:&isDir] && isDir)
+            sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:basePath:) userInfo:userInfo];
+        else
+            sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(UTICompare:)];
         
     }else {
         
@@ -235,23 +247,37 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
 
 - (id)initWithKey:(NSString *)key ascending:(BOOL)flag selector:(SEL)theSel;
 {
+    return [self initWithKey:key ascending:flag selector:theSel userInfo:nil];
+}
+
+- (id)initWithKey:(NSString *)key ascending:(BOOL)flag selector:(SEL)theSel userInfo:(id)info;
+{
     if(self = [super initWithKey:key ascending:flag selector:theSel]){
         [self cacheKeys];
         
         // since NSSortDescriptor ivars are declared @private, we have to use @defs to access them directly; use our own instead, since this won't be subclassed
         selector = theSel;
         ascending = flag;
+        userInfo = [info retain];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)aCoder
 {
-    self = [super initWithCoder:aCoder];
-    [self cacheKeys];
-    selector = [self selector];
-    ascending = [self ascending];
+    if (self = [super initWithCoder:aCoder]) {
+        [self cacheKeys];
+        selector = [self selector];
+        ascending = [self ascending];
+        userInfo = [aCoder allowsKeyedCoding] ? [aCoder decodeObjectForKey:@"userInfo"] : [aCoder decodeObject];
+    }
     return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [super encodeWithCoder:aCoder];
+    [aCoder allowsKeyedCoding] ? [aCoder encodeObject:userInfo forKey:@"userInfo"] : [aCoder encodeObject:userInfo];
 }
 
 - (id)copyWithZone:(NSZone *)aZone
@@ -262,6 +288,7 @@ There are some issues with BibAuthor's sortCompare:, though, which we may revisi
 - (void)dealloc
 {
     CFRelease(keys);
+    [userInfo release];
     [super dealloc];
 }
 
