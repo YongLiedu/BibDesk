@@ -330,10 +330,18 @@ static inline void __GetValuesUsingCache(BDSKTableSortDescriptor *sort, id objec
         }
     } 	
     
-    // we use the IMP directly since performSelector: returns an id
-    typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
-    comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
-    NSComparisonResult result = comparator(value1, selector, value2);
+    if (userInfo) {
+        // we use the IMP directly since performSelector: returns an id
+        typedef NSComparisonResult (*comparatorIMP)(id, SEL, id, id);
+        comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
+        NSComparisonResult result = comparator(value1, selector, value2, userInfo);
+    } else {
+        // we use the IMP directly since performSelector: returns an id
+        typedef NSComparisonResult (*comparatorIMP)(id, SEL, id);
+        comparatorIMP comparator = (comparatorIMP)[value1 methodForSelector:selector];
+        NSComparisonResult result = comparator(value1, selector, value2);
+    }
+    
     
     return ascending ? result : (result *= -1);
 }
