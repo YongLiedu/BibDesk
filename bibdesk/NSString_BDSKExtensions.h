@@ -78,6 +78,15 @@
 + (NSString *)stringWithBool:(BOOL)boolValue;
 
 /*!
+    @method     stringWithFileSystemRepresentation:
+    @abstract   More convenient than using NSFileManager, and thread safe.  Calls CFStringCreateWithFileSystemRepresentation.
+    @discussion Returns nil if the encoding was incorrect.
+    @param      cString NULL-terminated C string
+    @result     (description)
+*/
++ (NSString *)stringWithFileSystemRepresentation:(const char *)cString;
+
+/*!
 @method     stringWithTriStateValue:
  @abstract   Returns a localized string describing the value as one of {NO, YES, -}
  @discussion (comprehensive description)

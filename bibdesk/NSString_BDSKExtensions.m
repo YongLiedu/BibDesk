@@ -104,6 +104,12 @@ static int MAX_RATING = 5;
     return [[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try];
 }
 
++ (NSString *)stringWithFileSystemRepresentation:(const char *)cString;
+{
+    NSParameterAssert(cString != NULL);
+    return [(id)CFStringCreateWithFileSystemRepresentation(CFAllocatorGetDefault(), cString) autorelease];
+}
+
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue {
     switch (triStateValue) {
         case NSOffState:
