@@ -16,6 +16,12 @@
     #import "BibPrefController.h"
     #import "BDSKPreferenceController.h"
 
+extern void BDSKLog(NSString *format, ...);
+extern void BDSKLogv(NSString *format, va_list argList);
+
+#define NSLog BDSKLog
+#define NSLogv BDSKLogv
+
 #if defined (OMNI_ASSERTIONS_ON)
 
 #define log_method() \
