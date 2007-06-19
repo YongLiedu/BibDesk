@@ -827,7 +827,7 @@ http://home.planet.nl/~faase009/GNU.txt
         return NSOrderedDescending;
 }    
 
-static NSURL *CreateFileURL(NSString *aPath, NSString *basePath)
+static NSURL *CreateFileURLFromPathOrURLString(NSString *aPath, NSString *basePath)
 {
     // default return values
     NSURL *fileURL = nil;
@@ -844,13 +844,12 @@ static NSURL *CreateFileURL(NSString *aPath, NSString *basePath)
     return fileURL;
 }
 
-static NSString *UTIForPath(NSString *aPath, NSString *basePath)
+static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 {
-    BOOL isURLString;
     NSString *theUTI = nil;
     NSURL *fileURL = nil;
     // !!! We return nil when a file doesn't exist if it's a properly resolvable path/URL, but we have no way of checking existence with a relative path.  Returning nil is preferable, since then nonexistent files will be sorted to the top or bottom and they're easy to find.
-    if (fileURL = CreateFileURL(aPath, basePath)) {
+    if (fileURL = CreateFileURLFromPathOrURLString(aPath, basePath)) {
         // UTI will be nil for a file that doesn't exist, yet had an absolute/resolvable path
         if (fileURL) {
             theUTI = [[NSWorkspace sharedWorkspace] UTIForURL:fileURL error:NULL];
@@ -872,8 +871,8 @@ static NSString *UTIForPath(NSString *aPath, NSString *basePath)
 }
 
 - (NSComparisonResult)UTICompare:(NSString *)other basePath:(NSString *)basePath{
-    NSString *otherUTI = UTIForPath(other, basePath);
-    NSString *selfUTI = UTIForPath(self, basePath);
+    NSString *otherUTI = UTIForPathOrURLString(other, basePath);
+    NSString *selfUTI = UTIForPathOrURLString(self, basePath);
     if (nil == selfUTI)
         return (nil == otherUTI ? NSOrderedSame : NSOrderedDescending);
     if (nil == otherUTI)
