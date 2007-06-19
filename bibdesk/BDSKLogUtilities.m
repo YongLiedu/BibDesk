@@ -43,6 +43,8 @@
 #import <libkern/OSAtomic.h>
 
 #define BDSK_ASL_SENDER "BibDesk"
+#define BDSK_ASL_FACILITY NULL
+
 static BOOL isTiger = YES;
 
 static NSString *tigerASLHackaround(void)
@@ -138,7 +140,7 @@ NSString *BDSKStandardErrorString(void)
     if (err != 0)
         perror("asl_set_query level");
     
-    aslclient client = asl_open(BDSK_ASL_SENDER, BDSK_ASL_SENDER, ASL_OPT_NO_DELAY);
+    aslclient client = asl_open(BDSK_ASL_SENDER, BDSK_ASL_FACILITY, ASL_OPT_NO_DELAY);
     asl_set_filter(client, ASL_FILTER_MASK_UPTO(ASL_LEVEL_DEBUG));
     
     response = asl_search(client, query);
@@ -200,6 +202,7 @@ static void startASLThread(void)
         
         disableASLLogging = CFPreferencesGetAppBooleanValue(CFSTR("BDSKDisableASLLogging"), kCFPreferencesCurrentApplication, NULL);
         
+        // log to the automatic client/message; we're thread safe here
         if (disableASLLogging) {
             asl_log(NULL, NULL, ASL_LEVEL_ERR, "%s", "*** Disabled ASL logging ***\n\nTo re-enable, use\n\t`defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKDisableASLLogging -bool FALSE`\n");
         } else {
@@ -243,7 +246,7 @@ static void *copyStandardErrorToASL(void *unused)
     }
   
     // create a new client for this thread
-    aslclient client = asl_open(BDSK_ASL_SENDER, NULL, ASL_OPT_NO_DELAY);
+    aslclient client = asl_open(BDSK_ASL_SENDER, BDSK_ASL_FACILITY, ASL_OPT_NO_DELAY);
     aslmsg m = asl_new(ASL_TYPE_MSG);
     asl_set(m, ASL_KEY_SENDER, BDSK_ASL_SENDER);
     
@@ -265,17 +268,17 @@ static void *copyStandardErrorToASL(void *unused)
     return NULL;
 }
 
-__private_extern__ void BDSKLog(NSString *format, ...)
+BDSK_PRIVATE_EXTERN void BDSKLog(NSString *format, ...)
 {
     va_list list;
     va_start(list, format);
-    // this will be redefined as BDSKLogv
+    // this will be redefined as BDSKLogv (see Bibdesk_Prefix.pch)
     NSLogv(format, list);
     va_end(list);
 }
 
 // override to avoid passing additional info in the message string, since ASL handles that for us
-__private_extern__ void BDSKLogv(NSString *format, va_list argList)
+BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList)
 {
 
 // we want to call the real NSLog if we're not on Tiger, or if ASL logging is disabled on Tiger
@@ -290,7 +293,7 @@ __private_extern__ void BDSKLogv(NSString *format, va_list argList)
     NSString *logString = [[NSString alloc] initWithFormat:format arguments:argList];
     
     // create a new client since we may be calling this from an arbitrary thread
-    aslclient client = asl_open(BDSK_ASL_SENDER, NULL, ASL_OPT_NO_DELAY);
+    aslclient client = asl_open(BDSK_ASL_SENDER, BDSK_ASL_FACILITY, ASL_OPT_NO_DELAY);
     
     aslmsg m = asl_new(ASL_TYPE_MSG);
     asl_set(m, ASL_KEY_SENDER, BDSK_ASL_SENDER);
@@ -298,13 +301,15 @@ __private_extern__ void BDSKLogv(NSString *format, va_list argList)
     char *buf;
     char stackBuf[STACK_BUFFER_SIZE];
     
-    // nothing to prepend, since ASL takes care of that for us
-    unsigned len = [logString maximumLengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+    // nothing to prepend (pid, host, etc.) since ASL takes care of that for us; just convert the string to UTF-8
     
-    if (len < STACK_BUFFER_SIZE && [logString getCString:stackBuf maxLength:STACK_BUFFER_SIZE encoding:NSUTF8StringEncoding]) {
+    // add 1 for the NULL terminator (length arg to getCString:maxLength:encoding: needs to include space for this)
+    unsigned requiredLength = ([logString maximumLengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1);
+    
+    if (requiredLength <= STACK_BUFFER_SIZE && [logString getCString:stackBuf maxLength:STACK_BUFFER_SIZE encoding:NSUTF8StringEncoding]) {
         buf = stackBuf;
-    } else if (NULL != (buf = NSZoneMalloc(NULL, (len + 1) * sizeof(char))) ){
-        [logString getCString:buf maxLength:(len + 1) encoding:NSUTF8StringEncoding];
+    } else if (NULL != (buf = NSZoneMalloc(NULL, requiredLength * sizeof(char))) ){
+        [logString getCString:buf maxLength:requiredLength encoding:NSUTF8StringEncoding];
     } else {
         asl_log(client, m, ASL_LEVEL_EMERG, "%s", "unable to allocate log buffer");
         abort();
