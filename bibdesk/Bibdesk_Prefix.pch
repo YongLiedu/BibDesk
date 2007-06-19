@@ -2,9 +2,24 @@
 // Prefix header for all source files of the 'BibDesk' target in the 'BibDesk' project
 //
 
+#if defined(__MACH__)
+
+#ifdef __cplusplus
+#define BDSK_EXTERN               extern
+#define BDSK_PRIVATE_EXTERN       __private_extern__
+#else
+#define BDSK_EXTERN               extern
+#define BDSK_PRIVATE_EXTERN       __private_extern__
+#endif
+
+// not __MACH__
+#else
+
+#error Unsupported identifier
+
+#endif
+
 #define OMNI_BUNDLE_IDENTIFIER @"edu.ucsd.cs.mmccrack.bibdesk"
-#define __FILENAMEASNSSTRING__ \
-[[NSString stringWithCString:__FILE__] lastPathComponent]
 
 #ifdef __OBJC__
     #import <Cocoa/Cocoa.h>
@@ -16,8 +31,11 @@
     #import "BibPrefController.h"
     #import "BDSKPreferenceController.h"
 
-extern void BDSKLog(NSString *format, ...);
-extern void BDSKLogv(NSString *format, va_list argList);
+#define __FILENAMEASNSSTRING__ \
+[[NSString stringWithFileSystemRepresentation:__FILE__] lastPathComponent]
+
+BDSK_PRIVATE_EXTERN void BDSKLog(NSString *format, ...);
+BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList);
 
 #define NSLog BDSKLog
 #define NSLogv BDSKLogv
