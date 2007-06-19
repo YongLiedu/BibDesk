@@ -100,13 +100,16 @@
 - (void)awakeFromNib;
 {
     [self setWindowFrameAutosaveNameOrCascade:@"Edit Source Window"];
-    
+
     if(isPasteDrag)
         [reopenButton setEnabled:NO];
     
     [[textView textStorage] setDelegate:self];
     [syntaxHighlightCheckbox setState:NSOnState];
     
+    // faster layout if it's not antialiased, and fixed pitch makes pretty-printed files look right
+    [textView setFont:[NSFont userFixedPitchFontOfSize:10.0]];
+
     [self loadFile:self];
     
     NSString *prefix = (isPasteDrag) ? NSLocalizedString(@"Edit Paste/Drag", @"Partial window title") : NSLocalizedString(@"Edit Source", @"Partial window title");
