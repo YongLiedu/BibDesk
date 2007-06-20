@@ -9,7 +9,7 @@
 #ifndef GFXSTATE_H
 #define GFXSTATE_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

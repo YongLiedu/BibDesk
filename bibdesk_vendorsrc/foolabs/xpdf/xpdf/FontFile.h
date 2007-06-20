@@ -9,7 +9,7 @@
 #ifndef FONTFILE_H
 #define FONTFILE_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

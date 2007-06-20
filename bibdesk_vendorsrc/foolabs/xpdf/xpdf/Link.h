@@ -9,7 +9,7 @@
 #ifndef LINK_H
 #define LINK_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

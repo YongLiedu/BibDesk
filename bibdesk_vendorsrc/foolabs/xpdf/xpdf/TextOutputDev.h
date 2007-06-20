@@ -9,7 +9,7 @@
 #ifndef TEXTOUTPUTDEV_H
 #define TEXTOUTPUTDEV_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

@@ -9,7 +9,7 @@
 #ifndef PSTOKENIZER_H
 #define PSTOKENIZER_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

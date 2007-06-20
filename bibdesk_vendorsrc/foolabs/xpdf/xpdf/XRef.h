@@ -9,7 +9,7 @@
 #ifndef XREF_H
 #define XREF_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

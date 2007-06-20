@@ -9,7 +9,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

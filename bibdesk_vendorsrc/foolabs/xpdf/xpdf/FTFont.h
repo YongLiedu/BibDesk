@@ -11,7 +11,7 @@
 #ifndef FTFONT_H
 #define FTFONT_H
 
-#include <aconf.h>
+
 
 #if FREETYPE2 && (HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H)
 

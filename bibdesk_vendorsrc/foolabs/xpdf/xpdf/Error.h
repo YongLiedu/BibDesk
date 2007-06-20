@@ -9,7 +9,7 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

@@ -8,7 +8,7 @@
 //
 //========================================================================
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma implementation

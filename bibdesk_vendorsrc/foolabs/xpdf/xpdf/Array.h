@@ -9,7 +9,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

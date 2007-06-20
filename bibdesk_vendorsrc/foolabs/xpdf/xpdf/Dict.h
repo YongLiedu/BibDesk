@@ -9,7 +9,7 @@
 #ifndef DICT_H
 #define DICT_H
 
-#include <aconf.h>
+
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface

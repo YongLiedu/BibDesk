@@ -6,7 +6,7 @@
 //
 //========================================================================
 
-#include <aconf.h>
+
 #include <stdlib.h>
 #include "FontEncodingTables.h"
 #include "BuiltinFontTables.h"
