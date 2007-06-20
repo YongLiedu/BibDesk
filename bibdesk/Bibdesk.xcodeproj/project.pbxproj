@@ -29,17 +29,6 @@
 			name = latex2rtf;
 			productName = latex2rtf;
 		};
-		F98870BF07580E0B001D4D49 /* pdftotext */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = F993F1DA08553A61007A7657 /* Build configuration list for PBXAggregateTarget "pdftotext" */;
-			buildPhases = (
-				F98870BE07580E0B001D4D49 /* ShellScript */,
-			);
-			dependencies = (
-			);
-			name = pdftotext;
-			productName = pdftotext;
-		};
 		F98870CE07580E5F001D4D49 /* HeaderDoc */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F993F1E908553A61007A7657 /* Build configuration list for PBXAggregateTarget "HeaderDoc" */;
@@ -473,7 +462,6 @@
 		F9022D210758066000C3F701 /* CharacterConversion.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D150758066000C3F701 /* CharacterConversion.plist */; };
 		F9022D270758066000C3F701 /* TypeInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9022D1B0758066000C3F701 /* TypeInfo.plist */; };
 		F9022D9B0758073F00C3F701 /* latex2rtf in Resources */ = {isa = PBXBuildFile; fileRef = F9022D6E0758073E00C3F701 /* latex2rtf */; };
-		F9022D9F075807DC00C3F701 /* pdftotext in Resources */ = {isa = PBXBuildFile; fileRef = F9022D9E075807DC00C3F701 /* pdftotext */; };
 		F9022DBD0758088000C3F701 /* Action_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA20758088000C3F701 /* Action_Pressed.tiff */; };
 		F9022DBE0758088000C3F701 /* Action.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA30758088000C3F701 /* Action.tiff */; };
 		F9022DBF0758088000C3F701 /* Add_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DA40758088000C3F701 /* Add_Pressed.tiff */; };
@@ -524,6 +512,7 @@
 		F90261AE096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */; };
 		F90B09410C283B5100144F1B /* BDSKLogUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = F90B093F0C283B5100144F1B /* BDSKLogUtilities.h */; };
 		F90B09420C283B5100144F1B /* BDSKLogUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = F90B09400C283B5100144F1B /* BDSKLogUtilities.m */; };
+		F90B12840C298C2D00144F1B /* pdftotext in Resources */ = {isa = PBXBuildFile; fileRef = F90B12700C298A8900144F1B /* pdftotext */; };
 		F90C64060AC62B7B008B2DDA /* BDSKShellCommandFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F90C64040AC62B7B008B2DDA /* BDSKShellCommandFormatter.h */; };
 		F90C64070AC62B7B008B2DDA /* BDSKShellCommandFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */; };
 		F916E69407A9F9AB009EF011 /* BDSKThreadSafeMutableDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = F916E68A07A9F9AA009EF011 /* BDSKThreadSafeMutableDictionary.h */; };
@@ -777,6 +766,20 @@
 			remoteGlobalIDString = 3D8A5779082D3077008E818C;
 			remoteInfo = "BibDesk Help";
 		};
+		F90B126F0C298A8900144F1B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DD76F6C0486A84900D96B5E /* pdftotext */;
+			remoteInfo = pdftotext;
+		};
+		F90B12710C298A9F00144F1B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DD76F620486A84900D96B5E /* pdftotext */;
+			remoteInfo = pdftotext;
+		};
 		F92BACF10BCC00D2008D5BC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
@@ -818,13 +821,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = F98870BB07580DEF001D4D49;
 			remoteInfo = latex2rtf;
-		};
-		F9AF56290BEA4160009B16D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F98870BF07580E0B001D4D49;
-			remoteInfo = pdftotext;
 		};
 		F9AF562B0BEA4160009B16D5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1482,7 +1478,6 @@
 		F9022D560758073E00C3F701 /* ignore.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ignore.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/ignore.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D690758073E00C3F701 /* style.cfg */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = style.cfg; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/style.cfg; sourceTree = SOURCE_ROOT; };
 		F9022D6E0758073E00C3F701 /* latex2rtf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = latex2rtf; path = vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf; sourceTree = "<group>"; };
-		F9022D9E075807DC00C3F701 /* pdftotext */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = pdftotext; path = vendorsrc/foolabs/xpdf/xpdf/pdftotext; sourceTree = "<group>"; };
 		F9022DA20758088000C3F701 /* Action_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Action_Pressed.tiff; path = Images/Action_Pressed.tiff; sourceTree = "<group>"; };
 		F9022DA30758088000C3F701 /* Action.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Action.tiff; path = Images/Action.tiff; sourceTree = "<group>"; };
 		F9022DA40758088000C3F701 /* Add_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add_Pressed.tiff; path = Images/Add_Pressed.tiff; sourceTree = "<group>"; };
@@ -1531,6 +1526,7 @@
 		F90261AC096A0EF5008A551C /* OFCharacterSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFCharacterSet_BDSKExtensions.m; sourceTree = "<group>"; };
 		F90B093F0C283B5100144F1B /* BDSKLogUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKLogUtilities.h; sourceTree = "<group>"; };
 		F90B09400C283B5100144F1B /* BDSKLogUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKLogUtilities.m; sourceTree = "<group>"; };
+		F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pdftotext.xcodeproj; path = vendorsrc/foolabs/xpdf/xpdf/pdftotext.xcodeproj; sourceTree = "<group>"; };
 		F90C64040AC62B7B008B2DDA /* BDSKShellCommandFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKShellCommandFormatter.h; sourceTree = "<group>"; };
 		F90C64050AC62B7B008B2DDA /* BDSKShellCommandFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKShellCommandFormatter.m; sourceTree = "<group>"; };
 		F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AGRegex.xcodeproj; path = vendorsrc/agkit_sourceforge/agregex/AGRegex.xcodeproj; sourceTree = "<group>"; };
@@ -2038,7 +2034,6 @@
 				F9022CE50758050E00C3F701 /* Credits.rtf */,
 				F994B8F607F5F65F00751DA1 /* RelNotes.rtf */,
 				CE2941040A7F8F2900A46D05 /* ReadMe.rtf */,
-				F9022D9E075807DC00C3F701 /* pdftotext */,
 				F9022D6E0758073E00C3F701 /* latex2rtf */,
 				F9022D150758066000C3F701 /* CharacterConversion.plist */,
 				F9022D1B0758066000C3F701 /* TypeInfo.plist */,
@@ -2476,6 +2471,14 @@
 			path = Scripting;
 			sourceTree = "<group>";
 		};
+		F90B126C0C298A8900144F1B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F90B12700C298A8900144F1B /* pdftotext */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F918104307583A6E00CF822D /* Headers */ = {
 			isa = PBXGroup;
 			children = (
@@ -2776,6 +2779,7 @@
 		F98F307A088E0F2800C1427D /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
+				F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */,
 				F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */,
 				F9377F550B423A4C00ECCB3A /* yaz.xcodeproj */,
 				F9AA030C092FA2E20094A059 /* OmniAppKit.xcodeproj */,
@@ -3206,13 +3210,13 @@
 				CE87D7E80BA964D50027BBDD /* PBXTargetDependency */,
 				F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */,
 				F9AF56280BEA4160009B16D5 /* PBXTargetDependency */,
-				F9AF562A0BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56320BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56300BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56360BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56380BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */,
+				F90B12720C298A9F00144F1B /* PBXTargetDependency */,
 			);
 			name = BibDesk;
 			productInstallPath = "$(HOME)/Applications";
@@ -3259,6 +3263,10 @@
 					ProjectRef = F9AA02F3092FA2CA0094A059 /* OmniFoundation.xcodeproj */;
 				},
 				{
+					ProductGroup = F90B126C0C298A8900144F1B /* Products */;
+					ProjectRef = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
+				},
+				{
 					ProductGroup = F92BACEB0BCC00D2008D5BC3 /* Products */;
 					ProjectRef = F92BACEA0BCC00D2008D5BC3 /* SkimNotesAgent.xcodeproj */;
 				},
@@ -3272,7 +3280,6 @@
 				8D1107260486CEB800E47090 /* BibDesk */,
 				3D8A5779082D3077008E818C /* BibDesk Help */,
 				F98870BB07580DEF001D4D49 /* latex2rtf */,
-				F98870BF07580E0B001D4D49 /* pdftotext */,
 				F98870CE07580E5F001D4D49 /* HeaderDoc */,
 				F98870D407580E94001D4D49 /* DiskImage */,
 				275E270607838EE30070398A /* TestBibItem */,
@@ -3282,6 +3289,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		F90B12700C298A8900144F1B /* pdftotext */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = pdftotext;
+			remoteRef = F90B126F0C298A8900144F1B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		F92BACF20BCC00D2008D5BC3 /* SkimNotesAgent */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -3504,8 +3518,8 @@
 				F9BF481F0BD69F700071094F /* MODS2MARC21slim.xsl in Resources */,
 				CEEC72F7093BDCA200A64F54 /* BibDesk.sdef in Resources */,
 				F92BACF50BCC0140008D5BC3 /* SkimNotesAgent in Resources */,
+				F90B12840C298C2D00144F1B /* pdftotext in Resources */,
 				F9022D9B0758073F00C3F701 /* latex2rtf in Resources */,
-				F9022D9F075807DC00C3F701 /* pdftotext in Resources */,
 				F9022DBD0758088000C3F701 /* Action_Pressed.tiff in Resources */,
 				F9022DBE0758088000C3F701 /* Action.tiff in Resources */,
 				F9022DBF0758088000C3F701 /* Add_Pressed.tiff in Resources */,
@@ -3662,21 +3676,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\ncd $SOURCE_ROOT/vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake clean && make && strip latex2rtf\nexit 0";
-		};
-		F98870BE07580E0B001D4D49 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/vendorsrc/foolabs/xpdf/CHANGES",
-			);
-			outputPaths = (
-				"$(SRCROOT)/vendorsrc/foolabs/xpdf/xpdf/pdftotext",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\ncd $SOURCE_ROOT/vendorsrc/foolabs/xpdf\nexport CFLAGS=\"-O -g -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc\"\nexport CXXFLAGS=$CFLAGS\nmake distclean\n./configure --with-x=no --disable-dependency-tracking && make && strip xpdf/pdftotext\nexit 0";
 		};
 		F98870CD07580E5F001D4D49 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4020,6 +4019,11 @@
 			target = 3D8A5779082D3077008E818C /* BibDesk Help */;
 			targetProxy = CE87D7E70BA964D50027BBDD /* PBXContainerItemProxy */;
 		};
+		F90B12720C298A9F00144F1B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = pdftotext;
+			targetProxy = F90B12710C298A9F00144F1B /* PBXContainerItemProxy */;
+		};
 		F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SkimNotesAgent;
@@ -4034,11 +4038,6 @@
 			isa = PBXTargetDependency;
 			target = F98870BB07580DEF001D4D49 /* latex2rtf */;
 			targetProxy = F9AF56270BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9AF562A0BEA4160009B16D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F98870BF07580E0B001D4D49 /* pdftotext */;
-			targetProxy = F9AF56290BEA4160009B16D5 /* PBXContainerItemProxy */;
 		};
 		F9AF562C0BEA4160009B16D5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4915,76 +4914,6 @@
 			};
 			name = Test;
 		};
-		F993F1DB08553A61007A7657 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = pdftotext;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		F993F1DC08553A61007A7657 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_SIGN_COMPARE = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_PARAMETER = NO;
-				GCC_WARN_UNUSED_VALUE = YES;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = pdftotext;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		F993F1DD08553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = pdftotext;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Test;
-		};
 		F993F1EA08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5368,16 +5297,6 @@
 				F993F1D608553A61007A7657 /* Debug */,
 				F993F1D708553A61007A7657 /* Release */,
 				F993F1D808553A61007A7657 /* Test */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		F993F1DA08553A61007A7657 /* Build configuration list for PBXAggregateTarget "pdftotext" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F993F1DB08553A61007A7657 /* Debug */,
-				F993F1DC08553A61007A7657 /* Release */,
-				F993F1DD08553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
