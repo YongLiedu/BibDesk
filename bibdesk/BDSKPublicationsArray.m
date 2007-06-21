@@ -181,6 +181,11 @@
     [self updateFileOrder];
 }
 
+- (void)setArray:(NSArray *)otherArray{
+    [self removeAllObjects];
+    [self addObjectsFromArray:otherArray];
+}
+
 - (NSEnumerator *)objectEnumerator;
 {
     return [publications objectEnumerator];
@@ -287,8 +292,13 @@
 
 - (void)updateFileOrder{
     unsigned i, count = [publications count];
-    for(i = 0; i < count; i++)
-        [[publications objectAtIndex:i] setFileOrder:[NSNumber numberWithInt:i+1]];
+    int fileOrder = 1;
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    for(i = 0; i < count; i++, fileOrder++) {
+        CFNumberRef n = CFNumberCreate(alloc, kCFNumberIntType, &fileOrder);
+        [[publications objectAtIndex:i] setFileOrder:(NSNumber *)n];
+        CFRelease(n);
+    }
 }
 
 @end
