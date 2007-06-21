@@ -35,7 +35,7 @@
 
 /* Begin PBXFileReference section */
 		08FB7796FE84155DC02AAC07 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		8DD76FB20486AB0100D96B5E /* latex2rtf */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = latex2rtf; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* latex2rtf */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = latex2rtf; sourceTree = BUILT_PRODUCTS_DIR; };
 		F90B12A20C298F3600144F1B /* cfg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cfg.c; sourceTree = "<group>"; };
 		F90B12A30C298F3600144F1B /* chars.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = chars.c; sourceTree = "<group>"; };
 		F90B12A40C298F3600144F1B /* commands.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = commands.c; sourceTree = "<group>"; };
@@ -214,9 +214,11 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "latex2rtf" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* latex2rtf */;
 			projectDirPath = "";
+			projectRoot = "";
 			targets = (
 				8DD76FA90486AB0100D96B5E /* latex2rtf */,
 			);
@@ -268,6 +270,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = UNIX;
 				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_CFLAGS = "-fsigned-char";
 				PRODUCT_NAME = latex2rtf;
 				ZERO_LINK = YES;
 			};
@@ -284,6 +287,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = UNIX;
 				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_CFLAGS = "-fsigned-char";
 				PRODUCT_NAME = latex2rtf;
 			};
 			name = Release;
