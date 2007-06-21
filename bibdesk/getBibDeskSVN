@@ -21,9 +21,6 @@ Build Instructions
     
 2. In Xcode, Set Build Preferences to "Separate Location for Build Products"
    (This is required by the OmniFrameworks, but is good practice anyway)
-
-3. Remember to build the "BibDesk" target in Release configuration before 
-   trying to build the Debug config. (compiles latex2rtf and pdftotext)
     
 Do you want to open the project file (bibdesk/Bibdesk.xcodeproj) now? (y/n)
 ENDHERE
