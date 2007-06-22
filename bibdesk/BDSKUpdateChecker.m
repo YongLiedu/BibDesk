@@ -228,7 +228,10 @@
     
     // should be e.g. English.lproj
     NSString *localizationPath = [[resourcePath stringByDeletingLastPathComponent] lastPathComponent];
-    URLString = [URLString stringByAppendingPathComponent:localizationPath];
+    
+    // @@ RelNotes.rtf was changed from localized to non-localized, which broke URL formation; check for this, in case we switch it back
+    if ([[localizationPath pathExtension] isEqualToString:@"lproj"])
+        URLString = [URLString stringByAppendingPathComponent:localizationPath];
     URLString = [URLString stringByAppendingPathComponent:@"RelNotes.rtf"];
     
     return URLString ? [NSURL URLWithString:URLString] : nil;
@@ -534,11 +537,22 @@
     else
         attrString = [[[NSAttributedString alloc] initWithString:NSLocalizedString(@"Download Failed", @"Message when download failed") attributeName:NSForegroundColorAttributeName attributeValue:[NSColor redColor]] autorelease];
     
+    // likely a 404 (although why wasn't theData nil in that case?)  could check the response...
+    if (nil == attrString)
+        attrString = [[[NSAttributedString alloc] initWithHTML:theData documentAttributes:NULL] autorelease];
+    
+    if (nil == attrString) {
+        NSString *s = [[NSString alloc] initWithData:theData encoding:NSUTF8StringEncoding];
+        attrString = [[[NSAttributedString alloc] initWithString:s] autorelease];
+    }
+    
     if (nil == releaseNotesWindowController)
         releaseNotesWindowController = [[BDSKRelNotesController alloc] init];
     
     if (attrString)
         [releaseNotesWindowController displayAttributedString:attrString];
+    else
+        NSLog(@"failed to download release notes from URL %@", theURL);
     [releaseNotesWindowController showWindow:nil];
 }
 
