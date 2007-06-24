@@ -438,7 +438,7 @@
     NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
     
-    NSString *templateName = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:@"BDSKEmailTemplateKey"];
+    NSString *templateName = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKEmailTemplateKey];
     BDSKTemplate *template = nil;
     
     if ([NSString isEmptyString:templateName] == NO)
