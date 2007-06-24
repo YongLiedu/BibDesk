@@ -90,6 +90,7 @@
 		<string>Edit, paste, drag and drop</string>
 		<string>Warnings</string>
         <string>Groups</string>
+        <string>Mail, E-mail, Email, Template</string>
 	</array>
 	<key>bp_inputmanager</key>
 	<array>
