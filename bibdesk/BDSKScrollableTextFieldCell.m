@@ -59,13 +59,13 @@
         
 		scrollArrowLeftImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
         [scrollArrowLeftImage lockFocus];
-        [[NSColor colorWithDeviceWhite:0.25 alpha:0.75] setFill];
+        [[NSColor colorWithCalibratedWhite:0.25 alpha:0.75] setFill];
         [path fill];
         [scrollArrowLeftImage unlockFocus];
         
 		scrollArrowLeftPressedImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
         [scrollArrowLeftPressedImage lockFocus];
-        [[NSColor colorWithDeviceWhite:0.0 alpha:0.75] setFill];
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] setFill];
         [path fill];
         [scrollArrowLeftPressedImage unlockFocus];
         
@@ -77,13 +77,13 @@
         
 		scrollArrowRightImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
         [scrollArrowRightImage lockFocus];
-        [[NSColor colorWithDeviceWhite:0.25 alpha:0.75] setFill];
+        [[NSColor colorWithCalibratedWhite:0.25 alpha:0.75] setFill];
         [path fill];
         [scrollArrowRightImage unlockFocus];
         
 		scrollArrowRightPressedImage = [[NSImage alloc] initWithSize:NSMakeSize(6.0, 7.0)];
         [scrollArrowRightPressedImage lockFocus];
-        [[NSColor colorWithDeviceWhite:0.0 alpha:0.75] setFill];
+        [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] setFill];
         [path fill];
         [scrollArrowRightPressedImage unlockFocus];
 	}

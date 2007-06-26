@@ -309,7 +309,7 @@
     if (nil == backgroundColor) {
         // from Mail.app on 10.4; should be based on control tint?
         float red = (231.0f/255.0f), green = (237.0f/255.0f), blue = (246.0f/255.0f);
-        backgroundColor = [[NSColor colorWithDeviceRed:red green:green blue:blue alpha:1.0] retain];
+        backgroundColor = [[NSColor colorWithCalibratedRed:red green:green blue:blue alpha:1.0] retain];
     }
     return backgroundColor;
 }

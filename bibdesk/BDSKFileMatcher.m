@@ -771,7 +771,7 @@ static NSColor *fillColor = nil;
 // these accessors are bound to the hidden color wells in the nib, which allow playing with the colors easily
 - (NSColor *)topColor
 {
-    return [NSColor colorWithDeviceRed:[topColor red] green:[topColor green] blue:[topColor blue] alpha:[topColor alpha]];
+    return [NSColor colorWithCalibratedRed:[topColor red] green:[topColor green] blue:[topColor blue] alpha:[topColor alpha]];
 }
 
 - (void)setTopColor:(NSColor *)tc
@@ -788,7 +788,7 @@ static NSColor *fillColor = nil;
 
 - (NSColor *)bottomColor 
 { 
-    return [NSColor colorWithDeviceRed:[bottomColor red] green:[bottomColor green] blue:[bottomColor blue] alpha:[bottomColor alpha]]; 
+    return [NSColor colorWithCalibratedRed:[bottomColor red] green:[bottomColor green] blue:[bottomColor blue] alpha:[bottomColor alpha]]; 
 }
 
 // grid looks silly when the table is empty
