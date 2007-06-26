@@ -92,6 +92,9 @@
         [notes addObject:note];
         [note release];
     }
+    
+    [notes sortUsingDescriptor:[[[NSSortDescriptor alloc] initWithKey:@"page" ascending:YES] autorelease]];
+    
     [outlineView reloadData];
 }
 
