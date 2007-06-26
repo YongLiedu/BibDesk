@@ -93,7 +93,7 @@
         [note release];
     }
     
-    [notes sortUsingDescriptor:[[[NSSortDescriptor alloc] initWithKey:@"page" ascending:YES] autorelease]];
+    [notes sortUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"page" ascending:YES] autorelease]]];
     
     [outlineView reloadData];
 }
