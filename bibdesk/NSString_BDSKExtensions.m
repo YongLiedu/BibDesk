@@ -224,7 +224,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     NSRange foundRange = [mutableString rangeOfTeXCommandInRange:searchRange];
     while(foundRange.length){
         NSString *cmdString = [mutableString substringWithRange:foundRange];
-        if (foundRange.length == 2 && ([cmdString isEqualToString:@"\\ "] || [cmdString isEqualToString:@"\\~"]))
+        if (foundRange.length == 2 && [cmdString isEqualToString:@"\\ "])
             [mutableString replaceCharactersInRange:foundRange withString:@" "];
         else
             [mutableString replaceCharactersInRange:foundRange withString:@""];
