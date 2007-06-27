@@ -74,47 +74,54 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
         texStyle = (NSString *)CFStringCreateWithSubstring(alloc, (CFStringRef)mutableString, CFRangeMake(cmdRange.location, cmdRange.length));
         
         // delete the command, now that we know what it was
-        [mutableString deleteCharactersInRange:cmdRange];
-        
-        range.length -= cmdRange.length;
-        
-        startLoc = cmdRange.location;
-        endLoc = NSNotFound;
-        searchRange = NSMakeRange(startLoc, NSMaxRange(range) - startLoc);
-        
-        // see if this is a font command
-        NSFontTraitMask newTrait = [fontManager fontTraitMaskForTeXStyle:texStyle];
-        [texStyle release];
-        
-        if (0 != newTrait) {
+        if ([texStyle isEqualToString:@"\\ "] || [texStyle isEqualToString:@"\\~"]) {
             
-            // remember, we deleted our command, but not the brace
-            if([mutableString characterAtIndex:startLoc] == '{' && (endLoc = [mutableString indexOfRightBraceMatchingLeftBraceInRange:searchRange]) != NSNotFound){
+            [mutableString replaceCharactersInRange:cmdRange withString:@" "];
+            range.length -= 1;
+            
+        } else {
+            
+            [mutableString deleteCharactersInRange:cmdRange];
+            range.length -= cmdRange.length;
+            
+            startLoc = cmdRange.location;
+            endLoc = NSNotFound;
+            searchRange = NSMakeRange(startLoc, NSMaxRange(range) - startLoc);
+            
+            // see if this is a font command
+            NSFontTraitMask newTrait = [fontManager fontTraitMaskForTeXStyle:texStyle];
+            [texStyle release];
+            
+            if (0 != newTrait) {
                 
-                // have to delete the braces as we go along, or else ranges will be hosed after deleting at the end
-                [mutableString deleteCharactersInRange:NSMakeRange(startLoc, 1)];
-                
-                // deleting the left brace just shifted everything to the left
-                [mutableString deleteCharactersInRange:NSMakeRange(endLoc - 1, 1)];
-                
-                range.length -= 2;
-                
-                // account for the braces, since we'll be removing them
-                styleRange = NSMakeRange(startLoc, endLoc - startLoc - 1);
-                
-                attrs = [attributes mutableCopy];
-                [attrs setObject:[fontManager convertFont:font toHaveTrait:newTrait]
-                          forKey:NSFontAttributeName];
-                
-                // recursively parse the part inside the braces, can change styleRange
-                BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attrs, &styleRange);
-                
-                range.length -= endLoc - startLoc - 1 - styleRange.length;
-                endLoc = NSMaxRange(styleRange);
-                
-                [attrs setObject:[NSValue valueWithRange:styleRange] forKey:BDSKRangeKey];
-                [attributeDictionaries addObject:attrs];
-                [attrs release];
+                // remember, we deleted our command, but not the brace
+                if([mutableString characterAtIndex:startLoc] == '{' && (endLoc = [mutableString indexOfRightBraceMatchingLeftBraceInRange:searchRange]) != NSNotFound){
+                    
+                    // have to delete the braces as we go along, or else ranges will be hosed after deleting at the end
+                    [mutableString deleteCharactersInRange:NSMakeRange(startLoc, 1)];
+                    
+                    // deleting the left brace just shifted everything to the left
+                    [mutableString deleteCharactersInRange:NSMakeRange(endLoc - 1, 1)];
+                    
+                    range.length -= 2;
+                    
+                    // account for the braces, since we'll be removing them
+                    styleRange = NSMakeRange(startLoc, endLoc - startLoc - 1);
+                    
+                    attrs = [attributes mutableCopy];
+                    [attrs setObject:[fontManager convertFont:font toHaveTrait:newTrait]
+                              forKey:NSFontAttributeName];
+                    
+                    // recursively parse the part inside the braces, can change styleRange
+                    BDSKGetAttributeDictionariesAndFixString(attributeDictionaries, mutableString, attrs, &styleRange);
+                    
+                    range.length -= endLoc - startLoc - 1 - styleRange.length;
+                    endLoc = NSMaxRange(styleRange);
+                    
+                    [attrs setObject:[NSValue valueWithRange:styleRange] forKey:BDSKRangeKey];
+                    [attributeDictionaries addObject:attrs];
+                    [attrs release];
+                }
             }
         }
         
