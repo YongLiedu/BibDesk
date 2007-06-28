@@ -73,7 +73,7 @@ static NSSize fileIconSize;
 - (void)setButtonHighlighted:(BOOL)highlighted {
     if (buttonHighlighted != highlighted) {
         buttonHighlighted = highlighted;
-		[[self controlView] setNeedsDisplay:YES];
+		[(NSControl *)[self controlView] updateCell:self];
     }
 }
 

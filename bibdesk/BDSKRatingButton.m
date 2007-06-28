@@ -82,10 +82,7 @@
 - (void)setRating:(unsigned int)newRating {
 	id cell = [self cell];
     OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
-	if ([cell rating] != newRating) {
-		[cell setRating:newRating];
-		[self setNeedsDisplay:YES];
-	}
+	[cell setRating:newRating];
 }
 
 - (unsigned int)maxRating {
@@ -97,10 +94,7 @@
 - (void)setMaxRating:(unsigned int)newRating {
 	id cell = [self cell];
     OBPRECONDITION(cell == nil || [cell isKindOfClass:[BDSKRatingButtonCell class]]);
-	if ([cell maxRating] != newRating) {
-		[cell setMaxRating:newRating];
-		[self setNeedsDisplay:YES];
-	}
+    [cell setMaxRating:newRating];
 }
 
 - (void)keyDown:(NSEvent *)theEvent {

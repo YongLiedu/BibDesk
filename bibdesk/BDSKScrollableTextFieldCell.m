@@ -139,11 +139,11 @@
     if (button == BDSKScrollLeftButton) {
 		if (isLeftButtonHighlighted == highlighted) return;
         isLeftButtonHighlighted = highlighted;
-		[[self controlView] setNeedsDisplay:YES];
+		[(NSControl *)[self controlView] updateCell:self];
     } else {
 		if (isRightButtonHighlighted == highlighted) return;
         isRightButtonHighlighted = highlighted;
-		[[self controlView] setNeedsDisplay:YES];
+		[(NSControl *)[self controlView] updateCell:self];
 	}
 }
 

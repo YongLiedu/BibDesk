@@ -171,6 +171,7 @@
         [iconImage release];
         iconImage = [anImage retain];
         [buttonCell setImage:nil]; // invalidate the image
+        [(NSControl *)[self controlView] updateCell:self];
     }
 }
 
@@ -183,6 +184,7 @@
         [arrowImage release];
         arrowImage = [anImage retain];
         [buttonCell setImage:nil]; // invalidate the image
+        [(NSControl *)[self controlView] updateCell:self];
     }
 }
 

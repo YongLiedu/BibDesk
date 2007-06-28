@@ -90,7 +90,10 @@
 - (void)setRating:(unsigned int)newRating {
 	if (newRating > maxRating)
 		newRating = maxRating;
-	rating = newRating;
+	if (rating != newRating) {
+        rating = newRating;
+        [(NSControl *)[self controlView] updateCellInside:self];
+    }
 }
 
 - (unsigned int)maxRating {
@@ -98,7 +101,10 @@
 }
 
 - (void)setMaxRating:(unsigned int)newRating {
-    maxRating = newRating;
+    if (maxRating != newRating) {
+        maxRating = newRating;
+        [(NSControl *)[self controlView] updateCell:self];
+    }
 }
 
 - (void)setObjectValue:(id)object {
@@ -176,7 +182,7 @@
 		newRating = maxRating;
 	if (rating != newRating) {
 		rating = newRating;
-		[controlView setNeedsDisplayInRect:buttonRect];
+		[(NSControl *)controlView updateCellInside:self];
 	}
 	
 	while (keepOn) {
@@ -196,7 +202,7 @@
                     newRating = maxRating;
                 if (rating != newRating) {
                     rating = newRating;
-                    [controlView setNeedsDisplayInRect:buttonRect];
+                    [(NSControl *)controlView updateCellInside:self];
                 }
                 if (keepOn == NO)
                     [(NSControl *)controlView sendAction:[self action] to:[self target]];
