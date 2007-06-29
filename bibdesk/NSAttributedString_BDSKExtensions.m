@@ -74,7 +74,7 @@ static void BDSKGetAttributeDictionariesAndFixString(NSMutableArray *attributeDi
         texStyle = (NSString *)CFStringCreateWithSubstring(alloc, (CFStringRef)mutableString, CFRangeMake(cmdRange.location, cmdRange.length));
         
         // delete the command, now that we know what it was
-        if ([texStyle isEqualToString:@"\\ "]) {
+        if ([texStyle length] == 2 && [texStyle characterAtIndex:1] == ' ') {
             
             [mutableString replaceCharactersInRange:cmdRange withString:@" "];
             range.length -= 1;
