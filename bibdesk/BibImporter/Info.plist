@@ -14,6 +14,7 @@
 				<string>net.sourceforge.bibdesk.bib</string>
                 <string>net.sourceforge.bibdesk.bdskcache</string>
                 <string>net.sourceforge.bibdesk.ris</string>
+                <string>net.sourceforge.bibdesk.bdsksearch</string>
 			</array>
 		</dict>
 	</array>

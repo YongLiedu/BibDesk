@@ -49,17 +49,18 @@ Boolean GetMetadataForFile(void* thisInterface,
     CFStringRef cacheUTI = CFSTR("net.sourceforge.bibdesk.bdskcache");
     CFStringRef bibtexUTI = CFSTR("net.sourceforge.bibdesk.bib");
     CFStringRef risUTI = CFSTR("net.sourceforge.bibdesk.ris");
+    CFStringRef searchUTI = CFSTR("net.sourceforge.bibdesk.bdsksearch");
     
     if(UTTypeEqual(contentTypeUTI, cacheUTI)){
         
         NSDictionary *dictionary = [[NSDictionary alloc] initWithContentsOfFile:(NSString *)pathToFile];
+        success = (dictionary != nil);
+
         [(NSMutableDictionary *)attributes addEntriesFromDictionary:dictionary];
         
         // don't index this, since it's not useful to mds
         [(NSMutableDictionary *)attributes removeObjectForKey:@"FileAlias"]; 
         [dictionary release];
-
-        success = TRUE;
         
     } else if(UTTypeEqual(contentTypeUTI, bibtexUTI) || UTTypeEqual(contentTypeUTI, risUTI)){
         
@@ -92,6 +93,34 @@ Boolean GetMetadataForFile(void* thisInterface,
             [fileString release];
             success = TRUE;
         }
+        
+    } else if (UTTypeEqual(contentTypeUTI, searchUTI)) {
+        
+        NSDictionary *dictionary = [[NSDictionary alloc] initWithContentsOfFile:(NSString *)pathToFile];
+        success = (dictionary != nil);
+        NSString *value;
+        
+        // this is what the user sees as the name in BibDesk, so it's a reasonable title
+        value = [dictionary objectForKey:@"name"];
+        if (value) {
+            [(NSMutableDictionary *)attributes setObject:value forKey:(NSString *)kMDItemTitle];
+            [(NSMutableDictionary *)attributes setObject:value forKey:(NSString *)kMDItemDisplayName];
+        }
+        
+        // add hostname and database name as kMDItemWhereFroms
+        NSMutableArray *whereFroms = [NSMutableArray new];
+        value = [dictionary objectForKey:@"host"];
+        if (value)
+            [whereFroms addObject:value];
+        value = [dictionary objectForKey:@"database"];
+        if (value)
+            [whereFroms addObject:value];
+        if ([whereFroms count])
+            [(NSMutableDictionary *)attributes setObject:whereFroms forKey:(NSString *)kMDItemWhereFroms];
+        [whereFroms release];
+
+        // rest of the information (port, type, options) doesn't seem as useful        
+        [dictionary release];
         
     } else {
         NSLog(@"Importer asked to handle unknown UTI %@ at path", contentTypeUTI, pathToFile);
