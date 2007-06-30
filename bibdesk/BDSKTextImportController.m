@@ -1713,98 +1713,96 @@
                 cfEncoding = CFStringConvertIANACharSetNameToEncoding((CFStringRef)encodingName);
             if (cfEncoding != kCFStringEncodingInvalidId)
                 nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
-            string = [[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding];
+            string = [[[NSString alloc] initWithData:[dataSource data] encoding:nsEncoding] autorelease];
         }
         
         if (string != nil) 
             [self autoDiscoverDataFromString:string];
-        [string release];
-        return;
-    }
         
-    // This only reads Dublin Core for now.
-    // In the future, we should handle other HTML encodings like a nascent microformat.
-    // perhaps then a separate HTML parser would be useful to keep this file small.
-    
-    // @@ Should we check for the MIME type, text/html or application/xhtml+xml
-    
-    DOMDocument *domDoc = [frame DOMDocument];
-    
-    DOMNodeList *headList = [domDoc getElementsByTagName:@"head"];
-    if([headList length] != 1) return;
-    DOMNode *headNode = [headList item:0];
-    DOMNodeList *headChildren = [headNode childNodes];
-    unsigned i = 0;
-    unsigned length = [headChildren length];
-    NSMutableDictionary *metaTagDict = [[NSMutableDictionary alloc] initWithCapacity:length];    
-    
-    
-	for (i = 0; i < length; i++) {
-		DOMNode *node = [headChildren item:i];
-		DOMNamedNodeMap *attributes = [node attributes];
-        int typeIndex = 0;
+    } else if ([MIMEType isEqualToString:@"text/html"] || [MIMEType isEqualToString:@"text/xhtml+xml"]) {
+            
+        // This only reads Dublin Core for now.
+        // In the future, we should handle other HTML encodings like a nascent microformat.
+        // perhaps then a separate HTML parser would be useful to keep this file small.
         
-        NSString *nodeName = [node nodeName];
-        if([nodeName isEqualToString:@"META"]){
+        DOMDocument *domDoc = [frame DOMDocument];
+        
+        DOMNodeList *headList = [domDoc getElementsByTagName:@"head"];
+        if([headList length] != 1) return;
+        DOMNode *headNode = [headList item:0];
+        DOMNodeList *headChildren = [headNode childNodes];
+        unsigned i = 0;
+        unsigned length = [headChildren length];
+        NSMutableDictionary *metaTagDict = [[NSMutableDictionary alloc] initWithCapacity:length];    
+        
+        
+        for (i = 0; i < length; i++) {
+            DOMNode *node = [headChildren item:i];
+            DOMNamedNodeMap *attributes = [node attributes];
+            int typeIndex = 0;
             
-            NSString *metaName = [[attributes getNamedItem:@"name"] nodeValue];
-            NSString *metaVal = [[attributes getNamedItem:@"content"] nodeValue];
-            
-            if(metaVal == nil) continue;
+            NSString *nodeName = [node nodeName];
+            if([nodeName isEqualToString:@"META"]){
+                
+                NSString *metaName = [[attributes getNamedItem:@"name"] nodeValue];
+                NSString *metaVal = [[attributes getNamedItem:@"content"] nodeValue];
+                
+                if(metaVal == nil) continue;
 
-            // Catch repeated DC.creator or contributor and append them: 
-            if([metaName isEqualToString:@"DC.creator"] ||
-               [metaName isEqualToString:@"DC.contributor"]){
-                NSString *currentVal = [metaTagDict objectForKey:metaName];
-                if(currentVal != nil){
-                    metaVal = [NSString stringWithFormat:@"%@ and %@", currentVal, metaVal];
+                // Catch repeated DC.creator or contributor and append them: 
+                if([metaName isEqualToString:@"DC.creator"] ||
+                   [metaName isEqualToString:@"DC.contributor"]){
+                    NSString *currentVal = [metaTagDict objectForKey:metaName];
+                    if(currentVal != nil){
+                        metaVal = [NSString stringWithFormat:@"%@ and %@", currentVal, metaVal];
+                    }
+                }
+                
+                // Catch repeated DC.type and store them separately:
+                if([metaName isEqualToString:@"DC.type"]){
+                    NSString *currentVal = [metaTagDict objectForKey:metaName];
+                    if(currentVal != nil){
+                        metaName = [NSString stringWithFormat:@"DC.type.%d", ++typeIndex];
+                    }
+                }
+                
+                if(metaVal && metaName)
+                    [metaTagDict setObject:metaVal
+                                    forKey:metaName];
+
+                
+            }else if([nodeName isEqualToString:@"LINK"]){
+                // it might be the link rel="alternate" class="fulltext"
+                NSString *classVal = [[attributes getNamedItem:@"class"] nodeValue];
+                NSString *relVal = [[attributes getNamedItem:@"rel"] nodeValue];
+                
+                if( [classVal isEqualToString:@"fulltext"] &&
+                    [relVal isEqualToString:@"alternate"]){
+                    DOMNode *hrefAttr = [attributes getNamedItem:@"href"];
+                    if(hrefAttr)
+                        [metaTagDict setObject:[hrefAttr nodeValue]
+                                        forKey:BDSKUrlString];
                 }
             }
-            
-            // Catch repeated DC.type and store them separately:
-            if([metaName isEqualToString:@"DC.type"]){
-                NSString *currentVal = [metaTagDict objectForKey:metaName];
-                if(currentVal != nil){
-                    metaName = [NSString stringWithFormat:@"DC.type.%d", ++typeIndex];
-                }
+        }// for child of HEAD
+        
+        if([metaTagDict count]){
+            if([item hasBeenEdited]){
+                NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
+                                                 defaultButton:NSLocalizedString(@"Yes", @"Button title")
+                                               alternateButton:NSLocalizedString(@"No", @"Button title")
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
+                [alert beginSheetModalForWindow:[self window]
+                                  modalDelegate:self
+                                 didEndSelector:@selector(autoDiscoverFromFrameAlertDidEnd:returnCode:contextInfo:)
+                                    contextInfo:metaTagDict];
+            }else{
+                [self autoDiscoverFromFrameAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:metaTagDict];
             }
-            
-            if(metaVal && metaName)
-                [metaTagDict setObject:metaVal
-                                forKey:metaName];
-
-            
-        }else if([nodeName isEqualToString:@"LINK"]){
-            // it might be the link rel="alternate" class="fulltext"
-            NSString *classVal = [[attributes getNamedItem:@"class"] nodeValue];
-            NSString *relVal = [[attributes getNamedItem:@"rel"] nodeValue];
-            
-            if( [classVal isEqualToString:@"fulltext"] &&
-                [relVal isEqualToString:@"alternate"]){
-                DOMNode *hrefAttr = [attributes getNamedItem:@"href"];
-                if(hrefAttr)
-                    [metaTagDict setObject:[hrefAttr nodeValue]
-                                    forKey:BDSKUrlString];
-            }
-        }
-    }// for child of HEAD
-    
-    if([metaTagDict count]){
-        if([item hasBeenEdited]){
-            NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Autofill bibliography information", @"Message in alert dialog when trying to auto-fill information in text import") 
-                                             defaultButton:NSLocalizedString(@"Yes", @"Button title")
-                                           alternateButton:NSLocalizedString(@"No", @"Button title")
-                                               otherButton:nil
-                                 informativeTextWithFormat:NSLocalizedString(@"Do you want me to autofill information from Dublin Core META tags? This may overwrite fields that are already set.", @"Informative text in alert dialog")];
-            [alert beginSheetModalForWindow:[self window]
-                              modalDelegate:self
-                             didEndSelector:@selector(autoDiscoverFromFrameAlertDidEnd:returnCode:contextInfo:)
-                                contextInfo:metaTagDict];
         }else{
-            [self autoDiscoverFromFrameAlertDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:metaTagDict];
+            [metaTagDict release];
         }
-    }else{
-        [metaTagDict release];
     }
 }
 
