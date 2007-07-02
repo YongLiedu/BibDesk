@@ -55,7 +55,7 @@
 
 #define MAX_SEARCHKIT_RESULTS 10
 static float LEAF_ROW_HEIGHT = 20.0;
-static float GROUP_ROW_HEIGHT = 28.0;
+static float GROUP_ROW_HEIGHT = 24.0;
 
 @interface BDSKCountOvalCell : NSTextFieldCell
 @end
@@ -641,18 +641,9 @@ static NSDictionary *attributes = nil;
     if (nil == attributes) {
         NSMutableDictionary *newAttrs = [[NSMutableDictionary alloc] initWithCapacity:10];
         
-        [newAttrs setObject:[NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]] forKey:NSFontAttributeName];
+        [newAttrs setObject:[NSFont boldSystemFontOfSize:[NSFont systemFontSize]] forKey:NSFontAttributeName];
         [newAttrs setObject:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] forKey:NSForegroundColorAttributeName];
-        [newAttrs setObject:[NSNumber numberWithFloat:-4.0] forKey:NSStrokeWidthAttributeName];
 
-        /*
-        NSShadow *shadow = [[NSShadow alloc] init];
-        [shadow setShadowColor:[[NSColor shadowColor] colorWithAlphaComponent:0.7]];
-        [shadow setShadowBlurRadius:1.5];
-        [shadow setShadowOffset:NSMakeSize(1.0, -1.0)];
-        [newAttrs setObject:shadow forKey:NSShadowAttributeName];
-        [shadow release];
-        */
         attributes = [newAttrs copy];
         [newAttrs release];
     }
@@ -721,22 +712,6 @@ static NSColor *fillColor = nil;
 	return newRect;
 }
 
-- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
-{
-    [NSGraphicsContext saveGraphicsState];
-    [fillColor setFill];
-    NSRect countRect = NSIntegralRect(BDSKCenterRect(cellFrame, [self cellSizeForBounds:cellFrame], [controlView isFlipped]));
-    [NSBezierPath fillHorizontalOvalAroundRect:countRect];
-    
-    NSBezierPath *p = [NSBezierPath bezierPathWithHorizontalOvalAroundRect:countRect];
-    [p setLineWidth:1.0];
-    [[NSColor lightGrayColor] setStroke];
-    [p stroke];
-    [NSGraphicsContext restoreGraphicsState];
-    
-    [super drawInteriorWithFrame:cellFrame inView:controlView];
-}
-
 @end
 
 /* Groups items under the top-level outline, and uses a gradient fill for the top level row background.  Grid lines are drawn when the outline has data.
@@ -764,8 +739,21 @@ static NSColor *fillColor = nil;
         [super awakeFromNib];
     
     // colors similar to Spotlight's window: darker blue at bottom, lighter at top
-    topColor = [[CIColor colorWithRed:(74.0/255.0) green:(147.0/255.0) blue:(247.0/255.0) alpha:1.0] retain];
-    bottomColor = [[CIColor colorWithRed:(230.0/255.0) green:(231.0/255.0) blue:(243.0/255.0) alpha:1.0] retain];    
+    CGColorSpaceRef cspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+    const float upper[4] = { 106.0/255.0, 158.0/255.0, 238.0/255.0, 1.0 };
+    const float lower[4] = {  72.0/255.0, 139.0/255.0, 244.0/255.0, 1.0 };
+    
+    CGColorRef cgColor;
+    
+    cgColor = CGColorCreate(cspace, upper);
+    topColor = [[CIColor alloc] initWithCGColor:cgColor];
+    CGColorRelease(cgColor);
+    
+    cgColor = CGColorCreate(cspace, lower);
+    bottomColor = [[CIColor alloc] initWithCGColor:cgColor];
+    CGColorRelease(cgColor);
+    
+    CGColorSpaceRelease(cspace);
 }
 
 // these accessors are bound to the hidden color wells in the nib, which allow playing with the colors easily
@@ -803,7 +791,7 @@ static NSColor *fillColor = nil;
     if ([self isExpandable:[self itemAtRow:rowIndex]]) {
 
         NSBezierPath *p = [NSBezierPath bezierPathWithRect:[self rectOfRow:rowIndex]];
-        [p fillPathVerticallyWithStartColor:topColor endColor:bottomColor];
+        [p fillPathVerticallyWithStartColor:bottomColor endColor:topColor];
     }
     [super drawRow:rowIndex clipRect:clipRect];
 }
