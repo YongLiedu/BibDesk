@@ -967,7 +967,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
                 <cocoa key="to"/>
             </parameter>
             <parameter name="check" type="boolean" code="Chck" optional="yes"
-                description="Check whether all information to parse the Local-Url format is available. Ignored if a location is specified.">
+                description="Check whether all information to parse the Local-Url format is available. Ignored if a location is specified. Defaults to true.">
                 <cocoa key="check"/>
             </parameter>
         </command>    

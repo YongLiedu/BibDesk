@@ -52,9 +52,9 @@
 	NSDictionary *params = [self evaluatedArguments];
 	NSString *field = [params objectForKey:@"for"];
     NSString *location = [params objectForKey:@"to"];
-	BOOL check = [[params objectForKey:@"check"] boolValue];
+    NSNumber *checkNumber = [params objectForKey:@"check"];
+	BOOL check = checkNumber ? [checkNumber boolValue] : YES;
     int mask = 0;
-    NSArray *paperInfos = nil;
     
 	if (pub == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
@@ -74,25 +74,27 @@
         field = [field fieldName];
 	}
     
-    if (location) {
-        if ([location isKindOfClass:[NSString class]] == NO) {
-            [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-            return nil;
-        }
-        NSString *oldPath = [pub localFilePathForField:field];
-        if ([NSString isEmptyString:oldPath] == NO) {
+    NSString *oldPath = [pub localFilePathForField:field];    
+    NSArray *paperInfos = nil;
+    
+    if (oldPath) {
+        if (location) {
+            if ([location isKindOfClass:[NSString class]] == NO) {
+                [self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+                return nil;
+            }
             [pub setField:field toValue:location];
             NSString *newPath = [pub localFilePathForField:field];
             paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:pub, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
+        } else if ([field isEqualToString:BDSKLocalUrlString] == NO) {
+            [self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+            return nil;
+        } else {
+            mask |= BDSKInitialAutoFileOptionMask;
+            if (check)
+                mask |= BDSKCheckCompleteAutoFileOptionMask;
+            paperInfos = [NSArray arrayWithObject:pub];
         }
-    } else if ([field isEqualToString:BDSKLocalUrlString] == NO) {
-		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-		return nil;
-    } else {
-        mask |= BDSKInitialAutoFileOptionMask;
-        if (check)
-            mask |= BDSKCheckCompleteAutoFileOptionMask;
-        paperInfos = [NSArray arrayWithObject:pub];
     }
     
     if (paperInfos) {
