@@ -51,20 +51,21 @@
 	NSString *formatString = [self directParameter];
 	// the other parameters are either a field or a field name and a publication
 	NSDictionary *params = [self evaluatedArguments];
-	
-	if (!formatString || !params) {
+	id field = [params objectForKey:@"for"];
+	BibItem *pub = [params objectForKey:@"from"];
+	BOOL check = [[params objectForKey:@"check"] boolValue];
+    
+	if (formatString == nil || params == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return nil;
 	}
-	if (![formatString isKindOfClass:[NSString class]]) {
+	if ([formatString isKindOfClass:[NSString class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
 	}
 	
-	id field = [params objectForKey:@"for"];
-	BibItem *pub = [params objectForKey:@"from"];
 	
-	if (!field) {
+	if (field == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return nil;
 	}
@@ -73,23 +74,25 @@
 			pub = [(BibField *)field publication];
 		}
 		field = [field name];
-	} else if (![field isKindOfClass:[NSString class]]) {
+	} else if ([field isKindOfClass:[NSString class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
+	} else {
+        field = [field fieldName];
 	}
 	
-	if (!pub) {
+	if (pub == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return nil;
 	}
-	if (![pub isKindOfClass:[BibItem class]]) {
+	if ([pub isKindOfClass:[BibItem class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
 	}
 	
 	NSString *error = nil;
 	
-	if (![BDSKFormatParser validateFormat:&formatString forField:field inFileType:BDSKBibtexString error:&error]) {
+	if (NO == [BDSKFormatParser validateFormat:&formatString forField:field inFileType:BDSKBibtexString error:&error]) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		[self setScriptErrorString:[NSString stringWithFormat:@"Invalid format string: %@", error]]; 
 		return nil;
@@ -100,6 +103,38 @@
     if (isLocalFile)
         papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
 	
+    if (check) {
+        NSArray *requiredFields = [BDSKFormatParser requiredFieldsForFormat:formatString];
+        
+        if (isLocalFile &&
+            ([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey]] && 
+             [NSString isEmptyString:[[[[pub owner] fileURL] path] stringByDeletingLastPathComponent]]))
+            return [NSNull null];
+        
+        NSEnumerator *fEnum = [requiredFields objectEnumerator];
+        NSString *fieldName;
+        
+        while (fieldName = [fEnum nextObject]) {
+            if ([fieldName isEqualToString:BDSKCiteKeyString]) {
+                if([pub hasEmptyOrDefaultCiteKey])
+                    return [NSNull null];
+            } else if ([fieldName isEqualToString:@"Document Filename"]) {
+                if ([NSString isEmptyString:[[[pub owner] fileURL] path]])
+                    return [NSNull null];
+            } else if ([fieldName hasPrefix:@"Document: "]) {
+                if ([NSString isEmptyString:[[pub owner] documentInfoForKey:[fieldName substringFromIndex:10]]])
+                    return [NSNull null];
+            } else if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
+                if ([NSString isEmptyString:[pub valueOfField:BDSKAuthorString]] && 
+                    [NSString isEmptyString:[pub valueOfField:BDSKEditorString]])
+                    return [NSNull null];
+            } else {
+                if ([NSString isEmptyString:[pub valueOfField:fieldName]]) 
+                    return [NSNull null];
+            }
+        }
+    }
+    
     NSString *suggestion = nil;
     if ([field isEqualToString:BDSKCiteKeyString]) {
         suggestion = [pub citeKey];

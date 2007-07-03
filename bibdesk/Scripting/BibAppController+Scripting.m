@@ -48,14 +48,16 @@ Category on BibAppController making the papers folder readable for scripting
 */
 @implementation BibAppController (Scripting)
 
-/*
- ssp: 2004-07-12
- these two methods make the papers folder preference available to AppleScript
- -papersFolder accessor method
- -application:delegateHandlesKey: advertises the accesor method
-*/
-- (NSString*) papersFolder {
+- (NSString *)papersFolder {
 	return [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey] stringByStandardizingPath];
+}
+
+- (NSString *)citeKeyFormat {
+	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteKeyFormatKey];
+}
+
+- (NSString *)localUrlFormat {
+	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKLocalUrlFormatKey];
 }
 
 - (NSArray *)allTypes {
@@ -90,6 +92,8 @@ Category on BibAppController making the papers folder readable for scripting
 
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key {
 	if ([key isEqualToString:@"papersFolder"] ||
+        [key isEqualToString:@"localUrlFormat"] ||
+        [key isEqualToString:@"citeKeyFormat"] ||
 		[key isEqualToString:@"allTypes"] ||
 		[key isEqualToString:@"allFieldNames"] ||
 		[key isEqualToString:@"macros"] ||

@@ -43,7 +43,10 @@
 
 @interface BibAppController (Scripting) 
 
-- (NSString*) papersFolder;
+- (NSString *)papersFolder;
+
+- (NSString *)citeKeyFormat;
+- (NSString *)localUrlFormat;
 
 - (NSArray *)allTypes;
 

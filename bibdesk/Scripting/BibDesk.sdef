@@ -506,6 +506,14 @@ Having all three of these seems to work best for Panther. For Tiger include this
 				description="Path to the papers folder as specified in the Auto File preference.">
 				<cocoa key="papersFolder"/>
 			</property>
+			<property name="cite key format" code="CFmt" type="text" access="r"
+				description="Format for the cite key as specified in the Cite Key preference.">
+				<cocoa key="citeKeyFormat"/>
+			</property>
+			<property name="local file format" code="LFmt" type="text" access="r"
+				description="Format for the Local-Url field as specified in the Auto File preference.">
+				<cocoa key="localUrlFormat"/>
+			</property>
 			<property name="all typenames" code="atyp" access="r"
 				description="All the known BibTeX publication types.">
 				<type type="text" list="yes"/>
@@ -933,6 +941,10 @@ Having all three of these seems to work best for Panther. For Tiger include this
             <parameter name="from" type="publication" code="from" optional="yes"
                 description="The publication for which to parse the format string. This is required if the field name was given as a string.">
                 <cocoa key="from"/>
+            </parameter>
+            <parameter name="check" type="boolean" code="Chck" optional="yes"
+                description="Check whether all information to parse the format is available. 'missing value' is returned when this is set and the check fails.">
+                <cocoa key="check"/>
             </parameter>
             <result description="the parsed format" type="text">
             </result>
