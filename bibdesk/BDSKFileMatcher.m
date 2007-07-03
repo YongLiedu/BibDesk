@@ -791,9 +791,22 @@ static NSColor *fillColor = nil;
     if ([self isExpandable:[self itemAtRow:rowIndex]]) {
 
         NSBezierPath *p = [NSBezierPath bezierPathWithRect:[self rectOfRow:rowIndex]];
-        [p fillPathVerticallyWithStartColor:bottomColor endColor:topColor];
+        if ([self isFlipped])
+            [p fillPathVerticallyWithStartColor:bottomColor endColor:topColor];
+        else
+            [p fillPathVerticallyWithStartColor:topColor endColor:bottomColor];
     }
     [super drawRow:rowIndex clipRect:clipRect];
+}
+
+-(void)_drawDropHighlightOnRow:(int)rowIndex{
+    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
+    
+    [self lockFocus];
+    [NSGraphicsContext saveGraphicsState];
+    [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor whiteColor]];
+    [NSGraphicsContext restoreGraphicsState];
+    [self unlockFocus];
 }
 
 @end
