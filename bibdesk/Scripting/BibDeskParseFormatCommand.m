@@ -43,6 +43,7 @@
 #import "BibPrefController.h"
 #import "BibAppController.h"
 #import "BDSKOwnerProtocol.h"
+#import "BibTypeManager.h"
 
 @implementation BibDeskParseFormatCommand
 
@@ -64,13 +65,12 @@
 		return nil;
 	}
 	
-	
 	if (field == nil) {
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return nil;
 	}
 	if ([field isKindOfClass:[BibField class]]) {
-		if (!pub) {
+		if (pub == nil) {
 			pub = [(BibField *)field publication];
 		}
 		field = [field name];
@@ -98,7 +98,7 @@
 		return nil;
 	}
     
-    BOOL isLocalFile = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:field];
+    BOOL isLocalFile = [field isLocalFileField];
     NSString *papersFolderPath = nil;
     if (isLocalFile)
         papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub owner]];
