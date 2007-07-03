@@ -77,7 +77,7 @@
 	} else if ([field isKindOfClass:[NSString class]] == NO) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
 		return nil;
-	} else {
+	} else if ([field isEqualToString:BDSKCiteKeyString] == NO) {
         field = [field fieldName];
 	}
 	
