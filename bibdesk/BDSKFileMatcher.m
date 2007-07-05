@@ -295,10 +295,15 @@ static float GROUP_ROW_HEIGHT = 24.0;
         [alert addButtonWithTitle:NSLocalizedString(@"Overwrite", @"")];
         [alert setInformativeText:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"The publication's file is", @""), [[[pub localURL] path] stringByAbbreviatingWithTildeInPath]]];
         int rv = [alert runModal];
-        if (NSAlertSecondButtonReturn == rv)
+        if (NSAlertSecondButtonReturn == rv) {
             [pub setField:BDSKLocalUrlString toValue:[fileURL absoluteString]];
+            [pub autoFilePaper];
+            [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
+        }
     } else {
         [pub setField:BDSKLocalUrlString toValue:[fileURL absoluteString]];
+        [pub autoFilePaper];
+        [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
     }
     return YES;
 }
