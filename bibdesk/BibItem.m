@@ -3298,16 +3298,21 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (id)valueForUndefinedKey:(NSString *)key{
+    id value = nil;
     key = [key fieldName];
-    if (key == nil)
-        return nil;
-    [usedFields addObject:key];
-    if (type == BDSKPersonFieldCollection)
-        return (id)[item peopleArrayForField:key];
-    else if (type == BDSKURLFieldCollection)
-        return (id)[item URLForField:key];
-    else
-        return (id)[item stringValueOfField:key];
+    if (key) {
+        [usedFields addObject:key];
+        if (type == BDSKPersonFieldCollection) {
+            value = (id)[item peopleArrayForField:key];
+        } else if (type == BDSKURLFieldCollection) {
+            value = (id)[item URLForField:key];
+        } else {
+            value = (id)[item stringValueOfField:key];
+            if ([key isURLField] == NO && [key isBooleanField] == NO && [key isTriStateField] == NO && [key isRatingField] == NO && [key isCitationField] == NO)
+                value = (id)[value stringByDeTeXifyingString];
+        }
+    }
+    return value;
 }
 
 - (void)setType:(int)aType{
