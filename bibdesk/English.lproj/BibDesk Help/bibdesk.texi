@@ -4196,6 +4196,10 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @item stringByConvertingDoubleHyphenToEndash
 @tab 
+@item stringByTeXifyingString
+@tab 
+@item stringByDeteXifyingString
+@tab 
 @end multitable
 
 @subheading Appending
