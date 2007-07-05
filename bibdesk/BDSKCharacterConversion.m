@@ -188,7 +188,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 #pragma mark Actions
 
 - (IBAction)dismiss:(id)sender {
-    [self finalizeChangesIgnoringEdit:NO]; // commit edit before saving
+    [self finalizeChangesIgnoringEdit:[sender tag] == NSCancelButton]; // commit edit before saving
 	
     if ([sender tag] == NSOKButton) {
         if (!validRoman || !validTex) {
@@ -340,7 +340,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				[currentArray replaceObjectAtIndex:row withObject:object];
 				[currentDict setObject:tex forKey:object];
 				[currentDict removeObjectForKey:roman];
-				[romanSet removeObject:roman];
+                if (validRoman)
+                    [romanSet removeObject:roman];
 				[romanSet addObject:object];
 				
 				validRoman = YES;
@@ -364,7 +365,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 			} else {
 				[currentDict setObject:object forKey:roman];
 				if ([self listType] == 2) {
-					[texSet removeObject:tex];
+                    if (validTex)
+                        [texSet removeObject:tex];
 					[texSet addObject:object];
 				}
 				
