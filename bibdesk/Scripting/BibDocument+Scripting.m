@@ -46,8 +46,46 @@
 #import "NSObject_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKMacroResolver.h"
+#import "BDSKPreviewer.h"
+#import <Quartz/Quartz.h>
 
 @implementation BibDocument (Scripting)
+
+- (id)handlePrintScriptCommand:(NSScriptCommand *)command {
+    if(BDSKPDFPreviewDisplay == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]) {
+        // we let the PDFView handle printing
+        
+        NSDictionary *args = [command evaluatedArguments];
+        id settings = [args objectForKey:@"PrintSettings"];
+        // PDFView does not allow printing without showing the dialog, so we just ignore that setting
+        
+        NSPrintInfo *printInfo = [self printInfo];
+        PDFView *pdfView = [previewer pdfView];
+        
+        if ([settings isKindOfClass:[NSDictionary class]]) {
+            settings = [[settings mutableCopy] autorelease];
+            id value;
+            if (value = [settings objectForKey:NSPrintDetailedErrorReporting])
+                [settings setObject:[NSNumber numberWithBool:[value intValue] == 'lwdt'] forKey:NSPrintDetailedErrorReporting];
+            if ((value = [settings objectForKey:NSPrintPrinterName]) && (value = [NSPrinter printerWithName:value]))
+                [settings setObject:value forKey:NSPrintPrinter];
+            if ([settings objectForKey:NSPrintFirstPage] || [settings objectForKey:NSPrintLastPage]) {
+                [settings setObject:[NSNumber numberWithBool:NO] forKey:NSPrintAllPages];
+                if ([settings objectForKey:NSPrintFirstPage] == nil)
+                    [settings setObject:[NSNumber numberWithInt:1] forKey:NSPrintLastPage];
+                if ([settings objectForKey:NSPrintLastPage] == nil)
+                    [settings setObject:[NSNumber numberWithInt:[[pdfView document] pageCount]] forKey:NSPrintLastPage];
+            }
+            [[printInfo dictionary] addEntriesFromDictionary:settings];
+        }
+        
+        [pdfView printWithInfo:printInfo autoRotate:NO];
+        
+        return nil;
+    } else {
+        return [super handlePrintScriptCommand:command];
+    }
+}
 
 - (BibItem *)valueInPublicationsAtIndex:(unsigned int)index {
     return [publications objectAtIndex:index];
