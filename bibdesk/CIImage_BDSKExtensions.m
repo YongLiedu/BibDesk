@@ -98,6 +98,22 @@
     return [gaussianFilter valueForKey:@"outputImage"];
 }
 
++ (CIColor *)colorWithWhiteOne;
+{
+    static CIColor *color = nil;
+    if (nil == color)
+        color = [[CIColor colorWithWhite:1.0] retain];
+    return color;
+}
+
++ (CIColor *)colorWithWhiteZero;
+{
+    static CIColor *color = nil;
+    if (nil == color)
+        color = [[CIColor colorWithWhite:0.0] retain];
+    return color;    
+}
+
 + (CIImage *)imageInRect:(CGRect)aRect withHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
     float radius = 0.5f * CGRectGetWidth(aRect);
@@ -105,7 +121,7 @@
     
     CIImage *foreground = [self imageInRect:aRect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor];
     CIImage *background = [self imageInRect:aRect withVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
-    CIImage *mask = [self imageWithGaussianGradientWithCenter:center radius:radius fromColor:[CIColor colorWithWhite:1.0] toColor:[CIColor colorWithWhite:0.0]];
+    CIImage *mask = [self imageWithGaussianGradientWithCenter:center radius:radius fromColor:[self colorWithWhiteOne] toColor:[self colorWithWhiteZero]];
     
     return [foreground blendedImageWithBackground:background usingMask:mask];
 }
@@ -117,31 +133,43 @@
     
     CIImage *foreground = [self imageInRect:aRect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor];
     CIImage *background = [self imageInRect:aRect withHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
-    CIImage *mask = [self imageWithGaussianGradientWithCenter:center radius:radius fromColor:[CIColor colorWithWhite:1.0] toColor:[CIColor colorWithWhite:0.0]];
+    CIImage *mask = [self imageWithGaussianGradientWithCenter:center radius:radius fromColor:[self colorWithWhiteOne] toColor:[self colorWithWhiteZero]];
     
     return [foreground blendedImageWithBackground:background usingMask:mask];
 }
 
 + (CIImage *)imageInRect:(CGRect)aRect withColor:(CIColor *)fgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    float startWhite = right ? 1.0 : 0.0;
-    float endWhite = 1.0 - startWhite;
+    CIColor *start, *end;
+    if (right) {
+        start = [self colorWithWhiteOne];
+        end = [self colorWithWhiteZero];
+    } else {
+        start = [self colorWithWhiteZero];
+        end = [self colorWithWhiteOne];
+    }
     
     CIImage *foreground = [self imageWithConstantColor:fgColor];
     CIImage *background = [self imageInRect:aRect withVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
-    CIImage *mask = [self imageInRect:aRect withHorizontalGradientFromColor:[CIColor colorWithWhite:startWhite] toColor:[CIColor colorWithWhite:endWhite]];
+    CIImage *mask = [self imageInRect:aRect withHorizontalGradientFromColor:start toColor:end];
     
     return [foreground blendedImageWithBackground:background usingMask:mask];
 }
 
 + (CIImage *)imageInRect:(CGRect)aRect withColor:(CIColor *)fgColor blendedAtTop:(BOOL)top ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    float startWhite = top ? 1.0 : 0.0;
-    float endWhite = 1.0 - startWhite;
+    CIColor *start, *end;
+    if (top) {
+        start = [self colorWithWhiteOne];
+        end = [self colorWithWhiteZero];
+    } else {
+        start = [self colorWithWhiteZero];
+        end = [self colorWithWhiteOne];
+    }
     
     CIImage *foreground = [self imageWithConstantColor:fgColor];
     CIImage *background = [self imageInRect:aRect withHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
-    CIImage *mask = [self imageInRect:aRect withVerticalGradientFromColor:[CIColor colorWithWhite:startWhite] toColor:[CIColor colorWithWhite:endWhite]];
+    CIImage *mask = [self imageInRect:aRect withVerticalGradientFromColor:start toColor:end];
     
     return [foreground blendedImageWithBackground:background usingMask:mask];
 }
