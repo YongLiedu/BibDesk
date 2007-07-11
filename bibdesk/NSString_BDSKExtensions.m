@@ -1396,19 +1396,27 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     NSScanner *scanner = [[NSScanner alloc] initWithString:self];
     NSString *s = nil;
     NSMutableString *returnString = [NSMutableString stringWithCapacity:[self length]];
-    [NSCharacterSet curlyBraceCharacterSet];
     int nesting = 0;
     unichar ch;
     unsigned location;
     NSRange range;
+    BOOL foundFirstLetter = NO;
     
     [scanner setCharactersToBeSkipped:nil];
     
     while([scanner isAtEnd] == NO){
         if([scanner scanUpToCharactersFromSet:[NSCharacterSet curlyBraceCharacterSet] intoString:&s])
             [returnString appendString:nesting == 0 ? [s lowercaseString] : s];
+        if (foundFirstLetter == NO) {
+            range = [returnString rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
+            if (range.location != NSNotFound) {
+                foundFirstLetter = YES;
+                if (nesting == 0)
+                    [returnString replaceCharactersInRange:range withString:[[returnString substringWithRange:range] uppercaseString]];
+            }
+        }
         if([scanner scanCharacter:&ch] == NO)
-            continue;
+            break;
         [returnString appendFormat:@"%C", ch];
         location = [scanner scanLocation];
         if(location > 0 && [self characterAtIndex:location - 1] == '\\')
@@ -1418,10 +1426,6 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
         else
             nesting--;
     }
-    
-    range = [returnString rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
-    if(range.location != NSNotFound)
-        [returnString replaceCharactersInRange:range withString:[[returnString substringWithRange:range] uppercaseString]];
     
     [scanner release];
     
