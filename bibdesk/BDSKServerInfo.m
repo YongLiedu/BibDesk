@@ -47,10 +47,11 @@
 {
     BOOL isEntrez = [aType isEqualToString:BDSKSearchGroupEntrez];
     BOOL isZoom = [aType isEqualToString:BDSKSearchGroupZoom];
+    BOOL isISI = [aType isEqualToString:BDSKSearchGroupISI];
     
     return [[[[self class] alloc] initWithType:aType 
                                           name:NSLocalizedString(@"New Server", @"")
-                                          host:isEntrez ? nil : @"host.domain.com"
+                                          host:(isEntrez || isISI) ? nil : @"host.domain.com"
                                           port:isZoom ? @"0" : nil 
                                       database:@"database" 
                                        options:isZoom ? [NSDictionary dictionary] : nil] autorelease];
@@ -61,7 +62,7 @@
     if (self = [super init]) {
         type = [aType copy];
         name = [aName copy];
-        if ([self isEntrez]) {
+        if ([self isEntrez] || [self isISI]) {
             host = nil;
             port = nil;
             database = [aDbase copy];
@@ -73,6 +74,10 @@
             options = [opts mutableCopy];
         } else {
             host = [aHost copy];
+            // unknown type; you'll get a surprise if these are set to nil, so maybe we should just raise here...
+            OBPRECONDITION(nil == aDbase);
+            OBPRECONDITION(nil == opts);
+            OBPRECONDITION(nil == aPort);
             port = nil;
             database = nil;
             options = nil;
@@ -122,7 +127,7 @@
     // we don't compare the name, as that is just a label
     if ([self isMemberOfClass:[other class]] == NO || [[self type] isEqualToString:[(BDSKServerInfo *)other type]] == NO)
         isEqual = NO;
-    else if ([self isEntrez])
+    else if ([self isEntrez] || [self isISI])
         isEqual = OFISEQUAL([self database], [other database]);
     else if ([self isZoom])
         isEqual = OFISEQUAL([self host], [other host]) && 
@@ -177,6 +182,7 @@
 
 - (BOOL)isEntrez { return [[self type] isEqualToString:BDSKSearchGroupEntrez]; }
 - (BOOL)isZoom { return [[self type] isEqualToString:BDSKSearchGroupZoom]; }
+- (BOOL)isISI { return [[self type] isEqualToString:BDSKSearchGroupISI]; }
 
 @end
 

@@ -163,15 +163,32 @@
             };
         }
     );
-    /* OAI servers */
-    oai = (
+    /* ISI servers */
+    isi = (
+        /* Science Citation Index */
         {
-            name = "Citeseer";
-            host = "http://cs1.ist.psu.edu/cgi-bin/oai.cgi";
+            name = "Web Of Science SCI";
+            database = "SCI";
         },
+        /* Social Sciences Citation Index */
         {
-            name = "ArXiv";
-            host = "http://arXiv.org/oai2";
+            name = "Web Of Science SSCI";
+            database = "SSCI";
+        },
+        /* Arts & Humanities Citation Index */
+        {
+            name = "Web Of Science AHCI";
+            database = "AHCI";
+        },
+        /* Index Chemiculus */
+        {
+            name = "Web Of Science IC";
+            database = "IC";
+        },
+        /* Current Chemical Reactions */
+        {
+            name = "Web Of Science CCR";
+            database = "CCR";
         }
     );
 }

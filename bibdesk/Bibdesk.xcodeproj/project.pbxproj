@@ -445,6 +445,9 @@
 		F97BEBB5090886E50063504B /* genericFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F97BEBB4090886E50063504B /* genericFolderIcon.tiff */; };
 		F97BF0BA090AE7520063504B /* NSBezierPath_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */; };
 		F97BF344090B19520063504B /* smartFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F97BF343090B19520063504B /* smartFolderIcon.tiff */; };
+		F97C9DB20C4481670002EE01 /* BDSKISIGroupServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */; };
+		F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */; };
+		F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */ = {isa = PBXBuildFile; fileRef = F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */; };
 		F97FA7930AF56FA100C32BBA /* BDSKImageFadeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */; };
 		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
 		F9936CC60BC746C300A32DC4 /* BDSKItemSearchIndexes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9936CC40BC746C300A32DC4 /* BDSKItemSearchIndexes.m */; };
@@ -893,7 +896,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1401,6 +1404,12 @@
 		F97BF0B7090AE7520063504B /* NSBezierPath_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSBezierPath_BDSKExtensions.h; sourceTree = "<group>"; };
 		F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSBezierPath_BDSKExtensions.m; sourceTree = "<group>"; };
 		F97BF343090B19520063504B /* smartFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = smartFolderIcon.tiff; path = Images/smartFolderIcon.tiff; sourceTree = "<group>"; };
+		F97C9DB00C4481670002EE01 /* BDSKISIGroupServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKISIGroupServer.h; sourceTree = "<group>"; };
+		F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKISIGroupServer.m; sourceTree = "<group>"; };
+		F97C9DBA0C44866F0002EE01 /* WSGeneratedObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WSGeneratedObj.h; sourceTree = "<group>"; };
+		F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WSGeneratedObj.m; sourceTree = "<group>"; };
+		F97C9DBC0C44866F0002EE01 /* BDSKISIWebServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKISIWebServices.h; sourceTree = "<group>"; };
+		F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKISIWebServices.m; sourceTree = "<group>"; };
 		F97FA7900AF56FA100C32BBA /* BDSKImageFadeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKImageFadeAnimation.h; sourceTree = "<group>"; };
 		F97FA7910AF56FA100C32BBA /* BDSKImageFadeAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKImageFadeAnimation.m; sourceTree = "<group>"; };
 		F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewCompletionController.h; sourceTree = "<group>"; };
@@ -2019,7 +2028,13 @@
 				F9B3405C0BBC16720072C2B0 /* BibItem_PubMedLookup.m */,
 				F925352808FDFAE40045D563 /* BDSKSearchResult.m */,
 				F9B8019D0B41E91F00A5A615 /* BDSKZoomGroupServer.m */,
+				F97C9DBA0C44866F0002EE01 /* WSGeneratedObj.h */,
+				F97C9DBB0C44866F0002EE01 /* WSGeneratedObj.m */,
+				F97C9DBC0C44866F0002EE01 /* BDSKISIWebServices.h */,
+				F97C9DBD0C44866F0002EE01 /* BDSKISIWebServices.m */,
 				F91F284709A661A700419960 /* PDFMetadata.m */,
+				F97C9DB00C4481670002EE01 /* BDSKISIGroupServer.h */,
+				F97C9DB10C4481670002EE01 /* BDSKISIGroupServer.m */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -3513,6 +3528,9 @@
 				CEFD45890BFFC1F80027B933 /* NSWindow+Scripting.m in Sources */,
 				F90B09420C283B5100144F1B /* BDSKLogUtilities.m in Sources */,
 				CE4D85290C3A8C8F002C20CB /* BibDeskAutofileCommand.m in Sources */,
+				F97C9DB20C4481670002EE01 /* BDSKISIGroupServer.m in Sources */,
+				F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */,
+				F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

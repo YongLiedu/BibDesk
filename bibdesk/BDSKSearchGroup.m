@@ -45,11 +45,18 @@
 #import "BDSKServerInfo.h"
 #import <OmniFoundation/NSArray-OFExtensions.h>
 #import "BDSKItemSearchIndexes.h"
+#import "BDSKISIGroupServer.h"
 
 NSString *BDSKSearchGroupEntrez = @"entrez";
 NSString *BDSKSearchGroupZoom = @"zoom";
+NSString *BDSKSearchGroupISI = @"isi";
 
 @implementation BDSKSearchGroup
+
+- (id)initWithType:(NSString *)typeName name:(NSString *)aName;
+{
+    return [self initWithType:typeName serverInfo:[NSDictionary dictionaryWithObject:aName forKey:@"database"] searchTerm:nil];
+}
 
 - (id)initWithName:(NSString *)aName;
 {
@@ -256,6 +263,8 @@ NSString *BDSKSearchGroupZoom = @"zoom";
         server = [[BDSKEntrezGroupServer alloc] initWithGroup:self serverInfo:info];
     else if ([type isEqualToString:BDSKSearchGroupZoom])
         server = [[BDSKZoomGroupServer alloc] initWithGroup:self serverInfo:info];
+    else if ([type isEqualToString:BDSKSearchGroupISI])
+        server = [[BDSKISIGroupServer alloc] initWithGroup:self serverInfo:info];
     else
         OBASSERT_NOT_REACHED("unknown search group type");
 }
