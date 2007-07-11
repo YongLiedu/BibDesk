@@ -41,6 +41,7 @@
 #import "BDSKServerInfo.h"
 #import "BibItem.h"
 #import "NSArray_BDSKExtensions.h"
+#import "NSError_BDSKExtensions.h"
 
 #define MAX_RESULTS 100
 
@@ -58,6 +59,23 @@
 @end
 
 @implementation BDSKISIGroupServer
+
++ (BOOL)canConnect;
+{
+    CFURLRef theURL = (CFURLRef)[NSURL URLWithString:@"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"];
+    CFNetDiagnosticRef diagnostic = CFNetDiagnosticCreateWithURL(CFGetAllocator(theURL), theURL);
+    
+    NSString *details;
+    CFNetDiagnosticStatus status = CFNetDiagnosticCopyNetworkStatusPassively(diagnostic, (CFStringRef *)&details);
+    CFRelease(diagnostic);
+    [details autorelease];
+    
+    BOOL canConnect = kCFNetDiagnosticConnectionUp == status;
+    if (NO == canConnect)
+        NSLog(@"%@", details);
+    
+    return canConnect;
+}
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKISIGroupServerMainThread); }
 - (Protocol *)protocolForServerThread { return @protocol(BDSKISIGroupServerLocalThread); }
@@ -95,14 +113,20 @@
 
 - (void)retrievePublications
 {
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
+    if ([[self class] canConnect]) {
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
     
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
-    id server = [self serverOnServerThread];
-    if (server)
-        [server downloadWithSearchTerm:[group searchTerm]];
-    else
-        [self performSelector:_cmd withObject:nil afterDelay:0.1];
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+        id server = [self serverOnServerThread];
+        if (server)
+            [server downloadWithSearchTerm:[group searchTerm]];
+        else
+            [self performSelector:_cmd withObject:nil afterDelay:0.1];
+    } else {
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+        NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to connect to server", @"")];
+        [NSApp presentError:presentableError];
+    }
 }
 
 - (void)setServerInfo:(BDSKServerInfo *)info;
@@ -226,6 +250,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
 
 static NSArray *publicationsWithISIXMLString(NSString *xmlString)
 {
+    NSCParameterAssert(nil != xmlString);
     NSError *error;
     NSXMLDocument *xmlDoc = [[[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:&error] autorelease];
     if (nil == xmlDoc) {
@@ -272,8 +297,12 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
                                        in_firstRec:1
                                         in_numRecs:1];
         
-        if (nil == resultInfo)
+        if (nil == resultInfo) {
             OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+            // we already know that a connection can be made, so we likely don't have permission to read this edition or database
+            NSError *presentableError = [NSError mutableLocalErrorWithCode:kBDSKNetworkConnectionFailed localizedDescription:NSLocalizedString(@"Unable to retrieve results.  You may not have permission to use this database.", @"Error message when connection to Web of Science fails.")];
+            [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:presentableError waitUntilDone:NO];
+        }
         
         [self setAvailableResults:[[resultInfo objectForKey:@"recordsFound"] intValue]];
         
@@ -290,7 +319,9 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
                                                    in_firstRec:[self fetchedResults]
                                                     in_numRecs:numResults
                                                      in_fields:@"doctype authors bib_vol pubtype pub_url source_title item_title bib_issue bib_pages keywords abstract"];
-            pubs = publicationsWithISIXMLString([resultInfo objectForKey:@"records"]);
+
+            if ([resultInfo objectForKey:@"records"])
+                pubs = publicationsWithISIXMLString([resultInfo objectForKey:@"records"]);
         }
         
     }
