@@ -61,6 +61,9 @@ static NSString *joinedArrayComponents(NSArray *arrayOfXMLNodes, NSString *separ
 
 + (NSArray *)itemsFromString:(NSString *)xmlString error:(NSError **)outError
 {
+    if (nil == xmlString)
+        return nil;
+    
     NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:xmlString options:0 error:outError];
     
     if (nil == doc)

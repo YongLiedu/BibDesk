@@ -59,6 +59,9 @@ static NSData *MODSToMARCXSLTData = nil;
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError {
     
+    if (nil == itemString)
+        return [NSArray array];
+    
     NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:itemString options:0 error:outError];
     if (nil == doc)
         return [NSArray array];

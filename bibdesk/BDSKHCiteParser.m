@@ -61,9 +61,14 @@
 
 + (BOOL)canParseDocument:(DOMDocument *)domDocument fromURL:(NSURL *)url{
     NSString *htmlString = [(id)[domDocument documentElement] outerHTML];
+    if (nil == htmlString)
+        return NO;
+    
     NSError *error = nil;
     NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:htmlString
                                                           options:NSXMLDocumentTidyHTML error:&error];
+    [doc autorelease];
+    
     if(doc == nil)
         return NO;
     
@@ -77,9 +82,13 @@
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
     
     NSString *htmlString = [(id)[domDocument documentElement] outerHTML];
+    if (nil == htmlString)
+        return nil;
+    
     NSError *error = nil;
     NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:htmlString
                                                           options:NSXMLDocumentTidyHTML error:&error];
+    [doc autorelease];
     
     if(doc == nil){
         if (outError) *outError = error;
