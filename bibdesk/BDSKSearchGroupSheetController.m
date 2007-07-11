@@ -44,7 +44,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 
-#define SERVERS_FILENAME @"SearchGroupServers.plist"
+#define SERVERS_FILENAME @"SearchGroupServers"
 #define SERVERS_DIRNAME @"SearchGroupServers"
 
 static NSDictionary *searchGroupServers = nil;
@@ -60,15 +60,16 @@ static BOOL isSearchFileAtPath(NSString *path)
 }
     
 + (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"type", nil] triggerChangeNotificationsForDependentKey:@"entrez"];
-    [self setKeys:[NSArray arrayWithObjects:@"type", nil] triggerChangeNotificationsForDependentKey:@"zoom"];
-    [self setKeys:[NSArray arrayWithObjects:@"type", nil] triggerChangeNotificationsForDependentKey:@"isi"];
+    NSArray *typeKeys = [NSArray arrayWithObjects:@"type", nil];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"entrez"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"zoom"];
+    [self setKeys:typeKeys triggerChangeNotificationsForDependentKey:@"isi"];
     
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-    NSString *path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:SERVERS_FILENAME];
+    NSString *path = [[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"];
     
     NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:path];
-    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:2];
+    NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:3];
     NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, nil] objectEnumerator];
     NSString *type;
     
@@ -121,7 +122,7 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 + (void)resetServers;
 {
-    NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:SERVERS_FILENAME]];
+    NSDictionary *serverDicts = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:SERVERS_FILENAME ofType:@"plist"]];
     NSMutableDictionary *newServerDicts = [NSMutableDictionary dictionaryWithCapacity:[serverDicts count]];
     NSEnumerator *typeEnum = [[NSArray arrayWithObjects:BDSKSearchGroupEntrez, BDSKSearchGroupZoom, BDSKSearchGroupISI, nil] objectEnumerator];
     NSString *type;
