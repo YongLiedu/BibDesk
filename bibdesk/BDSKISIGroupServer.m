@@ -258,7 +258,8 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
         
         // @@ currently limited to topic search; need to figure out UI for other search types (mixing search types will require either NSTokenField or raw text string entry)
         BDSKServerInfo *info = [self serverInfo];
-        searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
+        if ([searchTerm rangeOfString:@"="].location == NSNotFound)
+            searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
         
         // perform WS query to get count of results...
         NSDictionary *resultInfo;
