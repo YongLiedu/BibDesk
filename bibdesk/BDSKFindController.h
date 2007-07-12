@@ -56,6 +56,9 @@
     IBOutlet NSButton *replaceAsMacroCheckbox;
     IBOutlet NSButton *replaceButton;
     IBOutlet NSView *controlsView;
+    IBOutlet NSButton *shouldSetWhenEmptyCheckbox;
+    IBOutlet NSBox *findOptionsBox;
+    IBOutlet NSBox *setOptionsBox;
     IBOutlet BDSKStatusBar *statusBar;
 
 	
@@ -71,7 +74,7 @@
 	BOOL searchSelection;
 	BOOL findAsMacro;
 	BOOL replaceAsMacro;
-	BOOL overwrite;
+	BOOL shouldSetWhenEmpty;
     int operation;
 	int shouldMove;
 	NSString *replaceLabel;
@@ -153,8 +156,8 @@
 - (BOOL)replaceAsMacro;
 - (void)setReplaceAsMacro:(BOOL)newReplaceAsMacro;
 
-- (BOOL)overwrite;
-- (void)setOverwrite:(BOOL)newOverwrite;
+- (BOOL)shouldSetWhenEmpty;
+- (void)setShouldSetWhenEmpty:(BOOL)newShouldSetWhenEmpty;
 
 - (NSString *)replaceAllTooltip;
 - (void)setReplaceAllTooltip:(NSString *)newReplaceAllTooltip;

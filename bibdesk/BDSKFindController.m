@@ -101,7 +101,7 @@ enum {
         searchSelection = YES;
         findAsMacro = NO;
         replaceAsMacro = NO;
-		overwrite = NO;
+		shouldSetWhenEmpty = NO;
         operation = FCOperationFindAndReplace;
 		
 		NSString *field = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKFindControllerLastFindAndReplaceFieldKey];
@@ -203,6 +203,17 @@ enum {
 	[self updateUI];
 }
 
+- (void)swapView:(NSView *)view1 with:(NSView *)view2 {
+    NSRect frame = [view2 frame];
+    NSView *superview = [view2 superview];
+    [view2 setFrame:[view1 frame]];
+    [view1 retain];
+    [[view1 superview] replaceSubview:view1 with:view2];
+    [view1 setFrame:frame];
+    [superview addSubview:view1];
+    [view1 release];
+}
+
 #pragma mark Accessors
 
 - (int)operation {
@@ -215,7 +226,12 @@ enum {
 		if (FCOperationFindAndReplace != operation) {
 			[self setSearchSelection:YES];
 			[self setFindString:@""];
-		}
+            [self setShouldSetWhenEmpty:FCOperationOverwrite == operation];
+            if ([setOptionsBox window] == nil)
+                [self swapView:findOptionsBox with:setOptionsBox];
+		} else if ([findOptionsBox window] == nil) {
+            [self swapView:setOptionsBox with:findOptionsBox];
+        }
 		[self updateUI];
     }
 }
@@ -337,18 +353,13 @@ enum {
     }
 }
 
-- (BOOL)overwrite {
-	return overwrite;
+- (BOOL)shouldSetWhenEmpty {
+	return shouldSetWhenEmpty;
 }
 
-- (void)setOverwrite:(BOOL)newOverwrite {
-    if (overwrite != newOverwrite) {
-        overwrite = newOverwrite;
-		if (overwrite == YES) {
-			[self setSearchSelection:YES];
-			[self setFindString:@""];
-		}
-		[self updateUI];
+- (void)setShouldSetWhenEmpty:(BOOL)newShouldSetWhenEmpty {
+    if (shouldSetWhenEmpty != newShouldSetWhenEmpty) {
+        shouldSetWhenEmpty = newShouldSetWhenEmpty;
     }
 }
 
@@ -1079,6 +1090,11 @@ enum {
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
+        if(origStr == nil || [origStr isEqualAsComplexString:@""]){
+            if(shouldSetWhenEmpty == NO) continue;
+            origStr = @"";
+        }
+        
 		if([replStr compareAsComplexString:origStr] != NSOrderedSame){
 			[self setField:field ofItem:bibItem toValue:replStr withInfos:paperInfos];
 			number++;
@@ -1120,8 +1136,10 @@ enum {
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
-        if(origStr == nil || [origStr isEqualAsComplexString:@""])
-            continue;
+        if(origStr == nil || [origStr isEqualAsComplexString:@""]){
+            if(shouldSetWhenEmpty == NO) continue;
+            origStr = @"";
+        }
         
         [self setField:field ofItem:bibItem toValue:[replStr stringByAppendingString:origStr] withInfos:paperInfos];
         number++;
@@ -1162,8 +1180,10 @@ enum {
             continue;
         
         origStr = [bibItem valueOfField:field inherit:NO];
-        if(origStr == nil || [origStr isEqualAsComplexString:@""])
-            continue;
+        if(origStr == nil || [origStr isEqualAsComplexString:@""]){
+            if(shouldSetWhenEmpty == NO) continue;
+            origStr = @"";
+        }
         
         [self setField:field ofItem:bibItem toValue:[origStr stringByAppendingString:replStr] withInfos:paperInfos];
         number++;
