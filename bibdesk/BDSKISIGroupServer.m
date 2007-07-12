@@ -221,7 +221,21 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     NSXMLNode *child = [record childCount] ? [record childAtIndex:0] : nil;
     NSMutableDictionary *pubFields = [NSMutableDictionary new];
     NSString *keywordSeparator = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultGroupFieldSeparatorKey];
-
+    
+    // fallback values
+    NSString *pubType = BDSKMiscString;
+    NSString *sourceField = @"Note";
+    
+    // I've only seen "Meeting Abstract" and "Article" as types
+    NSString *docType =[[[record nodesForXPath:@"doctype" error:NULL] lastObject] stringValue];
+    if ([docType isEqualToString:@"Article"]) {
+        pubType = BDSKArticleString;
+        sourceField = BDSKJournalString;
+    } else if ([docType isEqualToString:@"Meeting Abstract"]) {
+        pubType = BDSKInproceedingsString;
+        sourceField = BDSKBooktitleString;
+    }
+    
     while (nil != child) {
         
         NSString *name = [child name];
@@ -229,20 +243,35 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         if ([name isEqualToString:@"item_title"] && [child stringValue])
             [pubFields setObject:[child stringValue] forKey:BDSKTitleString];
         else if ([name isEqualToString:@"source_title"] && [child stringValue])
-            [pubFields setObject:[child stringValue] forKey:BDSKJournalString];
+            [pubFields setObject:[child stringValue] forKey:sourceField];
         else if ([name isEqualToString:@"authors"]) {
-            NSString *authorString = [[[child nodesForXPath:@".//AuCollectiveName" error:NULL] arrayByPerformingSelector:@selector(stringValue)] componentsJoinedByString:@" and "];
+            // this seems to be the best name representation, although we could build authors from components as well
+            NSArray *authorNodes = [child nodesForXPath:@".//AuCollectiveName" error:NULL];
+            NSString *authorString = nil;
+            if ([authorNodes count])
+                authorString = [[authorNodes arrayByPerformingSelector:@selector(stringValue)] componentsJoinedByString:@" and "];
             if (authorString)
                 [pubFields setObject:authorString forKey:BDSKAuthorString];
+            else {
+                // older entries don't seem to have AuCollectiveName, so we'll just walk the author subtree and add all the strings
+                NSXMLNode *authNode = [child childCount] ? [child childAtIndex:0] : nil;
+                NSMutableArray *auths = [NSMutableArray new];
+                while (nil != authNode) {
+                    [auths addObject:[authNode stringValue]];
+                    authNode = [authNode nextSibling];
+                }
+                if ([auths count])
+                    [pubFields setObject:[auths componentsJoinedByString:@" and "] forKey:BDSKAuthorString];
+                [auths release];
+            }
         }
         else if ([name isEqualToString:@"abstract"]) {
-            NSString *abstract = [[[child nodesForXPath:@"p" error:NULL] firstObject] stringValue];
+            // abstract is broken into paragraphs; we'll use a double newline as separator
+            NSString *abstract = [[[child nodesForXPath:@"p" error:NULL] arrayByPerformingSelector:@selector(stringValue)] componentsJoinedByString:@"\n\n"];
             if (abstract)
                 [pubFields setObject:abstract forKey:BDSKAbstractString];
         }
-        else if ([name isEqualToString:@"pub_url"] && [child stringValue])
-            [pubFields setObject:[child stringValue] forKey:BDSKUrlString];
-        else if ([name isEqualToString:@"keywords"] && [child stringValue]) {
+        else if ([name isEqualToString:@"keywords"]) {
             NSString *keywordString = [[[child nodesForXPath:@".//keyword" error:NULL] arrayByPerformingSelector:@selector(stringValue)] componentsJoinedByString:keywordSeparator];
             if (keywordString)
                 [pubFields setObject:keywordString forKey:BDSKKeywordsString];
@@ -257,13 +286,18 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
             if (val)
                 [pubFields setObject:val forKey:BDSKVolumeString];
         }
-        // @@ remainder are untested (they're empty in all of my search results) so may be NSXMLElements
-        else if ([name isEqualToString:@"bib_vol"] && [child stringValue])
-            [pubFields setObject:[child stringValue] forKey:BDSKVolumeString];
-        else if ([name isEqualToString:@"article_nos"] && [child stringValue])
-            [pubFields setObject:[child stringValue] forKey:BDSKNumberString];
+        else if ([name isEqualToString:@"article_nos"] && [child stringValue]) {
+            // for current journals, these are DOI strings, which doesn't follow from the name or the description
+            NSString *val = [[[child nodesForXPath:@"./article_no[1]" error:NULL] lastObject] stringValue];
+            if (val)
+                [pubFields setObject:val forKey:BDSKDoiString]; 
+        }
         else if ([name isEqualToString:@"source_series"] && [child stringValue])
             [pubFields setObject:[child stringValue] forKey:BDSKSeriesString];
+        
+        // @@ remainder are untested (they're empty in all of my search results) so may be NSXMLElements
+        else if ([name isEqualToString:@"pub_url"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKUrlString];
         else if ([name isEqualToString:@"bib_date"] && [child stringValue])
             [pubFields setObject:[child stringValue] forKey:BDSKDateString];
         else if ([name isEqualToString:@"publisher"] && [child stringValue])
@@ -278,8 +312,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
     if (addXMLStringToAnnote && [record XMLString])
         [pubFields setObject:[record XMLString] forKey:BDSKAnnoteString];
     
-    // doctype seems to be Article for inproceedings as well, so we'll just default to article until further notice
-    BibItem *pub = [[BibItem alloc] initWithType:BDSKArticleString
+    BibItem *pub = [[BibItem alloc] initWithType:pubType
                                         fileType:BDSKBibtexString
                                          citeKey:nil
                                        pubFields:pubFields
@@ -358,7 +391,7 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
                                                               in_sort:@""
                                                           in_firstRec:[self fetchedResults]
                                                            in_numRecs:numResults
-                                                            in_fields:@"doctype authors bib_vol pubtype pub_url source_title item_title bib_issue bib_pages keywords abstract"];
+                                                            in_fields:@"doctype authors bib_vol pub_url source_title item_title bib_issue bib_pages keywords abstract source_series article_nos bib_date publisher pub_address issue_ed"];
 
             if ([resultInfo objectForKey:@"records"])
                 pubs = publicationsWithISIXMLString([resultInfo objectForKey:@"records"]);
