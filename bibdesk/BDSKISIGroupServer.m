@@ -235,11 +235,27 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
             if (keywordString)
                 [pubFields setObject:keywordString forKey:BDSKKeywordsString];
         }
+        else if ([name isEqualToString:@"bib_vol"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKVolumeString];
+        else if ([name isEqualToString:@"bib_issue"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKVolumeString];
+        else if ([name isEqualToString:@"article_nos"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKNumberString];
+        else if ([name isEqualToString:@"bib_pages"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKPagesString];
+        else if ([name isEqualToString:@"source_series"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKSeriesString];
+        else if ([name isEqualToString:@"bib_date"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKDateString];
+        else if ([name isEqualToString:@"publisher"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKPublisherString];
+        else if ([name isEqualToString:@"pub_address"] && [child stringValue])
+            [pubFields setObject:[child stringValue] forKey:BDSKAddressString];
         
         child = [child nextSibling];
     }
     
-    BibItem *pub = [[BibItem alloc] initWithType:BDSKJournalString
+    BibItem *pub = [[BibItem alloc] initWithType:BDSKArticleString
                                         fileType:BDSKBibtexString
                                          citeKey:nil
                                        pubFields:pubFields
