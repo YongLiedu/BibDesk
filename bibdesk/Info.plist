@@ -832,6 +832,16 @@
                             <key>type</key>
                             <string>zoom</string>
                         </dict>
+                        <dict>
+                        <key>database</key>
+                            <string>SCI</string>
+                            <key>label</key>
+                            <string>Web of Science SCI</string>
+                            <key>name</key>
+                            <string>Web of Science SCI</string>
+                            <key>type</key>
+                            <string>isi</string>
+                        </dict>
 					</array>
                     <key>BDSKShouldUsePDFMetadata</key>
 					<false/>
