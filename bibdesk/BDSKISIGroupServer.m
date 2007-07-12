@@ -326,16 +326,16 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
         if ([searchTerm rangeOfString:@"="].location == NSNotFound)
             searchTerm = [NSString stringWithFormat:@"TS=\"%@\"", searchTerm];
         
-        // perform WS query to get count of results...
+        // perform WS query to get count of results; don't pass zero for record numbers, although it's not clear what the values mean in this context
         NSDictionary *resultInfo;
         
-        // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?
-        resultInfo = [SearchRetrieveService search:@"WOS"
-                                          in_query:searchTerm
-                                          in_depth:@""
-                                       in_editions:[info database]
-                                       in_firstRec:1
-                                        in_numRecs:1];
+        // @@ Currently limited to WOS database; extension to other WOS databases might require different WebService stubs?  Note that the value we're passing as [info database] is referred to as  "edition" in the WoS docs.
+        resultInfo = [BDSKISISearchRetrieveService search:@"WOS"
+                                                 in_query:searchTerm
+                                                 in_depth:@""
+                                              in_editions:[info database]
+                                              in_firstRec:1
+                                               in_numRecs:1];
         
         if (nil == resultInfo) {
             OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
@@ -350,15 +350,15 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString)
         //NSAssert(numResults >= 0, @"number of results to get must be non-negative");
         
         if(numResults > 0) {
-            // retrieve XML results
-            resultInfo = [SearchRetrieveService searchRetrieve:@"WOS"
-                                                      in_query:searchTerm
-                                                      in_depth:@""
-                                                   in_editions:[info database]
-                                                       in_sort:@""
-                                                   in_firstRec:[self fetchedResults]
-                                                    in_numRecs:numResults
-                                                     in_fields:@"doctype authors bib_vol pubtype pub_url source_title item_title bib_issue bib_pages keywords abstract"];
+            // retrieve the actual XML results up to the maximum number per fetch
+            resultInfo = [BDSKISISearchRetrieveService searchRetrieve:@"WOS"
+                                                             in_query:searchTerm
+                                                             in_depth:@""
+                                                          in_editions:[info database]
+                                                              in_sort:@""
+                                                          in_firstRec:[self fetchedResults]
+                                                           in_numRecs:numResults
+                                                            in_fields:@"doctype authors bib_vol pubtype pub_url source_title item_title bib_issue bib_pages keywords abstract"];
 
             if ([resultInfo objectForKey:@"records"])
                 pubs = publicationsWithISIXMLString([resultInfo objectForKey:@"records"]);

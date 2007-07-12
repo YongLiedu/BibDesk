@@ -11,7 +11,7 @@
  *   Method Name:  describeDatabase
  * Documentation:  <no documentation>
  */
-@implementation describeDatabase
+@implementation BDSKISIDescribeDatabase
 - (void) setParameters:(NSString*) in_databaseID in_format:(NSString*) in_format
 {
     id _paramValues[] = {    
@@ -49,7 +49,7 @@
  *   Method Name:  publisherLinks
  * Documentation:  <no documentation>
  */
-@implementation publisherLinks
+@implementation BDSKISIPublisherLinks
 - (void) setParameters:(NSString*) in_query in_jsetList:(NSString*) in_jsetList
 {
     id _paramValues[] = {    
@@ -87,7 +87,7 @@
  *   Method Name:  citingArticlesByRecids
  * Documentation:  <no documentation>
  */
-@implementation citingArticlesByRecids
+@implementation BDSKISICitingArticlesByRecids
 - (void) setParameters:(NSString*) in_databaseID in_recids:(NSString*) in_recids in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id _paramValues[] = {    
@@ -137,7 +137,7 @@
  *   Method Name:  retrieveRecid
  * Documentation:  <no documentation>
  */
-@implementation retrieveRecid
+@implementation BDSKISIRetrieveRecid
 - (void) setParameters:(NSString*) in_databaseID in_recid:(NSString*) in_recid in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields
 {
     id _paramValues[] = {    
@@ -179,7 +179,7 @@
  *   Method Name:  sharedReferences
  * Documentation:  <no documentation>
  */
-@implementation sharedReferences
+@implementation BDSKISISharedReferences
 - (void) setParameters:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys
 {
     id _paramValues[] = {    
@@ -217,7 +217,7 @@
  *   Method Name:  browseDictionary
  * Documentation:  <no documentation>
  */
-@implementation browseDictionary
+@implementation BDSKISIBrowseDictionary
 - (void) setParameters:(NSString*) in_databaseID in_term:(NSString*) in_term in_index:(NSString*) in_index in_linesBefore:(SInt32) in_linesBefore in_linesAfter:(SInt32) in_linesAfter in_pageNumber:(SInt32) in_pageNumber in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions
 {
     id _paramValues[] = {    
@@ -267,7 +267,7 @@
  *   Method Name:  mapTerms
  * Documentation:  <no documentation>
  */
-@implementation mapTerms
+@implementation BDSKISIMapTerms
 - (void) setParameters:(NSString*) in_databaseID in_index:(NSString*) in_index in_terms:(NSString*) in_terms
 {
     id _paramValues[] = {    
@@ -307,7 +307,7 @@
  *   Method Name:  summary
  * Documentation:  <no documentation>
  */
-@implementation summary
+@implementation BDSKISISummary
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs
 {
     id _paramValues[] = {    
@@ -355,7 +355,7 @@
  *   Method Name:  retrieve
  * Documentation:  <no documentation>
  */
-@implementation retrieve
+@implementation BDSKISIRetrieve
 - (void) setParameters:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields
 {
     id _paramValues[] = {    
@@ -397,7 +397,7 @@
  *   Method Name:  searchRetrieve
  * Documentation:  <no documentation>
  */
-@implementation searchRetrieve
+@implementation BDSKISISearchRetrieve
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id _paramValues[] = {    
@@ -447,7 +447,7 @@
  *   Method Name:  search
  * Documentation:  <no documentation>
  */
-@implementation search
+@implementation BDSKISISearch
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs
 {
     id _paramValues[] = {    
@@ -493,7 +493,7 @@
  *   Method Name:  citingArticles
  * Documentation:  <no documentation>
  */
-@implementation citingArticles
+@implementation BDSKISICitingArticles
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id _paramValues[] = {    
@@ -543,7 +543,7 @@
  *   Method Name:  retrieveLinks
  * Documentation:  <no documentation>
  */
-@implementation retrieveLinks
+@implementation BDSKISIRetrieveLinks
 - (void) setParameters:(NSString*) in_query in_jsetList:(NSString*) in_jsetList in_include:(NSString*) in_include in_exclude:(NSString*) in_exclude in_options:(NSString*) in_options
 {
     id _paramValues[] = {    
@@ -587,7 +587,7 @@
  *   Method Name:  relatedRecords
  * Documentation:  <no documentation>
  */
-@implementation relatedRecords
+@implementation BDSKISIRelatedRecords
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id _paramValues[] = {    
@@ -637,7 +637,7 @@
  *   Method Name:  citedReferences
  * Documentation:  <no documentation>
  */
-@implementation citedReferences
+@implementation BDSKISICitedReferences
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey
 {
     id _paramValues[] = {    
@@ -672,12 +672,12 @@
 
 
 
-@implementation SearchRetrieveService
+@implementation BDSKISISearchRetrieveService
 
 + (id) citedReferences:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey
 {
     id result = NULL;    
-    citedReferences* _invocation = [[citedReferences alloc] init];    
+    BDSKISICitedReferences* _invocation = [[BDSKISICitedReferences alloc] init];    
     [_invocation setParameters: in_databaseID in_primaryKey:in_primaryKey];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -688,7 +688,7 @@
 + (id) publisherLinks:(NSString*) in_query in_jsetList:(NSString*) in_jsetList
 {
     id result = NULL;    
-    publisherLinks* _invocation = [[publisherLinks alloc] init];    
+    BDSKISIPublisherLinks* _invocation = [[BDSKISIPublisherLinks alloc] init];    
     [_invocation setParameters: in_query in_jsetList:in_jsetList];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -699,7 +699,7 @@
 + (id) citingArticlesByRecids:(NSString*) in_databaseID in_recids:(NSString*) in_recids in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id result = NULL;    
-    citingArticlesByRecids* _invocation = [[citingArticlesByRecids alloc] init];    
+    BDSKISICitingArticlesByRecids* _invocation = [[BDSKISICitingArticlesByRecids alloc] init];    
     [_invocation setParameters: in_databaseID in_recids:in_recids in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -710,7 +710,7 @@
 + (id) retrieveRecid:(NSString*) in_databaseID in_recid:(NSString*) in_recid in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields
 {
     id result = NULL;    
-    retrieveRecid* _invocation = [[retrieveRecid alloc] init];    
+    BDSKISIRetrieveRecid* _invocation = [[BDSKISIRetrieveRecid alloc] init];    
     [_invocation setParameters: in_databaseID in_recid:in_recid in_sort:in_sort in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -721,7 +721,7 @@
 + (id) sharedReferences:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys
 {
     id result = NULL;    
-    sharedReferences* _invocation = [[sharedReferences alloc] init];    
+    BDSKISISharedReferences* _invocation = [[BDSKISISharedReferences alloc] init];    
     [_invocation setParameters: in_databaseID in_primaryKeys:in_primaryKeys];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -732,7 +732,7 @@
 + (id) browseDictionary:(NSString*) in_databaseID in_term:(NSString*) in_term in_index:(NSString*) in_index in_linesBefore:(SInt32) in_linesBefore in_linesAfter:(SInt32) in_linesAfter in_pageNumber:(SInt32) in_pageNumber in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions
 {
     id result = NULL;    
-    browseDictionary* _invocation = [[browseDictionary alloc] init];    
+    BDSKISIBrowseDictionary* _invocation = [[BDSKISIBrowseDictionary alloc] init];    
     [_invocation setParameters: in_databaseID in_term:in_term in_index:in_index in_linesBefore:in_linesBefore in_linesAfter:in_linesAfter in_pageNumber:in_pageNumber in_depth:in_depth in_editions:in_editions];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -743,7 +743,7 @@
 + (id) mapTerms:(NSString*) in_databaseID in_index:(NSString*) in_index in_terms:(NSString*) in_terms
 {
     id result = NULL;    
-    mapTerms* _invocation = [[mapTerms alloc] init];    
+    BDSKISIMapTerms* _invocation = [[BDSKISIMapTerms alloc] init];    
     [_invocation setParameters: in_databaseID in_index:in_index in_terms:in_terms];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -754,7 +754,7 @@
 + (id) summary:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs
 {
     id result = NULL;    
-    summary* _invocation = [[summary alloc] init];    
+    BDSKISISummary* _invocation = [[BDSKISISummary alloc] init];    
     [_invocation setParameters: in_databaseID in_query:in_query in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -765,7 +765,7 @@
 + (id) retrieve:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields
 {
     id result = NULL;    
-    retrieve* _invocation = [[retrieve alloc] init];    
+    BDSKISIRetrieve* _invocation = [[BDSKISIRetrieve alloc] init];    
     [_invocation setParameters: in_databaseID in_primaryKeys:in_primaryKeys in_sort:in_sort in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -776,7 +776,7 @@
 + (id) searchRetrieve:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id result = NULL;    
-    searchRetrieve* _invocation = [[searchRetrieve alloc] init];    
+    BDSKISISearchRetrieve* _invocation = [[BDSKISISearchRetrieve alloc] init];    
     [_invocation setParameters: in_databaseID in_query:in_query in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -787,7 +787,7 @@
 + (id) search:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs
 {
     id result = NULL;    
-    search* _invocation = [[search alloc] init];    
+    BDSKISISearch* _invocation = [[BDSKISISearch alloc] init];    
     [_invocation setParameters: in_databaseID in_query:in_query in_depth:in_depth in_editions:in_editions in_firstRec:in_firstRec in_numRecs:in_numRecs];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -798,7 +798,7 @@
 + (id) describeDatabase:(NSString*) in_databaseID in_format:(NSString*) in_format
 {
     id result = NULL;    
-    describeDatabase* _invocation = [[describeDatabase alloc] init];    
+    BDSKISIDescribeDatabase* _invocation = [[BDSKISIDescribeDatabase alloc] init];    
     [_invocation setParameters: in_databaseID in_format:in_format];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -809,7 +809,7 @@
 + (id) citingArticles:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id result = NULL;    
-    citingArticles* _invocation = [[citingArticles alloc] init];    
+    BDSKISICitingArticles* _invocation = [[BDSKISICitingArticles alloc] init];    
     [_invocation setParameters: in_databaseID in_primaryKey:in_primaryKey in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -820,7 +820,7 @@
 + (id) retrieveLinks:(NSString*) in_query in_jsetList:(NSString*) in_jsetList in_include:(NSString*) in_include in_exclude:(NSString*) in_exclude in_options:(NSString*) in_options
 {
     id result = NULL;    
-    retrieveLinks* _invocation = [[retrieveLinks alloc] init];    
+    BDSKISIRetrieveLinks* _invocation = [[BDSKISIRetrieveLinks alloc] init];    
     [_invocation setParameters: in_query in_jsetList:in_jsetList in_include:in_include in_exclude:in_exclude in_options:in_options];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    
@@ -831,7 +831,7 @@
 + (id) relatedRecords:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields
 {
     id result = NULL;    
-    relatedRecords* _invocation = [[relatedRecords alloc] init];    
+    BDSKISIRelatedRecords* _invocation = [[BDSKISIRelatedRecords alloc] init];    
     [_invocation setParameters: in_databaseID in_primaryKey:in_primaryKey in_depth:in_depth in_editions:in_editions in_sort:in_sort in_firstRec:in_firstRec in_numRecs:in_numRecs in_fields:in_fields];    
     result = [[_invocation resultValue] retain];    
     [_invocation release];    

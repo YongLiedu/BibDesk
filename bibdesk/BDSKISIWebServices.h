@@ -21,7 +21,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface describeDatabase : WSGeneratedObj
+@interface BDSKISIDescribeDatabase : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_format:(NSString*) in_format;
@@ -37,7 +37,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface publisherLinks : WSGeneratedObj
+@interface BDSKISIPublisherLinks : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_query in_jsetList:(NSString*) in_jsetList;
@@ -53,7 +53,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface citingArticlesByRecids : WSGeneratedObj
+@interface BDSKISICitingArticlesByRecids : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_recids:(NSString*) in_recids in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -69,7 +69,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface retrieveRecid : WSGeneratedObj
+@interface BDSKISIRetrieveRecid : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_recid:(NSString*) in_recid in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields;
@@ -85,7 +85,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface sharedReferences : WSGeneratedObj
+@interface BDSKISISharedReferences : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys;
@@ -101,7 +101,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface browseDictionary : WSGeneratedObj
+@interface BDSKISIBrowseDictionary : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_term:(NSString*) in_term in_index:(NSString*) in_index in_linesBefore:(SInt32) in_linesBefore in_linesAfter:(SInt32) in_linesAfter in_pageNumber:(SInt32) in_pageNumber in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions;
@@ -117,7 +117,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface mapTerms : WSGeneratedObj
+@interface BDSKISIMapTerms : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_index:(NSString*) in_index in_terms:(NSString*) in_terms;
@@ -133,7 +133,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface summary : WSGeneratedObj
+@interface BDSKISISummary : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs;
@@ -149,7 +149,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface retrieve : WSGeneratedObj
+@interface BDSKISIRetrieve : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields;
@@ -165,7 +165,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface searchRetrieve : WSGeneratedObj
+@interface BDSKISISearchRetrieve : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -181,7 +181,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface search : WSGeneratedObj
+@interface BDSKISISearch : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs;
@@ -197,7 +197,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface citingArticles : WSGeneratedObj
+@interface BDSKISICitingArticles : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -213,7 +213,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface retrieveLinks : WSGeneratedObj
+@interface BDSKISIRetrieveLinks : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_query in_jsetList:(NSString*) in_jsetList in_include:(NSString*) in_include in_exclude:(NSString*) in_exclude in_options:(NSString*) in_options;
@@ -229,7 +229,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface relatedRecords : WSGeneratedObj
+@interface BDSKISIRelatedRecords : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -245,7 +245,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface citedReferences : WSGeneratedObj
+@interface BDSKISICitedReferences : WSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey;
@@ -259,7 +259,7 @@
 /*-
  * Web Service:  SearchRetrieveService
  */
-@interface SearchRetrieveService : NSObject 
+@interface BDSKISISearchRetrieveService : NSObject 
 
 + (id) citedReferences:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey;
 + (id) publisherLinks:(NSString*) in_query in_jsetList:(NSString*) in_jsetList;
