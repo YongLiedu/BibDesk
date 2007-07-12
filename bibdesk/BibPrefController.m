@@ -367,7 +367,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  BDSKReadExtendedAttributesKey                   bool    false   // read/write BibTeX to files
  BDSKShouldUsePDFMetadata                        bool    false   // reads standard PDF info
  BDSKShouldWritePDFMetadata                      bool    false   // writes standard PDF info
- 
+ BDSKAddISIXMLStringToAnnote                     bool    false
 
  */
 

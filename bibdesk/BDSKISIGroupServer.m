@@ -44,6 +44,11 @@
 #import "NSError_BDSKExtensions.h"
 
 #define MAX_RESULTS 100
+#if(OMNI_FORCE_ASSERTIONS)
+static BOOL addXMLStringToAnnote = YES;
+#else
+static BOOL addXMLStringToAnnote = NO;
+#endif
 
 // private protocols for inter-thread messaging
 @protocol BDSKISIGroupServerMainThread <BDSKAsyncDOServerMainThread>
@@ -75,6 +80,13 @@
         NSLog(@"%@", details);
     
     return canConnect;
+}
+
++ (void)initialize
+{
+    // this is messy, but may be useful for debugging
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKAddISIXMLStringToAnnote"])
+        addXMLStringToAnnote = YES;
 }
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKISIGroupServerMainThread); }
@@ -235,14 +247,21 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
             if (keywordString)
                 [pubFields setObject:keywordString forKey:BDSKKeywordsString];
         }
+        else if ([name isEqualToString:@"bib_pages"] && [child stringValue] && NO == [[child stringValue] isEqualToString:@"-"])
+            [pubFields setObject:[child stringValue] forKey:BDSKPagesString];
+        else if ([name isEqualToString:@"bib_issue"] && [child kind] == NSXMLElementKind) {
+            NSString *val = [[(NSXMLElement *)child attributeForName:@"year"] stringValue];
+            if (val)
+                [pubFields setObject:val forKey:BDSKYearString];
+            val = [[(NSXMLElement *)child attributeForName:@"vol"] stringValue];
+            if (val)
+                [pubFields setObject:val forKey:BDSKVolumeString];
+        }
+        // @@ remainder are untested (they're empty in all of my search results) so may be NSXMLElements
         else if ([name isEqualToString:@"bib_vol"] && [child stringValue])
-            [pubFields setObject:[child stringValue] forKey:BDSKVolumeString];
-        else if ([name isEqualToString:@"bib_issue"] && [child stringValue])
             [pubFields setObject:[child stringValue] forKey:BDSKVolumeString];
         else if ([name isEqualToString:@"article_nos"] && [child stringValue])
             [pubFields setObject:[child stringValue] forKey:BDSKNumberString];
-        else if ([name isEqualToString:@"bib_pages"] && [child stringValue])
-            [pubFields setObject:[child stringValue] forKey:BDSKPagesString];
         else if ([name isEqualToString:@"source_series"] && [child stringValue])
             [pubFields setObject:[child stringValue] forKey:BDSKSeriesString];
         else if ([name isEqualToString:@"bib_date"] && [child stringValue])
@@ -255,6 +274,11 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         child = [child nextSibling];
     }
     
+    // mainly useful for debugging
+    if (addXMLStringToAnnote && [record XMLString])
+        [pubFields setObject:[record XMLString] forKey:BDSKAnnoteString];
+    
+    // doctype seems to be Article for inproceedings as well, so we'll just default to article until further notice
     BibItem *pub = [[BibItem alloc] initWithType:BDSKArticleString
                                         fileType:BDSKBibtexString
                                          citeKey:nil
