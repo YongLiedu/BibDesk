@@ -25,17 +25,49 @@
     [super dealloc];
 }
 
+- (NSArray *)URLsFromPathsAndDirectories:(NSArray *)filesAndDirectories
+{
+    NSMutableArray *URLs = [NSMutableArray arrayWithCapacity:[filesAndDirectories count]];
+    NSEnumerator *e = [filesAndDirectories objectEnumerator];
+    NSString *path;
+    BOOL isDir;
+    NSFileManager *fm = [NSFileManager defaultManager];
+    while ((path = [e nextObject])) {
+        // presumably the file exists, since it arrived here because of drag-and-drop or the open panel, but we handle directories specially
+        if (([fm fileExistsAtPath:path isDirectory:&isDir])) {
+            // if not a directory, or it's a package, add it immediately
+            if (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:path]) {
+                [URLs addObject:[NSURL fileURLWithPath:path]];
+            } else {
+                // shallow directory traversal: only add the (non-folder) contents of a folder that was dropped, since an arbitrarily deep traversal would have performance issues for file listing and for the search kit indexing
+                NSArray *dirContent = [fm directoryContentsAtPath:path];
+                unsigned i, iMax = [dirContent count];
+                for (i = 0; i < iMax; i++) {
+                    // directoryContentsAtPath returns relative paths with the starting directory as base
+                    NSString *subpath = [dirContent objectAtIndex:i];
+                    // exclude .DS_Store and others
+                    if ([subpath hasPrefix:@"."] == NO) {
+                        subpath = [path stringByAppendingPathComponent:subpath];
+                        if ([fm fileExistsAtPath:subpath isDirectory:&isDir] && (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:subpath]))
+                            [URLs addObject:[NSURL fileURLWithPath:subpath]];
+                    }
+                }
+            }
+        }
+    }
+    return URLs;
+}
 
 - (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if (returnCode == NSOKButton)
-		[[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[panel URLs]];
+		[[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:[panel filenames]]];
 }
 
 - (IBAction)add:(id)sender;
 {
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     [openPanel setAllowsMultipleSelection:YES];
-    [openPanel setCanChooseDirectories:NO];
+    [openPanel setCanChooseDirectories:YES];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
     [openPanel beginSheetForDirectory:nil file:nil types:nil modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
@@ -133,20 +165,8 @@
     NSArray *types = [pboard types];
     if ([types containsObject:NSFilenamesPboardType]) {
         NSArray *newFiles = [pboard propertyListForType:NSFilenamesPboardType];
-        if ([newFiles count]) {
-            NSMutableArray *URLs = [NSMutableArray array];
-            NSEnumerator *e = [newFiles objectEnumerator];
-            NSString *path;
-            BOOL isDir;
-            while ((path = [e nextObject])) {
-                if (([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] && NO == isDir)) {
-                    [URLs addObject:[NSURL fileURLWithPath:path]];
-                } else if ([[NSWorkspace sharedWorkspace] isFilePackageAtPath:path]) {
-                    [URLs addObject:[NSURL fileURLWithPath:path]];
-                }
-            }
-            [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:URLs];
-        }
+        if ([newFiles count])
+            [[self mutableArrayValueForKey:@"files"] addObjectsFromArray:[self URLsFromPathsAndDirectories:newFiles]];
         return YES;
     }
     return NO;
