@@ -74,6 +74,9 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     NSParameterAssert(searchString != nil);
     NSParameterAssert([fileURL isFileURL]);
     
+    if ([searchString isEqualToString:@""])
+        return [self openURL:fileURL];
+    
     /*
      Modified after Apple sample code for FinderLaunch http://developer.apple.com/samplecode/FinderLaunch/FinderLaunch.html
      Create an open documents event targeting the file's creator application; if that doesn't work, fall back on the Finder (which will discard the search text info).
