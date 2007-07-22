@@ -259,7 +259,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
     NSString *searchString = [[event descriptorForKeyword:keyAESearchText] stringValue];
     
-    if([event eventID] == kAEOpenDocuments && searchString != nil){
+    if([event eventID] == kAEOpenDocuments && [NSString isEmptyString:searchString] == NO){
         // We want to handle open events for our Spotlight cache files differently; rather than setting the search field, we can jump to them immediately since they have richer context.  This code gets the path of the document being opened in order to check the file extension.
         NSString *hfsPath = [[[event descriptorForKeyword:keyAEResult] coerceToDescriptorType:typeFileURL] stringValue];
         
