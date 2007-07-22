@@ -74,9 +74,6 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
     NSParameterAssert(searchString != nil);
     NSParameterAssert([fileURL isFileURL]);
     
-    if ([searchString isEqualToString:@""])
-        return [self openURL:fileURL];
-    
     /*
      Modified after Apple sample code for FinderLaunch http://developer.apple.com/samplecode/FinderLaunch/FinderLaunch.html
      Create an open documents event targeting the file's creator application; if that doesn't work, fall back on the Finder (which will discard the search text info).
@@ -145,14 +142,16 @@ FindRunningAppBySignature( OSType sig, ProcessSerialNumber *psn, FSSpec *fileSpe
 	if (err == noErr)
         err = AECreateAppleEvent(kCoreEventClass, kAEOpenDocuments, &appAddress, kAutoGenerateReturnID, kAnyTransactionID, &theAEvent);
     
-    // Here's the search text; convert it to UTF8 bytes without null termination.
+    // Here's the search text; convert it to UTF8 bytes without null termination.  If it's zero-length data, there's no point in passing it, and we'll just degrade to a standard file opening case.
     NSData *UTF8data = [searchString dataUsingEncoding:NSUTF8StringEncoding];
-    if (err == noErr)
+    if ([UTF8data length] && noErr == err) {
+
         err = AECreateDesc(typeUTF8Text, [UTF8data bytes], [UTF8data length], &searchText);
-    
-    // Add the search text to our event as keyAESearchText
-    if (err == noErr)
-        err = AEPutParamDesc(&theAEvent, keyAESearchText, &searchText);
+        
+        // Add the search text to our event as keyAESearchText
+        if (err == noErr)
+            err = AEPutParamDesc(&theAEvent, keyAESearchText, &searchText);
+    }
     
 	if (err == noErr)
         // We could create a list from an array of FSSpecs, as in the original FinderLaunch sample
