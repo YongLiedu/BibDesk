@@ -146,17 +146,18 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 #pragma mark Copying
 
-// used to cache the selection info and document for lazy copying
+// formerly used to cache the selection info and document for lazy copying, but we kept getting out-of-range exception reports, so now we just write the data and hold it until it's requested
 - (void)updatePasteboardInfo;
 {    
     PDFSelection *theSelection = [self currentSelection];
     if(!theSelection)
         theSelection = [[self document] selectionForEntireDocument];
     
-    // @@ copy selection since it's mutable; may eliminate exceptions when providing data, but I've never been able to reproduce the problem
-    [pasteboardInfo setValue:[[theSelection copy] autorelease] forKey:@"selection"];
-    [pasteboardInfo setValue:[self document] forKey:@"document"];
-    [pasteboardInfo setValue:[self currentPage] forKey:@"page"];
+    NSAttributedString *attrString = [theSelection attributedString];
+    if (attrString)
+        [pasteboardInfo setObject:attrString forKey:@"attributedString"];
+    [pasteboardInfo setObject:[[self document] dataRepresentation] forKey:@"documentData"];
+    [pasteboardInfo setObject:[[self currentPage] dataRepresentation] forKey:@"pageData"];
 }
 
 // override so we can put the entire document on the pasteboard if there is no selection
@@ -168,21 +169,17 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (void)pasteboard:(NSPasteboard *)sender provideDataForType:(NSString *)type;
-{    
-    PDFSelection *theSelection = [pasteboardInfo valueForKey:@"selection"];
-    PDFDocument *theDocument = [pasteboardInfo valueForKey:@"document"];
-    PDFPage *thePage = [pasteboardInfo valueForKey:@"page"];
-    
+{        
     // use a private type to signal that we need to provide a page as PDF
     if([type isEqualToString:NSPDFPboardType] && [[sender types] containsObject:@"BDSKPrivatePDFPageDataPboardType"]){
-        [sender setData:[thePage dataRepresentation] forType:type];
+        [sender setData:[pasteboardInfo objectForKey:@"pageData"] forType:type];
     } else if([type isEqualToString:NSPDFPboardType]){ 
         // write the whole document
-        [sender setData:[theDocument dataRepresentation] forType:type];
-    } else if([type isEqualToString:NSStringPboardType]){
-        [sender setString:[theSelection string] forType:type];
-    } else if([type isEqualToString:NSRTFPboardType]){
-        NSAttributedString *attrString = [theSelection attributedString];
+        [sender setData:[pasteboardInfo objectForKey:@"documentData"] forType:type];
+    } else if([type isEqualToString:NSStringPboardType] && [pasteboardInfo objectForKey:@"attributedString"] != nil){
+        [sender setString:[[pasteboardInfo objectForKey:@"attributedString"] string] forType:type];
+    } else if([type isEqualToString:NSRTFPboardType] && [pasteboardInfo objectForKey:@"attributedString"] != nil){
+        NSAttributedString *attrString = [pasteboardInfo objectForKey:@"attributedString"];
         [sender setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:type];
     } else NSBeep();
 }
