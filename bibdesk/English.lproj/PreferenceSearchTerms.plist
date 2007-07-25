@@ -57,10 +57,11 @@
 	<key>bp_defaults</key>
 	<array>
 		<string>Custom fields</string>
-		<string>RSS</string>
 		<string>Global macros</string>
 		<string>BibTeX</string>
 		<string>Types</string>
+		<string>Local, file, URL, boolean, person</string>
+        <string>Local PDF file viewer</string>
 	</array>
 	<key>bp_display</key>
 	<array>
