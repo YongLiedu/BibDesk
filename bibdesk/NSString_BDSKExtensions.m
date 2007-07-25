@@ -1045,6 +1045,58 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
     return [self stringByAppendingString:[NSString horizontalEllipsisString]];
 }
 
+- (NSString *)titlecaseString;
+{
+    CFAllocatorRef alloc = CFGetAllocator((CFStringRef)self);
+    CFMutableStringRef mutableString = CFStringCreateMutableCopy(alloc, 0, (CFStringRef)self);
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFStringCapitalize(mutableString, locale);
+    CFRelease(locale);
+    
+    CFArrayRef comp = BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(alloc, mutableString, CFCharacterSetGetPredefined(kCFCharacterSetWhitespace), TRUE);
+    NSMutableArray *words = nil;
+    
+    if (comp) {
+        words = (NSMutableArray *)CFArrayCreateMutableCopy(alloc, CFArrayGetCount(comp), comp);
+        CFRelease(comp);
+    }
+    
+    const NSString *uppercaseWords[] = {
+        @"A",
+        @"An",
+        @"The",
+        @"Of",
+        @"And",
+    };
+    
+    const NSString *lowercaseWords[] = {
+        @"a",
+        @"an",
+        @"the",
+        @"of",
+        @"and",
+    };
+    
+    unsigned i, j, iMax = sizeof(uppercaseWords) / sizeof(NSString *);
+    
+    for (i = 0; i < iMax; i++) {
+        
+        const NSString *ucWord = uppercaseWords[i];
+        const NSString *lcWord = lowercaseWords[i];
+        
+        // omit the first word, since it should always be capitalized
+        while (NSNotFound != (j = [words indexOfObject:ucWord]) && j > 0)
+            [words replaceObjectAtIndex:j withObject:lcWord];
+    }
+    
+    NSString *toReturn = nil;
+    if (words) {
+        toReturn = (NSString *)CFStringCreateByCombiningStrings(alloc, (CFArrayRef)words, CFSTR(" "));
+        [words release];
+    }
+    return [toReturn autorelease];
+}
+
 - (NSString *)stringByTrimmingFromLastPunctuation{
     NSRange range = [self rangeOfCharacterFromSet:[NSCharacterSet punctuationCharacterSet] options:NSBackwardsSearch];
     

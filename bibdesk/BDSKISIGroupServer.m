@@ -50,6 +50,8 @@ static BOOL addXMLStringToAnnote = YES;
 static BOOL addXMLStringToAnnote = NO;
 #endif
 
+static BOOL useTitlecase = YES;
+
 static NSArray *publicationsWithISIXMLString(NSString *xmlString);
 
 // private protocols for inter-thread messaging
@@ -89,6 +91,9 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
     // this is messy, but may be useful for debugging
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKAddISIXMLStringToAnnote"])
         addXMLStringToAnnote = YES;
+    // try to allow for common titlecasing in Web of Science (which gives us uppercase titles)
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableISITitleCasing"])
+        useTitlecase = NO;
 }
 
 - (Protocol *)protocolForMainThread { return @protocol(BDSKISIGroupServerMainThread); }
@@ -342,7 +347,7 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         if ([name isEqualToString:@"item_title"])
             addStringValueOfNodeForField(child, BDSKTitleString, pubFields);
         else if ([name isEqualToString:@"source_title"])
-            addStringValueOfNodeForField(child, sourceField, pubFields);
+            addStringToDictionaryIfNotNil((useTitlecase ? [[child stringValue] titlecaseString] : [child stringValue]), sourceField, pubFields);
         else if ([name isEqualToString:@"authors"])
             addAuthorsFromXMLNode(child, pubFields);
         else if ([name isEqualToString:@"abstract"])

@@ -438,6 +438,14 @@ An inline buffer is used for speed in accessing each character.
 
 - (NSString *)stringByAppendingEllipsis;
 
+/*!
+    @method     titlecaseString
+    @abstract   Converts string to -capitalizedString, then selectively transforms certain words to lowercase.
+    @discussion Words are whitespace-delimited, similar to -capitalizedString, but not necessarily identical.
+    @result     (description)
+*/
+- (NSString *)titlecaseString;
+
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks;

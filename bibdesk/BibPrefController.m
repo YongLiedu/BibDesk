@@ -368,6 +368,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  BDSKShouldUsePDFMetadata                        bool    false   // reads standard PDF info
  BDSKShouldWritePDFMetadata                      bool    false   // writes standard PDF info
  BDSKAddISIXMLStringToAnnote                     bool    false
+ BDSKDisableISITitleCasing                       bool    false
 
  */
 
