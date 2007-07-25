@@ -47,9 +47,21 @@
 
 static BOOL isTiger = YES;
 
+@interface BDSKLogMessage : NSObject
+{
+    NSDate *date;
+    NSString *message;
+    NSString *sender;
+    int pid;
+    unsigned hash;
+}
+- (id)initWithASLMessage:(aslmsg)msg;
+@end
+
 static NSString *tigerASLHackaround(void)
 {
-    NSArray *args  = [NSArray arrayWithObjects:@"-k", @ASL_KEY_SENDER, @BDSK_ASL_SENDER, @"-k", @ASL_KEY_UID, @"Neq", [NSString stringWithFormat:@"%d", getuid()], @"-k", @ASL_KEY_LEVEL, @"Nle", [NSString stringWithFormat:@"%d", ASL_LEVEL_DEBUG], nil];
+    // find messages that we've logged
+    NSArray *args  = [NSArray arrayWithObjects:@"-k", @ASL_KEY_SENDER, @BDSK_ASL_SENDER, @"-k", @ASL_KEY_UID, @"Neq", [NSString stringWithFormat:@"%d", getuid()], @"-k", @ASL_KEY_LEVEL, @"Nle", [NSString stringWithFormat:@"%d", ASL_LEVEL_DEBUG], @"-k", @ASL_KEY_TIME, @"ge", @"-24h", nil];
     
     NSString *logString = nil;
     @try{
@@ -61,74 +73,16 @@ static NSString *tigerASLHackaround(void)
     return logString;
 }
 
-// formats an ASL message and appends it to the given mutable data
-static void appendMessageToData(aslmsg msg, NSMutableData *stderrData)
-{
-    // constants for formatting the output as follows:
-    // Mon Jun 18 18:14:31 2007	BibDesk[13255]	here's a log message from <BibDocument: 0x467e180>
-    const char tab[1] = { '\t' };
-    const char newline[1] = { '\n' };
-    const char lb[1] = { '[' };
-    const char rbTab[2] = { ']', '\t' };
-    
-    const char *val;
-    
-    val = asl_get(msg, ASL_KEY_TIME);
-    if (NULL == val) val = "0";
-        
-    // Header definition of ASL_KEY_TIME says to see ctime(3), but the date string on Tiger is of the form "2007.06.18 16:31:42 UTC", which has nothing to do with ctime or any other time function I can find.  This is a crock.
-    struct tm tm;
-    memset(&tm, 0, sizeof(tm));
-    time_t time;
-
-    // %Z apparently requires "GMT" instead of "UTC", so omit it and force UTC with timegm().
-    if (strptime(val, "%Y.%m.%d %H:%M:%S", &tm)) {
-        time = timegm(&tm);
-    } else {
-        time = strtol(val, NULL, 0);
-    }
-    val = ctime(&time);
-    if (NULL == val) val = "0";
-    
-    // ctime is documented as adding a newline, which is annoying to read
-    [stderrData appendBytes:val length:(strlen(val) - 1)];
-    [stderrData appendBytes:tab length:sizeof(tab)];
-    
-    val = asl_get(msg, ASL_KEY_SENDER);
-    if (NULL == val) val = "Unknown";
-    [stderrData appendBytes:val length:strlen(val)];
-    [stderrData appendBytes:lb length:sizeof(lb)];
-    
-    val = asl_get(msg, ASL_KEY_PID);
-    if (NULL == val) val = "-1";
-    [stderrData appendBytes:val length:strlen(val)];
-    [stderrData appendBytes:rbTab length:sizeof(rbTab)];
-    
-    val = asl_get(msg, ASL_KEY_MSG);
-    if (NULL == val) val = "Empty log message";
-    [stderrData appendBytes:val length:strlen(val)];
-    [stderrData appendBytes:newline length:sizeof(newline)];
-}
-
 static Boolean disableASLLogging = TRUE;
-    
-NSString *BDSKStandardErrorString(void)
+
+static int new_default_asl_query(aslmsg *newQuery)
 {
-    // sadly, repeated calls to asl_search() seem to corrupt memory on 10.4.9 rdar://problem/5276522
-    if (isTiger) return (disableASLLogging ? @"Re-enable ASL logging with `defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKDisableASLLogging -bool FALSE`" : tigerASLHackaround());
-    
-    aslmsg query, msg;
-    aslresponse response;
+    int err;
+    aslmsg query;
     
     query = asl_new(ASL_TYPE_QUERY);
     if (NULL == query)
         perror("asl_new");
-    
-    int err;
-    
-    err = asl_set_query(query, ASL_KEY_SENDER, BDSK_ASL_SENDER, ASL_QUERY_OP_EQUAL);
-    if (err != 0)
-        perror("asl_set_query sender");
     
     const char *uid_string = [[NSString stringWithFormat:@"%d", getuid()] UTF8String];
     err = asl_set_query(query, ASL_KEY_UID, uid_string, ASL_QUERY_OP_EQUAL | ASL_QUERY_OP_NUMERIC);
@@ -140,26 +94,81 @@ NSString *BDSKStandardErrorString(void)
     if (err != 0)
         perror("asl_set_query level");
     
+    // limit to last 24 hours
+    const char *time_string = [[NSString stringWithFormat:@"%fh", -24.0] UTF8String];
+    err = asl_set_query(query, ASL_KEY_TIME, time_string, ASL_QUERY_OP_GREATER_EQUAL);
+    if (err != 0)
+        perror("asl_set_query time");
+    
+    *newQuery = query;
+    
+    return err;
+}
+    
+NSString *BDSKStandardErrorString(void)
+{
+    // sadly, repeated calls to asl_search() seem to corrupt memory on 10.4.9 rdar://problem/5276522
+    if (isTiger) return (disableASLLogging ? @"Re-enable ASL logging with `defaults write edu.ucsd.cs.mmccrack.bibdesk BDSKDisableASLLogging -bool FALSE`" : tigerASLHackaround());
+    
+    aslmsg query, msg;
+    aslresponse response;
+    
+    int err;
+        
     aslclient client = asl_open(BDSK_ASL_SENDER, BDSK_ASL_FACILITY, ASL_OPT_NO_DELAY);
     asl_set_filter(client, ASL_FILTER_MASK_UPTO(ASL_LEVEL_DEBUG));
     
-    response = asl_search(client, query);
-    if (NULL == response)
-        perror("asl_search");
-    
-    NSMutableData *stderrData = nil;
+    NSMutableSet *messages = [NSMutableSet set];
     NSString *stderrString = nil;
     
     @try {
-        stderrData = [[NSMutableData alloc] initWithCapacity:1024];
-                
+        
+        err = new_default_asl_query(&query);
+        
+        // search for anything with our sender name as substring; captures some system logging
+        err = asl_set_query(query, ASL_KEY_MSG, BDSK_ASL_SENDER, ASL_QUERY_OP_CASEFOLD | ASL_QUERY_OP_SUBSTRING | ASL_QUERY_OP_EQUAL);
+        if (err != 0)
+            perror("asl_set_query message");
+        
+        response = asl_search(client, query);
+        if (NULL == response)
+            perror("asl_search");
+        
+        BDSKLogMessage *logMessage;
+        
         while (NULL != (msg = aslresponse_next(response))) {
-            appendMessageToData(msg, stderrData);
+            logMessage = [[BDSKLogMessage alloc] initWithASLMessage:msg];
+            if (logMessage)
+                [messages addObject:logMessage];
+            [logMessage release];
         }
         
-        if ([stderrData length])
-            stderrString = [[[NSString alloc] initWithData:stderrData encoding:NSUTF8StringEncoding] autorelease];
+        aslresponse_free(response);
+        asl_free(query);
         
+        err = new_default_asl_query(&query);
+        
+        // now search for messages that we've logged directly
+        err = asl_set_query(query, ASL_KEY_SENDER, BDSK_ASL_SENDER, ASL_QUERY_OP_EQUAL);
+        if (err != 0)
+            perror("asl_set_query sender");
+        
+        response = asl_search(client, query);
+        if (NULL == response)
+            perror("asl_search");
+        
+        while (NULL != (msg = aslresponse_next(response))) {
+            logMessage = [[BDSKLogMessage alloc] initWithASLMessage:msg];
+            if (logMessage)
+                [messages addObject:logMessage];
+            [logMessage release];
+        }
+        
+        // sort by date so we have a coherent list...
+        NSArray *sortedMessages = [[messages allObjects] sortedArrayUsingSelector:@selector(compare:)];
+        
+        // sends -description to each object
+        stderrString = [sortedMessages componentsJoinedByString:@"\n"];
     }
     @catch(id exception) {
         stderrString = [NSString stringWithFormat:@"Caught exception \"%@\" when attempting to read standard error log.", exception];
@@ -168,8 +177,8 @@ NSString *BDSKStandardErrorString(void)
         aslresponse_free(response);
         asl_free(query);
         asl_close(client);
-        [stderrData release];
     }
+    
     return stderrString;
 }
 
@@ -322,3 +331,67 @@ BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList)
     asl_free(m);
     asl_close(client);
 }
+
+#pragma mark -
+
+@implementation BDSKLogMessage
+
+- (id)initWithASLMessage:(aslmsg)msg
+{
+    self = [super init];
+    if (self) {
+        const char *val;
+        
+        val = asl_get(msg, ASL_KEY_TIME);
+        if (NULL == val) val = "0";
+        time_t time = strtol(val, NULL, 0);
+        date = [[NSDate dateWithTimeIntervalSince1970:time] copy];
+        hash = [date hash];
+        
+        val = asl_get(msg, ASL_KEY_SENDER);
+        if (NULL == val) val = "Unknown";
+        sender = [[NSString alloc] initWithCString:val encoding:NSUTF8StringEncoding];
+        
+        val = asl_get(msg, ASL_KEY_PID);
+        if (NULL == val) val = "-1";
+        pid = strtol(val, NULL, 0);
+        
+        val = asl_get(msg, ASL_KEY_MSG);
+        if (NULL == val) val = "Empty log message";
+        message = [[NSString alloc] initWithCString:val encoding:NSUTF8StringEncoding];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [date release];
+    [sender release];
+    [message release];
+    [super dealloc];
+}
+
+- (int)hash { return hash; }
+- (NSDate *)date { return date; }
+- (NSString *)message { return message; }
+- (NSString *)sender { return sender; }
+- (int)pid { return pid; }
+
+- (BOOL)isEqual:(id)other
+{
+    if ([other isKindOfClass:[self class]] == NO)
+        return NO;
+    if ([other pid] != pid)
+        return NO;
+    if ([[other message] isEqualToString:message] == NO)
+        return NO;
+    if ([(NSString *)[other sender] isEqualToString:sender] == NO)
+        return NO;
+    if ([[other date] compare:date] != NSOrderedSame)
+        return NO;
+    return YES;
+}
+- (NSString *)description { return [NSString stringWithFormat:@"%@ %@[%d]\t%@", date, sender, pid, message]; }
+- (NSComparisonResult)compare:(BDSKLogMessage *)other { return [[self date] compare:[other date]]; }
+
+@end
