@@ -4683,7 +4683,7 @@
 		F993F20308553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
+				ARCHS = "$(NATIVE_ARCH)";
 				CURRENT_PROJECT_VERSION = 824;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_AUTO_VECTORIZATION = NO;
