@@ -453,10 +453,7 @@
 		CE67E7C3092C9C3700410758 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(NATIVE_ARCH)";
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
 				GCC_USE_GCC3_PFE_SUPPORT = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;

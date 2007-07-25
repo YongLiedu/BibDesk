@@ -457,7 +457,7 @@
 		F9ABEBF1086E102800741FC5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
+				ARCHS = "$(NATIVE_ARCH)";
 				GCC_ENABLE_SYMBOL_SEPARATION = NO;
 				HEADER_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
