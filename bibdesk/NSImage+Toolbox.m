@@ -112,8 +112,16 @@
 }
 
 + (NSImage *)imageForFile:(NSString *)path{
-    // It turns out that -[NSWorkspace iconForFileType:] doesn't cache previously returned values, so we cache them here.
-    // Mainly useful for tableview datasource methods.
+    
+    /* It turns out that -[NSWorkspace iconForFileType:] doesn't cache previously returned values, so we cache them here.  Mainly useful for tableview datasource methods.  
+     
+     This caching is problematic in that it 
+     a) doesn't allow for per-file application bindings 
+     b) if the user changes a LS binding while this app is open, we still show the stale value
+     c) custom icons are not handled correctly
+     d) it doesn't consider the custom file opening pref that overrides LS (there's no way to account for that)
+     
+     */
     
     static NSMutableDictionary *imageDictionary = nil;
     id image = nil;
@@ -126,7 +134,9 @@
         imageDictionary = [[NSMutableDictionary alloc] init];
     
     NSString *pathExtension = [path pathExtension];
-    if(![pathExtension isEqualToString:@""]) {
+    
+    // .app is a valid path extension to pass here, but we must not cache the icon based on that extension!
+    if(![pathExtension isEqualToString:@""] && ![@"app" isEqualToString:pathExtension]) {
         image = [imageDictionary objectForKey:pathExtension];
         if (image == nil) {
             IconFamily *iconFamily = [[IconFamily alloc] initWithIconOfFile:path];
