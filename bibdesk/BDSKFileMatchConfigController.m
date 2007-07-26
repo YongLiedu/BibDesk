@@ -25,6 +25,24 @@
     [super dealloc];
 }
 
+static BOOL fileURLIsVisible(NSURL *fileURL)
+{
+    OSStatus err;
+    FSRef fileRef;
+    err = CFURLGetFSRef((CFURLRef)fileURL, &fileRef) ? noErr : fnfErr;
+    CFBooleanRef isInvisible;
+    BOOL isVisible = YES;
+    
+    if (noErr == err)
+        err = LSCopyItemAttribute(&fileRef, kLSRolesAll, kLSItemIsInvisible, (CFTypeRef *)&isInvisible);
+    
+    if (noErr == err) {
+        isVisible = (CFBooleanGetValue(isInvisible) == FALSE);
+        CFRelease(isInvisible);
+    }
+    return isVisible;
+}
+
 - (NSArray *)URLsFromPathsAndDirectories:(NSArray *)filesAndDirectories
 {
     NSMutableArray *URLs = [NSMutableArray arrayWithCapacity:[filesAndDirectories count]];
@@ -44,13 +62,11 @@
                 unsigned i, iMax = [dirContent count];
                 for (i = 0; i < iMax; i++) {
                     // directoryContentsAtPath returns relative paths with the starting directory as base
-                    NSString *subpath = [dirContent objectAtIndex:i];
-                    // exclude .DS_Store and others
-                    if ([subpath hasPrefix:@"."] == NO) {
-                        subpath = [path stringByAppendingPathComponent:subpath];
-                        if ([fm fileExistsAtPath:subpath isDirectory:&isDir] && (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:subpath]))
-                            [URLs addObject:[NSURL fileURLWithPath:subpath]];
-                    }
+                    NSString *subpath = [path stringByAppendingPathComponent:[dirContent objectAtIndex:i]];
+                    NSURL *fileURL = [NSURL fileURLWithPath:subpath];
+                    [fm fileExistsAtPath:subpath isDirectory:&isDir];
+                    if (fileURLIsVisible(fileURL) && NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:subpath])
+                        [URLs addObject:fileURL];
                 }
             }
         }
