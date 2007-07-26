@@ -524,7 +524,7 @@ static NSZone *enumeratorZone = NULL;
     
     CFURLRef fileURL = (CFURLRef)[NSURL fileURLWithPath:path];
     if( !CFURLGetFSRef(fileURL, &fileRef) )
-        return nil;
+        return NO;
     
     UKFSCatInfoFromDictionary( attrs, &info, &whichInfo );
     
