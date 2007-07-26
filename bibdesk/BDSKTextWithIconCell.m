@@ -309,8 +309,8 @@ textRect.origin.y += vOffset; \
             image = [NSImage imageForFile:path];
     } else if ([obj isKindOfClass:[NSURL class]]) {
         NSURL *fileURL = (NSURL *)obj;
-        path = [[fileURL path] stringByStandardizingPath];
-        if(path && [[NSFileManager defaultManager] objectExistsAtFileURL:fileURL])
+        path = [fileURL path];
+        if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL])
             image = [NSImage imageForURL:fileURL];
     } else if ([obj isKindOfClass:[NSDictionary class]]) {
         NSDictionary *dict = (NSDictionary *)obj;
