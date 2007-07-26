@@ -105,6 +105,7 @@ static NSBitmapImageRep *bestRepFromImageForSize(NSImage *anImage, NSSize prefer
             
             CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
             CGContextSaveGState(context);
+            CGContextClipToRect(context, *(CGRect *)&drawFrame);
             CGContextSetAllowsAntialiasing(context, true);
             CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
             
