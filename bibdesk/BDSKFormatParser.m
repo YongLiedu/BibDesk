@@ -260,10 +260,10 @@
 							if (isLocalFile) {
 								string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 							}
-                            if (numString == nil || [string length] > intValue) {
+                            if (numString == nil || [string length] > (unsigned)intValue) {
                                 if (i > 0) [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
                                 [parsedStr appendString:string]; 
-                                if ([string length] > intValue) --number;
+                                if ([string length] > (unsigned)intValue) --number;
                             }
 						}
 					}
