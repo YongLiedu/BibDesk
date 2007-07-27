@@ -69,8 +69,8 @@
     NSMutableString *parsedStr = [NSMutableString string];
 	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
-	NSString *string, *authSep, *nameSep, *etal, *slash;
-	unsigned int number, numAuth, i, uniqueNumber;
+	NSString *string, *authSep, *nameSep, *etal, *slash, *numString;
+	unsigned int number, numAuth, i, uniqueNumber, length;
     int intValue;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSArray *authArray;
@@ -228,6 +228,13 @@
 				case 'T':
 					// title, optional #words
                     string = [pub title];
+                    length = 3;
+                    numString = nil;
+                    if ([scanner scanString:@"[" intoString:NULL]) {
+                        if ([scanner scanUpToString:@"]" intoString:&numString])
+                            length = [numString intValue];
+                        [scanner scanString:@"]" intoString:NULL];
+                    }
 					if (![scanner scanUnsignedInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
@@ -247,13 +254,15 @@
 						}
 						if (number == 0) number = [arr count];
 						for (i = 0; i < [arr count] && number > 0; i++) { 
-							if (i > 0) [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
 							string = [self stringByStrictlySanitizingString:[arr objectAtIndex:i] forField:fieldName inFileType:[pub fileType]]; 
 							if (isLocalFile) {
 								string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 							}
-							[parsedStr appendString:string]; 
-							if ([string length] > 3) --number;
+                            if (numString == nil || [string length] > length) {
+                                if (i > 0) [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
+                                [parsedStr appendString:string]; 
+                                if ([string length] > length) --number;
+                            }
 						}
 					}
 					break;
@@ -800,7 +809,7 @@
 		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
 		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
 		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fcsi"] retain];
-		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPkfs"] retain];
+		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aApPTkfs"] retain];
 		
 		NSFont *font = [NSFont systemFontOfSize:0];
 		NSFont *boldFont = [NSFont boldSystemFontOfSize:0];
