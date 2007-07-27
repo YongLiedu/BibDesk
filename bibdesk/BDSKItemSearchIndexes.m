@@ -99,12 +99,11 @@ static void appendNormalizedNames(const void *value, void *context)
     NSMutableString *names = (NSMutableString *)context;
     if ([names isEqualToString:@""] == NO)
         [names appendString:@" "];
-    [names appendString:[person normalizedName]];
+    [names appendString:[[person normalizedName] stringByRemovingCurlyBraces]];
 }
 
 - (void)addPublications:(NSArray *)pubs;
 {
-    
     NSEnumerator *pubsEnum = [pubs objectEnumerator];
     BibItem *pub;
     NSMutableString *names = [[NSMutableString alloc] initWithCapacity:100];
@@ -112,22 +111,27 @@ static void appendNormalizedNames(const void *value, void *context)
     while (pub = [pubsEnum nextObject]) {
         SKDocumentRef doc = SKDocumentCreateWithURL((CFURLRef)[pub identifierURL]);
         if (doc) {
-            NSString *searchText = [pub allFieldsString];
+            
+            // ARM: I thought Search Kit was supposed to ignore some punctuation, but it matches curly braces (bug #1762014).  Since Title is the field most likely to have specific formatting commands, we'll remove all TeX from it, but the commands shouldn't affect search results anyway unless the commands split words.  For the allFieldsString, we'll just remove curly braces to save time, and pollute the index with a few commands.
+            
+            NSString *searchText = [[pub allFieldsString] stringByRemovingCurlyBraces];
             SKIndexRef skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKAllFieldsString);
             if (searchText && skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
             
-            searchText = [pub title];
+            searchText = [[pub title] stringByRemovingTeX];
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKTitleString);
             if (searchText && skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)searchText, TRUE);
             
+            // just remove curly braces from names
             [names replaceCharactersInRange:NSMakeRange(0, [names length]) withString:@""];
             CFSetApplyFunction((CFSetRef)[pub allPeople], appendNormalizedNames, names);
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, BDSKPersonString);
             if (skIndex)
                 SKIndexAddDocumentWithText(skIndex, doc, (CFStringRef)names, TRUE);  
             
+            // shouldn't be any TeX junk to remove from these
             searchText = [pub skimNotesForLocalURL];
             skIndex = (void *)CFDictionaryGetValue(searchIndexes, (CFStringRef)BDSKSkimNotesString);
             if (searchText && skIndex)
