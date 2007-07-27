@@ -284,7 +284,7 @@ static NSArray *publicationsWithISIXMLString(NSString *xmlString);
 // convenience to avoid creating a local variable and checking it each time
 static inline void addStringToDictionaryIfNotNil(NSString *value, NSString *key, NSMutableDictionary *dict)
 {
-    if (value) [dict setObject:value forKey:key];
+    if (value) [dict setObject:[value stringByBackslashEscapingTeXSpecials] forKey:key];
 }
 
 // convenience to add the string value of a node; only adds if non-nil

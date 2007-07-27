@@ -433,6 +433,42 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     return NSMakeRange(NSNotFound, 0);
 }
 
+- (NSString *)stringByBackslashEscapingTeXSpecials;
+{
+    static NSCharacterSet *charSet = nil;
+    // We could really go crazy with this, but the main need is to escape characters that commonly appear in titles and journal names when importing from z39.50 and other non-RIS/non-BibTeX search group sources.  Those sources aren't processed by the HTML->TeX path that's used for RIS, since they generally don't have embedded HTML.
+    if (nil == charSet)
+        charSet = [[NSCharacterSet characterSetWithCharactersInString:@"%&"] copy];
+    return [self stringByBackslashEscapingCharactersInSet:charSet];
+}
+
+- (NSString *)stringByBackslashEscapingCharactersInSet:(NSCharacterSet *)charSet;
+{
+    NSRange r = [self rangeOfCharacterFromSet:charSet options:NSLiteralSearch];
+    if (r.location == NSNotFound)
+        return self;
+    
+    NSMutableString *toReturn = [self mutableCopy];
+    while (r.length) {
+        unsigned start;
+        if (r.location == 0 || [toReturn characterAtIndex:(r.location - 1)] != '\\') {
+            // insert the backslash, then advance the search range by two characters
+            [toReturn replaceCharactersInRange:NSMakeRange(r.location, 0) withString:@"\\"];
+            start = r.location + 2;
+            r = [toReturn rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [toReturn length] - start)];
+        } else {
+            // this one was already escaped, so advance a character and repeat the search, unless that puts us over the end
+            if (r.location < [toReturn length]) {
+                start = r.location + 1;
+                r = [toReturn rangeOfCharacterFromSet:charSet options:NSLiteralSearch range:NSMakeRange(start, [toReturn length] - start)];
+            } else {
+                r = NSMakeRange(NSNotFound, 0);
+            }
+        }
+    }
+    return [toReturn autorelease];
+}
+
 - (NSString *)stringByConvertingHTMLToTeX;
 {
     static NSCharacterSet *asciiSet = nil;
@@ -507,14 +543,16 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
     BOOL in_verb = NO;
     BOOL in_alltt = NO;
     
-// ARM:  this code was taken directly from HTML2LaTeX.  I modified it to return
-// an NSString object, since working with FILE* streams led to really nasty problems
-// with NSPipe needing asynchronous reads to avoid blocking.
-// The NSMutableString appendFormat method was used to replace all of the calls to
-// fputc, fprintf, and fputs.
-// The following copyright notice was taken verbatim from the HTML2LaTeX code:
+/* ARM:  this code was taken directly from HTML2LaTeX.  I modified it to return
+ an NSString object, since working with FILE* streams led to really nasty problems
+ with NSPipe needing asynchronous reads to avoid blocking.
+ The NSMutableString appendFormat method was used to replace all of the calls to
+ fputc, fprintf, and fputs.
+ 
+ Frans Faase, the author of HTML2LaTeX, gave permission to include this in BibDesk under the BSD license. 
+ The following copyright notice was taken verbatim from the HTML2LaTeX code:
     
-/* HTML2LaTeX -- Converting HTML files to LaTeX
+HTML2LaTeX -- Converting HTML files to LaTeX
 Copyright (C) 1995-2003 Frans Faase
 
 This program is free software; you can redistribute it and/or modify

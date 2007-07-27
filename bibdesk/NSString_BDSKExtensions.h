@@ -246,6 +246,15 @@ An inline buffer is used for speed in accessing each character.
 */
 - (NSString *)stringWithPhoneyCiteKeys:(NSString *)tmpKey;
 
+/*!
+    @method     stringByBackslashEscapingTeXSpecials
+    @abstract   Adds backslash escapes (if needed) for a few characters.
+    @discussion Mainly to escape characters that commonly appear in titles or journal names when importing from z39.50 and other non-RIS/non-BibTeX search group sources, since those aren't processed by the HTML->TeX path that's used for RIS.
+    @result     The escaped string.
+*/
+- (NSString *)stringByBackslashEscapingTeXSpecials;
+- (NSString *)stringByBackslashEscapingCharactersInSet:(NSCharacterSet *)charSet;
+
 - (NSString *)stringByConvertingHTMLToTeX;
 + (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
 
