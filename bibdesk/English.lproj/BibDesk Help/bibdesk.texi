@@ -3597,7 +3597,7 @@ Possible format specifiers are given in the table below.
 @tab Author or editor last names with initials, with (optional) maximal number of authors
 @item @specparam{%t, 0 }
 @tab Title, with (optional) maximal length
-@item @specparam{%T, 0 }
+@item @specparam{%T, []0 }
 @tab Title, with (optional) maximal number of words
 @item @spec{%y}
 @tab Year without century
@@ -3662,6 +3662,10 @@ The optional parameters delimited by square brackets after an author specifier
 can be used to control the separator between author names and an optional @samp{et al.} suffix. 
 For @spec{%A}, the first one is the separator between two author names, 
 and the second one is the separator between the last name and the first initial. 
+
+The optional parameter delimited by square brackets after a title specifier @spec{%T} 
+denotes the maximum length of words to be dropped. If this arguments is missing, 
+words with length up to 3 are not counted, but they are included. 
 
 In the local url format the slash-character (/) has a special meaning, as it is used 
 to build the (UNIX style) folder hierarchy. This is usually not what you want generated 

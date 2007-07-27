@@ -70,7 +70,7 @@
 	NSString *prefixStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
 	NSString *string, *authSep, *nameSep, *etal, *slash, *numString;
-	unsigned int number, numAuth, i, uniqueNumber, length;
+	unsigned int number, numAuth, i, uniqueNumber;
     int intValue;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSArray *authArray;
@@ -228,11 +228,13 @@
 				case 'T':
 					// title, optional #words
                     string = [pub title];
-                    length = 3;
+                    intValue = 3;
                     numString = nil;
                     if ([scanner scanString:@"[" intoString:NULL]) {
                         if ([scanner scanUpToString:@"]" intoString:&numString])
-                            length = [numString intValue];
+                            intValue = (unsigned)[numString intValue];
+                        else
+                            intValue = 0;
                         [scanner scanString:@"]" intoString:NULL];
                     }
 					if (![scanner scanUnsignedInt:&number]) number = 0;
@@ -258,10 +260,10 @@
 							if (isLocalFile) {
 								string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 							}
-                            if (numString == nil || [string length] > length) {
+                            if (numString == nil || [string length] > intValue) {
                                 if (i > 0) [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
                                 [parsedStr appendString:string]; 
-                                if ([string length] > length) --number;
+                                if ([string length] > intValue) --number;
                             }
 						}
 					}
