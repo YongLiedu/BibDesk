@@ -41,16 +41,18 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSURL_BDSKExtensions.h"
 
+// do not localized these strings
 NSString *BDSKTemplateRoleString = @"role";
 NSString *BDSKTemplateNameString = @"name";
 NSString *BDSKTemplateFileURLString = @"representedFileURL";
 NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
 NSString *BDSKServiceTemplateTree = @"BDSKServiceTemplateTree";
 
-NSString *BDSKTemplateAccessoryString = @"Accessory File";
-NSString *BDSKTemplateMainPageString = @"Main Page";
-NSString *BDSKTemplateDefaultItemString = @"Default Item";
-NSString *BDSKTemplateScriptString = @"Postprocess Script";
+// these strings are presented in the UI, so they're localized
+NSString *BDSKTemplateAccessoryString = nil;
+NSString *BDSKTemplateMainPageString = nil;
+NSString *BDSKTemplateDefaultItemString = nil;
+NSString *BDSKTemplateScriptString = nil;
 
 static inline NSString *itemTemplateSubstring(NSString *templateString){
     int start, end, length = [templateString length];
@@ -78,6 +80,17 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 
 @implementation BDSKTemplate
 
+// use +didLoad instead of +initialize since other classes depend on these globals; maybe someday we can convert them to class methods instead of globals
++ (void)didLoad
+{
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    BDSKTemplateAccessoryString = [NSLocalizedString(@"Accessory File", @"additional file used with export template") copy];
+    BDSKTemplateMainPageString = [NSLocalizedString(@"Main Page", @"template file used for the main page") copy];
+    BDSKTemplateDefaultItemString = [NSLocalizedString(@"Default Item", @"template file used for a generic pub type") copy];
+    BDSKTemplateScriptString = [NSLocalizedString(@"Postprocess Script", @"script for postprocessing template") copy];
+    [pool release];
+}
+
 #pragma mark Class methods
 
 + (NSArray *)defaultExportTemplates
@@ -90,7 +103,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     
     // HTML template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default HTML template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"Default HTML template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"html" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
@@ -108,7 +121,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     
     // RTF template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default RTF template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"Default RTF template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
@@ -117,7 +130,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     
     // RTFD template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default RTFD template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"Default RTFD template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"rtfd" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
@@ -126,7 +139,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         
     // RSS template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default RSS template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"Default RSS template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"rss" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
@@ -135,7 +148,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
         
     // Doc template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Default Doc template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"Default Doc template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"doc" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
@@ -154,7 +167,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     
     // Citation template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Citation Service template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"Citation Service template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"txt" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
@@ -163,7 +176,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     
     // Text template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"Text Service template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"Text Service template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"txt" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
@@ -172,7 +185,7 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
     
     // RTF template
     template = [[BDSKTemplate alloc] init];
-    [template setValue:@"RTF Service template" forKey:BDSKTemplateNameString];
+    [template setValue:NSLocalizedString(@"RTF Service template", @"template name") forKey:BDSKTemplateNameString];
     [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
     [itemNodes addObject:template];
     [template release];
