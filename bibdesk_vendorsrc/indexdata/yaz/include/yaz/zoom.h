@@ -173,7 +173,7 @@ ZOOM_resultset_option_get (ZOOM_resultset r, const char *key);
 ZOOM_API(void)
 ZOOM_resultset_option_set (ZOOM_resultset r, const char *key, const char *val);
 
-/*†return size of result set (alias hit count AKA result count) */
+/* return size of result set (alias hit count AKA result count) */
 ZOOM_API(size_t)
 ZOOM_resultset_size (ZOOM_resultset r);
 
