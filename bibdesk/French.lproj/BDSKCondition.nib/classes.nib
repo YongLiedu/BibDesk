@@ -1,57 +1,136 @@
-{
-    IBClasses = (
-        {
-            ACTIONS = {addNewCondition = id; changeRating = id; removeThisCondition = id; }; 
-            CLASS = BDSKConditionController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addButton = NSButton; 
-                agoText = NSTextField; 
-                andNumberTextField = NSTextField; 
-                booleanButton = NSButton; 
-                comparisonBox = NSBox; 
-                comparisonPopUp = NSPopUpButton; 
-                dateComparisonPopUp = NSPopUpButton; 
-                dateTextField = NSTextField; 
-                keyComboBox = NSComboBox; 
-                numberTextField = NSTextField; 
-                periodPopUp = NSPopUpButton; 
-                ratingButton = NSButton; 
-                removeButton = NSButton; 
-                toDateTextField = NSTextField; 
-                triStateButton = NSButton; 
-                valueBox = NSBox; 
-                valueTextField = NSTextField; 
-                view = NSView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }, 
-        {
-            ACTIONS = {addNewCondition = id; removeThisCondition = id; }; 
-            CLASS = BDSKConditionController1; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                addButton = NSButton; 
-                agoText = NSTextField; 
-                andNumberTextField = NSTextField; 
-                comparisonBox = NSBox; 
-                comparisonPopUp = NSPopUpButton; 
-                dateComparisonPopUp = NSPopUpButton; 
-                dateTextField = NSTextField; 
-                keyComboBox = NSComboBox; 
-                numberTextField = NSTextField; 
-                ownerController = NSObjectController; 
-                periodPopUp = NSPopUpButton; 
-                removeButton = NSButton; 
-                toDateTextField = NSTextField; 
-                valueBox = NSBox; 
-                valueTextField = NSTextField; 
-                view = NSView; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>BDSKRatingButton</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSButton</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenu</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>hideWindow</key>
+				<string>id</string>
+				<key>toggleShowingWindow</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>NSWindowController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSWindow</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSResponder</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>addNewCondition</key>
+				<string>id</string>
+				<key>changeRating</key>
+				<string>id</string>
+				<key>removeThisCondition</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>BDSKConditionController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>addButton</key>
+				<string>NSButton</string>
+				<key>agoText</key>
+				<string>NSTextField</string>
+				<key>andNumberTextField</key>
+				<string>NSTextField</string>
+				<key>booleanButton</key>
+				<string>NSButton</string>
+				<key>comparisonBox</key>
+				<string>NSBox</string>
+				<key>comparisonPopUp</key>
+				<string>NSPopUpButton</string>
+				<key>dateComparisonPopUp</key>
+				<string>NSPopUpButton</string>
+				<key>dateTextField</key>
+				<string>NSTextField</string>
+				<key>keyComboBox</key>
+				<string>NSComboBox</string>
+				<key>numberTextField</key>
+				<string>NSTextField</string>
+				<key>periodPopUp</key>
+				<string>NSPopUpButton</string>
+				<key>ratingButton</key>
+				<string>BDSKRatingButton</string>
+				<key>removeButton</key>
+				<string>NSButton</string>
+				<key>toDateTextField</key>
+				<string>NSTextField</string>
+				<key>triStateButton</key>
+				<string>NSButton</string>
+				<key>valueBox</key>
+				<string>NSBox</string>
+				<key>valueTextField</key>
+				<string>NSTextField</string>
+				<key>view</key>
+				<string>NSView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
