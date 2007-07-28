@@ -91,9 +91,7 @@
 
 /*!
     @method stringsForCompletionEntry
-    @abstract returns all strings registered for a particular entry.
-    @discussion «discussion»
-    
+    @abstract returns all strings registered for a particular entry.    
 */
 - (NSSet *)stringsForCompletionEntry:(NSString *)entry;
 

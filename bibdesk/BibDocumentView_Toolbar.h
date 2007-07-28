@@ -38,10 +38,5 @@
 
 @interface BibDocument (Toolbar)
 
-/*!
-@method setupToolbar
- @abstract «Abstract»
- @discussion «discussion»
- */
 - (void)setupToolbar;
 @end

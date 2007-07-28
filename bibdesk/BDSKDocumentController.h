@@ -53,17 +53,13 @@
 
 /*!
     @method openDocumentUsingFilter:
-    @abstract Lets user specify a command-line to read from stdin and give us stdout.
-    @discussion «discussion»
-    
+    @abstract Lets user specify a command-line to read from stdin and give us stdout.    
 */
 - (IBAction)openDocumentUsingFilter:(id)sender;
 
 /*!
     @method openDocumentUsingPhonyCiteKeys:
-    @abstract First sets cite keys when they are missing, so we can open the file.
-    @discussion «discussion»
-    
+    @abstract First sets cite keys when they are missing, so we can open the file.    
 */
 - (IBAction)openDocumentUsingPhonyCiteKeys:(id)sender;
 

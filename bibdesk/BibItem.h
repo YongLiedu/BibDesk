@@ -660,9 +660,7 @@ enum {
 
 /*!
     @method bibTeXString
-    @abstract  returns the bibtex source for this bib item.  Is TeXified based on default preferences for the application.
-    @discussion «discussion»
-    
+    @abstract  returns the bibtex source for this bib item.  Is TeXified based on default preferences for the application.    
 */
 - (NSString *)bibTeXString;
 
@@ -697,9 +695,7 @@ enum {
 
 /*!
     @method RTFValue
-    @abstract  returns a pretty RTF display for this bib item.
-    @discussion «discussion»
-    
+    @abstract  returns a pretty RTF display for this bib item.    
 */
 - (NSData *)RTFValue;
 
@@ -718,17 +714,13 @@ enum {
 
 /*!
     @method RSSValue
-    @abstract returns an rss XML entry suitable for embedding in an rss file.
-    @discussion «discussion»
-    
+    @abstract returns an rss XML entry suitable for embedding in an rss file.    
 */
 - (NSString *)RSSValue;
 
 /*!
     @method allFieldsString
-    @abstract returns the value of each of the fields concatenated into a single string.
-    @discussion «discussion»
-    
+    @abstract returns the value of each of the fields concatenated into a single string.    
 */
 - (NSString *)allFieldsString; 
 
