@@ -59,7 +59,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         
         fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"txt", @"rtf", @"rtfd", @"doc", nil];
         
-        roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateMainPageString, BDSKTemplateDefaultItemString, BDSKTemplateAccessoryString, BDSKTemplateScriptString, nil];
+        roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateLocalizedMainPageString, BDSKTemplateLocalizedDefaultItemString, BDSKTemplateLocalizedAccessoryString, BDSKTemplateLocalizedScriptString, nil];
         [roles addObjectsFromArray:[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
         
         templatePrefList = BDSKExportTemplateList;
@@ -227,6 +227,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             value = ([item isLeaf]) ? NSLocalizedString(@"Choose role", @"Default text for template role") : NSLocalizedString(@"Choose file type", @"Default text for template type");
         else if ([identifier isEqualToString:BDSKTemplateNameString])
             value = ([item isLeaf]) ? NSLocalizedString(@"Double-click to choose file", @"Default text for template file") : NSLocalizedString(@"Double-click to change name", @"Default text fo template name");
+    } else if ([identifier isEqualToString:BDSKTemplateRoleString]) {
+        value = [BDSKTemplate localizedRoleString:value];
     }
     return value;
 }
@@ -301,6 +303,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 // this seems to be called when editing the NSComboBoxCell as well as the parent name
 - (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
     NSString *identifier = [tableColumn identifier];
+    if ([identifier isEqualToString:BDSKTemplateRoleString])
+        object = [BDSKTemplate unlocalizedRoleString:object];
     if([identifier isEqualToString:BDSKTemplateRoleString] && [item isLeaf] && [object isEqualToString:BDSKTemplateAccessoryString] == NO && [(BDSKTemplate *)[item parent] childForRole:object] != nil) {
         [outlineView reloadData];
     } else if (object != nil) { // object can be nil when a NSComboBoxCell is edited while the options are shown, looks like an AppKit bug

@@ -47,12 +47,16 @@ NSString *BDSKTemplateNameString = @"name";
 NSString *BDSKTemplateFileURLString = @"representedFileURL";
 NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
 NSString *BDSKServiceTemplateTree = @"BDSKServiceTemplateTree";
+NSString *BDSKTemplateAccessoryString = @"Accessory File";
+NSString *BDSKTemplateMainPageString = @"Main Page";
+NSString *BDSKTemplateDefaultItemString = @"Default Item";
+NSString *BDSKTemplateScriptString = @"Postprocess Script";
 
 // these strings are presented in the UI, so they're localized
-NSString *BDSKTemplateAccessoryString = nil;
-NSString *BDSKTemplateMainPageString = nil;
-NSString *BDSKTemplateDefaultItemString = nil;
-NSString *BDSKTemplateScriptString = nil;
+NSString *BDSKTemplateLocalizedAccessoryString = nil;
+NSString *BDSKTemplateLocalizedMainPageString = nil;
+NSString *BDSKTemplateLocalizedDefaultItemString = nil;
+NSString *BDSKTemplateLocalizedScriptString = nil;
 
 static inline NSString *itemTemplateSubstring(NSString *templateString){
     int start, end, length = [templateString length];
@@ -84,11 +88,35 @@ static inline NSString *itemTemplateSubstring(NSString *templateString){
 + (void)didLoad
 {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    BDSKTemplateAccessoryString = [NSLocalizedString(@"Accessory File", @"additional file used with export template") copy];
-    BDSKTemplateMainPageString = [NSLocalizedString(@"Main Page", @"template file used for the main page") copy];
-    BDSKTemplateDefaultItemString = [NSLocalizedString(@"Default Item", @"template file used for a generic pub type") copy];
-    BDSKTemplateScriptString = [NSLocalizedString(@"Postprocess Script", @"script for postprocessing template") copy];
+    BDSKTemplateLocalizedAccessoryString = [NSLocalizedString(@"Accessory File", @"additional file used with export template") copy];
+    BDSKTemplateLocalizedMainPageString = [NSLocalizedString(@"Main Page", @"template file used for the main page") copy];
+    BDSKTemplateLocalizedDefaultItemString = [NSLocalizedString(@"Default Item", @"template file used for a generic pub type") copy];
+    BDSKTemplateLocalizedScriptString = [NSLocalizedString(@"Postprocess Script", @"script for postprocessing template") copy];
     [pool release];
+}
+
++ (NSString *)localizedRoleString:(NSString *)string {
+    if ([string isEqualToString:BDSKTemplateAccessoryString])
+        string = BDSKTemplateLocalizedAccessoryString;
+    else if ([string isEqualToString:BDSKTemplateMainPageString])
+        string = BDSKTemplateLocalizedMainPageString;
+    else if ([string isEqualToString:BDSKTemplateDefaultItemString])
+        string = BDSKTemplateLocalizedDefaultItemString;
+    else if ([string isEqualToString:BDSKTemplateScriptString])
+        string = BDSKTemplateLocalizedScriptString;
+    return string;
+}
+
++ (NSString *)unlocalizedRoleString:(NSString *)string {
+    if ([string isEqualToString:BDSKTemplateLocalizedAccessoryString])
+        string = BDSKTemplateAccessoryString;
+    else if ([string isEqualToString:BDSKTemplateLocalizedMainPageString])
+        string = BDSKTemplateMainPageString;
+    else if ([string isEqualToString:BDSKTemplateLocalizedDefaultItemString])
+        string = BDSKTemplateDefaultItemString;
+    else if ([string isEqualToString:BDSKTemplateLocalizedScriptString])
+        string = BDSKTemplateScriptString;
+    return string;
 }
 
 #pragma mark Class methods

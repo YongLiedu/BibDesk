@@ -60,10 +60,18 @@ extern NSString *BDSKTemplateMainPageString;
 extern NSString *BDSKTemplateDefaultItemString;
 extern NSString *BDSKTemplateScriptString;
 
+extern NSString *BDSKTemplateLocalizedAccessoryString;
+extern NSString *BDSKTemplateLocalizedMainPageString;
+extern NSString *BDSKTemplateLocalizedDefaultItemString;
+extern NSString *BDSKTemplateLocalizedScriptString;
+
 // concrete subclass with specific accessors for the template tree
 @interface BDSKTemplate : BDSKTreeNode
 {
 }
+
++ (NSString *)localizedRoleString:(NSString *)string; 
++ (NSString *)unlocalizedRoleString:(NSString *)string; 
 
 // default templates
 + (NSArray *)defaultExportTemplates;
