@@ -2562,22 +2562,23 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             currentPreviewView = view;
         }
         
-        PDFDocument *pdfDoc = nil;
         NSArray *items = [self selectedPublications];
-        if ([items count]) {
-            NSURL *url = [[items objectAtIndex:0] localURL];
-            if(url && [[[previewPdfView document] documentURL] isEqual:url] == NO)
-                pdfDoc = [[PDFDocument alloc] initWithURL:url];
-        }
-        if(pdfDoc == nil){
+        NSURL *url = [items count] ? [[items objectAtIndex:0] localURL] : nil;
+        if (url) {
+            if([[[previewPdfView document] documentURL] isEqual:url] == NO){
+                PDFDocument *pdfDoc = [[PDFDocument alloc] initWithURL:url];
+                [previewPdfView setDocument:pdfDoc];
+                [pdfDoc release];
+            }
+        }else{
             BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:YES];
             [printableView setFont:[NSFontManager bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]]];
-            NSData *data = [printableView PDFDataWithString:NSLocalizedString(@"No linked file.", @"Preview message")];
+            NSData *data = [printableView PDFDataWithString:NSLocalizedString(@"No linked file.", @"Preview message when there is no linked file")];
             [printableView release];
-            pdfDoc = [[PDFDocument alloc] initWithData:data];
+            PDFDocument *pdfDoc = [[PDFDocument alloc] initWithData:data];
+            [previewPdfView setDocument:pdfDoc];
+            [pdfDoc release];
         }
-        [previewPdfView setDocument:pdfDoc];
-        [pdfDoc release];
         
     }else{
     
