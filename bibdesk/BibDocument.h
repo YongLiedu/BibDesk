@@ -47,7 +47,7 @@
 @class BibItem, BibAuthor, BDSKGroup, BDSKStaticGroup, BDSKSmartGroup, BDSKTemplate, BDSKPublicationsArray, BDSKGroupsArray;
 @class AGRegex, BDSKTeXTask, BDSKMacroResolver, BDSKItemPasteboardHelper;
 @class BibEditor, MacroWindowController, BDSKDocumentInfoWindowController, BDSKPreviewer, BDSKFileContentSearchController, BDSKCustomCiteDrawerController, BDSKSearchGroupViewController;
-@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView;
+@class BDSKAlert, BDSKStatusBar, BDSKMainTableView, BDSKGroupTableView, BDSKGradientView, BDSKSplitView, BDSKCollapsibleView, BDSKEdgeView, BDSKImagePopUpButton, BDSKColoredBox, BDSKEncodingPopUpButton, BDSKZoomablePDFView;
 @class BDSKWebGroupViewController, BDSKSearchButtonController;
 @class BDSKItemSearchIndexes;
 
@@ -133,9 +133,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSTextView *previewTextView;
     IBOutlet NSView *currentPreviewView;
     BDSKPreviewer *previewer;
-    NSBox *previewerBox;
+    BDSKEdgeView *previewerBox;
     BDSKZoomablePDFView *previewPdfView;
-    NSBox *previewBox;
+    BDSKEdgeView *previewBox;
 	
 #pragma mark Toolbar variables
     

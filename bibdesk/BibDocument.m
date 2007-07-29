@@ -2540,11 +2540,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
             [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
             [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
-            previewerBox = [[NSBox alloc] init];
-            [previewerBox setBoxType:NSBoxOldStyle];
-            [previewerBox setBorderType:NSLineBorder];
-            [previewerBox setTitlePosition:NSNoTitle];
-            [previewerBox setContentViewMargins:NSZeroSize];
+            previewerBox = [[BDSKEdgeView alloc] init];
+            [previewerBox setEdges:BDSKEveryEdgeMask];
+            [previewerBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
             [previewerBox setContentView:[previewer pdfView]];
         }
         view = displayType == BDSKRTFPreviewDisplay ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)previewerBox;
@@ -2562,11 +2560,9 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [previewer updateWithBibTeXString:nil];
         if (previewPdfView == nil) {
             previewPdfView = [[BDSKZoomablePDFView alloc] init];
-            previewBox = [[NSBox alloc] init];
-            [previewBox setBoxType:NSBoxOldStyle];
-            [previewBox setBorderType:NSLineBorder];
-            [previewBox setTitlePosition:NSNoTitle];
-            [previewBox setContentViewMargins:NSZeroSize];
+            previewBox = [[BDSKEdgeView alloc] init];
+            [previewBox setEdges:BDSKEveryEdgeMask];
+            [previewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
             [previewBox setContentView:previewPdfView];
             [previewPdfView release];
         }
