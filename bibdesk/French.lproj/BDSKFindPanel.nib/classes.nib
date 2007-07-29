@@ -9,6 +9,7 @@
                 fieldToSearchComboBox = NSComboBox; 
                 findAsMacroCheckbox = NSButton; 
                 findComboBox = NSComboBox; 
+                findOptionsBox = NSBox; 
                 ignoreCaseCheckbox = NSButton; 
                 replaceAsMacroCheckbox = NSButton; 
                 replaceButton = NSButton; 
@@ -16,6 +17,8 @@
                 searchScopePopUpButton = NSPopUpButton; 
                 searchSelectionMatrix = NSMatrix; 
                 searchTypePopUpButton = NSPopUpButton; 
+                setOptionsBox = NSBox; 
+                shouldSetWhenEmptyCheckbox = NSButton; 
                 statusBar = BDSKStatusBar; 
             }; 
             SUPERCLASS = NSWindowController; 
