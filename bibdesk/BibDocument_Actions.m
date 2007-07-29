@@ -80,6 +80,7 @@
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
+#import "BDSKPreviewer.h"
 
 
 @implementation BibDocument (Actions)
@@ -792,10 +793,12 @@
 - (void)pageDownInPreview:(id)sender{
     NSScrollView *scrollView = nil;
     
-    if([currentPreviewView isKindOfClass:[NSScrollView class]])
+    if([currentPreviewView isEqual:previewerBox])
+        scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
+    else if([currentPreviewView isEqual:previewBox])
+        scrollView = [previewPdfView scrollView];
+    else
         scrollView = (NSScrollView *)currentPreviewView;
-    else if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]])
-        scrollView = [(BDSKZoomablePDFView *)currentPreviewView scrollView];
     
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     
@@ -815,10 +818,12 @@
 - (void)pageUpInPreview:(id)sender{
     NSScrollView *scrollView = nil;
     
-    if([currentPreviewView isKindOfClass:[NSScrollView class]])
+    if([currentPreviewView isEqual:previewerBox])
+        scrollView = [(BDSKZoomablePDFView *)[previewer pdfView] scrollView];
+    else if([currentPreviewView isEqual:previewBox])
+        scrollView = [previewPdfView scrollView];
+    else
         scrollView = (NSScrollView *)currentPreviewView;
-    else if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]])
-        scrollView = [(BDSKZoomablePDFView *)currentPreviewView scrollView];
     
     NSPoint p = [[scrollView documentView] scrollPositionAsPercentage];
     

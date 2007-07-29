@@ -236,7 +236,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 	[splitView release];
     [[previewTextView enclosingScrollView] release];
     [previewer release];
-    [previewPdfView release];
+    [previewerBox release];
+    [previewBox release];
     [macroWC release];
     [infoWC release];
     [promiseDragColumnIdentifier release];
@@ -2539,8 +2540,14 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
             NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
             [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
             [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
+            previewerBox = [[NSBox alloc] init];
+            [previewerBox setBoxType:NSBoxOldStyle];
+            [previewerBox setBorderType:NSLineBorder];
+            [previewerBox setTitlePosition:NSNoTitle];
+            [previewerBox setContentViewMargins:NSZeroSize];
+            [previewerBox setContentView:[previewer pdfView]];
         }
-        view = displayType == BDSKRTFPreviewDisplay ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)[previewer pdfView];
+        view = displayType == BDSKRTFPreviewDisplay ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)previewerBox;
         if(currentPreviewView != view){
             [view setFrame:[currentPreviewView frame]];
             [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
@@ -2553,9 +2560,17 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         
         [[previewer progressOverlay] remove];
         [previewer updateWithBibTeXString:nil];
-        if (previewPdfView == nil)
+        if (previewPdfView == nil) {
             previewPdfView = [[BDSKZoomablePDFView alloc] init];
-        view = previewPdfView;
+            previewBox = [[NSBox alloc] init];
+            [previewBox setBoxType:NSBoxOldStyle];
+            [previewBox setBorderType:NSLineBorder];
+            [previewBox setTitlePosition:NSNoTitle];
+            [previewBox setContentViewMargins:NSZeroSize];
+            [previewBox setContentView:previewPdfView];
+            [previewPdfView release];
+        }
+        view = previewBox;
         if(currentPreviewView != view){
             [view setFrame:[currentPreviewView frame]];
             [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
@@ -2904,8 +2919,10 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 #pragma mark Printing support
 
 - (IBAction)printDocument:(id)sender{
-    if([currentPreviewView isKindOfClass:[BDSKZoomablePDFView class]])
-        [(PDFView *)currentPreviewView printWithInfo:[self printInfo] autoRotate:NO];
+    if([currentPreviewView isEqual:previewerBox])
+        [[previewer pdfView] printWithInfo:[self printInfo] autoRotate:NO];
+    else if([currentPreviewView isEqual:previewBox])
+        [previewPdfView printWithInfo:[self printInfo] autoRotate:NO];
     else
         [super printDocument:sender];
 }
