@@ -2579,6 +2579,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         
         NSArray *items = [self selectedPublications];
         NSURL *url = [items count] ? [[items objectAtIndex:0] localURL] : nil;
+        if (url && UTTypeConformsTo((CFStringRef)[[NSWorkspace sharedWorkspace] UTIForURL:url], kUTTypePDF) == FALSE)
+            url = nil;
         if (url) {
             if([[[previewPdfView document] documentURL] isEqual:url] == NO){
                 PDFDocument *pdfDoc = [[PDFDocument alloc] initWithURL:url];
