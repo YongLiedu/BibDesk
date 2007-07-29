@@ -346,7 +346,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
     [splitView setFrame:frame];
     [mainBox addSubview:splitView];
     
-    if(currentPreviewView != [previewTextView enclosingScrollView])
+    if(currentPreviewView != [previewTextView enclosingScrollView] && currentPreviewView != previewPdfView)
         [[previewer progressOverlay] overlayView:currentPreviewView];
     
     if (BDSKDefaultAnimationTimeInterval > 0.0) {
@@ -409,7 +409,7 @@ NSString *BDSKSearchKitExpressionWithString(NSString *searchFieldString)
 {
     if([currentPreviewView isHidden])
         return nil;
-    if(currentPreviewView != [previewTextView enclosingScrollView]){
+    if([currentPreviewView isKindOfClass:[NSScrollView class]]){
         NSTextView *textView = (NSTextView *)[(NSScrollView *)currentPreviewView documentView];
         NSRange selRange = [textView selectedRange];
         if (selRange.location == NSNotFound)

@@ -52,7 +52,7 @@
 @implementation BibDocument (Scripting)
 
 - (id)handlePrintScriptCommand:(NSScriptCommand *)command {
-    if(BDSKPDFPreviewDisplay == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]) {
+    if([currentPreviewView isKindOfClass:[PDFView class]]) {
         // we let the PDFView handle printing
         
         NSDictionary *args = [command evaluatedArguments];
