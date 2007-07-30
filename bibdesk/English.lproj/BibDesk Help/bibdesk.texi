@@ -3312,7 +3312,7 @@ It exports an RSS representation of the document in the same folder as the BibTe
                 <span class="aslangkeyword">end if</span>
                 <span class="aslangkeyword">set</span> <span class="asvariable">theFileName</span> <span class="aslangkeyword">to</span> <span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFileExtension</span>
                 <span class="ascomment">-- create a reference to the file</span>
-                <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">alias</span>
+                <span class="aslangkeyword">set</span> <span class="asvariable">theFile</span> <span class="aslangkeyword">to</span> <span class="asoperator">(</span><span class="asvariable">theFileName</span> <span class="asoperator">&</span> <span class="asvariable">theFolder</span><span class="asoperator">)</span> <span class="aslangkeyword">as</span> <span class="asappkeyword">file specification</span>
             <span class="aslangkeyword">end tell</span>
             <span class="ascomment">-- now export using the template</span>
             <span class="aslangkeyword">tell</span> <span class="asvariable">theDocument</span>
