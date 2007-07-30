@@ -51,6 +51,70 @@
 
 @implementation BibDocument (Scripting)
 
+// fix a bug in Apple's implementation, which ignores the file type (for export)
+- (id)handleSaveScriptCommand:(NSScriptCommand *)command {
+	NSDictionary *args = [command evaluatedArguments];
+    id fileURL = [args objectForKey:@"File"];
+    id fileType = [args objectForKey:@"FileType"];
+    if ([fileType isEqualToString:@"BibTeX"]) {
+        fileType = BDSKBibTeXDocumentType;
+        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
+        [arguments setObject:fileType forKey:@"FileType"];
+        [command setArguments:arguments];
+        [arguments release];
+    } else if ([fileType isEqualToString:@"Minimal BibTeX"]) {
+        fileType = BDSKMinimalBibTeXDocumentType;
+        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
+        [arguments setObject:fileType forKey:@"FileType"];
+        [command setArguments:arguments];
+        [arguments release];
+    } else if ([fileType isEqualToString:@"RIS"]) {
+        fileType = BDSKRISDocumentType;
+        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
+        [arguments setObject:fileType forKey:@"FileType"];
+        [command setArguments:arguments];
+        [arguments release];
+    }
+    if ([fileType isEqualToString:@"BibTeX"]) {
+        fileType = BDSKBibTeXDocumentType;
+        NSMutableDictionary *arguments = [[command arguments] mutableCopy];
+        [arguments setObject:fileType forKey:@"FileType"];
+        [command setArguments:arguments];
+        [arguments release];
+    }
+    if (fileURL) {
+        if ([fileURL isKindOfClass:[NSURL class]] == NO) {
+            [command setScriptErrorNumber:NSArgumentsWrongScriptError];
+            [command setScriptErrorString:@"The file is not a file or alias."];
+        } else {
+            NSArray *fileExtensions = [[NSDocumentController sharedDocumentController] fileExtensionsFromType:fileType ? fileType : NSPDFPboardType];
+            NSString *extension = [[fileURL path] pathExtension];
+            if (extension == nil) {
+                extension = [fileExtensions objectAtIndex:0];
+                fileURL = [NSURL fileURLWithPath:[[fileURL path] stringByAppendingPathExtension:extension]];
+            }
+            if ([fileExtensions containsObject:[extension lowercaseString]] == NO) {
+                [command setScriptErrorNumber:NSArgumentsWrongScriptError];
+                [command setScriptErrorString:[NSString stringWithFormat:@"Invalid file extension for this file type."]];
+            } else if (fileType) {
+                if ([self saveToURL:fileURL ofType:fileType forSaveOperation:NSSaveToOperation error:NULL] == NO) {
+                    [command setScriptErrorNumber:NSInternalScriptError];
+                    [command setScriptErrorString:@"Unable to export."];
+                }
+            } else if ([self saveToURL:fileURL ofType:NSPDFPboardType forSaveOperation:NSSaveAsOperation error:NULL] == NO) {
+                [command setScriptErrorNumber:NSInternalScriptError];
+                [command setScriptErrorString:@"Unable to save."];
+            }
+        }
+    } else if (fileType) {
+        [command setScriptErrorNumber:NSArgumentsWrongScriptError];
+        [command setScriptErrorString:@"Missing file argument."];
+    } else {
+        return [super handleSaveScriptCommand:command];
+    }
+    return nil;
+}
+
 - (id)handlePrintScriptCommand:(NSScriptCommand *)command {
     if([currentPreviewView isEqual:previewerBox] || [currentPreviewView isEqual:previewBox]) {
         // we let the PDFView handle printing
