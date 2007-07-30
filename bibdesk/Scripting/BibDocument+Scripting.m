@@ -87,7 +87,7 @@
             [command setScriptErrorNumber:NSArgumentsWrongScriptError];
             [command setScriptErrorString:@"The file is not a file or alias."];
         } else {
-            NSArray *fileExtensions = [[NSDocumentController sharedDocumentController] fileExtensionsFromType:fileType ? fileType : NSPDFPboardType];
+            NSArray *fileExtensions = [[NSDocumentController sharedDocumentController] fileExtensionsFromType:fileType ? fileType : [self fileType]];
             NSString *extension = [[fileURL path] pathExtension];
             if (extension == nil) {
                 extension = [fileExtensions objectAtIndex:0];
@@ -101,7 +101,7 @@
                     [command setScriptErrorNumber:NSInternalScriptError];
                     [command setScriptErrorString:@"Unable to export."];
                 }
-            } else if ([self saveToURL:fileURL ofType:NSPDFPboardType forSaveOperation:NSSaveAsOperation error:NULL] == NO) {
+            } else if ([self saveToURL:fileURL ofType:[self fileType] forSaveOperation:NSSaveAsOperation error:NULL] == NO) {
                 [command setScriptErrorNumber:NSInternalScriptError];
                 [command setScriptErrorString:@"Unable to save."];
             }
