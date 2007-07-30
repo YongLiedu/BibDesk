@@ -1710,6 +1710,7 @@
 				080E96DDFE201D6D7F000001 /* Classes */,
 				CE220FE20A91BF86002CEFB8 /* Third Party Sources */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				27AF74ED08021E47006A6ADE /* Help Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				CEE23BAE0BFBA5FE002B746B /* Shared Support */,
 				F98F307A088E0F2800C1427D /* Subprojects */,
@@ -1830,7 +1831,6 @@
 		CE220FE20A91BF86002CEFB8 /* Third Party Sources */ = {
 			isa = PBXGroup;
 			children = (
-				27AF74ED08021E47006A6ADE /* Help Sources */,
 				F9022C1B0758013E00C3F701 /* BDAlias.h */,
 				F9022C1C0758013E00C3F701 /* BDAlias.m */,
 				F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */,
