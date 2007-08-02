@@ -2698,7 +2698,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		if(operation ==  BDSKOperationAsk || operation == BDSKOperationIgnore)
 			return operation;
 	}else{
-		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString])
+		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || [NSString isEmptyString:groupName])
 			operation = BDSKOperationSet;
 		else
 			operation = BDSKOperationAppend;
@@ -2706,7 +2706,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	// at this point operation is either Set or Append
 	
     // may be an author object, so convert it to a string
-    NSString *groupDescription = [group stringValue];
+    NSString *groupDescription = [NSString isEmptyString:groupName] ? @"" : [group stringValue];
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[groupDescription length] + [oldString length] + 1];
 
     // we set the type and journal field, add to other fields if needed

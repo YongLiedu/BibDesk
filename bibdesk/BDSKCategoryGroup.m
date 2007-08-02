@@ -178,8 +178,6 @@
 
 - (BOOL)isEditable { return NO; }
 
-- (BOOL)isValidDropTarget { return NO; }
-
 - (BOOL)isEqual:(id)other { return self == other; }
 
 - (unsigned int)hash {
