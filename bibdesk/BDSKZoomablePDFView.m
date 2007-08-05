@@ -125,25 +125,6 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 #pragma mark Instance methods
 
-- (id)initWithFrame:(NSRect)rect {
-    if (self = [super initWithFrame:rect]) {
-        pasteboardInfo = [[NSMutableDictionary alloc] initWithCapacity:2];
-    }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)coder {
-    if (self = [super initWithCoder:coder]) {
-        pasteboardInfo = [[NSMutableDictionary alloc] initWithCapacity:2];
-    }
-    return self;
-}
-
-- (void)dealloc{
-    [pasteboardInfo release];
-    [super dealloc];
-}
-
 #pragma mark Copying
 
 // override so we can put the entire document on the pasteboard if there is no selection
