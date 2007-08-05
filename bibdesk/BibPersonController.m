@@ -86,7 +86,7 @@
 }
 
 - (void)awakeFromNib{
-	if ([[self superclass] instancesRespondToSelector:@selector(awakeFromNib)]){
+	if ([NSWindowController instancesRespondToSelector:@selector(awakeFromNib)]){
         [super awakeFromNib];
 	}
 	

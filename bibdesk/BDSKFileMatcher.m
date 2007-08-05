@@ -740,7 +740,7 @@ static NSColor *fillColor = nil;
 
 - (void)awakeFromNib
 {
-    if ([[self superclass] instancesRespondToSelector:_cmd])
+    if ([NSWindowController instancesRespondToSelector:_cmd])
         [super awakeFromNib];
     
     // colors similar to Spotlight's window: darker blue at bottom, lighter at top

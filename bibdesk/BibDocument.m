@@ -802,7 +802,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
     NSSet *typesWithEncoding = [NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, nil];
     NSString *selectedType = [[sender selectedItem] representedObject];
     [saveTextEncodingPopupButton setEnabled:[typesWithEncoding containsObject:selectedType]];
-    if ([[self superclass] instancesRespondToSelector:@selector(changeSaveType:)])
+    if ([NSDocument instancesRespondToSelector:@selector(changeSaveType:)])
         [super changeSaveType:sender];
 }
 

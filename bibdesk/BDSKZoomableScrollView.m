@@ -237,7 +237,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         return [self canZoomOut];
     else if([menuItem action] == @selector(zoomToActualSize:))
         return [self canZoomToActualSize];
-    else if ([[self superclass] instancesRespondToSelector:_cmd])
+    else if ([NSScrollView instancesRespondToSelector:_cmd])
         return [super validateMenuItem:menuItem];
     return YES;
 }

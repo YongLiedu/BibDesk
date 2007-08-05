@@ -103,7 +103,7 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 - (void)awakeFromNib;
 {
     // OAPreferenceController may implement this in future
-    if ([[self superclass] instancesRespondToSelector:_cmd])
+    if ([OAPreferenceController instancesRespondToSelector:_cmd])
         [super awakeFromNib];
     
     NSWindow *theWindow = [self window];
