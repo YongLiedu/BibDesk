@@ -146,64 +146,48 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 #pragma mark Copying
 
-// formerly used to cache the selection info and document for lazy copying, but we kept getting out-of-range exception reports, so now we just write the data and hold it until it's requested
-- (void)updatePasteboardInfo;
-{    
-    PDFSelection *theSelection = [self currentSelection];
-    if(!theSelection)
-        theSelection = [[self document] selectionForEntireDocument];
-    
-    NSAttributedString *attrString = [theSelection attributedString];
-    if (attrString)
-        [pasteboardInfo setObject:attrString forKey:@"attributedString"];
-    [pasteboardInfo setObject:[[self document] dataRepresentation] forKey:@"documentData"];
-    [pasteboardInfo setObject:[[self currentPage] dataRepresentation] forKey:@"pageData"];
-}
-
 // override so we can put the entire document on the pasteboard if there is no selection
 - (void)copy:(id)sender;
 {
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, NSStringPboardType, NSRTFPboardType, nil] owner:self];
-    [self updatePasteboardInfo];
-}
-
-- (void)pasteboard:(NSPasteboard *)sender provideDataForType:(NSString *)type;
-{        
-    // use a private type to signal that we need to provide a page as PDF
-    if([type isEqualToString:NSPDFPboardType] && [[sender types] containsObject:@"BDSKPrivatePDFPageDataPboardType"]){
-        [sender setData:[pasteboardInfo objectForKey:@"pageData"] forType:type];
-    } else if([type isEqualToString:NSPDFPboardType]){ 
-        // write the whole document
-        [sender setData:[pasteboardInfo objectForKey:@"documentData"] forType:type];
-    } else if([type isEqualToString:NSStringPboardType] && [pasteboardInfo objectForKey:@"attributedString"] != nil){
-        [sender setString:[[pasteboardInfo objectForKey:@"attributedString"] string] forType:type];
-    } else if([type isEqualToString:NSRTFPboardType] && [pasteboardInfo objectForKey:@"attributedString"] != nil){
-        NSAttributedString *attrString = [pasteboardInfo objectForKey:@"attributedString"];
-        [sender setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:type];
-    } else NSBeep();
+    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, NSStringPboardType, NSRTFPboardType, nil] owner:nil];
+    
+    PDFSelection *theSelection = [self currentSelection];
+    if(!theSelection)
+        theSelection = [[self document] selectionForEntireDocument];
+    NSAttributedString *attrString = [theSelection attributedString];
+    
+    [pboard setData:[[self document] dataRepresentation] forType:NSPDFPboardType];
+    [pboard setString:[attrString string] forType:NSStringPboardType];
+    [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:NSRTFPboardType];
 }
 
 - (void)copyAsPDF:(id)sender;
 {
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    // don't add the private page pboard type here
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, nil] owner:self];
-    [self updatePasteboardInfo];
+    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, nil] owner:nil];
+    [pboard setData:[[self document] dataRepresentation] forType:NSPDFPboardType];
 }
 
 - (void)copyAsText:(id)sender;
 {
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:self];
-    [self updatePasteboardInfo];
+    [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, NSRTFPboardType, nil] owner:nil];
+    
+    PDFSelection *theSelection = [self currentSelection];
+    if(!theSelection)
+        theSelection = [[self document] selectionForEntireDocument];
+    NSAttributedString *attrString = [theSelection attributedString];
+    
+    [pboard setString:[attrString string] forType:NSStringPboardType];
+    [pboard setData:[attrString RTFFromRange:NSMakeRange(0, [attrString length]) documentAttributes:nil] forType:NSRTFPboardType];
 }
 
 - (void)copyPDFPage:(id)sender;
 {
     NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, @"BDSKPrivatePDFPageDataPboardType", nil] owner:self];
-    [self updatePasteboardInfo];
+    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, nil] owner:self];
+    [pboard setData:[[self currentPage] dataRepresentation] forType:NSPDFPboardType];
 }
 
 - (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode  contextInfo:(void  *)contextInfo;
