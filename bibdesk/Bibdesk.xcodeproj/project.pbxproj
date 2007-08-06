@@ -1170,8 +1170,8 @@
 		F9022C68075802E300C3F701 /* BibEditor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibEditor.m; sourceTree = "<group>"; };
 		F9022C69075802E300C3F701 /* BibFiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibFiler.h; sourceTree = "<group>"; };
 		F9022C6A075802E300C3F701 /* BibFiler.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibFiler.m; sourceTree = "<group>"; };
-		F9022C6D075802E300C3F701 /* BibItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibItem.h; sourceTree = "<group>"; };
-		F9022C6E075802E300C3F701 /* BibItem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibItem.m; sourceTree = "<group>"; };
+		F9022C6D075802E300C3F701 /* BibItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem.h; sourceTree = "<group>"; };
+		F9022C6E075802E300C3F701 /* BibItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibItem.m; sourceTree = "<group>"; };
 		F9022C71075802E300C3F701 /* BibPersonController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPersonController.h; sourceTree = "<group>"; };
 		F9022C72075802E300C3F701 /* BibPersonController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPersonController.m; sourceTree = "<group>"; };
 		F9022C73075802E300C3F701 /* BibPref_AutoFile.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_AutoFile.h; sourceTree = "<group>"; };
@@ -1505,7 +1505,7 @@
 		F9C7D3F80BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/SelectEncodingsPanel.nib; sourceTree = "<group>"; };
 		F9C7D3FA0BE927E400D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/TextImport.nib; sourceTree = "<group>"; };
 		F9C7D3FD0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/BibTeXKeys.strings; sourceTree = SOURCE_ROOT; };
-		F9C7D3FE0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F9C7D3FE0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F9C7D3FF0BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F9C7D4000BE9280F00D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Preferences.strings; sourceTree = "<group>"; };
 		F9C7D4040BE9282000D65C7F /* French */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = French; path = French.lproj/PreferenceSearchTerms.plist; sourceTree = "<group>"; };
@@ -2754,6 +2754,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
