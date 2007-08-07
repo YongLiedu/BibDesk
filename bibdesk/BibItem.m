@@ -2679,7 +2679,8 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 - (int)addToGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
 	OBASSERT([aGroup isCategory] == YES && [owner isDocument]);
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
-    // don't add it twice
+    
+    // don't add it twice; this is typed as id because it may be a BibAuthor or NSString, so be careful
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
@@ -2698,15 +2699,16 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		if(operation ==  BDSKOperationAsk || operation == BDSKOperationIgnore)
 			return operation;
 	}else{
-		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || [NSString isEmptyString:groupName])
+		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || ([@"" isEqual:groupName] || [[BibAuthor emptyAuthor] isEqual:groupName]))
 			operation = BDSKOperationSet;
 		else
 			operation = BDSKOperationAppend;
 	}
 	// at this point operation is either Set or Append
 	
-    // may be an author object, so convert it to a string
-    NSString *groupDescription = [NSString isEmptyString:groupName] ? @"" : [group stringValue];
+    // groupName may be an author object, so convert it to a string
+    // if the groupName is an empty object (author or string), use the empty string as description since stringValue would be "Empty field"
+    NSString *groupDescription = ([@"" isEqual:groupName] || [[BibAuthor emptyAuthor] isEqual:groupName]) ? @"" : [group stringValue];
 	NSMutableString *string = [[NSMutableString alloc] initWithCapacity:[groupDescription length] + [oldString length] + 1];
 
     // we set the type and journal field, add to other fields if needed
