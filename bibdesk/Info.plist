@@ -137,6 +137,10 @@
 			<array>
 				<string>****</string>
 			</array>
+            <key>LSItemContentTypes</key>
+			<array>
+				<string>public.data</string>
+			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>NSDocumentClass</key>
