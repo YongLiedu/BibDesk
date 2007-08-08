@@ -1490,9 +1490,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     if(outError) *outError = error;
     [self setPublicationsWithoutUndo:newPubs];
     
-    if (type == BDSKRISStringType) // since we can't save pubmed files as pubmed files:
-        [self updateChangeCount:NSChangeDone];
-    else // since we can't save other files in its native format
+    // since we can't save other files in their native format (BibTeX is handled separately)
+    if (type != BDSKRISStringType)
         [self setFileName:nil];
     
     return newPubs != nil;
