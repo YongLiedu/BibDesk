@@ -562,8 +562,7 @@
 {
     if ([link respondsToSelector:@selector(isFileURL)] && [link isFileURL]) {
         NSString *searchString;
-        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString] ||
-           [[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
+        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
             searchString = [searchField stringValue];
         else
             searchString = @"";
@@ -586,8 +585,7 @@
         
         NSString *searchString;
         // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKAllFieldsString] ||
-           [[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
+        if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
             searchString = [searchField stringValue];
         else
             searchString = @"";
