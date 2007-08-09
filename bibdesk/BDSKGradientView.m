@@ -95,8 +95,8 @@
 // provides an example implementation
 - (void)setDefaultColors
 {
-    [self setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
-    [self setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    [self setLowerColor:[NSColor colorWithCalibratedWhite:0.65 alpha:1.0]];
+    [self setUpperColor:[NSColor colorWithCalibratedWhite:0.8 alpha:1.0]];
 }
 
 @end
