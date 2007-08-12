@@ -205,13 +205,18 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 #pragma mark TeX cleaning
 
 - (NSString *)stringByConvertingDoubleHyphenToEndash{
-    NSMutableString *string = nil;
-    NSRange range = [self rangeOfString:@"--"];
-    if(range.length){
-        string = [NSMutableString stringWithString:self];
-        [string replaceCharactersInRange:range withString:[NSString endashString]];
+    NSString *string = self;
+    NSString *doubleHyphen = @"--";
+    NSRange range = [self rangeOfString:doubleHyphen];
+    if (range.location != NSNotFound) {
+        NSMutableString *mutString = [[self mutableCopy] autorelease];
+        do {
+            [mutString replaceCharactersInRange:range withString:[NSString endashString]];
+            range = [mutString rangeOfString:doubleHyphen];
+        } while (range.location != NSNotFound);
+        string = mutString;
     }
-    return string ? string : self;
+    return string;
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
