@@ -49,6 +49,7 @@
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
+#import "BibTypeManager.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;
@@ -1049,6 +1050,25 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 - (NSArray *)componentsSeparatedByStringCaseInsensitive:(NSString *)separator;
 {
     return [(id)BDStringCreateArrayBySeparatingStringsWithOptions(CFAllocatorGetDefault(), (CFStringRef)self, (CFStringRef)separator, kCFCompareCaseInsensitive) autorelease];
+}
+
+- (NSArray *)componentsSeparatedByFieldSeparators;
+{
+    NSCharacterSet *acSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
+    if([self containsCharacterInSet:acSet])
+        return [self componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
+    else 
+        return [self componentsSeparatedByStringCaseInsensitive:@" and "];
+}
+
+- (NSArray *)componentsSeparatedByAnd;
+{
+    return [self componentsSeparatedByStringCaseInsensitive:@" and "];
+}
+
+- (NSArray *)componentsSeparatedByComma;
+{
+    return [self componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@","] trimWhitespace:YES];
 }
 
 - (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
