@@ -4288,6 +4288,18 @@ Below are lists of collection keys that could be used in BibDesk export template
 @tab 
 @end multitable
 
+@subheading Splitting
+
+@multitable {componentsSeparatedByFieldSeparators} {}
+@headitem Key @tab Description
+@item componentsSeparatedByComma
+@tab
+@item componentsSeparatedByAnd
+@tab
+@item componentsSeparatedByFieldSeparators
+@tab
+@end multitable
+
 @heading Collection modifier keys
 
 @subheading General
