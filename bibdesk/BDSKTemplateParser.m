@@ -755,7 +755,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
     return [self componentsJoinedByString:@"/"];
 }
 
-- (NSString *)componentsJoinedByDefaultSeparatorString
+- (NSString *)componentsJoinedByDefaultJoinString
 {
     return [self componentsJoinedByString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultArrayJoinStringKey]];
 }
