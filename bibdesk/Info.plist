@@ -708,6 +708,8 @@
 					<key>BDSKServiceTemplateTree</key>
 					<data>
 					</data>
+                    <key>BDSKDefaultArrayJoinStringKey</key>
+                    <string>/</string>
 				</dict>
 				<key>helpURL</key>
 				<string>TemplatePreferences</string>

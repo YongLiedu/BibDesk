@@ -200,6 +200,7 @@ NSString *BDSKGroupFieldsKey = @"BDSKGroupFieldsKey";
 NSString *BDSKCurrentGroupFieldKey = @"BDSKCurrentGroupFieldKey";
 NSString *BDSKDefaultGroupFieldSeparatorKey = @"BDSKDefaultGroupFieldSeparatorKey";
 NSString *BDSKGroupFieldSeparatorCharactersKey = @"BDSKGroupFieldSeparatorCharactersKey";
+NSString *BDSKDefaultArrayJoinStringKey = @"BDSKDefaultArrayJoinString";
 
 NSString *BDSKTableHeaderImagesKey = @"BDSKTableHeaderImages";
 NSString *BDSKTableHeaderTitlesKey = @"BDSKTableHeaderTitles";
@@ -369,6 +370,7 @@ NSString *BDSKSkimNotesString = @"SkimNotes";
  BDSKShouldWritePDFMetadata                      bool    false   // writes standard PDF info
  BDSKAddISIXMLStringToAnnote                     bool    false
  BDSKDisableISITitleCasing                       bool    false
+ BDSKDefaultArrayJoinString                      string  "/"
 
  */
 

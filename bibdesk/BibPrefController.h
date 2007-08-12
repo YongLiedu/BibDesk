@@ -193,7 +193,7 @@ extern NSString *BDSKUpdateLatestNotifiedVersionKey;
 extern NSString *BDSKSpotlightVersionInfo;
 
 extern NSString *BDSKShouldShowWebGroupPrefKey;
-
+extern NSString *BDSKDefaultArrayJoinStringKey;
 
 #pragma mark Field name strings
 
