@@ -266,8 +266,14 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 
 #pragma mark String Representations
 
+// overriden so person objects can be returned directly in e.g. tableview datasource methods
 - (NSString *)description{
     return [self displayName];
+}
+
+// Automatically called by collection classes; override OBObject's implementation for templating, although the output still won't generally be appropriate for users.
+- (NSString *)descriptionWithLocale:(NSDictionary *)locale indent:(unsigned)level{
+    return [self description];
 }
 
 - (NSString *)displayName{
