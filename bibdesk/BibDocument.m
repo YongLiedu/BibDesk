@@ -117,6 +117,7 @@
 #import "BibFiler.h"
 #import "BibItem_PubMedLookup.h"
 #import "BDSKItemSearchIndexes.h"
+#import "PDFDocument_BDSKExtensions.h"
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -2526,166 +2527,252 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [aPreviewer updateWithBibTeXString:bibString];
 }
 
-- (void)updatePreviewPane{
-    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
-    NSView *view = [previewTextView enclosingScrollView];
+- (void)displayTeXPreviewInPreviewPane{
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
+        return;
     
-    if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKRTFPreviewDisplay){
-        
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] == NO)
-            return;
-        if(previewer == nil){
-            previewer = [[BDSKPreviewer alloc] init];
-            NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-            [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
-            [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
-            previewerBox = [[BDSKEdgeView alloc] init];
-            [previewerBox setEdges:BDSKEveryEdgeMask];
-            [previewerBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-            [previewerBox setContentView:[previewer pdfView]];
-        }
-        view = displayType == BDSKRTFPreviewDisplay ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)previewerBox;
-        if(currentPreviewView != view){
-            [view setFrame:[currentPreviewView frame]];
-            [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
-            currentPreviewView = view;
-            [[previewer progressOverlay] overlayView:currentPreviewView];
-        }
-        [self updatePreviewer:previewer];
-        
-    }else if(displayType == BDSKLocalUrlPreviewDisplay){
-        
-        [[previewer progressOverlay] remove];
-        [previewer updateWithBibTeXString:nil];
-        if (previewPdfView == nil) {
-            previewPdfView = [[BDSKZoomablePDFView alloc] init];
-            previewBox = [[BDSKEdgeView alloc] init];
-            [previewBox setEdges:BDSKEveryEdgeMask];
-            [previewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
-            [previewBox setContentView:previewPdfView];
-            [previewPdfView release];
-        }
-        view = previewBox;
-        if(currentPreviewView != view){
-            [view setFrame:[currentPreviewView frame]];
-            [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
-            currentPreviewView = view;
-        }
-        
-        NSArray *items = [self selectedPublications];
-        NSURL *url = [items count] ? [[items objectAtIndex:0] localURL] : nil;
-        if (url && UTTypeConformsTo((CFStringRef)[[NSWorkspace sharedWorkspace] UTIForURL:url], kUTTypePDF) == FALSE)
-            url = nil;
-        if (url) {
-            if([[[previewPdfView document] documentURL] isEqual:url] == NO){
-                PDFDocument *pdfDoc = [[PDFDocument alloc] initWithURL:url];
+    if(previewer == nil){
+        previewer = [[BDSKPreviewer alloc] init];
+        NSDictionary *xatrrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+        [previewer setPDFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewPDFScaleFactorKey defaultValue:0.0]];
+        [previewer setRTFScaleFactor:[xatrrDefaults floatForKey:BDSKPreviewRTFScaleFactorKey defaultValue:1.0]];
+        previewerBox = [[BDSKEdgeView alloc] init];
+        [previewerBox setEdges:BDSKEveryEdgeMask];
+        [previewerBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+        [previewerBox setContentView:[previewer pdfView]];
+    }
+    
+    // may be the pdflatex or latex2rtf generated preview
+    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
+    NSView *view = displayType == BDSKRTFPreviewDisplay ? (NSView *)[[previewer textView] enclosingScrollView] : (NSView *)previewerBox;
+    if(currentPreviewView != view){
+        [view setFrame:[currentPreviewView frame]];
+        [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+        currentPreviewView = view;
+        [[previewer progressOverlay] overlayView:currentPreviewView];
+    }
+    [self updatePreviewer:previewer];
+    
+}
+
+- (void)displayErrorMessageInPreviewTextView:(NSString *)errorMessage{
+    NSParameterAssert(errorMessage != nil);
+    // make sure we have the correct view in place (NSTextView)
+    NSView *view = [previewTextView enclosingScrollView];
+    [[previewer progressOverlay] remove];
+    [previewer updateWithBibTeXString:nil];
+    if(currentPreviewView != view){
+        [view setFrame:[currentPreviewView frame]];
+        [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+        currentPreviewView = view;
+    }
+    NSFont *font = [NSFontManager bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]];
+    NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:errorMessage attributeName:NSFontAttributeName attributeValue:font];
+    [[previewTextView textStorage] setAttributedString:attrString];
+    [attrString release];
+}
+
+- (void)displayLocalURLInPreviewPane{
+    NSView *view = [previewTextView enclosingScrollView];
+    [[previewer progressOverlay] remove];
+    [previewer updateWithBibTeXString:nil];
+    
+    NSURL *url = [[[self selectedPublications] firstObject] localURL];
+    BOOL isDir;
+    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:[url path] isDirectory:&isDir];
+    // checking kUTTypeText would get RTF, HTML, XML, txt, but not RTFD or web archives; consequently, we'll just try loading anything and let NSAttributedString sort it out if it's not PDF or PS
+    if (url && fileExists && (NO == isDir || [[NSWorkspace sharedWorkspace] isFilePackageAtPath:[url path]])) {
+        CFStringRef theUTI = (CFStringRef)[[NSWorkspace sharedWorkspace] UTIForURL:url];
+        if (UTTypeConformsTo(theUTI, kUTTypePDF) || UTTypeConformsTo(theUTI, CFSTR("com.adobe.postscript")) || UTTypeConformsTo(theUTI, kUTTypeImage)) {
+            
+            // set up the view hierarchy
+            if (previewPdfView == nil) {
+                previewPdfView = [[BDSKZoomablePDFView alloc] init];
+                previewBox = [[BDSKEdgeView alloc] init];
+                [previewBox setEdges:BDSKEveryEdgeMask];
+                [previewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+                [previewBox setContentView:previewPdfView];
+                [previewPdfView release];
+            }
+            view = previewBox;
+            if(currentPreviewView != view){
+                [view setFrame:[currentPreviewView frame]];
+                [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+                currentPreviewView = view;
+            }
+            
+            // if it's an image, first convert it to PDF
+            if (UTTypeConformsTo(theUTI, kUTTypeImage)) {
+                
+                // this should accept any image data types we're likely to run across, but PICT returns a zero size image
+                CGImageSourceRef imsrc = CGImageSourceCreateWithData((CFDataRef)[NSData dataWithContentsOfURL:url], (CFDictionaryRef)[NSDictionary dictionaryWithObject:(id)kUTTypeTIFF forKey:(id)kCGImageSourceTypeIdentifierHint]);
+                
+                NSMutableData *pdfData = nil;
+                
+                if (CGImageSourceGetCount(imsrc)) {
+                    CGImageRef cgImage = CGImageSourceCreateImageAtIndex(imsrc, 0, NULL);
+                    
+                    pdfData = [NSMutableData data];
+                    CGDataConsumerRef consumer = CGDataConsumerCreateWithCFData((CFMutableDataRef)pdfData);
+                    
+                    // create full size image, assuming pixel == point
+                    const CGRect rect = CGRectMake(0, 0, CGImageGetWidth(cgImage), CGImageGetHeight(cgImage));
+                    
+                    CGContextRef ctxt = CGPDFContextCreate(consumer, &rect, NULL);
+                    CGPDFContextBeginPage(ctxt, NULL);
+                    CGContextDrawImage(ctxt, rect, cgImage);
+                    CGPDFContextEndPage(ctxt);
+                    
+                    CGContextFlush(ctxt);
+                    
+                    CGDataConsumerRelease(consumer);
+                    CGContextRelease(ctxt);
+                    CGImageRelease(cgImage);
+                }
+                
+                CFRelease(imsrc);
+                if ([pdfData length]) {
+                    PDFDocument *pdfDoc = [[PDFDocument alloc] initWithData:pdfData];
+                    [previewPdfView setDocument:pdfDoc];
+                    [pdfDoc release];
+                } else {
+                    [self displayErrorMessageInPreviewTextView:NSLocalizedString(@"Unsupported image type.", @"Error message when an image file fails to load in the preview pane")];
+                }
+                
+            } else if([[[previewPdfView document] documentURL] isEqual:url] == NO){
+                // not an image type; this is either PDF or PostScript, so load it directly
+                PDFDocument *pdfDoc = nil;
+                if (UTTypeConformsTo(theUTI, kUTTypePDF))
+                    pdfDoc = [[PDFDocument alloc] initWithURL:url];
+                else if (UTTypeConformsTo(theUTI, CFSTR("com.adobe.postscript")))
+                    pdfDoc = [[PDFDocument alloc] initWithPostScriptURL:url];
                 [previewPdfView setDocument:pdfDoc];
                 [pdfDoc release];
+            }            
+
+        } else {
+            // if it's not PDF/PS or an image, try reading it with NSAttributedString, which handles a variety of common formats
+            if(currentPreviewView != view){
+                [view setFrame:[currentPreviewView frame]];
+                [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+                currentPreviewView = view;
             }
-        }else{
-            BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:YES];
-            [printableView setFont:[NSFontManager bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]]];
-            NSData *data = [printableView PDFDataWithString:NSLocalizedString(@"No linked file.", @"Preview message when there is no linked file")];
-            [printableView release];
-            PDFDocument *pdfDoc = [[PDFDocument alloc] initWithData:data];
-            [previewPdfView setDocument:pdfDoc];
-            [pdfDoc release];
+            
+            NSError *nsError;
+            NSAttributedString *attrString = [[NSAttributedString alloc] initWithURL:url options:nil documentAttributes:NULL error:&nsError];
+            if (nil == attrString) {
+                [self displayErrorMessageInPreviewTextView:([nsError localizedFailureReason] ? [nsError localizedFailureReason] : [nsError localizedDescription])];
+            } else {
+                [[previewTextView textStorage] setAttributedString:attrString];
+                [attrString release];
+            }
         }
         
     }else{
+        // no file, so reset view to attributed string view and set string to generic message
+        NSString *errString = [@"\n\n\t" stringByAppendingString:NSLocalizedString(@"No linked file.", @"Preview message when there is no linked file")];
+        [self displayErrorMessageInPreviewTextView:errString];
+    }
+}    
+
+- (void)displayAttributedTextPreviewInPreviewPane{
     
-        if(currentPreviewView != view){
-            [[previewer progressOverlay] remove];
-            [previewer updateWithBibTeXString:nil];
-            [view setFrame:[currentPreviewView frame]];
-            [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
-            currentPreviewView = view;
-        }
-        
-        if(NSIsEmptyRect([previewTextView visibleRect]))
-            return;
-            
-        static NSAttributedString *noAttrDoubleLineFeed = nil;
-        if(noAttrDoubleLineFeed == nil)
-            noAttrDoubleLineFeed = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:nil];
-        
-        NSArray *items = [self selectedPublications];
-        NSDictionary *bodyAttributes = nil;
-        NSDictionary *titleAttributes = nil;
-        if (displayType == BDSKNotesPreviewDisplay || displayType == BDSKAbstractPreviewDisplay) {
-            NSDictionary *cachedFonts = [[NSFontManager sharedFontManager] cachedFontsForPreviewPane];
-            bodyAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, nil];
-            titleAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, [NSNumber numberWithBool:YES], NSUnderlineStyleAttributeName, nil];
-        }
-      
-        unsigned int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
-        
-        if (maxItems > 0 && [items count] > maxItems)
-            items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
-        
-        NSTextStorage *textStorage = [previewTextView textStorage];
+    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
 
-        // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
-        NSRange zeroRange = NSMakeRange(0, 0);
-        static NSArray *zeroRanges = nil;
-        if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
-        [previewTextView setSelectedRanges:zeroRanges];
-                
-        NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
-        [layoutManager retain];
-        [textStorage removeLayoutManager:layoutManager]; // optimization: make sure the layout manager doesn't do any work while we're loading
+    NSView *view = [previewTextView enclosingScrollView];
 
-        [textStorage beginEditing];
-        [[textStorage mutableString] setString:@""];
-        
-        unsigned int numberOfSelectedPubs = [items count];
-        NSEnumerator *enumerator = [items objectEnumerator];
-        BibItem *pub = nil;
-        NSString *fieldValue;
-        BOOL isFirst = YES;
-        static NSAttributedString *attributedFormFeed = nil;
-        if (nil == attributedFormFeed)
-            attributedFormFeed = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%C", NSFormFeedCharacter] attributes:nil];
-        
-        switch(displayType){
-            case BDSKDetailsPreviewDisplay:
-                while(pub = [enumerator nextObject]){
-                    if (isFirst == YES) isFirst = NO;
-                    else [textStorage appendAttributedString:attributedFormFeed]; // page break for printing; doesn't display
+    if(currentPreviewView != view){
+        [[previewer progressOverlay] remove];
+        [previewer updateWithBibTeXString:nil];
+        [view setFrame:[currentPreviewView frame]];
+        [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+        currentPreviewView = view;
+    }
+    
+    if(NSIsEmptyRect([previewTextView visibleRect]))
+        return;
+    
+    static NSAttributedString *noAttrDoubleLineFeed = nil;
+    if(noAttrDoubleLineFeed == nil)
+        noAttrDoubleLineFeed = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:nil];
+    
+    NSArray *items = [self selectedPublications];
+    NSDictionary *bodyAttributes = nil;
+    NSDictionary *titleAttributes = nil;
+    if (displayType == BDSKNotesPreviewDisplay || displayType == BDSKAbstractPreviewDisplay) {
+        NSDictionary *cachedFonts = [[NSFontManager sharedFontManager] cachedFontsForPreviewPane];
+        bodyAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, nil];
+        titleAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[cachedFonts objectForKey:@"Body"], NSFontAttributeName, [NSNumber numberWithBool:YES], NSUnderlineStyleAttributeName, nil];
+    }
+    
+    unsigned int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
+    
+    if (maxItems > 0 && [items count] > maxItems)
+        items = [items subarrayWithRange:NSMakeRange(0, maxItems)];
+    
+    NSTextStorage *textStorage = [previewTextView textStorage];
+    
+    // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
+    NSRange zeroRange = NSMakeRange(0, 0);
+    static NSArray *zeroRanges = nil;
+    if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
+    [previewTextView setSelectedRanges:zeroRanges];
+    
+    NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
+    [layoutManager retain];
+    [textStorage removeLayoutManager:layoutManager]; // optimization: make sure the layout manager doesn't do any work while we're loading
+    
+    [textStorage beginEditing];
+    [[textStorage mutableString] setString:@""];
+    
+    unsigned int numberOfSelectedPubs = [items count];
+    NSEnumerator *enumerator = [items objectEnumerator];
+    BibItem *pub = nil;
+    NSString *fieldValue;
+    BOOL isFirst = YES;
+    static NSAttributedString *attributedFormFeed = nil;
+    if (nil == attributedFormFeed)
+        attributedFormFeed = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%C", NSFormFeedCharacter] attributes:nil];
+    
+    switch(displayType){
+        case BDSKDetailsPreviewDisplay:
+            while(pub = [enumerator nextObject]){
+                if (isFirst == YES) isFirst = NO;
+                else [textStorage appendAttributedString:attributedFormFeed]; // page break for printing; doesn't display
                     [textStorage appendAttributedString:[pub attributedStringValue]];
+                [textStorage appendAttributedString:noAttrDoubleLineFeed];
+            }
+            break;
+        case BDSKNotesPreviewDisplay:
+            while(pub = [enumerator nextObject]){
+                // Write out the title
+                if(numberOfSelectedPubs > 1){
+                    [textStorage appendString:[pub displayTitle] attributes:titleAttributes];
                     [textStorage appendAttributedString:noAttrDoubleLineFeed];
                 }
-                break;
-            case BDSKNotesPreviewDisplay:
-                while(pub = [enumerator nextObject]){
-                    // Write out the title
-                    if(numberOfSelectedPubs > 1){
-                        [textStorage appendString:[pub displayTitle] attributes:titleAttributes];
-                        [textStorage appendAttributedString:noAttrDoubleLineFeed];
-                    }
-                    fieldValue = [pub valueOfField:BDSKAnnoteString inherit:NO];
-                    if([fieldValue isEqualToString:@""])
-                        fieldValue = NSLocalizedString(@"No notes.", @"Preview message when notes are empty");
-                    [textStorage appendString:fieldValue attributes:bodyAttributes];
+                fieldValue = [pub valueOfField:BDSKAnnoteString inherit:NO];
+                if([fieldValue isEqualToString:@""])
+                    fieldValue = NSLocalizedString(@"No notes.", @"Preview message when notes are empty");
+                [textStorage appendString:fieldValue attributes:bodyAttributes];
+                [textStorage appendAttributedString:noAttrDoubleLineFeed];
+            }
+            break;
+        case BDSKAbstractPreviewDisplay:
+            while(pub = [enumerator nextObject]){
+                // Write out the title
+                if(numberOfSelectedPubs > 1){
+                    [textStorage appendString:[pub displayTitle] attributes:titleAttributes];
                     [textStorage appendAttributedString:noAttrDoubleLineFeed];
                 }
-                break;
-            case BDSKAbstractPreviewDisplay:
-                while(pub = [enumerator nextObject]){
-                    // Write out the title
-                    if(numberOfSelectedPubs > 1){
-                        [textStorage appendString:[pub displayTitle] attributes:titleAttributes];
-                        [textStorage appendAttributedString:noAttrDoubleLineFeed];
-                    }
-                    fieldValue = [pub valueOfField:BDSKAbstractString inherit:NO];
-                    if([fieldValue isEqualToString:@""])
-                        fieldValue = NSLocalizedString(@"No abstract.", @"Preview message when abstract is empty");
-                    [textStorage appendString:fieldValue attributes:bodyAttributes];
-                    [textStorage appendAttributedString:noAttrDoubleLineFeed];
-                }
-                break;
-            case BDSKTemplatePreviewDisplay:
-                {
+                fieldValue = [pub valueOfField:BDSKAbstractString inherit:NO];
+                if([fieldValue isEqualToString:@""])
+                    fieldValue = NSLocalizedString(@"No abstract.", @"Preview message when abstract is empty");
+                [textStorage appendString:fieldValue attributes:bodyAttributes];
+                [textStorage appendAttributedString:noAttrDoubleLineFeed];
+            }
+            break;
+        case BDSKTemplatePreviewDisplay:
+            {
                 NSString *style = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPreviewTemplateStyleKey];
                 BDSKTemplate *template = [BDSKTemplate templateForStyle:style];
                 if (template == nil)
@@ -2704,16 +2791,27 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
                     [textStorage appendAttributedString:templateString];
                     [templateString release];
                 }
-                }
-                break;
-        }
-        
-        [textStorage endEditing];
-        [textStorage addLayoutManager:layoutManager];
-        [layoutManager release];
-        
-        if([NSString isEmptyString:[searchField stringValue]] == NO)
-            [previewTextView highlightComponentsOfSearchString:[searchField stringValue]];
+            }
+            break;
+    }
+    
+    [textStorage endEditing];
+    [textStorage addLayoutManager:layoutManager];
+    [layoutManager release];
+    
+    if([NSString isEmptyString:[searchField stringValue]] == NO)
+        [previewTextView highlightComponentsOfSearchString:[searchField stringValue]];    
+}
+
+- (void)updatePreviewPane{
+    int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
+    
+    if(displayType == BDSKPDFPreviewDisplay || displayType == BDSKRTFPreviewDisplay){
+        [self displayTeXPreviewInPreviewPane];
+    }else if(displayType == BDSKLocalUrlPreviewDisplay){
+        [self displayLocalURLInPreviewPane];
+    }else{
+        [self displayAttributedTextPreviewInPreviewPane];
     }
 }
 
