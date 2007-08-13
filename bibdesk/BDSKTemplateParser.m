@@ -345,9 +345,9 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                             isMatch = [keyValue isNotEmpty];
                             matchString = [matchStrings objectAtIndex:i];
                             if (matchEqual) {
-                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : keyValue && [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
                             } else if (matchContain) {
-                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : keyValue && [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
                             }
                             if (isMatch) {
                                 subTemplate = [subTemplates objectAtIndex:i];
@@ -560,9 +560,9 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                             isMatch = [keyValue isNotEmpty];
                             matchString = [matchStrings objectAtIndex:i];
                             if (matchEqual) {
-                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
+                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : keyValue && [[keyValue stringDescription] caseInsensitiveCompare:matchString] == NSOrderedSame;
                             } else if (matchContain) {
-                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
+                                isMatch = [matchString isEqualToString:@""] ? NO == isMatch : keyValue && [[keyValue stringDescription] rangeOfString:matchString options:NSCaseInsensitiveSearch].location != NSNotFound;
                             }
                             if (isMatch) {
                                 subTemplate = [subTemplates objectAtIndex:i];
