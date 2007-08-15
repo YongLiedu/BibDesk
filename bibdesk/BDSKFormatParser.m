@@ -255,13 +255,15 @@
 							[arr addObject:string];
 						}
 						if (number == 0) number = [arr count];
+                        BOOL isFirst = YES;
 						for (i = 0; i < [arr count] && number > 0; i++) { 
 							string = [self stringByStrictlySanitizingString:[arr objectAtIndex:i] forField:fieldName inFileType:[pub fileType]]; 
 							if (isLocalFile) {
 								string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 							}
                             if (numString == nil || [string length] > (unsigned)intValue) {
-                                if (i > 0) [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
+                                if (isFirst) isFirst = NO;
+                                else [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
                                 [parsedStr appendString:string]; 
                                 if ([string length] > (unsigned)intValue) --number;
                             }
