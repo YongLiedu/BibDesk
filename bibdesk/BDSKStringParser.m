@@ -38,6 +38,7 @@
 
 #import "BDSKStringParser.h"
 #import <OmniBase/OBUtilities.h>
+#import "NSError_BDSKExtensions.h"
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
 #import "BDSKRISParser.h"
@@ -48,6 +49,7 @@
 #import "BDSKDublinCoreXMLParser.h"
 #import "BDSKReferParser.h"
 #import "BDSKMODSParser.h"
+#import "BDSKSciFinderParser.h"
 
 @implementation BDSKStringParser
 
@@ -86,6 +88,9 @@ static Class classForType(int stringType)
         case BDSKMODSStringType:
             parserClass = [BDSKMODSParser class];
             break;
+        case BDSKSciFinderStringType:
+            parserClass = [BDSKSciFinderParser class];
+            break;
         default:
             parserClass = Nil;
     }    
@@ -102,6 +107,10 @@ static Class classForType(int stringType)
     if (stringType == BDSKUnknownStringType)
         stringType = [itemString contentStringType];
     parserClass = classForType(stringType);
+    if (Nil == parserClass && outError){
+        *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
+        [*outError setValue:NSLocalizedString(@"BibDesk was not able to determine the syntax of this data.  It may be incorrect or an unsupported type of text.", @"error description when parsing text fails") forKey:NSLocalizedRecoverySuggestionErrorKey];
+    }
     return [parserClass itemsFromString:itemString error:outError];
 }
 
@@ -140,6 +149,8 @@ static Class classForType(int stringType)
         return BDSKReferStringType;
     if([BDSKMODSParser canParseString:self])
         return BDSKMODSStringType;
+    if([BDSKSciFinderParser canParseString:self])
+        return BDSKSciFinderStringType;
 	// don't check DC, as the check is too unreliable
     return BDSKUnknownStringType;
 }
