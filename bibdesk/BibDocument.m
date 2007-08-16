@@ -3056,17 +3056,18 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     float factor = (NSWidth([sender frame]) - [sender dividerThickness]) / (oldSize.width - [sender dividerThickness]);
 	
 	if (sender == splitView) {
-		// first = table, second = preview
-        secondFrame.size.width *= factor;
-        if (NSWidth(secondFrame) < 1.0)
-            secondFrame.size.width = 0.0;
+		// first = table, second = preview, zeroth = web
+        factor = (NSHeight([sender frame]) - i * [sender dividerThickness]) / (oldSize.height - i * [sender dividerThickness]);
+        secondFrame.size.height *= factor;
+        if (NSHeight(secondFrame) < 1.0)
+            secondFrame.size.height = 0.0;
         secondFrame = NSIntegralRect(secondFrame);
-        zerothFrame.size.width *= factor;
+        zerothFrame.size.height *= factor;
         zerothFrame = NSIntegralRect(zerothFrame);
-        firstFrame.size.width = NSWidth([sender frame]) - NSWidth(secondFrame) - NSWidth(zerothFrame) - i * [sender dividerThickness];
-        if (NSWidth(firstFrame) < 0.0) {
-            firstFrame.size.width = 0.0;
-            secondFrame.size.width = NSWidth([sender frame]) - NSWidth(firstFrame) - NSWidth(zerothFrame) - i * [sender dividerThickness];
+        firstFrame.size.height = NSHeight([sender frame]) - NSHeight(secondFrame) - NSHeight(zerothFrame) - i * [sender dividerThickness];
+        if (NSHeight(firstFrame) < 0.0) {
+            firstFrame.size.height = 0.0;
+            secondFrame.size.height = NSHeight([sender frame]) - NSHeight(firstFrame) - NSHeight(zerothFrame) - i * [sender dividerThickness];
         }
 	} else {
 		// first = group, second = table+preview
@@ -3081,6 +3082,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         }
     }
 	
+	[zerothView setFrame:zerothFrame];
 	[firstView setFrame:firstFrame];
 	[secondView setFrame:secondFrame];
     [sender adjustSubviews];

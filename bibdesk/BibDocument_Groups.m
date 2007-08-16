@@ -178,18 +178,27 @@ The groupedPublications array is a subset of the publications array, developed b
     if ([self isDisplayingWebGroupView] == NO) {
         [self insertControlView:webGroupView atTop:NO];
         
-        NSRect svFrame = [splitView frame];
-        NSRect tmpFrame;
+        NSView *view1 = [[splitView subviews] objectAtIndex:0];
+        NSView *view2 = [[splitView subviews] objectAtIndex:1];
+        NSRect svFrame = [splitView bounds];
+        NSRect webFrame = svFrame;
+        NSRect tableFrame = svFrame;
+        NSRect previewFrame = svFrame;
+        float height = NSHeight(svFrame) - 2 * [splitView dividerThickness];
+        float factor = NSHeight([view2 frame]) / (NSHeight([view1 frame]) + NSHeight([view2 frame]));
         
-        tmpFrame = svFrame;
-        tmpFrame.size.height *= 0.6;
-        [splitView setFrame:tmpFrame];
-        tmpFrame = svFrame;
-        tmpFrame.size.height *= 0.4;
-        [webView setFrame:tmpFrame];
+        webFrame.size.height = roundf(0.4 * height);
+        previewFrame.size.height = roundf(0.6 * height * factor);
+        tableFrame.size.height = height - NSHeight(webFrame) - NSHeight(previewFrame);
+        tableFrame.origin.y = NSMaxY(previewFrame) + [splitView dividerThickness];
+        webFrame.origin.y = NSMaxY(tableFrame) + [splitView dividerThickness];
+        
+        [webView setFrame:webFrame];
         [splitView addSubview:webView positioned:NSWindowBelow relativeTo:[tableView enclosingScrollView]];
-        [splitView setFrame:svFrame];
-        [mainBox addSubview:webGroupView];
+        [webView setFrame:webFrame];
+        [view1 setFrame:tableFrame];
+        [view2 setFrame:previewFrame];
+        [splitView adjustSubviews];
         [splitView setNeedsDisplay:YES];
     }
 }
@@ -251,7 +260,7 @@ The groupedPublications array is a subset of the publications array, developed b
         } 
     
         [tableView setAlternatingRowBackgroundColors:[NSColor alternateControlAlternatingRowBackgroundColors]];
-        [tableView insertTableColumnWithIdentifier:BDSKImportOrderString atIndex:0];
+        //[tableView insertTableColumnWithIdentifier:BDSKImportOrderString atIndex:0];
 
     } else {
         if ([self isDisplayingSearchButtons]) {
