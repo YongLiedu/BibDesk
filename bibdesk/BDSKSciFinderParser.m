@@ -97,10 +97,8 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
         value = [value stringByRemovingSuffix:@"."];
     else if ([key rangeOfCharacterFromSet:replaceChars].length)
         key = [key stringByReplacingCharactersInSet:replaceChars withString:@"-"];
-
-    // @@ worth it to remove newlines from the value?  probably depends on the source...
     
-    [pubFields setObject:value forKey:[key fieldName]];    
+    [pubFields setObject:[value stringByBackslashEscapingTeXSpecials] forKey:[key fieldName]];    
 }
 
 + (NSArray *)itemsFromString:(NSString *)itemString error:(NSError **)outError;
