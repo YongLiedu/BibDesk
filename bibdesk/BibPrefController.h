@@ -255,6 +255,11 @@ extern NSString *BDSKTechreportString;
 extern NSString *BDSKCommentedString;
 extern NSString *BDSKConferenceString;
 extern NSString *BDSKMiscString;
+extern NSString *BDSKInstitutionString;
+extern NSString *BDSKSchoolString;
+extern NSString *BDSKUnpublishedString;
+extern NSString *BDSKMastersThesisString;
+extern NSString *BDSKPhDThesisString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;

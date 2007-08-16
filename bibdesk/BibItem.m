@@ -2081,7 +2081,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     
     // EndNote officially does not allow returns between tags
     
-    if([entryType isEqualToString:@"misc"]){
+    if([entryType isEqualToString:BDSKMiscString]){
         refTypeID = 13; // generic
         publisherField = @"Howpublished";
     }else if([entryType isEqualToString:BDSKInbookString]){
@@ -2100,13 +2100,13 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         refTypeID = 27; // report
         isbnField = BDSKNumberString;
         numberField = @"";
-        publisherField = @"Institution";
-    }else if([entryType isEqualToString:@"mastersthesis"]){
+        publisherField = BDSKInstitutionString;
+    }else if([entryType isEqualToString:BDSKMastersThesisString]){
         refTypeID = 32; // thesis
-        publisherField = @"School";
-    }else if([entryType isEqualToString:@"phdthesis"]){
+        publisherField = BDSKSchoolString;
+    }else if([entryType isEqualToString:BDSKPhDThesisString]){
         refTypeID = 32; // thesis
-    }else if([entryType isEqualToString:@"unpublished"]){
+    }else if([entryType isEqualToString:BDSKUnpublishedString]){
         refTypeID = 34;
     }else if([entryType isEqualToString:BDSKArticleString]){
         refTypeID = 17; // journal article
