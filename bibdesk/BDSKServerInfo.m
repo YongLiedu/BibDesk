@@ -145,12 +145,10 @@
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:7];
     [info setValue:[self type] forKey:@"type"];
     [info setValue:[self name] forKey:@"name"];
-    if ([self isEntrez]) {
-        [info setValue:[self database] forKey:@"database"];
-    } else if ([self isZoom]) {
+    [info setValue:[self database] forKey:@"database"];
+    if ([self isZoom]) {
         [info setValue:[self host] forKey:@"host"];
         [info setValue:[self port] forKey:@"port"];
-        [info setValue:[self database] forKey:@"database"];
         [info setValue:[self password] forKey:@"password"];
         [info setValue:[self username] forKey:@"username"];
         [info setValue:[self options] forKey:@"options"];
