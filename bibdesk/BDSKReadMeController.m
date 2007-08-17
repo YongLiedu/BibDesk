@@ -140,7 +140,7 @@ static NSString *hostInfoString()
         [body appendFormat:@"Build details: %@\nHost: %@\n%@", build, hostInfoString(), [textView string]];
         
         OAInternetConfig *ic = [OAInternetConfig internetConfig];
-        [ic launchMailTo:@"bibdesk-develop@lists.sourceforge.net"
+        [ic launchMailTo:@"bibdesk-exceptions@lists.sourceforge.net"
               carbonCopy:nil 
                  subject:[NSString stringWithFormat:@"BibDesk %@ exception reported %@", version, [[NSDate date] description]]
                     body:body];
