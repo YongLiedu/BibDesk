@@ -69,6 +69,7 @@
     return NO;
 }
 
+// this is a set of fields that don't need any massaging; the key/value match BibTeX definitions
 static NSSet *correctFields = nil;
 
 + (void)initialize
@@ -80,21 +81,46 @@ static NSSet *correctFields = nil;
 // some more-or-less unique string that meets our field name criteria (leading cap, no space)
 static NSString *__documentTypeString = @"Doc-Type";
 
+static void addKeyValueToAnnote(NSString *key, NSString *value, NSMutableDictionary *pubFields)
+{
+    NSMutableString *mutString = [pubFields objectForKey:BDSKAnnoteString];
+    if (nil == mutString) {
+        mutString = [NSMutableString string];
+        [pubFields setObject:mutString forKey:BDSKAnnoteString];
+    }
+    [mutString appendFormat:@"%@:\t%@\n\n", key, value];    
+}
+
 static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMutableDictionary *pubFields)
 {    
     // We could move some of this into TypeInfo.plist, but we only have three fields that don't need special handling, so it's not really worthwhile.  This function has multiple early returns, so be careful when debugging.
     
     if ([key isEqualToString:BDSKAuthorString]) {
         value = [value stringByReplacingAllOccurrencesOfString:@"; " withString:@" and "];
+        // this sucks; some entries have "Last, Middle, First.", and some have "Last, M. F."
+        if ([value hasSuffix:@"."] && [value length] > 2 && 
+            [[NSCharacterSet lowercaseLetterCharacterSet] characterIsMember:[value characterAtIndex:([value length] - 2)]])
+            value = [value stringByRemovingSuffix:@"."];
     }
     else if ([key isEqualToString:@"Full Journal Title"]) {
         key = BDSKJournalString;
+        // apparently one of the databases returns journal names in all caps
+        if ([value rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet]].location == NSNotFound)
+            value = [value titlecaseString];
+        // if we previously used the short title, save it off in Annote
+        if ([pubFields objectForKey:key] != nil)
+            addKeyValueToAnnote(@"Journal Title", [pubFields objectForKey:key], pubFields);
     }
     else if ([key isEqualToString:@"Journal Title"]) {
         key = BDSKJournalString;
         // if we already have a Journal definition, bail out, because it's from "Full Journal Title"
-        if ([pubFields objectForKey:key] != nil)
+        if ([pubFields objectForKey:key] != nil) {
+            addKeyValueToAnnote(key, value, pubFields);
             return;
+        }
+        // apparently one of the databases returns journal names in all caps
+        if ([value rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet]].location == NSNotFound)
+            value = [value titlecaseString];
     }
     else if ([key isEqualToString:@"Document Type"]) {
         // parse this here and add to the dictionary, to be removed later when we match it up with a BibTeX type
@@ -128,18 +154,9 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
         if ([value hasSuffix:@"."]) 
             value = [value stringByRemovingSuffix:@"."];
     }
-    else if ([key isEqualToString:@"Index Terms"]) {
-        // stick Index Terms(2) and Supplementary Terms in annote; user says they're generally garbage
-        key = BDSKKeywordsString;
-    }
     else if ([correctFields containsObject:key] == NO) {
         // this is a field that isn't meaningful, so dump it into Annote
-        NSMutableString *mutString = [pubFields objectForKey:BDSKAnnoteString];
-        if (nil == mutString) {
-            mutString = [NSMutableString string];
-            [pubFields setObject:mutString forKey:BDSKAnnoteString];
-        }
-        [mutString appendFormat:@"%@:\t%@\n\n", key, value];
+        addKeyValueToAnnote(key, value, pubFields);
         
         // bail out instead of adding to the dictionary
         return;
@@ -240,7 +257,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
 /*
  Google turns up some sample documents at
  
- http://chemistry.library.wisc.edu/instruction/scifinder_taggedsample.txt
+ http://www.google.com/search?q=cache:3Cg15n4kCGwJ:chemistry.library.wisc.edu/instruction/scifinder_taggedsample.txt+scifinder+START_RECORD&hl=en&ct=clnk&cd=4&gl=us
  http://wiki.refbase.net/index.php/Import_Example:_SciFinder
  
  From those and user-suppled info, we have the following doc types:
