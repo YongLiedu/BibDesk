@@ -107,22 +107,21 @@
 					if ([delegate respondsToSelector:@selector(dragImageView:writeDataToPasteboard:)] &&
 						[delegate dragImageView:self writeDataToPasteboard:pboard]) {
                    
-						NSImage *image;
-						NSImage *dragImage;
-						NSSize imageSize;
-						if ([delegate respondsToSelector:@selector(dragImageForDragImageView:)])
-							image = [delegate dragImageForDragImageView:self];
-						else
-							image = [self image];
-						imageSize = [image size];
-						
-						dragImage = [[NSImage alloc] initWithSize:imageSize];
-						[dragImage lockFocus];
-						[image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
-						[dragImage unlockFocus];
-
-						[self dragImage:dragImage at:NSMakePoint(mouseLoc.x - 0.5f * imageSize.width, mouseLoc.y - 0.5f * imageSize.height) offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES]; 
-						[dragImage release];
+						NSImage *dragImage = nil;
+                        NSSize imageSize = NSZeroSize;
+						if ([delegate respondsToSelector:@selector(dragImageForDragImageView:)]) {
+							dragImage = [delegate dragImageForDragImageView:self];
+                            imageSize = [dragImage size];
+						}
+                        if (dragImage == nil) {
+							NSImage *image = [self image];
+                            imageSize = [image size];
+                            dragImage = [[[NSImage alloc] initWithSize:imageSize] autorelease];
+                            [dragImage lockFocus];
+                            [image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.7];
+                            [dragImage unlockFocus];
+                        }
+                        [self dragImage:dragImage at:NSMakePoint(mouseLoc.x - 0.5f * imageSize.width, mouseLoc.y - 0.5f * imageSize.height) offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES]; 
                     }
 					keepOn = NO;
                     break;
