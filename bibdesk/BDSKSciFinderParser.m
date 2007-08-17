@@ -71,15 +71,16 @@
 
 // this is a set of fields that don't need any massaging; the key/value match BibTeX definitions
 static NSSet *correctFields = nil;
+static NSString *shortJournalNameString = nil;
+// some more-or-less unique string that meets our field name criteria (leading cap, no space)
+static NSString *__documentTypeString = @"Doc-Type";
 
 + (void)initialize
 {
     OBINITIALIZE;
     correctFields = [[NSSet alloc] initWithObjects:BDSKVolumeString, @"Language", BDSKAbstractString, nil];
+    shortJournalNameString = [[[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKShortJournalNameField"] fieldName] copy];
 }
-
-// some more-or-less unique string that meets our field name criteria (leading cap, no space)
-static NSString *__documentTypeString = @"Doc-Type";
 
 static void addKeyValueToAnnote(NSString *key, NSString *value, NSMutableDictionary *pubFields)
 {
@@ -107,16 +108,26 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
         // apparently one of the databases returns journal names in all caps
         if ([value rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet]].location == NSNotFound)
             value = [value titlecaseString];
-        // if we previously used the short title, save it off in Annote
-        if ([pubFields objectForKey:key] != nil)
-            addKeyValueToAnnote(@"Journal Title", [pubFields objectForKey:key], pubFields);
+        
+        // if we previously used the short title for Journal, save it off in Annote
+        if ([pubFields objectForKey:key] != nil) {
+            if (nil == shortJournalNameString)
+                addKeyValueToAnnote(@"Journal Title", [pubFields objectForKey:key], pubFields);
+            else
+                [pubFields setObject:[pubFields objectForKey:key] forKey:shortJournalNameString];
+        }
     }
     else if ([key isEqualToString:@"Journal Title"]) {
         key = BDSKJournalString;
-        // if we already have a Journal definition, bail out, because it's from "Full Journal Title"
+        
+        // if we already have a Journal definition, it's from the full title, so keep it
         if ([pubFields objectForKey:key] != nil) {
-            addKeyValueToAnnote(key, value, pubFields);
-            return;
+            // add it to annote and bail out, unless the user wants to put it in a special field
+            if (nil == shortJournalNameString) {
+                addKeyValueToAnnote(@"Journal Title", value, pubFields);
+                return;
+            }
+            else key = shortJournalNameString;
         }
         // apparently one of the databases returns journal names in all caps
         if ([value rangeOfCharacterFromSet:[NSCharacterSet lowercaseLetterCharacterSet]].location == NSNotFound)
