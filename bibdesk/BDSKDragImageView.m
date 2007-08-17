@@ -72,6 +72,7 @@
 		dragOp = [delegate dragImageView:self validateDrop:sender];
 	if (dragOp != NSDragOperationNone) {
 		highlight = YES;
+        [self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
 		[self setNeedsDisplay:YES];
 	}
 	return dragOp;
@@ -79,11 +80,13 @@
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender{
     highlight = NO;
+    [self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
 	[self setNeedsDisplay:YES];
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
     highlight = NO;
+    [self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
 	[self setNeedsDisplay:YES];
 	if ([delegate respondsToSelector:@selector(dragImageView:acceptDrop:)])
 		return [delegate dragImageView:self acceptDrop:sender];
