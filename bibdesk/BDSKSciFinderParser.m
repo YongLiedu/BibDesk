@@ -58,25 +58,44 @@
         // advance range past the ":"
         r.location += 1;
         *value = (id)CFStringCreateWithSubstring(alloc, (CFStringRef)line, CFRangeMake(r.location, len - r.location));
-        return YES;
+        
+        // just checking length may not be sufficient; some entries have a single space past the colon
+        if ([*value rangeOfCharacterFromSet:[NSCharacterSet alphanumericCharacterSet]].length)
+            return YES;
+        // no meaningful characters, so release and return NO
+        [*key release];
+        [*value release];
     }
     return NO;
 }
 
+static NSSet *correctFields = nil;
+
++ (void)initialize
+{
+    OBINITIALIZE;
+    correctFields = [[NSSet alloc] initWithObjects:BDSKVolumeString, @"Language", BDSKAbstractString, nil];
+}
+
 // some more-or-less unique string that meets our field name criteria (leading cap, no space)
-static NSString *__documentTypeString = @"Document-Type";
+static NSString *__documentTypeString = @"Doc-Type";
 
 static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMutableDictionary *pubFields)
-{
-    // @@ most of this needs to be replaced by TypeInfo.plist dictionaries
-    static NSCharacterSet *replaceChars = nil;
-    if (nil == replaceChars) {
-        replaceChars = [[NSCharacterSet characterSetWithCharactersInString:@" ."] copy];
-    }
-    if ([key isEqualToString:@"Author"])
+{    
+    // We could move some of this into TypeInfo.plist, but we only have three fields that don't need special handling, so it's not really worthwhile.  This function has multiple early returns, so be careful when debugging.
+    
+    if ([key isEqualToString:BDSKAuthorString]) {
         value = [value stringByReplacingAllOccurrencesOfString:@"; " withString:@" and "];
-    else if ([key isEqualToString:@"Journal Title"])
+    }
+    else if ([key isEqualToString:@"Full Journal Title"]) {
         key = BDSKJournalString;
+    }
+    else if ([key isEqualToString:@"Journal Title"]) {
+        key = BDSKJournalString;
+        // if we already have a Journal definition, bail out, because it's from "Full Journal Title"
+        if ([pubFields objectForKey:key] != nil)
+            return;
+    }
     else if ([key isEqualToString:@"Document Type"]) {
         // parse this here and add to the dictionary, to be removed later when we match it up with a BibTeX type
         NSRange r = [value rangeOfString:@";"];
@@ -84,19 +103,47 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
             value = [value substringWithRange:NSMakeRange(0, r.location)];
         key = __documentTypeString;
     }
-    else if ([key isEqualToString:@"Publication Year"])
+    else if ([key isEqualToString:@"Publication Year"]) {
         key = BDSKYearString;
+    }
+    else if ([key isEqualToString:@"Publication Date"]) {
+        // user says that one database uses Publication Year, and the other uses Publication Date, and recommends we prefer year
+        key = BDSKYearString;
+        if ([pubFields objectForKey:key] == nil)
+            return;
+    }
+    else if ([key isEqualToString:@"Corporate Source"]) {
+        key = BDSKAddressString;
+    }
     else if ([key isEqualToString:@"Page"]) {
         key = BDSKPagesString;
         if ([value rangeOfString:@"--"].location == NSNotFound)
             value = [value stringByReplacingAllOccurrencesOfString:@"-" withString:@"--"];
     }
-    else if ([key isEqualToString:@"Issue"])
+    else if ([key isEqualToString:@"Issue"]) {
         key = BDSKNumberString;
-    else if ([key isEqualToString:@"Title"] && [value hasSuffix:@"."]) // many entries seem to have a trailing "." on the title
-        value = [value stringByRemovingSuffix:@"."];
-    else if ([key rangeOfCharacterFromSet:replaceChars].length)
-        key = [key stringByReplacingCharactersInSet:replaceChars withString:@"-"];
+    }
+    else if ([key isEqualToString:BDSKTitleString]) {
+        // many entries seem to have a trailing "." on the title
+        if ([value hasSuffix:@"."]) 
+            value = [value stringByRemovingSuffix:@"."];
+    }
+    else if ([key isEqualToString:@"Index Terms"]) {
+        // stick Index Terms(2) and Supplementary Terms in annote; user says they're generally garbage
+        key = BDSKKeywordsString;
+    }
+    else if ([correctFields containsObject:key] == NO) {
+        // this is a field that isn't meaningful, so dump it into Annote
+        NSMutableString *mutString = [pubFields objectForKey:BDSKAnnoteString];
+        if (nil == mutString) {
+            mutString = [NSMutableString string];
+            [pubFields setObject:mutString forKey:BDSKAnnoteString];
+        }
+        [mutString appendFormat:@"%@:\t%@\n\n", key, value];
+        
+        // bail out instead of adding to the dictionary
+        return;
+    }
     
     [pubFields setObject:[value stringByBackslashEscapingTeXSpecials] forKey:[key fieldName]];    
 }
@@ -147,7 +194,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
             NSString *value;
             
             // lots of keys have empty values, so check the return value of this method
-            // some fields also seem to be continued, as "Index Terms" and "Index Terms(2)"; not clear how to handle those yet
+            // some fields also seem to be continued, but those end up getting dumped into Annote
             if ([self copyKey:&key value:&value fromLine:line]) {
                 fixAndAddKeyValueToDictionary(key, value, pubFields);
                 [key release];
@@ -158,15 +205,15 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
         if ([pubFields count]) {
             NSString *type = [pubFields objectForKey:__documentTypeString];
             
-            // leave Document-Type as a field if we don't have a precise mapping
+            // leave Doc-Type as a field if we don't have a precise mapping
             if ([type isEqualToString:@"Journal"]) {
                 type = BDSKArticleString;
                 [pubFields removeObjectForKey:__documentTypeString];
             }else if ([type isEqualToString:@"Preprint"]) {
-                // preprint is most likely an article type...but unpublished is probably better
+                // preprint is most likely an article type...but unpublished is probably more correct
                 type = BDSKUnpublishedString;
             }else if ([type isEqualToString:@"Report"]) {
-                // this should be more accurate than "Journal", but unfortunately all types are described with the same keys
+                // techreport should be more correct than journal, but unfortunately all types are described with the same keys
                 if ([pubFields objectForKey:BDSKJournalString]) {
                     [pubFields setObject:[pubFields objectForKey:BDSKJournalString] forKey:BDSKInstitutionString];
                     [pubFields removeObjectForKey:BDSKJournalString];
@@ -174,8 +221,8 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
                 type = BDSKTechreportString;
                 [pubFields removeObjectForKey:__documentTypeString];
             }else {
-                // the only other type I've seen so far is patent, which BibTeX doesn't have
-                type = BDSKMiscString;
+                // SciFinder fields basically force everything to be an @article
+                type = BDSKArticleString;
             }
             
             BibItem *pub = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString citeKey:nil pubFields:pubFields isNew:YES];
@@ -196,7 +243,7 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
  http://chemistry.library.wisc.edu/instruction/scifinder_taggedsample.txt
  http://wiki.refbase.net/index.php/Import_Example:_SciFinder
  
- From those, we have the following unique doc types:
+ From those and user-suppled info, we have the following doc types:
  
  FIELD Document Type:Journal; Online Computer File
  FIELD Document Type:Patent
@@ -206,6 +253,10 @@ static void fixAndAddKeyValueToDictionary(NSString *key, NSString *value, NSMuta
  FIELD Document Type:Preprint
  FIELD Document Type:Journal; General Review
  FIELD Document Type:Report
+ FIELD Document Type:Conference; General Review
+ FIELD Document Type:Conference; Meeting Abstract; Computer Optical Disk
+ FIELD Document Type:Conference
+ FIELD Document Type:Journal; Article; (JOURNAL ARTICLE); (RESEARCH SUPPORT, NON-U.S. GOV'T)
  
  so it looks like we want to grab the first word/phrase before the semicolon, or to the end of the line, whichever is shorter.  Entries appear to have a maximum of 49 lines.
  
