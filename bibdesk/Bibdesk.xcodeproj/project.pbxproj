@@ -871,7 +871,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -3160,7 +3160,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "TARGET=\"${DERIVED_FILE_DIR}/BibDesk Help\"\n\nINPUT=\"BibDesk Help/bibdesk.texi\"\nTOOLS=\"BibDesk Help\"\nDEST=\"BibDesk Help\"\nPREFIX=\"BibDesk Help\";\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LOC_DIR in *.lproj; do \\\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\"; \\\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\"; \\\n\t\"${TOOLS}/texi2html\" \"${LOC_DIR}/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html; \\\ndone;\n";
+			shellScript = "TARGET=\"${DERIVED_FILE_DIR}/BibDesk Help\"\n\nINPUT=\"BibDesk Help/bibdesk.texi\"\nTOOLS=\"BibDesk Help\"\nDEST=\"BibDesk Help\"\nPREFIX=\"BibDesk Help\";\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LOC_DIR in *.lproj; do \\\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\"; \\\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\"; \\\n\techo \"*** Creating help files in ${LOC_TARGET} ***\"; \\\n\t\"${TOOLS}/texi2html\" \"${LOC_DIR}/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html; \\\ndone;\n";
 		};
 		CEF834480C7750F000A3AD51 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3177,7 +3177,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "TARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"BibDesk Help\";\n\ncd \"${DERIVED_FILE_DIR}/BibDesk Help\";\n\nfor LOC_DIR in *.lproj; do \\\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\"; \\\n\t/bin/rm -rf \"${LOC_TARGET}/\"*.html; \\\n\t/bin/cp -Rf \"${LOC_DIR}/${DEST}/\"*.html \"${LOC_TARGET}\"; \\\ndone;\n";
+			shellScript = "TARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"BibDesk Help\";\n\ncd \"${DERIVED_FILE_DIR}/BibDesk Help\";\n\nfor LOC_DIR in *.lproj; do \\\n\techo \"*** Copying help files from ${LOC_DIR}/${DEST} to ${LOC_TARGET} ***\"; \\\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\"; \\\n\t/bin/rm -rf \"${LOC_TARGET}/\"*.html; \\\n\t/bin/cp -Rf \"${LOC_DIR}/${DEST}/\"*.html \"${LOC_TARGET}\"; \\\ndone;\n";
 		};
 		F91E54660853576600208CDF /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
