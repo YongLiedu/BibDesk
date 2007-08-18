@@ -394,6 +394,18 @@
 }
 
 - (IBAction)dismissAddBookmarkSheet:(id)sender{
+    if ([sender tag] == NSOKButton && [[bookmarks valueForKey:@"Title"] containsObject:[bookmarkField stringValue]]) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Bookmark Name", @"Message in alert dialog") 
+                                         defaultButton:NSLocalizedString(@"OK", @"Button title")
+                                       alternateButton:NSLocalizedString(@"Cancel", @"Button title")
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"A bookmark with this name already exists.", @"Informative text in alert dialog")];
+        if (NSAlertAlternateReturn == [alert runModal]) {
+            [addBookmarkSheet orderOut:sender];
+            [NSApp endSheet:addBookmarkSheet returnCode:NSCancelButton];
+        }
+        return;
+    }
     [addBookmarkSheet orderOut:sender];
     [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
 }
