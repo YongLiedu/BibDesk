@@ -21,6 +21,7 @@
             ACTIONS = {
                 checkForUpdates = id; 
                 editSearchBookmarks = id; 
+                showBookmarks = id; 
                 showPreferencePanel = id; 
                 showReadMeFile = id; 
                 showRelNotes = id; 

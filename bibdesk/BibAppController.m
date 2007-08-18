@@ -79,6 +79,7 @@
 #import <libkern/OSAtomic.h>
 #import "BDSKFileMatcher.h"
 #import "BDSKSearchBookmarkController.h"
+#import "BDSKBookmarkController.h"
 
 @implementation BibAppController
 
@@ -943,6 +944,10 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (IBAction)editSearchBookmarks:(id)sender {
     [[BDSKSearchBookmarkController sharedBookmarkController] showWindow:self];
+}
+
+- (IBAction)showBookmarks:(id)sender{
+    [[BDSKBookmarkController sharedBookmarkController] showWindow:sender];
 }
 
 #pragma mark Service code

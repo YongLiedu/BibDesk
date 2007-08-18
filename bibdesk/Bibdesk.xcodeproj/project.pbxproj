@@ -263,6 +263,9 @@
 		CEF7295D09CC890400802D48 /* RemoveFieldSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF7295B09CC890400802D48 /* RemoveFieldSheet.nib */; };
 		CEF7A6690915115B00BE9E02 /* BDSKScriptMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7A6670915115B00BE9E02 /* BDSKScriptMenu.m */; };
 		CEF7AC070915929E00BE9E02 /* BDSKSplitView.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF7AC050915929E00BE9E02 /* BDSKSplitView.m */; };
+		CEF83F370C77911F00A3AD51 /* BDSKBookmarkController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */; };
+		CEF83F380C77911F00A3AD51 /* BDSKBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */; };
+		CEF83F4E0C7792D300A3AD51 /* BookmarksWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEF83F4C0C7792D300A3AD51 /* BookmarksWindow.nib */; };
 		CEF942120926458C00750FFA /* BDSKPathColorTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */; };
 		CEF94342092656BB00750FFA /* BDSKPathIconTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94340092656BB00750FFA /* BDSKPathIconTransformer.m */; };
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
@@ -753,6 +756,7 @@
 				F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */,
 				F9022FB307580A9600C3F701 /* OmniBase.framework in CopyFiles */,
 				F9022FB407580A9600C3F701 /* OmniFoundation.framework in CopyFiles */,
+				CEF83F370C77911F00A3AD51 /* BDSKBookmarkController.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1094,6 +1098,10 @@
 		CEF7A6670915115B00BE9E02 /* BDSKScriptMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptMenu.m; sourceTree = "<group>"; };
 		CEF7AC040915929E00BE9E02 /* BDSKSplitView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSplitView.h; sourceTree = "<group>"; };
 		CEF7AC050915929E00BE9E02 /* BDSKSplitView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSplitView.m; sourceTree = "<group>"; };
+		CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBookmarkController.h; sourceTree = "<group>"; };
+		CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBookmarkController.m; sourceTree = "<group>"; };
+		CEF83F4D0C7792D300A3AD51 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BookmarksWindow.nib; sourceTree = "<group>"; };
+		CEF83F5F0C77948F00A3AD51 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/BookmarksWindow.nib; sourceTree = "<group>"; };
 		CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPathColorTransformer.h; sourceTree = "<group>"; };
 		CEF942100926458C00750FFA /* BDSKPathColorTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPathColorTransformer.m; sourceTree = "<group>"; };
 		CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPathIconTransformer.h; sourceTree = "<group>"; };
@@ -1766,6 +1774,7 @@
 				CEF71B060B91BFFF003A2771 /* NotesWindow.nib */,
 				CE43865C0BB8274600A56987 /* SearchBookmarksWindow.nib */,
 				F92B91BF0BC6B51B008D5BC3 /* SearchButtonView.nib */,
+				CEF83F4C0C7792D300A3AD51 /* BookmarksWindow.nib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				3DA82938083ECE9300321864 /* Localizable.strings */,
@@ -1923,6 +1932,7 @@
 				4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */,
 				CE2209A6093639B0004D7D92 /* BDSKAlert.m */,
 				CEFA07F30AF0E52100A3B4B1 /* BDSKApplication.m */,
+				CEF83F360C77911F00A3AD51 /* BDSKBookmarkController.m */,
 				3D866C2708031CEC00FF1724 /* BDSKCharacterConversion.m */,
 				CE38FB85091D946A00BCB69D /* BDSKConditionController.m */,
 				F95ED68A0B07B87F00000BBF /* BDSKController.m */,
@@ -2242,6 +2252,7 @@
 				CEFA07F20AF0E52100A3B4B1 /* BDSKApplication.h */,
 				F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */,
 				3D824AA607D099C300FB2F67 /* BDSKBackgroundView.h */,
+				CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */,
 				CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */,
 				2730077607CF20B500F2E485 /* BDSKBorderlessKeyWindow.h */,
 				CEFDBDDB0AEA87F8009EE99D /* BDSKCategoryGroup.h */,
@@ -3099,6 +3110,7 @@
 				CE7F5E480B3F5F1800A919D0 /* searchFolderIcon.tiff in Resources */,
 				F945240C0B4B15A6000A5E12 /* searchDocIcon.icns in Resources */,
 				CE3A241A0B750424006B64D3 /* webFolderIcon.tiff in Resources */,
+				CEF83F4E0C7792D300A3AD51 /* BookmarksWindow.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3528,6 +3540,7 @@
 				F97C9DBE0C44866F0002EE01 /* WSGeneratedObj.m in Sources */,
 				F97C9DBF0C4486700002EE01 /* BDSKISIWebServices.m in Sources */,
 				F90C4ACE0C7395FC0035DD50 /* BDSKSciFinderParser.m in Sources */,
+				CEF83F380C77911F00A3AD51 /* BDSKBookmarkController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3910,6 +3923,15 @@
 				F9C7D3F50BE927E400D65C7F /* French */,
 			);
 			name = RemoveFieldSheet.nib;
+			sourceTree = "<group>";
+		};
+		CEF83F4C0C7792D300A3AD51 /* BookmarksWindow.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEF83F4D0C7792D300A3AD51 /* English */,
+				CEF83F5F0C77948F00A3AD51 /* French */,
+			);
+			name = BookmarksWindow.nib;
 			sourceTree = "<group>";
 		};
 		F9022CBD0758049200C3F701 /* ReadMe.nib */ = {

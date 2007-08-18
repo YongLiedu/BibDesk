@@ -1,0 +1,20 @@
+{
+    IBClasses = (
+        {
+            CLASS = BDSKBookmarkController; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {
+            ACTIONS = {startAnimation = id; stopAnimation = id; }; 
+            CLASS = BDSKStatusBar; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; textCell = id; }; 
+            SUPERCLASS = BDSKGradientView; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }
+    ); 
+    IBVersion = 1; 
+}

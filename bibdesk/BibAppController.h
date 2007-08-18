@@ -120,6 +120,8 @@
 
 - (IBAction)editSearchBookmarks:(id)sender;
 
+- (IBAction)showBookmarks:(id)sender;
+
 - (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current;
 - (void)showInputManagerUpdateAlert;
 

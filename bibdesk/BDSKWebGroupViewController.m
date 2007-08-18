@@ -45,6 +45,7 @@
 #import "BDSKEdgeView.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument.h"
+#import "BDSKBookmarkController.h"
 
 
 @implementation BDSKWebGroupViewController
@@ -53,16 +54,6 @@
     if (self = [super init]) {
         [self setGroup:aGroup];
         document = aDocument;
-		bookmarks = [[NSMutableArray alloc] init];
-		
-        NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
-		if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
-			NSEnumerator *bEnum = [[NSArray arrayWithContentsOfFile:bookmarksPath] objectEnumerator];
-			NSDictionary *bm;
-			while(bm = [bEnum nextObject])
-				[bookmarks addObject:[[bm mutableCopy] autorelease]];
-		}
     }
     return self;
 }
@@ -72,7 +63,6 @@
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [group release];
-    [bookmarks release];
     [super dealloc];
 }
 
@@ -88,7 +78,7 @@
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
 	[urlComboBox removeAllItems];
-    [urlComboBox addItemsWithObjectValues:[bookmarks valueForKey:@"URLString"]];
+    [urlComboBox addItemsWithObjectValues:[[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"URLString"]];
     [[urlComboBox cell] setPlaceholderString:NSLocalizedString(@"URL", @"Web group URL field placeholder")];
 }
 

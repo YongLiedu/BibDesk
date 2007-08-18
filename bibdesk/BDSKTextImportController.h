@@ -74,7 +74,6 @@
     BibItem* item;
 	NSMutableArray *itemsAdded;
     NSMutableArray *fields;
-    NSMutableArray *bookmarks;
 	NSString *webSelection;
     
     NSUndoManager *undoManager;

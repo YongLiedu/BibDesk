@@ -64,6 +64,7 @@
 #import "BDSKStringParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
+#import "BDSKBookmarkController.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -102,7 +103,6 @@
 - (BOOL)isInTemporaryTypeSelectMode;
 
 - (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
-- (void)saveBookmarks;
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (BOOL)editSelectedCellAsMacro;
@@ -121,24 +121,12 @@
         item = [[BibItem alloc] init];
         [item setOwner:self];
         fields = [[NSMutableArray alloc] init];
-		bookmarks = [[NSMutableArray alloc] init];
         showingWebView = NO;
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
 		tableCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
 		crossrefFormatter = [[BDSKCrossrefFormatter alloc] init];
 		citationFormatter = [[BDSKCitationFormatter alloc] initWithDelegate:self];
-		
-		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
-		if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
-			NSEnumerator *bEnum = [[NSArray arrayWithContentsOfFile:bookmarksPath] objectEnumerator];
-			NSDictionary *bm;
-			
-			while(bm = [bEnum nextObject]){
-				[bookmarks addObject:[[bm mutableCopy] autorelease]];
-			}
-		}
 		macroTextFieldWC = nil;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -160,7 +148,6 @@
     [webView setEditingDelegate:nil];
     [item release];
     [fields release];
-    [bookmarks release];
     [itemsAdded release];
     [tableCellFormatter release];
     [crossrefFormatter release];
@@ -217,13 +204,15 @@
 	[self setShowingWebView:YES];
 	
 	// load the popup buttons with our bookmarks
-	NSEnumerator *bEnum = [bookmarks objectEnumerator];
-	NSDictionary *bm;
-	
+	NSArray *bookmarks = [[BDSKBookmarkController sharedBookmarkController] bookmarks];
+	int i, count = [bookmarks count];
+    
 	[bookmarkPopUpButton removeAllItems];
 	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Menu item title for Bookmarks popup")];
-	while (bm = [bEnum nextObject]) {
+	for (i = 0; i < count; i++) {
+        NSDictionary *bm = [bookmarks objectAtIndex:i];
 		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
+        [[bookmarkPopUpButton itemAtIndex:i + 1] setTag:i];
 	}
 	
 	// remember the arguments to pass in the callback later
@@ -349,7 +338,7 @@
 }
 
 - (IBAction)importFromWebAction:(id)sender{
-	NSEnumerator *bEnum = [bookmarks objectEnumerator];
+	NSEnumerator *bEnum = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] objectEnumerator];
 	NSDictionary *bm;
 	
 	[bookmarkPopUpButton removeAllItems];
@@ -385,8 +374,8 @@
 }
 
 - (IBAction)chooseBookmarkAction:(id)sender{
-	int index = [bookmarkPopUpButton indexOfSelectedItem];
-	NSString *URLString = [[bookmarks objectAtIndex:index-1] objectForKey:@"URLString"];
+	int index = [[bookmarkPopUpButton selectedItem] tag];
+	NSString *URLString = [[[BDSKBookmarkController sharedBookmarkController] objectInBookmarksAtIndex:index] objectForKey:@"URLString"];
 	[urlTextField setStringValue:URLString];
     
 	[urlSheet orderOut:sender];
@@ -394,7 +383,8 @@
 }
 
 - (IBAction)dismissAddBookmarkSheet:(id)sender{
-    if ([sender tag] == NSOKButton && [[bookmarks valueForKey:@"Title"] containsObject:[bookmarkField stringValue]]) {
+    NSArray *bookmarkNames = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"Title"];
+    if ([sender tag] == NSOKButton && [bookmarkNames containsObject:[bookmarkField stringValue]]) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Bookmark Name", @"Message in alert dialog") 
                                          defaultButton:NSLocalizedString(@"OK", @"Button title")
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title")
@@ -1009,29 +999,9 @@
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSString *URLString = (NSString *)contextInfo;
 	if (returnCode == NSOKButton) {
-		NSMutableDictionary *bookmark = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-										URLString, @"URLString", [bookmarkField stringValue], @"Title", nil];
-		[bookmarks addObject:bookmark];
-		
-		[self saveBookmarks];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithURLString:URLString title:[bookmarkField stringValue]];
 	}
 	[URLString release]; //the contextInfo was retained
-}
-
-- (void)saveBookmarks{
-	NSString *error = nil;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:bookmarks
-															  format:NSPropertyListXMLFormat_v1_0 
-													errorDescription:&error];
-	if (error) {
-		NSLog(@"Error writing bookmarks: %@", error);
-        [error release];
-		return;
-	}
-	
-	NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-	NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
-	[data writeToFile:bookmarksPath atomically:YES];
 }
 
 #pragma mark Menu validation
