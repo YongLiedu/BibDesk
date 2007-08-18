@@ -7,17 +7,6 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		3D8A5779082D3077008E818C /* BibDesk Help */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = F993F1C108553A61007A7657 /* Build configuration list for PBXAggregateTarget "BibDesk Help" */;
-			buildPhases = (
-				3D8A577A082D308B008E818C /* ShellScript */,
-			);
-			dependencies = (
-			);
-			name = "BibDesk Help";
-			productName = "BibDesk Help";
-		};
 		F98870CE07580E5F001D4D49 /* HeaderDoc */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F993F1E908553A61007A7657 /* Build configuration list for PBXAggregateTarget "HeaderDoc" */;
@@ -36,7 +25,6 @@
 				F98870D307580E94001D4D49 /* ShellScript */,
 			);
 			dependencies = (
-				F9E0F88B085B9AFA00006A72 /* PBXTargetDependency */,
 				F98870D807580EA1001D4D49 /* PBXTargetDependency */,
 			);
 			name = DiskImage;
@@ -507,13 +495,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CE87D7E70BA964D50027BBDD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3D8A5779082D3077008E818C;
-			remoteInfo = "BibDesk Help";
-		};
 		F90B126F0C298A8900144F1B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F90B126B0C298A8900144F1B /* pdftotext.xcodeproj */;
@@ -738,13 +719,6 @@
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = yaz;
 		};
-		F9E0F88A085B9AFA00006A72 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3D8A5779082D3077008E818C;
-			remoteInfo = "BibDesk Help";
-		};
 		F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F95CC0C6087F53AE002C5694 /* BibImporter.xcodeproj */;
@@ -897,7 +871,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -2722,21 +2696,22 @@
 			buildPhases = (
 				F9E0B071083E450C000109C6 /* ShellScript */,
 				8D1107290486CEB800E47090 /* Resources */,
+				CEF8343E0C77502C00A3AD51 /* ShellScript */,
+				CEF834480C7750F000A3AD51 /* ShellScript */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				F9022E8B07580A7C00C3F701 /* CopyFiles */,
 				F920DB22075C2D40000C5FCA /* Rez */,
 				F91B5C4E076412A10011ED22 /* CopyFiles */,
+				F95CC0ED087F542F002C5694 /* CopyFiles */,
 				F9FF213B09E83BAB00BB1706 /* ShellScript */,
 				F91E54660853576600208CDF /* ShellScript */,
-				F95CC0ED087F542F002C5694 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */,
 				F9AF56340BEA4160009B16D5 /* PBXTargetDependency */,
-				CE87D7E80BA964D50027BBDD /* PBXTargetDependency */,
 				F92BACF40BCC00EB008D5BC3 /* PBXTargetDependency */,
 				F9AF562E0BEA4160009B16D5 /* PBXTargetDependency */,
 				F9AF56320BEA4160009B16D5 /* PBXTargetDependency */,
@@ -2811,7 +2786,6 @@
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* BibDesk */,
-				3D8A5779082D3077008E818C /* BibDesk Help */,
 				F98870CE07580E5F001D4D49 /* HeaderDoc */,
 				F98870D407580E94001D4D49 /* DiskImage */,
 				275E270607838EE30070398A /* TestBibItem */,
@@ -3167,26 +3141,43 @@
 			shellPath = /bin/bash;
 			shellScript = "/usr/local/bin/ukrun \"$BUILD_DIR/$PRODUCT_NAME.$WRAPPER_EXTENSION\"";
 		};
-		3D8A577A082D308B008E818C /* ShellScript */ = {
+		CEF8343E0C77502C00A3AD51 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/BibDesk Help/applehelp.init",
+				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
 				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
-				"$(SRCROOT)/BibDesk Help/applehelp.init",
-				"$(SRCROOT)/French.lproj/BibDesk Help/version.texi",
 				"$(SRCROOT)/French.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
 			);
 			outputPaths = (
-				"$(SRCROOT)/English.lproj/BibDesk Help/BibDesk Help.html",
-				"$(SRCROOT)/French.lproj/BibDesk Help/BibDesk Help.html",
+				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
+				"$(DERIVED_FILE_DIR)/BibDesk Help/French.lproj/BibDesk Help/BibDesk Help.html",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help;\ntexi2html=./texi2html\n\nINPUT='BibDesk Help/bibdesk.texi'\nDEST='BibDesk Help'\n\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\n\t/bin/rm -f \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help*.html; \\\n\t${texi2html} \"${LOC_DIR}/${INPUT}\" --init-file=applehelp.init --prefix=\"BibDesk Help\" --output=\"${LOC_DIR}/${DEST}\" --split=node && \\\n\tperl -pi -e 's#<!--AppleMeta-->#<meta name=\\\"AppleTitle\\\" content=\\\"BibDesk Help\\\"><meta name=\\\"AppleIcon\\\" content=\\\"BibDesk%20Help/gfx/BibDeskIcon.png\\\"><meta name=\\\"robots\\\" content=\\\"anchors\\\">#' \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help.html && \\\n\tpython postprocess-nontitle.py \"${LOC_DIR}/${DEST}\"/BibDesk\\ Help_*.html;\\\ndone;\n";
+			shellScript = "TARGET=\"${DERIVED_FILE_DIR}/BibDesk Help\"\n\nINPUT=\"BibDesk Help/bibdesk.texi\"\nTOOLS=\"BibDesk Help\"\nDEST=\"BibDesk Help\"\nPREFIX=\"BibDesk Help\";\n\ncd \"${SOURCE_ROOT}\"\n\n[ -d \"${TARGET}\" ] || /bin/mkdir -p \"${TARGET}\";\n\nfor LOC_DIR in *.lproj; do \\\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\"; \\\n\t[ -d \"${LOC_TARGET}\" ] && /bin/rm -rf \"${LOC_TARGET}\"/* || /bin/mkdir -p \"${LOC_TARGET}\"; \\\n\t\"${TOOLS}/texi2html\" \"${LOC_DIR}/${INPUT}\" --init-file=\"${TOOLS}/applehelp.init\" --prefix=\"${PREFIX}\" --output=\"${LOC_TARGET}\" --split=node --nonumber && \\\n\tpython \"${TOOLS}/postprocess-nontitle.py\" \"${LOC_TARGET}/${PREFIX}_\"*.html; \\\ndone;\n";
+		};
+		CEF834480C7750F000A3AD51 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
+				"$(DERIVED_FILE_DIR)/BibDesk Help/French.lproj/BibDesk Help/BibDesk Help.html",
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/English.lproj/BibDesk Help/BibDesk Help.html",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/French.lproj/BibDesk Help/BibDesk Help.html",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "TARGET=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\";\nDEST=\"BibDesk Help\";\n\ncd \"${DERIVED_FILE_DIR}/BibDesk Help\";\n\nfor LOC_DIR in *.lproj; do \\\n\tLOC_TARGET=\"${TARGET}/${LOC_DIR}/${DEST}\"; \\\n\t/bin/rm -rf \"${LOC_TARGET}/\"*.html; \\\n\t/bin/cp -Rf \"${LOC_DIR}/${DEST}/\"*.html \"${LOC_TARGET}\"; \\\ndone;\n";
 		};
 		F91E54660853576600208CDF /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3543,11 +3534,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CE87D7E80BA964D50027BBDD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3D8A5779082D3077008E818C /* BibDesk Help */;
-			targetProxy = CE87D7E70BA964D50027BBDD /* PBXContainerItemProxy */;
-		};
 		F90B12720C298A9F00144F1B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = pdftotext;
@@ -3602,11 +3588,6 @@
 			isa = PBXTargetDependency;
 			name = yaz;
 			targetProxy = F9AF56370BEA4160009B16D5 /* PBXContainerItemProxy */;
-		};
-		F9E0F88B085B9AFA00006A72 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3D8A5779082D3077008E818C /* BibDesk Help */;
-			targetProxy = F9E0F88A085B9AFA00006A72 /* PBXContainerItemProxy */;
 		};
 		F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4303,76 +4284,6 @@
 			};
 			name = Test;
 		};
-		F993F1C208553A61007A7657 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = "BibDesk Help";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		F993F1C308553A61007A7657 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_SIGN_COMPARE = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_PARAMETER = NO;
-				GCC_WARN_UNUSED_VALUE = YES;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = "BibDesk Help";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		F993F1C408553A61007A7657 /* Test */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = "BibDesk Help";
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
-			name = Test;
-		};
 		F993F1EA08553A61007A7657 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4736,16 +4647,6 @@
 				F993F1BD08553A61007A7657 /* Debug */,
 				F993F1BE08553A61007A7657 /* Release */,
 				F993F1BF08553A61007A7657 /* Test */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		F993F1C108553A61007A7657 /* Build configuration list for PBXAggregateTarget "BibDesk Help" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F993F1C208553A61007A7657 /* Debug */,
-				F993F1C308553A61007A7657 /* Release */,
-				F993F1C408553A61007A7657 /* Test */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
