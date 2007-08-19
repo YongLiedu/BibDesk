@@ -3155,7 +3155,7 @@
 		};
 		CEF8343E0C77502C00A3AD51 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			files = (
 			);
 			inputPaths = (
@@ -3163,8 +3163,10 @@
 				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
 				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
 				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
+				"$(SRCROOT)/English.lproj/BibDesk Help/bibdesk.texi",
+				"$(SRCROOT)/English.lproj/BibDesk Help/version.texi",
 				"$(SRCROOT)/French.lproj/BibDesk Help/bibdesk.texi",
-				"$(SRCROOT)/BibDesk Help/postprocess-nontitle.py",
+				"$(SRCROOT)/French.lproj/BibDesk Help/version.texi",
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/BibDesk Help/English.lproj/BibDesk Help/BibDesk Help.html",
