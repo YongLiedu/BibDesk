@@ -78,7 +78,7 @@
     [stopOrReloadButton setImagePosition:NSImageOnly];
     [stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
 	[urlComboBox removeAllItems];
-    [urlComboBox addItemsWithObjectValues:[[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"URLString"]];
+    [urlComboBox addItemsWithObjectValues:[[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"urlString"]];
     [[urlComboBox cell] setPlaceholderString:NSLocalizedString(@"URL", @"Web group URL field placeholder")];
 }
 

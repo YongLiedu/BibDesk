@@ -22,8 +22,29 @@
 - (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index;
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)index;
 
-- (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
+- (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name;
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
+
+@end
+
+
+@interface BDSKBookmark : NSObject {
+    NSString *urlString;
+    NSString *name;
+}
+
+- (id)initWithUrlString:(NSString *)aUrlString name:(NSString *)aName;
+- (id)initWithDictionary:(NSDictionary *)dictionary;
+
+- (NSDictionary *)dictionaryValue;
+
+- (NSURL *)URL;
+
+- (NSString *)urlString;
+- (void)setUrlString:(NSString *)newUrlString;
+
+- (NSString *)name;
+- (void)setName:(NSString *)newName;
 
 @end

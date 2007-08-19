@@ -210,8 +210,8 @@
 	[bookmarkPopUpButton removeAllItems];
 	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Menu item title for Bookmarks popup")];
 	for (i = 0; i < count; i++) {
-        NSDictionary *bm = [bookmarks objectAtIndex:i];
-		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
+        BDSKBookmark *bm = [bookmarks objectAtIndex:i];
+		[bookmarkPopUpButton addItemWithTitle:[bm name]];
         [[bookmarkPopUpButton itemAtIndex:i + 1] setTag:i];
 	}
 	
@@ -339,12 +339,12 @@
 
 - (IBAction)importFromWebAction:(id)sender{
 	NSEnumerator *bEnum = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] objectEnumerator];
-	NSDictionary *bm;
+	BDSKBookmark *bm;
 	
 	[bookmarkPopUpButton removeAllItems];
 	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks", @"Menu item title for Bookmarks popup")];
 	while (bm = [bEnum nextObject]) {
-		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
+		[bookmarkPopUpButton addItemWithTitle:[bm name]];
 	}
 	
 	[NSApp beginSheet:urlSheet
@@ -375,7 +375,7 @@
 
 - (IBAction)chooseBookmarkAction:(id)sender{
 	int index = [[bookmarkPopUpButton selectedItem] tag];
-	NSString *URLString = [[[BDSKBookmarkController sharedBookmarkController] objectInBookmarksAtIndex:index] objectForKey:@"URLString"];
+	NSString *URLString = [[[BDSKBookmarkController sharedBookmarkController] objectInBookmarksAtIndex:index] urlString];
 	[urlTextField setStringValue:URLString];
     
 	[urlSheet orderOut:sender];
@@ -383,7 +383,7 @@
 }
 
 - (IBAction)dismissAddBookmarkSheet:(id)sender{
-    NSArray *bookmarkNames = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"Title"];
+    NSArray *bookmarkNames = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"name"];
     if ([sender tag] == NSOKButton && [bookmarkNames containsObject:[bookmarkField stringValue]]) {
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Bookmark Name", @"Message in alert dialog") 
                                          defaultButton:NSLocalizedString(@"OK", @"Button title")
@@ -999,7 +999,7 @@
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSString *URLString = (NSString *)contextInfo;
 	if (returnCode == NSOKButton) {
-        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithURLString:URLString title:[bookmarkField stringValue]];
+        [[BDSKBookmarkController sharedBookmarkController] addBookmarkWithUrlString:URLString name:[bookmarkField stringValue]];
 	}
 	[URLString release]; //the contextInfo was retained
 }

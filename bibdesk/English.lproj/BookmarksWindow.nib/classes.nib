@@ -13,6 +13,7 @@
             OUTLETS = {delegate = id; textCell = id; }; 
             SUPERCLASS = BDSKGradientView; 
         }, 
+        {CLASS = BDSKURLStringFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSObject; LANGUAGE = ObjC; }
     ); 
