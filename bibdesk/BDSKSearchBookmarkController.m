@@ -108,7 +108,7 @@ static NSString *BDSKSearchBookmarkChangedNotification = @"BDSKSearchBookmarkCha
 }
 
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)index {
-    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:[[[bookmarks objectAtIndex:index] copy] autorelease] inBookmarksAtIndex:index];
+    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:[bookmarks objectAtIndex:index] inBookmarksAtIndex:index];
     [bookmarks removeObjectAtIndex:index];
     [self saveBookmarks];
 }
