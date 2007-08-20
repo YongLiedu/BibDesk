@@ -310,18 +310,18 @@ void __BDDeleteArticlesForSorting(CFMutableStringRef mutableString)
     
     // get the max string length of any of the strings in the plist; we don't want to search any farther than necessary
     CFIndex maxRemoveLength = 0; 
-    CFIndex index = count;
-    while(index--)
-        maxRemoveLength = MAX(CFStringGetLength(CFArrayGetValueAtIndex(articlesToRemove, index)), maxRemoveLength);
+    CFIndex idx = count;
+    while(idx--)
+        maxRemoveLength = MAX(CFStringGetLength(CFArrayGetValueAtIndex(articlesToRemove, idx)), maxRemoveLength);
     
-    index = count;
+    idx = count;
     CFRange articleRange;
     Boolean found;
     CFIndex length;
 
-    while(index--){
+    while(idx--){
         length = CFStringGetLength(mutableString);
-        found = CFStringFindWithOptions(mutableString, CFArrayGetValueAtIndex(articlesToRemove, index), CFRangeMake(0, MIN(length, maxRemoveLength)), 0, &articleRange);
+        found = CFStringFindWithOptions(mutableString, CFArrayGetValueAtIndex(articlesToRemove, idx), CFRangeMake(0, MIN(length, maxRemoveLength)), 0, &articleRange);
         
         // make sure the next character is whitespace before deleting, after checking bounds
         if(found && length > articleRange.length && 

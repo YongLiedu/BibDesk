@@ -97,17 +97,17 @@
     return count;
 }
 
-- (id)objectAtIndex:(unsigned)index {
+- (id)objectAtIndex:(unsigned)idx {
     pthread_rwlock_rdlock(&rwlock);
-    id object = [[[embeddedArray objectAtIndex:index] retain] autorelease];
+    id object = [[[embeddedArray objectAtIndex:idx] retain] autorelease];
     pthread_rwlock_unlock(&rwlock);
     return object;
 }
 
-- (void)insertObject:(id)object atIndex:(unsigned)index {
+- (void)insertObject:(id)object atIndex:(unsigned)idx {
     pthread_rwlock_wrlock(&rwlock);
     [object retain];
-	[embeddedArray insertObject:object atIndex:index];
+	[embeddedArray insertObject:object atIndex:idx];
     [object release];
     pthread_rwlock_unlock(&rwlock);
 }
@@ -120,10 +120,10 @@
     pthread_rwlock_unlock(&rwlock);
 }
 
-- (void)removeObjectAtIndex:(unsigned)index {
+- (void)removeObjectAtIndex:(unsigned)idx {
     pthread_rwlock_wrlock(&rwlock);
-    id obj = [[embeddedArray objectAtIndex:index] retain];
-	[embeddedArray removeObjectAtIndex:index];
+    id obj = [[embeddedArray objectAtIndex:idx] retain];
+	[embeddedArray removeObjectAtIndex:idx];
     [obj autorelease];
     pthread_rwlock_unlock(&rwlock);
 }
@@ -136,11 +136,11 @@
     pthread_rwlock_unlock(&rwlock);
 }
 
-- (void)replaceObjectAtIndex:(unsigned)index withObject:(id)object{
+- (void)replaceObjectAtIndex:(unsigned)idx withObject:(id)object{
     pthread_rwlock_wrlock(&rwlock);
     [object retain];
-    id objToReplace = [[embeddedArray objectAtIndex:index] retain];
-	[embeddedArray replaceObjectAtIndex:index withObject:object];
+    id objToReplace = [[embeddedArray objectAtIndex:idx] retain];
+	[embeddedArray replaceObjectAtIndex:idx withObject:object];
     [object release];
     [objToReplace autorelease];
     pthread_rwlock_unlock(&rwlock);

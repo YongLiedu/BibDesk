@@ -153,16 +153,16 @@
 }
 
 - (void)objectDidEndEditing:(id)editor {
-    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (index != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
+    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (idx != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
 }
 
 - (BOOL)commitEditing {
-    CFIndex index = CFArrayGetCount(editors);
+    CFIndex idx = CFArrayGetCount(editors);
     
-	while (index--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+	while (idx--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
 			return NO;
     
     if ([NSString isEmptyString:urlString]) {

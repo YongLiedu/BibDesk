@@ -127,17 +127,17 @@
     [anObject setParent:self];
 }
 
-- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(unsigned int)index;
+- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(unsigned int)idx;
 {
-    [children insertObject:anObject atIndex:index];
+    [children insertObject:anObject atIndex:idx];
     
     // make sure this child knows its parent
     [anObject setParent:self];
 }
 
-- (id)childAtIndex:(unsigned int)index;
+- (id)childAtIndex:(unsigned int)idx;
 {
-    return [children objectAtIndex:index];
+    return [children objectAtIndex:idx];
 }
 
 - (void)removeChild:(BDSKTreeNode *)anObject;

@@ -116,9 +116,9 @@
     return [[item valueForKey:@"type"] isEqualToString:@"Note"];
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)index ofItem:(id)item {
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item {
     if (item == nil) {
-        return [notes objectAtIndex:index];
+        return [notes objectAtIndex:idx];
     } else {
         return [item valueForKey:@"child"];
     }

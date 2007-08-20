@@ -104,9 +104,9 @@ static BOOL isSearchFileAtPath(NSString *path)
                 BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:nil dictionary:dict];
                 if (info) {
                     NSMutableArray *servers = [newServerDicts objectForKey:[info type]];
-                    unsigned index = [[servers valueForKey:@"name"] indexOfObject:[info name]];
-                    if (index != NSNotFound)
-                        [servers replaceObjectAtIndex:index withObject:info];
+                    unsigned idx = [[servers valueForKey:@"name"] indexOfObject:[info name]];
+                    if (idx != NSNotFound)
+                        [servers replaceObjectAtIndex:idx withObject:info];
                     else
                         [servers addObject:info];
                     [[searchGroupServerFiles objectForKey:[info type]] setObject:path forKey:[info name]];
@@ -214,19 +214,19 @@ static BOOL isSearchFileAtPath(NSString *path)
     [self saveServer:serverInfo];
 }
 
-+ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned)index forType:(NSString *)type;
++ (void)setServer:(BDSKServerInfo *)serverInfo atIndex:(unsigned)idx forType:(NSString *)type;
 {
     NSMutableArray *servers = [searchGroupServers objectForKey:type];
-    [self deleteServer:[servers objectAtIndex:index]];
-    [servers replaceObjectAtIndex:index withObject:serverInfo];
+    [self deleteServer:[servers objectAtIndex:idx]];
+    [servers replaceObjectAtIndex:idx withObject:serverInfo];
     [self saveServer:serverInfo];
 }
 
-+ (void)removeServerAtIndex:(unsigned)index forType:(NSString *)type;
++ (void)removeServerAtIndex:(unsigned)idx forType:(NSString *)type;
 {
     NSMutableArray *servers = [searchGroupServers objectForKey:type];
-    [self deleteServer:[servers objectAtIndex:index]];
-    [servers removeObjectAtIndex:index];
+    [self deleteServer:[servers objectAtIndex:idx]];
+    [servers removeObjectAtIndex:idx];
 }
 
 #pragma mark Initialization
@@ -264,13 +264,13 @@ static BOOL isSearchFileAtPath(NSString *path)
 
 - (NSString *)windowNibName { return @"BDSKSearchGroupSheet"; }
 
-- (void)reloadServersSelectingIndex:(unsigned)index{
+- (void)reloadServersSelectingIndex:(unsigned)idx{
     NSArray *servers = [[self class] serversForType:type];
     [serverPopup removeAllItems];
     [serverPopup addItemsWithTitles:[servers valueForKey:@"name"]];
     [[serverPopup menu] addItem:[NSMenuItem separatorItem]];
     [serverPopup addItemWithTitle:NSLocalizedString(@"Other", @"Popup menu item name for other search group server")];
-    [serverPopup selectItemAtIndex:index];
+    [serverPopup selectItemAtIndex:idx];
     [self selectPredefinedServer:serverPopup];
 }
 
@@ -297,19 +297,19 @@ static BOOL isSearchFileAtPath(NSString *path)
     [typeMatrix selectCellWithTag:[self isEntrez] ? 0 : [self isZoom] ? 1 : 2];
     
     NSArray *servers = [[self class] serversForType:type];
-    unsigned index = 0;
+    unsigned idx = 0;
     
     if ([servers count] == 0) {
-        index = 1;
+        idx = 1;
     } else if (group) {
-        index = [servers indexOfObject:[group serverInfo]];
-        if (index == NSNotFound)
-            index = [servers count] + 1;
+        idx = [servers indexOfObject:[group serverInfo]];
+        if (idx == NSNotFound)
+            idx = [servers count] + 1;
     }
     
     [syntaxPopup addItemsWithTitles:[BDSKZoomGroupServer supportedRecordSyntaxes]];
     
-    [self reloadServersSelectingIndex:index];
+    [self reloadServersSelectingIndex:idx];
     [self changeOptions];
 }
 
@@ -404,9 +404,9 @@ static BOOL isSearchFileAtPath(NSString *path)
             return;
         }
         
-        unsigned index = [servers count];
+        unsigned idx = [servers count];
         [[self class] addServer:[self serverInfo] forType:[self type]];
-        [self reloadServersSelectingIndex:index];
+        [self reloadServersSelectingIndex:idx];
         
     } else {
         // remove the selected default server
@@ -431,9 +431,9 @@ static BOOL isSearchFileAtPath(NSString *path)
         if ([self commitEditing] == NO)
             return;
         
-        unsigned index = [serverPopup indexOfSelectedItem];
+        unsigned idx = [serverPopup indexOfSelectedItem];
         unsigned existingIndex = [[[[self class] serversForType:[self type]] valueForKey:@"name"] indexOfObject:[serverPopup titleOfSelectedItem]];
-        if (existingIndex != NSNotFound && existingIndex != index) {
+        if (existingIndex != NSNotFound && existingIndex != idx) {
             NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Duplicate Server Name", @"Message in alert dialog when setting a search group server with a duplicate name")
                                              defaultButton:nil
                                            alternateButton:nil
@@ -444,8 +444,8 @@ static BOOL isSearchFileAtPath(NSString *path)
         }
         
         BDSKServerInfo *info = [[serverInfo copy] autorelease];
-        [[self class] setServer:info atIndex:index forType:[self type]];
-        [self reloadServersSelectingIndex:index];
+        [[self class] setServer:info atIndex:idx forType:[self type]];
+        [self reloadServersSelectingIndex:idx];
     } else {
         [editButton setTitle:NSLocalizedString(@"Set", @"Button title")];
         [editButton setToolTip:NSLocalizedString(@"Set the selected default server settings", @"Tool tip message")];
@@ -552,16 +552,16 @@ static BOOL isSearchFileAtPath(NSString *path)
 }
 
 - (void)objectDidEndEditing:(id)editor {
-    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (index != -1)
-		CFArrayRemoveValueAtIndex(editors, index);		
+    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (idx != -1)
+		CFArrayRemoveValueAtIndex(editors, idx);		
 }
 
 - (BOOL)commitEditing {
-    CFIndex index = CFArrayGetCount(editors);
+    CFIndex idx = CFArrayGetCount(editors);
     
-	while (index--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+	while (idx--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
         return NO;
     
     NSString *message = nil;

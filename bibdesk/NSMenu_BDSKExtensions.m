@@ -68,11 +68,11 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     }
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)index;
+- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenu:(NSMenu *)submenu atIndex:(unsigned int)idx;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     [item setSubmenu:submenu];
-    [self insertItem:item atIndex:index];
+    [self insertItem:item atIndex:idx];
     [item release];
     return item;
 }
@@ -82,13 +82,13 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:[self numberOfItems]];
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(unsigned int)index;
+- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle submenuTitle:(NSString *)submenuTitle submenuDelegate:(id)delegate atIndex:(unsigned int)idx;
 {
     NSMenuItem *item = [[NSMenuItem allocWithZone:[self zone]] initWithTitle:itemTitle action:NULL keyEquivalent:@""];
     NSMenu *submenu = [[NSMenu allocWithZone:[self zone]] initWithTitle:submenuTitle];
     [submenu setDelegate:delegate];
     [item setSubmenu:submenu];
-    [self insertItem:item atIndex:index];
+    [self insertItem:item atIndex:idx];
     [submenu release];
     [item release];
     return item;
@@ -99,11 +99,11 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     return [self insertItemWithTitle:itemTitle submenuTitle:submenuTitle submenuDelegate:delegate atIndex:[self numberOfItems]];
 }
 
-- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)index;
+- (NSMenuItem *)insertItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL atIndex:(unsigned int)idx;
 {
     if (theURL == nil) {
         // just return an empty item
-        return [self insertItemWithTitle:itemTitle action:NULL keyEquivalent:@"" atIndex:index];
+        return [self insertItemWithTitle:itemTitle action:NULL keyEquivalent:@"" atIndex:idx];
     }
     
     NSMenu *submenu;
@@ -121,7 +121,7 @@ static NSString *BDSKMenuApplicationURL = @"BDSKMenuApplicationURL";
     [item setRepresentedObject:representedObject];
     [representedObject release];
     
-    return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:index];
+    return [self insertItemWithTitle:itemTitle submenu:submenu atIndex:idx];
 }
 
 - (NSMenuItem *)addItemWithTitle:(NSString *)itemTitle andSubmenuOfApplicationsForURL:(NSURL *)theURL;

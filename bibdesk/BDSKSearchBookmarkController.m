@@ -97,19 +97,19 @@ static NSString *BDSKSearchBookmarkChangedNotification = @"BDSKSearchBookmarkCha
     return [bookmarks count];
 }
 
-- (id)objectInBookmarksAtIndex:(unsigned)index {
-    return [bookmarks objectAtIndex:index];
+- (id)objectInBookmarksAtIndex:(unsigned)idx {
+    return [bookmarks objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index {
-    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectFromBookmarksAtIndex:index];
-    [bookmarks insertObject:obj atIndex:index];
+- (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)idx {
+    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectFromBookmarksAtIndex:idx];
+    [bookmarks insertObject:obj atIndex:idx];
     [self saveBookmarks];
 }
 
-- (void)removeObjectFromBookmarksAtIndex:(unsigned)index {
-    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:[bookmarks objectAtIndex:index] inBookmarksAtIndex:index];
-    [bookmarks removeObjectAtIndex:index];
+- (void)removeObjectFromBookmarksAtIndex:(unsigned)idx {
+    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:[bookmarks objectAtIndex:idx] inBookmarksAtIndex:idx];
+    [bookmarks removeObjectAtIndex:idx];
     [self saveBookmarks];
 }
 

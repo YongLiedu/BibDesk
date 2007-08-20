@@ -345,25 +345,25 @@
 }
 
 - (BibEditor *)editPubBeforePub:(BibItem *)pub{
-    int index = [shownPublications indexOfObject:pub];
-    if(index == NSNotFound){
+    unsigned int idx = [shownPublications indexOfObject:pub];
+    if(idx == NSNotFound){
         NSBeep();
         return nil;
     }
-    if(index-- == 0)
-        index = [shownPublications count] - 1;
-    return [self editPub:[shownPublications objectAtIndex:index]];
+    if(idx-- == 0)
+        idx = [shownPublications count] - 1;
+    return [self editPub:[shownPublications objectAtIndex:idx]];
 }
 
 - (BibEditor *)editPubAfterPub:(BibItem *)pub{
-    unsigned int index = [shownPublications indexOfObject:pub];
-    if(index == NSNotFound){
+    unsigned int idx = [shownPublications indexOfObject:pub];
+    if(idx == NSNotFound){
         NSBeep();
         return nil;
     }
-    if(++index == [shownPublications count])
-        index = 0;
-    return [self editPub:[shownPublications objectAtIndex:index]];
+    if(++idx == [shownPublications count])
+        idx = 0;
+    return [self editPub:[shownPublications objectAtIndex:idx]];
 }
 
 - (void)editPubAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -1183,7 +1183,7 @@
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     
-    CFIndex index = [shownPublications count];
+    CFIndex idx = [shownPublications count];
     id object1 = nil, object2 = nil;
     
     OBASSERT(sortKey);
@@ -1193,11 +1193,11 @@
     BOOL isURL = [sortKey isURLField];
     
     // Compare objects in the currently sorted table column using the isEqual: method to test adjacent cells in order to check for duplicates based on a specific sort key.  BibTool does this, but its effectiveness is obviously limited by the key used <http://lml.ls.fi.upm.es/manuales/bibtool/m_2_11_1.html>.
-    while(index--){
+    while(idx--){
         object1 = object2;
-        object2 = isURL ? [[shownPublications objectAtIndex:index] valueOfField:sortKey] : [[shownPublications objectAtIndex:index] displayValueOfField:sortKey];
+        object2 = isURL ? [[shownPublications objectAtIndex:idx] valueOfField:sortKey] : [[shownPublications objectAtIndex:idx] displayValueOfField:sortKey];
         if([object1 isEqual:object2]){
-            [rowsToSelect addIndexesInRange:NSMakeRange(index, 2)];
+            [rowsToSelect addIndexesInRange:NSMakeRange(idx, 2)];
             countOfItems++;
         }
     }
@@ -1278,19 +1278,19 @@
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     
-    CFIndex i, index = [shownPublications count], countOfItems = 0;
+    CFIndex i, idx = [shownPublications count], countOfItems = 0;
     BibItem *pub;
     NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
     BibTypeManager *typeman = [BibTypeManager sharedManager];
     NSArray *reqFields;
     
-    while(index--){
-        pub = [shownPublications objectAtIndex:index];
+    while(idx--){
+        pub = [shownPublications objectAtIndex:idx];
         reqFields = [typeman requiredFieldsForType:[pub pubType]];
         i = [reqFields count];
         while(i--){
             if([NSString isEmptyString:[pub valueOfField:[reqFields objectAtIndex:i]]]){
-                [rowsToSelect addIndex:index];
+                [rowsToSelect addIndex:idx];
                 countOfItems++;
                 break;
             }

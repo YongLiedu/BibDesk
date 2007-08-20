@@ -120,11 +120,11 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
     [theWindow setShowsToolbarButton:NO];
 }
 
-- (void)iconView:(OAPreferencesIconView *)iconView buttonHitAtIndex:(unsigned int)index;
+- (void)iconView:(OAPreferencesIconView *)iconView buttonHitAtIndex:(unsigned int)idx;
 {
     isSearchActive = NO;
     [[overlay contentView] setNeedsDisplay:YES];
-    [super iconView:iconView buttonHitAtIndex:index];
+    [super iconView:iconView buttonHitAtIndex:idx];
 }
 
 - (IBAction)showPreferencesPanel:(id)sender;

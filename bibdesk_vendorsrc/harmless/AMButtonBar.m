@@ -250,14 +250,14 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 #pragma mark 		public methods
 //====================================================================
 
-- (AMButtonBarItem *)itemAtIndex:(int)index
+- (AMButtonBarItem *)itemAtIndex:(int)idx
 {
-	return [(NSMutableArray *)[self items] objectAtIndex:index];
+	return [(NSMutableArray *)[self items] objectAtIndex:idx];
 }
 
-- (void)insertItem:(AMButtonBarItem *)item atIndex:(int)index
+- (void)insertItem:(AMButtonBarItem *)item atIndex:(int)idx
 {
-	[(NSMutableArray *)[self items] insertObject:item atIndex:index];
+	[(NSMutableArray *)[self items] insertObject:item atIndex:idx];
 	[self setNeedsLayout:YES];
 }
 
@@ -271,9 +271,9 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	[self setNeedsLayout:YES];
 }
 
-- (void)removeItemAtIndex:(int)index
+- (void)removeItemAtIndex:(int)idx
 {
-	[self removeItem:[(NSMutableArray *)[self items] objectAtIndex:index]];
+	[self removeItem:[(NSMutableArray *)[self items] objectAtIndex:idx]];
 }
 
 - (void)removeAllItems
@@ -336,14 +336,14 @@ NSString *const AMButtonBarSelectionDidChangeNotification = @"AMButtonBarSelecti
 	return result;
 }
 
-- (NSRect)frameForItemAtIndex:(int)index
+- (NSRect)frameForItemAtIndex:(int)idx
 {
-	return [[[self items] objectAtIndex:index] frame];
+	return [[[self items] objectAtIndex:idx] frame];
 }
 
-- (void)drawItemAtIndex:(int)index
+- (void)drawItemAtIndex:(int)idx
 {
-	[self drawItem:[self itemAtIndex:index]];
+	[self drawItem:[self itemAtIndex:idx]];
 }
 
 - (void)drawItem:(AMButtonBarItem *)item

@@ -134,19 +134,19 @@
 }
 
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
-	unsigned int index = [conditionControllers indexOfObject:aConditionController];
-	if (index == NSNotFound) 
-		index = [conditionControllers count] - 1;
+	unsigned int idx = [conditionControllers indexOfObject:aConditionController];
+	if (idx == NSNotFound) 
+		idx = [conditionControllers count] - 1;
 	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
-    [self insertConditionController:newController atIndex:index + 1];
+    [self insertConditionController:newController atIndex:idx + 1];
 }
 
-- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)index {
-    [[[self undoManager] prepareWithInvocationTarget:self] removeConditionControllerAtIndex:index];
+- (void)insertConditionController:(BDSKConditionController *)newController atIndex:(unsigned int)idx {
+    [[[self undoManager] prepareWithInvocationTarget:self] removeConditionControllerAtIndex:idx];
 	
     unsigned int count = [conditionControllers count];
-    [conditionControllers insertObject:newController atIndex:index];
-    [conditionsView insertView:[newController view] atIndex:index];
+    [conditionControllers insertObject:newController atIndex:idx];
+    [conditionsView insertView:[newController view] atIndex:idx];
     [newController setCanRemove:(count > 0)];
 	if (count == 1) {
         [[conditionControllers objectAtIndex:0] setCanRemove:YES];
@@ -156,14 +156,14 @@
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
-	unsigned int index = [conditionControllers indexOfObject:aConditionController];
-    [self removeConditionControllerAtIndex:index];
+	unsigned int idx = [conditionControllers indexOfObject:aConditionController];
+    [self removeConditionControllerAtIndex:idx];
 }
 
-- (void)removeConditionControllerAtIndex:(unsigned int)index {
-    BDSKConditionController *aConditionController = [conditionControllers objectAtIndex:index];
+- (void)removeConditionControllerAtIndex:(unsigned int)idx {
+    BDSKConditionController *aConditionController = [conditionControllers objectAtIndex:idx];
     
-    [[[self undoManager] prepareWithInvocationTarget:self] insertConditionController:aConditionController atIndex:index];
+    [[[self undoManager] prepareWithInvocationTarget:self] insertConditionController:aConditionController atIndex:idx];
     
     [conditionsView removeView:[aConditionController view]];
 	[conditionControllers removeObject:aConditionController]; 
@@ -198,16 +198,16 @@
 }
 
 - (void)objectDidEndEditing:(id)editor {
-    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (index != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
+    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (idx != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
 }
 
 - (BOOL)commitEditing {
-    CFIndex index = CFArrayGetCount(editors);
+    CFIndex idx = CFArrayGetCount(editors);
     
-	while (index--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+	while (idx--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
 			return NO;
     
     return YES;

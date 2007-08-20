@@ -1625,11 +1625,11 @@ The groupedPublications array is a subset of the publications array, developed b
         [indexes addIndexesInRange:[groups rangeOfSearchGroups]];
     }
     
-    unsigned index = [indexes firstIndex];
+    unsigned idx = [indexes firstIndex];
     
-    while (index != NSNotFound) {
-        id group = [groups objectAtIndex:index];
-        index = [indexes indexGreaterThanIndex:index];
+    while (idx != NSNotFound) {
+        id group = [groups objectAtIndex:idx];
+        idx = [indexes indexGreaterThanIndex:idx];
         if ([group count] == 0) continue; // otherwise the group will load
         NSEnumerator *pubEnum = [[group publications] objectEnumerator];
         BibItem *pub;

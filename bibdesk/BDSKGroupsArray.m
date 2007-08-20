@@ -109,59 +109,59 @@
         ([lastImportGroup count] ? 1 : 0) + (webGroup == nil ? 0 : 1) + 1 /* add 1 for all publications group */ ;
 }
 
-- (id)objectAtIndex:(unsigned int)index {
+- (id)objectAtIndex:(unsigned int)idx {
     unsigned int count;
     
     [self updateStaticGroupsIfNeeded];
     
-    if (index == 0)
+    if (idx == 0)
 		return libraryGroup;
-    index -= 1;
+    idx -= 1;
     
     if (webGroup != nil){
         // if we are showing the web group, insert it after the library:
-        if(index == 0)
+        if(idx == 0)
             return webGroup;
-        index -= 1;
+        idx -= 1;
     }
         
     count = [sharedGroups count];
-    if (index < count)
-        return [sharedGroups objectAtIndex:index];
-    index -= count;
+    if (idx < count)
+        return [sharedGroups objectAtIndex:idx];
+    idx -= count;
     
     count = [urlGroups count];
-    if (index < count)
-        return [urlGroups objectAtIndex:index];
-    index -= count;
+    if (idx < count)
+        return [urlGroups objectAtIndex:idx];
+    idx -= count;
     
     count = [scriptGroups count];
-    if (index < count)
-        return [scriptGroups objectAtIndex:index];
-    index -= count;
+    if (idx < count)
+        return [scriptGroups objectAtIndex:idx];
+    idx -= count;
     
     count = [searchGroups count];
-    if (index < count)
-        return [searchGroups objectAtIndex:index];
-    index -= count;
+    if (idx < count)
+        return [searchGroups objectAtIndex:idx];
+    idx -= count;
     
     if ([lastImportGroup count] != 0) {
-        if (index == 0)
+        if (idx == 0)
             return lastImportGroup;
-        index -= 1;
+        idx -= 1;
     }
     
 	count = [smartGroups count];
-    if (index < count)
-		return [smartGroups objectAtIndex:index];
-    index -= count;
+    if (idx < count)
+		return [smartGroups objectAtIndex:idx];
+    idx -= count;
     
     count = [staticGroups count];
-    if (index < count)
-        return [staticGroups objectAtIndex:index];
-    index -= count;
+    if (idx < count)
+        return [staticGroups objectAtIndex:idx];
+    idx -= count;
     
-    return [categoryGroups objectAtIndex:index];
+    return [categoryGroups objectAtIndex:idx];
 }
 
 #pragma mark Subarray Accessors

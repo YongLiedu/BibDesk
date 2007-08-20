@@ -56,11 +56,11 @@
 - (BOOL)intersectsIndexSet:(NSIndexSet *)indexSet{
     if ([indexSet count] == 0)
         return NO;
-    unsigned int index = [indexSet firstIndex];
-    while (index != NSNotFound) {
-        if ([self containsIndex:index])
+    unsigned int idx = [indexSet firstIndex];
+    while (idx != NSNotFound) {
+        if ([self containsIndex:idx])
             return YES;
-        index = [indexSet indexGreaterThanIndex:index];
+        idx = [indexSet indexGreaterThanIndex:idx];
     }
     return NO;
 }

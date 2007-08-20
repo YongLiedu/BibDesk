@@ -63,8 +63,8 @@ ssp: 2004-07-11
 	if (![param isKindOfClass:[NSArray class]]) return nil;
 	
 	// Determine the document responsible for this
-	NSIndexSpecifier * index = [param objectAtIndex:0];
-	NSScriptObjectSpecifier * parent = [index containerSpecifier];
+	NSIndexSpecifier * indexSpec = [param objectAtIndex:0];
+	NSScriptObjectSpecifier * parent = [indexSpec containerSpecifier];
 	BibDocument *doc = [parent objectsByEvaluatingSpecifier];
 	//NSLog([doc description]);
 	if (doc == nil) return nil;

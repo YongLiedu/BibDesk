@@ -233,9 +233,9 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     return value;
 }
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item
 {
-    return nil == item ? [itemNodes objectAtIndex:index] : [[item children] objectAtIndex:index];
+    return nil == item ? [itemNodes objectAtIndex:idx] : [[item children] objectAtIndex:idx];
 }
 
 - (id)outlineView:(NSOutlineView *)ov itemForPersistentObject:(id)object
@@ -365,26 +365,26 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     return NO;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)index{
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
     if ([type isEqualToString:NSFilenamesPboardType]) {
-        if ([item isLeaf] && index == NSOutlineViewDropOnItemIndex) {
+        if ([item isLeaf] && idx == NSOutlineViewDropOnItemIndex) {
             return NSDragOperationCopy;
         } else if (item == nil) {
-            if (index == NSOutlineViewDropOnItemIndex)
+            if (idx == NSOutlineViewDropOnItemIndex)
                 [outlineView setDropItem:nil dropChildIndex:[itemNodes count]];
             return NSDragOperationCopy;
-        } else if ([item isLeaf] == NO && index != NSOutlineViewDropOnItemIndex && index > 0) {
+        } else if ([item isLeaf] == NO && idx != NSOutlineViewDropOnItemIndex && idx > 0) {
             return NSDragOperationCopy;
         }
     } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
-        if (index == NSOutlineViewDropOnItemIndex)
+        if (idx == NSOutlineViewDropOnItemIndex)
             return NSDragOperationNone;
         id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
         if ([dropItem isLeaf]) {
-            if ([[item children] containsObject:dropItem] && index > 0)
+            if ([[item children] containsObject:dropItem] && idx > 0)
                 return NSDragOperationMove;
         } else {
             if (item == nil)
@@ -405,7 +405,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     
     NSDictionary *info = [(NSDictionary *)contextInfo autorelease];
     NSArray *fileNames = [info objectForKey:@"fileNames"];
-    int index = [[info objectForKey:@"index"] intValue];
+    int idx = [[info objectForKey:@"index"] intValue];
     
     int mainIndex = [chooseMainPagePopup indexOfSelectedItem] - 1;
     int i, count = [fileNames count];
@@ -416,7 +416,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     for (i = 0; i < count; i++) {
         if (mainIndex == -1 || i == 0) {
             newNode = [[BDSKTemplate alloc] init];
-            [itemNodes insertObject:newNode atIndex:index++];
+            [itemNodes insertObject:newNode atIndex:idx++];
             [newNode release];
             [addedItems addObject:newNode];
         }
@@ -439,7 +439,7 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 }
 
 
-- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)index{
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx{
     NSPasteboard *pboard = [info draggingPasteboard];
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
@@ -449,15 +449,15 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
         id newNode = nil;
         id childNode = nil;
         
-        if ([item isLeaf] && index == NSOutlineViewDropOnItemIndex) {
+        if ([item isLeaf] && idx == NSOutlineViewDropOnItemIndex) {
             fileName = [fileNames objectAtIndex:0];
             [item setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];
             newNode = item;
-        } else if (item == nil && index != NSOutlineViewDropOnItemIndex) {
+        } else if (item == nil && idx != NSOutlineViewDropOnItemIndex) {
             if ([fileNames count] == 1){
                 newNode = [[BDSKTemplate alloc] init];
                 childNode = [[BDSKTemplate alloc] init];
-                [itemNodes insertObject:newNode atIndex:index++];
+                [itemNodes insertObject:newNode atIndex:idx++];
                 [newNode addChild:childNode];
                 [newNode release];
                 [childNode release];
@@ -469,18 +469,18 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
                 [chooseMainPagePopup addItemWithTitle:NSLocalizedString(@"Separate templates", @"Popup menu item title")];
                 [chooseMainPagePopup addItemsWithTitles:[fileNames valueForKey:@"lastPathComponent"]];
                 [chooseMainPagePopup selectItemAtIndex:0];
-                NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInt:index], @"index", nil];
+                NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInt:idx], @"index", nil];
                 [NSApp beginSheet:chooseMainPageSheet modalForWindow:[[self controlBox] window]
                                                        modalDelegate:self
                                                       didEndSelector:@selector(chooseMainPageSheetDidEnd:returnCode:contextInfo:)
                                                          contextInfo:info];
                 return YES;
             }
-        } else if ([item isLeaf] == NO && index != NSOutlineViewDropOnItemIndex && index > 0) {
+        } else if ([item isLeaf] == NO && idx != NSOutlineViewDropOnItemIndex && idx > 0) {
             NSEnumerator *fileEnum = [fileNames objectEnumerator];
             while (fileName = [fileEnum nextObject]) {
                 newNode = [[[BDSKTemplate alloc] init] autorelease];
-                [item insertChild:newNode atIndex:index++];
+                [item insertChild:newNode atIndex:idx++];
                 [newNode setValue:[NSURL fileURLWithPath:fileName] forKey:BDSKTemplateFileURLString];
             }
         } else return NO;
@@ -495,19 +495,19 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             int sourceIndex = [[item children] indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
-            if (sourceIndex < index)
-                --index;
+            if (sourceIndex < idx)
+                --idx;
             [item removeChild:dropItem];
-            [item insertChild:dropItem atIndex:index];
+            [item insertChild:dropItem atIndex:idx];
         } else {
             int sourceIndex = [itemNodes indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
                 return NO;
-            if (sourceIndex < index)
-                --index;
+            if (sourceIndex < idx)
+                --idx;
             [[dropItem retain] autorelease];
             [itemNodes removeObjectAtIndex:sourceIndex];
-            [itemNodes insertObject:dropItem atIndex:index];
+            [itemNodes insertObject:dropItem atIndex:idx];
         }
         [self valuesHaveChanged];
         [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:dropItem]] byExtendingSelection:NO];

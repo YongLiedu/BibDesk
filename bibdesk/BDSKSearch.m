@@ -110,9 +110,9 @@
     [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
 }
 
-- (void)searchIndexDidUpdate:(BDSKSearchIndex *)index;
+- (void)searchIndexDidUpdate:(BDSKSearchIndex *)anIndex;
 {
-    if ([index isEqual:searchIndex]) {
+    if ([anIndex isEqual:searchIndex]) {
         
         // if there's a search in progress, we'll cancel it and re-update
         // if not, we'll notify the delegate with an empty array, since the index is still working
@@ -124,10 +124,10 @@
     }
 }
 
-- (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)index;
+- (void)searchIndexDidFinishInitialIndexing:(BDSKSearchIndex *)anIndex;
 {
-    if ([index isEqual:searchIndex]) {
-        [self searchIndexDidUpdate:index];
+    if ([anIndex isEqual:searchIndex]) {
+        [self searchIndexDidUpdate:anIndex];
         [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
     }
 }

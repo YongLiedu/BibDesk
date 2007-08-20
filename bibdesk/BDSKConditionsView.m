@@ -79,21 +79,21 @@
         [self setFrameSize:newSize];
 }
 
-- (void)insertView:(NSView *)view atIndex:(unsigned int)index{
+- (void)insertView:(NSView *)view atIndex:(unsigned int)idx{
     NSArray *subviews = [[self subviews] copy];
     
-    float yPosition = (index > 0) ? NSMaxY([[subviews objectAtIndex:index - 1] frame]) + SEPARATION : 0.0f;
+    float yPosition = (idx > 0) ? NSMaxY([[subviews objectAtIndex:idx - 1] frame]) + SEPARATION : 0.0f;
     NSSize size = [view frame].size;
     int i, count = [subviews count];
     
-    for (i = index; i < count; i++) 
+    for (i = idx; i < count; i++) 
         [[subviews objectAtIndex:i] removeFromSuperview];
     
     [view setFrameOrigin:NSMakePoint(0.0l, yPosition)];
     [view setFrameSize:NSMakeSize(NSWidth([self frame]), size.height)];
     [self addSubview:view];
     
-    for (i = index; i < count; i++) {
+    for (i = idx; i < count; i++) {
         yPosition = NSMaxY([view frame]) + SEPARATION;
         view = [subviews objectAtIndex:i];
         [view setFrameOrigin:NSMakePoint(0.0l, yPosition)];
@@ -112,19 +112,19 @@
 
 - (void)removeView:(NSView *)view {
     NSArray *subviews = [[[self subviews] copy] autorelease];
-    int index = [subviews indexOfObjectIdenticalTo:view];
+    unsigned int idx = [subviews indexOfObjectIdenticalTo:view];
     
-    if (index != NSNotFound) {
-        NSView *view = [subviews objectAtIndex:index];
+    if (idx != NSNotFound) {
+        NSView *view = [subviews objectAtIndex:idx];
         NSPoint newPoint = [view frame].origin;
         float dy = NSHeight([view frame]) + SEPARATION;
         
         [view removeFromSuperview];
         
-        int count = [subviews count];
+        unsigned int count = [subviews count];
         
-        for (index++; index < count; index++) {
-            view = [subviews objectAtIndex:index];
+        for (idx++; idx < count; idx++) {
+            view = [subviews objectAtIndex:idx];
             [view setFrameOrigin:newPoint];
             newPoint.y += dy;
         }

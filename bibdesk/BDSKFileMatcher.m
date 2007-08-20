@@ -271,7 +271,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     return NO;
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)index;
+- (NSDragOperation)outlineView:(NSOutlineView*)olv validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)idx;
 {
     if ([[info draggingSource] isEqual:outlineView] && [item isLeaf] == NO) {
         [olv setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -280,7 +280,7 @@ static float GROUP_ROW_HEIGHT = 24.0;
     return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)index;
+- (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)idx;
 {
     NSArray *types = [[info draggingPasteboard] types];
     NSURL *fileURL = ([types containsObject:NSURLPboardType] ? [NSURL URLFromPasteboard:[info draggingPasteboard]] : nil);
@@ -352,9 +352,9 @@ static float GROUP_ROW_HEIGHT = 24.0;
 
 #pragma mark Outline view datasource
 
-- (id)outlineView:(NSOutlineView *)ov child:(int)index ofItem:(id)item;
+- (id)outlineView:(NSOutlineView *)ov child:(int)idx ofItem:(id)item;
 {
-    return nil == item ? [matches objectAtIndex:index] : [item childAtIndex:index];
+    return nil == item ? [matches objectAtIndex:idx] : [item childAtIndex:idx];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov isItemExpandable:(id)item;

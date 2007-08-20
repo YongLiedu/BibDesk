@@ -66,7 +66,7 @@ static inline
 NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *objectsToFind, SEL theSelector)
 {
     NSMutableIndexSet *indexes = [NSMutableIndexSet indexSet];
-    unsigned index;
+    unsigned idx;
     NSEnumerator *objEnum = [objectsToFind objectEnumerator];
 	id obj;
     unsigned count = [arrayToSearch count];
@@ -79,17 +79,17 @@ NSIndexSet *__BDIndexesOfObjectsUsingSelector(NSArray *arrayToSearch, NSArray *o
     while(obj = [objEnum nextObject]){
         
         // see if we have the first occurrence of this object
-        index = indexOfObjectInRange(arrayToSearch, theSelector, obj, range);
+        idx = indexOfObjectInRange(arrayToSearch, theSelector, obj, range);
         
-        while(index != NSNotFound){ 
-            [indexes addIndex:index];
+        while(idx != NSNotFound){ 
+            [indexes addIndex:idx];
             
             // shift search range to the right
-            range.location = index + 1;
-            range.length = count - index - 1;
+            range.location = idx + 1;
+            range.length = count - idx - 1;
             
             // NSArray seems to handle out-of-range here, but we'll be careful anyway
-            index = NSMaxRange(range) < count ? indexOfObjectInRange(arrayToSearch, theSelector, obj, range) : NSNotFound;
+            idx = NSMaxRange(range) < count ? indexOfObjectInRange(arrayToSearch, theSelector, obj, range) : NSNotFound;
         }
         
         // resetting to max range is always valid

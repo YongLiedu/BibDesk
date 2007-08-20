@@ -207,11 +207,11 @@ static BDSKAllItemsErrorManager *allItemsErrorManager = nil;
 
 - (void)removeClosedEditors;
 {
-    unsigned index = [editors count];
+    unsigned idx = [editors count];
     BDSKErrorEditor *editor;
     
-    while(index--){
-        editor = [editors objectAtIndex:index];
+    while(idx--){
+        editor = [editors objectAtIndex:idx];
         if([editor isWindowVisible] == NO)
             [self removeEditor:editor];
     }

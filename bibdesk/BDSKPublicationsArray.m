@@ -106,9 +106,9 @@
     return [publications count];
 }
 
-- (id)objectAtIndex:(unsigned)index;
+- (id)objectAtIndex:(unsigned)idx;
 {
-    return [publications objectAtIndex:index];
+    return [publications objectAtIndex:idx];
 }
 
 - (void)addObject:(id)anObject;
@@ -118,9 +118,9 @@
     [anObject setFileOrder:[NSNumber numberWithInt:[publications count]]];
 }
 
-- (void)insertObject:(id)anObject atIndex:(unsigned)index;
+- (void)insertObject:(id)anObject atIndex:(unsigned)idx;
 {
-    [publications insertObject:anObject atIndex:index];
+    [publications insertObject:anObject atIndex:idx];
     [self addToItemsForCiteKeys:anObject];
     [self updateFileOrder];
 }
@@ -134,19 +134,19 @@
     }
 }
 
-- (void)removeObjectAtIndex:(unsigned)index;
+- (void)removeObjectAtIndex:(unsigned)idx;
 {
-    [self removeFromItemsForCiteKeys:[publications objectAtIndex:index]];
-    [publications removeObjectAtIndex:index];
+    [self removeFromItemsForCiteKeys:[publications objectAtIndex:idx]];
+    [publications removeObjectAtIndex:idx];
     [self updateFileOrder];
 }
 
-- (void)replaceObjectAtIndex:(unsigned)index withObject:(id)anObject;
+- (void)replaceObjectAtIndex:(unsigned)idx withObject:(id)anObject;
 {
-    BibItem *oldObject = [publications objectAtIndex:index];
+    BibItem *oldObject = [publications objectAtIndex:idx];
     [anObject setFileOrder:[oldObject fileOrder]];
     [self removeFromItemsForCiteKeys:oldObject];
-    [publications replaceObjectAtIndex:index withObject:anObject];
+    [publications replaceObjectAtIndex:idx withObject:anObject];
     [self addToItemsForCiteKeys:anObject];
 }
 
