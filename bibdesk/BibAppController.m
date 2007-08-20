@@ -87,28 +87,28 @@
 // maybe we can support transforming these in the add field sheets, if we want to allow some 
 // sort of fuzzy matching?
 static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers){
-    unsigned index;
+    unsigned idx;
     NSMutableArray *array = [[tableColumnIdentifiers mutableCopy] autorelease];
     
-    index = [array indexOfObject:@"Added"];
-    if(NSNotFound != index)
-        [array replaceObjectAtIndex:index withObject:BDSKDateAddedString];
+    idx = [array indexOfObject:@"Added"];
+    if(NSNotFound != idx)
+        [array replaceObjectAtIndex:idx withObject:BDSKDateAddedString];
     
-    index = [array indexOfObject:@"Created"];
-    if(NSNotFound != index)
-        [array replaceObjectAtIndex:index withObject:BDSKDateAddedString];
+    idx = [array indexOfObject:@"Created"];
+    if(NSNotFound != idx)
+        [array replaceObjectAtIndex:idx withObject:BDSKDateAddedString];
     
-    index = [array indexOfObject:@"Modified"];
-    if(NSNotFound != index)
-        [array replaceObjectAtIndex:index withObject:BDSKDateModifiedString];
+    idx = [array indexOfObject:@"Modified"];
+    if(NSNotFound != idx)
+        [array replaceObjectAtIndex:idx withObject:BDSKDateModifiedString];
     
-    index = [array indexOfObject:@"Authors Or Editors"];
-    if(NSNotFound != index)
-        [array replaceObjectAtIndex:index withObject:BDSKAuthorEditorString];
+    idx = [array indexOfObject:@"Authors Or Editors"];
+    if(NSNotFound != idx)
+        [array replaceObjectAtIndex:idx withObject:BDSKAuthorEditorString];
     
-    index = [array indexOfObject:@"Authors"];
-    if(NSNotFound != index)
-        [array replaceObjectAtIndex:index withObject:BDSKAuthorString];
+    idx = [array indexOfObject:@"Authors"];
+    if(NSNotFound != idx)
+        [array replaceObjectAtIndex:idx withObject:BDSKAuthorString];
     
     return array;
 }
@@ -139,9 +139,9 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     }
     
     // name image to make it available app wide, also in IB
-    static NSImage *cautionIcon = nil;
-    cautionIcon = [[NSImage iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kAlertCautionIcon] retain];
-    [cautionIcon setName:@"BDSKSmallCautionIcon"];
+    static NSImage *nsCautionIcon = nil;
+    nsCautionIcon = [[NSImage iconWithSize:NSMakeSize(16.0, 16.0) forToolboxCode:kAlertCautionIcon] retain];
+    [nsCautionIcon setName:@"BDSKSmallCautionIcon"];
 }
 
 - (id)init
@@ -709,7 +709,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 	return NSMakeRange(matchStart, NSMaxRange(charRange) - matchStart);
 }
 
-- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(int *)index{
+- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(int *)idx {
     // all persons are keyed to author
 	if ([entry isPersonField])	
 		entry = BDSKAuthorString;
@@ -740,7 +740,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 	for (i = 0; i < count; i++) {
         string = [completions objectAtIndex:i];
 		if ([[string stringByRemovingCurlyBraces] caseInsensitiveCompare:matchString]) {
-            *index = i;
+            *idx = i;
 			break;
 		}
     }
@@ -767,7 +767,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 	return charRange;
 }
 
-- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index{
+- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)idx{
     NSString *partialString = [fullString substringWithRange:charRange];
     NSMutableArray *matches = [NSMutableArray arrayWithCapacity:[definitions count]];
     NSEnumerator *keyE = [definitions keyEnumerator];
@@ -786,7 +786,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         key = [matches objectAtIndex:i];
         if ([key hasPrefix:partialString]) {
             // If the key has the entire partialString as prefix, it's a good match, so we'll select it by default.
-            *index = i;
+            *idx = i;
 			break;
         }
     }

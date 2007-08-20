@@ -216,12 +216,12 @@
 - (NSFormCell *)insertEntry:(NSString *)title
              usingTitleFont:(NSFont *)titleFont
          attributesForTitle:(NSDictionary *)attrs
-                    indexAndTag:(int)index 
+                    indexAndTag:(int)idx 
                 objectValue:(id<NSCopying>)objectValue{
     
     // this will be an instance of the prototype cell
-    NSFormCell *theCell = [self insertEntry:title atIndex:index];
-    [theCell setTag:index];
+    NSFormCell *theCell = [self insertEntry:title atIndex:idx];
+    [theCell setTag:idx];
     [theCell setObjectValue:objectValue];
     [theCell setTitleFont:titleFont];
     NSAttributedString *attrTitle = [[NSAttributedString alloc] initWithString:title attributes:attrs];

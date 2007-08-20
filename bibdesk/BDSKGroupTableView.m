@@ -256,14 +256,14 @@
 }
 
 // make sure that certain rows are only selected as a single selection
-- (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend{
+- (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)shouldExtend{
     NSIndexSet *singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
     
     // don't extend rows that should be in single selection
-    if (extend == YES && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes])
+    if (shouldExtend == YES && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes])
         return;
     // remove single selection rows from multiple selections
-    if ((extend == YES || [indexes count] > 1) && [indexes intersectsIndexSet:singleIndexes]) {
+    if ((shouldExtend == YES || [indexes count] > 1) && [indexes intersectsIndexSet:singleIndexes]) {
         NSMutableIndexSet *mutableIndexes = [[indexes mutableCopy] autorelease];
         [mutableIndexes removeIndexes:singleIndexes];
         indexes = mutableIndexes;
@@ -271,7 +271,7 @@
     if ([indexes count] == 0) 
         return;
     
-    [super selectRowIndexes:indexes byExtendingSelection:extend];
+    [super selectRowIndexes:indexes byExtendingSelection:shouldExtend];
     // this is needed because we draw multiple selections differently and OAGradientTableView calls this only for deprecated 10.3 methods
     [self setNeedsDisplay:YES];
 }

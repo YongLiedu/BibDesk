@@ -140,16 +140,16 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     return [errors count];
 }
 
-- (id)objectInErrorsAtIndex:(unsigned)index {
-    return [errors objectAtIndex:index];
+- (id)objectInErrorsAtIndex:(unsigned)idx {
+    return [errors objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned)index {
-    [errors insertObject:obj atIndex:index];
+- (void)insertObject:(id)obj inErrorsAtIndex:(unsigned)idx {
+    [errors insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromErrorsAtIndex:(unsigned)index {
-    [errors removeObjectAtIndex:index];
+- (void)removeObjectFromErrorsAtIndex:(unsigned)idx {
+    [errors removeObjectAtIndex:idx];
 }
 
 #pragma mark | managers
@@ -268,11 +268,11 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
         [self showWindow:self];
 	
     // remove any earlier failed load editors unless we're editing them
-    unsigned index = [managers count];
+    unsigned idx = [managers count];
     BDSKErrorManager *manager;
     
-    while (index--) {
-        manager = [managers objectAtIndex:index];
+    while (idx--) {
+        manager = [managers objectAtIndex:idx];
         if([manager sourceDocument] == document){
             [manager setSourceDocument:nil];
             if(shouldEdit)
@@ -290,11 +290,11 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 - (void)handleRemoveDocumentNotification:(NSNotification *)notification{
     BibDocument *document = [notification object];
     // clear reference to document in its editors and close it when it is not editing
-    unsigned index = [managers count];
+    unsigned idx = [managers count];
     BDSKErrorManager *manager;
     
-    while (index--) {
-        manager = [managers objectAtIndex:index];
+    while (idx--) {
+        manager = [managers objectAtIndex:idx];
         if([[manager sourceDocument] isEqual:document]){
             [manager setSourceDocument:nil];
             [manager removeClosedEditors];
@@ -311,15 +311,15 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeErrorsForPublications:(NSArray *)pubs{
-	unsigned index = [self countOfErrors];
+	unsigned idx = [self countOfErrors];
     BibItem *pub;
     
     NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
      
-    while (index--) {
-		pub = [[self objectInErrorsAtIndex:index] publication];
+    while (idx--) {
+		pub = [[self objectInErrorsAtIndex:idx] publication];
         if(pub && [pubs containsObject:pub])
-            [indexesToRemove addIndex:index];
+            [indexesToRemove addIndex:idx];
     }
     
     // batch changes
@@ -329,15 +329,15 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
 }
 
 - (void)removeErrorsForEditor:(BDSKErrorEditor *)editor{
-	unsigned index = [self countOfErrors];
+	unsigned idx = [self countOfErrors];
     BDSKErrorObject *errObj;
     
     NSMutableIndexSet *indexesToRemove = [NSMutableIndexSet indexSet];
 
-    while (index--) {
-		errObj = [self objectInErrorsAtIndex:index];
+    while (idx--) {
+		errObj = [self objectInErrorsAtIndex:idx];
         if ([[errObj editor] isEqual:editor]) {
-            [indexesToRemove addIndex:index];
+            [indexesToRemove addIndex:idx];
     	}
     }
     // batch these; this method is particularly slow (order of minutes) with a large number of errors, when closing the associated document, since using [self removeObjectFromErrorsAtIndex:index] in the loop causes KVO notifications to reload the tableview (although the tooltip rebuild appears to be what kills performance)

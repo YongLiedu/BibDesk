@@ -174,7 +174,7 @@ static NSSet *alwaysDisabledFields = nil;
     NSArray *pdfViewers = [[NSWorkspace sharedWorkspace] editorAndViewerNamesAndBundleIDsForPathExtension:@"pdf"];
     NSString *pdfViewerID = [[defaults dictionaryForKey:BDSKDefaultViewersKey] objectForKey:@"pdf"];
     int i, iMax = [pdfViewers count];
-    int index = 0;
+    int idx = 0;
     
     for(i = 0; i < iMax; i++){
         NSDictionary *dict = [pdfViewers objectAtIndex:i];
@@ -184,16 +184,16 @@ static NSSet *alwaysDisabledFields = nil;
         [[pdfViewerPopup itemAtIndex:i + 2] setRepresentedObject:bundleID];
         [(NSMenuItem *)[pdfViewerPopup itemAtIndex:i + 2] setImageAndSize:[sws iconForFile:appPath]];
         if([pdfViewerID isEqualToString:bundleID])
-            index = i + 2;
+            idx = i + 2;
     }
-    if(index == 0 && [pdfViewerID length]){
+    if(idx == 0 && [pdfViewerID length]){
         NSString *name = [[[[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:pdfViewerID] lastPathComponent] stringByDeletingPathExtension];
         [pdfViewerPopup insertItemWithTitle:name atIndex:2];
         [[pdfViewerPopup itemAtIndex:2] setRepresentedObject:pdfViewerID];
-        index = 2;
+        idx = 2;
     }
     
-    [pdfViewerPopup selectItemAtIndex:index];
+    [pdfViewerPopup selectItemAtIndex:idx];
 }
 
 - (void)updatePrefs{

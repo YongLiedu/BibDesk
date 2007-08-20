@@ -257,8 +257,8 @@
 #pragma mark Actions
 
 - (IBAction)addItemAction:(id)sender{
-    int optionKey = [NSApp currentModifierFlags] & NSAlternateKeyMask;
-    BibItem *newItem = (optionKey) ? [item copy] : [[BibItem alloc] init];
+    int optKey = [NSApp currentModifierFlags] & NSAlternateKeyMask;
+    BibItem *newItem = (optKey) ? [item copy] : [[BibItem alloc] init];
     
     // make the tableview stop editing:
     [self finalizeChangesPreservingSelection:NO];
@@ -374,8 +374,8 @@
 }
 
 - (IBAction)chooseBookmarkAction:(id)sender{
-	int index = [[bookmarkPopUpButton selectedItem] tag];
-	NSString *URLString = [[[BDSKBookmarkController sharedBookmarkController] objectInBookmarksAtIndex:index] urlString];
+	int idx = [[bookmarkPopUpButton selectedItem] tag];
+	NSString *URLString = [[[BDSKBookmarkController sharedBookmarkController] objectInBookmarksAtIndex:idx] urlString];
 	[urlTextField setStringValue:URLString];
     
 	[urlSheet orderOut:sender];
@@ -1281,11 +1281,11 @@
 
 #pragma mark Editing
 
-- (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)index{
-    if ([fields count] <= index)
+- (BOOL)addCurrentSelectionToFieldAtIndex:(unsigned int)idx{
+    if ([fields count] <= idx)
         return NO;
     
-    NSString *selKey = [fields objectAtIndex:index];
+    NSString *selKey = [fields objectAtIndex:idx];
     NSString *selString = nil;
 
     if(showingWebView){
@@ -1342,20 +1342,20 @@
 	}
 }
 
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
     if (control != itemTableView) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[document macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
-								indexOfBestMatch:index];
+								indexOfBestMatch:idx];
 	} else {
 		return [[NSApp delegate] entry:[fields objectAtIndex:[itemTableView selectedRow]] 
 						   completions:words 
 				   forPartialWordRange:charRange 
 							  ofString:[textView string] 
-				   indexOfSelectedItem:index];
+				   indexOfSelectedItem:idx];
 	}
 }
 
@@ -1543,13 +1543,13 @@
 
 // this is used by the paste: action defined in NSTableView-OAExtensions
 - (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
-	int index = [tv selectedRow];
+	int idx = [tv selectedRow];
 	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
 	
-	if (type == nil || index == -1)
+	if (type == nil || idx == -1)
 		return;
 	
-    NSString *selKey = [fields objectAtIndex:index];
+    NSString *selKey = [fields objectAtIndex:idx];
 	NSString *string = [pboard stringForType:NSStringPboardType];
     NSString *oldValue = [item valueOfField:selKey];
     
@@ -1895,11 +1895,11 @@
         
         if (c >= '0' && c <= '9') {
         
-            unsigned index = (unsigned)(c - '0');
+            unsigned idx = (unsigned)(c - '0');
             BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
-                index += 10;
-            if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
+                idx += 10;
+            if ([[self dataSource] addCurrentSelectionToFieldAtIndex:idx] == NO) {
                 NSBeep();
                 rv = NO;
             }

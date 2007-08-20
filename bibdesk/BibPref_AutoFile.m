@@ -228,8 +228,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 }
 
 - (IBAction)localUrlFormatAdd:(id)sender{
-	int index = [formatRepositoryPopUp indexOfSelectedItem];
-	NSString *newSpecifier = repositorySpecifierStrings[index];
+	int idx = [formatRepositoryPopUp indexOfSelectedItem];
+	NSString *newSpecifier = repositorySpecifierStrings[idx];
     NSText *fieldEditor = [formatSheetField currentEditor];
 	NSRange selRange;
 	

@@ -705,14 +705,14 @@ static CFDictionaryRef selectorTable = NULL;
     return [self peopleStringForDisplayFromField:BDSKAuthorString];
 }
 
-- (BibAuthor *)authorAtIndex:(unsigned int)index{ 
-    return [self authorAtIndex:index inherit:YES];
+- (BibAuthor *)authorAtIndex:(unsigned int)idx{ 
+    return [self authorAtIndex:idx inherit:YES];
 }
 
-- (BibAuthor *)authorAtIndex:(unsigned int)index inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorAtIndex:(unsigned int)idx inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsInheriting:inherit];
-	if ([auths count] > index)
-        return [auths objectAtIndex:index];
+	if ([auths count] > idx)
+        return [auths objectAtIndex:idx];
     else
         return [BibAuthor emptyAuthor];
 }
@@ -798,14 +798,14 @@ static CFDictionaryRef selectorTable = NULL;
     return [self peopleStringForDisplayFromField:([[self peopleArrayForField:BDSKAuthorString] count] ? BDSKAuthorString : BDSKEditorString)];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index{ 
-    return [self authorOrEditorAtIndex:index inherit:YES];
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)idx{ 
+    return [self authorOrEditorAtIndex:idx inherit:YES];
 }
 
-- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)index inherit:(BOOL)inherit{ 
+- (BibAuthor *)authorOrEditorAtIndex:(unsigned int)idx inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsOrEditorsInheriting:inherit];
-	if ([auths count] > index)
-        return [auths objectAtIndex:index];
+	if ([auths count] > idx)
+        return [auths objectAtIndex:idx];
     else
         return [BibAuthor emptyAuthor];
 }
@@ -965,8 +965,8 @@ static CFDictionaryRef selectorTable = NULL;
     [self setField:BDSKRatingString toRatingValue:rating];
 }
 
-- (void)setHasBeenEdited:(BOOL)yn{
-    hasBeenEdited = yn;
+- (void)setHasBeenEdited:(BOOL)flag{
+    hasBeenEdited = flag;
 }
 
 - (BOOL)hasBeenEdited{
@@ -2373,7 +2373,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     return [[self persons] valueForKey:BDSKEditorString];
 }
 
-- (void)setItemIndex:(int)index{ currentIndex = index; }
+- (void)setItemIndex:(int)idx{ currentIndex = idx; }
 
 - (int)itemIndex{ return currentIndex; }
 
@@ -3366,8 +3366,8 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     return [fieldNames count];
 }
 
-- (id)objectAtIndex:(unsigned int)index{
-    return [fieldCollection fieldForName:[fieldNames objectAtIndex:index]];
+- (id)objectAtIndex:(unsigned int)idx{
+    return [fieldCollection fieldForName:[fieldNames objectAtIndex:idx]];
 }
 
 - (id)nonEmpty{

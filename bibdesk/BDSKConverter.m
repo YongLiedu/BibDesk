@@ -176,13 +176,13 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     NSString *TEXString = nil;
     
     UniChar ch;
-    unsigned int index, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
+    unsigned int idx, numberOfCharacters = CFStringGetLength((CFStringRef)precomposedString);
     CFStringInlineBuffer inlineBuffer;
     CFStringInitInlineBuffer((CFStringRef)precomposedString, &inlineBuffer, CFRangeMake(0, numberOfCharacters));
     
-    for (index = 0; (index < numberOfCharacters); index++) {
+    for (idx = 0; (idx < numberOfCharacters); idx++) {
             
-        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, index);
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, idx);
         
         if ([finalCharSet characterIsMember:ch]){
         
@@ -190,13 +190,13 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
     
             // try the dictionary first
             if((TEXString = [texifyConversions objectForKey:tmpConv])){
-                [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1) withString:TEXString];
+                [convertedSoFar replaceCharactersInRange:NSMakeRange((idx + offset), 1) withString:TEXString];
                 // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
                 offset += [TEXString length] - 1;
                 
             // fall back to Unicode decomposition/conversion of the mutable string
             } else if(convertComposedCharacterToTeX(tmpConv, baseCharacterSetForTeX, accentCharSet, texifyAccents)){
-                [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1) withString:tmpConv];
+                [convertedSoFar replaceCharactersInRange:NSMakeRange((idx + offset), 1) withString:tmpConv];
                 // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
                 offset += [tmpConv length] - 1;
                 

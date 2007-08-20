@@ -422,21 +422,21 @@
     [ctxt restoreGraphicsState];
 }
 
-- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)index {
+- (void)insertTableColumnWithIdentifier:(NSString *)identifier atIndex:(unsigned)idx {
     NSMutableArray *shownColumns = [NSMutableArray arrayWithArray:[self tableColumnIdentifiers]];
     unsigned oldIndex = [shownColumns indexOfObject:identifier];
     
     // Check if an object already exists in the tableview, remove the old one if it does
     // This means we can't have a column more than once.
     if (oldIndex != NSNotFound) {
-        if (index > oldIndex)
-            index--;
-        else if (oldIndex == index)
+        if (idx > oldIndex)
+            idx--;
+        else if (oldIndex == idx)
             return;
         [shownColumns removeObject:identifier];
     }
     
-    [shownColumns insertObject:identifier atIndex:index];
+    [shownColumns insertObject:identifier atIndex:idx];
     
     [self changeTableColumnsWithIdentifiers:shownColumns];
 }

@@ -140,8 +140,8 @@
 }
 
 - (IBAction)changeEmailTemplate:(id)sender{
-    int index = [sender indexOfSelectedItem];
-    NSString *style = index == 0 ? @"" : [sender titleOfSelectedItem];
+    int idx = [sender indexOfSelectedItem];
+    NSString *style = idx == 0 ? @"" : [sender titleOfSelectedItem];
     if ([style isEqualToString:[defaults stringForKey:BDSKEmailTemplateKey]] == NO) {
         [defaults setObject:style forKey:BDSKEmailTemplateKey];
         [defaults autoSynchronize];

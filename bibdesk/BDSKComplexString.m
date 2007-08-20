@@ -251,9 +251,9 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return len;
 }
 
-- (unichar)characterAtIndex:(unsigned)index{
+- (unichar)characterAtIndex:(unsigned)idx{
     CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
-    unichar ch = CFStringGetCharacterAtIndex(expVal, index);
+    unichar ch = CFStringGetCharacterAtIndex(expVal, idx);
     if(expVal != NULL) CFRelease(expVal);
     return ch;
 }

@@ -389,9 +389,9 @@
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-    int index = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
-	int dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
-    BOOL yn = NO;
+    int idx = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
+	int dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:idx] intValue];
+    BOOL success = NO;
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSArray *pubs = nil;
     NSArray *additionalFilenames = nil;
@@ -494,16 +494,16 @@
 					if(url != nil){
 						// put the URL and a webloc file promise on the pasteboard
                         [pboard declareTypes:[NSArray arrayWithObjects:NSFilesPromisePboardType, NSURLPboardType, nil] owner:self];
-                        yn = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
+                        success = [pboard setPropertyList:[NSArray arrayWithObject:[[pub displayTitle] stringByAppendingPathExtension:@"webloc"]] forType:NSFilesPromisePboardType];
                         [url writeToPasteboard:pboard];
-						return yn;
+						return success;
 					}
 				}
 			}
 		}
     }
 	
-	BOOL success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
+	success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
 	
     if(success && additionalFilenames){
         [pboardHelper addTypes:[NSArray arrayWithObject:NSFilesPromisePboardType] forPasteboard:pboard];
@@ -630,10 +630,10 @@
     
 	} else {
 		OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-        int index = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
+        int idx = ([NSApp currentModifierFlags] & NSAlternateKeyMask) ? 1 : 0;
 		NSMutableString *s = [NSMutableString string];
         
-        dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:index] intValue];
+        dragCopyType = [[[sud arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:idx] intValue];
 		
 		// don't depend on this being non-zero; this method gets called for drags where promisedDraggedItems is nil
 		count = [promisedDraggedItems count];

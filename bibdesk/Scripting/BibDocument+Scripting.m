@@ -151,12 +151,12 @@
     }
 }
 
-- (BibItem *)valueInPublicationsAtIndex:(unsigned int)index {
-    return [publications objectAtIndex:index];
+- (BibItem *)valueInPublicationsAtIndex:(unsigned int)idx {
+    return [publications objectAtIndex:idx];
 }
 
-- (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)index {
-	[self insertPublication:pub atIndex:index];
+- (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)idx {
+	[self insertPublication:pub atIndex:idx];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
@@ -165,8 +165,8 @@
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (void)removeFromPublicationsAtIndex:(unsigned int)index {
-	[self removePublicationsAtIndexes:[NSIndexSet indexSetWithIndex:index]];
+- (void)removeFromPublicationsAtIndex:(unsigned int)idx {
+	[self removePublicationsAtIndexes:[NSIndexSet indexSetWithIndex:idx]];
 	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
@@ -211,13 +211,13 @@
 	return nil;
 }
 
-- (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)index {
+- (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)idx {
 	NSMutableSet *auths = [NSMutableSet set];
 	
     [auths performSelector:@selector(addObjectsFromArray:) withObjectsByMakingObjectsFromArray:publications performSelector:@selector(pubAuthors)];
 	
-	if (index < [auths count]) 
-		return [[auths allObjects] objectAtIndex:index];
+	if (idx < [auths count]) 
+		return [[auths allObjects] objectAtIndex:idx];
 	return nil;
 }
 

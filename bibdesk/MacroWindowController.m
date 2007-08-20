@@ -467,7 +467,7 @@
         NSEnumerator *fileEnum = [fileNames objectEnumerator];
         NSString *file;
         NSFileManager *fm = [NSFileManager defaultManager];
-        BOOL ok = NO;
+        BOOL success = NO;
         
         while (file = [fileEnum nextObject]) {
             NSString *extension = [file pathExtension];
@@ -477,9 +477,9 @@
                 continue;
             NSString *fileStr = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding guessEncoding:YES];
             if (fileStr != nil)
-                ok = ok || [self addMacrosFromBibTeXString:fileStr];
+                success = success || [self addMacrosFromBibTeXString:fileStr];
         }
-        return ok;
+        return success;
     } else
         return NO;
 }

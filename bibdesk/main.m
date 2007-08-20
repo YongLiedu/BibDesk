@@ -26,7 +26,6 @@ int main(int argc, const char *argv[])
     
     if (noErr != err || version < 0x00001040) {
         DialogRef alert;
-        OSStatus err;
         
         // pool required for NSLocalizedString
         NSAutoreleasePool *pool = [NSAutoreleasePool new];
@@ -45,13 +44,13 @@ int main(int argc, const char *argv[])
         };
         
         err = CreateStandardAlert(kAlertStopAlert, (CFStringRef)NSLocalizedString(@"Unsupported System Version", @""), (CFStringRef)NSLocalizedString(@"This version of BibDesk requires Mac OS X 10.4 or greater to run.  Older versions of BibDesk are still available for download.  Would you like to download an older version or quit now?", @""), &alertParamRec, &alert);
-        DialogItemIndex index;
+        DialogItemIndex idx;
         
         if (noErr == err) {
             
             // this will dispose of the alert (not that a leak is a big deal at this point)
-            err = RunStandardAlert(alert, NULL, &index);
-            if (2 == index) {
+            err = RunStandardAlert(alert, NULL, &idx);
+            if (2 == idx) {
                 
                 // the home page should have a link to the previous versions
                 CFURLRef homeURL = CFURLCreateWithString(NULL, CFSTR("http://bibdesk.sourceforge.net"), NULL);

@@ -66,16 +66,16 @@
 	float offset = 2.0;
 	NSSize size = [self bounds].size;
 	NSRect viewRect = NSMakeRect(blur, blur + offset, size.width - 2 * blur, size.height - blur - offset);
-	NSShadow *shadow = [[[NSShadow alloc] init] autorelease];
+	NSShadow *aShadow = [[[NSShadow alloc] init] autorelease];
 	
-	[shadow setShadowColor:[[NSColor shadowColor] colorWithAlphaComponent:0.7]];
-	[shadow setShadowBlurRadius:blur];
-	[shadow setShadowOffset:NSMakeSize(0.0, -offset)];
+	[aShadow setShadowColor:[[NSColor shadowColor] colorWithAlphaComponent:0.7]];
+	[aShadow setShadowBlurRadius:blur];
+	[aShadow setShadowOffset:NSMakeSize(0.0, -offset)];
     
 	[NSGraphicsContext saveGraphicsState];
 	
  	[[NSColor controlBackgroundColor] set]; // this is the white control background
-	[shadow set];
+	[aShadow set];
 	[NSBezierPath fillRect:viewRect];
 	
 	if(showFocusRing){

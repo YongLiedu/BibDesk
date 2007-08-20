@@ -179,7 +179,7 @@
 - (void)toggleInWindow:(NSWindow *)window offset:(float)offset {
 	NSRect winFrame = [window frame];
 	NSSize minSize = [window minSize];
-	NSSize maxSize = [window maxSize];
+	NSSize maximumSize = [window maxSize];
 	NSView *contentView = [window contentView];
 	float shiftHeight = NSHeight([self frame]) + offset;
 	BOOL autoresizes = [contentView autoresizesSubviews];
@@ -202,10 +202,10 @@
 	winFrame.size.height += shiftHeight;
 	winFrame.origin.y -= shiftHeight;
 	if (minSize.height > 0.0) minSize.height += shiftHeight;
-	if (maxSize.height > 0.0) maxSize.height += shiftHeight;
+	if (maximumSize.height > 0.0) maximumSize.height += shiftHeight;
 	if (winFrame.size.height < 0.0) winFrame.size.height = 0.0;
 	if (minSize.height < 0.0) minSize.height = 0.0;
-	if (maxSize.height < 0.0) maxSize.height = 0.0;
+	if (maximumSize.height < 0.0) maximumSize.height = 0.0;
 	
 	if ([self superview]) {
 		[self removeFromSuperview];
@@ -222,7 +222,7 @@
 	[window setFrame:winFrame display:YES];
 	[contentView setAutoresizesSubviews:autoresizes];
 	[window setMinSize:minSize];
-	[window setMaxSize:maxSize];
+	[window setMaxSize:maximumSize];
 }
 
 #pragma mark Text cell accessors

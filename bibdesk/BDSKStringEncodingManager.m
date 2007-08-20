@@ -52,8 +52,8 @@ enum {
 @implementation BDSKEncodingPopUpButtonCell
 
 // Do not allow selecting the "Customize" item and the separator before it. (Note that the customize item can be chosen and an action will be sent, but the selection doesn't change to it.)
-- (void)selectItemAtIndex:(int)index {
-    if (index + 2 <= [self numberOfItems]) [super selectItemAtIndex:index];
+- (void)selectItemAtIndex:(int)idx {
+    if (idx + 2 <= [self numberOfItems]) [super selectItemAtIndex:idx];
 }
 
 @end

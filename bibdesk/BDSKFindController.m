@@ -145,9 +145,9 @@ enum {
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
     
 	// IB does not allow us to set the maxSize.height equal to the minSize.height for some reason, but it should be only horizontally resizable
-	NSSize maxSize = [[self window] maxSize];
-	maxSize.height = [[self window] minSize].height;
-	[[self window] setMaxSize:maxSize];
+	NSSize maxWindowSize = [[self window] maxSize];
+	maxWindowSize.height = [[self window] minSize].height;
+	[[self window] setMaxSize:maxWindowSize];
 	
 	// this fixes a bug with initialization of the menuItem states when using bindings
 	int numItems = [searchTypePopUpButton numberOfItems];
@@ -395,21 +395,21 @@ enum {
     return [findHistory count];
 }
 
-- (id)objectInFindHistoryAtIndex:(unsigned)index {
-    return [findHistory objectAtIndex:index];
+- (id)objectInFindHistoryAtIndex:(unsigned)idx {
+    return [findHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned)index {
+- (void)insertObject:(id)obj inFindHistoryAtIndex:(unsigned)idx {
     if ([NSString isEmptyString:obj] || [findHistory containsObject:obj])
 		return;
-	[findHistory insertObject:obj atIndex:index];
+	[findHistory insertObject:obj atIndex:idx];
 	int count = [findHistory count];
 	if (count > MAX_HISTORY_COUNT)
 		[findHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromFindHistoryAtIndex:(unsigned)index {
-    [findHistory removeObjectAtIndex:index];
+- (void)removeObjectFromFindHistoryAtIndex:(unsigned)idx {
+    [findHistory removeObjectAtIndex:idx];
 }
 
 - (NSArray *)replaceHistory {
@@ -420,21 +420,21 @@ enum {
     return [replaceHistory count];
 }
 
-- (id)objectInReplaceHistoryAtIndex:(unsigned)index {
-    return [replaceHistory objectAtIndex:index];
+- (id)objectInReplaceHistoryAtIndex:(unsigned)idx {
+    return [replaceHistory objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned)index {
+- (void)insertObject:(id)obj inReplaceHistoryAtIndex:(unsigned)idx {
     if ([NSString isEmptyString:obj] || [replaceHistory containsObject:obj])
 		return;
-	[replaceHistory insertObject:obj atIndex:index];
+	[replaceHistory insertObject:obj atIndex:idx];
 	int count = [findHistory count];
 	if (count > MAX_HISTORY_COUNT)
 		[replaceHistory removeObjectAtIndex:count - 1];
 }
 
-- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned)index {
-    [replaceHistory removeObjectAtIndex:index];
+- (void)removeObjectFromReplaceHistoryAtIndex:(unsigned)idx {
+    [replaceHistory removeObjectAtIndex:idx];
 }
 
 #pragma mark Validation
@@ -610,16 +610,16 @@ enum {
 }
 
 - (void)objectDidEndEditing:(id)editor {
-    CFIndex index = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
-    if (index != -1)
-		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, index);		
+    CFIndex idx = CFArrayGetFirstIndexOfValue(editors, CFRangeMake(0, CFArrayGetCount(editors)), editor);
+    if (idx != -1)
+		CFArrayRemoveValueAtIndex((CFMutableArrayRef)editors, idx);		
 }
 
 - (BOOL)commitEditing {
-    CFIndex index = CFArrayGetCount(editors);
+    CFIndex idx = CFArrayGetCount(editors);
     
-	while (index--)
-		if([(NSObject *)(CFArrayGetValueAtIndex(editors, index)) commitEditing] == NO)
+	while (idx--)
+		if([(NSObject *)(CFArrayGetValueAtIndex(editors, idx)) commitEditing] == NO)
 			return NO;
     
     return YES;

@@ -1052,15 +1052,15 @@ enum{
     
     NSString *crossref = [publication valueOfField:BDSKCrossrefString inherit:NO];
     if (crossref != nil && [crossref caseInsensitiveCompare:newKey] == NSOrderedSame) {
-        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key", @"Message in alert dialog when failing to generate cite key") 
+        NSAlert *nsAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Could not generate cite key", @"Message in alert dialog when failing to generate cite key") 
                                          defaultButton:nil
                                        alternateButton:nil
                                            otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"The cite key for \"%@\" could not be generated because the generated key would be the same as the crossref key.", @"Informative text in alert dialog"), oldKey];
-        [alert beginSheetModalForWindow:[self window]
-                          modalDelegate:nil
-                         didEndSelector:NULL
-                            contextInfo:NULL];
+        [nsAlert beginSheetModalForWindow:[self window]
+                            modalDelegate:nil
+                           didEndSelector:NULL
+                              contextInfo:NULL];
         return;
     }
 	[publication setCiteKey:newKey];
@@ -1733,11 +1733,11 @@ enum{
 	
     if (control == bibFields) {
         
-        int index = [control indexOfSelectedItem];
-        if (index == -1)
+        int idx = [control indexOfSelectedItem];
+        if (idx == -1)
             return;
         
-        NSCell *cell = [control cellAtIndex:index];
+        NSCell *cell = [control cellAtIndex:idx];
         NSString *title = [cell representedObject];
         NSString *value = [cell stringValue];
         NSString *prevValue = [publication valueOfField:title];
@@ -2303,20 +2303,20 @@ enum{
 	return NO;
 }
 
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)idx{
     if (control != bibFields) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
 		return [[NSApp delegate] possibleMatches:[[[publication owner] macroResolver] allMacroDefinitions] 
 						   forBibTeXString:[textView string] 
 								partialWordRange:charRange 
-								indexOfBestMatch:index];
+								indexOfBestMatch:idx];
 	} else {
 		return [[NSApp delegate] entry:[[bibFields selectedCell] representedObject] 
 						   completions:words 
 				   forPartialWordRange:charRange 
 							  ofString:[textView string] 
-				   indexOfSelectedItem:index];
+				   indexOfSelectedItem:idx];
 
 	}
 }

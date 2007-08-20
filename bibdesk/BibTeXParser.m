@@ -65,7 +65,7 @@ static NSLock *parserLock = nil;
 // private function to check the string for encoding.
 static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
 // private function to do create a string from a c-string with encoding checking.
-static inline NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding);
+static inline NSString *copyCheckedString(const char *cstring, int line, NSString *filePath, NSStringEncoding parserEncoding);
 
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
@@ -147,9 +147,7 @@ error:(NSError **)outError{
         return [NSArray array];
     
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
-    		
-    int ok = 1;
-    
+    		    
     BibItem *newBI = nil;
     BibDocument *document = [anOwner isDocument] ? (BibDocument *)anOwner : nil;
     BDSKMacroResolver *macroResolver = [anOwner macroResolver];	
@@ -193,10 +191,11 @@ error:(NSError **)outError{
     BOOL hadProblems = NO;
     BOOL ignoredMacros = NO;
     BOOL ignoredFrontmatter = NO;
+    int parsed_ok = 1;
 
-    while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &ok)){
+    while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &parsed_ok)){
 
-        if (ok) {
+        if (parsed_ok) {
             
             bt_metatype metatype = bt_entry_metatype (entry);
             if (metatype != BTE_REGULAR) {
@@ -277,7 +276,7 @@ error:(NSError **)outError{
     } // while (scanning through file) 
         
     // generic error message; the error tableview will have specific errors and context
-    if(ok == 0 || hadProblems){
+    if(parsed_ok == 0 || hadProblems){
         OFErrorWithInfo(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @"Error description"), nil);
         
     // If no critical errors, warn about ignoring macros or frontmatter; callers can ignore this by passing a valid NSMutableString for frontmatter (or ignoring the partial data flag).  Mainly relevant for paste/drag on the document.
@@ -623,8 +622,8 @@ static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *fileP
     return YES;
 }
 
-static inline NSString *copyCheckedString(const char *cString, int line, NSString *filePath, NSStringEncoding parserEncoding){
-    NSString *nsString = cString ? [[NSString alloc] initWithCString:cString encoding:parserEncoding] : nil;
+static inline NSString *copyCheckedString(const char *cstring, int line, NSString *filePath, NSStringEncoding parserEncoding){
+    NSString *nsString = cstring ? [[NSString alloc] initWithCString:cstring encoding:parserEncoding] : nil;
     if (nsString && checkStringForEncoding(nsString, line, filePath, parserEncoding) == NO) {
         [nsString release];
         nsString = nil;

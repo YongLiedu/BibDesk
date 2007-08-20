@@ -57,10 +57,10 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     // only items belonging to a BibDocument are scriptable
     BibDocument *myDoc = (BibDocument *)[self owner];
 	NSArray * ar = [myDoc publications];
-	unsigned index = [ar indexOfObjectIdenticalTo:self];
-    if (index != NSNotFound) {
+	unsigned idx = [ar indexOfObjectIdenticalTo:self];
+    if (idx != NSNotFound) {
         NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
-        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:index] autorelease];
+        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:idx] autorelease];
     } else {
         return nil;
     }

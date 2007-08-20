@@ -105,10 +105,10 @@ static int MAX_RATING = 5;
     return [[self alloc] initWithContentsOfFile:path encoding:encoding guessEncoding:try];
 }
 
-+ (NSString *)stringWithFileSystemRepresentation:(const char *)cString;
++ (NSString *)stringWithFileSystemRepresentation:(const char *)cstring;
 {
-    NSParameterAssert(cString != NULL);
-    return [(id)CFStringCreateWithFileSystemRepresentation(CFAllocatorGetDefault(), cString) autorelease];
+    NSParameterAssert(cstring != NULL);
+    return [(id)CFStringCreateWithFileSystemRepresentation(CFAllocatorGetDefault(), cstring) autorelease];
 }
 
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue {

@@ -346,13 +346,13 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
     
     // set previous splitview frames
-    float fraction;
-    fraction = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
-    if (fraction >= 0)
-        [groupSplitView setFraction:fraction];
-    fraction = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
-    if (fraction >= 0)
-        [splitView setFraction:fraction];
+    float fract;
+    fract = [xattrDefaults floatForKey:BDSKGroupSplitViewFractionKey defaultValue:-1.0];
+    if (fract >= 0)
+        [groupSplitView setFraction:fract];
+    fract = [xattrDefaults floatForKey:BDSKMainTableSplitViewFractionKey defaultValue:-1.0];
+    if (fract >= 0)
+        [splitView setFraction:fract];
     
     // it might be replaced by the file content search view
     [splitView retain];
@@ -608,8 +608,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 													  userInfo:notifInfo];
 }
 
-- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index {
-    [self insertPublications:[NSArray arrayWithObject:pub] atIndexes:[NSIndexSet indexSetWithIndex:index]];
+- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)idx {
+    [self insertPublications:[NSArray arrayWithObject:pub] atIndexes:[NSIndexSet indexSetWithIndex:idx]];
 }
 
 - (void)addPublications:(NSArray *)pubs{
@@ -1316,9 +1316,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 - (BOOL)revertToContentsOfURL:(NSURL *)absoluteURL ofType:(NSString *)aType error:(NSError **)outError
 {
 	// first remove all editor windows, as they will be invalid afterwards
-    unsigned int index = [[self windowControllers] count];
-    while(--index)
-        [[[self windowControllers] objectAtIndex:index] close];
+    unsigned int idx = [[self windowControllers] count];
+    while(--idx)
+        [[[self windowControllers] objectAtIndex:idx] close];
     
     if([super revertToContentsOfURL:absoluteURL ofType:aType error:outError]){
         [self setSearchString:@""];
@@ -2877,7 +2877,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 - (BOOL)isDisplayingSearchGroupView { return [documentWindow isEqual:[[searchGroupViewController view] window]]; }
 - (BOOL)isDisplayingWebGroupView { return [documentWindow isEqual:[[webGroupViewController view] window]]; }
 
-- (void)insertControlView:(NSView *)controlView atTop:(BOOL)atTop {
+- (void)insertControlView:(NSView *)controlView atTop:(BOOL)insertAtTop {
     if ([documentWindow isEqual:[controlView window]])
         return;
     
@@ -2887,7 +2887,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     NSRect controlFrame = [controlView frame];
     NSRect startRect, endRect = [splitView frame];
     
-    if (atTop) {
+    if (insertAtTop) {
         viewEnum = [views objectEnumerator];
         while (view = [viewEnum nextObject])
             endRect = NSUnionRect(endRect, [view frame]);
@@ -2904,7 +2904,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     
     [mainBox addSubview:clipView];
     [clipView addSubview:resizeView];
-    if (atTop) {
+    if (insertAtTop) {
         viewEnum = [views objectEnumerator];
         while (view = [viewEnum nextObject])
             [resizeView addSubview:view];

@@ -134,8 +134,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 # pragma mark Accessors
 
-- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned)index {
-	[types insertObject:newType atIndex:index];
+- (void)insertType:(NSString *)newType withFields:(NSDictionary *)fieldsDict atIndex:(unsigned)idx {
+	[types insertObject:newType atIndex:idx];
 	
 	// create mutable containers for the fields
 	NSMutableArray *requiredFields;

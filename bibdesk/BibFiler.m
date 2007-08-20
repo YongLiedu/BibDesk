@@ -402,16 +402,16 @@ static BibFiler *sharedFiler = nil;
     return [errorInfoDicts count];
 }
 
-- (id)objectInErrorInfoDictsAtIndex:(unsigned)index {
-    return [errorInfoDicts objectAtIndex:index];
+- (id)objectInErrorInfoDictsAtIndex:(unsigned)idx {
+    return [errorInfoDicts objectAtIndex:idx];
 }
 
-- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned)index {
-    [errorInfoDicts insertObject:obj atIndex:index];
+- (void)insertObject:(id)obj inErrorInfoDictsAtIndex:(unsigned)idx {
+    [errorInfoDicts insertObject:obj atIndex:idx];
 }
 
-- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned)index {
-    [errorInfoDicts removeObjectAtIndex:index];
+- (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned)idx {
+    [errorInfoDicts removeObjectAtIndex:idx];
 }
 
 #pragma mark table view stuff

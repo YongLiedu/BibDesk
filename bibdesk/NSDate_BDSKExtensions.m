@@ -140,36 +140,36 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     
     static CFMutableDictionaryRef numbers = NULL;
     if(numbers == NULL){
-        int index = 1;
+        int idx = 1;
         numbers = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 10, &OFCaseInsensitiveStringKeyDictionaryCallbacks, &OFIntegerDictionaryValueCallbacks);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"one",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"two",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"three",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"four",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"five",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"six",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"seven",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"eight",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"nine",@"Number for parsing colloquial date"), (const void *)index++);
-        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"ten",@"Number for parsing colloquial date"), (const void *)index++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"one",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"two",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"three",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"four",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"five",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"six",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"seven",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"eight",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"nine",@"Number for parsing colloquial date"), (const void *)idx++);
+        CFDictionaryAddValue(numbers, (CFStringRef)NSLocalizedString(@"ten",@"Number for parsing colloquial date"), (const void *)idx++);
     }
     
     @try{
         NSString *countStr = nil;
-        int count;
+        int cnt;
         [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&countStr];
         
         // we could add an NSString method to look up numbers from a dictionary, say 
         if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"a", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-            count = 1;
+            cnt = 1;
         else if(CFStringCompare((CFStringRef)countStr, (CFStringRef)NSLocalizedString(@"an", @"Word for parsing colloquial date"), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-            count = 1;
+            cnt = 1;
         else if(countStr != nil)
-            if(CFDictionaryGetValueIfPresent(numbers, countStr, (const void **)&count) == FALSE)
-                count = [countStr intValue];
+            if(CFDictionaryGetValueIfPresent(numbers, countStr, (const void **)&cnt) == FALSE)
+                cnt = [countStr intValue];
 
         // this occurs if the first token was unrecognizable
-        if(count == 0 || ABS(count) >= HUGE_VAL)
+        if(cnt == 0 || ABS(cnt) >= HUGE_VAL)
             @throw parseException;
         
         [scanner scanCharactersFromSet:whitespaceSet intoString:NULL];
@@ -208,7 +208,7 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
             @throw parseException;
         
         // we need to apply this number of intervals
-        interval *= count;
+        interval *= cnt;
         
         // NSTimeInterval is supposed to give submillisecond precision over a range of 10,000 years.  It's unlikely that we work with publications over that range.
         NSAssert(ABS(interval) < DBL_MAX, @"Time interval overflow.");
@@ -244,44 +244,44 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
             [scanner scanUpToCharactersFromSet:whitespaceSet intoString:&baseStr];
             
             static CFMutableDictionaryRef days = NULL;
-            int delta; // an NSTimeInterval, but we can't store a double in a dictionary, and we don't need the extra precision
+            int deltat; // an NSTimeInterval, but we can't store a double in a dictionary, and we don't need the extra precision
             
             if(days == NULL){
-                int delta = 0;
+                deltat = 0;
                 days = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &OFCaseInsensitiveStringKeyDictionaryCallbacks, &OFIntegerDictionaryValueCallbacks);
                 
                 // strings equivalent to "today"
                 NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:NSThisDayDesignations];
-                CFIndex count = [array count];
-                if(count < 2)
+                cnt = [array count];
+                if(cnt < 2)
                     array = [NSArray arrayWithObjects:NSLocalizedString(@"today", @"Word for parsing colloquial date"), NSLocalizedString(@"now", @"Word for parsing colloquial date"), nil];
-                while(count--)
-                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, count), (const void *)delta);
+                while(cnt--)
+                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, cnt), (const void *)deltat);
                 
                 // strings equivalent to "tomorrow"
                 array = [[NSUserDefaults standardUserDefaults] objectForKey:NSNextDayDesignations];
-                count = [array count];
-                delta = 1 * 24 * 3600;
-                if(count == 0)
+                cnt = [array count];
+                deltat = 1 * 24 * 3600;
+                if(cnt == 0)
                     array = [NSArray arrayWithObject:NSLocalizedString(@"tomorrow", @"Word for parsing colloquial date")];
-                while(count--)
-                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, count), (const void *)delta);
+                while(cnt--)
+                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, cnt), (const void *)deltat);
 
                 // strings equivalent to "yesterday"
                 array = [[NSUserDefaults standardUserDefaults] objectForKey:NSPriorDayDesignations];
-                count = [array count];
-                delta = -1 * 24 * 3600;
-                if(count == 0)
+                cnt = [array count];
+                deltat = -1 * 24 * 3600;
+                if(cnt == 0)
                     array = [NSArray arrayWithObject:NSLocalizedString(@"yesterday", @"Word for parsing colloquial date")];
-                while(count--)
-                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, count), (const void *)delta);
+                while(cnt--)
+                    CFDictionaryAddValue(days, CFArrayGetValueAtIndex((CFArrayRef)array, cnt), (const void *)deltat);
             }
                 
-            delta = 0;
-            if(baseStr != nil && CFDictionaryGetValueIfPresent(days, (CFStringRef)baseStr, (const void **)&delta) == FALSE)
+            deltat = 0;
+            if(baseStr != nil && CFDictionaryGetValueIfPresent(days, (CFStringRef)baseStr, (const void **)&deltat) == FALSE)
                 @throw parseException;
             
-            today = [today addTimeInterval:delta];
+            today = [today addTimeInterval:deltat];
         }
         
         // not really necessary; we just ignore stuff after this
@@ -315,8 +315,8 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
 - (NSCalendarDate *)initWithMonthDayYearString:(NSString *)dateString;
 {        
     NSDate *date = [[NSDate alloc] initWithMonthDayYearString:dateString];
-    NSTimeInterval time = [date timeIntervalSinceReferenceDate];
-    self = [self initWithTimeIntervalSinceReferenceDate:time];
+    NSTimeInterval t = [date timeIntervalSinceReferenceDate];
+    self = [self initWithTimeIntervalSinceReferenceDate:t];
     [date release];
     
     return self;

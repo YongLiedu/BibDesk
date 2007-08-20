@@ -223,7 +223,7 @@
     NSString *fieldName;
     
     CFMutableArrayRef people = CFArrayCreateMutable(CFAllocatorGetDefault(), 0, &BDSKAuthorFuzzyArrayCallBacks);
-    CFIndex index, fieldIndex;
+    CFIndex idx, fieldIndex;
     BibAuthor *newAuthor;
     
     // we set our person at some point in the iteration, so copy the current value now
@@ -244,11 +244,11 @@
                 CFArrayAppendArray(people, (CFArrayRef)peopleFromString, range);
                 
                 // use the fuzzy compare to find which author we're going to replace
-                index = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
-                if(index != -1){
+                idx = CFArrayGetFirstIndexOfValue(people, range, (const void *)oldPerson);
+                if(idx != -1){
                     // replace this author, then create a new BibTeX author string
                     newAuthor = [BibAuthor authorWithName:newNameString andPub:pub];
-                    CFArraySetValueAtIndex(people, index, newAuthor);
+                    CFArraySetValueAtIndex(people, idx, newAuthor);
                     [pub setField:fieldName toValue:[(NSArray *)people componentsJoinedByString:@" and "]];
                     if([pub isEqual:[person publication]])
                         [self setPerson:newAuthor]; // changes the window title
