@@ -3821,7 +3821,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     NSPoint origin = [extraBibFields frame].origin;
     float width = NSWidth([[extraBibFields enclosingScrollView] frame]) - [NSScroller scrollerWidth];
     float spacing = [extraBibFields intercellSpacing].width;
-    int numCols = MAX(MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries), 1);
+    int numCols = MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries);
+    numCols = MAX(numCols, 1);
     int numRows = (numEntries / numCols) + (numEntries % numCols == 0 ? 0 : 1);
     
     while ([extraBibFields numberOfRows])
@@ -3859,7 +3860,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     float width = NSWidth([[extraBibFields enclosingScrollView] frame]) - [NSScroller scrollerWidth];
     float spacing = [extraBibFields intercellSpacing].width;
     float cellWidth = [extraBibFields cellSize].width;
-    int numCols = MAX(MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries), 1);
+    int numCols = MIN(floor((width + spacing) / (cellWidth + spacing)), numEntries);
+    numCols = MAX(numCols, 1);
     if (numCols != [extraBibFields numberOfColumns])
         [self setupMatrix];
 }

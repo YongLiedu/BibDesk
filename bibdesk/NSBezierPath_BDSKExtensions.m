@@ -62,7 +62,8 @@
     OBASSERT([NSThread inMainThread]);
     
     // Make sure radius doesn't exceed a maximum size to avoid artifacts:
-    radius = MIN(radius, 0.5f * MIN(NSHeight(rect), NSWidth(rect)));
+    float rectLimit = MIN(NSHeight(rect), NSWidth(rect));
+    radius = MIN(radius, 0.5f * rectLimit);
     
     // Make sure silly values simply lead to un-rounded corners:
     if( radius <= 0 )

@@ -363,7 +363,6 @@
 			return;
 		}
 		
-        NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
 		if([macroResolver macroDefinition:[macroDefinitions objectForKey:key] dependsOnMacro:object]){
 			[tableView reloadData];
             [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];

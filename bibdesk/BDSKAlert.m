@@ -269,7 +269,7 @@
 		imageRect.size = [unbadgedImage size];
         badgeRect = NSMakeRect(floorf(NSMidX(imageRect)), 1.0, ceilf(0.5 * NSWidth(imageRect)), ceilf(0.5 * NSHeight(imageRect)));
         
-		NSImage *image = [NSImage iconWithSize:imageRect.size forToolboxCode:kAlertCautionIcon];
+		image = [NSImage iconWithSize:imageRect.size forToolboxCode:kAlertCautionIcon];
 		
 		[image lockFocus]; 
 		[unbadgedImage drawInRect:badgeRect fromRect:imageRect operation:NSCompositeSourceOver fraction:1.0];

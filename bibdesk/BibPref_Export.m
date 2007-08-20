@@ -469,11 +469,11 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
                 [chooseMainPagePopup addItemWithTitle:NSLocalizedString(@"Separate templates", @"Popup menu item title")];
                 [chooseMainPagePopup addItemsWithTitles:[fileNames valueForKey:@"lastPathComponent"]];
                 [chooseMainPagePopup selectItemAtIndex:0];
-                NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInt:idx], @"index", nil];
+                NSDictionary *contextInfo = [[NSDictionary alloc] initWithObjectsAndKeys:fileNames, @"fileNames", [NSNumber numberWithInt:idx], @"index", nil];
                 [NSApp beginSheet:chooseMainPageSheet modalForWindow:[[self controlBox] window]
                                                        modalDelegate:self
                                                       didEndSelector:@selector(chooseMainPageSheetDidEnd:returnCode:contextInfo:)
-                                                         contextInfo:info];
+                                                         contextInfo:contextInfo];
                 return YES;
             }
         } else if ([item isLeaf] == NO && idx != NSOutlineViewDropOnItemIndex && idx > 0) {

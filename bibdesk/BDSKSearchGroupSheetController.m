@@ -99,7 +99,7 @@ static BOOL isSearchFileAtPath(NSString *path)
             if ([[[dirEnum fileAttributes] valueForKey:NSFileType] isEqualToString:NSFileTypeDirectory]) {
                 [dirEnum skipDescendents];
             } else if (isSearchFileAtPath([serversPath stringByAppendingPathComponent:file])) {
-                NSString *path = [serversPath stringByAppendingPathComponent:file];
+                path = [serversPath stringByAppendingPathComponent:file];
                 NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
                 BDSKServerInfo *info = [[BDSKServerInfo alloc] initWithType:nil dictionary:dict];
                 if (info) {
@@ -483,19 +483,19 @@ static BOOL isSearchFileAtPath(NSString *path)
     BOOL collapse = [revealButton state] == NSOffState;
     NSRect winRect = [[self window] frame];
     NSSize minSize = [[self window] minSize];
-    NSSize maxSize = [[self window] maxSize];
+    NSSize maximumSize = [[self window] maxSize];
     float dh = [serverView minSize].height;
     if (collapse)
         dh *= -1;
     winRect.size.height += dh;
     winRect.origin.y -= dh;
     minSize.height += dh;
-    maxSize.height += dh;
+    maximumSize.height += dh;
     if (collapse == NO)
         [serverView setHidden:NO];
     [[self window] setFrame:winRect display:[[self window] isVisible] animate:[[self window] isVisible]];
     [[self window] setMinSize:minSize];
-    [[self window] setMaxSize:maxSize];
+    [[self window] setMaxSize:maximumSize];
     if (collapse)
         [serverView setHidden:YES];
 }

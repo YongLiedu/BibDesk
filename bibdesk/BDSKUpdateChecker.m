@@ -366,8 +366,8 @@
 // a zero interval indicates that automatic update checking should not be performed
 - (NSTimeInterval)updateCheckTimeInterval;
 {    
-    CFAbsoluteTime time = 0;
-    return (NSTimeInterval)CFAbsoluteTimeAddGregorianUnits(time, NULL, [self updateCheckGregorianUnits]);
+    CFAbsoluteTime cfTime = 0;
+    return (NSTimeInterval)CFAbsoluteTimeAddGregorianUnits(cfTime, NULL, [self updateCheckGregorianUnits]);
 }
 
 // returns UTC date of next update check

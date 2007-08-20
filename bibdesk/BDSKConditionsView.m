@@ -115,7 +115,7 @@
     unsigned int idx = [subviews indexOfObjectIdenticalTo:view];
     
     if (idx != NSNotFound) {
-        NSView *view = [subviews objectAtIndex:idx];
+
         NSPoint newPoint = [view frame].origin;
         float dy = NSHeight([view frame]) + SEPARATION;
         

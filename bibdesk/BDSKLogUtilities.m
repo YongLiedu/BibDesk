@@ -344,8 +344,8 @@ BDSK_PRIVATE_EXTERN void BDSKLogv(NSString *format, va_list argList)
         
         val = asl_get(msg, ASL_KEY_TIME);
         if (NULL == val) val = "0";
-        time_t time = strtol(val, NULL, 0);
-        date = [[NSDate dateWithTimeIntervalSince1970:time] copy];
+        time_t theTime = strtol(val, NULL, 0);
+        date = [[NSDate dateWithTimeIntervalSince1970:theTime] copy];
         hash = [date hash];
         
         val = asl_get(msg, ASL_KEY_SENDER);
