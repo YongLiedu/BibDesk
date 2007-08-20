@@ -592,7 +592,7 @@ static BibFiler *sharedFiler = nil;
                     // unfortunately NSFileManager cannot reliably move symlinks...
                     if([fileType isEqualToString:NSFileTypeSymbolicLink]){
                         NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
-                        if(![pathContent hasPrefix:@"/"]){// it links to a relative path
+                        if([pathContent isAbsolutePath] == NO){// it links to a relative path
                             pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
                         }
                         if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){

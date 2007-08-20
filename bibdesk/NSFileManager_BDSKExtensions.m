@@ -275,8 +275,8 @@ static void createTemporaryDirectory()
 
 - (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory {
     // could expand this path?
-    NSParameterAssert([directory hasPrefix:[NSString pathSeparator]]);
-    NSParameterAssert([fileName hasPrefix:[NSString pathSeparator]] == NO);
+    NSParameterAssert([directory isAbsolutePath]);
+    NSParameterAssert([fileName isAbsolutePath] == NO);
     NSString *baseName = [fileName stringByDeletingPathExtension];
     NSString *extension = [fileName pathExtension];
     
