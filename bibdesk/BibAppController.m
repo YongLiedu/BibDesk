@@ -558,7 +558,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     } else if ([menu isEqual:searchBookmarksMenu]) {
         
         BDSKSearchBookmarkController *bmController = [BDSKSearchBookmarkController sharedBookmarkController];
-        NSArray *bookmarks = [bmController bookmarks];
         int i = [menu numberOfItems], iMax = [bmController countOfBookmarks];
         while (--i > 2)
             [menu removeItemAtIndex:i];
