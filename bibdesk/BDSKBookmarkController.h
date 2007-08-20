@@ -10,7 +10,9 @@
 
 
 @interface BDSKBookmarkController : NSWindowController {
+    IBOutlet NSTableView *tableView;
     NSMutableArray *bookmarks;
+    NSUndoManager *undoManager;
 }
 
 + (id)sharedBookmarkController;
@@ -23,13 +25,16 @@
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)index;
 
 - (void)addBookmarkWithUrlString:(NSString *)urlString name:(NSString *)name;
-
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification;
+
+- (NSString *)uniqueName;
+
+- (NSUndoManager *)undoManager;
 
 @end
 
 
-@interface BDSKBookmark : NSObject {
+@interface BDSKBookmark : NSObject <NSCopying> {
     NSString *urlString;
     NSString *name;
 }

@@ -991,12 +991,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)searchBookmarkSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSOKButton) {
-        BDSKSearchBookmarkController *bmController = [BDSKSearchBookmarkController sharedBookmarkController];
         BDSKGroup *group = [[self selectedGroups] lastObject];
-        NSMutableDictionary *bm = [[group dictionaryValue] mutableCopy];
-        [bm setObject:[searchBookmarkField stringValue] forKey:@"label"];
-        [[bmController mutableArrayValueForKey:@"bookmarks"] addObject:bm];
-        [bm release];
+        [[BDSKSearchBookmarkController sharedBookmarkController] addBookmarkWithInfo:[group dictionaryValue] label:[searchBookmarkField stringValue]];
     }
 }
 

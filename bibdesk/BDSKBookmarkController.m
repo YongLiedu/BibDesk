@@ -8,7 +8,9 @@
 
 #import "BDSKBookmarkController.h"
 #import "NSFileManager_BDSKExtensions.h"
+#import "BibDocument.h"
 
+static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
 
 @implementation BDSKBookmarkController
 
@@ -23,7 +25,8 @@
 - (id)init {
     if (self = [super init]) {
         bookmarks = [[NSMutableArray alloc] init];
-		
+		undoManager = nil;
+        
 		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
 		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
 		if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
@@ -44,6 +47,7 @@
 
 - (void)dealloc {
     [bookmarks release];
+    [undoManager release];
     [super dealloc];
 }
 
@@ -51,6 +55,7 @@
 
 - (void)windowDidLoad {
     [self setWindowFrameAutosaveName:@"BDSKBookmarksWindow"];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
 }
 
 - (NSArray *)bookmarks {
@@ -59,6 +64,7 @@
 
 - (void)setBookmarks:(NSArray *)newBookmarks {
     if (bookmarks != newBookmarks) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setBookmarks:[[bookmarks copy] autorelease]];
         [bookmarks release];
         bookmarks = [newBookmarks mutableCopy];
     }
@@ -73,10 +79,12 @@
 }
 
 - (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index {
+    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectFromBookmarksAtIndex:index];
     [bookmarks insertObject:obj atIndex:index];
 }
 
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)index {
+    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:[[[bookmarks objectAtIndex:index] copy] autorelease] inBookmarksAtIndex:index];
     [bookmarks removeObjectAtIndex:index];
 }
 
@@ -102,6 +110,94 @@
 	[data writeToFile:bookmarksPath atomically:YES];
 }
 
+#pragma mark Undo support
+
+- (NSUndoManager *)undoManager {
+    if(undoManager == nil)
+        undoManager = [[NSUndoManager alloc] init];
+    return undoManager;
+}
+
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender {
+    return [self undoManager];
+}
+
+#pragma mark NSTableView datasource methods
+
+- (int)numberOfRowsInTableView:(NSTableView *)tv { return 0; }
+
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
+    OBASSERT([rowIndexes count] == 1);
+    [pboard declareTypes:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, nil] owner:nil];
+    [pboard setPropertyList:[NSNumber numberWithUnsignedInt:[rowIndexes firstIndex]] forType:BDSKBookmarkRowsPboardType];
+    return YES;
+}
+
+- (NSDragOperation)tableView:(NSTableView *)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+    
+    if ([type isEqualToString:BDSKBookmarkRowsPboardType]) {
+        [tv setDropRow:row == -1 ? [tv numberOfRows] : row dropOperation:NSTableViewDropAbove];
+        return NSDragOperationMove;
+    } else if (type) {
+        return NSDragOperationEvery;
+    }
+    return NSDragOperationNone;
+}
+
+
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBookmarkRowsPboardType, BDSKWeblocFilePboardType, NSURLPboardType, nil]];
+    
+    if ([type isEqualToString:BDSKBookmarkRowsPboardType]) {
+        int draggedRow = [[pboard propertyListForType:BDSKBookmarkRowsPboardType] intValue];
+        BDSKBookmark *bookmark = [[bookmarks objectAtIndex:draggedRow] retain];
+        [self removeObjectFromBookmarksAtIndex:draggedRow];
+        [self insertObject:bookmark inBookmarksAtIndex:row < draggedRow ? row : row - 1];
+        [bookmark release];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        return YES;
+    } else if (type) {
+        NSString *urlString = nil;
+        if ([type isEqualToString:BDSKWeblocFilePboardType])
+            urlString = [pboard stringForType:BDSKWeblocFilePboardType];
+        else if ([type isEqualToString:NSURLPboardType])
+            urlString = [[NSURL URLFromPasteboard:pboard] absoluteString];
+        if (urlString == nil)
+            return NO;
+        if (op == NSTableViewDropOn && row != -1) {
+            [[bookmarks objectAtIndex:row] setUrlString:urlString];
+        } else {
+            if (row == -1)
+                row = [bookmarks count];
+            BDSKBookmark *bookmark = [[BDSKBookmark alloc] initWithUrlString:urlString name:[self uniqueName]];
+            [self insertObject:bookmark inBookmarksAtIndex:row];
+            [bookmark release];
+        }
+        return YES;
+    }
+    return NO;
+}
+
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows {
+    int row = [[rows lastObject] intValue];
+    [self removeObjectFromBookmarksAtIndex:row];
+}
+
+- (NSString *)uniqueName {
+    NSArray *names = [[self bookmarks] valueForKey:@"name"];
+    NSString *baseName = NSLocalizedString(@"New Boookmark", @"Default name for boookmark");
+    NSString *newName = baseName;
+    int i = 0;
+    while ([names containsObject:newName])
+        newName = [baseName stringByAppendingFormat:@" %i", ++i];
+    return newName;
+}
+
 @end
 
 
@@ -116,14 +212,19 @@
 }
 
 - (id)init {
-    return [self initWithUrlString:@"http://" name:NSLocalizedString(@"New Boookmark", @"Default name for boookmark")];
+    return [self initWithUrlString:@"http://" name:[[BDSKBookmarkController sharedBookmarkController] uniqueName]];
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
     return [self initWithUrlString:[dictionary objectForKey:@"URLString"] name:[dictionary objectForKey:@"Title"]];
 }
 
+- (id)copyWithZone:(NSZone *)aZone {
+    return [[[self class] allocWithZone:aZone] initWithUrlString:urlString name:name];
+}
+
 - (void)dealloc {
+    [[[BDSKBookmarkController sharedBookmarkController] undoManager] removeAllActionsWithTarget:self];
     [urlString release];
     [name release];
     [super dealloc];
@@ -143,6 +244,8 @@
 
 - (void)setUrlString:(NSString *)newUrlString {
     if (urlString != newUrlString) {
+        NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+        [[undoManager prepareWithInvocationTarget:self] setUrlString:urlString];
         [urlString release];
         urlString = [newUrlString retain];
     }
@@ -168,6 +271,8 @@
 
 - (void)setName:(NSString *)newName {
     if (name != newName) {
+        NSUndoManager *undoManager = [[BDSKBookmarkController sharedBookmarkController] undoManager];
+        [(BDSKBookmark *)[undoManager prepareWithInvocationTarget:self] setName:name];
         [name release];
         name = [newName retain];
     }

@@ -39,6 +39,8 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BibPrefController.h"
 
+static NSString *BDSKSearchBookmarkRowsPboardType = @"BDSKSearchBookmarkRowsPboardType";
+static NSString *BDSKSearchBookmarkChangedNotification = @"BDSKSearchBookmarkChangedNotification";
 
 @implementation BDSKSearchBookmarkController
 
@@ -52,30 +54,42 @@
 - (id)init {
     if (self = [super init]) {
         bookmarks = [[NSMutableArray alloc] init];
-        NSEnumerator *bmEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
-        NSDictionary *bm;
+        NSEnumerator *dictEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKSearchGroupBookmarksKey] objectEnumerator];
+        NSDictionary *dict;
         
-        while (bm = [bmEnum nextObject]) {
-            bm = [bm mutableCopy];
+        while (dict = [dictEnum nextObject]) {
+            BDSKSearchBookmark *bm = [[BDSKSearchBookmark alloc] initWithDictionary:dict];
             [bookmarks addObject:bm];
             [bm release];
         }
+        
+		[[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleSearchBookmarkChangedNotification:)
+                                                     name:BDSKSearchBookmarkChangedNotification
+                                                   object:nil];
     }
     return self;
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [bookmarks release];
     [super dealloc];
 }
 
 - (NSString *)windowNibName { return @"SearchBookmarksWindow"; }
 
+- (void)windowDidLoad {
+    [self setWindowFrameAutosaveName:@"BDSKSearchBookmarksWindow"];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKSearchBookmarkRowsPboardType]];
+}
+
 - (NSArray *)bookmarks {
     return bookmarks;
 }
 
 - (void)setBookmarks:(NSArray *)newBookmarks {
+    [[[self undoManager] prepareWithInvocationTarget:self] setBookmarks:[[bookmarks copy] autorelease]];
     return [bookmarks setArray:newBookmarks];
 }
 
@@ -88,32 +102,141 @@
 }
 
 - (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index {
+    [[[self undoManager] prepareWithInvocationTarget:self] removeObjectFromBookmarksAtIndex:index];
     [bookmarks insertObject:obj atIndex:index];
     [self saveBookmarks];
 }
 
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)index {
+    [[[self undoManager] prepareWithInvocationTarget:self] insertObject:[[[bookmarks objectAtIndex:index] copy] autorelease] inBookmarksAtIndex:index];
     [bookmarks removeObjectAtIndex:index];
     [self saveBookmarks];
 }
 
+- (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label {
+    BDSKSearchBookmark *bookmark = [[BDSKSearchBookmark alloc] initWithInfo:info label:label];
+    [[self mutableArrayValueForKey:@"bookmarks"] addObject:bookmark];
+    [bookmark release];
+}
+
 - (void)saveBookmarks {
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:bookmarks forKey:BDSKSearchGroupBookmarksKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[bookmarks valueForKey:@"dictionaryValue"] forKey:BDSKSearchGroupBookmarksKey];
+}
+
+- (void)handleSearchBookmarkChangedNotification:(NSNotification *)notification {
+    [self saveBookmarks];
+}
+
+
+#pragma mark Undo support
+
+- (NSUndoManager *)undoManager {
+    if(undoManager == nil)
+        undoManager = [[NSUndoManager alloc] init];
+    return undoManager;
+}
+
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender {
+    return [self undoManager];
 }
 
 #pragma mark tableView datasource methods
 
-- (int)numberOfRowsInTableView:(NSTableView *)tv{
-    return [bookmarks count];
+- (int)numberOfRowsInTableView:(NSTableView *)tv { return 0; }
+
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row { return nil; }
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
+    OBASSERT([rowIndexes count] == 1);
+    [pboard declareTypes:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil] owner:nil];
+    [pboard setPropertyList:[NSNumber numberWithUnsignedInt:[rowIndexes firstIndex]] forType:BDSKSearchBookmarkRowsPboardType];
+    return YES;
 }
 
-- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    return [[bookmarks objectAtIndex:row] objectForKey:[tableColumn identifier]];
+- (NSDragOperation)tableView:(NSTableView *)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
+    
+    if (type) {
+        [tv setDropRow:row == -1 ? [tv numberOfRows] : row dropOperation:NSTableViewDropAbove];
+        return NSDragOperationMove;
+    }
+    return NSDragOperationNone;
 }
 
-- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    [[bookmarks objectAtIndex:row] setObject:object forKey:[tableColumn identifier]];
-    [self saveBookmarks];
+
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKSearchBookmarkRowsPboardType, nil]];
+    
+    if (type) {
+        int draggedRow = [[pboard propertyListForType:BDSKSearchBookmarkRowsPboardType] intValue];
+        NSDictionary *bookmark = [[bookmarks objectAtIndex:draggedRow] retain];
+        [self removeObjectFromBookmarksAtIndex:draggedRow];
+        [self insertObject:bookmark inBookmarksAtIndex:row < draggedRow ? row : row - 1];
+        [bookmark release];
+        [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        return YES;
+    }
+    return NO;
+}
+
+@end
+
+
+@implementation BDSKSearchBookmark
+
+- (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel {
+    if (self = [super init]) {
+        info = [aDictionary copy];
+        label = [aLabel copy];
+    }
+    return self;
+}
+
+- (id)init {
+    [[super init] release];
+    return nil;
+}
+
+- (id)initWithDictionary:(NSDictionary *)dictionary {
+    NSMutableDictionary *dict = [[dictionary mutableCopy] autorelease];
+    [dict removeObjectForKey:@"label"];
+    return [self initWithInfo:dict label:[dictionary objectForKey:@"label"]];
+}
+
+- (id)copyWithZone:(NSZone *)aZone {
+    return [[[self class] allocWithZone:aZone] initWithInfo:info label:label];
+}
+
+- (void)dealloc {
+    [info release];
+    [label release];
+    [super dealloc];
+}
+
+- (NSDictionary *)dictionaryValue {
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithObjectsAndKeys:label, @"label", nil];
+    [dictionary addEntriesFromDictionary:info];
+    return dictionary;
+}
+
+- (NSDictionary *)info {
+    return info;
+}
+
+- (NSString *)label {
+    return label;
+}
+
+- (void)setLabel:(NSString *)newLabel {
+    if (label != newLabel) {
+        NSUndoManager *undoManager = [[BDSKSearchBookmarkController sharedBookmarkController] undoManager];
+        [(BDSKSearchBookmark *)[undoManager prepareWithInvocationTarget:self] setLabel:label];
+        [label release];
+        label = [newLabel retain];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSearchBookmarkChangedNotification object:self];
+    }
 }
 
 @end

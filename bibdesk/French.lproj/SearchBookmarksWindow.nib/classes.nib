@@ -1,8 +1,10 @@
 {
     IBClasses = (
+        {CLASS = BDSKSearchBookmark; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
             CLASS = BDSKSearchBookmarkController; 
             LANGUAGE = ObjC; 
+            OUTLETS = {tableView = NSTableView; }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }

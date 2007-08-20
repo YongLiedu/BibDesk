@@ -1,8 +1,10 @@
 {
     IBClasses = (
+        {CLASS = BDSKBookmark; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
             CLASS = BDSKBookmarkController; 
             LANGUAGE = ObjC; 
+            OUTLETS = {tableView = NSTableView; }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 

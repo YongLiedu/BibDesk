@@ -557,16 +557,17 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         
     } else if ([menu isEqual:searchBookmarksMenu]) {
         
-        NSArray *bookmarks = [[BDSKSearchBookmarkController sharedBookmarkController] bookmarks];
-        int i = [menu numberOfItems], iMax = [bookmarks count];
+        BDSKSearchBookmarkController *bmController = [BDSKSearchBookmarkController sharedBookmarkController];
+        NSArray *bookmarks = [bmController bookmarks];
+        int i = [menu numberOfItems], iMax = [bmController countOfBookmarks];
         while (--i > 2)
             [menu removeItemAtIndex:i];
         if (iMax > 0)
             [menu addItem:[NSMenuItem separatorItem]];
         for (i = 0; i < iMax; i++) {
-            NSDictionary *bm = [bookmarks objectAtIndex:i];
-            NSMenuItem *item = [menu addItemWithTitle:[bm objectForKey:@"label"] action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
-            [item setRepresentedObject:bm];
+            BDSKSearchBookmark *bm = [bmController objectInBookmarksAtIndex:i];
+            NSMenuItem *item = [menu addItemWithTitle:[bm label] action:@selector(newSearchGroupFromBookmark:)  keyEquivalent:@""];
+            [item setRepresentedObject:[bm info]];
         }
         
     }

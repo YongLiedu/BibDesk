@@ -42,6 +42,7 @@
 @interface BDSKSearchBookmarkController : NSWindowController {
     IBOutlet NSTableView *tableView;
     NSMutableArray *bookmarks;
+    NSUndoManager *undoManager;
 }
 
 + (id)sharedBookmarkController;
@@ -53,6 +54,29 @@
 - (void)insertObject:(id)obj inBookmarksAtIndex:(unsigned)index;
 - (void)removeObjectFromBookmarksAtIndex:(unsigned)index;
 
+- (void)addBookmarkWithInfo:(NSDictionary *)info label:(NSString *)label;
+
 - (void)saveBookmarks;
+- (void)handleSearchBookmarkChangedNotification:(NSNotification *)notification;
+
+- (NSUndoManager *)undoManager;
+
+@end
+
+
+@interface BDSKSearchBookmark : NSObject <NSCopying> {
+    NSString *label;
+    NSDictionary *info;
+}
+
+- (id)initWithInfo:(NSDictionary *)aDictionary label:(NSString *)aLabel;
+- (id)initWithDictionary:(NSDictionary *)dictionary;
+
+- (NSDictionary *)dictionaryValue;
+
+- (NSDictionary *)info;
+
+- (NSString *)label;
+- (void)setLabel:(NSString *)newLabel;
 
 @end
