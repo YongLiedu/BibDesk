@@ -740,7 +740,7 @@ static NSColor *fillColor = nil;
 
 - (void)awakeFromNib
 {
-    if ([NSWindowController instancesRespondToSelector:_cmd])
+    if ([[BDSKGroupingOutlineView superclass] instancesRespondToSelector:_cmd])
         [super awakeFromNib];
     
     // colors similar to Spotlight's window: darker blue at bottom, lighter at top
