@@ -250,10 +250,15 @@ static void createTemporaryDirectory()
 
 // This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
 - (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)baseName {
-    NSParameterAssert(baseName != nil);
     NSString *finalPath = nil;
     
     @synchronized(self) {
+        if (baseName == nil) {
+            CFUUIDRef uuid = CFUUIDCreate(NULL);
+            baseName = [(NSString *)CFUUIDCreateString(NULL, uuid) autorelease];
+            CFRelease(uuid);
+        }
+        
         unsigned i = 0;
         NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
         while ([self objectExistsAtFileURL:fileURL]) {
