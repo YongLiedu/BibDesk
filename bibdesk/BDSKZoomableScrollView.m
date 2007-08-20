@@ -230,7 +230,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     }
 }
 
-- (BOOL)validatMenuItem:(NSMenuItem *)menuItem{
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if([menuItem action] == @selector(zoomIn:))
         return [self canZoomIn];
     else if([menuItem action] == @selector(zoomOut:))
