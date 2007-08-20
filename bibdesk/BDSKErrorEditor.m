@@ -207,7 +207,7 @@
     
     if(fileName == nil){
         OBASSERT(data != nil && document != nil);
-        [self setFileName:[[NSApp delegate] temporaryFilePath:[document displayName] createDirectory:NO]];
+        [self setFileName:[[NSFileManager defaultManager] temporaryFileWithBasename:[document displayName]]];
         [data writeToFile:fileName atomically:YES];
         [data release];
         data = nil;
@@ -234,7 +234,7 @@
 - (IBAction)reopenDocument:(id)sender{
     NSString *expandedFileName = [[self fileName] stringByExpandingTildeInPath];
     
-    expandedFileName = [[NSFileManager defaultManager] uniqueFilePath:expandedFileName createDirectory:NO];
+    expandedFileName = [[NSFileManager defaultManager] uniqueFilePathWithName:[expandedFileName lastPathComponent] atPath:[expandedFileName stringByDeletingLastPathComponent]];
     NSURL *expandedFileURL = [NSURL fileURLWithPath:expandedFileName];
     
     // write this out with the user's default encoding, so the openDocumentWithContentsOfFile is more likely to succeed

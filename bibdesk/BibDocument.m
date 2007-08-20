@@ -1456,7 +1456,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         NSString *string = [[NSString alloc] initWithData:data encoding:encoding];
         if([string canBeConvertedToEncoding:NSUTF8StringEncoding]){
             data = [string dataUsingEncoding:NSUTF8StringEncoding];
-            filePath = [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
+            filePath = [[NSFileManager defaultManager] temporaryFileWithBasename:[filePath lastPathComponent]];
             [data writeToFile:filePath atomically:YES];
             [string release];
         }else{

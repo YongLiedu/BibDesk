@@ -69,7 +69,15 @@
 - (void)createWeblocFilesInBackgroundThread:(NSDictionary *)fullPathDict;
 - (void)copyFilesInBackgroundThread:(NSDictionary *)fullPathDict;
 
-- (NSString *)uniqueFilePath:(NSString *)path createDirectory:(BOOL)create;
+// creates a temporary directory with default attributes in a system temp location; this is thread safe
+- (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)fileName;
+
+// !!! The next two methods are not thread safe, since they return a name without creating a file, and other threads/processes may return the same value
+
+// accepts a filename and a directory, and returns a unique file name in that directory using the filename as a basename
+- (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory;
+// creates a file in a system temp location; pass nil for fileName if you want a UUID based name
+- (NSString *)temporaryFileWithBasename:(NSString *)fileName;
 
 // for spotlight stuff; thread safe
 - (BOOL)spotlightCacheFolderExists;

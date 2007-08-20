@@ -50,6 +50,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKItemSearchIndexes.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 @implementation BDSKURLGroup
 
@@ -166,7 +167,7 @@
             [URLDownload cancel];
         [URLDownload release];
         URLDownload = [[WebDownload alloc] initWithRequest:request delegate:self];
-        [URLDownload setDestination:[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] allowOverwrite:NO];
+        [URLDownload setDestination:[[NSFileManager defaultManager] temporaryFileWithBasename:nil] allowOverwrite:NO];
         isRetrieving = YES;
     }
 }

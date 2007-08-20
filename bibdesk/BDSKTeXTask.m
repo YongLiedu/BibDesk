@@ -94,13 +94,13 @@
 @implementation BDSKTeXTask
 
 - (id)init{
-    NSString *tmpDirPath = [[NSApp delegate] temporaryFilePath:@"tmpbib" createDirectory:YES];
+    NSString *tmpDirPath = [[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:@"tmpbib"];
 	self = [self initWithWorkingDirPath:tmpDirPath fileName:@"tmpbib"];
 	return self;
 }
 
 - (id)initWithFileName:(NSString *)newFileName{
-    NSString *tmpDirPath = [[NSApp delegate] temporaryFilePath:newFileName createDirectory:YES];
+    NSString *tmpDirPath = [[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:newFileName];
 	self = [self initWithWorkingDirPath:tmpDirPath fileName:newFileName];
 	return self;
 }

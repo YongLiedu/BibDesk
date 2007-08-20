@@ -38,6 +38,7 @@
 
 #import "BDSKShellTask.h"
 #import "BibAppController.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 volatile int caughtSignal = 0;
 
@@ -114,7 +115,7 @@ volatile int caughtSignal = 0;
 - (NSData *)privateRunShellCommand:(NSString *)cmd withInputString:(NSString *)input{
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *shellPath = @"/bin/sh";
-    NSString *shellScriptPath = [[NSApp delegate] temporaryFilePath:@"shellscript" createDirectory:NO];
+    NSString *shellScriptPath = [[NSFileManager defaultManager] temporaryFileWithBasename:@"shellscript"];
     NSString *script;
     NSData *scriptData;
     NSMutableDictionary *currentAttributes;

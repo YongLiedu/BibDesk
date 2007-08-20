@@ -1013,7 +1013,7 @@
             NSString *fullPath = [[dropDestination path] stringByAppendingPathComponent:fileName];
             
             // make sure the filename is unique
-            fullPath = [[NSFileManager defaultManager] uniqueFilePath:fullPath createDirectory:NO];
+            fullPath = [[NSFileManager defaultManager] uniqueFilePathWithName:fileName atPath:[dropDestination path]];
             return ([plist writeToFile:fullPath atomically:YES]) ? [NSArray arrayWithObject:fileName] : nil;
         } else
             return nil;

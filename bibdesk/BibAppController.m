@@ -113,35 +113,10 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     return array;
 }
 
-static NSString *temporaryBaseDirectory = nil;
-static void createTemporaryDirectory()
-{
-    OBASSERT([NSThread inMainThread]);
-    // somewhere in /var/tmp, generally; contents moved to Trash on relaunch
-    NSString *temporaryPath = NSTemporaryDirectory();
-    
-    // chewable items are automatically cleaned up at restart
-    FSRef fileRef;
-    OSErr err = FSFindFolder(kUserDomain, kChewableItemsFolderType, TRUE, &fileRef);
-    
-    NSURL *fileURL = nil;
-    if (noErr == err)
-        fileURL = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), &fileRef) autorelease];
-    
-    if (NULL != fileURL)
-        temporaryPath = [fileURL path];
-    
-    temporaryBaseDirectory = [[[NSFileManager defaultManager] uniqueFilePath:[temporaryPath stringByAppendingPathComponent:@"bibdesk"] 
-    createDirectory:YES] copy];    
-}
-
 + (void)initialize
 {
     OBINITIALIZE;
-    
-    // do this now to avoid race condition instead of creating it lazily and locking
-    createTemporaryDirectory();    
-    
+        
     // make sure we use Spotlight's plugins on 10.4 and later
     SKLoadDefaultExtractorPlugIns();
 
@@ -495,21 +470,6 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (void)applicationDidBecomeActive:(NSNotification *)aNotification{
     [[NSNotificationCenter defaultCenter] postNotificationName:OAFlagsChangedNotification object:[NSApp currentEvent]];
-}
-
-#pragma mark Temporary files and directories
-
-- (NSString *)temporaryFilePath:(NSString *)fileName createDirectory:(BOOL)create{
-	if(nil == fileName) {
-        // NSProcessInfo isn't thread-safe, so use CFUUID instead of globallyUniqueString
-        CFAllocatorRef alloc = CFAllocatorGetDefault();
-        CFUUIDRef uuid = CFUUIDCreate(alloc);
-        fileName = [(id)CFUUIDCreateString(alloc, uuid) autorelease];
-        CFRelease(uuid);
-    }
-	NSString *tmpFilePath = [temporaryBaseDirectory stringByAppendingPathComponent:fileName];
-	return [[NSFileManager defaultManager] uniqueFilePath:tmpFilePath 
-										  createDirectory:create];
 }
 
 #pragma mark Menu stuff

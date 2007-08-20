@@ -69,7 +69,6 @@
 }
 
 - (void)copyAllExportTemplatesToApplicationSupportAndOverwrite:(BOOL)overwrite;
-- (NSString *)temporaryFilePath:(NSString *)fileName createDirectory:(BOOL)create;
 
 - (NSMenu *)groupSortMenu;
 	

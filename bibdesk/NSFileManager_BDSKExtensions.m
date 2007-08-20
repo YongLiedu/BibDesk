@@ -96,6 +96,54 @@ typedef struct WLDragMapEntryStruct
 
 @implementation NSFileManager (BDSKExtensions)
 
+static NSString *temporaryBaseDirectory = nil;
+
+// we can't use +initialize in a category, and +load is too dangerous
+__attribute__((constructor))
+static void createTemporaryDirectory()
+{    
+    // chewable items are automatically cleaned up at restart, and it's hidden from the user
+    FSRef chewableRef;
+    OSErr err = FSFindFolder(kUserDomain, kChewableItemsFolderType, TRUE, &chewableRef);
+    
+    CFAllocatorRef alloc = CFAllocatorGetDefault();
+    CFURLRef chewableURL = NULL;
+    if (noErr == err)
+        chewableURL = CFURLCreateFromFSRef(alloc, &chewableRef);
+    
+    CFStringRef baseName = CFStringCreateWithFileSystemRepresentation(alloc, "bibdesk");
+    CFURLRef newURL = CFURLCreateCopyAppendingPathComponent(alloc, chewableURL, baseName, TRUE);
+    FSRef newRef;
+    unsigned i = 1;
+    
+    // loop until CFURLGetFSRef fails, indicating we don't have a file yet
+    while (CFURLGetFSRef(newURL, &newRef)) {
+        CFRelease(baseName);
+        CFRelease(newURL);
+        baseName = CFStringCreateWithFormat(alloc, NULL, CFSTR("bibdesk-%i"), i++);
+        newURL = CFURLCreateCopyAppendingPathComponent(alloc, chewableURL, baseName, TRUE);
+    }
+    
+    if (chewableURL) CFRelease(chewableURL);
+    
+    assert(NULL != newURL);
+    
+    int nameLength = CFStringGetLength(baseName);
+    UniChar *nameBuf = CFAllocatorAllocate(alloc, nameLength * sizeof(UniChar), 0);
+    CFStringGetCharacters(baseName, CFRangeMake(0, nameLength), nameBuf);
+    
+    err = FSCreateDirectoryUnicode(&chewableRef, nameLength, nameBuf, kFSCatInfoNone, NULL, NULL, NULL, NULL);
+    CFAllocatorDeallocate(alloc, nameBuf);
+    
+    if (noErr == err)
+        temporaryBaseDirectory = (NSString *)CFURLCopyFileSystemPath(newURL, kCFURLPOSIXPathStyle);
+    
+    if (newURL) CFRelease(newURL);
+    if (baseName) CFRelease(baseName);
+    
+    assert(NULL != temporaryBaseDirectory);
+}
+
 - (NSString *)currentApplicationSupportPathForCurrentUser{
     
     static NSString *path = nil;
@@ -191,22 +239,54 @@ typedef struct WLDragMapEntryStruct
     return path;
 }
 
-- (NSString *)uniqueFilePath:(NSString *)path createDirectory:(BOOL)create{
-    @synchronized(self){
-        NSString *basePath = [path stringByDeletingPathExtension];
-        NSString *extension = [path pathExtension];
-        int i = 0;
+#pragma mark Temporary files and directories
+
+- (NSString *)temporaryFileWithBasename:(NSString *)fileName;
+{
+	if(nil == fileName)
+        fileName = [[NSProcessInfo processInfo] globallyUniqueString];
+	return [self uniqueFilePathWithName:fileName atPath:temporaryBaseDirectory];
+}
+
+// This method is subject to a race condition in our temporary directory if we pass the same baseName to this method and temporaryFileWithBasename: simultaneously; hence the lock in uniqueFilePathWithName:atPath:, even though it and temporaryFileWithBasename: are not thread safe or secure.
+- (NSString *)makeTemporaryDirectoryWithBasename:(NSString *)baseName {
+    NSParameterAssert(baseName != nil);
+    NSString *finalPath = nil;
+    
+    @synchronized(self) {
+        unsigned i = 0;
+        NSURL *fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:baseName]];
+        while ([self objectExistsAtFileURL:fileURL]) {
+            fileURL = [NSURL fileURLWithPath:[temporaryBaseDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%i", baseName, ++i]]];
+        }
+        finalPath = [fileURL path];
         
-        if(![extension isEqualToString:@""])
-            extension = [@"." stringByAppendingString:extension];
-        
-        while([self fileExistsAtPath:path])
-            path = [NSString stringWithFormat:@"%@-%i%@", basePath, ++i, extension];
-        
-        if(create)
-            [self createDirectoryAtPath:path attributes:nil];
+        // raise if we can't create a file in the chewable folder?
+        if (NO == [self createDirectoryAtPathWithNoAttributes:finalPath])
+            finalPath = nil;
     }
-	return path;
+    return finalPath;
+}
+
+- (NSString *)uniqueFilePathWithName:(NSString *)fileName atPath:(NSString *)directory {
+    // could expand this path?
+    NSParameterAssert([directory hasPrefix:[NSString pathSeparator]]);
+    NSParameterAssert([fileName hasPrefix:[NSString pathSeparator]] == NO);
+    NSString *baseName = [fileName stringByDeletingPathExtension];
+    NSString *extension = [fileName pathExtension];
+    
+    // optimistically assume we can just return the sender's guess of /directory/filename
+    NSString *fullPath = [directory stringByAppendingPathComponent:fileName];
+    int i = 0;
+    
+    // this method is always invoked from the main thread, but we don't want multiple threads in temporaryBaseDirectory (which may be passed as directory here); could make the lock conditional, but performance isn't a concern here
+    @synchronized(self) {
+    // if the file exists, try /directory/filename-i.extension
+    while([self fileExistsAtPath:fullPath])
+        fullPath = [directory stringByAppendingPathComponent:[[NSString stringWithFormat:@"%@-%i", baseName, ++i] stringByAppendingPathExtension:extension]];
+    }
+
+	return fullPath;
 }
 
 // note: IC is not thread safe

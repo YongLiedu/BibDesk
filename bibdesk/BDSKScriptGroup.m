@@ -91,7 +91,7 @@ static OFMessageQueue *messageQueue = nil;
         scriptType = type;
         failedDownload = NO;
         
-        workingDirPath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:YES] retain];
+        workingDirPath = [[[NSFileManager defaultManager] makeTemporaryDirectoryWithBasename:nil] retain];
         
         OFSimpleLockInit(&processingLock);
         OFSimpleLockInit(&currentTaskLock);

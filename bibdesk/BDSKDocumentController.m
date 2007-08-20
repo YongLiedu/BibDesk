@@ -54,6 +54,7 @@
 #import "NSError_BDSKExtensions.h"
 #import "BDSKSearchGroup.h"
 #import "BDSKGroupsArray.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 @implementation BDSKDocumentController
 
@@ -275,7 +276,7 @@
     // @@ we could also use [[NSApp delegate] temporaryFilePath:[filePath lastPathComponent] createDirectory:NO];
     // or [[NSFileManager defaultManager] uniqueFilePath:[filePath lastPathComponent] createDirectory:NO];
     // or move aside the original file
-    NSString *tmpFilePath = [[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] stringByAppendingPathExtension:@"bib"];
+    NSString *tmpFilePath = [[[NSFileManager defaultManager] temporaryFileWithBasename:nil] stringByAppendingPathExtension:@"bib"];
     NSURL *tmpFileURL = [NSURL fileURLWithPath:tmpFilePath];
     NSData *data = [fileString dataUsingEncoding:encoding];
     

@@ -57,6 +57,7 @@
 #import <WebKit/WebKit.h>
 #import "BDSKServerInfo.h"
 #import "NSError_BDSKExtensions.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 @implementation BDSKEntrezGroupServer
 
@@ -284,7 +285,7 @@
         [URLDownload cancel];
     [URLDownload release];
     URLDownload = [[WebDownload alloc] initWithRequest:request delegate:self];
-    [URLDownload setDestination:[[NSApp delegate] temporaryFilePath:nil createDirectory:NO] allowOverwrite:NO];
+    [URLDownload setDestination:[[NSFileManager defaultManager] temporaryFileWithBasename:nil] allowOverwrite:NO];
 }
 
 - (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path
