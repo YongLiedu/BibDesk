@@ -1077,10 +1077,7 @@
 
     NSError *error = nil;
 	if ([self addPublicationsFromPasteboard:pboard selectLibrary:YES error:&error] == NO) {
-        if(error != nil && [NSResponder instancesRespondToSelector:@selector(presentError:)])
-            [tv presentError:error];
-		else
-            NSBeep();
+        [tv presentError:error];
 	}
 }
 
