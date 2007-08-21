@@ -44,8 +44,7 @@
 
 @class OFScheduledEvent;
 
-@interface BDSKTypeSelectHelper : NSObject
-{
+@interface BDSKTypeSelectHelper : NSObject {
     id dataSource;
     BOOL cycleResults;
     BOOL matchPrefix;
@@ -53,6 +52,7 @@
     NSArray *searchCache;
     NSMutableString *searchString;
     OFScheduledEvent *timeoutEvent;
+    BOOL processing;
 }
 
 - (id)dataSource;
@@ -69,6 +69,7 @@
 - (BOOL)isProcessing;
 
 - (void)processKeyDownCharacter:(unichar)character;
+- (void)repeatSearch;
 
 @end
 

@@ -133,6 +133,10 @@
 			 
 			[typeSelectHelper processKeyDownCharacter:c];
 			return;
+        } else if (c == '/' && modifierFlags == 0) {
+            
+            [typeSelectHelper repeatSearch];
+			return;
 		}
 	}
     [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];

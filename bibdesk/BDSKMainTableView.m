@@ -149,6 +149,8 @@
     // pass it on the typeahead selector
     }else if ([alnum characterIsMember:c] && flags == 0) {
         [typeSelectHelper processKeyDownCharacter:c];
+    }else if (c == '/' && flags == 0) {
+        [typeSelectHelper repeatSearch];
     }else{
         [super keyDown:event];
     }

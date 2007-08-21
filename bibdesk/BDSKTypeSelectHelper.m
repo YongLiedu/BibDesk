@@ -41,8 +41,14 @@
 #import <OmniBase/OmniBase.h>
 
 @interface BDSKTypeSelectHelper (BDSKPrivate)
+- (void)searchWithStickyMatch:(BOOL)allowUpdate;
+- (void)stopTimer;
+- (void)startTimer;
 - (void)typeSelectSearchTimeout;
-- (unsigned int)indexOfItemWithSubstring:(NSString *)substring afterIndex:(unsigned int)selectedIndex;
+- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
+
+- (void)typeSelectSearchTimeout;
+- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 @end
 
 @implementation BDSKTypeSelectHelper
@@ -52,6 +58,7 @@
 - init;
 {
     if(self = [super init]){
+        searchString = [[NSMutableString alloc] init];
         cycleResults = YES;
         matchPrefix = YES;
     }
@@ -61,12 +68,14 @@
 - (void)dealloc;
 {
     [self setDataSource:nil];
-    [self typeSelectSearchTimeout];
+    [self stopTimer];
+    [searchString release];
     [searchCache release];
     [super dealloc];
 }
 
-// API
+#pragma mark Accessors
+
 - (id)dataSource;
 {
     return dataSource;
@@ -101,6 +110,13 @@
     matchPrefix = newValue;
 }
 
+- (BOOL)isProcessing;
+{
+    return processing;
+}
+
+#pragma mark API
+
 - (void)rebuildTypeSelectSearchCache;
 {    
     if (searchCache)
@@ -111,60 +127,32 @@
 
 - (void)processKeyDownCharacter:(unichar)character;
 {
-    OFScheduler *scheduler;
-    NSString *selectedItem = nil;
-    unsigned int selectedIndex, foundIndex;
-    unsigned int searchStringLength;
-    unsigned int selectedItemLength;
-    NSRange range;
-
-    OBPRECONDITION(dataSource != nil);
-
-    // Create the search string the first time around
-    if (searchString == nil)
-        searchString = [[NSMutableString alloc] init];
-
+    if (processing == NO)
+        [searchString setString:@""];
+    
     // Append the new character to the search string
-    [searchString appendCharacter:character];
+    [searchString appendFormat:@"%C", character];
     
-    if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
+    if ([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
         [dataSource typeSelectHelper:self updateSearchString:searchString];
-
+    
     // Reset the timer if it hasn't expired yet
-    scheduler = [OFScheduler mainScheduler];
-    if (timeoutEvent != nil) {
-        [scheduler abortEvent:timeoutEvent];
-        [timeoutEvent release];
-        timeoutEvent = nil;
-    }
-    timeoutEvent = [[scheduler scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:0.7] retain];
-
-    selectedIndex = [dataSource typeSelectHelperCurrentlySelectedIndex:self];
-    if (selectedIndex < [searchCache count])
-       selectedItem = [searchCache objectAtIndex:selectedIndex];
-    else
-        selectedIndex = NSNotFound;
-
-    searchStringLength = [searchString length];
-    selectedItemLength = [selectedItem length];
+    [self startTimer];
     
-    // The Omni implementation of this looks for a prefix; we might be searching for a substring
-    range = NSMakeRange(0, matchPrefix ? searchStringLength : selectedItemLength);
-    if (searchStringLength > 1 && selectedItemLength >= searchStringLength && [selectedItem containsString:searchString options:NSCaseInsensitiveSearch range:range])
-        return; // Avoid flashing a selection all over the place while you're still typing the thing you have selected
-
-    if (cycleResults == NO)
-        selectedIndex = NSNotFound;
+    [self searchWithStickyMatch:processing];
     
-    foundIndex = [self indexOfItemWithSubstring:searchString afterIndex:selectedIndex];
-
-    if (foundIndex != NSNotFound)
-        [dataSource typeSelectHelper:self selectItemAtIndex:foundIndex];
+    processing = YES;
 }
 
-- (BOOL)isProcessing;
-{
-    return timeoutEvent != nil;
+- (void)repeatSearch {
+    [self searchWithStickyMatch:NO];
+    
+    if ([searchString length] && [dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
+        [dataSource typeSelectHelper:self updateSearchString:searchString];
+    
+    [self startTimer];
+    
+    processing = NO;
 }
 
 @end
@@ -172,60 +160,94 @@
 
 @implementation BDSKTypeSelectHelper (BDSKPrivate)
 
-- (void)typeSelectSearchTimeout{
-    if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
-        [dataSource typeSelectHelper:self updateSearchString:nil];
-    [timeoutEvent release];
-    timeoutEvent = nil;
-    [searchString release];
-    searchString = nil;
+- (void)stopTimer;
+{
+    if (timeoutEvent != nil) {
+        [[OFScheduler mainScheduler] abortEvent:timeoutEvent];
+        [timeoutEvent release];
+        timeoutEvent = nil;
+    }
 }
 
-- (unsigned int)indexOfItemWithSubstring:(NSString *)substring afterIndex:(unsigned int)selectedIndex;
+- (void)startTimer;
 {
-    unsigned int labelIndex, foundIndex, labelCount;
-    unsigned int substringLength;
-    BOOL looped;
-    int options;
+    [self stopTimer];
+    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:0.7] retain];
+}
 
+- (void)typeSelectSearchTimeout;
+{
+    if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
+        [dataSource typeSelectHelper:self updateSearchString:nil];
+    [self stopTimer];
+    processing = NO;
+}
+
+- (void)searchWithStickyMatch:(BOOL)sticky;
+{
+    OBPRECONDITION(dataSource != nil);
+    
+    if ([searchString length]) {
+        unsigned int selectedIndex, startIndex, foundIndex;
+        
+        if (cycleResults) {
+            selectedIndex = [dataSource typeSelectHelperCurrentlySelectedIndex:self];
+            if (selectedIndex >= [searchCache count])
+                selectedIndex = NSNotFound;
+        } else {
+            selectedIndex = NSNotFound;
+        }
+        
+        startIndex = selectedIndex;
+        if (sticky && selectedIndex != NSNotFound)
+            startIndex = startIndex > 0 ? startIndex - 1 : [searchCache count] - 1;
+        
+        foundIndex = [self indexOfMatchedItemAfterIndex:startIndex];
+        
+        // Avoid flashing a selection all over the place while you're still typing the thing you have selected
+        if (foundIndex != NSNotFound && foundIndex != selectedIndex)
+            [dataSource typeSelectHelper:self selectItemAtIndex:foundIndex];
+    }
+}
+
+- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
+{
     if (searchCache == nil)
         [self rebuildTypeSelectSearchCache];
-
-    substringLength = [substring length];
-    labelCount = [searchCache count];
-    if (labelCount == 0)
+    
+    unsigned int labelCount = [searchCache count];
+    
+    if (labelCount == NO)
         return NSNotFound;
+    
     if (selectedIndex == NSNotFound)
         selectedIndex = labelCount - 1;
 
-    labelIndex = selectedIndex + 1;
-    if (labelIndex == labelCount)
-        labelIndex = 0;
-    looped = NO;
-    options = NSCaseInsensitiveSearch;
+    unsigned int labelIndex = selectedIndex;
+    BOOL looped = NO;
+    unsigned int searchStringLength = [searchString length];
+    int options = NSCaseInsensitiveSearch;
+    
     if (matchPrefix)
         options |= NSAnchoredSearch;
-    while (!looped) {
+    
+    while (looped == NO) {
         NSString *label;
-        unsigned int labelLength;
-        int location;
-
-        foundIndex = labelIndex++;
-        if (labelIndex == labelCount)
+        
+        if (++labelIndex == labelCount)
             labelIndex = 0;
-        if (labelIndex == selectedIndex + 1 || (labelIndex == 0 && selectedIndex == labelCount - 1))
+        if (labelIndex == selectedIndex)
             looped = YES;
-        label = [searchCache objectAtIndex:foundIndex];
-        labelLength = [label length];
-        if (labelLength < substringLength)
-            continue;
-        location = [label rangeOfString:substring options:options].location;
+        
+        label = [searchCache objectAtIndex:labelIndex];
+        
+        int location = [label length] < searchStringLength ? NSNotFound : [label rangeOfString:searchString options:options].location;
         if (location != NSNotFound) {
             if (location == 0 || [[NSCharacterSet letterCharacterSet] characterIsMember:[label characterAtIndex:location - 1]] == NO)
-                return foundIndex;
+                return labelIndex;
         }
     }
-
+    
     return NSNotFound;
 }
 

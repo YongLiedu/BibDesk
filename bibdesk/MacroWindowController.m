@@ -641,6 +641,8 @@
                     [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
     }else if ([alnum characterIsMember:c] && flags == 0) {
         [typeSelectHelper processKeyDownCharacter:c];
+    }else if (c == '/' && flags == 0) {
+        [typeSelectHelper repeatSearch];
     }else{
         [super keyDown:event];
     }
