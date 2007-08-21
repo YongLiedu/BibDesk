@@ -1103,8 +1103,10 @@
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString{
     if(searchString == nil || sortKey == nil)
         [self updateStatus]; // resets the status line to its default value
-    else
+    else if(typeSelectHelper == [tableView typeSelectHelper]) 
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding item with %@: \"%@\"", @"Status message:Finding item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
+    else if(typeSelectHelper == [groupTableView typeSelectHelper]) 
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding group: \"%@\"", @"Status message:Finding group: \"[search string]\""), searchString]];
 }
 
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
