@@ -100,8 +100,12 @@ static BDSKTextViewFindController *findController = nil;
     NSTextStorage *textStorage = [self textStorage];
 
     static NSCharacterSet *charactersToRemove = nil;
-    if (nil == charactersToRemove)
-        charactersToRemove = [[NSCharacterSet characterSetWithCharactersInString:@"\"!*()|&"] copy];
+    if (nil == charactersToRemove) {
+        // SearchKit ignores punctuation, so results can be surprising.  In bug #1779548 the user was trying to search for a literal "ic.8" with the default wildcard expansion.  This translated into a large number of matches, but nothing was highlighted in the textview because we only removed SearchKit special characters.
+        NSMutableCharacterSet *ms = (id)[NSMutableCharacterSet characterSetWithCharactersInString:@"\"!*()|&"];
+        [ms formUnionWithCharacterSet:[NSCharacterSet punctuationCharacterSet]];
+        charactersToRemove = [ms copy];
+    }
     
     NSMutableString *mutableString = [searchString mutableCopy];
     
