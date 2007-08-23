@@ -151,12 +151,17 @@ error:(NSError **)outError{
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a double newline, which the parser still handles.
     NSMutableData *fixedData = [[inData mutableCopy] autorelease];
     unsigned indexOfReturnChar;
-    const char retCh[1] = {'\r'};
-    const char newLine[1] = {'\n'};
+    const char cr[1] = {'\r'};
+    const char lf[1] = {'\n'};
+    const char crlf[2] = {'\r', '\n'};
     unsigned nrepl = 0;
 
-    while (NSNotFound != (indexOfReturnChar = [fixedData indexOfBytes:retCh length:1])) {
-        [fixedData replaceBytesInRange:NSMakeRange(indexOfReturnChar, 1) withBytes:newLine length:1];
+    while (NSNotFound != (indexOfReturnChar = [fixedData indexOfBytes:crlf length:2])) {
+        [fixedData replaceBytesInRange:NSMakeRange(indexOfReturnChar, 2) withBytes:lf length:1];
+        nrepl++;
+    }
+    while (NSNotFound != (indexOfReturnChar = [fixedData indexOfBytes:cr length:1])) {
+        [fixedData replaceBytesInRange:NSMakeRange(indexOfReturnChar, 1) withBytes:lf length:1];
         nrepl++;
     }
     // if we replaced anything, set filePath to the paste/drag string, or else the parser will still choke on it
