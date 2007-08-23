@@ -201,9 +201,13 @@
     [openUsingFilterAccessoryView addSubview:openTextEncodingAccessoryView];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
 
-    NSSet *uniqueCommandHistory = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKFilterFieldHistoryKey]];
-    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[uniqueCommandHistory allObjects]];
-        
+    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKFilterFieldHistoryKey]];
+    NSSet *uniqueCommandHistory = [NSSet setWithArray:commandHistory];
+    
+    // this is a workaround for older versions which added the same command multiple times; it screws up the order
+    if ([commandHistory count] != [uniqueCommandHistory count])
+        commandHistory = [NSMutableArray arrayWithArray:[uniqueCommandHistory allObjects]];
+    
     unsigned MAX_HISTORY = 7;
     if([commandHistory count] > MAX_HISTORY)
         [commandHistory removeObjectsInRange:NSMakeRange(MAX_HISTORY, [commandHistory count] - MAX_HISTORY)];
@@ -226,9 +230,16 @@
         }
         
         unsigned commandIndex = [commandHistory indexOfObject:shellCommand];
-        if(commandIndex != NSNotFound && commandIndex != 0)
+        // already in the array, so move it to the head of the list
+        if(commandIndex != NSNotFound && commandIndex != 0) {
+            [[shellCommand retain] autorelease];
             [commandHistory removeObject:shellCommand];
-        [commandHistory insertObject:shellCommand atIndex:0];
+            [commandHistory insertObject:shellCommand atIndex:0];
+        } else {
+            // not in the array, so add it and then remove the tail
+            [commandHistory insertObject:shellCommand atIndex:0];
+            [commandHistory removeLastObject];
+        }
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:commandHistory forKey:BDSKFilterFieldHistoryKey];
     }
 }
