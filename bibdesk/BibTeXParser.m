@@ -148,7 +148,24 @@ error:(NSError **)outError{
         return [NSArray array];
     
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
-    		    
+    
+    // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a double newline, which the parser still handles.
+    NSMutableData *fixedData = [[inData mutableCopy] autorelease];
+    unsigned indexOfReturnChar;
+    const char retCh[1] = {'\r'};
+    const char newLine[1] = {'\n'};
+    unsigned nrepl = 0;
+
+    while (NSNotFound != (indexOfReturnChar = [fixedData indexOfBytes:retCh length:1])) {
+        [fixedData replaceBytesInRange:NSMakeRange(indexOfReturnChar, 1) withBytes:newLine length:1];
+        nrepl++;
+    }
+    // if we replaced anything, set filePath to the paste/drag string, or else the parser will still choke on it
+    if (nrepl) {
+        inData = fixedData;
+        filePath = BDSKParserPasteDragString;
+    }
+		    
     BibItem *newBI = nil;
     BibDocument *document = [anOwner isDocument] ? (BibDocument *)anOwner : nil;
     BDSKMacroResolver *macroResolver = [anOwner macroResolver];	
