@@ -148,23 +148,30 @@ error:(NSError **)outError{
     
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
-    // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a double newline, which the parser still handles.
+    // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
     NSMutableData *fixedData = [[inData mutableCopy] autorelease];
-    unsigned indexOfReturnChar;
+    unsigned indexOfReturnChar, nextIndex;
+    NSRange replaceRange;
     const char cr[1] = {'\r'};
     const char lf[1] = {'\n'};
-    const char crlf[2] = {'\r', '\n'};
     unsigned nrepl = 0;
+    char *bytePtr = [fixedData mutableBytes];
 
-    while (NSNotFound != (indexOfReturnChar = [fixedData indexOfBytes:crlf length:2])) {
-        [fixedData replaceBytesInRange:NSMakeRange(indexOfReturnChar, 2) withBytes:lf length:1];
-        nrepl++;
-    }
     while (NSNotFound != (indexOfReturnChar = [fixedData indexOfBytes:cr length:1])) {
-        [fixedData replaceBytesInRange:NSMakeRange(indexOfReturnChar, 1) withBytes:lf length:1];
+
+        replaceRange.location = indexOfReturnChar;
+        
+        // check the next char to see if we have a Windows line ending
+        nextIndex = indexOfReturnChar + 1;
+        if ([fixedData length] > nextIndex && bytePtr[nextIndex] == '\n') 
+            replaceRange.length = 2;
+        else
+            replaceRange.length = 1;
+        
+        [fixedData replaceBytesInRange:replaceRange withBytes:lf length:1];
         nrepl++;
     }
-    // if we replaced anything, set filePath to the paste/drag string, or else the parser will still choke on it
+    // If we replace any characters, swap data and set the filePath to the paste/drag string, or else the parser will still choke on it (in the case of Mac line ends); this isn't ideal, as we lose some error reporting capability.
     if (nrepl) {
         inData = fixedData;
         filePath = BDSKParserPasteDragString;
