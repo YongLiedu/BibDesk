@@ -208,6 +208,7 @@
     if ([commandHistory count] != [uniqueCommandHistory count])
         commandHistory = [NSMutableArray arrayWithArray:[uniqueCommandHistory allObjects]];
     
+    // this is also a workaround for older versions
     unsigned MAX_HISTORY = 7;
     if([commandHistory count] > MAX_HISTORY)
         [commandHistory removeObjectsInRange:NSMakeRange(MAX_HISTORY, [commandHistory count] - MAX_HISTORY)];
