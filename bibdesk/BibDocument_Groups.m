@@ -1173,6 +1173,19 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
+- (void)editGroupWithoutWarning:(BDSKGroup *)group {
+    unsigned i = [groups indexOfObject:group];
+    OBASSERT(i != NSNotFound);
+    
+    if(i != NSNotFound){
+        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
+        [groupTableView scrollRowToVisible:i];
+        
+        // don't show the warning sheet, since presumably the user wants to change the group name
+        [groupTableView editColumn:0 row:i withEvent:nil select:YES];
+    }
+}
+
 - (IBAction)editNewStaticGroupWithSelection:(id)sender{
     NSArray *names = [[groups staticGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
@@ -1193,16 +1206,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [groups addStaticGroup:group];    
     [groupTableView deselectAll:nil];
     
-    i = [[groups staticGroups] indexOfObject:group];
-    OBASSERT(i != NSNotFound);
-    
-    if(i != NSNotFound){
-        i += [groups rangeOfStaticGroups].location;
-        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [groupTableView scrollRowToVisible:i];
-        
-        [groupTableView editColumn:0 row:i withEvent:nil select:YES];
-    }
+    [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
 }
 
 - (IBAction)editNewCategoryGroupWithSelection:(id)sender{
@@ -1210,31 +1214,30 @@ The groupedPublications array is a subset of the publications array, developed b
         NSBeep();
         return;
     }
-    NSArray *names = [[groups categoryGroups] valueForKeyPath:@"@distinctUnionOfObjects.name"];
+    
+    BOOL isAuthor = [currentGroupField isPersonField];
+    NSArray *names = [[groups categoryGroups] valueForKeyPath:isAuthor ? @"@distinctUnionOfObjects.name.lastName" : @"@distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
-    NSString *name = baseName;
+    id name = baseName;
     BDSKCategoryGroup *group;
     unsigned int i = 1;
     
     while ([names containsObject:name])
         name = [NSString stringWithFormat:@"%@%d", baseName, i++];
+    if (isAuthor)
+        name = [BibAuthor authorWithName:name andPub:nil];
     group = [[[BDSKCategoryGroup alloc] initWithName:name key:currentGroupField count:[pubs count]] autorelease];
+    
+    // first merge in shared groups
+    if ([self hasExternalGroupsSelected])
+        pubs = [self mergeInPublications:pubs];
     
     [self addPublications:pubs toGroup:group];
     [groupTableView deselectAll:nil];
+    [self updateCategoryGroupsPreservingSelection:NO];
     
-    i = [[groups categoryGroups] indexOfObject:group];
-    OBASSERT(i != NSNotFound);
-    
-    if(i != NSNotFound){
-        i += [groups rangeOfCategoryGroups].location;
-        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
-        [groupTableView scrollRowToVisible:i];
-        
-        // don't show the warning sheet, since presumably the user wants to change the group name
-        [groupTableView editColumn:0 row:i withEvent:nil select:YES];
-    }
+    [self performSelector:@selector(editGroupWithoutWarning:) withObject:group afterDelay:0.0];
 }
 
 - (IBAction)mergeInExternalGroup:(id)sender{
