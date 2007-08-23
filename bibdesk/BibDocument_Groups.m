@@ -1243,7 +1243,7 @@ The groupedPublications array is a subset of the publications array, developed b
         return;
     }
     // we should have a single external group selected
-    NSArray *pubs = [[[self selectedPublications] lastObject] publications];
+    NSArray *pubs = [[[self selectedGroups] lastObject] publications];
     [self mergeInPublications:pubs];
 }
 
