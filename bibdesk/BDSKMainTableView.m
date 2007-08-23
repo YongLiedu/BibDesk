@@ -115,7 +115,6 @@
     if ([[event characters] length] == 0)
         return;
     unichar c = [[event characters] characterAtIndex:0];
-    NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
     unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
     if (c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
         if(flags & NSShiftKeyMask)
@@ -147,9 +146,9 @@
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
         [self scrollRowToVisible:row];
     // pass it on the typeahead selector
-    }else if ([alnum characterIsMember:c] && flags == 0) {
+    }else if(([[NSCharacterSet alphanumericCharacterSet] characterIsMember:c] || ([typeSelectHelper isProcessing] && NO == [[NSCharacterSet controlCharacterSet] characterIsMember:c])) && flags == 0){
         [typeSelectHelper processKeyDownCharacter:c];
-    }else if (c == '/' && flags == 0) {
+    }else if(c == '/' && flags == 0){
         [typeSelectHelper repeatSearch];
     }else{
         [super keyDown:event];
