@@ -47,6 +47,7 @@
 #import "BDSKComplexString.h"
 #import "BibPrefController.h"
 #import "BibDocument_Groups.h"
+#import "CFString_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibAuthor.h"
 #import "BDSKErrorObjectController.h"
@@ -624,11 +625,12 @@ static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *fileP
 
 static inline NSString *copyCheckedString(const char *cstring, int line, NSString *filePath, NSStringEncoding parserEncoding){
     NSString *nsString = cstring ? [[NSString alloc] initWithCString:cstring encoding:parserEncoding] : nil;
-    if (nsString && checkStringForEncoding(nsString, line, filePath, parserEncoding) == NO) {
-        [nsString release];
-        nsString = nil;
-    }
-    return nsString;
+    NSString *returnString = nil;
+    if (nsString && checkStringForEncoding(nsString, line, filePath, parserEncoding))
+        // btparse does this, but only for \n, as the lex parser does not recognize it as a newline character
+        returnString = (NSString *)BDStringCreateByCollapsingAndTrimmingWhitespaceAndNewlines(CFAllocatorGetDefault(), (CFStringRef)nsString);
+    [nsString release];
+    return returnString;
 }
 
 static NSString *copyStringFromBTField(AST *field, NSString *filePath, BDSKMacroResolver *macroResolver, NSStringEncoding parserEncoding){
