@@ -1132,7 +1132,7 @@
                 value = [pub displayValueOfField:sortKey];
                 
                 // use @"" for nil values; ensure typeahead index matches shownPublications index
-                [a addObject:value ? [value description] : @""];
+                [a addObject:value ? [[value description] lossyASCIIString] : @""];
             }
         }else{
             for (i = 0; i < count; i++)
@@ -1150,7 +1150,7 @@
 		OBPRECONDITION(groupCount);
         for(i = 0; i < groupCount; i++){
 			group = [groups objectAtIndex:i];
-            [array addObject:[group stringValue]];
+            [array addObject:[[group stringValue] lossyASCIIString]];
 		}
         return array;
         

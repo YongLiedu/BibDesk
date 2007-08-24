@@ -74,10 +74,6 @@ static NSString *mixedString = nil;
     return string;
 }
 
-+ (NSString *)lossyASCIIStringWithString:(NSString *)aString{
-    return [[[NSString alloc] initWithData:[aString dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] encoding:NSASCIIStringEncoding] autorelease];
-}
-
 static int MAX_RATING = 5;
 + (NSString *)ratingStringWithInteger:(int)rating;
 {
@@ -793,6 +789,10 @@ http://home.planet.nl/~faase009/GNU.txt
 	[escapedValue replaceAllOccurrencesOfString:@"%3E" withString:@">"];
 	[escapedValue replaceAllOccurrencesOfString:@"%25" withString:@"%"]; // this should come last
 	return [escapedValue autorelease];
+}
+
+- (NSString *)lossyASCIIString{
+    return [[[NSString alloc] initWithData:[self dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] encoding:NSASCIIStringEncoding] autorelease];
 }
 
 #pragma mark Comparisons

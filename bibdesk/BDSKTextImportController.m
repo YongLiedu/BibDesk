@@ -1609,7 +1609,7 @@
 }
 
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    return fields;
+    return [fields valueForKey:@"lossyASCIIString"];
 }
     // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 

@@ -740,7 +740,7 @@
 		}
 		newString = [newString stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
 													 withString:@"-"];
-		newString = [NSString lossyASCIIStringWithString:newString];
+		newString = [newString lossyASCIIString];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		
 		return newString;
@@ -760,7 +760,7 @@
 		} else if (cleanOption >= 2) {
 			newString = [newString stringByRemovingTeX];
             if (cleanOption == 4)
-                newString = [NSString lossyASCIIStringWithString:newString];
+                newString = [newString lossyASCIIString];
 		}
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		
@@ -771,7 +771,7 @@
 			return @"";
 		}
 		newString = [string stringByDeTeXifyingString];
-		newString = [NSString lossyASCIIStringWithString:newString];
+		newString = [newString lossyASCIIString];
 		newString = [newString stringByRemovingTeX];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		

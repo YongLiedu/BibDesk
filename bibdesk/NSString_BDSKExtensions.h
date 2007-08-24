@@ -52,14 +52,6 @@
 + (NSString *)hexStringForCharacter:(unichar)ch;
 
 /*!
-    @method     lossyASCIIStringWithString:
-    @abstract   Returns a lossy ASCII version of the input string.
-    @discussion Useful for stripping accents from accented characters.  Returns an autoreleased string.
-    @param      aString (description)
-*/
-+ (NSString *)lossyASCIIStringWithString:(NSString *)aString;
-
-/*!
     @method     ratingStringWithInteger:
     @abstract   Returns a sequence of digits as bubbles surrounding each character
     @discussion Requires a font with characters 0x278A-278E
@@ -262,6 +254,8 @@ An inline buffer is used for speed in accessing each character.
 
 - (NSString *)stringByEscapingGroupPlistEntities;
 - (NSString *)stringByUnescapingGroupPlistEntities;
+
+- (NSString *)lossyASCIIString;
 
 #pragma mark Comparisons
 

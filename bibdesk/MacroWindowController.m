@@ -543,7 +543,7 @@
     NSMutableArray *array = [NSMutableArray array];
     NSDictionary *defs = [macroResolver macroDefinitions];
     foreach(macro, macros)
-        [array addObject:[defs objectForKey:macro]]; // order of items in the array must match the tableview datasource
+        [array addObject:[[defs objectForKey:macro] lossyASCIIString]]; // order of items in the array must match the tableview datasource
     return array;
 }
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
