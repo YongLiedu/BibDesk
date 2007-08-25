@@ -153,7 +153,7 @@
     return [item valueForKey:@"type"] ? [item valueForKey:@"contents"] : [[item valueForKey:@"contents"] string];
 }
 
-- (void)outlineView:(NSOutlineView *)ov copyItems:(NSArray *)items {
+- (BOOL)outlineView:(NSOutlineView *)tv writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
     NSEnumerator *itemEnum = [items objectEnumerator];
     id item, lastItem = nil;
     NSMutableString *string = [NSMutableString string];
@@ -176,7 +176,6 @@
         }
     }
     
-    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
     [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
     [pboard setString:string forType:NSStringPboardType];
 }
@@ -310,19 +309,8 @@
     }
 }
 
-- (void)copy:(id)sender {
-    if ([self numberOfSelectedRows] && [[self delegate] respondsToSelector:@selector(outlineView:copyItems:)]) {
-        NSMutableArray *items = [NSMutableArray array];
-        NSIndexSet *rowIndexes = [self selectedRowIndexes];
-        unsigned int row = [rowIndexes firstIndex];
-        
-        while (row != NSNotFound) {
-            [items addObject:[self itemAtRow:row]];
-            row = [rowIndexes indexGreaterThanIndex:row];
-        }
-        
-        [[self delegate] outlineView:self copyItems:items];
-    }
+- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+    return isLocal ? NSDragOperationEvery : NSDragOperationCopy;
 }
 
 @end
