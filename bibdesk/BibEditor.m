@@ -80,6 +80,7 @@
 #import "BDSKPublicationsArray.h"
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
+#import "BDSKSkimReader.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -484,6 +485,29 @@ enum{
     [notesController showWindow:self];
 }
 
+- (IBAction)copyNotesForLinkedFile:(id)sender{
+	NSString *field = [sender representedObject];
+    if (field == nil)
+		field = BDSKLocalUrlString;
+	NSURL *fileURL = [publication localFileURLForField:field];
+    
+    if (fileURL == nil) {
+        NSBeep();
+        return;
+    }
+    
+    NSString *notes = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+    
+    if ([notes isEqualToString:@""]) {
+        NSBeep();
+        return;
+    }
+    
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pboard setString:notes forType:NSStringPboardType];
+}
+
 #pragma mark Menus
 
 - (void)menuNeedsUpdate:(NSMenu *)menu{
@@ -558,8 +582,13 @@ enum{
                             keyEquivalent:@""];
 			[item setRepresentedObject:field];
             
-			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Notes For %@",@"Menu item title: Move Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
+			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Skim Notes For %@",@"Menu item title: Skim Notes For Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
                                    action:@selector(showNotesForLinkedFile:)
+                            keyEquivalent:@""];
+			[item setRepresentedObject:field];
+            
+			item = [menu addItemWithTitle:[[NSString stringWithFormat:NSLocalizedString(@"Copy Skim Notes For %@",@"Menu item title: Copy Skim Notes For Local-Url..."), [field localizedFieldName]] stringByAppendingEllipsis]
+                                   action:@selector(copyNotesForLinkedFile:)
                             keyEquivalent:@""];
 			[item setRepresentedObject:field];
 		}
@@ -932,7 +961,16 @@ enum{
 			field = BDSKLocalUrlString;
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Notes For Linked File", @"Menu item title")];
+			[menuItem setTitle:NSLocalizedString(@"Skim Notes For Linked File", @"Menu item title")];
+		return (lurl == nil ? NO : YES);
+	}
+	else if (theAction == @selector(copyNotesForLinkedFile:)) {
+		NSString *field = (NSString *)[menuItem representedObject];
+		if (field == nil)
+			field = BDSKLocalUrlString;
+		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
+		if ([[menuItem menu] supermenu])
+			[menuItem setTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title")];
 		return (lurl == nil ? NO : YES);
 	}
 	else if (theAction == @selector(openRemoteURL:)) {

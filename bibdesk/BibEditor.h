@@ -250,6 +250,8 @@
 
 - (IBAction)showNotesForLinkedFile:(id)sender;
 
+- (IBAction)copyNotesForLinkedFile:(id)sender;
+
 - (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)updateMenu:(NSMenu *)menu forImagePopUpButton:(BDSKImagePopUpButton *)view;

@@ -81,7 +81,7 @@
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKPreviewer.h"
-
+#import "BDSKSkimReader.h"
 
 @implementation BibDocument (Actions)
 
@@ -740,6 +740,39 @@
                             contextInfo:[field retain]];
 	} else {
         [self showNotesForLinkedFileAlertDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+    }
+}
+
+- (IBAction)copyNotesForLinkedFile:(id)sender{
+	NSString *field = [sender representedObject];
+    if (field == nil)
+		field = BDSKLocalUrlString;
+    [self copyNotesForLinkedFileForField:field];
+}
+
+- (void)copyNotesForLinkedFileForField:(NSString *)field{
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+    BibItem *pub;
+    NSURL *fileURL;
+    NSString *string;
+    NSMutableString *notes = [NSMutableString string];
+    
+    while (pub = [e nextObject]) {  
+        fileURL = [pub URLForField:field];
+        if(fileURL == nil) continue;
+        string = [[BDSKSkimReader sharedReader] textNotesAtURL:fileURL];
+        if ([NSString isEmptyString:string]) continue;
+        if ([notes length])
+            [notes appendString:@"\n\n"];
+        [notes appendString:string];
+    }
+    
+    if ([notes isEqualToString:@""] == NO) {
+        NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [pboard setString:notes forType:NSStringPboardType];
+    } else {
+        NSBeep();
     }
 }
 

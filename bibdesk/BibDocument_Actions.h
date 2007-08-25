@@ -193,6 +193,10 @@
 
 - (void)showNotesForLinkedFileForField:(NSString *)field;
 
+- (IBAction)copyNotesForLinkedFile:(id)sender;
+
+- (void)copyNotesForLinkedFileForField:(NSString *)field;
+
 #pragma mark View Actions
 
 /*!

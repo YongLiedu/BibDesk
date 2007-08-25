@@ -310,6 +310,9 @@
                 item = [menu addItemWithTitle:NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title") action:@selector(showNotesForLinkedFile:) keyEquivalent:@""];
                 [item setTarget:self];
                 [item setRepresentedObject:tcId];
+                item = [menu addItemWithTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title") action:@selector(copyNotesForLinkedFile:) keyEquivalent:@""];
+                [item setTarget:self];
+                [item setRepresentedObject:tcId];
             }else{
                 item = [menu addItemWithTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title") action:@selector(openRemoteURL:) keyEquivalent:@""];
                 [item setTarget:self];
