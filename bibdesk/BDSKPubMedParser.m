@@ -1,5 +1,5 @@
 //
-//  PubMedParser.m
+//  BDSKPubMedParser.m
 //  BibDesk
 //
 //  Created by Michael McCracken on Sun Nov 16 2003.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "PubMedParser.h"
+#import "BDSKPubMedParser.h"
 #import "BibTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
@@ -44,7 +44,7 @@
 #import "NSString_BDSKExtensions.h"
 
 
-@implementation PubMedParser
+@implementation BDSKPubMedParser
 
 + (BOOL)canParseString:(NSString *)string{
     NSScanner *scanner = [[NSScanner alloc] initWithString:string];

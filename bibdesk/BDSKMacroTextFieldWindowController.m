@@ -1,4 +1,4 @@
-// MacroTextFieldWindowController.m
+// BDSKMacroTextFieldWindowController.m
 // Created by Michael McCracken, January 2005
 
 /*
@@ -34,14 +34,14 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "MacroTextFieldWindowController.h"
+#import "BDSKMacroTextFieldWindowController.h"
 #import "BDSKComplexString.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKBackgroundView.h"
 #import <OmniBase/assertions.h>
 #import "NSWindowController_BDSKExtensions.h"
 
-@interface MacroTextFieldWindowController (Private)
+@interface BDSKMacroTextFieldWindowController (Private)
 
 + (Class)controlClass;
 
@@ -65,7 +65,7 @@
 
 @end
 
-@implementation MacroTextFieldWindowController
+@implementation BDSKMacroTextFieldWindowController
 
 - (id)init {
 	if (self = [super initWithWindowNibName:[self windowNibName]]) {
@@ -112,7 +112,7 @@
 
 @end
 
-@implementation MacroTextFieldWindowController (Private)
+@implementation BDSKMacroTextFieldWindowController (Private)
 
 + (Class)controlClass {
     return [NSTextField class];

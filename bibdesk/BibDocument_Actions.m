@@ -51,7 +51,7 @@
 #import "BibEditor.h"
 #import "BibPersonController.h"
 #import "BDSKDocumentInfoWindowController.h"
-#import "MacroWindowController.h"
+#import "BDSKMacroWindowController.h"
 #import "BDSKNotesWindowController.h"
 
 #import "NSString_BDSKExtensions.h"
@@ -893,24 +893,24 @@
 - (IBAction)showMacrosWindow:(id)sender{
     if ([self hasExternalGroupsSelected]) {
         BDSKMacroResolver *resolver = [(id<BDSKOwner>)[groups objectAtIndex:[groupTableView selectedRow]] macroResolver];
-        MacroWindowController *controller = nil;
+        BDSKMacroWindowController *controller = nil;
         NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
         NSWindowController *wc;
         while(wc = [wcEnum nextObject]){
-            if([wc isKindOfClass:[MacroWindowController class]] && [(MacroWindowController*)wc macroResolver] == resolver)
+            if([wc isKindOfClass:[BDSKMacroWindowController class]] && [(BDSKMacroWindowController*)wc macroResolver] == resolver)
                 break;
         }
         if(wc){
-            controller = (MacroWindowController *)wc;
+            controller = (BDSKMacroWindowController *)wc;
         }else{
-            controller = [[MacroWindowController alloc] initWithMacroResolver:resolver];
+            controller = [[BDSKMacroWindowController alloc] initWithMacroResolver:resolver];
             [self addWindowController:controller];
             [controller release];
         }
         [controller showWindow:self];
     } else {
         if (!macroWC) {
-            macroWC = [[MacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
+            macroWC = [[BDSKMacroWindowController alloc] initWithMacroResolver:[self macroResolver]];
         }
         if ([[self windowControllers] containsObject:macroWC] == NO) {
             [self addWindowController:macroWC];

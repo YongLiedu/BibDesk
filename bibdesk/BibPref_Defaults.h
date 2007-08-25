@@ -37,7 +37,7 @@
 #import <OmniAppKit/OAPreferenceClient.h>
 #import "BibPrefController.h"
 #import "BDSKFieldNameFormatter.h"
-#import "MacroWindowController.h"
+#import "BDSKMacroWindowController.h"
 
 @interface BibPref_Defaults : OAPreferenceClient
 {
@@ -52,7 +52,7 @@
     NSMutableArray *customFieldsArray;
     NSMutableSet *customFieldsSet;
     NSMutableArray *globalMacroFiles;
-    MacroWindowController *macroWC;
+    BDSKMacroWindowController *macroWC;
 }
 
 - (IBAction)delSelectedDefaultField:(id)sender;

@@ -540,7 +540,7 @@ static NSSet *alwaysDisabledFields = nil;
 
 - (IBAction)showMacrosWindow:(id)sender{
 	if (!macroWC){
-		macroWC = [[MacroWindowController alloc] initWithMacroResolver:[BDSKMacroResolver defaultMacroResolver]];
+		macroWC = [[BDSKMacroWindowController alloc] initWithMacroResolver:[BDSKMacroResolver defaultMacroResolver]];
 	}
 	[macroWC beginSheetModalForWindow:[[self controlBox] window]];
 }

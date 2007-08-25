@@ -59,7 +59,7 @@
 #import "BibAppController.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
-#import "MacroTextFieldWindowController.h"
+#import "BDSKMacroTextFieldWindowController.h"
 #import "BDSKForm.h"
 #import "BDSKStatusBar.h"
 #import "BibAuthor.h"

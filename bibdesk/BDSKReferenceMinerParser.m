@@ -38,7 +38,7 @@
 
 #import "BDSKReferenceMinerParser.h"
 #import <AGRegex/AGRegex.h>
-#import "PubMedparser.h"
+#import "BDSKPubMedparser.h"
 #import "BDSKRISParser.h"
 #import "BDSKMARCParser.h"
 
@@ -72,7 +72,7 @@
     if([itemString isRefMinerPubMedString]){
         // the only problem here is the stuff that Ref Miner prepends to the PMID; other than that, it's just PubMed output
         itemString = [itemString stringByFixingRefMinerPubMedTags];
-        return [PubMedParser itemsFromString:itemString error:outError];
+        return [BDSKPubMedParser itemsFromString:itemString error:outError];
     }else if([itemString isRefMinerAmazonString]){
         // run a crude hack for fixing the broken RIS that we get for Amazon entries from Reference Miner
         itemString = [itemString stringByFixingRefMinerAmazonString]; 

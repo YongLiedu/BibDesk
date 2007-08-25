@@ -40,7 +40,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
 #import "BibTypeManager.h"
-#import "MacroTextFieldWindowController.h"
+#import "BDSKMacroTextFieldWindowController.h"
 #import "BDSKImagePopUpButton.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "BDSKTypeSelectHelper.h"

@@ -40,7 +40,7 @@
 #import <OmniBase/OBUtilities.h>
 #import "NSError_BDSKExtensions.h"
 #import "BibTeXParser.h"
-#import "PubMedParser.h"
+#import "BDSKPubMedParser.h"
 #import "BDSKRISParser.h"
 #import "BDSKMARCParser.h"
 #import "BDSKReferenceMinerParser.h"
@@ -62,7 +62,7 @@ static Class classForType(int stringType)
     Class parserClass = Nil;
     switch(stringType){
 		case BDSKPubMedStringType: 
-            parserClass = [PubMedParser class];
+            parserClass = [BDSKPubMedParser class];
             break;
 		case BDSKRISStringType:
             parserClass = [BDSKRISParser class];
@@ -133,7 +133,7 @@ static Class classForType(int stringType)
 		return BDSKBibTeXStringType;
 	if([BDSKReferenceMinerParser canParseString:self])
 		return BDSKReferenceMinerStringType;
-	if([PubMedParser canParseString:self])
+	if([BDSKPubMedParser canParseString:self])
 		return BDSKPubMedStringType;
 	if([BDSKRISParser canParseString:self])
 		return BDSKRISStringType;

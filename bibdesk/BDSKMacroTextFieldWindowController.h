@@ -1,8 +1,9 @@
-//
-//  MacroWindowController.h
-//  BibDesk
-//
-//  Created by Michael McCracken on 2/21/05.
+// BDSKMacroTextFieldWindowController.h
+// Created by Michael McCracken, January 2005
+
+// Inspired by and somewhat copied from Calendar, whose author I've
+// lost record of.
+
 /*
  This software is Copyright (c) 2005,2007
  Michael O. McCracken. All rights reserved.
@@ -35,52 +36,25 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#import <Cocoa/Cocoa.h>
 
-@class BDSKMacroResolver, BDSKComplexStringFormatter, MacroTableViewWindowController;
+#import <AppKit/AppKit.h>
 
-@interface MacroWindowController : NSWindowController {
-    IBOutlet NSTableView *tableView;
-    IBOutlet NSButton *closeButton;
-    IBOutlet NSButton *addButton;
-    IBOutlet NSButton *removeButton;
-    BDSKMacroResolver *macroResolver;
-    NSMutableArray *macros;
-	BDSKComplexStringFormatter *tableCellFormatter;
-	MacroTableViewWindowController *macroTextFieldWC;
-    BOOL isEditable;
+@class BDSKBackgroundView;
+
+@interface BDSKMacroTextFieldWindowController : NSWindowController {
+    IBOutlet NSTextField *expandedValueTextField;
+    IBOutlet BDSKBackgroundView *backgroundView;
+	NSControl *control;
+	int row;
+	int column;
 }
 
-- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
-
-- (BDSKMacroResolver *)macroResolver;
-
-- (void)refreshMacros;
-
-- (IBAction)addMacro:(id)sender;
-- (IBAction)removeSelectedMacros:(id)sender;
-- (BOOL)addMacrosFromBibTeXString:(NSString *)aString;
-
-- (void)beginSheetModalForWindow:(NSWindow *)modalWindow;
-- (IBAction)closeAction:(id)sender;
-
-- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
-- (BOOL)editSelectedCellAsMacro;
-
-- (void)handleMacroChangedNotification:(NSNotification *)notif;
-- (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif;
+- (BOOL)attachToView:(NSControl *)aControl atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString;
+- (BOOL)isEditing;
 
 @end
 
-@interface MacroKeyFormatter : NSFormatter {
+@interface MacroTableViewWindowController : BDSKMacroTextFieldWindowController @end
+@interface MacroFormWindowController : BDSKMacroTextFieldWindowController @end
+@interface MacroMatrixWindowController : BDSKMacroTextFieldWindowController @end
 
-}
-
-@end
-
-@class BDSKTypeSelectHelper;
-
-@interface MacroDragTableView : NSTableView{
-    BDSKTypeSelectHelper *typeSelectHelper;
-}
-@end

@@ -1,5 +1,5 @@
 //
-//  MacroWindowController.m
+//  BDSKMacroWindowController.m
 //  BibDesk
 //
 //  Created by Michael McCracken on 2/21/05.
@@ -36,14 +36,14 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "MacroWindowController.h"
+#import "BDSKMacroWindowController.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BibPrefController.h" // for notification name declarations
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "OmniFoundation/NSData-OFExtensions.h"
-#import "MacroTextFieldWindowController.h"
+#import "BDSKMacroTextFieldWindowController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibTeXParser.h"
 #import "BDSKComplexStringFormatter.h"
@@ -55,7 +55,7 @@
 #import "BDSKTypeSelectHelper.h"
 #import "BibDocument.h"
 
-@implementation MacroWindowController
+@implementation BDSKMacroWindowController
 
 - (id)init {
     self = [self initWithMacroResolver:nil];

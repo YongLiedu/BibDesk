@@ -1,10 +1,10 @@
 //
-//  PubMedParser.h
+//  BDSKMacroWindowController.h
 //  BibDesk
 //
-//  Created by Michael McCracken on Sun Nov 16 2003.
+//  Created by Michael McCracken on 2/21/05.
 /*
- This software is Copyright (c) 2003,2004,2005,2006,2007
+ This software is Copyright (c) 2005,2007
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,10 +35,52 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#import <Cocoa/Cocoa.h>
 
-#import <Foundation/Foundation.h>
-#import "BDSKRISParser.h"
+@class BDSKMacroResolver, BDSKComplexStringFormatter, MacroTableViewWindowController;
 
-@interface PubMedParser : BDSKRISParser {
+@interface BDSKMacroWindowController : NSWindowController {
+    IBOutlet NSTableView *tableView;
+    IBOutlet NSButton *closeButton;
+    IBOutlet NSButton *addButton;
+    IBOutlet NSButton *removeButton;
+    BDSKMacroResolver *macroResolver;
+    NSMutableArray *macros;
+	BDSKComplexStringFormatter *tableCellFormatter;
+	MacroTableViewWindowController *macroTextFieldWC;
+    BOOL isEditable;
+}
+
+- (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
+
+- (BDSKMacroResolver *)macroResolver;
+
+- (void)refreshMacros;
+
+- (IBAction)addMacro:(id)sender;
+- (IBAction)removeSelectedMacros:(id)sender;
+- (BOOL)addMacrosFromBibTeXString:(NSString *)aString;
+
+- (void)beginSheetModalForWindow:(NSWindow *)modalWindow;
+- (IBAction)closeAction:(id)sender;
+
+- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
+- (BOOL)editSelectedCellAsMacro;
+
+- (void)handleMacroChangedNotification:(NSNotification *)notif;
+- (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif;
+
+@end
+
+@interface MacroKeyFormatter : NSFormatter {
+
+}
+
+@end
+
+@class BDSKTypeSelectHelper;
+
+@interface MacroDragTableView : NSTableView{
+    BDSKTypeSelectHelper *typeSelectHelper;
 }
 @end

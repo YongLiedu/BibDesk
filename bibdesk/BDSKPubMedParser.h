@@ -1,11 +1,10 @@
-// MacroTextFieldWindowController.h
-// Created by Michael McCracken, January 2005
-
-// Inspired by and somewhat copied from Calendar, whose author I've
-// lost record of.
-
+//
+//  BDSKPubMedParser.h
+//  BibDesk
+//
+//  Created by Michael McCracken on Sun Nov 16 2003.
 /*
- This software is Copyright (c) 2005,2007
+ This software is Copyright (c) 2003,2004,2005,2006,2007
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,24 +36,9 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <AppKit/AppKit.h>
+#import <Foundation/Foundation.h>
+#import "BDSKRISParser.h"
 
-@class BDSKBackgroundView;
-
-@interface MacroTextFieldWindowController : NSWindowController {
-    IBOutlet NSTextField *expandedValueTextField;
-    IBOutlet BDSKBackgroundView *backgroundView;
-	NSControl *control;
-	int row;
-	int column;
+@interface BDSKPubMedParser : BDSKRISParser {
 }
-
-- (BOOL)attachToView:(NSControl *)aControl atRow:(int)aRow column:(int)aColumn withValue:(NSString *)aString;
-- (BOOL)isEditing;
-
 @end
-
-@interface MacroTableViewWindowController : MacroTextFieldWindowController @end
-@interface MacroFormWindowController : MacroTextFieldWindowController @end
-@interface MacroMatrixWindowController : MacroTextFieldWindowController @end
-
