@@ -115,6 +115,9 @@
 }
 
 - (void)awakeFromNib{
+    if ([[macroResolver owner] isDocument])
+        [self setWindowFrameAutosaveNameOrCascade:@"BDSKMacroWindow"];
+    
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     if(isEditable)
@@ -124,6 +127,7 @@
     [tableView reloadData];
     [[tc dataCell] setEditable:isEditable];
     [[[tableView tableColumnWithIdentifier:@"macro"] dataCell] setEditable:isEditable];
+    
     [self updateButtons];
 }
 
