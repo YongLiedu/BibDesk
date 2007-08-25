@@ -86,6 +86,7 @@
     while (dict = [dictEnum nextObject]) {
         NSMutableDictionary *note = [dict mutableCopy];
         
+        [note setObject:[NSNumber numberWithFloat:19.0] forKey:@"rowHeight"];
         if ([[dict valueForKey:@"type"] isEqualToString:@"Note"])
             [note setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:85.0], @"rowHeight", [dict valueForKey:@"text"], @"contents", nil] forKey:@"child"];
         
@@ -258,25 +259,29 @@
                 continue;
             
             BOOL isHighlighted = isFirstResponder && [self isRowSelected:row];
-            NSColor *color = isHighlighted ? [NSColor whiteColor] : [NSColor grayColor];
+            NSColor *color = [NSColor colorWithCalibratedWhite:isHighlighted ? 1.0 : 0.5 alpha:0.7];
             NSRect rect = [self rectOfRow:row];
-            NSPoint startPoint = NSMakePoint(NSMaxX(rect) - 20.0, NSMaxY(rect) - 1.5);
-            NSPoint endPoint = NSMakePoint(NSMaxX(rect), NSMaxY(rect) - 1.5);
+            float x = ceilf(NSMidX(rect));
+            float y = NSMaxY(rect) - 1.5;
             
             [color set];
-            [NSBezierPath strokeLineFromPoint:startPoint toPoint:endPoint];
-            [[color colorWithAlphaComponent:0.5] set];
-            startPoint.y -= 2.0;
-            endPoint.y -= 2.0;
-            [NSBezierPath strokeLineFromPoint:startPoint toPoint:endPoint];
+            [NSBezierPath strokeLineFromPoint:NSMakePoint(x - 1.0, y) toPoint:NSMakePoint(x + 1.0, y)];
+            y -= 2.0;
+            [NSBezierPath strokeLineFromPoint:NSMakePoint(x - 3.0, y) toPoint:NSMakePoint(x + 3.0, y)];
         }
         
         [NSGraphicsContext restoreGraphicsState];
     }
 }
 
+- (void)expandItem:(id)item expandChildren:(BOOL)collapseChildren {
+    // NSOutlineView does not call resetCursorRect when expanding
+    [super expandItem:item expandChildren:collapseChildren];
+    [self resetCursorRects];
+}
+
 - (void)collapseItem:(id)item collapseChildren:(BOOL)collapseChildren {
-    // NSOutlineView seems to call resetCursorRect when expanding, but not when collapsing
+    // NSOutlineView does not call resetCursorRect when collapsing
     [super collapseItem:item collapseChildren:collapseChildren];
     [self resetCursorRects];
 }
