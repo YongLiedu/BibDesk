@@ -99,6 +99,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 // this is necessary as the NSTableView-OAExtensions defines these actions accordingly
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
 	SEL action = [menuItem action];
+    BOOL isOutlineView = [self isKindOfClass:[NSOutlineView class]];
 	if (action == @selector(delete:)) {
 		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:deleteRows:)];
 	}
@@ -109,16 +110,16 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
 		return [_dataSource respondsToSelector:@selector(tableView:deleteRows:)];
 	}
 	else if (action == @selector(cut:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:writeRows:toPasteboard:)];
+		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:isOutlineView ? @selector(outlineView:writeItems:toPasteboard:) : @selector(tableView:writeRows:toPasteboard:)];
 	}
 	else if (action == @selector(copy:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:writeRows:toPasteboard:)];
+		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:isOutlineView ? @selector(outlineView:writeItems:toPasteboard:) : @selector(tableView:writeRows:toPasteboard:)];
 	}
 	else if (action == @selector(paste:)) {
 		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:addItemsFromPasteboard:)];
 	}
 	else if (action == @selector(duplicate:)) {
-		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:@selector(tableView:writeRows:toPasteboard:)];
+		return [self validateDelegatedMenuItem:menuItem defaultDataSourceSelector:isOutlineView ? @selector(outlineView:writeItems:toPasteboard:) : @selector(tableView:writeRows:toPasteboard:)];
 	}
 	else if (action == @selector(invertSelection:)) {
 		return [self allowsMultipleSelection];
