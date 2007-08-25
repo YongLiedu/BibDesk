@@ -1,8 +1,8 @@
 //
-//  BibDeskExportUsingTemplateCommand.h
+//  BDSKTemplatedTextCommand.h
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 8/19/06.
+//  Created by Christiaan Hofman on 8/18/06.
 /*
  This software is Copyright (c) 2006,2007
  Christiaan Hofman. All rights reserved.
@@ -36,8 +36,11 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #import <Cocoa/Cocoa.h>
 
-@interface BibDeskExportUsingTemplateCommand : NSScriptCommand {}
+
+@interface BDSKTemplatedTextCommand : NSScriptCommand {}
+@end
+
+@interface BibDeskTemplatedRichTextCommand : NSScriptCommand {}
 @end

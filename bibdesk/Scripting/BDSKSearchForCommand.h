@@ -1,5 +1,5 @@
 //
-//  BibDeskSearchForCommand.h
+//  BDSKSearchForCommand.h
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Wed Jul 21 2004.
@@ -42,7 +42,7 @@
 #import "BibItem+Scripting.h"
 
 
-@interface BibDeskSearchForCommand : NSScriptCommand {
+@interface BDSKSearchForCommand : NSScriptCommand {
 
 }
 

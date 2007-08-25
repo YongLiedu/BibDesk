@@ -1,5 +1,5 @@
 //
-//  BibDeskParseFormatCommand.m
+//  BDSKParseFormatCommand.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 10/18/05.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDeskParseFormatCommand.h"
+#import "BDSKParseFormatCommand.h"
 #import "BDSKFormatParser.h"
 #import "BibField.h"
 #import "BibItem.h"
@@ -45,7 +45,7 @@
 #import "BDSKOwnerProtocol.h"
 #import "BibTypeManager.h"
 
-@implementation BibDeskParseFormatCommand
+@implementation BDSKParseFormatCommand
 
 - (id)performDefaultImplementation {
 	// the direct object is the format string

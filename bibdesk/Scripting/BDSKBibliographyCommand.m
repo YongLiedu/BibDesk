@@ -1,5 +1,5 @@
 //
-//  BibDeskBibliographyCommand.m
+//  BDSKBibliographyCommand.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 29/11/05.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDeskBibliographyCommand.h"
+#import "BDSKBibliographyCommand.h"
 #import "BibDocument.h"
 #import "BibDocument+Scripting.h"
 #import "BibItem.h"
@@ -48,7 +48,7 @@ ssp: 2004-07-11
  NSScriptCommand for the "bibliography for" command.
  This is sent to the BibDocument.
 */
-@implementation BibDeskBibliographyCommand
+@implementation BDSKBibliographyCommand
 
 /*
  ssp: 2004-07-11

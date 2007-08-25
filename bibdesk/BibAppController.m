@@ -71,7 +71,7 @@
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"
-#import "BibDeskSearchForCommand.h"
+#import "BDSKSearchForCommand.h"
 #import "BDSKCompletionServerProtocol.h"
 #import "BDSKDocumentController.h"
 #import "NSError_BDSKExtensions.h"

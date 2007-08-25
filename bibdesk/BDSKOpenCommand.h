@@ -1,11 +1,11 @@
 //
-//  BibDeskAutofileCommand.h
-//  Bibdesk
+//  BDSKOpenCommand.h
+//  BibDesk
 //
-//  Created by Christiaan Hofman on 7/3/07.
+//  Created by Sven-S. Porst on 14.09.04.
 /*
- This software is Copyright (c) 2007
- Christiaan Hofman. All rights reserved.
+ This software is Copyright (c) 2004,2005,2006,2007
+ Sven-S. Porst. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -19,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Christiaan Hofman nor the names of any
+ - Neither the name of Sven-S. Porst nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -37,9 +37,10 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BibDocument.h"
 
 
-@interface BibDeskAutoFileCommand : NSScriptCommand {
+@interface BDSKOpenCommand : NSScriptCommand {
 
 }
 

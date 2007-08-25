@@ -1,5 +1,5 @@
 //
-//  BibDeskAutofileCommand.m
+//  BDSKAutofileCommand.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 7/3/07.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDeskAutofileCommand.h"
+#import "BDSKAutofileCommand.h"
 #import "BibPrefController.h"
 #import "BibItem.h"
 #import "BibDocument.h"

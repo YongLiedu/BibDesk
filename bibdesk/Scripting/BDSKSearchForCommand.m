@@ -1,5 +1,5 @@
 //
-//  BibDeskSearchForCommand.m
+//  BDSKSearchForCommand.m
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Wed Jul 21 2004.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDeskSearchForCommand.h"
+#import "BDSKSearchForCommand.h"
 #import "BibAuthor.h"
 
 
@@ -46,7 +46,7 @@ To be used for finding bibliography information from a keyword with AppleScript.
 The command should have the form
 	search (document|application) for (searchterm) [for autocompletion (yes|no)]
 */
-@implementation BibDeskSearchForCommand
+@implementation BDSKSearchForCommand
 
 - (id)performDefaultImplementation {
 

@@ -1,8 +1,8 @@
 //
-//  BibDeskExportUsingTemplateCommand.m
+//  BDSKTemplatedTextCommand.m
 //  Bibdesk
 //
-//  Created by Christiaan Hofman on 8/19/06.
+//  Created by Christiaan Hofman on 8/18/06.
 /*
  This software is Copyright (c) 2006,2007
  Christiaan Hofman. All rights reserved.
@@ -36,14 +36,15 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDeskExportUsingTemplateCommand.h"
+#import "BDSKTemplatedTextCommand.h"
 #import "BibDocument.h"
 #import "BDSKTemplate.h"
+#import "BDSKTemplateObjectProxy.h"
 #import "BDSKPublicationsArray.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BibItem.h"
 
-@implementation BibDeskExportUsingTemplateCommand
+@implementation BDSKTemplatedTextCommand
 
 - (id)performDefaultImplementation {
 
@@ -67,7 +68,7 @@
 		// give up
 		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
 		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
-		return nil;
+		return @"";
 	}
 	
 	// the 'using' parameters gives the template name to use
@@ -80,27 +81,7 @@
 	// make sure we get the right thing
 	if (![templateStyle isKindOfClass:[NSString class]] ) {
 		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-			return nil;
-	}
-	
-	// the 'to' parameters gives the file to save to, either as a path or a url (it seems)
-	id fileObj = [params objectForKey:@"to"];
-    NSURL *fileURL;
-	// make sure we get something
-	if (!fileObj) {
-		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
-		return nil;
-	}
-	// make sure we get the right thing
-	if ([fileObj isKindOfClass:[NSString class]]) {
-        fileURL = [NSURL fileURLWithPath:(NSString*)fileObj];
-        if (fileURL == nil)
-            return nil;
-    } else if ([fileObj isKindOfClass:[NSURL class]]) {
-        fileURL = (NSURL*)fileObj;
-    } else {
-		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
-        return nil;
+			return @"";
 	}
 	
 	// the 'for' parameter can select the items to template
@@ -117,7 +98,7 @@
 			// wrong kind of argument
 			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
 			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
-			return nil;
+			return @"";
 		}
 		
 	} else {
@@ -125,17 +106,90 @@
     }
     
     BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
-    NSData *fileData = nil;
+    NSString *templatedText = nil;
     
     if ([template templateFormat] & BDSKRichTextTemplateFormat) {
-        fileData = [document attributedStringDataForPublications:items usingTemplate:template];
+        templatedText = [[BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items documentAttributes:NULL] string];
     } else {
-        fileData = [document stringDataForPublications:items usingTemplate:template];
+        templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items];
+    }
+	
+	return templatedText;
+}
+
+@end
+
+
+@implementation BibDeskTemplatedRichTextCommand
+
+- (id)performDefaultImplementation {
+
+	// figure out parameters first
+	NSDictionary *params = [self evaluatedArguments];
+	if (!params) {
+		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+			return [[[NSTextStorage alloc] init] autorelease];;
+	}
+	
+	BibDocument *document = nil;
+	id receiver = [self evaluatedReceivers];
+    NSScriptObjectSpecifier *dP = [self directParameter];
+	id dPO = [dP objectsByEvaluatingSpecifier];
+
+	if ([receiver isKindOfClass:[BibDocument class]]) {
+        document = receiver;
+    } else if ([dPO isKindOfClass:[BibDocument class]]) {
+        document = dPO;
+    } else {
+		// give up
+		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+		[self setScriptErrorString:NSLocalizedString(@"The templated text command can only be sent to the documents.", @"Error description")];
+			return [[[NSTextStorage alloc] init] autorelease];;
+	}
+	
+	// the 'using' parameters gives the template name to use
+	NSString *templateStyle = [params objectForKey:@"using"];
+	// make sure we get something
+	if (!templateStyle) {
+		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+		return [NSArray array];
+	}
+	// make sure we get the right thing
+	if (![templateStyle isKindOfClass:[NSString class]] ) {
+		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+			return [[[NSTextStorage alloc] init] autorelease];;
+	}
+	
+	// the 'for' parameter can select the items to template
+	NSArray *publications = [document publications];
+    id obj = [params objectForKey:@"for"];
+    NSArray *items = nil;
+	if (obj) {
+		// the parameter is present
+		if ([obj isKindOfClass:[BibItem class]]) {
+            items = [NSArray arrayWithObject:obj];
+		} else if ([obj isKindOfClass:[NSArray class]]) {
+            items = [[obj lastObject] isKindOfClass:[BibItem class]] ? obj : [publications objectsAtIndexSpecifiers:(NSArray *)obj];
+        } else {
+			// wrong kind of argument
+			[self setScriptErrorNumber:NSArgumentsWrongScriptError];
+			[self setScriptErrorString:NSLocalizedString(@"The 'for' option needs to be a publication or a list of publications.",@"Error description")];
+			return [[[NSTextStorage alloc] init] autorelease];;
+		}
+		
+	} else {
+        items = publications;
     }
     
-    [fileData writeToURL:fileURL atomically:YES];
+    BDSKTemplate *template = [BDSKTemplate templateForStyle:templateStyle];
     
-	return nil;
+    if ([template templateFormat] & BDSKRichTextTemplateFormat) {
+        NSAttributedString *templatedRichText = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:document publications:items documentAttributes:NULL];
+        return [[[NSTextStorage alloc] initWithAttributedString:templatedRichText] autorelease];
+    } else {
+        NSString *templatedText = [BDSKTemplateObjectProxy stringByParsingTemplate:template withObject:document publications:items];
+        return [[[NSTextStorage alloc] initWithString:templatedText] autorelease];
+    }
 }
 
 @end
