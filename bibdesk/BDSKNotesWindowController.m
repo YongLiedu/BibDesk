@@ -178,6 +178,8 @@
     
     [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
     [pboard setString:string forType:NSStringPboardType];
+    
+    return YES;
 }
 
 @end
