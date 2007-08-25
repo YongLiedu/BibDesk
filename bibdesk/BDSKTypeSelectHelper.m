@@ -235,7 +235,6 @@
 
     unsigned int labelIndex = selectedIndex;
     BOOL looped = NO;
-    unsigned int searchStringLength = [searchString length];
     int options = NSCaseInsensitiveSearch;
     
     if (matchPrefix)
