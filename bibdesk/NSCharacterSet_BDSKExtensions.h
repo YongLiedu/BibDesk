@@ -40,12 +40,12 @@
 
 @interface NSCharacterSet (BDSKExtensions)
 
-+ (NSCharacterSet *)curlyBraceCharacterSet;
-+ (NSCharacterSet *)commaCharacterSet;
-+ (NSCharacterSet *)searchStringSeparatorCharacterSet;
-+ (NSCharacterSet *)upAndDownArrowCharacterSet;
-+ (NSCharacterSet *)newlineCharacterSet;
-+ (NSCharacterSet *)nonWhitespaceCharacterSet;
-+ (NSCharacterSet *)nonDecimalDigitCharacterSet;
++ (id)curlyBraceCharacterSet;
++ (id)commaCharacterSet;
++ (id)searchStringSeparatorCharacterSet;
++ (id)upAndDownArrowCharacterSet;
++ (id)newlineCharacterSet;
++ (id)nonWhitespaceCharacterSet;
++ (id)nonDecimalDigitCharacterSet;
 
 @end

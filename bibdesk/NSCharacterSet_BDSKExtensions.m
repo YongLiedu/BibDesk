@@ -76,39 +76,80 @@ static NSCharacterSet *nonDecimalDigitCharacterSet = nil;
     nonWhitespaceCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] copy];
 }
 
-+ (NSCharacterSet *)curlyBraceCharacterSet;
++ (id)curlyBraceCharacterSet;
 {  
     return curlyBraceCharacterSet; 
 }    
 
-+ (NSCharacterSet *)commaCharacterSet;
++ (id)commaCharacterSet;
 {
     return commaCharacterSet;
 }
 
-+ (NSCharacterSet *)searchStringSeparatorCharacterSet;
++ (id)searchStringSeparatorCharacterSet;
 {
     return searchStringSeparatorCharacterSet;
 }
 
-+ (NSCharacterSet *)upAndDownArrowCharacterSet;
++ (id)upAndDownArrowCharacterSet;
 {
     return upAndDownArrowCharacterSet;
 }
 
-+ (NSCharacterSet *)newlineCharacterSet;
++ (id)newlineCharacterSet;
 {
     return newlineCharacterSet;
 }
 
-+ (NSCharacterSet *)nonWhitespaceCharacterSet;
++ (id)nonWhitespaceCharacterSet;
 {
     return nonWhitespaceCharacterSet;
 }
 
-+ (NSCharacterSet *)nonDecimalDigitCharacterSet;
++ (id)nonDecimalDigitCharacterSet;
 {
     return nonDecimalDigitCharacterSet;
+}
+
+@end
+/*
+    No point in keeping mutable copies of these; this category is just insurance in case we need +[NSMutableCharacterSet someClassMethod].
+ */
+@implementation NSMutableCharacterSet (BDSKExtensions)
+
++ (id)curlyBraceCharacterSet;
+{  
+    return [[curlyBraceCharacterSet mutableCopy] autorelease]; 
+}    
+
++ (id)commaCharacterSet;
+{
+    return [[commaCharacterSet mutableCopy] autorelease];
+}
+
++ (id)searchStringSeparatorCharacterSet;
+{
+    return [[searchStringSeparatorCharacterSet mutableCopy] autorelease];
+}
+
++ (id)upAndDownArrowCharacterSet;
+{
+    return [[upAndDownArrowCharacterSet mutableCopy] autorelease];
+}
+
++ (id)newlineCharacterSet;
+{
+    return [[newlineCharacterSet mutableCopy] autorelease];
+}
+
++ (id)nonWhitespaceCharacterSet;
+{
+    return [[nonWhitespaceCharacterSet mutableCopy] autorelease];
+}
+
++ (id)nonDecimalDigitCharacterSet;
+{
+    return [[nonDecimalDigitCharacterSet mutableCopy] autorelease];
 }
 
 @end
