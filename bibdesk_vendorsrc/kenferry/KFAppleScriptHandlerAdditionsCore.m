@@ -130,7 +130,7 @@ NSString *KFASException = @"KFASException";
 		else
 			[event setParamDescriptor:[theObject aeDescriptorValue] forKeyword:aKeyWord];
 	}
-	while( (aKeyWord = va_arg( anArgList, AEKeyword ) ) != nil );
+	while( (aKeyWord = va_arg( anArgList, AEKeyword ) ) != 0 );
     
     // execute
     resultDesc = [self executeAppleEvent:event error:errorInfo];
