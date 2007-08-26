@@ -210,8 +210,8 @@
 }
 
 - (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(unsigned int)modifierFlags {
-    NSURL *link = [elementInformation objectForKey:WebElementLinkURLKey];
-    [self setStatus:[link absoluteString]];
+    NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
+    [self setStatus:[aLink absoluteString]];
 }
 
 @end

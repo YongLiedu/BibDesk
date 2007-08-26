@@ -245,8 +245,8 @@
     return [[self delegate] textView:textView isValidKey:key forFormCell:[self selectedCell]];
 }
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex{
-    return [[self delegate] textView:aTextView clickedOnLink:link atIndex:charIndex forFormCell:[self selectedCell]];
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+    return [[self delegate] textView:aTextView clickedOnLink:aLink atIndex:charIndex forFormCell:[self selectedCell]];
 }
 
 #pragma mark NSDraggingDestination protocol 

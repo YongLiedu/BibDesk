@@ -96,11 +96,11 @@
     
 #if OMNI_FORCE_ASSERTIONS
     [task setStandardError:[NSFileHandle fileHandleWithStandardError]];
-    NSPipe *pipe = [NSPipe pipe];
-    [task setStandardOutput:pipe];
+    NSPipe *aPipe = [NSPipe pipe];
+    [task setStandardOutput:aPipe];
     @try {
         [task launch];
-        NSData *data = [[pipe fileHandleForReading] readDataToEndOfFile];
+        NSData *data = [[aPipe fileHandleForReading] readDataToEndOfFile];
         NSLog(@"SkimNotesAgent started with identifier \"%@\"", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
         taskLaunched = [task isRunning];
     }

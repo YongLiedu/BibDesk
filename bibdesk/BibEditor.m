@@ -2377,17 +2377,17 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     return YES;
 }
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex forFormCell:(id)aCell {
-    BibItem *pub = [[[publication owner] publications] itemForCiteKey:link];
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex forFormCell:(id)aCell {
+    BibItem *pub = [[[publication owner] publications] itemForCiteKey:aLink];
     if (nil == pub) {
-        NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(link) attribute:(id)kMDItemPath] firstObject];
+        NSString *path = [[[BDSKPersistentSearch sharedSearch] resultsForQuery:queryStringWithCiteKey(aLink) attribute:(id)kMDItemPath] firstObject];
         // if it was a valid key/link, we should definitely have a path, but better make sure
         if (path)
             [[NSWorkspace sharedWorkspace] openLinkedFile:path];
         else
             NSBeep();
     } else {
-        [[self document] editPub:[[[publication owner] publications] itemForCiteKey:link]];
+        [[self document] editPub:[[[publication owner] publications] itemForCiteKey:aLink]];
     }
     return YES;
 }

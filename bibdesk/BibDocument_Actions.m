@@ -558,18 +558,18 @@
     [self openLinkedFileForField:field];
 }
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex
 {
-    if ([link respondsToSelector:@selector(isFileURL)] && [link isFileURL]) {
+    if ([aLink respondsToSelector:@selector(isFileURL)] && [aLink isFileURL]) {
         NSString *searchString;
         if([[searchButtonController selectedItemIdentifier] isEqualToString:BDSKFileContentSearchString])
             searchString = [searchField stringValue];
         else
             searchString = @"";
-        [[NSWorkspace sharedWorkspace] openURL:link withSearchString:searchString];
+        [[NSWorkspace sharedWorkspace] openURL:aLink withSearchString:searchString];
         return YES;
-    } else if ([link isKindOfClass:[NSString class]]) {
-        BibItem *pub = [[self publications] itemForCiteKey:link];
+    } else if ([aLink isKindOfClass:[NSString class]]) {
+        BibItem *pub = [[self publications] itemForCiteKey:aLink];
         return pub != nil && [self editPub:pub] != nil;
     }
     // let the next responder handle it if it was a non-file URL

@@ -1661,8 +1661,8 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
 #pragma mark -
 #pragma mark New publications from pasteboard
 
-- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)select{
-    if (select)
+- (void)addPublications:(NSArray *)newPubs publicationsToAutoFile:(NSArray *)pubsToAutoFile temporaryCiteKey:(NSString *)tmpCiteKey selectLibrary:(BOOL)shouldSelect{
+    if (shouldSelect)
         [self selectLibraryGroup:nil];    
 	[self addPublications:newPubs];
     if ([self hasLibraryGroupSelected])
@@ -1702,7 +1702,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [self reportTemporaryCiteKeys:tmpCiteKey forNewDocument:NO];
 }
 
-- (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)select error:(NSError **)outError{
+- (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb selectLibrary:(BOOL)shouldSelect error:(NSError **)outError{
 	// these are the types we support, the order here is important!
     NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     NSArray *newPubs = nil;
@@ -1758,7 +1758,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         if(outError) *outError = error;
 		return NO;
     }else if ([newPubs count] > 0) 
-		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:select];
+		[self addPublications:newPubs publicationsToAutoFile:newFilePubs temporaryCiteKey:temporaryCiteKey selectLibrary:shouldSelect];
     
     return YES;
 }

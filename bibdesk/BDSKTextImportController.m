@@ -1145,8 +1145,8 @@
 }
 
 - (void)webView:(WebView *)sender mouseDidMoveOverElement:(NSDictionary *)elementInformation modifierFlags:(unsigned int)modifierFlags {
-    NSURL *link = [elementInformation objectForKey:WebElementLinkURLKey];
-    [statusLine setStringValue:link ? [link absoluteString] : @""];
+    NSURL *aLink = [elementInformation objectForKey:WebElementLinkURLKey];
+    [statusLine setStringValue:aLink ? [aLink absoluteString] : @""];
 }
 
 #pragma mark WebEditingDelegate methods
@@ -1414,7 +1414,7 @@
     return [[self publications] itemForCiteKey:key] != nil;
 }
 
-- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex {
+- (BOOL)tableView:(NSTableView *)tView textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex {
     // we don't open the linked item from the text import sheet
     return NO;
 }
@@ -1993,8 +1993,8 @@
     return [[self delegate] tableView:self textView:textView isValidKey:key];
 }
 
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex{
-    return [[self delegate] tableView:self textView:aTextView clickedOnLink:link atIndex:charIndex];
+- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)aLink atIndex:(unsigned)charIndex{
+    return [[self delegate] tableView:self textView:aTextView clickedOnLink:aLink atIndex:charIndex];
 }
 
 @end
