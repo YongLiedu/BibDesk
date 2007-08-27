@@ -168,7 +168,7 @@
     
     // default is (3.0, 2.0); use a larger spacing for the gradient and drop highlights
     NSSize intercellSize = [self intercellSpacing];
-    intercellSize.height = MAX(2.0f, roundf(0.5f * rowHeight));
+    intercellSize.height = fmaxf(2.0f, roundf(0.5f * rowHeight));
     [self setIntercellSpacing:intercellSize];
 
 	[self tile];
@@ -198,7 +198,7 @@
     NSParameterAssert(highlightColor != nil);
     
     float lineWidth = 1.0;
-    float heightOffset = MAX(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
+    float heightOffset = fmaxf(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
     
     [self lockFocus];
     [NSGraphicsContext saveGraphicsState];
@@ -225,7 +225,7 @@
 -(void)_drawDropHighlightOnRow:(int)rowIndex
 {
     float lineWidth = 2.0;
-    float heightOffset = rowIndex == -1 ? 0.0f : MAX(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
+    float heightOffset = rowIndex == -1 ? 0.0f : fmaxf(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
     
     [self lockFocus];
     [NSGraphicsContext saveGraphicsState];

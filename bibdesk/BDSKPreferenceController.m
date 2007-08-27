@@ -173,7 +173,7 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
                 // this is a private method, but declared in the header
                 NSRect rect = [view _boundsForIndex:i];
                 
-                float radius = 0.4 * MAX(NSHeight(rect), NSWidth(rect));
+                float radius = 0.4 * fmaxf(NSHeight(rect), NSWidth(rect));
                 NSPoint center = NSMakePoint(NSMidX(rect), NSMidY(rect));
                 center = [view convertPoint:center toView:nil];
                 center = [theWindow convertBaseToScreen:center];

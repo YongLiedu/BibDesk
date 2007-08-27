@@ -238,7 +238,7 @@
 	lowerEdgeRect = [control convertRect:lowerEdgeRect toView:nil]; // takes into account isFlipped
     winFrame.origin = [[control window] convertBaseToScreen:lowerEdgeRect.origin];
 	winFrame.origin.y -= NSHeight(winFrame);
-	winFrame.size.width = MAX(NSWidth(lowerEdgeRect), minWidth);
+	winFrame.size.width = fmaxf(NSWidth(lowerEdgeRect), minWidth);
 	winFrame = NSInsetRect(winFrame, -margin, 0.0);
 	[[self window] setFrame:winFrame display:YES];
 	

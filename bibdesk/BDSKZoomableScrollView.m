@@ -135,7 +135,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
     }
 	
-	if (fabs(scaleFactor - newScaleFactor) > 0.01) {
+	if (fabsf(scaleFactor - newScaleFactor) > 0.01) {
 		NSSize curDocFrameSize, newDocBoundsSize;
 		NSView *documentView = [self documentView];
 		NSView *clipView = [documentView superview];
@@ -181,7 +181,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (BOOL)canZoomToActualSize{
-    return fabs(scaleFactor - 1.0) > 0.01;
+    return fabsf(scaleFactor - 1.0) > 0.01;
 }
 
 - (BOOL)canZoomIn{

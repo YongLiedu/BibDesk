@@ -80,7 +80,7 @@
 		} else {
 			brightness = 1.0;
 			if (saturation > 0.12) {
-				saturation = MAX(0.0, saturation-0.1-(saturation/2.0));
+				saturation = fmaxf(0.0, saturation-0.1-(saturation/2.0));
 			} else {
 				saturation += 0.25;
 			}

@@ -3828,7 +3828,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 		[buttonCell setTitle:[tmp localizedFieldName]]; \
 		[buttonCell setRepresentedObject:tmp]; \
 		[buttonCell setIntValue:[publication intValueOfField:tmp]]; \
-        cellWidth = MAX(cellWidth, [buttonCell cellSize].width); \
+        cellWidth = fmaxf(cellWidth, [buttonCell cellSize].width); \
         [cells addObject:buttonCell]; \
 		[buttonCell release]; \
 		if([editedTitle isEqualToString:tmp]) \

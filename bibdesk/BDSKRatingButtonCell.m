@@ -232,7 +232,7 @@
 		case NSImageLeft:
 		case NSImageRight:
 			size.width = buttonSize.width + titleSize.width + BUTTON_TEXT_X_SEP;
-			size.height = MAX(buttonSize.height, titleSize.height);
+			size.height = fmaxf(buttonSize.height, titleSize.height);
 			if ([self isBordered])
 				size.width -= EXTRA_BORDER_MARGIN;
 			break;
