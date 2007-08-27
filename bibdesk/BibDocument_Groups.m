@@ -1362,13 +1362,13 @@ The groupedPublications array is a subset of the publications array, developed b
     while(pub = [pubEnum nextObject]){
         OBASSERT([pub isKindOfClass:[BibItem class]]);        
         
-        if(field)
+        if(field && [field isEqualToString:BDSKPubTypeString] == NO)
             oldValue = [[[pub valueOfField:field] retain] autorelease];
 		rv = [pub addToGroup:group handleInherited:handleInherited];
 		
 		if(rv == BDSKOperationSet || rv == BDSKOperationAppend){
             count++;
-            if(field){
+            if(field && [field isEqualToString:BDSKPubTypeString] == NO){
                 [changedPubs addObject:pub];
                 [oldValues addObject:oldValue ? oldValue : @""];
                 [newValues addObject:[pub valueOfField:field]];
@@ -1388,7 +1388,7 @@ The groupedPublications array is a subset of the publications array, developed b
 			if(handleInherited != BDSKOperationIgnore){
                 [pub addToGroup:group handleInherited:handleInherited];
                 count++;
-                if(field){
+                if(field && [field isEqualToString:BDSKPubTypeString] == NO){
                     [changedPubs addObject:pub];
                     [oldValues addObject:oldValue ? oldValue : @""];
                     [newValues addObject:[pub valueOfField:field]];
@@ -1441,6 +1441,9 @@ The groupedPublications array is a subset of the publications array, developed b
 		int rv;
         int tmpCount = 0;
 		
+        if([field isEqualToString:BDSKPubTypeString])
+            continue;
+        
 		while(pub = [pubEnum nextObject]){
 			OBASSERT([pub isKindOfClass:[BibItem class]]);        
 			

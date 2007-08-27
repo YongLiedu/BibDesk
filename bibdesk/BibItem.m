@@ -2699,7 +2699,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		if(operation ==  BDSKOperationAsk || operation == BDSKOperationIgnore)
 			return operation;
 	}else{
-		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || ([@"" isEqual:groupName] || [[BibAuthor emptyAuthor] isEqual:groupName]))
+		if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || ([@"" isEqual:groupName] || [[BibAuthor emptyAuthor] isEqual:groupName] || [field isEqualToString:BDSKPubTypeString]))
 			operation = BDSKOperationSet;
 		else
 			operation = BDSKOperationAppend;
@@ -2725,7 +2725,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
     
     [string appendString:groupDescription];
-	[self setField:field toStringValue:string];
+    if ([field isEqualToString:BDSKPubTypeString])
+        [self setPubType:string];
+    else
+        [self setField:field toStringValue:string];
     [string release];
 	
 	return operation;
@@ -2736,7 +2739,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
-	OBASSERT(field != nil);
+	OBASSERT(field != nil && [field isEqualToString:BDSKPubTypeString] == NO);
 	NSSet *groupNames = [groups objectForKey:field];
     if([groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
@@ -2887,7 +2890,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 			return operation;
 	}
 	
-	if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || [groupNames count] < 2)
+	if([field isSingleValuedGroupField] || [NSString isEmptyString:oldString] || [groupNames count] < 2 || [field isEqualToString:BDSKPubTypeString])
 		operation = BDSKOperationSet;
 	else
 		operation = BDSKOperationAppend; // Append really means Replace here
@@ -2906,7 +2909,10 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		return BDSKOperationSet;
 	} else if (operation == BDSKOperationSet) {
 		// we should have a single value to remove, so we can simply clear the field
-		[self setField:field toStringValue:newGroupName];
+		if ([field isEqualToString:BDSKPubTypeString])
+            [self setPubType:newGroupName];
+        else
+            [self setField:field toStringValue:newGroupName];
 		return BDSKOperationSet;
 	}
 	
