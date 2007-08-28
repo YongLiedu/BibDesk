@@ -120,6 +120,7 @@
         Y = Editor; /* series editor */
         3 = Doi;    /* maybe AGU only */
         6 = Volume; /* the number of volumes? */
+        7 = Edition;
         8 = Date;
         9 = Type;   /* report type */
     };
