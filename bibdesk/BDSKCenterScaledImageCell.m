@@ -96,7 +96,7 @@ static NSBitmapImageRep *bestRepFromImageForSize(NSImage *anImage, NSSize prefer
         // draw the image rep directly to avoid creating a new NSImage and adding the rep to it
         if (rep) {
             
-            srcRect.size = fminf[rep size];
+            srcRect.size = [rep size];
             float ratio = fminf(NSWidth(drawFrame) / srcRect.size.width, NSHeight(drawFrame) / srcRect.size.height);
             drawFrame.size.width = ratio * srcRect.size.width;
             drawFrame.size.height = ratio * srcRect.size.height;
