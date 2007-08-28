@@ -397,16 +397,18 @@ static BOOL convertTeXStringToComposedCharacter(NSMutableString *texString, NSDi
                 CFStringAppend(mutableCharacter, (CFStringRef)accent);
                 CFStringNormalize(mutableCharacter, kCFStringNormalizationFormC);
                 
-                if ([(NSString *)mutableCharacter length] == 1) {
+                if (CFStringGetLength(mutableCharacter) == 1) {
                     [texString setString:(NSString *)mutableCharacter];
                 } else {
                     // if it can't be composed to a single character, we won't be able to convert it back
                     [character release];
+                    CFRelease(mutableCharacter);
                     return NO;
                 }
                 
                 // should be at idx = length anyway
                 [character release];
+                CFRelease(mutableCharacter);
                 return YES;
             } else {
                 
