@@ -1801,6 +1801,10 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSError *parseError = nil;
     BOOL isPartialData = NO;
     
+    // @@ BDSKStringParser doesn't handle any BibTeX types, so it's not really useful as a funnel point for any string type, since each usage requires special casing for BibTeX.
+    if(BDSKUnknownStringType == type)
+        type = [string contentStringType];
+    
     if(type == BDSKBibTeXStringType){
         newPubs = [BibTeXParser itemsFromString:string document:self isPartialData:&isPartialData error:&parseError];
     }else if(type == BDSKNoKeyBibTeXStringType){
