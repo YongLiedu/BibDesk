@@ -106,6 +106,9 @@ static Class classForType(int stringType)
     Class parserClass = Nil;
     if (stringType == BDSKUnknownStringType)
         stringType = [itemString contentStringType];
+    // @@ currently returns Nil for BibTeX types
+    OBASSERT(stringType != BDSKBibTeXStringType);
+    OBASSERT(stringType != BDSKNoKeyBibTeXStringType);
     parserClass = classForType(stringType);
     if (Nil == parserClass && outError){
         *outError = [NSError mutableLocalErrorWithCode:kBDSKUnknownError localizedDescription:NSLocalizedString(@"Unsupported or invalid format", @"error when parsing text fails")];
