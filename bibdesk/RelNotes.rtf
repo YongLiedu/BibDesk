@@ -1,4 +1,4 @@
-{\rtf1\ansi\ansicpg1252\cocoartf920
+{\rtf1\ansi\ansicpg1252\cocoartf929
 {\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 LucidaGrande;\f2\fnil\fcharset0 LucidaSans-Typewriter;
 \f3\fnil\fcharset0 Geneva;\f4\fnil\fcharset0 Verdana;\f5\fnil\fcharset129 AppleGothic;
 }
@@ -29,8 +29,8 @@
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\fs22 \cf0 \
-Last update: 16 August 2007 (rev 
-\f2\fs20 10928)
+Last update: 28 August 2007 (rev 
+\f2\fs20 11007)
 \f1\fs22 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -46,6 +46,12 @@ New Features\
 {\listtext	\'95	}Simple template method for joining array components\
 {\listtext	\'95	}Support more file types for preview display in the main window, so we can show PDF, PostScript, image types supported by ImageIO, text and composite types supported by NSAttributedString (RTF/MS Word/HTML)\
 {\listtext	\'95	}SciFinder format is now supported\
+{\listtext	\'95	}Skim Notes are included in the "Any Field" search\
+{\listtext	\'95	}Revised and enhanced bookmark handling for web views\
+{\listtext	\'95	}Revised type-select handling\
+{\listtext	\'95	}External items can now be merged by creating a field group with the current selection\
+{\listtext	\'95	}Action menu now has item for merging external items\
+{\listtext	\'95	}Dragging and copying from the Skim notes table is now supported, and all rows are resizable\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\i\b\fs26 \cf0 \
@@ -63,6 +69,18 @@ Bugs Fixed\
 {\listtext	\'95	}Only add escaped space between title words in parsed format (bug #1774983)\
 {\listtext	\'95	}Fixes for resizing of splitview and subviews, web group view\
 {\listtext	\'95	}Web of Science custom bookmarks are now functional (bug #1775537)\
+{\listtext	\'95	}Exception reports are now sent to a dedicated mailing list\
+{\listtext	\'95	}Duplicate bookmarks can't be added to the text import sheet or web group\
+{\listtext	\'95	}Popup zoom button in editor text drawer is validated correctly\
+{\listtext	\'95	}Added a workaround for bug #1779548; SearchKit ignores punctuation, but the result highlighting did not indicate this\
+{\listtext	\'95	}Merging in external groups will now work correctly\
+{\listtext	\'95	}Fixed shell command history in the Open Using Filter... dialog; order is now preserved\
+{\listtext	\'95	}Pretty-printed files with Windows CRLF line endings as produced by JabRef on Windows are now converted to UNIX line endings, so editing is easier (bug #1779632)\
+{\listtext	\'95	}Files with old-style Macintosh line endings are now readable (formerly caused a parser error)\
+{\listtext	\'95	}Drag-and-drop with field group of "BibTeX Type" now works correctly as a special case\
+{\listtext	\'95	}Renamed some menu items for Skim notes to include "Skim"\
+{\listtext	\'95	}Fixed a minor memory leak in character conversion\
+{\listtext	\'95	}Added mapping of %7 to Edition for Refer (EndNote) format\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f0\b\fs28 \cf0 \
