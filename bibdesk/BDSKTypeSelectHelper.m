@@ -52,6 +52,7 @@
 - (void)stopTimer;
 - (void)startTimer;
 - (void)typeSelectSearchTimeout;
+- (NSTimeInterval)timeoutInterval;
 - (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 
 - (void)typeSelectSearchTimeout;
@@ -185,7 +186,7 @@
 - (void)startTimer;
 {
     [self stopTimer];
-    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:0.7] retain];
+    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:[self timeoutInterval]] retain];
 }
 
 - (void)typeSelectSearchTimeout;
@@ -194,6 +195,15 @@
         [dataSource typeSelectHelper:self updateSearchString:nil];
     [self stopTimer];
     processing = NO;
+}
+
+// See http://www.mactech.com/articles/mactech/Vol.18/18.10/1810TableTechniques/index.html
+- (NSTimeInterval)timeoutInterval {
+    int keyThreshTicks = [[NSUserDefaults standardUserDefaults] integerForKey:@"InitialKeyRepeat"];
+    if (0 == keyThreshTicks)
+        keyThreshTicks = 35;	// apparent default value, translates to 1.17 sec timeout.
+    
+    return fmin(2.0 / 60.0 * keyThreshTicks, 2.0);
 }
 
 - (void)searchWithStickyMatch:(BOOL)sticky;
