@@ -1953,6 +1953,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
             NSError *xerror = nil;
             BibItem *newBI = nil;
             
+            // most reliable metadata should be our private EA
             if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKReadExtendedAttributesKey]){
                 NSData *btData = [[NSFileManager defaultManager] extendedAttributeNamed:OMNI_BUNDLE_IDENTIFIER @".bibtexstring" atPath:fnStr traverseLink:NO error:&xerror];
                 if(btData){
@@ -1963,13 +1964,15 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                     [btString release];
                 }
             }
-            
-            if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
-                newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
-            
+                    
+            // next best metadata source: if the filename is purely decimal digits, try getting it from PubMed
             NSString *lastPathComponent = [[fnStr lastPathComponent] stringByDeletingPathExtension];
             if(newBI == nil && [lastPathComponent containsCharacterInSet:[NSCharacterSet nonDecimalDigitCharacterSet]] == NO)
                 newBI = [BibItem itemWithPMID:lastPathComponent];
+            
+            // fall back on the least reliable metadata source (hidden pref)
+            if(newBI == nil && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUsePDFMetadata])
+                newBI = [BibItem itemWithPDFMetadata:[PDFMetadata metadataForURL:url error:&xerror]];
             
             if(newBI == nil)
                 newBI = [[[BibItem alloc] init] autorelease];
