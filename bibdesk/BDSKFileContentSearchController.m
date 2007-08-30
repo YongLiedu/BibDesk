@@ -131,6 +131,8 @@
     // @@ workaround: the font from prefs seems to be overridden by the nib; maybe bindings issue?
     [tableView changeFont:nil];
     
+    [tableView sizeToFit];
+    
     [indexProgressBar setMaxValue:100.0];
     [indexProgressBar setMinValue:0.0];
     [indexProgressBar setDoubleValue:[searchIndex progressValue]];
