@@ -409,6 +409,25 @@
     }
 }
 
+// called from tableView insertNewline: action defined in NSTableView_OAExtensions
+- (void)tableView:(NSTableView *)tv insertNewline:(id)sender {
+    if([self numberOfSelectedRows] == 1)
+        [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+}
+
+// called from tableView paste: action defined in NSTableView_OAExtensions
+- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+    if(![[pboard types] containsObject:NSStringPboardType])
+        return;
+    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
+    [self addMacrosFromBibTeXString:pboardStr];
+}
+
+// called from tableView delete: action defined in NSTableView_OAExtensions
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+	[self removeSelectedMacros:nil];
+}
+
 #pragma mark tableview delegate methods
 
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
@@ -485,19 +504,6 @@
         return success;
     } else
         return NO;
-}
-
-// called from tableView paste: action defined in NSTableView_OAExtensions
-- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
-    if(![[pboard types] containsObject:NSStringPboardType])
-        return;
-    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
-    [self addMacrosFromBibTeXString:pboardStr];
-}
-
-// called from tableView delete: action defined in NSTableView_OAExtensions
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
-	[self removeSelectedMacros:nil];
 }
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
@@ -619,7 +625,7 @@
 
 - (void)awakeFromNib{
     typeSelectHelper = [[BDSKTypeSelectHelper alloc] init];
-    [typeSelectHelper setDataSource:[self delegate]];
+    [typeSelectHelper setDataSource:[self dataSource]];
     [typeSelectHelper setCyclesSimilarResults:YES];
     [typeSelectHelper setMatchesPrefix:NO];
 }
@@ -630,26 +636,15 @@
 }
 
 - (void)keyDown:(NSEvent *)event{
-    if ([[event characters] length] == 0)
-        return;
-    unichar c = [[event characters] characterAtIndex:0];
-    NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
+    unichar c = [[event characters] length] ? [[event characters] characterAtIndex:0] : 0;
     unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
-    if (c == NSDeleteCharacter ||
-        c == NSBackspaceCharacter) {
-        [[self delegate] removeSelectedMacros:nil];
-    }else if(c == NSNewlineCharacter ||
-             c == NSEnterCharacter ||
-             c == NSCarriageReturnCharacter){
-                if([self numberOfSelectedRows] == 1)
-                    [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
-    }else if ([typeSelectHelper isTypeSelectCharacter:c] && flags == 0) {
+    
+    if ([typeSelectHelper isTypeSelectCharacter:c] && flags == 0)
         [typeSelectHelper processKeyDownCharacter:c];
-    }else if ([typeSelectHelper isRepeatCharacter:c] && flags == 0) {
+    else if ([typeSelectHelper isRepeatCharacter:c] && flags == 0)
         [typeSelectHelper repeatSearch];
-    }else{
+    else
         [super keyDown:event];
-    }
 }
 
 // this gets called whenever an object is added/removed/changed, so it's
