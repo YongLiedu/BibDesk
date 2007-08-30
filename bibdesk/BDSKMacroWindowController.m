@@ -411,8 +411,8 @@
 
 // called from tableView insertNewline: action defined in NSTableView_OAExtensions
 - (void)tableView:(NSTableView *)tv insertNewline:(id)sender {
-    if([self numberOfSelectedRows] == 1)
-        [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+    if([tableView numberOfSelectedRows] == 1)
+        [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
 }
 
 // called from tableView paste: action defined in NSTableView_OAExtensions
