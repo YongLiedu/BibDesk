@@ -40,6 +40,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniBase/OmniBase.h>
 
+#define REPEAT_CHARACTER '/'
 
 @interface NSString (BDSKTypeAheadHelperExtensions)
 - (BOOL)containsStringStartingAtWord:(NSString *)string options:(int)mask range:(NSRange)range;
@@ -161,6 +162,18 @@
     [self startTimer];
     
     processing = NO;
+}
+
+- (BOOL)isTypeSelectCharacter:(unichar)character {
+    if ([[NSCharacterSet alphanumericCharacterSet] characterIsMember:character])
+        return YES;
+    if ([self isProcessing] && [[NSCharacterSet controlCharacterSet] characterIsMember:character] == NO)
+        return YES;
+    return NO;
+}
+
+- (BOOL)isRepeatCharacter:(unichar)character {
+    return [self cyclesSimilarResults] && character == REPEAT_CHARACTER;
 }
 
 @end

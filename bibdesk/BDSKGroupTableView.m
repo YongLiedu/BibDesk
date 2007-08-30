@@ -129,11 +129,11 @@
         if([[typeSelectHelper valueForKey:@"searchCache"] count] == 0)
             [typeSelectHelper rebuildTypeSelectSearchCache];
 
-		if (([[NSCharacterSet alphanumericCharacterSet] characterIsMember:c] || ([typeSelectHelper isProcessing] && ![[NSCharacterSet controlCharacterSet] characterIsMember:c])) && modifierFlags == 0) {
+		if ([typeSelectHelper isTypeSelectCharacter:c] && modifierFlags == 0) {
 			 
 			[typeSelectHelper processKeyDownCharacter:c];
 			return;
-        } else if (c == '/' && modifierFlags == 0) {
+        } else if ([typeSelectHelper isRepeatCharacter:c] && modifierFlags == 0) {
             
             [typeSelectHelper repeatSearch];
 			return;

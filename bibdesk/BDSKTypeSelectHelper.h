@@ -71,6 +71,9 @@
 - (void)processKeyDownCharacter:(unichar)character;
 - (void)repeatSearch;
 
+- (BOOL)isTypeSelectCharacter:(unichar)character;
+- (BOOL)isRepeatCharacter:(unichar)character;
+
 @end
 
 

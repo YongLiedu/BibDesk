@@ -146,9 +146,9 @@
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
         [self scrollRowToVisible:row];
     // pass it on the typeahead selector
-    }else if(([[NSCharacterSet alphanumericCharacterSet] characterIsMember:c] || ([typeSelectHelper isProcessing] && NO == [[NSCharacterSet controlCharacterSet] characterIsMember:c])) && flags == 0){
+    }else if([typeSelectHelper isTypeSelectCharacter:c] && flags == 0){
         [typeSelectHelper processKeyDownCharacter:c];
-    }else if(c == '/' && flags == 0){
+    }else if([typeSelectHelper isRepeatCharacter:c] && flags == 0){
         [typeSelectHelper repeatSearch];
     }else{
         [super keyDown:event];
