@@ -7,6 +7,7 @@
                 closeAction = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 removeSelectedMacros = id; 
+                search = id; 
             }; 
             CLASS = BDSKMacroWindowController; 
             LANGUAGE = ObjC; 

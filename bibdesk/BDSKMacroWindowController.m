@@ -292,6 +292,17 @@
 	}
 }
 
+- (IBAction)search:(id)sender {
+    NSString *string = [sender stringValue];
+    NSPredicate *predicate = nil;
+    if ([NSString isEmptyString:string] == NO) {
+        string = [NSString stringWithFormat:@"*%@*", string];
+        predicate = [NSPredicate predicateWithFormat:@"(name like[cd] %@) OR (value like[cd] %@)", string, string];
+    }
+    [arrayController setFilterPredicate:predicate];
+    [tableView reloadData];
+}
+
 #pragma mark Macro editing
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
@@ -464,6 +475,28 @@
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
     [self updateButtons];
+}
+
+- (void)tableView:(NSTableView *)tv didClickTableColumn:(NSTableColumn *)tableColumn{
+    NSSortDescriptor *sortDescriptor = [[arrayController sortDescriptors] lastObject];
+    
+    NSString *oldKey = [sortDescriptor key];
+    NSString *newKey = [[tableColumn identifier] isEqualToString:@"macro"] ? @"name" : @"value";
+    
+    if ([newKey isEqualToString:oldKey])
+        sortDescriptor = [sortDescriptor reversedSortDescriptor];
+    else
+       sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:newKey ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    
+    if ([newKey isEqualToString:oldKey] == NO)
+        [tableView setIndicatorImage:nil inTableColumn:[tableView highlightedTableColumn]];
+    [tableView setHighlightedTableColumn:tableColumn]; 
+    [tableView setIndicatorImage:[sortDescriptor ascending] ? [NSImage imageNamed:@"NSAscendingSortIndicator"] : [NSImage imageNamed:@"NSDescendingSortIndicator"]
+                   inTableColumn:tableColumn];
+    
+    [arrayController rearrangeObjects];
+    [tableView reloadData];
 }
 
 #pragma mark || dragging operations
