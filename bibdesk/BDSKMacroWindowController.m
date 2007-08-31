@@ -295,10 +295,8 @@
 - (IBAction)search:(id)sender {
     NSString *string = [sender stringValue];
     NSPredicate *predicate = nil;
-    if ([NSString isEmptyString:string] == NO) {
-        string = [NSString stringWithFormat:@"*%@*", string];
-        predicate = [NSPredicate predicateWithFormat:@"(name like[cd] %@) OR (value like[cd] %@)", string, string];
-    }
+    if ([NSString isEmptyString:string] == NO)
+        predicate = [NSPredicate predicateWithFormat:@"(name CONTAINS[cd] %@) OR (value CONTAINS[cd] %@)", string, string];
     [arrayController setFilterPredicate:predicate];
     [tableView reloadData];
 }
