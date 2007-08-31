@@ -1,8 +1,6 @@
 {
     IBClasses = (
         {CLASS = BDSKMacroTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = MacroKeyFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
         {
             ACTIONS = {
                 addMacro = id; 
@@ -10,16 +8,19 @@
                 editSelectedFieldAsRawBibTeX = id; 
                 removeSelectedMacros = id; 
             }; 
-            CLASS = MacroWindowController; 
+            CLASS = BDSKMacroWindowController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addButton = NSButton; 
+                arrayController = NSArrayController; 
                 closeButton = NSButton; 
                 removeButton = NSButton; 
                 tableView = NSTableView; 
             }; 
             SUPERCLASS = NSWindowController; 
-        }
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = MacroKeyFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }
     ); 
     IBVersion = 1; 
 }

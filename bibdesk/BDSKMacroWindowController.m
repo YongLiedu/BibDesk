@@ -54,6 +54,7 @@
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "BDSKTypeSelectHelper.h"
 #import "BibDocument.h"
+#import "BDSKMacro.h"
 
 @implementation BDSKMacroWindowController
 
@@ -73,6 +74,15 @@
 		macroTextFieldWC = nil;
         
         isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
+        
+        NSEnumerator *keyEnum = [[macroResolver macroDefinitions] keyEnumerator];
+        NSString *key;
+        
+        while (key = [keyEnum nextObject]) {
+            BDSKMacro *macro = [[BDSKMacro alloc] initWithName:key macroResolver:macroResolver];
+            [macros addObject:macro];
+            [macro release];
+        }
         
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
@@ -94,8 +104,6 @@
                                                            object:nil];
             }
         }
-        
-        [self refreshMacros];
     }
     return self;
 }
@@ -114,7 +122,7 @@
     [removeButton setEnabled:isEditable && [tableView numberOfSelectedRows]];
 }
 
-- (void)awakeFromNib{
+- (void)windowDidLoad{
     if ([[macroResolver owner] isDocument])
         [self setWindowFrameAutosaveNameOrCascade:@"BDSKMacroWindow"];
     
@@ -127,6 +135,9 @@
     [tableView reloadData];
     [[tc dataCell] setEditable:isEditable];
     [[[tableView tableColumnWithIdentifier:@"macro"] dataCell] setEditable:isEditable];
+    
+    NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     
     [self updateButtons];
 }
@@ -144,22 +155,47 @@
     return [[macroResolver owner] isDocument] ? nil : @"";
 }
 
+#pragma mark Accessors
+
 - (BDSKMacroResolver *)macroResolver{
     return macroResolver;
 }
+
+- (NSArray *)macros {
+    return macros;
+}
+
+- (void)setMacros:(NSArray *)newMacros {
+    [macros setArray:newMacros];
+}
+
+- (unsigned)countOfMacros {
+    return [macros count];
+}
+
+- (id)objectInMacrosAtIndex:(unsigned)idx {
+    return [macros objectAtIndex:idx];
+}
+
+- (void)insertObject:(id)obj inMacrosAtIndex:(unsigned)idx {
+    [macros insertObject:obj atIndex:idx];
+}
+
+- (void)removeObjectFromMacrosAtIndex:(unsigned)idx {
+    [macros removeObjectAtIndex:idx];
+}
+
+- (void)replaceObjectInMacrosAtIndex:(unsigned)idx withObject:(id)obj {
+    [macros replaceObjectAtIndex:idx withObject:obj];
+}
+
+#pragma mark Support
 
 - (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif{
 	NSArray *groups = [[notif userInfo] objectForKey:@"groups"];
 	
 	if ([groups containsObject:[macroResolver owner]])
 		[self close];
-}
-
-- (void)refreshMacros{
-    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
-    [macros release];
-    macros = [[macroDefinitions allKeys] mutableCopy];
-    [macros sortUsingSelector:@selector(compare:)];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif{
@@ -169,20 +205,27 @@
         NSString *type = [info objectForKey:@"type"];
         if ([type isEqualToString:@"Add macro"]) {
             NSString *key = [info objectForKey:@"macroKey"];
-            [macros addObject:key];
+            BDSKMacro *macro = [[BDSKMacro alloc] initWithName:key macroResolver:macroResolver];
+            [self insertObject:macro inMacrosAtIndex:[self countOfMacros]];
+            [macro release];
         } else if ([type isEqualToString:@"Remove macro"]) {
             NSString *key = [info objectForKey:@"macroKey"];
-            if (key)
-                [macros removeObject:key];
-            else
-                [macros removeAllObjects];
+            if (key) {
+                unsigned idx = [[macros valueForKey:@"name"] indexOfObject:key];
+                [self removeObjectFromMacrosAtIndex:idx];
+            } else {
+                [self setMacros:[NSArray array]];
+            }
         } else if ([type isEqualToString:@"Change key"]) {
             NSString *newKey = [info objectForKey:@"newKey"];
             NSString *oldKey = [info objectForKey:@"oldKey"];
-            int indexOfOldKey = [macros indexOfObject:oldKey];
-            [macros replaceObjectAtIndex:indexOfOldKey withObject:newKey];
+            unsigned int idx = [[macros valueForKey:@"name"] indexOfObject:oldKey];
+            BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
+            [self replaceObjectInMacrosAtIndex:idx withObject:macro];
+            [macro release];
         }
     }
+    [arrayController rearrangeObjects];
     [tableView reloadData];
 }
 
@@ -190,45 +233,27 @@
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
     // find a unique new macro key
     int i = 0;
-    NSString *newKey = [NSString stringWithString:@"newMacro"];
-    while([macroDefinitions objectForKey:newKey] != nil){
+    NSString *newKey = [NSString stringWithString:@"macro"];
+    while([macroDefinitions objectForKey:newKey] != nil)
         newKey = [NSString stringWithFormat:@"macro%d", ++i];
-    }
     
-    [(BDSKMacroResolver *)macroResolver addMacroDefinition:@"definition"
-                                                       forMacro:newKey];
+    [(BDSKMacroResolver *)macroResolver addMacroDefinition:@"definition" forMacro:newKey];
     [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
-	
-    [self refreshMacros];
-    [tableView reloadData];
-
-    int row = [macros indexOfObject:newKey];
+    
+    unsigned int row = [[[arrayController arrangedObjects] valueForKey:@"name"] indexOfObject:newKey];
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-    [tableView editColumn:0
-                      row:row
-                withEvent:nil
-                   select:YES];
+    [tableView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)removeSelectedMacros:(id)sender{
-	NSIndexSet *rowIndexes = [tableView selectedRowIndexes];
-	int row = [rowIndexes firstIndex];
-
-    // used because we modify the macros array during the loop
-    NSArray *shadowOfMacros = [[macros copy] autorelease];
+    NSArray *macrosToRemove = [[arrayController selectedObjects] valueForKey:@"name"];
+    NSEnumerator *keyEnum = [macrosToRemove objectEnumerator];
+    NSString *key;
     
-    // in case we're editing the selected field we need to end editing.
-    // we don't give it a chance to modify state.
-    [[self window] endEditingFor:[tableView selectedCell]];
-
-    while(row != NSNotFound){
-        NSString *key = [shadowOfMacros objectAtIndex:row];
+    while (key = [keyEnum nextObject]) {
         [(BDSKMacroResolver *)macroResolver removeMacro:key];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
-		row = [rowIndexes indexGreaterThanIndex:row];
     }
-    [self refreshMacros];
-    [tableView reloadData];
 }
 
 // we want to have the same undoManager as our document, so we use this 
@@ -279,14 +304,14 @@
 }
 
 - (BOOL)editSelectedCellAsMacro{
-	int row = [tableView selectedRow];
+    int row = [tableView selectedRow];
 	if ([macroTextFieldWC isEditing] || row == -1) 
 		return NO;
 	if(macroTextFieldWC == nil)
         macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
-    NSString *key = [macros objectAtIndex:row];
-	NSString *value = [macroDefinitions objectForKey:key];
+    BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
+	NSString *value = [macro value];
 	NSText *fieldEditor = [tableView currentEditor];
 	[tableCellFormatter setEditAsComplexString:YES];
 	if (fieldEditor) {
@@ -313,17 +338,16 @@
 #pragma mark tableView datasource methods
 
 - (int)numberOfRowsInTableView:(NSTableView *)tv{
-    return [macros count];
+    return [[arrayController arrangedObjects] count];
 }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
-    NSString *key = [macros objectAtIndex:row];
+    BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
     
     if([[tableColumn identifier] isEqualToString:@"macro"]){
-         return key;
+         return [macro name];
     }else{
-         return [macroDefinitions objectForKey:key];
+         return [macro value];
     }
     
 }
@@ -331,9 +355,11 @@
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     NSUndoManager *undoMan = [[self window] undoManager];
 	if([undoMan isUndoingOrRedoing]) return;
-    NSParameterAssert(row >= 0 && row < (int)[macros count]);    
+    NSArray *arrangedMacros = [arrayController arrangedObjects];
+    NSParameterAssert(row >= 0 && row < (int)[arrangedMacros count]);    
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
-    NSString *key = [macros objectAtIndex:row];
+    BDSKMacro *macro = [arrangedMacros objectAtIndex:row];
+    NSString *key = [macro name];
     
     if([[tableColumn identifier] isEqualToString:@"macro"]){
         // do nothing if there was no change.
@@ -446,16 +472,14 @@
 - (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray *)rows toPasteboard:(NSPasteboard *)pboard{
     NSEnumerator *e = [rows objectEnumerator];
     NSNumber *row;
-    NSString *key;
-    NSString *value;
     NSMutableString *pboardStr = [NSMutableString string];
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
+    NSArray *arrangedMacros = [arrayController arrangedObjects];
     [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
     while(row = [e nextObject]){
-        key = [macros objectAtIndex:[row intValue]];
-        value = [[macroDefinitions objectForKey:key] stringAsBibTeXString];
-        [pboardStr appendStrings:@"@string{", key, @" = ", value, @"}\n", nil];
+        BDSKMacro *macro = [arrangedMacros objectAtIndex:[row intValue]];
+        [pboardStr appendStrings:@"@string{", [macro name], @" = ", [macro bibTeXString], @"}\n", nil];
     }
     return [pboard setString:pboardStr forType:NSStringPboardType];
     
@@ -534,8 +558,6 @@
             hadCircular = YES;
         [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
     }
-    [self refreshMacros];
-    [tableView reloadData];
     
     if(hadCircular){
         NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Circular Macros", @"Message in alert dialog when entering macro with circular definition") 
@@ -550,27 +572,20 @@
 
 #pragma mark || Methods to support the type-ahead selector.
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    NSMutableArray *array = [NSMutableArray array];
-    NSDictionary *defs = [macroResolver macroDefinitions];
-    foreach(macro, macros)
-        [array addObject:[[defs objectForKey:macro] lossyASCIIString]]; // order of items in the array must match the tableview datasource
-    return array;
+    return [[arrayController arrangedObjects] valueForKeyPath:@"value.lossyASCIIString"];
 }
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 
 - (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper{
-    if ([tableView numberOfSelectedRows] == 1){
-        return [tableView selectedRow];
-    }else{
-        return NSNotFound;
-    }
+    int row = [tableView selectedRow];
+    return row == -1 ? NSNotFound : row;
 }
 // Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
 
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
 }
-// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
+// We call this when a type-ahead-selection match has been made; you should select the item based on its idx in the array you provided in -typeAheadSelectionItems.
 
 
 @end

@@ -40,6 +40,7 @@
 @class BDSKMacroResolver, BDSKComplexStringFormatter, MacroTableViewWindowController;
 
 @interface BDSKMacroWindowController : NSWindowController {
+    IBOutlet NSArrayController *arrayController;
     IBOutlet NSTableView *tableView;
     IBOutlet NSButton *closeButton;
     IBOutlet NSButton *addButton;
@@ -55,7 +56,13 @@
 
 - (BDSKMacroResolver *)macroResolver;
 
-- (void)refreshMacros;
+- (NSArray *)macros;
+- (unsigned)countOfMacros;
+- (id)objectInMacrosAtIndex:(unsigned)idx;
+- (void)insertObject:(id)obj inMacrosAtIndex:(unsigned)idx;
+- (void)removeObjectFromMacrosAtIndex:(unsigned)idx;
+- (void)replaceObjectInMacrosAtIndex:(unsigned)idx withObject:(id)obj;
+
 
 - (IBAction)addMacro:(id)sender;
 - (IBAction)removeSelectedMacros:(id)sender;
