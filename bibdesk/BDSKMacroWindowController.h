@@ -80,7 +80,7 @@
 
 @class BDSKTypeSelectHelper;
 
-@interface MacroDragTableView : NSTableView{
+@interface BDSKMacroTableView : NSTableView{
     BDSKTypeSelectHelper *typeSelectHelper;
 }
 @end

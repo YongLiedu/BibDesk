@@ -617,7 +617,7 @@
 
 @end
 
-@implementation MacroDragTableView
+@implementation BDSKMacroTableView
 
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
     return NSDragOperationCopy;

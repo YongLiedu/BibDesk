@@ -1,7 +1,7 @@
 {
     IBClasses = (
+        {CLASS = BDSKMacroTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = MacroDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = MacroKeyFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
         {
             ACTIONS = {
