@@ -278,7 +278,7 @@ static NSString *BDSKBookmarkRowsPboardType = @"BDSKBookmarkRowsPboardType";
     }
 }
 
-- (BOOL)validateName:(id *)value error:(NSError **)error {log_method();
+- (BOOL)validateName:(id *)value error:(NSError **)error {
     NSArray *names = [[[BDSKBookmarkController sharedBookmarkController] bookmarks] valueForKey:@"name"];
     NSString *string = *value;
     if ([NSString isEmptyString:string] || ([name isEqualToString:string] == NO && [names containsObject:string])) {
