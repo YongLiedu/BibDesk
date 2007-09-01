@@ -35,18 +35,26 @@
  */
 
 #import "BibPref_Cite.h"
+#import "BDSKTemplate.h"
+#import "BibDocument.h"
 
 #define MAX_PREVIEW_WIDTH	465.0
 
 @implementation BibPref_Cite
+
 - (void)awakeFromNib{
     [super awakeFromNib];
+    
     BDSKDragCopyCiteKeyFormatter *formatter = [[BDSKDragCopyCiteKeyFormatter alloc] init];
     [citeStringField setFormatter:formatter];
     [citeStringField setDelegate:self];
     [formatter release];
+    
+    [self handleTemplatePrefsChangedNotification:nil];
+    [OFPreference addObserver:self 
+                     selector:@selector(handleTemplatePrefsChangedNotification:) 
+                forPreference:[OFPreference preferenceForKey:BDSKExportTemplateTree]];
 }
-
 
 - (void)updateUI{
     NSString *citeString = [defaults stringForKey:BDSKCiteStringKey];
@@ -73,6 +81,38 @@
 		[citeBehaviorLine setFrame:frame];
 	}
 	[controlBox setNeedsDisplay:YES];
+    
+    [defaultDragCopyTemplatePopup setEnabled:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:0] intValue] == BDSKTemplateDragCopyType];
+    [alternateDragCopyTemplatePopup setEnabled:[[[defaults arrayForKey:BDSKDragCopyTypesKey] objectAtIndex:1] intValue] == BDSKTemplateDragCopyType];
+}
+
+- (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification{
+    NSArray *currentStyles = [defaults arrayForKey:BDSKDragCopyTemplatesKey];
+    NSArray *styles = [BDSKTemplate allStyleNames];
+    [defaultDragCopyTemplatePopup removeAllItems];
+    [defaultDragCopyTemplatePopup addItemsWithTitles:styles];
+    [alternateDragCopyTemplatePopup removeAllItems];
+    [alternateDragCopyTemplatePopup addItemsWithTitles:styles];
+    if ([styles containsObject:[currentStyles objectAtIndex:0]]) {
+        [defaultDragCopyTemplatePopup selectItemWithTitle:[currentStyles objectAtIndex:0]];
+    } else if ([styles count]) {
+        [defaultDragCopyTemplatePopup selectItemAtIndex:0];
+        NSMutableArray *mutableStyles = [currentStyles mutableCopy];
+        [mutableStyles replaceObjectAtIndex:0 withObject:[styles objectAtIndex:0]];
+        [defaults setObject:mutableStyles forKey:BDSKPreviewTemplateStyleKey];
+        [mutableStyles release];
+        [defaults autoSynchronize];
+    }
+    if ([styles containsObject:[currentStyles objectAtIndex:0]]) {
+        [alternateDragCopyTemplatePopup selectItemWithTitle:[currentStyles objectAtIndex:1]];
+    } else if ([styles count]) {
+        [alternateDragCopyTemplatePopup selectItemAtIndex:0];
+        NSMutableArray *mutableStyles = [currentStyles mutableCopy];
+        [mutableStyles replaceObjectAtIndex:1 withObject:[styles objectAtIndex:0]];
+        [defaults setObject:mutableStyles forKey:BDSKPreviewTemplateStyleKey];
+        [mutableStyles release];
+        [defaults autoSynchronize];
+    }
 }
 
 - (IBAction)changeDefaultDragCopyFormat:(id)sender{
@@ -81,7 +121,18 @@
     [dragCopyTypes replaceObjectAtIndex:0 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
-    [defaults autoSynchronize];
+    [self valuesHaveChanged];
+}
+
+- (IBAction)changeDefaultDragCopyTemplate:(id)sender{
+    NSString *style = [sender title];
+    NSMutableArray *dragCopyTemplates = [[defaults arrayForKey:BDSKDragCopyTemplatesKey] mutableCopy];
+    if ([style isEqualToString:[dragCopyTemplates objectAtIndex:0]] == NO) {
+        [dragCopyTemplates replaceObjectAtIndex:0 withObject:[sender titleOfSelectedItem]];
+        [defaults setObject:dragCopyTemplates forKey:BDSKDragCopyTemplatesKey];
+        [defaults autoSynchronize];
+    }
+    [dragCopyTemplates release];
 }
 
 - (IBAction)changeAlternateDragCopyFormat:(id)sender{
@@ -90,7 +141,18 @@
     [dragCopyTypes replaceObjectAtIndex:1 withObject:number];
     [defaults setObject:dragCopyTypes forKey:BDSKDragCopyTypesKey];
     [dragCopyTypes release];
-    [defaults autoSynchronize];
+    [self valuesHaveChanged];
+}
+
+- (IBAction)changeAlternateDragCopyTemplate:(id)sender{
+    NSString *style = [sender title];
+    NSMutableArray *dragCopyTemplates = [[defaults arrayForKey:BDSKDragCopyTemplatesKey] mutableCopy];
+    if ([style isEqualToString:[dragCopyTemplates objectAtIndex:1]] == NO) {
+        [dragCopyTemplates replaceObjectAtIndex:1 withObject:[sender titleOfSelectedItem]];
+        [defaults setObject:dragCopyTemplates forKey:BDSKDragCopyTemplatesKey];
+        [defaults autoSynchronize];
+    }
+    [dragCopyTemplates release];
 }
 
 - (IBAction)changeSeparateCite:(id)sender{

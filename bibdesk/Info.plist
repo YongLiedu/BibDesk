@@ -436,6 +436,11 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKDragCopyTemplatesKey</key>
+					<array>
+						<string></string>
+						<string></string>
+					</array>
 					<key>BDSKDragCopyTypesKey</key>
 					<array>
 						<integer>1</integer>

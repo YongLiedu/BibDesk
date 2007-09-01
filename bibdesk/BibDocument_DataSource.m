@@ -505,6 +505,13 @@
 			}
 		}
     }
+    
+    if (dragCopyType == BDSKTemplateDragCopyType) {
+        NSString *template = [[sud arrayForKey:BDSKDragCopyTemplatesKey] objectAtIndex:idx];
+        unsigned templateIdx = [[BDSKTemplate allStyleNames] indexOfObject:template];
+        if (templateIdx != NSNotFound)
+            dragCopyType += templateIdx;
+    }
 	
 	success = [self writePublications:pubs forDragCopyType:dragCopyType citeString:citeString toPasteboard:pboard];
 	
@@ -661,14 +668,6 @@
                     if (count > 1) 
                         [s appendString:[NSString horizontalEllipsisString]];
                     break;
-                case BDSKPDFDragCopyType:
-                case BDSKRTFDragCopyType:
-                    [s appendString:@"["];
-                    [s appendString:[firstItem citeKey]]; 
-                    [s appendString:@"]"];
-                    if (count > 1) 
-                        [s appendString:[NSString horizontalEllipsisString]];
-                    break;
                 case BDSKLaTeXDragCopyType:
                     [s appendString:@"\\bibitem{"];
                     [s appendString:[firstItem citeKey]];
@@ -690,6 +689,13 @@
                     if (count > 1) 
                         [s appendString:[NSString horizontalEllipsisString]];
                     inside = YES;
+                    break;
+                default:
+                    [s appendString:@"["];
+                    [s appendString:[firstItem citeKey]]; 
+                    [s appendString:@"]"];
+                    if (count > 1) 
+                        [s appendString:[NSString horizontalEllipsisString]];
                     break;
             }
 		}

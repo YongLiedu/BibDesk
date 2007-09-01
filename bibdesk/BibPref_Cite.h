@@ -40,7 +40,9 @@
 @interface BibPref_Cite : OAPreferenceClient
 {
     IBOutlet NSPopUpButton* defaultDragCopyPopup;
+    IBOutlet NSPopUpButton* defaultDragCopyTemplatePopup;
     IBOutlet NSPopUpButton* alternateDragCopyPopup;
+    IBOutlet NSPopUpButton* alternateDragCopyTemplatePopup;
     
     IBOutlet NSTextField* citeBehaviorLine; /*! for feedback */
     IBOutlet NSTextField* citeStringField; /*! for user input */
@@ -50,11 +52,15 @@
 }
 
 - (IBAction)changeDefaultDragCopyFormat:(id)sender;
+- (IBAction)changeDefaultDragCopyTemplate:(id)sender;
 - (IBAction)changeAlternateDragCopyFormat:(id)sender;
+- (IBAction)changeAlternateDragCopyTemplate:(id)sender;
 - (IBAction)changeSeparateCite:(id)sender;
 - (IBAction)changePrependTilde:(id)sender;
 - (IBAction)citeStringFieldChanged:(id)sender;
 - (IBAction)setCitationBracketStyle:(id)sender;
+
+- (void)handleTemplatePrefsChangedNotification:(NSNotification *)notification;
 
 @end
 
