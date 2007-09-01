@@ -39,6 +39,7 @@
 
 #import "BDSKImagePopUpButtonCell.h"
 #import "BDSKImagePopUpButton.h"
+#import "NSCharacterSet_BDSKExtensions.h"
 
 @interface BDSKImagePopUpButtonCell (Private)
 
@@ -252,14 +253,8 @@
 
     if ([event type] == NSKeyDown) {
 		// Keyboard event
-		unichar upAndDownArrowCharacters[2];
-		upAndDownArrowCharacters[0] = NSUpArrowFunctionKey;
-		upAndDownArrowCharacters[1] = NSDownArrowFunctionKey;
-		NSString *upAndDownArrowString = [NSString stringWithCharacters: upAndDownArrowCharacters  length: 2];
-		NSCharacterSet *upAndDownArrowCharacterSet = [NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString];
-		
 		if ([self showsMenuWhenIconClicked] == YES ||
-			[[event characters] rangeOfCharacterFromSet: upAndDownArrowCharacterSet].location != NSNotFound) {
+			[[event characters] rangeOfCharacterFromSet: [NSCharacterSet upAndDownArrowCharacterSet]].location != NSNotFound) {
 			[self showMenuInView:controlView withEvent:event];
 		} else if ([[event characters] rangeOfString: @" "].location != NSNotFound) {
 			[self performClick: controlView];
