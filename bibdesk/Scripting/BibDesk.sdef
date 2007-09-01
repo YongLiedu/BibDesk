@@ -478,7 +478,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
 
 		<class name="application" code="capp"
 			description="Bibdesk's top level scripting object.">
-			<cocoa class="OAApplication"/>
+			<cocoa class="BDSKApplication"/>
 			<element type="document" access="r"
 				description="The bibliography files currently opened by Bibdesk.">
 				<cocoa key="orderedDocuments"/>
