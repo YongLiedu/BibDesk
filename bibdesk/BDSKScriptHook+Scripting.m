@@ -37,6 +37,7 @@
  */
 
 #import "BDSKScriptHook+Scripting.h"
+#import "BDSKApplication.h";
 
 
 @implementation BDSKScriptHook (Scripting)
