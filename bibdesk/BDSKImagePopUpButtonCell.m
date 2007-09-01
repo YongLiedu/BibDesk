@@ -351,10 +351,7 @@
 		if (shouldSendAction) {
 			NSMenuItem *selectedItem = [self selectedItem];
 			[NSEvent stopPeriodicEvents];
-			[[NSApplication sharedApplication] sendAction: [selectedItem action]  
-													   to: [selectedItem target]
-													 from: selectedItem];
-			
+            [NSApp sendAction: [selectedItem action] to: [selectedItem target] from: selectedItem];
 		}
     }
     
@@ -366,6 +363,10 @@
 - (void)performClick:(id)sender{
     [buttonCell performClick: sender];
     [super performClick: sender];
+    if ([self iconActionEnabled]) {
+        NSMenuItem *selectedItem = [self selectedItem];
+        [NSApp sendAction: [selectedItem action] to: [selectedItem target] from: selectedItem];
+    }
 }
 
 
