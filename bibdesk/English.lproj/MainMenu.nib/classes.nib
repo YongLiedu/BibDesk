@@ -21,6 +21,8 @@
             ACTIONS = {
                 checkForUpdates = id; 
                 editSearchBookmarks = id; 
+                reportBug = id; 
+                requestFeature = id; 
                 showBookmarks = id; 
                 showPreferencePanel = id; 
                 showReadMeFile = id; 
@@ -29,6 +31,7 @@
                 toggleShowingOrphanedFilesPanel = id; 
                 toggleShowingPreviewPanel = id; 
                 visitWebSite = id; 
+                visitWiki = id; 
             }; 
             CLASS = BibAppController; 
             LANGUAGE = ObjC; 

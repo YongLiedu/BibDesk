@@ -108,6 +108,10 @@
 - (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index;
 
 - (IBAction)visitWebSite:(id)sender;
+- (IBAction)visitWiki:(id)sender;
+- (IBAction)reportBug:(id)sender;
+- (IBAction)requestFeature:(id)sender;
+
 - (IBAction)checkForUpdates:(id)sender;
 
 - (IBAction)showPreferencePanel:(id)sender;

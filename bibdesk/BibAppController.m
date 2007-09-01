@@ -882,6 +882,13 @@ static BOOL fileIsInTrash(NSURL *fileURL)
     }
 }
 
+- (IBAction)visitWiki:(id)sender{
+    if(![[NSWorkspace sharedWorkspace] openURL:
+        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/wiki/"]]){
+        NSBeep();
+    }
+}
+
 - (IBAction)showPreferencePanel:(id)sender{
     [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:sender];
 }
