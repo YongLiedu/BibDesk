@@ -8,7 +8,9 @@
         {
             ACTIONS = {
                 changeAlternateDragCopyFormat = id; 
+                changeAlternateDragCopyTemplate = id; 
                 changeDefaultDragCopyFormat = id; 
+                changeDefaultDragCopyTemplate = id; 
                 changePrependTilde = id; 
                 changeSeparateCite = id; 
                 citeStringFieldChanged = id; 
@@ -18,10 +20,12 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 alternateDragCopyPopup = NSPopUpButton; 
+                alternateDragCopyTemplatePopup = NSPopUpButton; 
                 citeBehaviorLine = NSTextField; 
                 citeBracketRadio = NSMatrix; 
                 citeStringField = NSTextField; 
                 defaultDragCopyPopup = NSPopUpButton; 
+                defaultDragCopyTemplatePopup = NSPopUpButton; 
                 prependTildeCheckButton = NSButton; 
                 separateCiteCheckButton = NSButton; 
             }; 
