@@ -150,7 +150,6 @@ static float GROUP_ROW_HEIGHT = 24.0;
         
         NSImage *image = [[NSImage alloc] initWithSize:size];
         [image lockFocus];
-        [NSGraphicsContext saveGraphicsState];
         [[NSColor clearColor] setFill];
         NSRect r = NSZeroRect;
         r.size = [image size];
@@ -163,13 +162,11 @@ static float GROUP_ROW_HEIGHT = 24.0;
         [bezierPath closePath];
         [[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] setFill];
         [bezierPath fill];
-        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         
         rightImage = [image copy];
         
         [image lockFocus];
-        [NSGraphicsContext saveGraphicsState];
         [[NSColor clearColor] setFill];
         r = NSZeroRect;
         r.size = [image size];
@@ -182,7 +179,6 @@ static float GROUP_ROW_HEIGHT = 24.0;
         [bezierPath closePath];
         [[NSColor colorWithCalibratedWhite:1.0 alpha:1.0] setFill];
         [bezierPath fill];
-        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         
         downImage = [image copy];
@@ -808,9 +804,7 @@ static NSColor *fillColor = nil;
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
     
     [self lockFocus];
-    [NSGraphicsContext saveGraphicsState];
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor whiteColor]];
-    [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];
 }
 

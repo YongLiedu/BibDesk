@@ -121,11 +121,9 @@ static NSImage *unlockedIcon = nil;
         NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
-        [NSGraphicsContext saveGraphicsState];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
         [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
-        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         
         lockedIcon = image;
@@ -142,11 +140,9 @@ static NSImage *unlockedIcon = nil;
         NSSize srcSize = [[self icon] size];
         
         [image lockFocus];
-        [NSGraphicsContext saveGraphicsState];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:NSMakeRect(0, 0, srcSize.width, srcSize.height) operation:NSCompositeSourceOver  fraction:1.0];
         [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
-        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         
         unlockedIcon = image;

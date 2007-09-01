@@ -201,7 +201,6 @@
     float heightOffset = fmaxf(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
     
     [self lockFocus];
-    [NSGraphicsContext saveGraphicsState];
     
     unsigned rowIndex = [rows firstIndex];
     NSRect drawRect;
@@ -214,7 +213,6 @@
         rowIndex = [rows indexGreaterThanIndex:rowIndex];
     }
     
-    [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];    
 }
 
@@ -228,13 +226,11 @@
     float heightOffset = rowIndex == -1 ? 0.0f : fmaxf(0.0f, roundf(0.25 * [self intercellSpacing].height) - lineWidth);
     
     [self lockFocus];
-    [NSGraphicsContext saveGraphicsState];
     
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
     drawRect = NSInsetRect(drawRect, 0.0, heightOffset);
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:lineWidth color:[NSColor alternateSelectedControlColor]];
     
-    [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];
 }
 

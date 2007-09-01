@@ -171,11 +171,9 @@
 	NSAffineTransformStruct flip = {-1.0, 0.0, 0.0, 1.0, size.width, 0.0};	
 	flippedImage = [[[NSImage alloc] initWithSize:size] autorelease];
 	[flippedImage lockFocus];
-    [NSGraphicsContext saveGraphicsState];
     [transform setTransformStruct:flip];
 	[transform concat];
 	[self drawAtPoint:NSZeroPoint fromRect:rect operation:NSCompositeCopy fraction:1.0];
-    [NSGraphicsContext restoreGraphicsState];
 	[flippedImage unlockFocus];
 	return flippedImage;
 }
@@ -191,10 +189,8 @@
     [self drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
     
     // blend with black to create a highlighted appearance
-    [NSGraphicsContext saveGraphicsState];
     [[[NSColor blackColor] colorWithAlphaComponent:0.3] set];
     NSRectFillUsingOperation(iconRect, NSCompositeSourceAtop);
-    [NSGraphicsContext restoreGraphicsState];
     [newImage unlockFocus];
     
     return [newImage autorelease];
@@ -239,12 +235,10 @@
         
         [self drawInRect:targetRect fromRect:sourceRect operation:NSCompositeCopy fraction:1.0];
         
-        [NSGraphicsContext saveGraphicsState];
         // draw a count of the rows being dragged, similar to Mail.app
         [[NSColor redColor] setFill];
         [NSBezierPath fillHorizontalOvalAroundRect:countRect];
         [countString drawInRect:countRect];
-        [NSGraphicsContext restoreGraphicsState];
         
         [labeledImage unlockFocus];
         

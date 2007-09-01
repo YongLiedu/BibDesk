@@ -338,9 +338,7 @@ static IMP originalDragImageForRowsWithIndexesTableColumnsEventOffset;
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
     
     [self lockFocus];
-    [NSGraphicsContext saveGraphicsState];
     [NSBezierPath drawHighlightInRect:drawRect radius:4.0 lineWidth:2.0 color:[NSColor alternateSelectedControlColor]];
-    [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];
 }
 

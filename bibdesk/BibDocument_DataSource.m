@@ -720,12 +720,10 @@
         
         [image lockFocus];
         
-		[NSGraphicsContext saveGraphicsState];
         [NSBezierPath drawHighlightInRect:rect radius:4.0 lineWidth:2.0 color:color];
 		
 		NSRectClip(NSInsetRect(rect, 3.0, 3.0));
         [attrString drawAtPoint:point];
-		[NSGraphicsContext restoreGraphicsState];
         
         [image unlockFocus];
 	}
