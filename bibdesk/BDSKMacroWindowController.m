@@ -654,6 +654,7 @@
 
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
+    [tableView scrollRowToVisible:itemIndex];
 }
 // We call this when a type-ahead-selection match has been made; you should select the item based on its idx in the array you provided in -typeAheadSelectionItems.
 
