@@ -50,6 +50,7 @@
 	BDSKComplexStringFormatter *tableCellFormatter;
 	MacroTableViewWindowController *macroTextFieldWC;
     BOOL isEditable;
+    BOOL showAll;
 }
 
 - (id)initWithMacroResolver:(BDSKMacroResolver *)aMacroResolver;
@@ -57,6 +58,7 @@
 - (BDSKMacroResolver *)macroResolver;
 
 - (NSArray *)macros;
+- (void)setMacros:(NSArray *)newMacros;
 - (unsigned)countOfMacros;
 - (id)objectInMacrosAtIndex:(unsigned)idx;
 - (void)insertObject:(id)obj inMacrosAtIndex:(unsigned)idx;
@@ -72,11 +74,15 @@
 
 - (IBAction)search:(id)sender;
 
+- (IBAction)changeShowAll:(id)sender;
+
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
 - (BOOL)editSelectedCellAsMacro;
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif;
 - (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif;
+
+- (void)reloadMacros;
 
 @end
 

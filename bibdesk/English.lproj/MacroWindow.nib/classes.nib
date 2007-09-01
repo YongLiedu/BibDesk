@@ -4,6 +4,7 @@
         {
             ACTIONS = {
                 addMacro = id; 
+                changeShowAll = id; 
                 closeAction = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 removeSelectedMacros = id; 

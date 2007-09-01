@@ -75,14 +75,7 @@
         
         isEditable = (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
         
-        NSEnumerator *keyEnum = [[macroResolver macroDefinitions] keyEnumerator];
-        NSString *key;
-        
-        while (key = [keyEnum nextObject]) {
-            BDSKMacro *macro = [[BDSKMacro alloc] initWithName:key macroResolver:macroResolver];
-            [macros addObject:macro];
-            [macro release];
-        }
+        [self reloadMacros];
         
         // register to listen for changes in the macros.
         // mostly used to correctly catch undo changes.
@@ -126,6 +119,9 @@
     if ([[macroResolver owner] isDocument])
         [self setWindowFrameAutosaveNameOrCascade:@"BDSKMacroWindow"];
     
+    NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     if(isEditable)
@@ -133,11 +129,6 @@
     tc = [tableView tableColumnWithIdentifier:@"definition"];
     [[tc dataCell] setFormatter:tableCellFormatter];
     [tableView reloadData];
-    [[tc dataCell] setEditable:isEditable];
-    [[[tableView tableColumnWithIdentifier:@"macro"] dataCell] setEditable:isEditable];
-    
-    NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
-    [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     
     [self updateButtons];
 }
@@ -153,6 +144,34 @@
 
 - (NSString *)representedFilenameForWindow:(NSWindow *)aWindow {
     return [[macroResolver owner] isDocument] ? nil : @"";
+}
+
+- (void)windowWillClose:(NSNotification *)notification{
+	if(![[self window] makeFirstResponder:[self window]])
+        [[self window] endEditingFor:nil];
+}
+
+// we want to have the same undoManager as our document, so we use this 
+// NSWindow delegate method to return the doc's undomanager.
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
+    return [macroResolver undoManager];
+}
+
+- (void)reloadMacros {
+    NSDictionary *macroDefinitions = showAll ? [macroResolver allMacroDefinitions] : [macroResolver macroDefinitions];
+    NSEnumerator *keyEnum = [macroDefinitions keyEnumerator];
+    NSString *key;
+    NSMutableArray *tmpMacros = [NSMutableArray arrayWithCapacity:[macroDefinitions count]];
+    
+    while (key = [keyEnum nextObject]) {
+        BDSKMacroResolver *resolver = [macroResolver valueOfMacro:key] ? macroResolver : [BDSKMacroResolver defaultMacroResolver];
+        BDSKMacro *macro = [[BDSKMacro alloc] initWithName:key macroResolver:resolver];
+        [tmpMacros addObject:macro];
+        [macro release];
+    }
+    [self setMacros:tmpMacros];
+    [arrayController rearrangeObjects];
+    [tableView reloadData];
 }
 
 #pragma mark Accessors
@@ -189,7 +208,7 @@
     [macros replaceObjectAtIndex:idx withObject:obj];
 }
 
-#pragma mark Support
+#pragma mark Notification handlers
 
 - (void)handleGroupWillBeRemovedNotification:(NSNotification *)notif{
 	NSArray *groups = [[notif userInfo] objectForKey:@"groups"];
@@ -201,7 +220,11 @@
 - (void)handleMacroChangedNotification:(NSNotification *)notif{
     NSDictionary *info = [notif userInfo];
     BDSKMacroResolver *sender = [notif object];
-    if (sender == macroResolver) {
+    if (showAll) {
+        // this is complicated, as macros can shadow macros from the other resolver
+        if (sender == macroResolver || sender == [BDSKMacroResolver defaultMacroResolver])
+            [self reloadMacros];
+    } else if (sender == macroResolver) {
         NSString *type = [info objectForKey:@"type"];
         if ([type isEqualToString:@"Add macro"]) {
             NSString *key = [info objectForKey:@"macroKey"];
@@ -211,33 +234,39 @@
         } else if ([type isEqualToString:@"Remove macro"]) {
             NSString *key = [info objectForKey:@"macroKey"];
             if (key) {
-                unsigned idx = [[macros valueForKey:@"name"] indexOfObject:key];
+                unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[key lowercaseString]];
+                OBASSERT(idx != NSNotFound);
                 [self removeObjectFromMacrosAtIndex:idx];
             } else {
                 [self setMacros:[NSArray array]];
+                return;
             }
         } else if ([type isEqualToString:@"Change key"]) {
             NSString *newKey = [info objectForKey:@"newKey"];
             NSString *oldKey = [info objectForKey:@"oldKey"];
-            unsigned int idx = [[macros valueForKey:@"name"] indexOfObject:oldKey];
+            unsigned idx = [[macros valueForKeyPath:@"name.lowercaseString"] indexOfObject:[oldKey lowercaseString]];
             BDSKMacro *macro = [[BDSKMacro alloc] initWithName:newKey macroResolver:macroResolver];
+            OBASSERT(idx != NSNotFound);
             [self replaceObjectInMacrosAtIndex:idx withObject:macro];
             [macro release];
         }
+        [arrayController rearrangeObjects];
+        [tableView reloadData];
     }
-    [arrayController rearrangeObjects];
-    [tableView reloadData];
 }
 
+#pragma mark Actions
+
 - (IBAction)addMacro:(id)sender{
-    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
+    OBASSERT(isEditable);
+    NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     // find a unique new macro key
     int i = 0;
     NSString *newKey = [NSString stringWithString:@"macro"];
     while([macroDefinitions objectForKey:newKey] != nil)
         newKey = [NSString stringWithFormat:@"macro%d", ++i];
     
-    [(BDSKMacroResolver *)macroResolver addMacroDefinition:@"definition" forMacro:newKey];
+    [macroResolver addMacroDefinition:@"definition" forMacro:newKey];
     [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"Undo action name")];
     
     unsigned int row = [[[arrayController arrangedObjects] valueForKey:@"name"] indexOfObject:newKey];
@@ -246,28 +275,15 @@
 }
 
 - (IBAction)removeSelectedMacros:(id)sender{
+    OBASSERT(isEditable);
     NSArray *macrosToRemove = [[arrayController selectedObjects] valueForKey:@"name"];
     NSEnumerator *keyEnum = [macrosToRemove objectEnumerator];
     NSString *key;
     
     while (key = [keyEnum nextObject]) {
-        [(BDSKMacroResolver *)macroResolver removeMacro:key];
+        [macroResolver removeMacro:key];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"Undo action name")];
     }
-}
-
-// we want to have the same undoManager as our document, so we use this 
-// NSWindow delegate method to return the doc's undomanager.
-- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
-    return [macroResolver undoManager];
-}
-
-- (void)beginSheetModalForWindow:(NSWindow *)modalWindow{
-    [self window]; // make sure we loaded the nib
-    [tableView reloadData];
-    [closeButton setKeyEquivalent:@"\E"];
-    
-    [NSApp beginSheet:[self window] modalForWindow:modalWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
 - (void)showWindow:(id)sender{
@@ -277,9 +293,12 @@
     [super showWindow:sender];
 }
 
-- (void)windowWillClose:(NSNotification *)notification{
-	if(![[self window] makeFirstResponder:[self window]])
-        [[self window] endEditingFor:nil];
+- (void)beginSheetModalForWindow:(NSWindow *)modalWindow{
+    [self window]; // make sure we loaded the nib
+    [tableView reloadData];
+    [closeButton setKeyEquivalent:@"\E"];
+    
+    [NSApp beginSheet:[self window] modalForWindow:modalWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
 - (IBAction)closeAction:(id)sender{
@@ -301,11 +320,19 @@
     [tableView reloadData];
 }
 
+- (IBAction)changeShowAll:(id)sender{
+    showAll = [sender state] == NSOnState;
+    isEditable = showAll == NO && (macroResolver == [BDSKMacroResolver defaultMacroResolver] || [[macroResolver owner] isDocument]);
+    
+    [self updateButtons];
+    [self reloadMacros];
+}
+
 #pragma mark Macro editing
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
 	int row = [tableView selectedRow];
-	if (row == -1) 
+	if (row == -1 || isEditable == NO) 
 		return;
     [self editSelectedCellAsMacro];
 	if([tableView editedRow] != row)
@@ -318,7 +345,7 @@
 		return NO;
 	if(macroTextFieldWC == nil)
         macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
-    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
+    NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
 	NSString *value = [macro value];
 	NSText *fieldEditor = [tableView currentEditor];
@@ -344,7 +371,7 @@
 		[tableCellFormatter setEditAsComplexString:NO];
 }
 
-#pragma mark tableView datasource methods
+#pragma mark NSTableView datasource methods
 
 - (int)numberOfRowsInTableView:(NSTableView *)tv{
     return [[arrayController arrangedObjects] count];
@@ -366,7 +393,7 @@
 	if([undoMan isUndoingOrRedoing]) return;
     NSArray *arrangedMacros = [arrayController arrangedObjects];
     NSParameterAssert(row >= 0 && row < (int)[arrangedMacros count]);    
-    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
+    NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     BDSKMacro *macro = [arrangedMacros objectAtIndex:row];
     NSString *key = [macro name];
     
@@ -416,7 +443,7 @@
 			return;
 		}
 		
-        [(BDSKMacroResolver *)macroResolver changeMacroKey:key to:object];
+        [macroResolver changeMacroKey:key to:object];
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"Undo action name")];
 
@@ -438,63 +465,10 @@
 			return;
 		}
         
-		[(BDSKMacroResolver *)macroResolver setMacroDefinition:object forMacro:key];
+		[macroResolver setMacroDefinition:object forMacro:key];
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"Undo action name")];
     }
-}
-
-// called from tableView insertNewline: action defined in NSTableView_OAExtensions
-- (void)tableView:(NSTableView *)tv insertNewline:(id)sender {
-    if([tableView numberOfSelectedRows] == 1)
-        [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
-}
-
-// called from tableView paste: action defined in NSTableView_OAExtensions
-- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
-    if(![[pboard types] containsObject:NSStringPboardType])
-        return;
-    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
-    [self addMacrosFromBibTeXString:pboardStr];
-}
-
-// called from tableView delete: action defined in NSTableView_OAExtensions
-- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
-	[self removeSelectedMacros:nil];
-}
-
-#pragma mark tableview delegate methods
-
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	if([[tableColumn identifier] isEqualToString:@"definition"]){
-        [tableCellFormatter setHighlighted:[tv isRowSelected:row]];
-	}
-}
-
-- (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-    [self updateButtons];
-}
-
-- (void)tableView:(NSTableView *)tv didClickTableColumn:(NSTableColumn *)tableColumn{
-    NSSortDescriptor *sortDescriptor = [[arrayController sortDescriptors] lastObject];
-    
-    NSString *oldKey = [sortDescriptor key];
-    NSString *newKey = [[tableColumn identifier] isEqualToString:@"macro"] ? @"name" : @"value";
-    
-    if ([newKey isEqualToString:oldKey])
-        sortDescriptor = [sortDescriptor reversedSortDescriptor];
-    else
-       sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:newKey ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
-    [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
-    
-    if ([newKey isEqualToString:oldKey] == NO)
-        [tableView setIndicatorImage:nil inTableColumn:[tableView highlightedTableColumn]];
-    [tableView setHighlightedTableColumn:tableColumn]; 
-    [tableView setIndicatorImage:[sortDescriptor ascending] ? [NSImage imageNamed:@"NSAscendingSortIndicator"] : [NSImage imageNamed:@"NSDescendingSortIndicator"]
-                   inTableColumn:tableColumn];
-    
-    [arrayController rearrangeObjects];
-    [tableView reloadData];
 }
 
 #pragma mark || dragging operations
@@ -504,7 +478,7 @@
     NSEnumerator *e = [rows objectEnumerator];
     NSNumber *row;
     NSMutableString *pboardStr = [NSMutableString string];
-    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroResolver macroDefinitions];
+    NSDictionary *macroDefinitions = showAll ? [macroResolver allMacroDefinitions] : [macroResolver macroDefinitions];
     NSArray *arrangedMacros = [arrayController arrangedObjects];
     [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
@@ -517,7 +491,9 @@
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
-    if ([info draggingSource]) {
+    if (isEditable == NO) {
+        return NSDragOperationNone;    
+    } else if ([info draggingSource]) {
         if([[info draggingSource] isEqual:tableView])
         {
             // can't copy onto same table
@@ -561,6 +537,68 @@
         return NO;
 }
 
+#pragma mark OA extensions
+
+// called from tableView insertNewline: action defined in NSTableView_OAExtensions
+- (void)tableView:(NSTableView *)tv insertNewline:(id)sender {
+    if(isEditable && [tableView numberOfSelectedRows] == 1)
+        [tableView editColumn:0 row:[tableView selectedRow] withEvent:nil select:YES];
+}
+
+// called from tableView paste: action defined in NSTableView_OAExtensions
+- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+    if(isEditable == NO || [[pboard types] containsObject:NSStringPboardType] == NO)
+        return;
+    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
+    [self addMacrosFromBibTeXString:pboardStr];
+}
+
+// called from tableView delete: action defined in NSTableView_OAExtensions
+- (void)tableView:(NSTableView *)tv deleteRows:(NSArray *)rows{
+	if (isEditable)
+        [self removeSelectedMacros:nil];
+}
+
+#pragma mark NSTableView delegate methods
+
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if([[tableColumn identifier] isEqualToString:@"definition"]){
+        [tableCellFormatter setHighlighted:[tv isRowSelected:row]];
+	}
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
+    [self updateButtons];
+}
+
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    return isEditable;
+}
+
+- (void)tableView:(NSTableView *)tv didClickTableColumn:(NSTableColumn *)tableColumn{
+    NSSortDescriptor *sortDescriptor = [[arrayController sortDescriptors] lastObject];
+    
+    NSString *oldKey = [sortDescriptor key];
+    NSString *newKey = [[tableColumn identifier] isEqualToString:@"macro"] ? @"name" : @"value";
+    
+    if ([newKey isEqualToString:oldKey])
+        sortDescriptor = [sortDescriptor reversedSortDescriptor];
+    else
+       sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:newKey ascending:YES selector:@selector(caseInsensitiveCompare:)] autorelease];
+    [arrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    
+    if ([newKey isEqualToString:oldKey] == NO)
+        [tableView setIndicatorImage:nil inTableColumn:[tableView highlightedTableColumn]];
+    [tableView setHighlightedTableColumn:tableColumn]; 
+    [tableView setIndicatorImage:[sortDescriptor ascending] ? [NSImage imageNamed:@"NSAscendingSortIndicator"] : [NSImage imageNamed:@"NSDescendingSortIndicator"]
+                   inTableColumn:tableColumn];
+    
+    [arrayController rearrangeObjects];
+    [tableView reloadData];
+}
+
+#pragma mark Support
+
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
     // if this is called, we shouldn't belong to a group
 	BibDocument *document = (BibDocument *)[macroResolver owner];
@@ -602,6 +640,7 @@
 }
 
 #pragma mark || Methods to support the type-ahead selector.
+
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
     return [[arrayController arrangedObjects] valueForKeyPath:@"value.lossyASCIIString"];
 }
