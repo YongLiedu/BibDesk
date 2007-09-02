@@ -73,7 +73,7 @@
 #import "BDSKItemPasteboardHelper.h"
 #import "BDSKMainTableView.h"
 #import "BDSKConverter.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
 
 #import "ApplicationServices/ApplicationServices.h"
@@ -1467,7 +1467,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     
     NSError *error = nil;
     BOOL isPartialData;
-	NSArray *newPubs = [BibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath document:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
+	NSArray *newPubs = [BDSKBibTeXParser itemsFromData:data frontMatter:frontMatter filePath:filePath document:self encoding:parserEncoding isPartialData:&isPartialData error:&error];
 	if(isPartialData && outError) *outError = error;	
     [self setPublicationsWithoutUndo:newPubs];
     
@@ -1806,9 +1806,9 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         type = [string contentStringType];
     
     if(type == BDSKBibTeXStringType){
-        newPubs = [BibTeXParser itemsFromString:string document:self isPartialData:&isPartialData error:&parseError];
+        newPubs = [BDSKBibTeXParser itemsFromString:string document:self isPartialData:&isPartialData error:&parseError];
     }else if(type == BDSKNoKeyBibTeXStringType){
-        newPubs = [BibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] document:self isPartialData:&isPartialData error:&parseError];
+        newPubs = [BDSKBibTeXParser itemsFromString:[string stringWithPhoneyCiteKeys:@"FixMe"] document:self isPartialData:&isPartialData error:&parseError];
 	}else {
         // this will create the NSError if the type is unrecognized
         newPubs = [BDSKStringParser itemsFromString:string ofType:type error:&parseError];
@@ -1959,7 +1959,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
                 if(btData){
                     NSString *btString = [[NSString alloc] initWithData:btData encoding:NSUTF8StringEncoding];
                     BOOL isPartialData;
-                    NSArray *items = [BibTeXParser itemsFromString:btString document:self isPartialData:&isPartialData error:&xerror];
+                    NSArray *items = [BDSKBibTeXParser itemsFromString:btString document:self isPartialData:&isPartialData error:&xerror];
                     newBI = isPartialData ? nil : [items firstObject];
                     [btString release];
                 }

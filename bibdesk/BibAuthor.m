@@ -38,7 +38,7 @@
 #import "BibItem.h"
 #import <OmniFoundation/OmniFoundation.h>
 #import "BibPrefController.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
 #import "BDSKErrorObjectController.h"
 

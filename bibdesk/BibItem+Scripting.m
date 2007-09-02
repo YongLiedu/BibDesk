@@ -39,7 +39,7 @@
 #import "BibAuthor.h"
 #import "BibPrefController.h"
 #import "BibDocument.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKPublicationsArray.h"
 
 /* ssp
@@ -289,7 +289,7 @@ Extra wrapping of the created and modified date methods to
 
     NSError *error = nil;
     BOOL isPartialData;
-    NSArray *newPubs = [BibTeXParser itemsFromString:btString document:[self owner] isPartialData:&isPartialData error:&error];
+    NSArray *newPubs = [BDSKBibTeXParser itemsFromString:btString document:[self owner] isPartialData:&isPartialData error:&error];
 	
 	// try to do some error handling for AppleScript
 	if(isPartialData) {

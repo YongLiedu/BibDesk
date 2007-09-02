@@ -1,5 +1,5 @@
 //
-//  BibTeXParser.m
+//  BDSKBibTeXParser.m
 //  BibDesk
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
 #import <BTParse/BDSKErrorObject.h>
 #import <AGRegex/AGRegex.h>
@@ -60,7 +60,7 @@
 
 static NSLock *parserLock = nil;
 
-@interface BibTeXParser (Private)
+@interface BDSKBibTeXParser (Private)
 
 // private function to check the string for encoding.
 static inline BOOL checkStringForEncoding(NSString *s, int line, NSString *filePath, NSStringEncoding parserEncoding);
@@ -84,7 +84,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
 
 @end
 
-@implementation BibTeXParser
+@implementation BDSKBibTeXParser
 
 + (void)initialize{
     if(nil == parserLock)

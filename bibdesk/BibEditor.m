@@ -72,7 +72,7 @@
 #import "BDSKPersistentSearch.h"
 #import "BDSKMacroResolver.h"
 #import "NSMenu_BDSKExtensions.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "PDFDocument_BDSKExtensions.h"

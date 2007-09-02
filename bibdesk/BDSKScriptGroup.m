@@ -41,7 +41,7 @@
 #import "BDSKShellTask.h"
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "KFASHandlerAdditions-TypeTranslation.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
@@ -255,7 +255,7 @@ static OFMessageQueue *messageQueue = nil;
 
     if (type == BDSKBibTeXStringType) {
         NSMutableString *frontMatter = [NSMutableString string];
-        pubs = [BibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:@"" document:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+        pubs = [BDSKBibTeXParser itemsFromData:[outputString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:@"" document:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
     } else if (type != BDSKUnknownStringType){
         pubs = [BDSKStringParser itemsFromString:outputString ofType:type error:&error];
     } else {

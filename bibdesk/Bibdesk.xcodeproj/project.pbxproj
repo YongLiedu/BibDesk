@@ -43,8 +43,8 @@
 		275E272407838F7B0070398A /* TestBibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 275E271E07838F7B0070398A /* TestBibItem.m */; };
 		275E277F078396210070398A /* BibItem.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C6D075802E300C3F701 /* BibItem.h */; };
 		275E2780078396220070398A /* BibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C6E075802E300C3F701 /* BibItem.m */; };
-		275E2783078397510070398A /* BibTeXParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C950758038000C3F701 /* BibTeXParser.h */; };
-		275E2784078397520070398A /* BibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C960758038000C3F701 /* BibTeXParser.m */; };
+		275E2783078397510070398A /* BDSKBibTeXParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C950758038000C3F701 /* BDSKBibTeXParser.h */; };
+		275E2784078397520070398A /* BDSKBibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C960758038000C3F701 /* BDSKBibTeXParser.m */; };
 		275E2788078397BB0070398A /* OmniFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
 		275E2789078397BF0070398A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		275E278B078397D90070398A /* UnitKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 275E26FB07838EB80070398A /* UnitKit.framework */; };
@@ -298,7 +298,7 @@
 		F9022C8E0758034000C3F701 /* BibDocumentView_Toolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C8C0758034000C3F701 /* BibDocumentView_Toolbar.m */; };
 		F9022CA80758038000C3F701 /* BibPref_InputManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C900758038000C3F701 /* BibPref_InputManager.m */; };
 		F9022CAA0758038000C3F701 /* BibPrefController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C940758038000C3F701 /* BibPrefController.m */; };
-		F9022CAB0758038000C3F701 /* BibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C960758038000C3F701 /* BibTeXParser.m */; };
+		F9022CAB0758038000C3F701 /* BDSKBibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C960758038000C3F701 /* BDSKBibTeXParser.m */; };
 		F9022CAC0758038000C3F701 /* BibTypeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C980758038000C3F701 /* BibTypeManager.m */; };
 		F9022CAD0758038000C3F701 /* BDSKZoomableScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9A0758038000C3F701 /* BDSKZoomableScrollView.m */; };
 		F9022CAE0758038000C3F701 /* NSImage+Toolbox.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C9D0758038000C3F701 /* NSImage+Toolbox.m */; };
@@ -1167,8 +1167,8 @@
 		F9022C900758038000C3F701 /* BibPref_InputManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPref_InputManager.m; sourceTree = "<group>"; };
 		F9022C930758038000C3F701 /* BibPrefController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = BibPrefController.h; sourceTree = "<group>"; };
 		F9022C940758038000C3F701 /* BibPrefController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibPrefController.m; sourceTree = "<group>"; };
-		F9022C950758038000C3F701 /* BibTeXParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibTeXParser.h; sourceTree = "<group>"; };
-		F9022C960758038000C3F701 /* BibTeXParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibTeXParser.m; sourceTree = "<group>"; };
+		F9022C950758038000C3F701 /* BDSKBibTeXParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKBibTeXParser.h; sourceTree = "<group>"; };
+		F9022C960758038000C3F701 /* BDSKBibTeXParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKBibTeXParser.m; sourceTree = "<group>"; };
 		F9022C970758038000C3F701 /* BibTypeManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibTypeManager.h; sourceTree = "<group>"; };
 		F9022C980758038000C3F701 /* BibTypeManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibTypeManager.m; sourceTree = "<group>"; };
 		F9022C990758038000C3F701 /* BDSKZoomableScrollView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKZoomableScrollView.h; sourceTree = "<group>"; };
@@ -2086,6 +2086,7 @@
 		CE38FA8D091D267A00BCB69D /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
+				F9022C960758038000C3F701 /* BDSKBibTeXParser.m */,
 				457538290B70170D00C0E49B /* BDSKHCiteParser.m */,
 				F9022C3B0758027800C3F701 /* BDSKConverter.m */,
 				CE966C6F0B47CF25003BAB9A /* BDSKDublinCoreXMLParser.m */,
@@ -2102,7 +2103,6 @@
 				CE3A254E0B75FF09006B64D3 /* BDSKWebParser.m */,
 				F9DB895B08A54BBA00CB3D53 /* BDSKTeXTask.m */,
 				F9E069B50981A03B00AEFBE7 /* BDSKWebOfScienceParser.m */,
-				F9022C960758038000C3F701 /* BibTeXParser.m */,
 				F9022CA70758038000C3F701 /* BDSKPubMedParser.m */,
 				F9D0E5350BF92768001C6C22 /* BDSKMODSParser.m */,
 			);
@@ -2249,6 +2249,7 @@
 				CE4D85260C3A8C8E002C20CB /* BDSKAutofileCommand.h */,
 				3D824AA607D099C300FB2F67 /* BDSKBackgroundView.h */,
 				CE9DBEDD093CF2640008648B /* BDSKBibliographyCommand.h */,
+				F9022C950758038000C3F701 /* BDSKBibTeXParser.h */,
 				CEF83F350C77911F00A3AD51 /* BDSKBookmarkController.h */,
 				CEEA4C690B57B0D400434059 /* BDSKBooleanValueTransformer.h */,
 				2730077607CF20B500F2E485 /* BDSKBorderlessKeyWindow.h */,
@@ -2442,7 +2443,6 @@
 				F9022CB8075803AC00C3F701 /* BibPref_TeX.h */,
 				F9022C8F0758038000C3F701 /* BibPref_InputManager.h */,
 				F9022C930758038000C3F701 /* BibPrefController.h */,
-				F9022C950758038000C3F701 /* BibTeXParser.h */,
 				F9022C970758038000C3F701 /* BibTypeManager.h */,
 				F9025F2E0969D66F008A551C /* CFString_BDSKExtensions.h */,
 				CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */,
@@ -2634,7 +2634,7 @@
 			files = (
 				275E272307838F7B0070398A /* TestBibItem.h in Headers */,
 				275E277F078396210070398A /* BibItem.h in Headers */,
-				275E2783078397510070398A /* BibTeXParser.h in Headers */,
+				275E2783078397510070398A /* BDSKBibTeXParser.h in Headers */,
 				275E278D078397EE0070398A /* BibTypeManager.h in Headers */,
 				275E27930783982A0070398A /* BibAppController.h in Headers */,
 				275E2795078398320070398A /* BibAuthor.h in Headers */,
@@ -3265,7 +3265,7 @@
 			files = (
 				275E272407838F7B0070398A /* TestBibItem.m in Sources */,
 				275E2780078396220070398A /* BibItem.m in Sources */,
-				275E2784078397520070398A /* BibTeXParser.m in Sources */,
+				275E2784078397520070398A /* BDSKBibTeXParser.m in Sources */,
 				275E278E078397EF0070398A /* BibTypeManager.m in Sources */,
 				275E27940783982A0070398A /* BibAppController.m in Sources */,
 				275E2796078398330070398A /* BibAuthor.m in Sources */,
@@ -3317,7 +3317,7 @@
 				F9022C8E0758034000C3F701 /* BibDocumentView_Toolbar.m in Sources */,
 				F9022CA80758038000C3F701 /* BibPref_InputManager.m in Sources */,
 				F9022CAA0758038000C3F701 /* BibPrefController.m in Sources */,
-				F9022CAB0758038000C3F701 /* BibTeXParser.m in Sources */,
+				F9022CAB0758038000C3F701 /* BDSKBibTeXParser.m in Sources */,
 				F9022CAC0758038000C3F701 /* BibTypeManager.m in Sources */,
 				F9022CAD0758038000C3F701 /* BDSKZoomableScrollView.m in Sources */,
 				F9022CAE0758038000C3F701 /* NSImage+Toolbox.m in Sources */,

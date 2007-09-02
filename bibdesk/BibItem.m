@@ -49,7 +49,7 @@
 #import "BDSKFontManager.h"
 #import "BDAlias.h"
 #import "BDSKFormatParser.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BibFiler.h"
 #import "BibDocument.h"
 #import "BibAppController.h"
@@ -578,7 +578,7 @@ static CFDictionaryRef selectorTable = NULL;
             personStr = [pubFields objectForKey:personType];
             
             // parse into an array of BibAuthor objects
-            NSArray *tmpPeople = [BibTeXParser authorsFromBibtexString:personStr withPublication:self];
+            NSArray *tmpPeople = [BDSKBibTeXParser authorsFromBibtexString:personStr withPublication:self];
             if([tmpPeople count])
                 [people setObject:tmpPeople forKey:personType];
         }

@@ -39,7 +39,7 @@
 #import "BDSKStringParser.h"
 #import <OmniBase/OBUtilities.h>
 #import "NSError_BDSKExtensions.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKPubMedParser.h"
 #import "BDSKRISParser.h"
 #import "BDSKMARCParser.h"
@@ -132,7 +132,7 @@ static Class classForType(int stringType)
 @implementation NSString (BDSKStringParserExtensions)
 
 - (int)contentStringType{
-	if([BibTeXParser canParseString:self])
+	if([BDSKBibTeXParser canParseString:self])
 		return BDSKBibTeXStringType;
 	if([BDSKReferenceMinerParser canParseString:self])
 		return BDSKReferenceMinerStringType;
@@ -146,7 +146,7 @@ static Class classForType(int stringType)
 		return BDSKJSTORStringType;
 	if([BDSKWebOfScienceParser canParseString:self])
 		return BDSKWOSStringType;
-	if([BibTeXParser canParseStringAfterFixingKeys:self])
+	if([BDSKBibTeXParser canParseStringAfterFixingKeys:self])
 		return BDSKNoKeyBibTeXStringType;
     if([BDSKReferParser canParseString:self])
         return BDSKReferStringType;

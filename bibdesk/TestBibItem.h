@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import <UnitKit/UnitKit.h>
 #import "BibItem.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import <OmniFoundation/OmniFoundation.h>
 
 @interface TestBibItem : NSObject <UKTest> {

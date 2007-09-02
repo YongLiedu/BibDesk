@@ -1,5 +1,5 @@
 //
-//  BibTeXParser.h
+//  BDSKBibTeXParser.h
 //  BibDesk
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
@@ -40,7 +40,7 @@
 @class BibDocument, BibItem;
 @protocol BDSKOwner;
 
-@interface BibTeXParser : NSObject {
+@interface BDSKBibTeXParser : NSObject {
 }
 
 + (BOOL)canParseString:(NSString *)string;

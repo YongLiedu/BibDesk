@@ -39,7 +39,7 @@
 #import "BDSKURLGroup.h"
 #import "BDSKOwnerProtocol.h"
 #import <WebKit/WebKit.h>
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKWebOfScienceParser.h"
 #import "BDSKSharedGroup.h"
 #import "BibAppController.h"
@@ -199,7 +199,7 @@
         BOOL isPartialData = NO;
         if (type == BDSKBibTeXStringType) {
             NSMutableString *frontMatter = [NSMutableString string];
-            pubs = [BibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
+            pubs = [BDSKBibTeXParser itemsFromData:[contentString dataUsingEncoding:NSUTF8StringEncoding] frontMatter:frontMatter filePath:filePath document:self encoding:NSUTF8StringEncoding isPartialData:&isPartialData error:&error];
         } else if (type != BDSKUnknownStringType && type != BDSKNoKeyBibTeXStringType){
             pubs = [BDSKStringParser itemsFromString:contentString ofType:type error:&error];
         }

@@ -45,7 +45,7 @@
 #import "OmniFoundation/NSData-OFExtensions.h"
 #import "BDSKMacroTextFieldWindowController.h"
 #import "NSString_BDSKExtensions.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKComplexStringFormatter.h"
 #import "BDSKGroup.h"
 #import "BibItem.h"
@@ -607,10 +607,10 @@
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];
     
     if([aString rangeOfString:@"@string" options:NSCaseInsensitiveSearch].location != NSNotFound)
-        [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXString:aString document:document]];
+        [defs addEntriesFromDictionary:[BDSKBibTeXParser macrosFromBibTeXString:aString document:document]];
             
     if([aString rangeOfString:@"MACRO" options:NSCaseInsensitiveSearch].location != NSNotFound)
-        [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
+        [defs addEntriesFromDictionary:[BDSKBibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
 
     if ([defs count] == 0)
         return NO;
@@ -654,7 +654,6 @@
 
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex{
     [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
-    [tableView scrollRowToVisible:itemIndex];
 }
 // We call this when a type-ahead-selection match has been made; you should select the item based on its idx in the array you provided in -typeAheadSelectionItems.
 

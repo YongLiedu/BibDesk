@@ -43,7 +43,7 @@
 #import "BibDocument_Actions.h"
 #import "BibAuthor.h"
 #import "BibItem.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKDragImageView.h"
 #import "BDSKPublicationsArray.h"
@@ -236,7 +236,7 @@
             fieldName = [fieldNames objectAtIndex:fieldIndex];
             
             // create a new array of BibAuthor objects from a person field (which may be nil or empty)
-            peopleFromString = [BibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName] withPublication:pub];
+            peopleFromString = [BDSKBibTeXParser authorsFromBibtexString:[pub valueOfField:fieldName] withPublication:pub];
                     
             if([peopleFromString count]){
                 

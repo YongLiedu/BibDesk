@@ -35,7 +35,7 @@
 
 #import "BibPref_Defaults.h"
 #import "BDSKTypeInfoEditor.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKMacroResolver.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"

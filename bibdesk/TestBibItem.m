@@ -54,7 +54,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     // init two bibitems, then check that the difference in their fileorder is one
     BOOL error = NO;
 	NSData *twoItemsData = [twoItems dataUsingEncoding:NSASCIIStringEncoding];
-    NSMutableArray *testArray = [BibTeXParser itemsFromData:twoItemsData
+    NSMutableArray *testArray = [BDSKBibTeXParser itemsFromData:twoItemsData
 													  error:&error
 												frontMatter:nil
 												   filePath:@"testFileOrder"];
@@ -72,7 +72,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     // init two bibitems, then check that the difference in their fileorder is one
     BOOL error = NO;
 	NSData *oneItemData = [oneItem dataUsingEncoding:NSASCIIStringEncoding];
-    NSMutableArray *testArray = [BibTeXParser itemsFromData:oneItemData
+    NSMutableArray *testArray = [BDSKBibTeXParser itemsFromData:oneItemData
 													  error:&error
 												frontMatter:nil
 												   filePath:@"testFieldOrder"];
@@ -95,7 +95,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 - (void)testMakeTypeBibTeX{
     BOOL error = NO;
 	NSData *oneItemData = [oneItem dataUsingEncoding:NSASCIIStringEncoding];
-    NSMutableArray *testArray = [BibTeXParser itemsFromData:oneItemData
+    NSMutableArray *testArray = [BDSKBibTeXParser itemsFromData:oneItemData
 													  error:&error
 												frontMatter:nil
 												   filePath:@"testFieldOrder"];

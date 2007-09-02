@@ -42,7 +42,7 @@
 #import "BDSKStringNode.h"
 #import "NSDictionary_BDSKExtensions.h"
 #import "BDSKConverter.h"
-#import "BibTeXParser.h"
+#import "BDSKBibTeXParser.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import <OmniFoundation/OFPreference.h>
@@ -379,9 +379,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
         NSDictionary *macroDefs = nil;
         if (fileContent == nil) continue;
         if ([[file pathExtension] caseInsensitiveCompare:@"bib"] == NSOrderedSame)
-            macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent document:nil];
+            macroDefs = [BDSKBibTeXParser macrosFromBibTeXString:fileContent document:nil];
         else if ([[file pathExtension] caseInsensitiveCompare:@"bst"] == NSOrderedSame)
-            macroDefs = [BibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
+            macroDefs = [BDSKBibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
         else continue;
         if (macroDefs != nil) {
             NSEnumerator *macroE = [macroDefs keyEnumerator];
