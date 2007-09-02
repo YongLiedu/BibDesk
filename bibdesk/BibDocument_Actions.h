@@ -240,7 +240,7 @@
 
 /*!
     @method     consolidateLinkedFiles:
-    @abstract   invokes autofile. see BibFiler.h,m for info
+    @abstract   invokes autofile. see BDSKFiler.h,m for info
     
 */
 

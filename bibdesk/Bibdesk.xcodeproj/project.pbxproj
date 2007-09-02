@@ -290,7 +290,7 @@
 		F9022C7F075802E300C3F701 /* BibDocument_DataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C64075802E300C3F701 /* BibDocument_DataSource.m */; };
 		F9022C80075802E300C3F701 /* BibDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C66075802E300C3F701 /* BibDocument.m */; };
 		F9022C81075802E300C3F701 /* BibEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C68075802E300C3F701 /* BibEditor.m */; };
-		F9022C82075802E300C3F701 /* BibFiler.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C6A075802E300C3F701 /* BibFiler.m */; };
+		F9022C82075802E300C3F701 /* BDSKFiler.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C6A075802E300C3F701 /* BDSKFiler.m */; };
 		F9022C84075802E300C3F701 /* BibItem.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C6E075802E300C3F701 /* BibItem.m */; };
 		F9022C86075802E300C3F701 /* BDSKPersonController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C72075802E300C3F701 /* BDSKPersonController.m */; };
 		F9022C87075802E300C3F701 /* BibPref_AutoFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C74075802E300C3F701 /* BibPref_AutoFile.m */; };
@@ -1151,8 +1151,8 @@
 		F9022C66075802E300C3F701 /* BibDocument.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibDocument.m; sourceTree = "<group>"; };
 		F9022C67075802E300C3F701 /* BibEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibEditor.h; sourceTree = "<group>"; };
 		F9022C68075802E300C3F701 /* BibEditor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibEditor.m; sourceTree = "<group>"; };
-		F9022C69075802E300C3F701 /* BibFiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibFiler.h; sourceTree = "<group>"; };
-		F9022C6A075802E300C3F701 /* BibFiler.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BibFiler.m; sourceTree = "<group>"; };
+		F9022C69075802E300C3F701 /* BDSKFiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFiler.h; sourceTree = "<group>"; };
+		F9022C6A075802E300C3F701 /* BDSKFiler.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFiler.m; sourceTree = "<group>"; };
 		F9022C6D075802E300C3F701 /* BibItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BibItem.h; sourceTree = "<group>"; };
 		F9022C6E075802E300C3F701 /* BibItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BibItem.m; sourceTree = "<group>"; };
 		F9022C71075802E300C3F701 /* BDSKPersonController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPersonController.h; sourceTree = "<group>"; };
@@ -1968,6 +1968,7 @@
 				F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */,
 				F9B88D970B7D14B700D5D42C /* BDSKFileMatcher.m */,
 				F9BE68360B80F94000B2597C /* BDSKFileMatchConfigController.m */,
+				F9022C6A075802E300C3F701 /* BDSKFiler.m */,
 				CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */,
 				F97965F0086909EA00050427 /* BDSKFindController.m */,
 				CEF71AD90B91BBCB003A2771 /* BDSKNotesWindowController.m */,
@@ -1990,7 +1991,6 @@
 				F9B800930B41DFAF00A5A615 /* BDSKSearchGroupSheetController.m */,
 				F9022C68075802E300C3F701 /* BibEditor.m */,
 				3DE3916607FEF5E600BE3AE7 /* BibEditor_Toolbar.m */,
-				F9022C6A075802E300C3F701 /* BibFiler.m */,
 				2730077A07CF20B500F2E485 /* BDSKMacroTextFieldWindowController.m */,
 				2730077C07CF20B500F2E485 /* BDSKMacroWindowController.m */,
 			);
@@ -2296,6 +2296,7 @@
 				F9252E2008F60D170045D563 /* BDSKFileContentSearchController.h */,
 				F9B88D960B7D14B700D5D42C /* BDSKFileMatcher.h */,
 				F9BE68370B80F94000B2597C /* BDSKFileMatchConfigController.h */,
+				F9022C69075802E300C3F701 /* BDSKFiler.h */,
 				CE38FB8A091D94A100BCB69D /* BDSKFilter.h */,
 				CE38FB8C091D94A100BCB69D /* BDSKFilterController.h */,
 				F97965EF086909EA00050427 /* BDSKFindController.h */,
@@ -2426,7 +2427,6 @@
 				F9022C67075802E300C3F701 /* BibEditor.h */,
 				3DE3916507FEF5E600BE3AE7 /* BibEditor_Toolbar.h */,
 				3DD300F3075C0532003FD2D7 /* BibField.h */,
-				F9022C69075802E300C3F701 /* BibFiler.h */,
 				F920DAFE075C2B69000C5FCA /* BibItem+Scripting.h */,
 				F9022C6D075802E300C3F701 /* BibItem.h */,
 				F9B3405B0BBC16720072C2B0 /* BibItem_PubMedLookup.h */,
@@ -3308,7 +3308,7 @@
 				F9022C7F075802E300C3F701 /* BibDocument_DataSource.m in Sources */,
 				F9022C80075802E300C3F701 /* BibDocument.m in Sources */,
 				F9022C81075802E300C3F701 /* BibEditor.m in Sources */,
-				F9022C82075802E300C3F701 /* BibFiler.m in Sources */,
+				F9022C82075802E300C3F701 /* BDSKFiler.m in Sources */,
 				F9022C84075802E300C3F701 /* BibItem.m in Sources */,
 				F9022C86075802E300C3F701 /* BDSKPersonController.m in Sources */,
 				F9022C87075802E300C3F701 /* BibPref_AutoFile.m in Sources */,

@@ -114,7 +114,7 @@
 #import "BDSKCustomCiteDrawerController.h"
 #import "NSObject_BDSKExtensions.h"
 #import "BDSKDocumentController.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "BibItem_PubMedLookup.h"
 #import "BDSKItemSearchIndexes.h"
 #import "PDFDocument_BDSKExtensions.h"
@@ -3161,7 +3161,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         rv |= 1;
     }
     if([autofilePubs count]){
-        [[BibFiler sharedFiler] filePapers:autofilePubs fromDocument:self check:NO];
+        [[BDSKFiler sharedFiler] filePapers:autofilePubs fromDocument:self check:NO];
         rv |= 2;
     }
     

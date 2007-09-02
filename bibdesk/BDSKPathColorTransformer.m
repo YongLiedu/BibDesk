@@ -37,7 +37,7 @@
  */
 
 #import "BDSKPathColorTransformer.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 
 
 @implementation BDSKOldPathColorTransformer

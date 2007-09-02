@@ -2,7 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {closeProgress = id; done = id; dump = id; showFile = id; tryAgain = id; }; 
-            CLASS = BibFiler; 
+            CLASS = BDSKFiler; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 contextMenu = NSMenu; 

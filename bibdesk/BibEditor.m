@@ -50,7 +50,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKAlert.h"
 #import "BDSKFieldSheetController.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "BDSKDragWindow.h"
 #import "BibItem.h"
 #import "BDSKCiteKeyFormatter.h"
@@ -431,7 +431,7 @@ enum{
             NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:publication, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
             
             [publication setField:field toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
-            [[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:[self document] options:0];
+            [[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:[self document] options:0];
             
             [[self undoManager] setActionName:NSLocalizedString(@"Edit Publication", @"Undo action name")];
 		}
@@ -1145,7 +1145,7 @@ enum{
         return;
     }
     
-	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
+	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:publication] fromDocument:[self document] check:NO];
 	
 	[tabView selectFirstTabViewItem:self];
 	
@@ -1814,7 +1814,7 @@ enum{
     if (returnCode == NSAlertDefaultReturn) {
         NSArray *paperInfos = [NSArray arrayWithObject:info];
         NSString *fieldName = [info objectForKey:@"fieldName"];
-        [[BibFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:[self document] options:0];
+        [[BDSKFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:[self document] options:0];
     }
     [info release];
 }

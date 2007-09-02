@@ -1,5 +1,5 @@
 //
-//  BibFiler.h
+//  BDSKFiler.h
 //  BibDesk
 //
 //  Created by Michael McCracken on Fri Apr 30 2004.
@@ -58,7 +58,7 @@ enum {
     BDSKForceAutoFileOptionMask = 4
 };
 
-@interface BibFiler : NSObject {
+@interface BDSKFiler : NSObject {
 	IBOutlet NSWindow *window;
 	IBOutlet NSTableView *tv;
 	IBOutlet NSTextField *infoTextField;
@@ -77,7 +77,7 @@ enum {
 	NSMutableArray *errorInfoDicts;
 }
 
-+ (BibFiler *)sharedFiler;
++ (BDSKFiler *)sharedFiler;
 
 /*!
 	@method		filePapers:fromDocument:doc:check:

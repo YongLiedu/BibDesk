@@ -5,10 +5,9 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = BDSKTextWithIconCell; 
         }, 
-        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             ACTIONS = {done = id; dump = id; showFile = id; tryAgain = id; }; 
-            CLASS = BibFiler; 
+            CLASS = BDSKFiler; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 contextMenu = NSMenu; 
@@ -22,6 +21,7 @@
             }; 
             SUPERCLASS = NSObject; 
         }, 
+        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             ACTIONS = {"" = id; }; 
             CLASS = FirstResponder; 

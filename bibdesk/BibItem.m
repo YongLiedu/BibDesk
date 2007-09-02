@@ -50,7 +50,7 @@
 #import "BDAlias.h"
 #import "BDSKFormatParser.h"
 #import "BDSKBibTeXParser.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "BibDocument.h"
 #import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
@@ -2607,7 +2607,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 	if ([self canSetLocalUrl]) {
         OBASSERT([owner isDocument]);
         if ([owner isDocument]) {
-            [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
+            [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
                                   fromDocument:(BibDocument *)owner
                                          check:NO]; 
             return YES;

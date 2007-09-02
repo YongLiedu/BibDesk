@@ -60,7 +60,7 @@
 #import "BDSKFieldSheetController.h"
 #import "BDSKMacroResolver.h"
 #import "NSImage+Toolbox.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "BDSKStringParser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKPublicationsArray.h"
@@ -270,7 +270,7 @@
         [item setCiteKey:[item suggestedCiteKey]];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
        [item needsToBeFiled] && [item canSetLocalUrl]){
-        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
+        [[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
         [item setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
     }
     [item release];
@@ -470,7 +470,7 @@
         return;
     }
     
-	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
+	[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Move File", @"Undo action name")];
 }
@@ -1454,7 +1454,7 @@
 		return NO;
 	
 	if ([item canSetLocalUrl]) {
-		[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO]; 
+		[[BDSKFiler sharedFiler] filePapers:[NSArray arrayWithObject:item] fromDocument:document check:NO]; 
 		return YES;
 	} else {
 		[item setNeedsToBeFiled:YES];

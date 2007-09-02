@@ -1,5 +1,5 @@
 //
-//  BibFiler.m
+//  BDSKFiler.m
 //  BibDesk
 //
 //  Created by Michael McCracken on Fri Apr 30 2004.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "NSImage+Toolbox.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKPathColorTransformer.h"
@@ -47,9 +47,9 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
 
-static BibFiler *sharedFiler = nil;
+static BDSKFiler *sharedFiler = nil;
 
-@implementation BibFiler
+@implementation BDSKFiler
 
 + (void)initialize {
 	// register transformer class
@@ -59,9 +59,9 @@ static BibFiler *sharedFiler = nil;
 									forName:@"BDSKNewPathColorTransformer"];
 }
 
-+ (BibFiler *)sharedFiler{
++ (BDSKFiler *)sharedFiler{
 	if(!sharedFiler){
-		sharedFiler = [[BibFiler alloc] init];
+		sharedFiler = [[BDSKFiler alloc] init];
 	}
 	return sharedFiler;
 }

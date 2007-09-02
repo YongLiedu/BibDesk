@@ -41,7 +41,7 @@
 #import "BibItem.h"
 #import "BibDocument.h"
 #import "BDSKOwnerProtocol.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "BDSKTypeManager.h"
 
 
@@ -98,7 +98,7 @@
     }
     
     if (paperInfos) {
-        [[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:(BibDocument *)[pub owner] options:mask];
+        [[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:(BibDocument *)[pub owner] options:mask];
         [[pub undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
     }
     

@@ -63,7 +63,7 @@
 #import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKAlert.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "BDSKTextImportController.h"
 #import "BDSKStatusBar.h"
 #import "BDSKSharingServer.h"
@@ -981,7 +981,7 @@
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
 
-    [[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
+    [[BDSKFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files", @"Undo action name")];
 }
@@ -996,7 +996,7 @@
                                        alternateButton:NSLocalizedString(@"Cancel", @"Button title")
                                            otherButton:NSLocalizedString(@"Move All", @"Button title")
                              informativeTextWithFormat:NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?", @"Informative text in alert dialog")];
-    // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BibFiler 
+    // we need the callback in the didDismissSelector, because the sheet must be removed from the document before we call BDSKFiler 
     // as that will use a sheet as well, see bug # 1526145
 	[alert beginSheetModalForWindow:documentWindow
                       modalDelegate:self

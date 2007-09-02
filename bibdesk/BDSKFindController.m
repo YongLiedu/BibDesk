@@ -47,7 +47,7 @@
 #import "BDSKFieldNameFormatter.h"
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
-#import "BibFiler.h"
+#import "BDSKFiler.h"
 #import "BDSKAlert.h"
 #import "BDSKFindFieldEditor.h"
 
@@ -1001,7 +1001,7 @@ enum {
     }
 
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
 	return number;
 }
@@ -1059,7 +1059,7 @@ enum {
     }
 	
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }
@@ -1102,7 +1102,7 @@ enum {
     }
 	
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }
@@ -1146,7 +1146,7 @@ enum {
     }
 	
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }
@@ -1190,7 +1190,7 @@ enum {
     }
 	
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+		[[BDSKFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	    
 	return number;
 }
