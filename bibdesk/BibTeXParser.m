@@ -139,40 +139,48 @@ error:(NSError **)outError{
 
 + (NSArray *)itemsFromData:(NSData *)inData frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id<BDSKOwner>)anOwner encoding:(NSStringEncoding)parserEncoding isPartialData:(BOOL *)isPartialData error:(NSError **)outError{
     
+    unsigned inputDataLength = [inData length];
+    
     // btparse will crash if we pass it a zero-length data, so we'll return here for empty files
     if (isPartialData)
         *isPartialData = NO;
     
-    if ([inData length] == 0)
+    if (inputDataLength == 0)
         return [NSArray array];
     
     [[BDSKErrorObjectController sharedErrorObjectController] startObservingErrors];
     
     // btparse chokes on classic Macintosh line endings, so we'll replace all returns with a newline; this takes < 0.01 seconds on a 1000+ item file with Unix line endings, so performance is not affected.  Windows line endings will be replaced by a single newline.
     NSMutableData *fixedData = [[inData mutableCopy] autorelease];
-    unsigned indexOfReturnChar, nextIndex;
+    unsigned currIndex, nextIndex;
     NSRange replaceRange;
-    const char cr[1] = {'\r'};
     const char lf[1] = {'\n'};
-    unsigned nrepl = 0;
-    char *bytePtr = [fixedData mutableBytes];
-
-    while (NSNotFound != (indexOfReturnChar = [fixedData indexOfBytes:cr length:1])) {
-
-        replaceRange.location = indexOfReturnChar;
+    unsigned const char *bytePtr = [fixedData mutableBytes];
+    unsigned char ch;
+    BOOL didReplaceNewlines = NO;
+    
+    for (currIndex = 0; currIndex < inputDataLength; currIndex++) {
         
-        // check the next char to see if we have a Windows line ending
-        nextIndex = indexOfReturnChar + 1;
-        if ([fixedData length] > nextIndex && bytePtr[nextIndex] == '\n') 
-            replaceRange.length = 2;
-        else
-            replaceRange.length = 1;
+        ch = bytePtr[currIndex];
         
-        [fixedData replaceBytesInRange:replaceRange withBytes:lf length:1];
-        nrepl++;
+        if (ch != '\n' && [[NSCharacterSet newlineCharacterSet] characterIsMember:ch]) {
+            
+            replaceRange.location = currIndex;
+            // check the next char to see if we have a Windows line ending
+            nextIndex = currIndex + 1;
+            if (inputDataLength > nextIndex && ch == '\r' && bytePtr[nextIndex] == '\n') 
+                replaceRange.length = 2;
+            else
+                replaceRange.length = 1;
+        
+            [fixedData replaceBytesInRange:replaceRange withBytes:lf length:1];
+            inputDataLength -= replaceRange.length - 1;
+            didReplaceNewlines = YES;
+        }
     }
-    // If we replace any characters, swap data and set the filePath to the paste/drag string, or else the parser will still choke on it (in the case of Mac line ends); this isn't ideal, as we lose some error reporting capability.
-    if (nrepl)
+    // If we replace any characters, swap data, or else the parser will still choke on it (in the case of Mac line ends).
+    // Error reporting should not be affected, because old and new line endings correspond exactly.
+    if (didReplaceNewlines)
         inData = fixedData;
 	
     BibItem *newBI = nil;
@@ -198,7 +206,7 @@ error:(NSError **)outError{
     if(isPasteOrDrag || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO){
         fs_path = NULL; // used for error context in libbtparse
         infile = [inData openReadOnlyStandardIOFile];
-    }else if(nrepl){
+    }else if(didReplaceNewlines){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
         infile = [inData openReadOnlyStandardIOFile];
     }else{
@@ -207,7 +215,6 @@ error:(NSError **)outError{
     }    
 
     buf = (const char *) [inData bytes];
-    unsigned inputDataLength = [inData length];
 
     if([parserLock tryLock] == NO)
         [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
