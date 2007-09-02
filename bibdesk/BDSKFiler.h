@@ -158,7 +158,7 @@ BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems mov
 @end
 
 
-@interface NSFileManager (BibFilerExtensions)
+@interface NSFileManager (BDSKFilerExtensions)
 
 /*!
 	@method		movePath:toPath:force:error:

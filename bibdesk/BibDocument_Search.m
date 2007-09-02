@@ -195,7 +195,7 @@ Ensure that views are always ordered vertically from top to bottom as
 
 #pragma mark -
 
-// simplified search used by BibAppController's Service for legacy compatibility
+// simplified search used by BDSKAppController's Service for legacy compatibility
 - (NSArray *)publicationsMatchingSubstring:(NSString *)searchString inField:(NSString *)field{
     unsigned i, iMax = [publications count];
     NSMutableArray *results = [NSMutableArray arrayWithCapacity:100];

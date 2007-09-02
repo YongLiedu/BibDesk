@@ -483,7 +483,7 @@ static BDSKFiler *sharedFiler = nil;
 @end
 
 
-@implementation NSFileManager (BibFilerExtensions)
+@implementation NSFileManager (BDSKFilerExtensions)
 
 - (BOOL)movePath:(NSString *)path toPath:(NSString *)newPath force:(BOOL)force error:(NSError **)error{
     NSString *resolvedPath = nil;
@@ -635,7 +635,7 @@ static BDSKFiler *sharedFiler = nil;
             NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:status, NSLocalizedDescriptionKey, nil];
             if (fix != nil)
                 [userInfo setObject:fix forKey:NSLocalizedRecoverySuggestionErrorKey];
-            *error = [NSError errorWithDomain:@"BibFilerErrorDomain" code:statusFlag userInfo:userInfo];
+            *error = [NSError errorWithDomain:@"BDSKFilerErrorDomain" code:statusFlag userInfo:userInfo];
             //NSLog(@"error \"%@\" occurred; suggested fix is \"%@\"", *error, fix);
         }
         return NO;
