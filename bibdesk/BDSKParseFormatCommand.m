@@ -38,7 +38,7 @@
 
 #import "BDSKParseFormatCommand.h"
 #import "BDSKFormatParser.h"
-#import "BibField.h"
+#import "BDSKField.h"
 #import "BibItem.h"
 #import "BibPrefController.h"
 #import "BDSKAppController.h"
@@ -69,9 +69,9 @@
 		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
 		return nil;
 	}
-	if ([field isKindOfClass:[BibField class]]) {
+	if ([field isKindOfClass:[BDSKField class]]) {
 		if (pub == nil) {
-			pub = [(BibField *)field publication];
+			pub = [(BDSKField *)field publication];
 		}
 		field = [field name];
 	} else if ([field isKindOfClass:[NSString class]] == NO) {

@@ -1,5 +1,5 @@
 //
-//  BibField.h
+//  BDSKField.h
 //  BibDesk
 //
 //  Created by Christiaan Hofman on 27/11/04.
@@ -39,7 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibItem.h"
 
-@interface BibField : NSObject {
+@interface BDSKField : NSObject {
 	NSString *name;
 	BibItem *bibItem;
 }

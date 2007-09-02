@@ -68,23 +68,23 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 
 
 /* cmh:
- Access to arbitrary fields through 'proxy' objects BibField. 
+ Access to arbitrary fields through 'proxy' objects BDSKField. 
  These are simply wrappers for the accessors in BibItem. 
 */
-- (BibField *)valueInBibFieldsWithName:(NSString *)name
+- (BDSKField *)valueInBibFieldsWithName:(NSString *)name
 {
-	return [[[BibField alloc] initWithName:[name fieldName] bibItem:self] autorelease];
+	return [[[BDSKField alloc] initWithName:[name fieldName] bibItem:self] autorelease];
 }
 
 - (NSArray *)bibFields
 {
 	NSEnumerator *fEnum = [pubFields keyEnumerator];
 	NSString *name = nil;
-	BibField *field = nil;
+	BDSKField *field = nil;
 	NSMutableArray *bibFields = [NSMutableArray arrayWithCapacity:5];
 	
 	while (name = [fEnum nextObject]) {
-		field = [[BibField alloc] initWithName:[name fieldName] bibItem:self];
+		field = [[BDSKField alloc] initWithName:[name fieldName] bibItem:self];
 		[bibFields addObject:field];
 		[field release];
 	}

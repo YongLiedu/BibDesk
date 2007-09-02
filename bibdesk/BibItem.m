@@ -63,7 +63,7 @@
 #import "BDSKStringNode.h"
 #import "OFCharacterSet_BDSKExtensions.h"
 #import "PDFMetadata.h"
-#import "BibField.h"
+#import "BDSKField.h"
 #import "BDSKTemplate.h"
 #import "BDSKTemplateParser.h"
 #import "BDSKPublicationsArray.h"
@@ -3338,7 +3338,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
 }
 
 - (id)fieldForName:(NSString *)name{
-    return [[[BibField alloc] initWithName:name bibItem:item] autorelease];
+    return [[[BDSKField alloc] initWithName:name bibItem:item] autorelease];
 }
 
 - (id)fieldsWithNames:(NSArray *)names{

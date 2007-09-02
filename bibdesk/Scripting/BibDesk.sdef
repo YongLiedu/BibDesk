@@ -776,7 +776,7 @@ Having all three of these seems to work best for Panther. For Tiger include this
         
         <class name="field" plural="fields" code="bfld" inherits="item"
 			description="Field containing data for a publication.">
-            <cocoa class="BibField"/>
+            <cocoa class="BDSKField"/>
             <property name="value" code="fldv" type="text"
                 description="The value of the field">
                 <cocoa key="value"/>

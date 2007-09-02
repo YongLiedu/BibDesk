@@ -37,13 +37,13 @@
  */
 #import <Foundation/Foundation.h>
 #import "BibItem.h"
-#import "BibField.h"
+#import "BDSKField.h"
 
 #define BibItemBasicObjects @"citeKey", @"pubDate", @"title", @"type", @"date", @"pubFields", @"bibTeXStrings", @"RTFValue", @"RSSValue"
 
 @interface BibItem (Scripting) 
 
-- (BibField *)valueInBibFieldsWithName:(NSString *)name;
+- (BDSKField *)valueInBibFieldsWithName:(NSString *)name;
 - (NSArray *)bibFields;
 
 - (BibAuthor*)valueInAuthorsWithName:(NSString*)name;

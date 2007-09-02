@@ -1,5 +1,5 @@
 //
-//  BibField.m
+//  BDSKField.m
 //  BibDesk
 //
 //  Created by Christiaan Hofman on 27/11/04.
@@ -36,13 +36,13 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibField.h"
+#import "BDSKField.h"
 #import "BDSKOwnerProtocol.h"
 
 /* cmh
 A wrapper object around the fields to access them in AppleScript. 
 */
-@implementation BibField
+@implementation BDSKField
 
 + (BOOL)accessInstanceVariablesDirectly {
 	return NO;
