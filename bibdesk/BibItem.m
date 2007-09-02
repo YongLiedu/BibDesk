@@ -43,7 +43,7 @@
 #import "BibEditor.h"
 #import "BDSKTypeManager.h"
 #import "BibAuthor.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"
 #import "BDSKFontManager.h"

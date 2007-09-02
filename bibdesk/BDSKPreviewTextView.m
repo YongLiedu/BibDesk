@@ -37,7 +37,7 @@
  */
 
 #import "BDSKPreviewTextView.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 
 
 @implementation BDSKPreviewTextView

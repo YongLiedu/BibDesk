@@ -35,7 +35,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
 
 @interface BibPref_General : OAPreferenceClient {

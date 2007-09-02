@@ -38,7 +38,7 @@
  */
 
 #import "NSFileManager_BDSKExtensions.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import <OmniFoundation/OFResourceFork.h>
 #import "NSURL_BDSKExtensions.h"
 #import "NSObject_BDSKExtensions.h"

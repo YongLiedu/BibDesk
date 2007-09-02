@@ -37,7 +37,7 @@
  */
 
 #import "BDSKSearchBookmarkController.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 
 static NSString *BDSKSearchBookmarkRowsPboardType = @"BDSKSearchBookmarkRowsPboardType";
 static NSString *BDSKSearchBookmarkChangedNotification = @"BDSKSearchBookmarkChangedNotification";

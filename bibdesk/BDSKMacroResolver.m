@@ -37,7 +37,7 @@
  */
 
 #import "BDSKMacroResolver.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKComplexString.h"
 #import "BDSKStringNode.h"
 #import "NSDictionary_BDSKExtensions.h"

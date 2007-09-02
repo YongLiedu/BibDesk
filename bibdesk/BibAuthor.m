@@ -37,7 +37,7 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import <OmniFoundation/OmniFoundation.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
 #import "BDSKErrorObjectController.h"

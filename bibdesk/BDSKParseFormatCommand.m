@@ -40,7 +40,7 @@
 #import "BDSKFormatParser.h"
 #import "BDSKField.h"
 #import "BibItem.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKAppController.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKTypeManager.h"

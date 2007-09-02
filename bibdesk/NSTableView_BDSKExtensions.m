@@ -38,7 +38,7 @@
 
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "NSLayoutManager_BDSKExtensions.h"
 #import <OmniAppKit/OAApplication.h>

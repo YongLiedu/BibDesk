@@ -38,7 +38,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import <OmniAppKit/OAGradientTableView.h>
 #import <OmniAppKit/OATextWithIconCell.h>
 

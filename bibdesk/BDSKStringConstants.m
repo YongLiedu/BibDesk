@@ -1,4 +1,4 @@
-// BibPrefController.m
+// BDSKStringConstants.m
 // BibDesk 
 // Created by Michael McCracken, 2002
 /*
@@ -34,13 +34,11 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibPrefController.h"
-#import <OmniAppKit/OAPreferenceController.h>
-#import <OmniAppKit/OAPreferenceClientRecord.h>
+#import "BDSKStringConstants.h"
 
 NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
 
-@implementation OAPreferenceController (HelpLookup)
+@implementation NSString (BDSKStringConstants)
 
 + (void)didLoad
 {    
@@ -51,20 +49,6 @@ NSTimeInterval BDSKDefaultAnimationTimeInterval = 0.15;
     NSNumber *n = [[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKDefaultAnimationTimeInterval"];
     if (nil != n)
         BDSKDefaultAnimationTimeInterval = [n floatValue];
-}
-
-- (IBAction)showHelpForClient:(id)sender;
-{
-    // we override this since Omni's method uses the file URL name, which we generate dynamically
-    NSString *helpAnchor = [nonretained_currentClientRecord helpURL];
-    
-    // log an error is someone mistakenly passes a URL instead of an anchor
-    OBASSERT([helpAnchor rangeOfString:@".htm"].location == NSNotFound);
-    
-	NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
-    OBASSERT(helpBookName);
-    
-	[[NSHelpManager sharedHelpManager] openHelpAnchor:helpAnchor inBook:helpBookName];
 }
 
 @end

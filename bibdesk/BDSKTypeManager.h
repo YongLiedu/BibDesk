@@ -37,7 +37,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 
 // The filename and keys used in the plist
 #define TYPE_INFO_FILENAME                    @"TypeInfo.plist"

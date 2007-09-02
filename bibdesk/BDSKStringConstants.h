@@ -1,4 +1,4 @@
-// BibPrefController 
+// BDSKStringConstants 
 /*
  This software is Copyright (c) 2002,2003,2004,2005,2006,2007
  Michael O. McCracken. All rights reserved.
@@ -32,9 +32,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OFPreference.h>
-#import <OmniAppKit/OmniAppKit.h>
+#import <Foundation/Foundation.h>
 
 #pragma mark Global CPP macros
 
@@ -49,12 +47,10 @@ while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtN
 
 #pragma mark ||  User Defaults Key String Declarations
 
-extern NSTimeInterval BDSKDefaultAnimationTimeInterval;
-
-@interface OAPreferenceController (HelpLookup)
-
+@interface NSString (BDSKStringConstants)
 @end
 
+extern NSTimeInterval BDSKDefaultAnimationTimeInterval;
 
 extern NSString *BDSKTeXBinPathKey;
 extern NSString *BDSKBibTeXBinPathKey;

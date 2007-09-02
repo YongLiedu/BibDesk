@@ -39,7 +39,7 @@
 #import "BDSKGroupTableView.h"
 #import <OmniBase/OmniBase.h>
 #import <OmniAppKit/OmniAppKit.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"

@@ -37,7 +37,7 @@
  */
 
 #import "NSDate_BDSKExtensions.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 
 static NSDictionary *locale = nil;
 static CFDateFormatterRef dateFormatter = NULL;

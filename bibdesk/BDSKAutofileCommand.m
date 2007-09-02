@@ -37,7 +37,7 @@
  */
 
 #import "BDSKAutofileCommand.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BibItem.h"
 #import "BibDocument.h"
 #import "BDSKOwnerProtocol.h"

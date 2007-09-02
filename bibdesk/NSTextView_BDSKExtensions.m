@@ -35,7 +35,7 @@
  */
 
 #import "NSTextView_BDSKExtensions.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import <OmniFoundation/OmniFoundation.h>
 #import "BDSKTextViewFindController.h"
 #import <OmniAppKit/OAApplication.h>

@@ -37,7 +37,7 @@
  */
 
 #import "BDSKWebGroup.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKPublicationsArray.h"
 #import "BDSKMacroResolver.h"
 #import "NSImage+Toolbox.h"

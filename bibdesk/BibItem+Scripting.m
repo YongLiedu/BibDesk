@@ -37,7 +37,7 @@
  */
 #import "BibItem+Scripting.h"
 #import "BibAuthor.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BibDocument.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKPublicationsArray.h"

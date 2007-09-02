@@ -41,7 +41,7 @@
 #import <BTParse/BDSKErrorObject.h>
 #import "BDSKErrorManager.h"
 #import "BDSKErrorEditor.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"

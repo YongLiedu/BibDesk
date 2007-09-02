@@ -141,6 +141,20 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
     }
 }
 
+- (IBAction)showHelpForClient:(id)sender;
+{
+    // we override this since Omni's method uses the file URL name, which we generate dynamically
+    NSString *helpAnchor = [nonretained_currentClientRecord helpURL];
+    
+    // log an error is someone mistakenly passes a URL instead of an anchor
+    OBASSERT([helpAnchor rangeOfString:@".htm"].location == NSNotFound);
+    
+	NSString *helpBookName = [[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleHelpBookName"];
+    OBASSERT(helpBookName);
+    
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:helpAnchor inBook:helpBookName];
+}
+
 - (BOOL)isSearchActive { return isSearchActive; }
 
 - (NSArray *)highlightCirclesInScreenCoordinates;

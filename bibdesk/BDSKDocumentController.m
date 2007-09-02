@@ -35,7 +35,7 @@
  */
 
 #import "BDSKDocumentController.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import <OmniBase/OmniBase.h>
 #import <AGRegex/AGRegex.h>
 #import "BDSKStringEncodingManager.h"

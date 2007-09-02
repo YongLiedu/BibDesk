@@ -38,7 +38,7 @@
 
 #import "BDSKPrintableView.h"
 #import "BDSKFontManager.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 
 /* Most of this code was borrowed from TextEdit.  This is designed mainly to give a PDF data representation of plain or attributed text, as the AppKit provides no easy way to do this programmatically.  Page layout features have been overriden in order for better on-screen display, as the default margins from NSPrintInfo are too large for many cases; pass NO to initForScreenDisplay to get the default NSPrintInfo values (which are more appropriate for hard-copy results). */
 

@@ -37,7 +37,7 @@
    or as nodes by themselves. */
 
 #import <Foundation/Foundation.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 
 @class BDSKMacroResolver;
 

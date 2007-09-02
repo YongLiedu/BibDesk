@@ -37,7 +37,7 @@
  */
 
 #import "BDSKOrphanedFilesFinder.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 #import "BDSKAppController.h"
 #import "BibDocument.h"

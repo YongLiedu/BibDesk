@@ -37,7 +37,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 
 @class BDSKEncodingPopUpButton;
 

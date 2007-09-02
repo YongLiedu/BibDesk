@@ -37,7 +37,7 @@
 #import "BDSKAppController.h"
 #import "BDSKOwnerProtocol.h"
 #import <Carbon/Carbon.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKPreviewer.h"

@@ -40,7 +40,7 @@
 #import "BibDocument_DataSource.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BDSKGroup.h"

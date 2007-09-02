@@ -36,7 +36,7 @@
 #import "BDSKMainTableView.h"
 #import <OmniFoundation/OFPreference.h>
 #import <OmniFoundation/CFArray-OFExtensions.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
 #import "BDSKTypeSelectHelper.h"

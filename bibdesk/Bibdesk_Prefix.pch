@@ -28,7 +28,7 @@
     #import <OmniAppKit/OmniAppKit.h>
     #import "NSString_BDSKExtensions.h"
     #import "BDSKComplexString.h"
-    #import "BibPrefController.h"
+    #import "BDSKStringConstants.h"
     #import "BDSKPreferenceController.h"
 
 #define __FILENAMEASNSSTRING__ \

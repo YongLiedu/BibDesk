@@ -38,7 +38,7 @@
  */
 
 #import "BibPref_Sharing.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKSharingBrowser.h"
 #import <Security/Security.h>
 #import "BDSKSharingServer.h"

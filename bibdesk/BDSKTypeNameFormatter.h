@@ -37,7 +37,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKTypeManager.h"
 
 

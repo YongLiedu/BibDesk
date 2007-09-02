@@ -38,7 +38,7 @@
 
 #import "BDSKFileContentSearchController.h"
 #import "BibItem.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "NSImage+Toolbox.h"
 #import <Carbon/Carbon.h>
 #import "NSWorkspace_BDSKExtensions.h"

@@ -37,7 +37,7 @@
  */
 
 #import "BDSKSharingBrowser.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BibDocument_Groups.h"
 #import "BDSKSharedGroup.h"
 #import "NSArray_BDSKExtensions.h"

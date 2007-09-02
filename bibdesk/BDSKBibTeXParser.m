@@ -45,7 +45,7 @@
 #import "BibItem.h"
 #import "BDSKConverter.h"
 #import "BDSKComplexString.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BibDocument_Groups.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibAuthor.h"

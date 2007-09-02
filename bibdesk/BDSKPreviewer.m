@@ -35,7 +35,7 @@
  */
 
 #import "BDSKPreviewer.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKTeXTask.h"
 #import "BDSKOverlay.h"
 #import "BDSKAppController.h"

@@ -39,7 +39,7 @@
 #import "BDSKMacroWindowController.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
-#import "BibPrefController.h" // for notification name declarations
+#import "BDSKStringConstants.h" // for notification name declarations
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "OmniFoundation/NSData-OFExtensions.h"

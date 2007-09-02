@@ -42,7 +42,7 @@
 #import "BibDocument_Actions.h"
 #import "BibDocumentView_Toolbar.h"
 #import "BDSKAppController.h"
-#import "BibPrefController.h"
+#import "BDSKStringConstants.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"
 #import "BDSKSearchGroup.h"
