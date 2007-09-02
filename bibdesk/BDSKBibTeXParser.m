@@ -155,7 +155,7 @@ error:(NSError **)outError{
     unsigned currIndex, nextIndex;
     NSRange replaceRange;
     const char lf[1] = {'\n'};
-    unsigned const char *bytePtr = [fixedData mutableBytes];
+    unsigned char *bytePtr = [fixedData mutableBytes];
     unsigned char ch;
     BOOL didReplaceNewlines = NO;
     
