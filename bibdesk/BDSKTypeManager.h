@@ -1,5 +1,5 @@
 //
-//  BibTypeManager.h
+//  BDSKTypeManager.h
 //  BibDesk
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
@@ -64,7 +64,7 @@
 
 @class OFCharacterSet;
 
-@interface BibTypeManager : NSObject {
+@interface BDSKTypeManager : NSObject {
 	NSDictionary *fileTypesDict;
 	NSDictionary *fieldsForTypesDict;
 	NSDictionary *typesForFileTypeDict;
@@ -107,7 +107,7 @@
     NSMutableSet *singleValuedGroupFieldsSet;
     NSMutableSet *invalidGroupFieldsSet;
 }
-+ (BibTypeManager *)sharedManager;
++ (BDSKTypeManager *)sharedManager;
 
 - (void)reloadTypeInfo;
 - (void)reloadAllFieldNames;

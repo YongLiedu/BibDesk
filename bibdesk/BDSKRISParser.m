@@ -37,7 +37,7 @@
  */
 
 #import "BDSKRISParser.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
 #import <AGRegex/AGRegex.h>
@@ -99,7 +99,7 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
     NSString *tag = nil;
     NSString *value = nil;
     NSMutableString *mutableValue = [NSMutableString string];
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     
     NSSet *tagsNotToConvert = [NSSet setWithObjects:@"UR", @"L1", @"L2", @"L3", @"L4", nil];
@@ -185,7 +185,7 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
     if([tag isEqualToString:@"IS"])
         key = BDSKNumberString;
 	else
-        key = [[BibTypeManager sharedManager] fieldNameForPubMedTag:tag];
+        key = [[BDSKTypeManager sharedManager] fieldNameForPubMedTag:tag];
 	if(key == nil) key = [tag fieldName];
 	oldString = [pubDict objectForKey:key];
 	
@@ -237,7 +237,7 @@ static BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
 
 + (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
 {
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSString *type = BDSKArticleString;
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]] != nil)
         type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]];

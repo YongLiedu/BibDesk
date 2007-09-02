@@ -449,7 +449,7 @@
 
 /*!
     @method     showPersonDetail:
-	 @abstract   opens a BibPersonController to show details of a pub
+	 @abstract   opens a BDSKPersonController to show details of a pub
 	 @discussion (description)
 */
 - (IBAction)showPersonDetailCmd:(id)sender;

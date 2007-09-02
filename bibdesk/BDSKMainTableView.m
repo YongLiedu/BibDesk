@@ -43,7 +43,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKRatingButtonCell.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKImagePopUpButtonCell.h"
@@ -525,7 +525,7 @@
 
 - (void)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCiteKeyString, BDSKPubDateString, BDSKDateAddedString, BDSKDateModifiedString, BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKLastAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKLastAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
                                               excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
     

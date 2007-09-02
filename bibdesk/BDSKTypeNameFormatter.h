@@ -38,7 +38,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 
 @interface BDSKTypeNameFormatter : NSFormatter {

@@ -57,7 +57,7 @@
 #import "BDSKCountedSet.h"
 #import "BibAuthor.h"
 #import "BibAppController.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKSharingBrowser.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWindowController_BDSKExtensions.h"
@@ -65,7 +65,7 @@
 #import "BDSKURLGroupSheetController.h"
 #import "BDSKScriptGroupSheetController.h"
 #import "BibEditor.h"
-#import "BibPersonController.h"
+#import "BDSKPersonController.h"
 #import "BDSKColoredBox.h"
 #import "BDSKCollapsibleView.h"
 #import "BDSKSearchGroup.h"
@@ -841,7 +841,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [headerCell selectItemAtIndex:[headerCell indexOfItemWithRepresentedObject:currentGroupField]];
 	[headerCell setTitle:[headerCell titleOfSelectedItem]];
     
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKPubTypeString, BDSKCrossrefString, nil]
                                               excluding:[[[typeMan invalidGroupFieldsSet] allObjects] arrayByAddingObjectsFromArray:groupFields]];

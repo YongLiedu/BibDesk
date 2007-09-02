@@ -40,7 +40,7 @@
 #import <OmniBase/assertions.h>
 #import <OmniBase/OBUtilities.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 @interface NSArray (BibAuthorMultipleCompare)
 @end

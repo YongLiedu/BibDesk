@@ -42,7 +42,7 @@
 #import "BibDocument.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibFiler.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 
 @implementation BibDeskAutoFileCommand

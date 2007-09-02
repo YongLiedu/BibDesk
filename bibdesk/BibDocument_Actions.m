@@ -49,7 +49,7 @@
 #import "BDSKGroupsArray.h"
 
 #import "BibEditor.h"
-#import "BibPersonController.h"
+#import "BDSKPersonController.h"
 #import "BDSKDocumentInfoWindowController.h"
 #import "BDSKMacroWindowController.h"
 #import "BDSKNotesWindowController.h"
@@ -60,7 +60,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSTableView_BDSKExtensions.h"
 
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKScriptHookManager.h"
 #import "BDSKAlert.h"
 #import "BibFiler.h"
@@ -419,10 +419,10 @@
 
 - (void)showPerson:(BibAuthor *)person{
     OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
-    BibPersonController *pc = [person personController];
+    BDSKPersonController *pc = [person personController];
     
     if(pc == nil){
-        pc = [[BibPersonController alloc] initWithPerson:person];
+        pc = [[BDSKPersonController alloc] initWithPerson:person];
         [self addWindowController:pc];
         [pc release];
     }
@@ -1314,7 +1314,7 @@
     CFIndex i, idx = [shownPublications count], countOfItems = 0;
     BibItem *pub;
     NSMutableIndexSet *rowsToSelect = [NSMutableIndexSet indexSet];
-    BibTypeManager *typeman = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeman = [BDSKTypeManager sharedManager];
     NSArray *reqFields;
     
     while(idx--){

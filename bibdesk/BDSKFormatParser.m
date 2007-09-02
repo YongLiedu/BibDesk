@@ -41,7 +41,7 @@
 #import "BibPrefController.h"
 #import "BibAuthor.h"
 #import "BDSKConverter.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
 #import "NSScanner_BDSKExtensions.h"
@@ -322,7 +322,7 @@
 					if (string != nil) {
 						arr = [NSMutableArray array];
 						// split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
-                        NSCharacterSet *sepCharSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
+                        NSCharacterSet *sepCharSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
                         NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:sepCharSet];
 						if (keywordPunctuationRange.location != NSNotFound) {
 							wordScanner = [NSScanner scannerWithString:string];
@@ -679,7 +679,7 @@
 
 + (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {
-	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
+	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
     NSString *newString = nil;
 
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
@@ -722,7 +722,7 @@
 
 + (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {
-	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
+	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
     NSString *newString = nil;
 	int cleanOption = 0;
 
@@ -749,7 +749,7 @@
 		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalUrlCleanOptionKey];
 		
 		if (cleanOption >= 3)
-			invalidCharSet = [[BibTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName inFileType:type];
+			invalidCharSet = [[BDSKTypeManager sharedManager] veryStrictInvalidCharactersForField:fieldName inFileType:type];
 		
 		if ([NSString isEmptyString:string]) {
 			return @"";
@@ -824,7 +824,7 @@
 		errorAttr = [[NSDictionary alloc] initWithObjectsAndKeys:font, NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
 	}
 	
-	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
+	NSCharacterSet *invalidCharSet = [[BDSKTypeManager sharedManager] invalidCharactersForField:fieldName inFileType:type];
 	NSCharacterSet *digitCharSet = [NSCharacterSet decimalDigitCharacterSet];
 	NSScanner *scanner = [NSScanner scannerWithString:*formatString];
 	NSMutableString *sanitizedFormatString = [[NSMutableString alloc] init];

@@ -67,7 +67,7 @@
         condition = [aCondition retain];
 		canRemove = [filterController canRemoveCondition];
 		
-        BibTypeManager *typeMan = [BibTypeManager sharedManager];
+        BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
         keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateAddedString, BDSKDateModifiedString, BDSKAllFieldsString, BDSKPubTypeString, BDSKAbstractString, BDSKAnnoteString, BDSKRssDescriptionString, nil]
                                       excluding:nil] mutableCopy];
     }

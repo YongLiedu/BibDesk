@@ -40,7 +40,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 // The filename and keys used in the plist
 #define CHARACTER_CONVERSION_FILENAME	@"CharacterConversion.plist"

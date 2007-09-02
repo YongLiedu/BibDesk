@@ -38,7 +38,7 @@
 
 #import "BDSKOrphanedFilesFinder.h"
 #import "BibPrefController.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibAppController.h"
 #import "BibDocument.h"
 #import "BibItem.h"
@@ -141,7 +141,7 @@ static BDSKOrphanedFilesFinder *sharedFinder = nil;
 
 - (NSSet *)knownFiles
 {
-    NSSet *localFileFields = [[BibTypeManager sharedManager] localFileFieldsSet];
+    NSSet *localFileFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *docEnum = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
     BibDocument *doc;
     NSEnumerator *pubEnum;

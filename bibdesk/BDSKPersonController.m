@@ -1,5 +1,5 @@
 //
-//  BibPersonController.m
+//  BDSKPersonController.m
 //  BibDesk
 //
 //  Created by Michael McCracken on Thu Mar 18 2004.
@@ -36,8 +36,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibPersonController.h"
-#import "BibTypeManager.h"
+#import "BDSKPersonController.h"
+#import "BDSKTypeManager.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibDocument.h"
 #import "BibDocument_Actions.h"
@@ -51,7 +51,7 @@
 #import "NSImage+Toolbox.h"
 #import <AddressBook/AddressBook.h>
 
-@implementation BibPersonController
+@implementation BDSKPersonController
 
 #pragma mark initialization
 
@@ -59,11 +59,11 @@
     [self setKeys:[NSArray arrayWithObject:@"document"] triggerChangeNotificationsForDependentKey:@"publications"];
 }
 
-- (NSString *)windowNibName{return @"BibPersonView";}
+- (NSString *)windowNibName{return @"BDSKPersonWindow";}
 
 - (id)initWithPerson:(BibAuthor *)aPerson{
 
-    self = [super initWithWindowNibName:@"BibPersonView"];
+    self = [super init];
 	if(self){
         [self setPerson:aPerson];
         publications = nil;
@@ -217,7 +217,7 @@
     BibItem *pub = nil;
     
     // @@ maybe handle this in the type manager?
-    NSArray *fieldNames = [[[BibTypeManager sharedManager] personFieldsSet] allObjects];
+    NSArray *fieldNames = [[[BDSKTypeManager sharedManager] personFieldsSet] allObjects];
     NSArray *peopleFromString;
     CFIndex numberOfFields = [fieldNames count];
     NSString *fieldName;

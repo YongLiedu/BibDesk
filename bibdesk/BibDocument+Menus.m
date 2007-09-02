@@ -43,7 +43,7 @@
 #import "BDSKMainTableView.h"
 #import "BDSKGroupTableView.h"
 #import "BibItem.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKTemplate.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument_Actions.h"

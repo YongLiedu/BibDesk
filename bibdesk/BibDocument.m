@@ -2270,7 +2270,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         [nc addObserver:self
                selector:@selector(handleTypeInfoDidChangeNotification:)
                    name:BDSKBibTypeInfoChangedNotification
-                 object:[BibTypeManager sharedManager]];
+                 object:[BDSKTypeManager sharedManager]];
         [nc addObserver:self
                selector:@selector(handleCustomFieldsDidChangeNotification:)
                    name:BDSKCustomFieldsChangedNotification
@@ -2410,7 +2410,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [searchIndexes addPublications:[NSArray arrayWithObject:pub]];
     
     // access type manager outside the enumerator, since it's @synchronized...
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSCharacterSet *invalidSet = [typeManager invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
     NSSet *citeFields = [typeManager citationFieldsSet];
     

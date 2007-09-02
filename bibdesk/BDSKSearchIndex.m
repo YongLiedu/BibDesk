@@ -40,7 +40,7 @@
 #import "BibDocument.h"
 #import "BibItem.h"
 #import <libkern/OSAtomic.h>
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKThreadSafeMutableArray.h"
 #import "NSObject_BDSKExtensions.h"
 

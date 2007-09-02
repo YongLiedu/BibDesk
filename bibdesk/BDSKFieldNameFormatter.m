@@ -68,7 +68,7 @@
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-    NSRange r = [partialString rangeOfCharacterFromSet:[[BibTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
+    NSRange r = [partialString rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
     if ( r.location != NSNotFound || 
         ([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) )
 		return NO; // BibTeX chokes if the first character of a field name is a digit

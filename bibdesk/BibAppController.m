@@ -42,7 +42,7 @@
 #import "BibAuthor.h"
 #import "BDSKPreviewer.h"
 #import "NSString_BDSKExtensions.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKCharacterConversion.h"
 #import "BDSKFindController.h"
 #import "BDSKScriptMenu.h"
@@ -651,7 +651,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
         return;
     }
     
-    NSCharacterSet *acSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:entry];
+    NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:entry];
     if([string rangeOfCharacterFromSet:acSet].location != NSNotFound){
         [completionSet addObjectsFromArray:[string componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES]];
     } else if([entry isEqualToString:BDSKKeywordsString]){
@@ -672,7 +672,7 @@ static BOOL fileIsInTrash(NSURL *fileURL)
 
 - (NSRange)entry:(NSString *)entry rangeForUserCompletion:(NSRange)charRange ofString:(NSString *)fullString {
     OFCharacterSet *wsCharSet = [OFCharacterSet whitespaceCharacterSet];
-    NSCharacterSet *acSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:entry];
+    NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:entry];
 
 	if ([entry isEqualToString:BDSKEditorString])	
 		entry = BDSKAuthorString;

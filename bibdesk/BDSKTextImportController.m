@@ -39,7 +39,7 @@
 #import "BDSKTextImportController.h"
 #import "BDSKOwnerProtocol.h"
 #import "BibItem.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKMacroTextFieldWindowController.h"
 #import "BDSKImagePopUpButton.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
@@ -428,7 +428,7 @@
 }
 
 - (IBAction)addField:(id)sender{
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *currentFields = [item allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
@@ -761,7 +761,7 @@
 
     // setup the type popup:
     [itemTypeButton removeAllItems];
-    [itemTypeButton addItemsWithTitles:[[BibTypeManager sharedManager] bibTypesForFileType:[item fileType]]];
+    [itemTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypesForFileType:[item fileType]]];
     
     NSString *type = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPubTypeStringKey];
     
@@ -775,7 +775,7 @@
     [itemTypeButton selectItemWithTitle:type];
     [item setPubType:type];
 
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 
     [fields removeAllObjects];
     
@@ -1790,7 +1790,7 @@
 
 - (void)autoDiscoverFromFrameAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSDictionary *metaTagDict = [(NSDictionary *)contextInfo autorelease];
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSEnumerator *metaTagKeyE = [metaTagDict keyEnumerator];
     NSString *metaName = nil;
     
@@ -1936,7 +1936,7 @@
     
     static NSCharacterSet *fieldNameCharSet = nil;
     if (fieldNameCharSet == nil) 
-        fieldNameCharSet = [[[[BibTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
+        fieldNameCharSet = [[[[BDSKTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
     
     if ([[self dataSource] isInTemporaryTypeSelectMode]) {
         if (c == NSDownArrowFunctionKey || c == NSUpArrowFunctionKey || c == NSDeleteCharacter || c == NSBackspaceCharacter) {

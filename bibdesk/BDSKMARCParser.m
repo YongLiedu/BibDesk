@@ -38,7 +38,7 @@
 
 #import "BDSKMARCParser.h"
 #import "NSString_BDSKExtensions.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
 #import <OmniFoundation/NSScanner-OFExtensions.h>
@@ -332,7 +332,7 @@ static NSString *nameSubTag = @"a";
 static NSString *relatorSubTag = @"e";
 
 static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pubDict, NSString *tag, NSString *subTag){
-    NSString *key = [[[BibTypeManager sharedManager] fieldNamesForMARCTag:tag] objectForKey:subTag];
+    NSString *key = [[[BDSKTypeManager sharedManager] fieldNamesForMARCTag:tag] objectForKey:subTag];
     NSString *tmpValue = nil;
     
     if(key == nil)

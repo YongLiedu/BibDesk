@@ -40,7 +40,7 @@
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKTypeNameFormatter.h"
 #import "BibAppController.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"
 
@@ -71,7 +71,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
         
 		fieldsForTypesDict = [[NSMutableDictionary alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
 		types = [[NSMutableArray alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
-		[self revertTypes]; // this loads the current typeInfo from BibTypeManager
+		[self revertTypes]; // this loads the current typeInfo from BDSKTypeManager
     }
     return self;
 }
@@ -112,7 +112,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (void)revertTypes {
-	BibTypeManager *btm = [BibTypeManager sharedManager];
+	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
 	NSMutableDictionary *fieldsDict = [NSMutableDictionary dictionaryWithCapacity:2];
 	NSEnumerator *typeEnum = [[btm bibTypesForFileType:BDSKBibtexString] objectEnumerator];
 	NSString *type;
@@ -204,7 +204,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
             [data writeToFile:typeInfoPath atomically:YES];
         }
         
-        [[BibTypeManager sharedManager] reloadTypeInfo];
+        [[BDSKTypeManager sharedManager] reloadTypeInfo];
         
         [self setDocumentEdited:NO];
     } else {

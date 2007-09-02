@@ -38,7 +38,7 @@
  */
 
 #import "BDSKFindController.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibDocument.h"
 #import "BDSKComplexString.h"
 #import "BibDocument+Scripting.h"
@@ -128,7 +128,7 @@ enum {
 }
 
 - (void)awakeFromNib{
-    BibTypeManager *btm = [BibTypeManager sharedManager];
+    BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSArray *fields = [btm allFieldNamesIncluding:[[btm noteFieldsSet] allObjects] excluding:nil];
 	[fieldToSearchComboBox removeAllItems];
 	[fieldToSearchComboBox addItemsWithObjectValues:fields];

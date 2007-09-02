@@ -41,7 +41,7 @@
 #import "BibAppController.h"
 #import "BibAuthor.h"
 #import "BDSKFormatParser.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSArray_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>

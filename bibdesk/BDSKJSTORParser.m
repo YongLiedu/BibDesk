@@ -38,7 +38,7 @@
 
 #import "BDSKJSTORParser.h"
 #import "NSString_BDSKExtensions.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
 #import <OmniBase/assertions.h>
@@ -111,7 +111,7 @@ static void splitDateString(NSMutableDictionary *pubDict)
     NSString *tag = nil;
     NSString *key = nil;
     NSString *value = nil;
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     
     NSSet *fieldsNotToConvert = nil;

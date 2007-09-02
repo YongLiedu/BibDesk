@@ -101,7 +101,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 												   filePath:@"testFieldOrder"];
     BibItem *item1 = [testArray objectAtIndex:0];
     NSString *firstType = [item1 type];
-    NSEnumerator *typeE = [[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString] objectEnumerator];
+    NSEnumerator *typeE = [[[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString] objectEnumerator];
     NSString *aType = nil;
     NSString *beforeString = [item1 bibTeXString];
     

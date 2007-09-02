@@ -41,7 +41,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 @interface BDSKCondition (Private)
 - (NSDate *)cachedEndDate;

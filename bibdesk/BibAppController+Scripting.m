@@ -39,7 +39,7 @@
 #import "BibAppController+Scripting.h"
 #import <OmniFoundation/OFPreference.h>
 #import "BDSKScriptHookManager.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BDSKMacroResolver.h"
 #import "BDSKMacro.h"
 
@@ -61,11 +61,11 @@ Category on BibAppController making the papers folder readable for scripting
 }
 
 - (NSArray *)allTypes {
-	return [[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString];
+	return [[BDSKTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString];
 }
 
 - (NSArray *)allFieldNames {
-	return [[BibTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
+	return [[BDSKTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
 }
 
 - (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID {

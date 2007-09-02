@@ -37,7 +37,7 @@
  */
 
 #import "BDSKPubMedParser.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibItem.h"
 #import "BibAppController.h"
 #import <AGRegex/AGRegex.h>
@@ -76,7 +76,7 @@
     else if([tag isEqualToString:@"IS"])
         key = @"Issn";
 	else
-        key = [[BibTypeManager sharedManager] fieldNameForPubMedTag:tag];
+        key = [[BDSKTypeManager sharedManager] fieldNameForPubMedTag:tag];
     if(key == nil || [key isEqualToString:BDSKAuthorString]) key = [tag fieldName];
 	oldString = [pubDict objectForKey:key];
 	
@@ -143,7 +143,7 @@
 
 + (NSString *)pubTypeFromDictionary:(NSDictionary *)pubDict;
 {
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSString *type = BDSKArticleString;
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]] != nil)
         type = [typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Pt"]];

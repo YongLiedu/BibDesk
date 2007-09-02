@@ -38,7 +38,7 @@
 #import "BDSKHCiteParser.h"
 #import <WebKit/WebKit.h>
 #import "BibItem.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 @interface NSXMLNode (BDSKExtensions)
 - (NSString *)stringValueOfAttribute:(NSString *)attrName;
@@ -136,7 +136,7 @@
 @implementation BDSKHCiteParser (Private)
 
 + (NSMutableDictionary *)dictionaryFromCitationNode:(NSXMLNode *)citationNode{
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSMutableDictionary *rd = [NSMutableDictionary dictionaryWithCapacity:0];
     
     NSError *err = nil;

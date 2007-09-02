@@ -39,7 +39,7 @@
 #import "BDSKWebOfScienceParser.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 static void mergePageNumbers(NSMutableDictionary *dict)
 {
@@ -50,8 +50,8 @@ static void mergePageNumbers(NSMutableDictionary *dict)
     static NSString *bpName = nil;
     static NSString *epName = nil;
     if(bpName == nil){
-        bpName = [[[BibTypeManager sharedManager] fieldNameForWebOfScienceTag:@"BP"] copy];
-        epName = [[[BibTypeManager sharedManager] fieldNameForWebOfScienceTag:@"EP"] copy];
+        bpName = [[[BDSKTypeManager sharedManager] fieldNameForWebOfScienceTag:@"BP"] copy];
+        epName = [[[BDSKTypeManager sharedManager] fieldNameForWebOfScienceTag:@"EP"] copy];
     }
     
     if([keys containsObject:bpName] && [keys containsObject:epName]){
@@ -180,7 +180,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
     NSString *tag = nil;
     NSString *value = nil;
     NSMutableString *mutableValue = [NSMutableString string];
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     NSString *type = nil;
     

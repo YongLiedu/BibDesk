@@ -376,11 +376,11 @@ __BibAuthorsHaveEqualFirstNames(CFArrayRef myFirstNames, CFArrayRef otherFirstNa
 }
 
 // Accessors for personController - we don't retain it to avoid cycles.
-- (BibPersonController *)personController{
+- (BDSKPersonController *)personController{
     return personController; 
 }
 
-- (void)setPersonController:(BibPersonController *)newPersonController{
+- (void)setPersonController:(BDSKPersonController *)newPersonController{
 	personController = newPersonController;
 }
 

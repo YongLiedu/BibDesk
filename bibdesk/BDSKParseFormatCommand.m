@@ -43,7 +43,7 @@
 #import "BibPrefController.h"
 #import "BibAppController.h"
 #import "BDSKOwnerProtocol.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 @implementation BDSKParseFormatCommand
 

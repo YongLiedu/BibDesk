@@ -37,7 +37,7 @@
  */
 
 #import "BDSKCitationFormatter.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 
 @implementation BDSKCitationFormatter
@@ -112,7 +112,7 @@
             errorDescription:(NSString **)error{
 	static NSCharacterSet *invalidSet = nil;
     if (invalidSet == nil) {
-        NSMutableCharacterSet *tmpSet = [[[BibTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] mutableCopy];
+        NSMutableCharacterSet *tmpSet = [[[BDSKTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] mutableCopy];
         [tmpSet removeCharactersInString:@", "];
         invalidSet = [tmpSet copy];
         [tmpSet release];

@@ -40,7 +40,7 @@
 #import "NSImage+Toolbox.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 
 // a private subclass for the Empty ... group

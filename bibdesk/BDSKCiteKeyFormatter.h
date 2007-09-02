@@ -34,7 +34,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 
 @interface BDSKCiteKeyFormatter : NSFormatter {

@@ -1318,7 +1318,7 @@ enum{
 
 // raises the add field sheet
 - (IBAction)raiseAddField:(id)sender{
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *currentFields = [publication allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
     
@@ -1411,7 +1411,7 @@ enum{
 - (IBAction)raiseDelField:(id)sender{
     // populate the popupbutton
     NSString *currentType = [publication pubType];
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
 	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
 	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
 	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
@@ -1457,7 +1457,7 @@ enum{
         return;
     
     NSString *currentType = [publication pubType];
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSMutableSet *nonNilFields = [NSMutableSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
 	[nonNilFields addObjectsFromArray:[typeMan requiredFieldsForType:currentType]];
 	[nonNilFields addObjectsFromArray:[typeMan optionalFieldsForType:currentType]];
@@ -1478,7 +1478,7 @@ enum{
 }
 
 - (IBAction)raiseChangeFieldName:(id)sender{
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     NSArray *currentFields = [publication allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObject:BDSKCrossrefString] excluding:currentFields];
 	NSMutableArray *removableFields = [[publication allFieldNames] mutableCopy];
@@ -1724,7 +1724,7 @@ enum{
 		
         NSString *message = nil;
         NSString *cancelButton = nil;
-        NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] fragileCiteKeyCharacterSet];
+        NSCharacterSet *invalidSet = [[BDSKTypeManager sharedManager] fragileCiteKeyCharacterSet];
         NSRange r = [[control stringValue] rangeOfCharacterFromSet:invalidSet];
         
         if (r.location != NSNotFound) {
@@ -3783,8 +3783,8 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
     sKeys = [[publication allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 	
 	// now add the entries to the form
-	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[publication pubType]], reqAtt);
-	AddFormEntries([[BibTypeManager sharedManager] optionalFieldsForType:[publication pubType]], nil);
+	AddFormEntries([[BDSKTypeManager sharedManager] requiredFieldsForType:[publication pubType]], reqAtt);
+	AddFormEntries([[BDSKTypeManager sharedManager] optionalFieldsForType:[publication pubType]], nil);
 	AddFormEntries(sKeys, nil);
     
     [ignoredKeys release];
@@ -3893,7 +3893,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 }
 
 - (void)matrixFrameDidChange:(NSNotification *)notification {
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeMan = [BDSKTypeManager sharedManager];
     int numEntries = [[typeMan booleanFieldsSet] count] + [[typeMan triStateFieldsSet] count] + [[typeMan ratingFieldsSet] count];
     float width = NSWidth([[extraBibFields enclosingScrollView] frame]) - [NSScroller scrollerWidth];
     float spacing = [extraBibFields intercellSpacing].width;
@@ -3906,7 +3906,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 
 - (void)setupTypePopUp{
     [bibTypeButton removeAllItems];
-    [bibTypeButton addItemsWithTitles:[[BibTypeManager sharedManager] bibTypesForFileType:[publication fileType]]];
+    [bibTypeButton addItemsWithTitles:[[BDSKTypeManager sharedManager] bibTypesForFileType:[publication fileType]]];
 
     [bibTypeButton selectItemWithTitle:[publication pubType]];
 }
@@ -3944,7 +3944,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(typeInfoDidChange:)
 												 name:BDSKBibTypeInfoChangedNotification
-											   object:[BibTypeManager sharedManager]];
+											   object:[BDSKTypeManager sharedManager]];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(customFieldsDidChange:)
 												 name:BDSKCustomFieldsChangedNotification
@@ -4014,7 +4014,7 @@ static NSString *queryStringWithCiteKey(NSString *citekey)
 - (void)breakTextStorageConnections {
     
     // This is a fix for bug #1483613 (and others).  We set some of the BibItem's fields to -[[NSTextView textStorage] mutableString] for efficiency in tracking changes for live editing updates in the main window preview.  However, this causes a retain cycle, as the text storage retains its text view; any font changes to the editor text view will cause the retained textview to message its delegate (BibEditor) which is garbage in -[NSTextView _addToTypingAttributes].
-    NSEnumerator *fieldE = [[[BibTypeManager sharedManager] noteFieldsSet] objectEnumerator];
+    NSEnumerator *fieldE = [[[BDSKTypeManager sharedManager] noteFieldsSet] objectEnumerator];
     NSString *currentValue = nil;
     NSString *fieldName = nil;
     while(fieldName = [fieldE nextObject]){

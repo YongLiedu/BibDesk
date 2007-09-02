@@ -40,7 +40,7 @@
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BibEditor.h"
-#import "BibPersonController.h"
+#import "BDSKPersonController.h"
 #import "BDSKOwnerProtocol.h"
 
 @implementation NSWindow (BDSKScripting)

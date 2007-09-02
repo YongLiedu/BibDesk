@@ -53,7 +53,7 @@
 #import "BDSKGroupTableView.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSFileManager_ExtendedAttributes.h"
 #import "NSSet_BDSKExtensions.h"

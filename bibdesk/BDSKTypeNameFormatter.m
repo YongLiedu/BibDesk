@@ -68,7 +68,7 @@
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-    NSRange r = [partialString rangeOfCharacterFromSet:[[BibTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
+    NSRange r = [partialString rangeOfCharacterFromSet:[[BDSKTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
     if ( r.location != NSNotFound)
         return NO;
     r = [partialString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]];

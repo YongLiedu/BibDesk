@@ -1,5 +1,5 @@
 //
-//  BibTypeManager.m
+//  BDSKTypeManager.m
 //  BibDesk
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
@@ -36,20 +36,20 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSCharacterSet_BDSKExtensions.h"
 #import "OFCharacterSet_BDSKExtensions.h"
 
-static BibTypeManager *sharedInstance = nil;
+static BDSKTypeManager *sharedInstance = nil;
 
 // note: if calling this in a loop, @synchronized() can be very expensive, so call it before entering the loop
-@implementation BibTypeManager
-+ (BibTypeManager *)sharedManager{
+@implementation BDSKTypeManager
++ (BDSKTypeManager *)sharedManager{
     @synchronized(sharedInstance){
         if(sharedInstance == nil) 
-            sharedInstance = [[BibTypeManager alloc] init];
+            sharedInstance = [[BDSKTypeManager alloc] init];
     }
     return sharedInstance;
 }
@@ -714,18 +714,18 @@ static BibTypeManager *sharedInstance = nil;
 
 @implementation NSString (BDSKTypeExtensions)
 
-- (BOOL)isBooleanField { return [[[BibTypeManager sharedManager] booleanFieldsSet] containsObject:self]; }
-- (BOOL)isTriStateField { return [[[BibTypeManager sharedManager] triStateFieldsSet] containsObject:self]; }
-- (BOOL)isRatingField { return [[[BibTypeManager sharedManager] ratingFieldsSet] containsObject:self]; }
-- (BOOL)isLocalFileField { return [[[BibTypeManager sharedManager] localFileFieldsSet] containsObject:self]; }
-- (BOOL)isRemoteURLField { return [[[BibTypeManager sharedManager] remoteURLFieldsSet] containsObject:self]; }
-- (BOOL)isCitationField { return [[[BibTypeManager sharedManager] citationFieldsSet] containsObject:self]; }
-- (BOOL)isPersonField { return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:self]; }
-- (BOOL)isURLField { return [[[BibTypeManager sharedManager] allURLFieldsSet] containsObject:self]; }
-- (BOOL)isNoteField { return [[[BibTypeManager sharedManager] noteFieldsSet] containsObject:self]; }
-- (BOOL)isNumericField { return [[[BibTypeManager sharedManager] numericFieldsSet] containsObject:self]; }
-- (BOOL)isSingleValuedGroupField { return [[[BibTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self]; }
-- (BOOL)isSingleValuedField { return [[[BibTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self] || [self isInvalidGroupField]; }
-- (BOOL)isInvalidGroupField { return [[[BibTypeManager sharedManager] invalidGroupFieldsSet] containsObject:self]; }
+- (BOOL)isBooleanField { return [[[BDSKTypeManager sharedManager] booleanFieldsSet] containsObject:self]; }
+- (BOOL)isTriStateField { return [[[BDSKTypeManager sharedManager] triStateFieldsSet] containsObject:self]; }
+- (BOOL)isRatingField { return [[[BDSKTypeManager sharedManager] ratingFieldsSet] containsObject:self]; }
+- (BOOL)isLocalFileField { return [[[BDSKTypeManager sharedManager] localFileFieldsSet] containsObject:self]; }
+- (BOOL)isRemoteURLField { return [[[BDSKTypeManager sharedManager] remoteURLFieldsSet] containsObject:self]; }
+- (BOOL)isCitationField { return [[[BDSKTypeManager sharedManager] citationFieldsSet] containsObject:self]; }
+- (BOOL)isPersonField { return [[[BDSKTypeManager sharedManager] personFieldsSet] containsObject:self]; }
+- (BOOL)isURLField { return [[[BDSKTypeManager sharedManager] allURLFieldsSet] containsObject:self]; }
+- (BOOL)isNoteField { return [[[BDSKTypeManager sharedManager] noteFieldsSet] containsObject:self]; }
+- (BOOL)isNumericField { return [[[BDSKTypeManager sharedManager] numericFieldsSet] containsObject:self]; }
+- (BOOL)isSingleValuedGroupField { return [[[BDSKTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self]; }
+- (BOOL)isSingleValuedField { return [[[BDSKTypeManager sharedManager] singleValuedGroupFieldsSet] containsObject:self] || [self isInvalidGroupField]; }
+- (BOOL)isInvalidGroupField { return [[[BDSKTypeManager sharedManager] invalidGroupFieldsSet] containsObject:self]; }
 
 @end

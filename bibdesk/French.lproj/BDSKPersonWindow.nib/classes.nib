@@ -9,7 +9,7 @@
         {CLASS = BDSKDragImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
         {
             ACTIONS = {openSelectedPub = id; }; 
-            CLASS = BibPersonController; 
+            CLASS = BDSKPersonController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 collapsibleView = BDSKCollapsibleView; 

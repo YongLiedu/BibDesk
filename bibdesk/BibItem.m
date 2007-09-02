@@ -41,7 +41,7 @@
 #import "BDSKGroup.h"
 #import "BDSKCategoryGroup.h"
 #import "BibEditor.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 #import "BibAuthor.h"
 #import "BibPrefController.h"
 #import "NSString_BDSKExtensions.h"
@@ -138,7 +138,7 @@ CFHashCode BibItemEquivalenceHash(const void *item)
     CFHashCode hash = OFCaseInsensitiveStringHash(type);
 	
 	// hash only the standard fields; are these all we should compare?
-	BibTypeManager *btm = [BibTypeManager sharedManager];
+	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
 	[keys addObjectsFromArray:[btm requiredFieldsForType:type]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:type]];
@@ -401,7 +401,7 @@ static CFDictionaryRef selectorTable = NULL;
 		return NO;
 	
 	// compare only the standard fields; are these all we should compare?
-	BibTypeManager *btm = [BibTypeManager sharedManager];
+	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
 	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
@@ -435,7 +435,7 @@ static CFDictionaryRef selectorTable = NULL;
 		return NO;
 	
 	// compare only the standard fields; are these all we should compare?
-	BibTypeManager *btm = [BibTypeManager sharedManager];
+	BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
 	NSMutableSet *keys = [[NSMutableSet alloc] initWithCapacity:20];
 	[keys addObjectsFromArray:[btm requiredFieldsForType:[self pubType]]];
 	[keys addObjectsFromArray:[btm optionalFieldsForType:[self pubType]]];
@@ -567,7 +567,7 @@ static CFDictionaryRef selectorTable = NULL;
     
     if (people == nil) {
         
-        NSEnumerator *pEnum = [[[BibTypeManager sharedManager] personFieldsSet] objectEnumerator];
+        NSEnumerator *pEnum = [[[BDSKTypeManager sharedManager] personFieldsSet] objectEnumerator];
         NSString *personStr;
         NSString *personType;
         
@@ -1473,7 +1473,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (NSDictionary *)searchIndexInfo{
-    NSSet *urlFields = [[BibTypeManager sharedManager] localFileFieldsSet];
+    NSSet *urlFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
     NSEnumerator *fieldEnumerator = [urlFields objectEnumerator];
     NSString *urlFieldName = nil;
     
@@ -1605,7 +1605,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableArray *keys = [[self allFieldNames] mutableCopy];
 	NSEnumerator *e;
     
-    BibTypeManager *btm = [BibTypeManager sharedManager];
+    BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSString *type = [self pubType];
     NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
@@ -1623,7 +1623,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		[knownKeys addObject:BDSKCrossrefString];
 	}
 	if(shouldTeXify)
-        urlKeys = [[BibTypeManager sharedManager] allURLFieldsSet];
+        urlKeys = [[BDSKTypeManager sharedManager] allURLFieldsSet];
 	
 	e = [keys objectEnumerator];
 	[keys release];
@@ -1678,7 +1678,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     BOOL isOK = YES;
     
     
-    BibTypeManager *btm = [BibTypeManager sharedManager];
+    BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     NSString *type = [self pubType];
     NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
@@ -1696,7 +1696,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 		[knownKeys addObject:BDSKCrossrefString];
 	}
 	if(shouldTeXify)
-        urlKeys = [[BibTypeManager sharedManager] allURLFieldsSet];
+        urlKeys = [[BDSKTypeManager sharedManager] allURLFieldsSet];
 	
 	e = [keys objectEnumerator];
 	[keys release];
@@ -1800,7 +1800,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     NSMutableAttributedString* nonReqStr = [[NSMutableAttributedString alloc] init];
 	NSAttributedString *valueStr;
     
-	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
+	NSSet *reqKeys = [[NSSet alloc] initWithArray:[[BDSKTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
 
     static NSDateFormatter *dateFormatter = nil;
     if(dateFormatter == nil) {
@@ -1936,7 +1936,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     [keys removeObject:BDSKDateModifiedString];
     [keys removeObject:BDSKLocalUrlString];
 
-    BibTypeManager *btm = [BibTypeManager sharedManager];
+    BDSKTypeManager *btm = [BDSKTypeManager sharedManager];
     
     // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
     // since they mark the beginning of each entry
@@ -2008,7 +2008,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>", t, [value stringByEscapingBasicXMLEntitiesUsingUTF8], t]
 
 - (NSString *)MODSString{
-    NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:[self pubType]];
+    NSDictionary *genreForTypeDict = [[BDSKTypeManager sharedManager] MODSGenresForBibTeXType:[self pubType]];
     NSMutableString *s = [NSMutableString stringWithString:@"<mods>\n"];
     unsigned i = 0;
     NSString *value;
@@ -2323,23 +2323,23 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 }
 
 - (id)requiredFields{
-    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
+    return [[self fields] fieldsWithNames:[[BDSKTypeManager sharedManager] requiredFieldsForType:[self pubType]]];
 }
 
 - (id)optionalFields{
-    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] optionalFieldsForType:[self pubType]]];
+    return [[self fields] fieldsWithNames:[[BDSKTypeManager sharedManager] optionalFieldsForType:[self pubType]]];
 }
 
 - (id)defaultFields{
-    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self pubType]]];
+    return [[self fields] fieldsWithNames:[[BDSKTypeManager sharedManager] userDefaultFieldsForType:[self pubType]]];
 }
 
 - (id)allFields{
     NSMutableArray *allFields = [NSMutableArray array];
     NSString *type = [self pubType];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:type]];
-    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:type]];
-    [allFields addNonDuplicateObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:type]];
+    [allFields addObjectsFromArray:[[BDSKTypeManager sharedManager] requiredFieldsForType:type]];
+    [allFields addObjectsFromArray:[[BDSKTypeManager sharedManager] optionalFieldsForType:type]];
+    [allFields addNonDuplicateObjectsFromArray:[[BDSKTypeManager sharedManager] userDefaultFieldsForType:type]];
     [allFields addNonDuplicateObjectsFromArray:[self allFieldNames]];
     return [[self fields] fieldsWithNames:allFields];
 }
@@ -2655,7 +2655,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         [mutableGroupSet addObjectsFromArray:[self peopleArrayForField:field]];
 	}else{
         NSArray *groupArray;   
-        NSCharacterSet *acSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:field];
+        NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:field];
         if([value containsCharacterInSet:acSet])
 			groupArray = [value componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
         else 
@@ -2817,7 +2817,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
 	
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
-    OFCharacterSet *delimiterCharSet = [[BibTypeManager sharedManager] separatorOFCharacterSetForField:field];
+    OFCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorOFCharacterSetForField:field];
     OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
 	
 	BOOL useDelimiters = NO;
@@ -2938,7 +2938,7 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
     }
 	
 	// otherwise we have a multivalued string, we should parse to get the order and delimiters right
-    OFCharacterSet *delimiterCharSet = [[BibTypeManager sharedManager] separatorOFCharacterSetForField:field];
+    OFCharacterSet *delimiterCharSet = [[BDSKTypeManager sharedManager] separatorOFCharacterSetForField:field];
     OFCharacterSet *whitespaceCharSet = [OFCharacterSet whitespaceCharacterSet];
 	
 	BOOL useDelimiters = NO;
@@ -3226,7 +3226,7 @@ static Boolean stringIsEqualToString(const void *value1, const void *value2) { r
     NSString *fieldString;
     NSString *theType = [self pubType];
     
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     
     // enumerating small arrays by index is generally faster than NSEnumerator, and -makeType is called many times at load
     CFArrayRef requiredFields = (CFArrayRef)[typeManager requiredFieldsForType:theType];

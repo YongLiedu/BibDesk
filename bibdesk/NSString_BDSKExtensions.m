@@ -49,7 +49,7 @@
 #import "NSDictionary_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKStringEncodingManager.h"
-#import "BibTypeManager.h"
+#import "BDSKTypeManager.h"
 
 static NSString *yesString = nil;
 static NSString *noString = nil;
@@ -1054,7 +1054,7 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (NSArray *)componentsSeparatedByFieldSeparators;
 {
-    NSCharacterSet *acSet = [[BibTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
+    NSCharacterSet *acSet = [[BDSKTypeManager sharedManager] separatorCharacterSetForField:BDSKKeywordsString];
     if([self containsCharacterInSet:acSet])
         return [self componentsSeparatedByCharactersInSet:acSet trimWhitespace:YES];
     else 

@@ -1,5 +1,5 @@
 //
-//  BibPersonController.h
+//  BDSKPersonController.h
 //  BibDesk
 //
 //  Created by Michael McCracken on Thu Mar 18 2004.
@@ -45,7 +45,7 @@
 @class BDSKCollapsibleView;
 @class OASplitView;
 
-@interface BibPersonController : NSWindowController {
+@interface BDSKPersonController : NSWindowController {
     BibAuthor *person;
     NSArray *publications;
 	float lastPickerHeight;

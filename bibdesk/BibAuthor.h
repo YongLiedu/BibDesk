@@ -41,7 +41,7 @@
 #import "BDSKCountedSet.h"
 #import <AddressBook/AddressBook.h>
 
-@class BibPersonController;
+@class BDSKPersonController;
 @class BibItem;
 @class ABPerson;
 
@@ -75,7 +75,7 @@ enum {
     NSString *sortableName;
     NSString *abbreviatedName;
     NSString *abbreviatedNormalizedName;
-    BibPersonController *personController; // unretained
+    BDSKPersonController *personController; // unretained
     BibItem *publication;
     unsigned hash;
    
@@ -130,8 +130,8 @@ enum {
 - (BibItem *)publication;
 - (void)setPublication:(BibItem *)newPub;
 
-- (BibPersonController *)personController;
-- (void)setPersonController:(BibPersonController *)newPersonController;
+- (BDSKPersonController *)personController;
+- (void)setPersonController:(BDSKPersonController *)newPersonController;
 - (ABPerson *)personFromAddressBook;
 
 @end
