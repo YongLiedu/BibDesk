@@ -36,7 +36,7 @@
 
 #import "BibDocumentView_Toolbar.h"
 #import "BibDocument_Search.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "NSImage+Toolbox.h"
 #import <OmniAppKit/OAToolbarItem.h>
 #import "OAToolbarItem_BDSKExtensions.h"

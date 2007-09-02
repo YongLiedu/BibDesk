@@ -39,7 +39,7 @@
 #import "BDSKPubMedParser.h"
 #import "BDSKTypeManager.h"
 #import "BibItem.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import <AGRegex/AGRegex.h>
 #import "NSString_BDSKExtensions.h"
 

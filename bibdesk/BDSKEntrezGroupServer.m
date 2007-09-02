@@ -53,7 +53,7 @@
 #import "BDSKSearchGroup.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKStringParser.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import <WebKit/WebKit.h>
 #import "BDSKServerInfo.h"
 #import "NSError_BDSKExtensions.h"

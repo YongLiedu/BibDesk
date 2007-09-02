@@ -52,7 +52,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BibFiler.h"
 #import "BibDocument.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSAttributedString_BDSKExtensions.h"
 #import "NSSet_BDSKExtensions.h"

@@ -39,7 +39,7 @@
 #import "BDSKOrphanedFilesFinder.h"
 #import "BibPrefController.h"
 #import "BDSKTypeManager.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BibDocument.h"
 #import "BibItem.h"
 #import "NSString_BDSKExtensions.h"

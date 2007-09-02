@@ -1,23 +1,6 @@
 {
     IBClasses = (
         {
-            ACTIONS = {openDocumentUsingFilter = id; openDocumentUsingPhonyCiteKeys = id; }; 
-            CLASS = BDSKDocumentController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                openTextEncodingAccessoryView = NSView; 
-                openTextEncodingPopupButton = BDSKEncodingPopUpButton; 
-                openUsingFilterAccessoryView = NSView; 
-                openUsingFilterComboBox = NSComboBox; 
-            }; 
-            SUPERCLASS = NSDocumentController; 
-        }, 
-        {
-            CLASS = BDSKEncodingPopUpButton; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSPopUpButton; 
-        }, 
-        {
             ACTIONS = {
                 checkForUpdates = id; 
                 editSearchBookmarks = id; 
@@ -33,7 +16,7 @@
                 visitWebSite = id; 
                 visitWiki = id; 
             }; 
-            CLASS = BibAppController; 
+            CLASS = BDSKAppController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 columnsMenu = NSMenu; 
@@ -42,6 +25,23 @@
                 searchBookmarksMenu = NSMenu; 
             }; 
             SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {openDocumentUsingFilter = id; openDocumentUsingPhonyCiteKeys = id; }; 
+            CLASS = BDSKDocumentController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                openTextEncodingAccessoryView = NSView; 
+                openTextEncodingPopupButton = BDSKEncodingPopUpButton; 
+                openUsingFilterAccessoryView = NSView; 
+                openUsingFilterComboBox = NSComboBox; 
+            }; 
+            SUPERCLASS = NSDocumentController; 
+        }, 
+        {
+            CLASS = BDSKEncodingPopUpButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButton; 
         }, 
         {
             ACTIONS = {

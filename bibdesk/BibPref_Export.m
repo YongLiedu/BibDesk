@@ -41,7 +41,7 @@
 #import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplate.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "NSMenu_BDSKExtensions.h"
 
 static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";

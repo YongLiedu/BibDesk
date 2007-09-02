@@ -39,7 +39,7 @@
 #import <OmniBase/OmniBase.h>
 #import <AGRegex/AGRegex.h>
 #import "BDSKStringEncodingManager.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BibDocument.h"
 #import "BibDocument_Groups.h"
 #import "BibDocument_Search.h"

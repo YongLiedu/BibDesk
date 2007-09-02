@@ -38,7 +38,7 @@
 
 #import "BibPref_Files.h"
 #import "BDSKStringEncodingManager.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKCharacterConversion.h"
 #import "BDSKConverter.h"
 #import "BDSKErrorObjectController.h"

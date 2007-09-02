@@ -38,7 +38,7 @@
 #import "BibPrefController.h"
 #import "BDSKTeXTask.h"
 #import "BDSKOverlay.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKZoomableScrollView.h"
 #import "BDSKZoomablePDFView.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>

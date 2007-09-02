@@ -35,7 +35,7 @@
  */
 
 #import "BibPref_TeX.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKStringEncodingManager.h"
 #import "BDSKPreviewer.h"
 #import "NSFileManager_BDSKExtensions.h"

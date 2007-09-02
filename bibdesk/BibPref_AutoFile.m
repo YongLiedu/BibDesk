@@ -40,7 +40,7 @@
 #import "NSImage+Toolbox.h"
 #import "BDSKAlert.h"
 #import "BDSKFormatParser.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKPreviewItem.h"
 
 #define MAX_PREVIEW_WIDTH	501.0

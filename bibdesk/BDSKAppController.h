@@ -1,4 +1,4 @@
-//  BibAppController.h
+//  BDSKAppController.h
 
 //  Created by Michael McCracken on Sat Jan 19 2002.
 /*
@@ -40,7 +40,7 @@
 @protocol BDSKOwner;
 
 /*!
-    @class BibAppController
+    @class BDSKAppController
     @abstract The application delegate.
     @discussion This (intended as a singleton) object handles various tasks that require global knowledge, such
  as showing & hiding the finder & preferences window, and the preview. <br>
@@ -48,7 +48,7 @@
 */
 
 
-@interface BibAppController : NSObject {
+@interface BDSKAppController : NSObject {
 	
     // global auto-completion dictionary:
     NSMutableDictionary *autoCompletionDict;

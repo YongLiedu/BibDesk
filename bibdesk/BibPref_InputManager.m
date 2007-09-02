@@ -43,7 +43,7 @@
 #import "NSImage+Toolbox.h"
 #import "BDSKTextWithIconCell.h"
 #import "NSSet_BDSKExtensions.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"

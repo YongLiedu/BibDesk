@@ -40,7 +40,7 @@
 #import <BTParse/btparse.h>
 #import <BTParse/BDSKErrorObject.h>
 #import <AGRegex/AGRegex.h>
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #include <stdio.h>
 #import "BibItem.h"
 #import "BDSKConverter.h"

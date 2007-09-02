@@ -37,7 +37,7 @@
  */
 
 #import "BDSKNotesWindowController.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKSkimReader.h"
 
 

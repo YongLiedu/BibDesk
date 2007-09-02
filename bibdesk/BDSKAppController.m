@@ -1,4 +1,4 @@
-//  BibAppController.m
+//  BDSKAppController.m
 
 //  Created by Michael McCracken on Sat Jan 19 2002.
 /*
@@ -34,7 +34,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKOwnerProtocol.h"
 #import <Carbon/Carbon.h>
 #import "BibPrefController.h"
@@ -81,7 +81,7 @@
 #import "BDSKSearchBookmarkController.h"
 #import "BDSKBookmarkController.h"
 
-@implementation BibAppController
+@implementation BDSKAppController
 
 // remove legacy comparisons of added/created/modified strings in table column code from prefs
 // maybe we can support transforming these in the add field sheets, if we want to allow some 

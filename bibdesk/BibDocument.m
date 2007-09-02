@@ -41,7 +41,7 @@
 #import "BibDocument_DataSource.h"
 #import "BibDocument_Actions.h"
 #import "BibDocumentView_Toolbar.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BibPrefController.h"
 #import "BDSKGroup.h"
 #import "BDSKStaticGroup.h"

@@ -37,13 +37,13 @@
  */
 
 #import "TestSystemServices.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 
 @implementation TestSystemServices
 
 
 - (BOOL)_constraintsFromString:(NSString *)string isEqualToDict:(NSDictionary *)result{
-    BibAppController *ac = [NSApp delegate];
+    BDSKAppController *ac = [NSApp delegate];
 
     NSDictionary *dict = [ac _constraintsFromString:string];
 

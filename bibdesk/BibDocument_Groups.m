@@ -56,7 +56,7 @@
 #import "BDSKFieldSheetController.h"
 #import "BDSKCountedSet.h"
 #import "BibAuthor.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKTypeManager.h"
 #import "BDSKSharingBrowser.h"
 #import "NSArray_BDSKExtensions.h"

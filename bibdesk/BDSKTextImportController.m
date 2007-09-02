@@ -55,7 +55,7 @@
 #import "BibDocument.h"
 #import "BDSKImagePopUpButtonCell.h"
 #import "NSFileManager_BDSKExtensions.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKFieldEditor.h"
 #import "BDSKFieldSheetController.h"
 #import "BDSKMacroResolver.h"

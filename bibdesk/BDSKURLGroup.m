@@ -42,7 +42,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKWebOfScienceParser.h"
 #import "BDSKSharedGroup.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKStringParser.h"
 #import "NSError_BDSKExtensions.h"

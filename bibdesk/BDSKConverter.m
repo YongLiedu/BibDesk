@@ -36,7 +36,7 @@
 #import "BDSKConverter.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKComplexString.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import <OmniFoundation/OmniFoundation.h>
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKStringNode.h"

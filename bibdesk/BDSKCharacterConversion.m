@@ -36,7 +36,7 @@
  */
 
 #import "BDSKCharacterConversion.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKConverter.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKAlert.h"

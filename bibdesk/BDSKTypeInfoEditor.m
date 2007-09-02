@@ -39,7 +39,7 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BDSKTypeNameFormatter.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKTypeManager.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "NSIndexSet_BDSKExtensions.h"

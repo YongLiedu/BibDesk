@@ -40,7 +40,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKTypeManager.h"
 #import "BibItem.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import <OmniBase/assertions.h>
 
 //

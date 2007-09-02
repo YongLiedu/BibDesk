@@ -1,5 +1,5 @@
 //
-//  BibAppController+Scripting.m
+//  BDSKAppController+Scripting.m
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibAppController+Scripting.h"
+#import "BDSKAppController+Scripting.h"
 #import <OmniFoundation/OFPreference.h>
 #import "BDSKScriptHookManager.h"
 #import "BDSKTypeManager.h"
@@ -44,9 +44,9 @@
 #import "BDSKMacro.h"
 
 /* ssp
-Category on BibAppController making the papers folder readable for scripting
+Category on BDSKAppController making the papers folder readable for scripting
 */
-@implementation BibAppController (Scripting)
+@implementation BDSKAppController (Scripting)
 
 - (NSString *)papersFolder {
 	return [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey] stringByStandardizingPath];

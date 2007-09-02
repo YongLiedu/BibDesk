@@ -37,7 +37,7 @@
  */
 
 #import "BDSKShellTask.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "NSFileManager_BDSKExtensions.h"
 
 volatile int caughtSignal = 0;

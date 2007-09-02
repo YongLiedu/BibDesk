@@ -44,7 +44,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibDocument.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKStringEncodingManager.h"
 #import "NSWindowController_BDSKExtensions.h"
 

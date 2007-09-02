@@ -40,7 +40,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "BDSKTypeManager.h"
 #import "BibItem.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import <OmniFoundation/NSScanner-OFExtensions.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <AGRegex/AGRegex.h>

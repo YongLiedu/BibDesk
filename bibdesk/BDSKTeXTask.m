@@ -40,7 +40,7 @@
 #import "BDSKTeXTask.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibPrefController.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "UKDirectoryEnumerator.h"
 #import "BDSKShellCommandFormatter.h"

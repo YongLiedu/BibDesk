@@ -1,5 +1,5 @@
 //
-//  BibAppController+Scripting.h
+//  BDSKAppController+Scripting.h
 //  BibDesk
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
@@ -37,11 +37,11 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 
 @class BDSKScriptHook, BDSKMacro;
 
-@interface BibAppController (Scripting) 
+@interface BDSKAppController (Scripting) 
 
 - (NSString *)papersFolder;
 

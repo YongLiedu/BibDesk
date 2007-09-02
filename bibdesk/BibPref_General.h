@@ -36,7 +36,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 
 @interface BibPref_General : OAPreferenceClient {
     IBOutlet NSMatrix *startupBehaviorRadio;

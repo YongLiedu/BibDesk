@@ -41,7 +41,7 @@
 #import "BibField.h"
 #import "BibItem.h"
 #import "BibPrefController.h"
-#import "BibAppController.h"
+#import "BDSKAppController.h"
 #import "BDSKOwnerProtocol.h"
 #import "BDSKTypeManager.h"
 
