@@ -360,7 +360,7 @@
 		F9022FB207580A9600C3F701 /* OmniAppKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE40758095000C3F701 /* OmniAppKit.framework */; };
 		F9022FB307580A9600C3F701 /* OmniBase.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
 		F9022FB407580A9600C3F701 /* OmniFoundation.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9022DE60758095000C3F701 /* OmniFoundation.framework */; };
-		F9022FCB07580B9400C3F701 /* BibAppController+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FBC07580B9400C3F701 /* BibAppController+Scripting.m */; };
+		F9022FCB07580B9400C3F701 /* BDSKAppController+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */; };
 		F9022FCD07580B9400C3F701 /* BibAuthor+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */; };
 		F9022FD007580B9400C3F701 /* BDSKSearchForCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */; };
 		F9022FD207580B9400C3F701 /* BibDocument+Scripting.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */; };
@@ -1247,7 +1247,7 @@
 		F9022DE60758095000C3F701 /* OmniFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OmniFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9022DEB0758099D00C3F701 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		F9022DEC0758099D00C3F701 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
-		F9022FBC07580B9400C3F701 /* BibAppController+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibAppController+Scripting.m"; sourceTree = "<group>"; };
+		F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BDSKAppController+Scripting.m"; sourceTree = "<group>"; };
 		F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = "BibAuthor+Scripting.m"; sourceTree = "<group>"; };
 		F9022FBF07580B9400C3F701 /* BibDesk.sdef */ = {isa = PBXFileReference; explicitFileType = text.xml; fileEncoding = 4; languageSpecificationIdentifier = plist; name = BibDesk.sdef; path = Scripting/BibDesk.sdef; sourceTree = "<group>"; };
 		F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchForCommand.m; sourceTree = "<group>"; };
@@ -1815,7 +1815,6 @@
 		CE1255DF0C80DD3000F755F8 /* Scripting */ = {
 			isa = PBXGroup;
 			children = (
-				F9201E000B72504C007E45BB /* BDSKMacro.m */,
 				F9022FBF07580B9400C3F701 /* BibDesk.sdef */,
 				CE4D85270C3A8C8E002C20CB /* BDSKAutofileCommand.m */,
 				CE9DBEDE093CF2640008648B /* BDSKBibliographyCommand.m */,
@@ -1824,7 +1823,8 @@
 				CED65DC70907A2FD003EED90 /* BDSKParseFormatCommand.m */,
 				F9022FC107580B9400C3F701 /* BDSKSearchForCommand.m */,
 				CEAC484F0A96589A00B8DF43 /* BDSKTemplatedTextCommand.m */,
-				F9022FBC07580B9400C3F701 /* BibAppController+Scripting.m */,
+				F9022FBC07580B9400C3F701 /* BDSKAppController+Scripting.m */,
+				F9201E000B72504C007E45BB /* BDSKMacro.m */,
 				F9022FBE07580B9400C3F701 /* BibAuthor+Scripting.m */,
 				F9022FC307580B9400C3F701 /* BibDocument+Scripting.m */,
 				3DD300F5075C054D003FD2D7 /* BibField.m */,
@@ -3329,7 +3329,7 @@
 				F9022CBB075803AC00C3F701 /* BibPref_General.m in Sources */,
 				F9022CBC075803AC00C3F701 /* BibPref_TeX.m in Sources */,
 				F9022DDE075808EB00C3F701 /* BibPref_Cite.m in Sources */,
-				F9022FCB07580B9400C3F701 /* BibAppController+Scripting.m in Sources */,
+				F9022FCB07580B9400C3F701 /* BDSKAppController+Scripting.m in Sources */,
 				F9022FCD07580B9400C3F701 /* BibAuthor+Scripting.m in Sources */,
 				F9022FD007580B9400C3F701 /* BDSKSearchForCommand.m in Sources */,
 				F9022FD207580B9400C3F701 /* BibDocument+Scripting.m in Sources */,
