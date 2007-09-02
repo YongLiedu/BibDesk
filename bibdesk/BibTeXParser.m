@@ -172,11 +172,9 @@ error:(NSError **)outError{
         nrepl++;
     }
     // If we replace any characters, swap data and set the filePath to the paste/drag string, or else the parser will still choke on it (in the case of Mac line ends); this isn't ideal, as we lose some error reporting capability.
-    if (nrepl) {
+    if (nrepl)
         inData = fixedData;
-        filePath = @"Fixed";
-    }
-		    
+	
     BibItem *newBI = nil;
     BibDocument *document = [anOwner isDocument] ? (BibDocument *)anOwner : nil;
     BDSKMacroResolver *macroResolver = [anOwner macroResolver];	
@@ -197,12 +195,15 @@ error:(NSError **)outError{
     
     NSError *error = nil;
     
-    if( !(isPasteOrDrag) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+    if(isPasteOrDrag || [[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO){
+        fs_path = NULL; // used for error context in libbtparse
+        infile = [inData openReadOnlyStandardIOFile];
+    }else if(nrepl){
+        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
+        infile = [inData openReadOnlyStandardIOFile];
+    }else{
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
         infile = fopen(fs_path, "r");
-    }else{
-        infile = [inData openReadOnlyStandardIOFile];
-        fs_path = NULL; // used for error context in libbtparse
     }    
 
     buf = (const char *) [inData bytes];
