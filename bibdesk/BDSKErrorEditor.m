@@ -272,12 +272,6 @@
 }
 
 - (void)gotoLine:(int)lineNumber{
-    // we're not using getLineStart:end:contentsEnd:forRange: because btparse only recognized \n as a newline
-    static NSCharacterSet *newlineCharacterSet = nil;
-    
-    if(newlineCharacterSet == nil)
-        newlineCharacterSet = [[NSCharacterSet characterSetWithRange:NSMakeRange('\n', 1)] retain];
-    
     int i = 0;
     NSString *string = [textView string];
     unsigned start = 0;
@@ -285,19 +279,12 @@
     unsigned length = [string length];
     NSRange range;
     
-    while (++i <= lineNumber) {
-        start = end;
-        range = [string rangeOfCharacterFromSet:newlineCharacterSet options:NSLiteralSearch range:NSMakeRange(start, length - start)];
-        if (range.location == NSNotFound) {
-            end = length;
-            if (i < lineNumber)
-                start = length;
-            break;
-        }
-        end = NSMaxRange(range);
+    while (i++ < lineNumber && end < length) {
+        [string getLineStart:&start end:&end contentsEnd:NULL forRange:NSMakeRange(end, 0)];
+        if (end == length && i < lineNumber)
+            start = end;
     }
-    range.location = start;
-    range.length = (end - start);
+    range = NSMakeRange(start, end - start);
     [textView setSelectedRange:range];
     [textView scrollRangeToVisible:range];
 }
