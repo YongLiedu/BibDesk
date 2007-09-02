@@ -84,7 +84,7 @@
     NSString *newString = nil;
 	
     // returns [tag fieldName] if nothing in the dictionary
-    key = [[BibTypeManager sharedManager] fieldNameForReferTag:tag];	
+    key = [[BDSKTypeManager sharedManager] fieldNameForReferTag:tag];	
     oldString = [pubDict objectForKey:key];
     
     // this is likely only useful for AGU
@@ -194,7 +194,7 @@ static inline BOOL isTagLine(NSString *sourceLine)
     NSString *tag = nil;
     NSString *value = nil;
     NSMutableString *mutableValue = [NSMutableString string];
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BDSKTypeManager *typeManager = [BDSKTypeManager sharedManager];
     NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     
     // refer records are separated by empty lines
