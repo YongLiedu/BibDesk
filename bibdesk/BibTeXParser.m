@@ -174,7 +174,7 @@ error:(NSError **)outError{
     // If we replace any characters, swap data and set the filePath to the paste/drag string, or else the parser will still choke on it (in the case of Mac line ends); this isn't ideal, as we lose some error reporting capability.
     if (nrepl) {
         inData = fixedData;
-        filePath = BDSKParserPasteDragString;
+        filePath = @"Fixed";
     }
 		    
     BibItem *newBI = nil;
