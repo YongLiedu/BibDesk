@@ -213,9 +213,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
                 
                 // simple template tag
-                @try{ keyValue = [object valueForKeyPath:tag]; }
-                @catch (id exception) { keyValue = nil; }
-                if (keyValue != nil) 
+                if (keyValue = [object safeValueForKeyPath:tag]) 
                     [result appendString:[keyValue stringDescription]];
                 
             } else if ([scanner scanString:MULTITAG_CLOSE_DELIM intoString:nil]) {
@@ -252,8 +250,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                         lastItemTemplate = nil;
                     }
                     
-                    @try{ keyValue = [object valueForKeyPath:tag]; }
-                    @catch (id exception) { keyValue = nil; }
+                    keyValue = [object safeValueForKeyPath:tag];
                     if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
                         NSEnumerator *itemE = [keyValue objectEnumerator];
                         id nextItem, item = [itemE nextObject];
@@ -337,8 +334,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                         }
                         [subTemplates addObject:subTemplate];
                         
-                        @try{ keyValue = [object valueForKeyPath:tag]; }
-                        @catch (id exception) { keyValue = nil; }
+                        keyValue = [object safeValueForKeyPath:tag];
                         count = [matchStrings count];
                         subTemplate = nil;
                         for (i = 0; i < count; i++) {
@@ -418,9 +414,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
             if ([scanner scanString:SINGLETAG_CLOSE_DELIM intoString:nil]) {
                 
                 // simple template tag
-                @try{ keyValue = [object valueForKeyPath:tag]; }
-                @catch (id exception) { keyValue = nil; }
-                if (keyValue != nil) {
+                if (keyValue = [object safeValueForKeyPath:tag]) {
                     if ([keyValue isKindOfClass:[NSAttributedString class]]) {
                         tmpAttrStr = [[NSAttributedString alloc] initWithAttributedString:keyValue attributes:attr];
                     } else {
@@ -464,8 +458,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                         lastItemTemplate = nil;
                     }
                     
-                    @try{ keyValue = [object valueForKeyPath:tag]; }
-                    @catch (id exception) { keyValue = nil; }
+                    keyValue = [object safeValueForKeyPath:tag];
                     if ([keyValue respondsToSelector:@selector(objectEnumerator)]) {
                         NSEnumerator *itemE = [keyValue objectEnumerator];
                         id nextItem, item = [itemE nextObject];
@@ -552,8 +545,7 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
                         [subTemplates addObject:subTemplate];
                         
                         
-                        @try{ keyValue = [object valueForKeyPath:tag]; }
-                        @catch (id exception) { keyValue = nil; }
+                        keyValue = [object safeValueForKeyPath:tag];
                         count = [matchStrings count];
                         subTemplate = nil;
                         for (i = 0; i < count; i++) {
@@ -614,6 +606,13 @@ static inline NSRange altTemplateTagRange(NSString *template, NSString *altTag, 
 
 - (BOOL)isNotEmpty {
     return YES;
+}
+
+- (id)safeValueForKeyPath:(NSString *)keyPath {
+    id value = nil;
+    @try{ value = [self valueForKeyPath:keyPath]; }
+    @catch (id exception) { value = nil; }
+    return value;
 }
 
 @end
