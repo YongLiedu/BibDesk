@@ -290,21 +290,24 @@
 }
 
 - (void)handleSelectionDidChangeNotification:(NSNotification *)notification{
-    static NSCharacterSet *newlineCharacterSet = nil;
-    
-    if(newlineCharacterSet == nil)
-        newlineCharacterSet = [[NSCharacterSet characterSetWithRange:NSMakeRange('\n', 1)] retain];
-    
     NSRange selectedRange = [textView selectedRange];
     
     int lineNumber = 0;
     NSString *string = [textView string];
+    unsigned length = [string length];
     unsigned location = selectedRange.location;
-    NSRange range = NSMakeRange(0, 0);
+    unsigned end = 0;
+    unsigned contentsEnd = 0;
     
-    while (range.location != NSNotFound) {
+    while (end <= location) {
         ++lineNumber;
-        range = [string rangeOfCharacterFromSet:newlineCharacterSet options:NSLiteralSearch range:NSMakeRange(NSMaxRange(range), location - NSMaxRange(range))];
+        if (end < length)
+            [string getLineStart:NULL end:&end contentsEnd:&contentsEnd forRange:NSMakeRange(end, 0)];
+        if (end == length) {
+            if (location > contentsEnd)
+                ++lineNumber;
+            break;
+        }
     }
     
     [lineNumberField setIntValue:lineNumber];
