@@ -3033,11 +3033,21 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         // we don't reach this, we let the pdfView do the printing
         return currentPreviewView; 
     }else if(displayType == BDSKRTFPreviewDisplay){
+        // user reported an NSBigMutableString nil replacement exception when printing; it's not immediately clear which view he was printing, or under what conditions it returns nil, so we'll check for this and print an error
         BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
-        [printableView setAttributedString:[[previewer textView] textStorage]];    
+        NSTextStorage *ts = [[previewer textView] textStorage];
+        if (ts)
+            [printableView setAttributedString:ts];
+        else
+            [printableView setString:NSLocalizedString(@"Error: nothing to print from latex2rtf preview", @"printing error")];
         return [printableView autorelease];
     }else{
         BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
+        NSTextStorage *ts = [previewTextView textStorage];
+        if (ts)
+            [printableView setAttributedString:ts];
+        else
+            [printableView setString:NSLocalizedString(@"Error: nothing to print from document preview", @"printing error")];
         [printableView setAttributedString:[previewTextView textStorage]];    
         return [printableView autorelease];
     }
