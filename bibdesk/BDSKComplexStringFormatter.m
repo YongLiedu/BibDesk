@@ -149,11 +149,14 @@
         }
 
     }
-    @catch(id anException){
-        if([anException isKindOfClass:[NSException class]] && [[anException name] isEqualToString:BDSKComplexStringException])
+    @catch(NSException *anException){
+        if([[anException name] isEqualToString:BDSKComplexStringException])
             [self setParseError:[anException reason]];
         else
             @throw;
+    }
+    @catch(id anException){
+        @throw;
     }
     
     // if we use @finally here, this gets executed even if it wasn't our exception

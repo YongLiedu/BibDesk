@@ -1554,18 +1554,22 @@ static NSString *UTIForPathOrURLString(NSString *aPath, NSString *basePath)
 
 - (BOOL)isMutableString;
 {
+    int isMutable = YES;
     @try{
         [self appendCharacter:'X'];
     }
-    @catch(id localException){
-        if([localException respondsToSelector:@selector(name)] && [[localException name] isEqual:NSInvalidArgumentException])
-            return NO;
+    @catch(NSException *localException){
+        if([[localException name] isEqual:NSInvalidArgumentException])
+            isMutable = NO;
         else
             @throw;
     }
+    @catch(id localException){
+        @throw;
+    }
     
     [self deleteCharactersInRange:NSMakeRange([self length] - 1, 1)];
-    return YES;
+    return isMutable;
 }
 
 - (void)deleteCharactersInCharacterSet:(NSCharacterSet *)characterSet;

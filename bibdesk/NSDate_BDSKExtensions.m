@@ -287,10 +287,14 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
         // not really necessary; we just ignore stuff after this
         OBASSERT([scanner isAtEnd]);
     }
+    @catch(NSException *exception){
+        failed = YES;
+        if([[exception name] isEqual:@"BDSKColloquialDateException"] == NO)
+            @throw;
+    }
     @catch(id exception){
         failed = YES;
-        if([exception respondsToSelector:@selector(name)] == NO || [[exception name] isEqual:@"BDSKColloquialDateException"] == NO)
-            @throw;
+        @throw;
     }
     @finally{
         [scanner release];

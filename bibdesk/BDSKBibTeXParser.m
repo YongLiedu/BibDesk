@@ -430,11 +430,14 @@ error:(NSError **)outError{
                 value = [NSString stringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
                 [macros setObject:value forKey:key];
             }
-            @catch(id exception){
-                if([exception respondsToSelector:@selector(name)] && [[exception name] isEqual:BDSKComplexStringException])
+            @catch(NSException *exception){
+                if([[exception name] isEqual:BDSKComplexStringException])
                     NSLog(@"Ignoring invalid complex macro: %@", exception);
                 else
                     NSLog(@"Ignoring exception while parsing macro: %@", exception);
+            }
+            @catch(id exception){
+                NSLog(@"Ignoring exception while parsing macro: %@", exception);
             }
             
         }
