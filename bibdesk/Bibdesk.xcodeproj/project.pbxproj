@@ -3228,7 +3228,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "rm -f /tmp/BibDesk.dmg\n/bin/cp ${SOURCE_ROOT}/BibDesk.dmg /tmp\n/usr/bin/hdiutil attach /tmp/BibDesk.dmg\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"Bibdesk\\\" to {204, 148}\" -e \"end tell\" && \\\nsleep 7; \\\n/usr/sbin/diskutil eject /Volumes/BibDesk\n/usr/bin/hdiutil resize -size `/usr/bin/hdiutil resize /tmp/BibDesk.dmg | cut -f -1 -d \" \" -`b /tmp/BibDesk.dmg\n/usr/bin/hdiutil convert /tmp/BibDesk.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/BibDesk.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/BibDesk.dmg\nexit 0";
+			shellScript = "/bin/rm -f /tmp/BibDesk.dmg\n/usr/bin/unzip ${SOURCE_ROOT}/BibDesk.dmg.zip\n/bin/cp ${SOURCE_ROOT}/BibDesk.dmg /tmp\n/usr/bin/hdiutil attach /tmp/BibDesk.dmg\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\n/usr/bin/osascript -e \"tell application \\\"Finder\\\" to set the position of item 1 of the disk named \\\"BibDesk\\\" to {204, 148}\" -e \"end tell\" && \\\nsleep 7; \\\n/usr/sbin/diskutil eject /Volumes/BibDesk\n/usr/bin/hdiutil resize -size `/usr/bin/hdiutil resize /tmp/BibDesk.dmg | cut -f -1 -d \" \" -`b /tmp/BibDesk.dmg\n/usr/bin/hdiutil convert /tmp/BibDesk.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/BibDesk.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/BibDesk.dmg\nexit 0";
 		};
 		F9E0B071083E450C000109C6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
