@@ -345,7 +345,6 @@
 		return NO;
 	if(macroTextFieldWC == nil)
         macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
-    NSDictionary *macroDefinitions = [macroResolver macroDefinitions];
     BDSKMacro *macro = [[arrayController arrangedObjects] objectAtIndex:row];
 	NSString *value = [macro value];
 	NSText *fieldEditor = [tableView currentEditor];
@@ -478,7 +477,6 @@
     NSEnumerator *e = [rows objectEnumerator];
     NSNumber *row;
     NSMutableString *pboardStr = [NSMutableString string];
-    NSDictionary *macroDefinitions = showAll ? [macroResolver allMacroDefinitions] : [macroResolver macroDefinitions];
     NSArray *arrangedMacros = [arrayController arrangedObjects];
     [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 

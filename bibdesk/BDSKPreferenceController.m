@@ -41,6 +41,7 @@
 #import <OmniAppKit/OAPreferencesIconView.h>
 #import <OmniAppKit/NSToolbar-OAExtensions.h>
 #import <OmniAppKit/OAPreferenceClient.h>
+#import <OmniAppKit/OAPreferenceClientRecord.h>
 
 @interface NSArray (PreferencesSearch)
 - (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;
