@@ -351,7 +351,7 @@
 - (id)openDocumentWithContentsOfURL:(NSURL *)fileURL usingFilter:(NSString *)shellCommand encoding:(NSStringEncoding)encoding;
 {
     NSError *error;
-    NSString *fileInputString = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:NULL];
+    NSString *fileInputString = [NSString stringWithContentsOfURL:fileURL encoding:encoding error:&error];
     BibDocument *doc = nil;
         
     if (nil == fileInputString){
