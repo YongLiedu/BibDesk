@@ -50,6 +50,7 @@
 #import "BibDocument_Search.h"
 #import "BDSKGroupsArray.h"
 #import "BDSKCustomCiteDrawerController.h"
+#import "BDSKPreviewer.h"
 
 @implementation BibDocument (Menus)
 
@@ -587,7 +588,18 @@
 		return NO;
 	}
 	else {
-		return YES;
+        // even if there is a selection, we may have an error condition with nothing to print
+        if([currentPreviewView isEqual:previewerBox])
+            return [[previewer pdfView] document] != nil;
+        else if ([currentPreviewView isEqual:previewBox])
+            return [previewPdfView document] != nil;
+        
+        // see comments on exception in -printableView, which is the main motivation for this validation
+        int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
+        if (BDSKRTFPreviewDisplay == displayType)
+            return [[previewer textView] textStorage] != nil;
+        else
+            return [previewTextView textStorage] != nil;
 	}
 }
 
