@@ -25,7 +25,7 @@
 				F98870D307580E94001D4D49 /* ShellScript */,
 			);
 			dependencies = (
-				F9EE10FD0C8E6E5900EB1DD8 /* PBXTargetDependency */,
+				F9AF5D8E0C8F3DB6005614AE /* PBXTargetDependency */,
 			);
 			name = DiskImage;
 			productName = DiskImage;
@@ -602,6 +602,13 @@
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = yaz;
 		};
+		F9AF5D8D0C8F3DB6005614AE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090 /* BibDesk */;
+			remoteInfo = BibDesk;
+		};
 		F9C7E5460BEA3C0500D65C7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F911CB4008972F7300ABDAC6 /* AGRegex.xcodeproj */;
@@ -713,13 +720,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = yaz;
-		};
-		F9EE10FC0C8E6E5900EB1DD8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090;
-			remoteInfo = BibDesk;
 		};
 		F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -873,7 +873,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -3228,7 +3228,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/rm -f /tmp/BibDesk.dmg\nif [ -f ${SOURCE_ROOT}/BibDesk.dmg.zip ]; then\n/bin/cp ${SOURCE_ROOT}/BibDesk.dmg /tmp\nelse\n/usr/bin/unzip ${SOURCE_ROOT}/BibDesk.dmg.zip\n/bin/cp ${SOURCE_ROOT}/BibDesk.dmg /tmp\nfi\n/usr/bin/hdiutil attach /tmp/BibDesk.dmg\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\n/usr/bin/osascript -e \"tell application \\\"Finder\\\" to set the position of item 1 of the disk named \\\"BibDesk\\\" to {204, 148}\" && \\\nsleep 7; \\\n/usr/sbin/diskutil eject /Volumes/BibDesk\n/usr/bin/hdiutil resize -size `/usr/bin/hdiutil resize /tmp/BibDesk.dmg | cut -f -1 -d \" \" -`b /tmp/BibDesk.dmg\n/usr/bin/hdiutil convert /tmp/BibDesk.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/BibDesk.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/BibDesk.dmg\nexit 0";
+			shellScript = "####\n##\n## If you feel an undying urge to improve this,\n## discuss it with the poor slob that does the\n## releases first (and test it thoroughly)!\n##\n####\n\n# template image in source folder\nSRC_IMAGE=\"${SOURCE_ROOT}/BibDesk.dmg\"\n\n# temporary image\nDST_IMAGE=/tmp/BibDesk.dmg\n\n# final distribution image\nFINAL_IMAGE=\"$HOME/Desktop/BibDesk.dmg\"\n\n# see if this file already exists and bail\nif [ -f ${FINAL_IMAGE} ]; then\n\techo \"error: ${FINAL_IMAGE} exists\"\n\texit 1\nfi\n\n# see if a volume is already mounted or a\n# previous cp operation was botched\nif [ -e '/Volumes/BibDesk' ]; then\n\techo 'error: /Volumes/BibDesk exists'\n\techo 'warning: opening /Volumes in Finder'\n\t/usr/bin/open /Volumes/BibDesk\n\texit 1\nfi\n\n# remove temp image from a previous run\nif [ -f ${DST_IMAGE} ]; then\n\techo \"warning: removing ${DST_IMAGE}\"\n\t/bin/rm ${DST_IMAGE}\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to remove ${DST_IMAGE}\"\n\t\texit 1\n\tfi\nfi\n\n# stored zipped in svn, so unzip if needed\n# pass o to overwrite, or unzip waits for stdin\n# when trying to unpack the resource fork/EA\n\nif [ ! -f ${SRC_IMAGE} ]; then\n\t/usr/bin/unzip -uo ${SRC_IMAGE}.zip\n\tif [ $? != 0 ]; then\n\t\techo \"error: failed to unzip ${SRC_IMAGE}.zip\"\n\t\texit 1\n\tfi\nfi\n\n# copy empty image to /tmp\n/bin/cp ${SRC_IMAGE} /tmp\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${SRC_IMAGE} to /tmp\"\n\texit 1\nfi\n\n# mount image and use CpMac to copy all files\n/usr/bin/hdiutil attach ${DST_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to mount ${DST_IMAGE}\"\n\texit 1\nfi\n\n${SYSTEM_DEVELOPER_TOOLS}/CpMac -r ${BUILT_PRODUCTS_DIR}/BibDesk.app /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to copy ${BUILT_PRODUCTS_DIR}/BibDesk.app\"\n\texit 1\nfi\n\n# tell finder to set the icon position\n/usr/bin/osascript -e \"tell application \\\"Finder\\\" to set the position of item 1 of the disk named \\\"BibDesk\\\" to {204, 148}\" && \\\nsleep 7; \\\n\nif [ $? != 0 ]; then\n\techo \"error: Finder failed to set position\"\n\texit 1\nfi\n\n# data is copied, so unmount the volume\n/usr/sbin/diskutil eject /Volumes/BibDesk\nif [ $? != 0 ]; then\n\techo \"error: failed to eject /Volumes/BibDesk\"\n\texit 1\nfi\n\n# convert image to read only and compress\n/usr/bin/hdiutil convert ${DST_IMAGE} -format UDZO -imagekey zlib-level=9 -o ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to convert ${DST_IMAGE}\"\n\texit 1\nfi\n\n# set internet-enable bit for Safari, even\n# though I dislike internet-enabled images...\n/usr/bin/hdiutil internet-enable -YES ${FINAL_IMAGE}\nif [ $? != 0 ]; then\n\techo \"error: failed to internet-enable ${DST_IMAGE}\"\n\texit 1\nfi\n\nexit 0";
 		};
 		F9E0B071083E450C000109C6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3597,10 +3597,10 @@
 			name = yaz;
 			targetProxy = F9AF56370BEA4160009B16D5 /* PBXContainerItemProxy */;
 		};
-		F9EE10FD0C8E6E5900EB1DD8 /* PBXTargetDependency */ = {
+		F9AF5D8E0C8F3DB6005614AE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* BibDesk */;
-			targetProxy = F9EE10FC0C8E6E5900EB1DD8 /* PBXContainerItemProxy */;
+			targetProxy = F9AF5D8D0C8F3DB6005614AE /* PBXContainerItemProxy */;
 		};
 		F9EF0CE20B4EFC8F00A1F282 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
