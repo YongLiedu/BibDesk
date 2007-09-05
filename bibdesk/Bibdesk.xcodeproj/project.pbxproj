@@ -718,7 +718,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090 /* BibDesk */;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = BibDesk;
 		};
 		F9EF0CE10B4EFC8F00A1F282 /* PBXContainerItemProxy */ = {
@@ -2743,7 +2743,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
