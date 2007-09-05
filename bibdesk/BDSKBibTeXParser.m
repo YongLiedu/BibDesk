@@ -163,12 +163,12 @@ error:(NSError **)outError{
         
         ch = bytePtr[currIndex];
         
-        if (ch != '\n' && [[NSCharacterSet newlineCharacterSet] characterIsMember:ch]) {
+        if (ch == '\r') {
             
             replaceRange.location = currIndex;
             // check the next char to see if we have a Windows line ending
             nextIndex = currIndex + 1;
-            if (inputDataLength > nextIndex && ch == '\r' && bytePtr[nextIndex] == '\n') 
+            if (inputDataLength > nextIndex && bytePtr[nextIndex] == '\n') 
                 replaceRange.length = 2;
             else
                 replaceRange.length = 1;
