@@ -41,9 +41,15 @@
 #import <OmniBase/OmniBase.h>
 
 #define REPEAT_CHARACTER '/'
+#define CANCEL_CHARACTER 0x1B
+
+static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDidChangeFirstResponderNotification";
 
 @interface NSString (BDSKTypeAheadHelperExtensions)
 - (BOOL)containsStringStartingAtWord:(NSString *)string options:(int)mask range:(NSRange)range;
+@end
+
+@interface NSWindow (BDSKTypeAheadHelperExtensions)
 @end
 
 
@@ -53,6 +59,7 @@
 - (void)stopTimer;
 - (void)startTimer;
 - (void)typeSelectSearchTimeout;
+- (void)handleTimeoutNotification:(NSNotification *)notification;
 - (NSTimeInterval)timeoutInterval;
 - (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 
@@ -67,7 +74,8 @@
 - init;
 {
     if(self = [super init]){
-        searchString = [[NSMutableString alloc] init];
+        searchCache = nil;
+        searchString = nil;
         cycleResults = YES;
         matchPrefix = YES;
     }
@@ -76,6 +84,7 @@
 
 - (void)dealloc;
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self setDataSource:nil];
     [self stopTimer];
     [searchString release];
@@ -119,6 +128,19 @@
     matchPrefix = newValue;
 }
 
+- (NSString *)searchString;
+{
+    return searchString;
+}
+
+- (void)setSearchString:(NSString *)newSearchString;
+{
+    if (searchString != newSearchString) {
+        [searchString release];
+        searchString = [newSearchString retain];
+    }
+}
+
 - (BOOL)isProcessing;
 {
     return processing;
@@ -134,13 +156,37 @@
     searchCache = [[dataSource typeSelectHelperSelectionItems:self] retain];
 }
 
-- (void)processKeyDownCharacter:(unichar)character;
+- (BOOL)processKeyDownEvent:(NSEvent *)keyEvent;
 {
-    if (processing == NO)
-        [searchString setString:@""];
+    if ([self isSearchEvent:keyEvent]) {
+        [self searchWithEvent:keyEvent];
+        return YES;
+    } else if ([self isRepeatEvent:keyEvent]) {
+        [self repeatSearch];
+        return YES;
+    } else if ([self isCancelEvent:keyEvent]) {
+        [self cancelSearch];
+        return YES;
+    }
+    return NO;
+}
+
+- (void)searchWithEvent:(NSEvent *)keyEvent;
+{
+    NSWindow *window = [NSApp keyWindow];
+    NSText *fieldEditor = [window fieldEditor:YES forObject:self];
+    
+    if (processing == NO) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:BDSKWindowDidChangeFirstResponderNotification object:window];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowDidResignKeyNotification object:window];
+        [fieldEditor setDelegate:self];
+        [fieldEditor setString:@""];
+    }
     
     // Append the new character to the search string
-    [searchString appendFormat:@"%C", character];
+    [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
+    [self setSearchString:[fieldEditor string]];
     
     if ([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
         [dataSource typeSelectHelper:self updateSearchString:searchString];
@@ -153,7 +199,8 @@
     processing = YES;
 }
 
-- (void)repeatSearch {
+- (void)repeatSearch;
+{
     [self searchWithStickyMatch:NO];
     
     if ([searchString length] && [dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
@@ -164,16 +211,57 @@
     processing = NO;
 }
 
-- (BOOL)isTypeSelectCharacter:(unichar)character {
-    if ([[NSCharacterSet alphanumericCharacterSet] characterIsMember:character])
-        return YES;
-    if ([self isProcessing] && [[NSCharacterSet controlCharacterSet] characterIsMember:character] == NO)
-        return YES;
-    return NO;
+- (void)cancelSearch;
+{
+    if (timeoutEvent)
+        [self typeSelectSearchTimeout];
 }
 
-- (BOOL)isRepeatCharacter:(unichar)character {
-    return [self cyclesSimilarResults] && character == REPEAT_CHARACTER;
+- (BOOL)isTypeSelectEvent:(NSEvent *)keyEvent;
+{
+    return [self isSearchEvent:keyEvent] || [self isRepeatEvent:keyEvent] || [self isCancelEvent:keyEvent];
+}
+
+- (BOOL)isSearchEvent:(NSEvent *)keyEvent;
+{
+    if ([keyEvent type] != NSKeyDown)
+        return NO;
+    if ([keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSShiftKeyMask & ~NSAlternateKeyMask & ~NSAlphaShiftKeyMask)
+        return NO;
+    
+    static NSCharacterSet *nonAlphanumericCharacterSet = nil;
+    if (nonAlphanumericCharacterSet == nil)
+        nonAlphanumericCharacterSet = [[[NSCharacterSet alphanumericCharacterSet] invertedSet] copy];
+    
+    NSCharacterSet *invalidCharacters = [self isProcessing] ? [NSCharacterSet controlCharacterSet] : nonAlphanumericCharacterSet;
+    
+    return [[keyEvent characters] rangeOfCharacterFromSet:invalidCharacters].location == NSNotFound;
+}
+
+- (BOOL)isRepeatEvent:(NSEvent *)keyEvent;
+{
+    if ([keyEvent type] != NSKeyDown)
+        return NO;
+    
+    NSString *characters = [keyEvent charactersIgnoringModifiers];
+    unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
+	unsigned modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    
+    return modifierFlags == 0 && character == REPEAT_CHARACTER;
+}
+
+- (BOOL)isCancelEvent:(NSEvent *)keyEvent;
+{
+    if ([keyEvent type] != NSKeyDown)
+        return NO;
+    if ([self isProcessing] == NO)
+        return NO;
+    
+    NSString *characters = [keyEvent charactersIgnoringModifiers];
+    unichar character = [characters length] > 0 ? [characters characterAtIndex:0] : 0;
+	unsigned modifierFlags = [keyEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    
+    return modifierFlags == 0 && character == CANCEL_CHARACTER;
 }
 
 @end
@@ -181,7 +269,8 @@
 
 @implementation BDSKTypeSelectHelper (BDSKPrivate)
 
-- (NSArray *)searchCache {
+- (NSArray *)searchCache;
+{
     if (searchCache == nil)
         [self rebuildTypeSelectSearchCache];
     return searchCache;
@@ -199,15 +288,38 @@
 - (void)startTimer;
 {
     [self stopTimer];
-    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:[self timeoutInterval]] retain];
+    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout:) onObject:self afterTime:[self timeoutInterval]] retain];
 }
 
 - (void)typeSelectSearchTimeout;
 {
     if([dataSource respondsToSelector:@selector(typeSelectHelper:updateSearchString:)])
         [dataSource typeSelectHelper:self updateSearchString:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopTimer];
     processing = NO;
+    
+    NSText *fieldEditor = [[NSApp keyWindow] fieldEditor:YES forObject:self];
+    if ([fieldEditor delegate] == self) {
+        // we pass a dummy key event to the field editor to clear any hanging dead keys (marked text)
+        NSEvent *keyEvent = [NSEvent keyEventWithType:NSKeyDown
+                                             location:NSZeroPoint
+                                        modifierFlags:0
+                                            timestamp:0
+                                         windowNumber:0
+                                              context:nil
+                                           characters:@""
+                          charactersIgnoringModifiers:@""
+                                            isARepeat:NO
+                                              keyCode:0];
+        [fieldEditor interpretKeyEvents:[NSArray arrayWithObject:keyEvent]];
+        [fieldEditor setDelegate:nil];
+    }
+}
+
+- (void)handleTimeoutNotification:(NSNotification *)notification;
+{
+    [self typeSelectSearchTimeout];
 }
 
 // See http://www.mactech.com/articles/mactech/Vol.18/18.10/1810TableTechniques/index.html
@@ -240,9 +352,13 @@
         
         foundIndex = [self indexOfMatchedItemAfterIndex:startIndex];
         
-        // Avoid flashing a selection all over the place while you're still typing the thing you have selected
-        if (foundIndex != NSNotFound && foundIndex != selectedIndex)
+        if (foundIndex == NSNotFound) {
+            if ([dataSource respondsToSelector:@selector(typeSelectHelper:didFailToFindMatchForSearchString:)])
+                [dataSource typeSelectHelper:self didFailToFindMatchForSearchString:searchString];
+        } else if (foundIndex != selectedIndex) {
+            // Avoid flashing a selection all over the place while you're still typing the thing you have selected
             [dataSource typeSelectHelper:self selectItemAtIndex:foundIndex];
+        }
     }
 }
 
@@ -281,6 +397,7 @@
 
 @end
 
+#pragma mark -
 
 @implementation NSString (BDSKTypeAheadHelperExtensions)
 
@@ -305,6 +422,26 @@
             range = NSMakeRange(r.location + 1, NSMaxRange(range) - r.location - 1);
     }
     return NO;
+}
+
+@end
+
+#pragma mark -
+
+@implementation NSWindow (BDSKTypeAheadHelperExtensions)
+
+static BOOL (*originalMakeFirstResponder)(id, SEL, id) = NULL;
+
++ (void)load {
+    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
+}
+
+- (BOOL)replacementMakeFirstResponder:(NSResponder *)aResponder {
+    id oldFirstResponder = [self firstResponder];
+    BOOL success = originalMakeFirstResponder(self, _cmd, aResponder);
+    if (oldFirstResponder != [self firstResponder])
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWindowDidChangeFirstResponderNotification object:self];
+    return success;
 }
 
 @end

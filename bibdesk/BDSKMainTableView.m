@@ -146,11 +146,7 @@
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
         [self scrollRowToVisible:row];
     // pass it on the typeahead selector
-    }else if([typeSelectHelper isTypeSelectCharacter:c] && flags == 0){
-        [typeSelectHelper processKeyDownCharacter:c];
-    }else if([typeSelectHelper isRepeatCharacter:c] && flags == 0){
-        [typeSelectHelper repeatSearch];
-    }else{
+    }else if ([typeSelectHelper processKeyDownEvent:event] == NO){
         [super keyDown:event];
     }
 }

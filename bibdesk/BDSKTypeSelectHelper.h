@@ -50,7 +50,7 @@
     BOOL matchPrefix;
     
     NSArray *searchCache;
-    NSMutableString *searchString;
+    NSString *searchString;
     OFScheduledEvent *timeoutEvent;
     BOOL processing;
 }
@@ -63,16 +63,23 @@
 
 - (BOOL)matchesPrefix;
 - (void)setMatchesPrefix:(BOOL)newValue;
-
-- (void)rebuildTypeSelectSearchCache;
+    
+- (NSString *)searchString;
+- (void)setSearchString:(NSString *)newSearchString;
     
 - (BOOL)isProcessing;
 
-- (void)processKeyDownCharacter:(unichar)character;
-- (void)repeatSearch;
+- (void)rebuildTypeSelectSearchCache;
 
-- (BOOL)isTypeSelectCharacter:(unichar)character;
-- (BOOL)isRepeatCharacter:(unichar)character;
+- (BOOL)processKeyDownEvent:(NSEvent *)keyEvent;
+- (void)searchWithEvent:(NSEvent *)keyEvent;
+- (void)repeatSearch;
+- (void)cancelSearch;
+
+- (BOOL)isTypeSelectEvent:(NSEvent *)keyEvent;
+- (BOOL)isSearchEvent:(NSEvent *)keyEvent;
+- (BOOL)isRepeatEvent:(NSEvent *)keyEvent;
+- (BOOL)isCancelEvent:(NSEvent *)keyEvent;
 
 @end
 
@@ -83,6 +90,7 @@
 - (unsigned int)typeSelectHelperCurrentlySelectedIndex:(BDSKTypeSelectHelper *)typeSelectHelper; // required
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper selectItemAtIndex:(unsigned int)itemIndex; // required
 
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString; // optional
 - (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper updateSearchString:(NSString *)searchString; // optional
 
 @end

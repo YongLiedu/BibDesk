@@ -1608,8 +1608,12 @@
         [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @"Status message"), [searchString fieldName]]];
 }
 
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
+    [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"No field:", @"Status message"), [searchString fieldName]]];
+}
+
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    return [fields valueForKey:@"lossyASCIIString"];
+    return fields;
 }
     // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 
@@ -1957,7 +1961,9 @@
     }
     
     if ([fieldNameCharSet characterIsMember:c] && flags == 0) {
-        [typeSelectHelper processKeyDownCharacter:c];
+        [typeSelectHelper searchWithEvent:event];
+    }else if([typeSelectHelper isCancelEvent:event]) {
+        [typeSelectHelper cancelSearch];
     }else{
         [super keyDown:event];
     }

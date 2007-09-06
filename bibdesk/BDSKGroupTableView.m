@@ -129,15 +129,8 @@
         if([[typeSelectHelper valueForKey:@"searchCache"] count] == 0)
             [typeSelectHelper rebuildTypeSelectSearchCache];
 
-		if ([typeSelectHelper isTypeSelectCharacter:c] && modifierFlags == 0) {
-			 
-			[typeSelectHelper processKeyDownCharacter:c];
-			return;
-        } else if ([typeSelectHelper isRepeatCharacter:c] && modifierFlags == 0) {
-            
-            [typeSelectHelper repeatSearch];
-			return;
-		}
+        if ([typeSelectHelper processKeyDownEvent:theEvent])
+            return;
 	}
     [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
 }

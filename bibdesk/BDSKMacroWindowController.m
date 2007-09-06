@@ -640,7 +640,7 @@
 #pragma mark || Methods to support the type-ahead selector.
 
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
-    return [[arrayController arrangedObjects] valueForKeyPath:@"value.lossyASCIIString"];
+    return [arrayController arrangedObjects];
 }
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 
@@ -719,14 +719,7 @@
 }
 
 - (void)keyDown:(NSEvent *)event{
-    unichar c = [[event characters] length] ? [[event characters] characterAtIndex:0] : 0;
-    unsigned int flags = ([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
-    
-    if ([typeSelectHelper isTypeSelectCharacter:c] && flags == 0)
-        [typeSelectHelper processKeyDownCharacter:c];
-    else if ([typeSelectHelper isRepeatCharacter:c] && flags == 0)
-        [typeSelectHelper repeatSearch];
-    else
+    if ([typeSelectHelper processKeyDownEvent:event] == NO)
         [super keyDown:event];
 }
 

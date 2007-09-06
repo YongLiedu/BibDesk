@@ -1116,6 +1116,15 @@
         [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Finding group: \"%@\"", @"Status message:Finding group: \"[search string]\""), searchString]];
 }
 
+- (void)typeSelectHelper:(BDSKTypeSelectHelper *)typeSelectHelper didFailToFindMatchForSearchString:(NSString *)searchString{
+    if(sortKey == nil)
+        [self updateStatus]; // resets the status line to its default value
+    else if(typeSelectHelper == [tableView typeSelectHelper]) 
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No item with %@: \"%@\"", @"Status message:No item with [sorting field]: \"[search string]\""), [sortKey localizedFieldName], searchString]];
+    else if(typeSelectHelper == [groupTableView typeSelectHelper]) 
+        [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"No group: \"%@\"", @"Status message:No group: \"[search string]\""), searchString]];
+}
+
 // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
 - (NSArray *)typeSelectHelperSelectionItems:(BDSKTypeSelectHelper *)typeSelectHelper{
     if(typeSelectHelper == [tableView typeSelectHelper]){    
@@ -1139,7 +1148,7 @@
                 value = [pub displayValueOfField:sortKey];
                 
                 // use @"" for nil values; ensure typeahead index matches shownPublications index
-                [a addObject:value ? [[value description] lossyASCIIString] : @""];
+                [a addObject:value ? [value description] : @""];
             }
         }else{
             for (i = 0; i < count; i++)
@@ -1157,7 +1166,7 @@
 		OBPRECONDITION(groupCount);
         for(i = 0; i < groupCount; i++){
 			group = [groups objectAtIndex:i];
-            [array addObject:[[group stringValue] lossyASCIIString]];
+            [array addObject:[group stringValue]];
 		}
         return array;
         
