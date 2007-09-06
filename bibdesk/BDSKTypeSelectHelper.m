@@ -180,7 +180,7 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:BDSKWindowDidChangeFirstResponderNotification object:window];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowDidResignKeyNotification object:window];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowWillCloseNotification object:keyWindow];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTimeoutNotification:) name:NSWindowWillCloseNotification object:window];
         [fieldEditor setDelegate:self];
         [fieldEditor setString:@""];
     }
