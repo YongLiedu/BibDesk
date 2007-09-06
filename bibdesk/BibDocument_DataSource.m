@@ -330,6 +330,23 @@
             [item setTarget:self];
 		}else{
 			menu = [actionMenu copyWithZone:[NSMenu menuZone]];
+            
+            NSMenu *submenu = nil;
+            int i, count = [menu numberOfItems];
+            
+            for (i = 0; submenu == nil && i < count; i++)
+                submenu = [[menu itemAtIndex:i] submenu];
+            if (submenu) {
+                while ([submenu numberOfItems])
+                    [submenu removeItemAtIndex:0];
+                NSArray *styles = [BDSKTemplate allStyleNames];
+                count = [styles count];
+                for (i = 0; i < count; i++) {
+                    item = [submenu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+                    [item setTarget:self];
+                    [item setTag:BDSKTemplateDragCopyType + i];
+                }
+            }
 		}
 		
 	}else if (tv == groupTableView){

@@ -384,7 +384,8 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
-	[[actionMenuButton cell] setRefreshesMenu:NO];
+	[[actionMenuButton cell] setRefreshesMenu:YES];
+	[actionMenuButton setDelegate:self];
 	
 	[groupActionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
@@ -3013,6 +3014,27 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
 
 - (NSMenu *)columnsMenu{
     return [tableView columnsMenu];
+}
+
+- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
+    NSMenu *menu = actionMenu;
+    NSMenu *submenu = nil;
+    int i, count = [menu numberOfItems];
+    
+    for (i = 0; submenu == nil && i < count; i++)
+        submenu = [[menu itemAtIndex:i] submenu];
+    if (submenu) {
+        while ([submenu numberOfItems])
+            [submenu removeItemAtIndex:0];
+        NSArray *styles = [BDSKTemplate allStyleNames];
+        count = [styles count];
+        for (i = 0; i < count; i++) {
+            NSMenuItem *item = [submenu addItemWithTitle:[styles objectAtIndex:i] action:@selector(copyAsAction:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setTag:BDSKTemplateDragCopyType + i];
+        }
+    }
+    return menu;
 }
 
 #pragma mark -
