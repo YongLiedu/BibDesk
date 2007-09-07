@@ -63,8 +63,6 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 - (NSTimeInterval)timeoutInterval;
 - (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 
-- (void)typeSelectSearchTimeout;
-- (unsigned int)indexOfMatchedItemAfterIndex:(unsigned int)selectedIndex;
 @end
 
 @implementation BDSKTypeSelectHelper
@@ -289,7 +287,7 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 - (void)startTimer;
 {
     [self stopTimer];
-    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout:) onObject:self afterTime:[self timeoutInterval]] retain];
+    timeoutEvent = [[[OFScheduler mainScheduler] scheduleSelector:@selector(typeSelectSearchTimeout) onObject:self afterTime:[self timeoutInterval]] retain];
 }
 
 - (void)typeSelectSearchTimeout;
@@ -433,16 +431,16 @@ static NSString *BDSKWindowDidChangeFirstResponderNotification = @"BDSKWindowDid
 
 static BOOL (*originalMakeFirstResponder)(id, SEL, id) = NULL;
 
-+ (void)load {
-    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
-}
-
 - (BOOL)replacementMakeFirstResponder:(NSResponder *)aResponder {
     id oldFirstResponder = [self firstResponder];
     BOOL success = originalMakeFirstResponder(self, _cmd, aResponder);
     if (oldFirstResponder != [self firstResponder])
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKWindowDidChangeFirstResponderNotification object:self];
     return success;
+}
+
++ (void)load {
+    originalMakeFirstResponder = (typeof(originalMakeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(makeFirstResponder:), @selector(replacementMakeFirstResponder:));
 }
 
 @end
