@@ -908,18 +908,13 @@ enum{
 		return NO;
 	}
 	else if (theAction == @selector(generateCiteKey:)) {
-		// need to set the title, as the document can change it in the main menu
-		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Menu item title")];
 		return isEditable;
 	}
 	else if (theAction == @selector(consolidateLinkedFiles:)) {
-		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Menu item title")];
 		NSString *lurl = [publication localUrlPath];
 		return (isEditable && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
 	else if (theAction == @selector(duplicateTitleToBooktitle:)) {
-		// need to set the title, as the document can change it in the main menu
-		[menuItem setTitle: NSLocalizedString(@"Duplicate Title to Booktitle", @"Menu item title")];
 		return (isEditable && ![NSString isEmptyString:[publication valueOfField:BDSKTitleString]]);
 	}
 	else if (theAction == @selector(selectCrossrefParentAction:)) {
@@ -933,8 +928,6 @@ enum{
 		if (field == nil)
 			field = BDSKLocalUrlString;
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Open Linked File", @"Menu item title")];
 		return (lurl == nil ? NO : YES);
 	}
 	else if (theAction == @selector(revealLinkedFile:)) {
@@ -942,8 +935,6 @@ enum{
 		if (field == nil)
 			field = BDSKLocalUrlString;
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title")];
 		return (lurl == nil ? NO : YES);
 	}
 	else if (theAction == @selector(moveLinkedFile:)) {
@@ -951,8 +942,6 @@ enum{
 		if (field == nil)
 			field = BDSKLocalUrlString;
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Move Linked File", @"Menu item title")];
 		return (isEditable && lurl != nil);
 	}
 	else if (theAction == @selector(showNotesForLinkedFile:)) {
@@ -960,8 +949,6 @@ enum{
 		if (field == nil)
 			field = BDSKLocalUrlString;
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Skim Notes For Linked File", @"Menu item title")];
 		return (lurl == nil ? NO : YES);
 	}
 	else if (theAction == @selector(copyNotesForLinkedFile:)) {
@@ -969,16 +956,12 @@ enum{
 		if (field == nil)
 			field = BDSKLocalUrlString;
 		NSURL *lurl = [[publication URLForField:field] fileURLByResolvingAliases];
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title")];
 		return (lurl == nil ? NO : YES);
 	}
 	else if (theAction == @selector(openRemoteURL:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
 			field = BDSKUrlString;
-		if ([[menuItem menu] supermenu])
-			[menuItem setTitle:NSLocalizedString(@"Open URL in Browser", @"Menu item title")];
 		return ([publication remoteURLForField:field] != nil);
 	}
     else if (theAction == @selector(saveFileAsLocalUrl:)) {

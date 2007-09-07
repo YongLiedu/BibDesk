@@ -99,110 +99,13 @@
 }	
 
 - (BOOL) validateCopyAsMenuItem:(NSMenuItem*) menuItem {
-    OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL usesTeX = [sud boolForKey:BDSKUsesTeXKey];
+    BOOL usesTeX = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey];
 	int copyType = [menuItem tag];
-	NSString *s = nil;
-	NSString *copyString = NSLocalizedString(@"Copy", @"Menu item title");
-	int n = [self numberOfSelectedPubs];
-	
-	switch (copyType) {
-		case BDSKBibTeXDragCopyType:
-			if (n <= 1)
-				s = NSLocalizedString(@"BibTeX Record", @"Menu item title");
-			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"%i BibTeX Records", @"Menu item title"), n];
-			break;
-		case BDSKCiteDragCopyType:
-			do {
-				// figure out correct name for TeX as chosen in prefs
-				NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
-				NSString *TeXName = (![startCiteBracket isEqualToString:@"["]) ? @"TeX" : @"ConTeXt";
-				if (n <= 1)
-					s = [NSString stringWithFormat:NSLocalizedString(@"%@ \\cite Command", @"Menu item title"), TeXName];
-				else if ([sud boolForKey:BDSKSeparateCiteKey]) 
-					s = [NSString stringWithFormat:NSLocalizedString(@"%i %@ \\cite Commands", @"Menu item title"), n, TeXName];
-				else
-					s = [NSString stringWithFormat:NSLocalizedString(@"%@ \\cite Command for %i Items", @"Menu item title"), TeXName, n];
-			} while (0);
-			break;
-		case BDSKPDFDragCopyType:
-            if (usesTeX == NO)
-                n = 0;
-			if (n <= 1)
-				s = NSLocalizedString(@"PDF", @"PDF");
-			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"PDF for %i Items", @"Menu item title"), n];
-			break;
-		case BDSKRTFDragCopyType:
-            if (usesTeX == NO)
-                n = 0;
-			if (n <= 1)
-				s = NSLocalizedString(@"Text", @"Text");
-			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"Text for %i Items", @"Menu item title"), n];
-			break;
-		case BDSKLaTeXDragCopyType:
-            if (usesTeX == NO)
-                n = 0;
-			if (n <= 1)
-				s = NSLocalizedString(@"LaTeX", @"LaTeX");
-			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"LaTeX for %i Items", @"Menu item title"), n];
-			break;
-		case BDSKLTBDragCopyType:
-            if (usesTeX == NO)
-                n = 0;
-			if (n <= 1)
-				s = NSLocalizedString(@"Amsrefs LaTeX", @"Amsrefs LaTeX");
-			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"Amsrefs LaTeX for %i Items", @"Menu item title"), n];
-			break;
-		case BDSKMinimalBibTeXDragCopyType:
-			if (n <= 1)
-				s = NSLocalizedString(@"Minimal BibTeX Record", @"Minimal BibTeX Record");
-			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"%i Minimal BibTeX Records", @"Menu item title"), n];
-			break;
-		case BDSKRISDragCopyType:
-			if (n <= 1)
-				s = NSLocalizedString(@"RIS Record", @"Menu item title");
-			else
-				s = [NSString stringWithFormat:NSLocalizedString(@"%i RIS Records", @"Menu item title"), n];
-			break;
-        default:
-            return (n > 0);
-	}
-	
-	if (n == 0) {
-		// no selection
-		if (![[menuItem menu] supermenu]) {
-			s = [NSString stringWithFormat:@"%@ %@", copyString, s];
-		}
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if (n == 1) {
-		// single selection
-		NSString *forString = NSLocalizedString(@"for", @"Menu item title: [Copy format] for [cite key]");
-		NSString *citeKey = [(BibItem*)[[self selectedPublications] objectAtIndex:0] citeKey];
-		if ([[menuItem menu] supermenu]) {
-			s = [NSString stringWithFormat:@"%@ %@ %@", s, forString, citeKey];
-		}
-		else {
-			s = [NSString stringWithFormat:@"%@ %@ %@ %@", copyString, s, forString, citeKey];
-		}
-		[menuItem setTitle:s];
-		return YES;
-	}
-	else {
-		// multiple selection
-		if (![[menuItem menu] supermenu]) {
-			s = [NSString stringWithFormat:@"%@ %@", copyString, s];
-		}
-		[menuItem setTitle:s];
-		return YES;
-	}
+    
+    if (usesTeX == NO && (copyType == BDSKPDFDragCopyType || copyType == BDSKRTFDragCopyType || copyType == BDSKLaTeXDragCopyType || copyType == BDSKLTBDragCopyType))
+        return NO;
+    else
+        return [self numberOfSelectedPubs] > 0;
 }
 
 - (BOOL)validatePasteMenuItem:(NSMenuItem *)menuItem{
@@ -220,109 +123,25 @@
 }
 
 - (BOOL) validateEditSelectionMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
-	
-	if ([self numberOfSelectedPubs] == 0) {
-		// no selection
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Get Info", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Get Info for Publication", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return YES;
-	}
-	else {
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Get Info for %i Publications", @"Menu item title");
-			[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		}
-		return YES;
-	}
+    return [self numberOfSelectedPubs] > 0;
 }
 
 - (BOOL) validateDeleteSelectionMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
-	int n = [self numberOfSelectedPubs];
-	
-	if (n == 0 ||
-        [self hasExternalGroupsSelected] == YES) {
-		// no selection
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Delete", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return NO;
-	}
-	else if (n == 1) {
-		// single selection
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Delete Publication", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return YES;
-	}
-	else {
-		// multiple selection
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Delete %i Publications", @"Menu item title");
-			[menuItem setTitle:[NSString stringWithFormat:s, n]];
-		}
-		return YES;
-	}
+    return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
 }	
 		
 - (BOOL) validateRemoveSelectionMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
-	int n = [self numberOfSelectedPubs];
-	int m = 0; // number of non-smart groups
-    NSIndexSet *selIndexes = [groupTableView selectedRowIndexes];
-    
-    // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
-	if([selIndexes firstIndex] == 0) {
+    if ([self numberOfSelectedPubs] == 0 && [self hasExternalGroupsSelected])
+        return NO;
+    if([self hasLibraryGroupSelected])
         return [self validateDeleteSelectionMenuItem:menuItem];
-    } else {
-        m = [groups numberOfStaticGroupsAtIndexes:selIndexes];
-        if ([[self currentGroupField] isSingleValuedGroupField] == NO)
-            m += [groups numberOfCategoryGroupsAtIndexes:selIndexes];
-    }
-	
-	if (n == 0 || m == 0) {
-		// no selection
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove from Group", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return NO;
-	}
-	else if (n == 1) {
-		// single selection
-		if (![[menuItem menu] supermenu]) {
-			if (m == 1)
-				s = NSLocalizedString(@"Remove Publication from Group", @"Menu item title");
-			else
-				s = NSLocalizedString(@"Remove Publication from Groups", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return YES;
-	}
-	else {
-		// multiple selection
-		if (![[menuItem menu] supermenu]) {
-			if (m == 1)
-				s = NSLocalizedString(@"Remove %i Publications from Group", @"Menu item title");
-			else
-				s = NSLocalizedString(@"Remove %i Publications from Groups", @"Menu item title");
-			[menuItem setTitle:[NSString stringWithFormat:s, n]];
-		}
-		return YES;
-	}
+    
+    NSIndexSet *selIndexes = [groupTableView selectedRowIndexes];
+    int n = [groups numberOfStaticGroupsAtIndexes:selIndexes];
+    // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
+    if ([[self currentGroupField] isSingleValuedGroupField] == NO)
+        n += [groups numberOfCategoryGroupsAtIndexes:selIndexes];
+    return n > 0;
 }	
 
 - (BOOL)validateSendToLyXMenuItem:(NSMenuItem*) menuItem {
@@ -338,269 +157,113 @@
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	NSString *field = [menuItem representedObject];
-	BibItem *selectedBI = nil;
-	NSString *lurl = nil;
     if (field == nil)
 		field = BDSKLocalUrlString;
-	
-	if ([self numberOfSelectedPubs] == 0) {
-		// no selection
-		s = NSLocalizedString(@"Open Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Open Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		selectedBI = [[self selectedPublications] objectAtIndex:0];
-		lurl = [selectedBI localFilePathForField:field];
-		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
-	}
-	else {
-		s = NSLocalizedString(@"Open %i Linked Files", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-		while(selectedBI = [e nextObject]){
-			lurl = [selectedBI localFilePathForField:field];
-			if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl])
-				return YES;
-		}
-		return NO;
-	}
+    
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+	BibItem *pub = nil;
+    
+    while(pub = [e nextObject]){
+        NSString *path = [pub localFilePathForField:field];
+        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            return YES;
+    }
+    return NO;
 }	
 
 - (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	NSString *field = [menuItem representedObject];
-	BibItem *selectedBI = nil;
-	NSString *lurl = nil;
     if (field == nil)
 		field = BDSKLocalUrlString;
-	
-	if ([self numberOfSelectedPubs] == 0) {
-		// no selection
-		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Menu item title");
-		[menuItem setTitle:s];
-		selectedBI = [[self selectedPublications] objectAtIndex:0];
-		lurl = [selectedBI localFilePathForField:field];
-		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
-	}
-	else {
-		s = NSLocalizedString(@"Reveal %i Linked Files in Finder", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-		while(selectedBI = [e nextObject]){
-			lurl = [selectedBI localFilePathForField:field];
-			if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl])
-				return YES;
-		}
-		return NO;
-	}
+    
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+	BibItem *pub = nil;
+    
+    while(pub = [e nextObject]){
+        NSString *path = [pub localFilePathForField:field];
+        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            return YES;
+    }
+    return NO;
 }	
 
 - (BOOL) validateOpenRemoteURLMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	NSString *field = [menuItem representedObject];
-	BibItem *selectedBI = nil;
-	NSURL *url = nil;
     if (field == nil)
-		field = BDSKUrlString;
-	
-	if ([self numberOfSelectedPubs] == 0) {
-		// no selection
-		s = NSLocalizedString(@"Open URL in Browser", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Open URL in Browser", @"Menu item title");
-		[menuItem setTitle:s];
-		selectedBI = [[self selectedPublications] objectAtIndex:0];
-		url = [selectedBI remoteURLForField:field];
-		return (url != nil);
-	}
-	else {
-		s = NSLocalizedString(@"Open %i URLs in Browser", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-		while(selectedBI = [e nextObject]){
-			url = [selectedBI remoteURLForField:field];
-			if (url != nil)
-				return YES;
-		}
-		return NO;
-	}
+		field = BDSKLocalUrlString;
+    
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+	BibItem *pub = nil;
+    
+    while(pub = [e nextObject]){
+        NSString *path = [pub localFilePathForField:field];
+        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            return YES;
+    }
+    return NO;
 }	
 
 - (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	NSString *field = [menuItem representedObject];
-	BibItem *selectedBI = nil;
-	NSString *lurl = nil;
     if (field == nil)
 		field = BDSKLocalUrlString;
     
-	if ([self numberOfSelectedPubs] == 0) {
-		// no selection
-		s = NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Show Skim Notes For Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		selectedBI = [[self selectedPublications] objectAtIndex:0];
-		lurl = [selectedBI localFilePathForField:field];
-		return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
-	}
-	else {
-		s = NSLocalizedString(@"Show Skim Notes For %i Linked Files", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-		while(selectedBI = [e nextObject]){
-			lurl = [selectedBI localFilePathForField:field];
-			return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
-		}
-		return NO;
-	}
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+	BibItem *pub = nil;
+    
+    while(pub = [e nextObject]){
+        NSString *path = [pub localFilePathForField:field];
+        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            return YES;
+    }
+    return NO;
 }	
 
 - (BOOL) validateCopyNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	NSString *field = [menuItem representedObject];
-	BibItem *selectedBI = nil;
-	NSString *lurl = nil;
     if (field == nil)
 		field = BDSKLocalUrlString;
     
-	if ([self numberOfSelectedPubs] == 0) {
-		// no selection
-		s = NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Copy Skim Notes For Linked File", @"Menu item title");
-		[menuItem setTitle:s];
-		selectedBI = [[self selectedPublications] objectAtIndex:0];
-		lurl = [selectedBI localFilePathForField:field];
-		return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
-	}
-	else {
-		s = NSLocalizedString(@"Copy Skim Notes For %i Linked Files", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-		while(selectedBI = [e nextObject]){
-			lurl = [selectedBI localFilePathForField:field];
-			return lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl];
-		}
-		return NO;
-	}
+    NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+	BibItem *pub = nil;
+    
+    while(pub = [e nextObject]){
+        NSString *path = [pub localFilePathForField:field];
+        if (path && [[NSFileManager defaultManager] fileExistsAtPath:path])
+            return YES;
+    }
+    return NO;
 }	
 
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
-	
-	if ([self numberOfSelectedPubs] == 0 || 
-        [documentWindow isKeyWindow] == NO || 
-        [self hasExternalGroupsSelected] == YES) {
-		// no selection
-		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s]];
-		return YES;
-	}
-	else {
-		s = NSLocalizedString(@"Duplicate %i Titles to Booktitles", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		return YES;
-	}
+	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
 }
+
 - (BOOL) validateGenerateCiteKeyMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
-	
-	if ([self numberOfSelectedPubs] == 0 || 
-        [documentWindow isKeyWindow] == NO || 
-        [self hasExternalGroupsSelected] == YES) {
-		// no selection
-		s = NSLocalizedString(@"Generate Cite Key", @"Menu item title");
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		s = NSLocalizedString(@"Generate Cite Key", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s]];
-		return YES;
-	}
-	else {
-		s = NSLocalizedString(@"Generate %i Cite Keys", @"Menu item title");
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		return YES;
-	}
+	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
 }	
 
 - (BOOL) validateConsolidateLinkedFilesMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
-	
-	if ([self numberOfSelectedPubs] == 0 || 
-        [documentWindow isKeyWindow] == NO || 
-        [self hasExternalGroupsSelected] == YES) {
-		// no selection
-		s = [NSLocalizedString(@"Consolidate Linked Files", @"Menu item title") stringByAppendingEllipsis];
-		[menuItem setTitle:s];
-		return NO;
-	}
-	else if ([self numberOfSelectedPubs] == 1) {
-		// single selection
-		NSString * citeKey = [(BibItem*)[[self selectedPublications] objectAtIndex:0] citeKey];
-		s = [NSLocalizedString(@"Consolidate Linked File for %@", @"Menu item title") stringByAppendingEllipsis];
-		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
-		return YES;
-	}
-	else {
-		s = [NSLocalizedString(@"Consolidate %i Linked Files", @"Menu item title") stringByAppendingEllipsis];
-		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-		return YES;
-	}
+	return ([self numberOfSelectedPubs] > 0 && [self hasExternalGroupsSelected] == NO);
 }	
 
 - (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem {
-	// change name of menu item to indicate that we are only printing the selection?
-    if ([self numberOfSelectedPubs] == 0 || 
-        [documentWindow isKeyWindow] == NO){
-		// no selection => no printing
-		return NO;
-	}
-	else {
-        // even if there is a selection, we may have an error condition with nothing to print
-        if([currentPreviewView isEqual:previewerBox])
-            return [[previewer pdfView] document] != nil;
-        else if ([currentPreviewView isEqual:previewBox])
-            return [previewPdfView document] != nil;
-        
-        // see comments on exception in -printableView, which is the main motivation for this validation
-        int displayType = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey];
-        if (BDSKRTFPreviewDisplay == displayType)
-            return [[previewer textView] textStorage] != nil;
-        else
-            return [previewTextView textStorage] != nil;
-	}
+	if ([self numberOfSelectedPubs] == 0)
+        return NO;
+    // even if there is a selection, we may have an error condition with nothing to print
+    // see comments on exception in -printableView, which is the main motivation for this validation
+    else if([currentPreviewView isEqual:previewerBox])
+        return [[previewer pdfView] document] != nil;
+    else if ([currentPreviewView isEqual:previewBox])
+        return [previewPdfView document] != nil;
+    else if ([[previewer textView] isEqual:previewBox])
+        return [[previewer textView] textStorage] != nil;
+    else
+        return [previewTextView textStorage] != nil;
 }
 
 - (BOOL) validateToggleToggleCustomCiteDrawerMenuItem:(NSMenuItem*) menuItem {
@@ -697,36 +360,11 @@
 } 
 
 - (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
-    int n = [groups numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfURLGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]] + 
-            [groups numberOfSearchGroupsAtIndexes:[groupTableView selectedRowIndexes]];
-	
-	NSString *s = @"";
-	
-	if (n == 0) {
-		// no smart group selected
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove Group", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return NO;
-	} else if (n == 1) {
-		// single smart group selected
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove Group", @"Menu item title");
-			[menuItem setTitle:s];
-		}
-		return YES;
-	} else {
-		// multiple smart groups selected
-		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove %i Groups", @"Menu item title");
-			[menuItem setTitle:[NSString stringWithFormat:s, n]];
-		}
-		return YES;
-	}
+    return [groups numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
+           [groups numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
+           [groups numberOfURLGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
+           [groups numberOfScriptGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0 ||
+           [groups numberOfSearchGroupsAtIndexes:[groupTableView selectedRowIndexes]] > 0;
 } 
 
 - (BOOL) validateRenameGroupMenuItem:(NSMenuItem *)menuItem{
