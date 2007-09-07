@@ -120,8 +120,6 @@
 {
     if ([[theEvent characters] length] == 0)
         return;
-    unichar c = [[theEvent characters] characterAtIndex:0];
-    unsigned int modifierFlags = ([theEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask & ~NSAlphaShiftKeyMask);
 	// modified from NSTableView-OAExtensions.h which uses a shared typeahead helper instance (which we can't access to force it to recache)
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableTypeAheadSelection"]) {
 

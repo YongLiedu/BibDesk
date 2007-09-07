@@ -155,7 +155,6 @@
 }
 
 - (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
 	NSString *field = [menuItem representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -172,7 +171,6 @@
 }	
 
 - (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
 	NSString *field = [menuItem representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -189,7 +187,6 @@
 }	
 
 - (BOOL) validateOpenRemoteURLMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
 	NSString *field = [menuItem representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -206,7 +203,6 @@
 }	
 
 - (BOOL) validateShowNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
 	NSString *field = [menuItem representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
@@ -223,7 +219,6 @@
 }	
 
 - (BOOL) validateCopyNotesForLinkedFileMenuItem:(NSMenuItem*) menuItem {
-	NSString * s;
 	NSString *field = [menuItem representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
