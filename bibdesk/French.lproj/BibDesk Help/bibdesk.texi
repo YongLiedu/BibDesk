@@ -598,8 +598,8 @@ which searches Author, Editor, and any other field defined as a ``Person'' field
 @image{gfx/quickSearchField}
 
 The quick search field is configurable using its menu (click on the triangle in the text box).
-The default behavior is to do a simple substring search, but advanced options for Apple's Search Kit
-technology are available as well.  These options are described below.
+The default behavior is to do a simple substring search, but @ref{Advanced Search Options} 
+for Apple's Search Kit technology are available as well.
 
 @node Advanced Search Options
 @section Advanced Search Options

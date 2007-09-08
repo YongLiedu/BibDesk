@@ -598,8 +598,8 @@ which searches Author, Editor, and any other field defined as a ``Person'' field
 @image{gfx/quickSearchField}
 
 The quick search field is configurable using its menu (click on the triangle in the text box).
-The default behavior is to do a simple substring search, but advanced options for Apple's Search Kit
-technology are available as well.  These options are described below.
+The default behavior is to do a simple substring search, but @ref{Advanced Search Options} 
+for Apple's Search Kit technology are available as well.
 
 @node Advanced Search Options
 @section Advanced Search Options
@@ -643,9 +643,9 @@ The query operators that SKSearchCreate recognizes for non-similarity searching 
 
 The operators AND, OR, and NOT are case sensitive.
 
-Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `à', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
+Search Kit performs Unicode normalization on query strings and on the text placed into indexes. It uses Unicode Normalization Form KC (NFKC, compatibility decomposition followed by canonical composition) as documented in Unicode Standard Annex #15. For example, the a-grave character, `√†', can be written as the two Unicode characters (0x0061, 0x0300) or as the single Unicode character 0x00E0. Search Kit will normalize (0x0061, 0x0300) to 0x00E0. For more information on Unicode normalization, see @url{http://unicode.org/reports/tr15}.
 
-Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `à', `A', and `À'.
+Search Kit further normalizes query strings and indexes by stripping diacritical marks and by forcing characters to lowercase. For example, Search Kit normalizes each of the following characters to `a': `a', `√†', `A', and `√Ä'.
 
 @node Find and Replace
 @c DO NOT LOCALIZE THE NEXT LINE
