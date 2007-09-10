@@ -228,20 +228,43 @@
 
 @implementation BDSKItemPasteboardHelper (Private)
 
+- (BOOL)pasteboardIsValid:(NSPasteboard *)pboard
+{
+    // see bug #1791132 https://sourceforge.net/tracker/index.php?func=detail&aid=1791132&group_id=61487&atid=497423
+    // the system pboard server seems to go down periodically, which gives us various objectForKey:nil exceptions
+    static BOOL didAlert = NO;
+    BOOL isValid = (nil != [pboard name]);
+    
+    // only show the panel once; this may be called when closing/quitting after seeing the warning
+    if (NO == didAlert && NO == isValid) {
+        NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to access clipboard", @"alert title for system problem")
+                                         defaultButton:nil
+                                       alternateButton:nil
+                                           otherButton:nil
+                             informativeTextWithFormat:NSLocalizedString(@"The system clipboard is not working.  If restarting your system does not solve this problem, please report a bug using BibDesk's Help menu.", @"error message when copy/paste fails")];
+        [alert runModal];
+        didAlert = YES;
+    }
+    else if (NO == isValid) {
+        // more subtle reminder in case the user ignores the warning
+        NSBeep();
+    }
+    return isValid;
+}
+
 - (NSMutableArray *)promisedTypesForPasteboard:(NSPasteboard *)pboard {
-	return [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"types"];
+	return [self pasteboardIsValid:pboard] ? [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"types"] : nil;
 }
 
 - (int)promisedDragCopyTypeForPasteboard:(NSPasteboard *)pboard {
-	return [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] intValue];
+	return [self pasteboardIsValid:pboard] ? [[[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"dragCopyType"] intValue] : nil;
 }
 
 - (NSString *)promisedBibTeXStringForPasteboard:(NSPasteboard *)pboard {
-	return [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"bibTeXString"];
+	return [self pasteboardIsValid:pboard] ? [[promisedPboardTypes objectForKey:[pboard name]] objectForKey:@"bibTeXString"] : nil;
 }
 
 - (void)removePromisedType:(NSString *)type forPasteboard:(NSPasteboard *)pboard {
-    NSParameterAssert(nil != pboard);
 	NSMutableArray *types = [self promisedTypesForPasteboard:pboard];
 	[types removeObject:type];
 	if([types count] == 0)
@@ -249,10 +272,11 @@
 }
 
 - (void)removePromisedTypesForPasteboard:(NSPasteboard *)pboard {
-    NSParameterAssert(nil != [pboard name]);
-	[promisedPboardTypes removeObjectForKey:[pboard name]];
-    if([promisedPboardTypes count] == 0 && promisedPboardTypes != nil && delegate == nil)   
-        [self absolveResponsibility];
+    if ([self pasteboardIsValid:pboard]) {
+        [promisedPboardTypes removeObjectForKey:[pboard name]];
+        if([promisedPboardTypes count] == 0 && promisedPboardTypes != nil && delegate == nil)   
+            [self absolveResponsibility];
+    }
 }
 
 - (void)provideAllPromisedTypes {
