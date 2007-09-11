@@ -2653,6 +2653,7 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
                 else if (UTTypeConformsTo(theUTI, CFSTR("com.adobe.postscript")))
                     pdfDoc = [[PDFDocument alloc] initWithPostScriptURL:url];
                 [previewPdfView setDocument:pdfDoc];
+                [previewPdfView layoutDocumentView];
                 [pdfDoc release];
             }            
 
