@@ -127,6 +127,7 @@ NSString *BDSKLTBDocumentType = @"Amsrefs LTB";
 NSString *BDSKEndNoteDocumentType = @"EndNote XML";
 NSString *BDSKMODSDocumentType = @"MODS XML";
 NSString *BDSKAtomDocumentType = @"Atom XML";
+NSString *BDSKArchiveDocumentType = @"BibTeX and Papers Archive";
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
@@ -804,7 +805,7 @@ static NSPopUpButton *popUpButtonSubview(NSView *view)
 
 // this is a private method, the action of the file format poup
 - (void)changeSaveType:(id)sender{
-    NSSet *typesWithEncoding = [NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, nil];
+    NSSet *typesWithEncoding = [NSSet setWithObjects:BDSKBibTeXDocumentType, BDSKRISDocumentType, BDSKMinimalBibTeXDocumentType, BDSKLTBDocumentType, BDSKArchiveDocumentType, nil];
     NSString *selectedType = [[sender selectedItem] representedObject];
     [saveTextEncodingPopupButton setEnabled:[typesWithEncoding containsObject:selectedType]];
     if ([NSDocument instancesRespondToSelector:@selector(changeSaveType:)])
@@ -901,7 +902,25 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
         items = [self numberOfSelectedPubs] > 0 ? [self selectedPublications] : groupedPublications;
     
     NSFileWrapper *fileWrapper = [self fileWrapperOfType:docType forPublications:items error:&nsError];
-    success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:YES updateFilenames:NO];
+    
+    if ([docType isEqualToString:BDSKArchiveDocumentType]) {
+        if (success = nil != fileWrapper) {
+            NSString *path = [[fileURL path] stringByDeletingPathExtension];
+            if (success = [fileWrapper writeToFile:path atomically:NO updateFilenames:NO]) {
+                NSTask *task = [[[NSTask alloc] init] autorelease];
+                [task setLaunchPath:@"/usr/bin/tar"];
+                [task setArguments:[NSArray arrayWithObjects:@"czf", [[fileURL path] lastPathComponent], [path lastPathComponent], nil]];
+                [task setCurrentDirectoryPath:[path stringByDeletingLastPathComponent]];
+                [task launch];
+                if ([task isRunning])
+                    [task waitUntilExit];
+                success = [task terminationStatus] == 0;
+                [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+            }
+        }
+    } else {
+        success = nil == fileWrapper ? NO : [fileWrapper writeToFile:[fileURL path] atomically:NO updateFilenames:NO];
+    }
     
     // see if this is our error or Apple's
     if (NO == success && [nsError isLocalError]) {
@@ -955,6 +974,12 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:aType];
     if([selectedTemplate templateFormat] & BDSKRTFDTemplateFormat){
         fileWrapper = [self fileWrapperForPublications:items usingTemplate:selectedTemplate];
+        if(fileWrapper == nil){
+            if (outError) 
+                *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
+        }
+    }else if ([aType isEqualToString:BDSKArchiveDocumentType]){
+        fileWrapper = [self fileWrapperForPublications:items];
         if(fileWrapper == nil){
             if (outError) 
                 *outError = [NSError mutableLocalErrorWithCode:kBDSKDocumentSaveError localizedDescription:NSLocalizedString(@"Unable to create file wrapper for the selected template", @"Error description")];
@@ -1312,6 +1337,36 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     NSAttributedString *fileTemplate = [BDSKTemplateObjectProxy attributedStringByParsingTemplate:template withObject:self publications:items documentAttributes:&docAttributes];
     
     return [fileTemplate RTFDFileWrapperFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:docAttributes];
+}
+
+
+- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items{
+    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
+    
+    NSStringEncoding encoding = [saveTextEncodingPopupButton encoding] ? [saveTextEncodingPopupButton encoding] : [BDSKStringEncodingManager defaultEncoding];
+    NSData *bibtexData = [self bibTeXDataForPublications:items encoding:encoding droppingInternal:NO error:NULL];
+    NSFileWrapper *bibtexFileWrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:bibtexData] autorelease];
+    NSFileWrapper *fileWrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:[NSDictionary dictionaryWithObjectsAndKeys:bibtexFileWrapper, @"bibliography.bib", nil]] autorelease];
+    
+    NSEnumerator *itemEnum = [items objectEnumerator];
+    BibItem *item;
+    NSSet *URLFields = [[BDSKTypeManager sharedManager] localFileFieldsSet];
+    
+    while (item = [itemEnum nextObject]) {
+        NSEnumerator *fieldEnum = [URLFields objectEnumerator];
+        NSString *field;
+        while (field = [fieldEnum nextObject]) {
+            NSURL *url = [item URLForField:field];
+            if (url) {
+                NSString *fileName = [[url path] lastPathComponent];
+                NSData *data = [NSData dataWithContentsOfURL:url];
+                NSFileWrapper *fw = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
+                [fw setPreferredFilename:fileName];
+                [fileWrapper addFileWrapper:fw];
+            }
+        }
+    }
+    return fileWrapper;
 }
 
 #pragma mark -

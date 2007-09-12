@@ -22,7 +22,7 @@
 				<string>net.sourceforge.bibdesk.bdskcache</string>
 			</array>
 		</dict>
-        <dict>
+		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>bdsksearch</string>
@@ -63,6 +63,7 @@
 				<string>EndNote XML</string>
 				<string>MODS XML</string>
 				<string>Atom XML</string>
+				<string>BibTeX and Papers Archive</string>
 			</array>
 		</dict>
 		<dict>
@@ -118,6 +119,7 @@
 				<string>EndNote XML</string>
 				<string>MODS XML</string>
 				<string>Atom XML</string>
+				<string>BibTeX and Papers Archive</string>
 			</array>
 		</dict>
 		<dict>
@@ -212,6 +214,20 @@
 			<key>NSPersistentStoreTypeKey</key>
 			<string>Binary</string>
 		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>tgz</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>BibTeX and Papers Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>BibDesk</string>
@@ -237,10 +253,10 @@
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
 	<string>v${CURRENT_PROJECT_VERSION}</string>
-	<key>NSAppleScriptEnabled</key>
-	<true/>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4.0</string>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2001-07 Michael O. McCracken.</string>
 	<key>NSMainNibFile</key>
@@ -582,11 +598,6 @@
 						<string>Cited-By</string>
 						<string>Cites</string>
 					</array>
-                    <key>Person fields</key>
-                    <array>
-                        <string>Author</string>
-                        <string>Editor</string>
-                    </array>
 					<key>Default Fields</key>
 					<array>
 						<string>Keywords</string>
@@ -599,6 +610,11 @@
 					</array>
 					<key>Macro definitions from bib style file</key>
 					<dict/>
+					<key>Person fields</key>
+					<array>
+						<string>Author</string>
+						<string>Editor</string>
+					</array>
 					<key>Rating fields</key>
 					<array>
 						<string>Rating</string>
@@ -705,6 +721,8 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKDefaultArrayJoinStringKey</key>
+					<string>/</string>
 					<key>BDSKExportTemplateStyleKey</key>
 					<string>Default HTML template</string>
 					<key>BDSKExportTemplateTree</key>
@@ -713,8 +731,6 @@
 					<key>BDSKServiceTemplateTree</key>
 					<data>
 					</data>
-                    <key>BDSKDefaultArrayJoinStringKey</key>
-                    <string>/</string>
 				</dict>
 				<key>helpURL</key>
 				<string>TemplatePreferences</string>
@@ -790,73 +806,77 @@
 					<key>BDSKCurrentGroupFieldKey</key>
 					<string>Keywords</string>
 					<key>BDSKDefaultBibFileAliasKey</key>
-					<data></data>
+					<data>
+					</data>
 					<key>BDSKDefaultGroupFieldSeparatorKey</key>
 					<string>; </string>
 					<key>BDSKEmailTemplateKey</key>
 					<string></string>
+					<key>BDSKGroupFieldSeparatorCharactersKey</key>
+					<string>,:;</string>
 					<key>BDSKGroupFieldsKey</key>
 					<array>
 						<string>Keywords</string>
 						<string>Group</string>
 					</array>
-					<key>BDSKGroupFieldSeparatorCharactersKey</key>
-					<string>,:;</string>
 					<key>BDSKIntersectGroupsKey</key>
 					<false/>
 					<key>BDSKReadExtendedAttributesKey</key>
 					<false/>
-                    <key>BDSKSearchGroupBookmarksKey</key>
-                    <array>
-                        <dict>
-                            <key>database</key>
-                            <string>pubmed</string>
-                            <key>label</key>
-                            <string>PubMed</string>
-                            <key>name</key>
-                            <string>PubMed</string>
-                            <key>type</key>
-                            <string>entrez</string>
-                        </dict>
-                        <dict>
-                            <key>database</key>
-                            <string>Voyager</string>
-                            <key>host</key>
-                            <string>z3950.loc.gov</string>
-                            <key>label</key>
-                            <string>Library of Congress</string>
-                            <key>name</key>
-                            <string>Library of Congress</string>
-                            <key>options</key>
-                            <dict>
-                                <key>recordSyntax</key>
-                                <string>US MARC</string>
-                                <key>resultEncoding</key>
-                                <string>marc-8</string>
-                            </dict>
-                            <key>port</key>
-                            <string>7090</string>
-                            <key>type</key>
-                            <string>zoom</string>
-                        </dict>
-                        <dict>
-                        <key>database</key>
-                            <string>SCI</string>
-                            <key>label</key>
-                            <string>Web of Science SCI</string>
-                            <key>name</key>
-                            <string>Web of Science SCI</string>
-                            <key>type</key>
-                            <string>isi</string>
-                        </dict>
+					<key>BDSKSearchGroupBookmarksKey</key>
+					<array>
+						<dict>
+							<key>database</key>
+							<string>pubmed</string>
+							<key>label</key>
+							<string>PubMed</string>
+							<key>name</key>
+							<string>PubMed</string>
+							<key>type</key>
+							<string>entrez</string>
+						</dict>
+						<dict>
+							<key>database</key>
+							<string>Voyager</string>
+							<key>host</key>
+							<string>z3950.loc.gov</string>
+							<key>label</key>
+							<string>Library of Congress</string>
+							<key>name</key>
+							<string>Library of Congress</string>
+							<key>options</key>
+							<dict>
+								<key>recordSyntax</key>
+								<string>US MARC</string>
+								<key>resultEncoding</key>
+								<string>marc-8</string>
+							</dict>
+							<key>port</key>
+							<string>7090</string>
+							<key>type</key>
+							<string>zoom</string>
+						</dict>
+						<dict>
+							<key>database</key>
+							<string>SCI</string>
+							<key>label</key>
+							<string>Web of Science SCI</string>
+							<key>name</key>
+							<string>Web of Science SCI</string>
+							<key>type</key>
+							<string>isi</string>
+						</dict>
 					</array>
-                    <key>BDSKShouldUsePDFMetadata</key>
+					<key>BDSKSearchMenuTagKey</key>
+					<integer>0</integer>
+					<key>BDSKShouldShowWebGroup</key>
+					<false/>
+					<key>BDSKShouldUsePDFMetadata</key>
 					<false/>
 					<key>BDSKShouldWritePDFMetadata</key>
 					<false/>
 					<key>BDSKSpotlightVersionInfo</key>
-                    <dict>
-                    </dict>
+					<dict/>
 					<key>BDSKUpdateCheckIntervalKey</key>
 					<integer>1</integer>
 					<key>BDSKUpdateCheckLastDateKey</key>
@@ -930,8 +950,6 @@
 					<real>1</real>
 					<key>Preview RTF Scale Factor</key>
 					<real>1</real>
-                    <key>BDSKSearchMenuTagKey</key>
-                    <integer>0</integer>
 					<key>Saved size of BibEditor document snoop drawer</key>
 					<string></string>
 					<key>Show Editor Status Bar</key>
@@ -962,8 +980,6 @@
 					<integer>0</integer>
 					<key>View-by Field</key>
 					<string>Author</string>
-                    <key>BDSKShouldShowWebGroup</key>
-                    <false/>
 				</dict>
 				<key>helpURL</key>
 				<string>GeneralPreferences</string>
@@ -1147,7 +1163,7 @@
 				<key>public.mime-type</key>
 				<array>
 					<string>application/x-Research-Info-Systems</string>
-                    <string>application/x-endnote-refer</string>
+					<string>application/x-endnote-refer</string>
 				</array>
 			</dict>
 		</dict>

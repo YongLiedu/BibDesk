@@ -89,6 +89,7 @@ extern NSString *BDSKLTBDocumentType;
 extern NSString *BDSKEndNoteDocumentType;
 extern NSString *BDSKMODSDocumentType;
 extern NSString *BDSKAtomDocumentType;
+extern NSString *BDSKArchiveDocumentType;
 
 // Some pasteboard types used by the document for dragging and copying.
 extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Reference Miner, determined using Pasteboard Peeker
@@ -245,6 +246,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSData *)attributedStringDataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
 - (NSData *)dataForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
 - (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items usingTemplate:(BDSKTemplate *)template;
+- (NSFileWrapper *)fileWrapperForPublications:(NSArray *)items;
 
 - (NSData *)atomDataForPublications:(NSArray *)items;
 - (NSData *)MODSDataForPublications:(NSArray *)items;
