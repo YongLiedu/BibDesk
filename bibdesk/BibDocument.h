@@ -118,6 +118,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
     BDSKWebGroupViewController *webGroupViewController;
     
+    NSDictionary *tableColumnWidths;
+    
 #pragma mark Group pane variables
 
     IBOutlet BDSKGroupTableView *groupTableView;

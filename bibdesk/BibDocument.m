@@ -174,6 +174,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         [self setDocumentStringEncoding:[BDSKStringEncodingManager defaultEncoding]]; 
         
         // these are set in windowControllerDidLoadNib: from the xattr defaults if available
+        tableColumnWidths = nil;
         sortKey = nil;
         previousSortKey = nil;
         sortGroupsKey = nil;
@@ -242,6 +243,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [macroWC release];
     [infoWC release];
     [promiseDragColumnIdentifier release];
+    [tableColumnWidths release];
     [sortKey release];
     [sortGroupsKey release];
     [searchGroupViewController release];
@@ -363,6 +365,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     // TableView setup
     [tableView removeAllTableColumns];
     
+    tableColumnWidths = [[xattrDefaults objectForKey:BDSKColumnWidthsKey] retain];
     [tableView setupTableColumnsWithIdentifiers:[xattrDefaults objectForKey:BDSKShownColsNamesKey defaultObject:[pw objectForKey:BDSKShownColsNamesKey]]];
     sortKey = [[xattrDefaults objectForKey:BDSKDefaultSortedTableColumnKey defaultObject:[pw objectForKey:BDSKDefaultSortedTableColumnKey]] retain];
     previousSortKey = [sortKey retain];
@@ -513,7 +516,7 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
         }
         
         [dictionary setObject:[[[tableView tableColumnIdentifiers] arrayByRemovingObject:BDSKImportOrderString] arrayByRemovingObject:BDSKRelevanceString] forKey:BDSKShownColsNamesKey];
-        [dictionary setObject:[self currentTableColumnWidthsAndIdentifiers] forKey:BDSKColumnWidthsKey];
+        [dictionary setObject:tableColumnWidths forKey:BDSKColumnWidthsKey];
         [dictionary setObject:savedSortKey ? savedSortKey : BDSKTitleString forKey:BDSKDefaultSortedTableColumnKey];
         [dictionary setBoolValue:docState.sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
         [dictionary setObject:sortGroupsKey forKey:BDSKSortGroupsKey];

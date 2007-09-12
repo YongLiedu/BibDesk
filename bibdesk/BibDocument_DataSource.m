@@ -240,7 +240,7 @@
 
 - (NSDictionary *)defaultColumnWidthsForTableView:(NSTableView *)aTableView{
     NSMutableDictionary *defaultTableColumnWidths = [NSMutableDictionary dictionaryWithDictionary:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey]];
-    [defaultTableColumnWidths addEntriesFromDictionary:[[self mainWindowSetupDictionaryFromExtendedAttributes] objectForKey:BDSKColumnWidthsKey]];
+    [defaultTableColumnWidths addEntriesFromDictionary:tableColumnWidths];
     return defaultTableColumnWidths;
 }
 
@@ -261,7 +261,9 @@
       
     // current setting will override those already in the prefs; we may not be displaying all the columns in prefs right now, but we want to preserve their widths
     NSMutableDictionary *defaultWidths = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey] mutableCopy];
-    [defaultWidths addEntriesFromDictionary:[self currentTableColumnWidthsAndIdentifiers]];
+    [tableColumnWidths release];
+    tableColumnWidths = [[self currentTableColumnWidthsAndIdentifiers] retain];
+    [defaultWidths addEntriesFromDictionary:tableColumnWidths];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:defaultWidths forKey:BDSKColumnWidthsKey];
     [defaultWidths release];
 }
