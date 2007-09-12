@@ -56,6 +56,7 @@ static NSString *presetFormatStrings[] = {@"%L", @"%l%n0%e", @"%a1/%Y%u0%e", @"%
 static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", @"%P0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%s{}[][][]0", @"%c{}", @"%f{Cite Key}", @"%i{}0", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (void)dealloc{
+    [lastPapersFolderPath release];
     [coloringEditor release];
 	[formatSheet release];
 	[super dealloc];
@@ -94,13 +95,13 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 		[papersFolderLocationTextField setStringValue:USE_DOCUMENT_FOLDER];
 		[papersFolderLocationTextField setEnabled:NO];
 		[choosePapersFolderLocationButton setEnabled:NO];
-		[clearPapersFolderLocationButton setState:NSOffState];
+		[papersFolderLocationRadio selectCellWithTag:1];
 		[useRelativePathCheckButton setEnabled:YES];
 	} else {
 		[papersFolderLocationTextField setStringValue:papersFolder];
 		[papersFolderLocationTextField setEnabled:YES];
 		[choosePapersFolderLocationButton setEnabled:YES];
-		[clearPapersFolderLocationButton setState:NSOnState];
+		[papersFolderLocationRadio selectCellWithTag:0];
 		[useRelativePathCheckButton setState:NSOffState];
 		[useRelativePathCheckButton setEnabled:NO];
 	}
@@ -169,12 +170,19 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%p00", 
 	[self valuesHaveChanged];
 }
 
-- (IBAction)clearPapersFolderLocationAction:(id)sender{
-	if ([sender state] == NSOnState) {
+- (IBAction)papersFolderLocationAction:(id)sender{
+	if ([[sender selectedCell] tag] == 0) {
         [defaults setBool:NO forKey:BDSKAutoFileUsesRelativePathKey];
-		[self choosePapersFolderLocationAction:sender];
-        [defaults autoSynchronize];
+        if ([NSString isEmptyString:lastPapersFolderPath]) {
+            [self choosePapersFolderLocationAction:sender];
+            [defaults autoSynchronize];
+        } else {
+            [defaults setObject:lastPapersFolderPath forKey:BDSKPapersFolderPathKey];
+            [self valuesHaveChanged];
+        }
 	} else {
+        [lastPapersFolderPath release];
+        lastPapersFolderPath = [[defaults objectForKey:BDSKPapersFolderPathKey] retain];
 		[defaults setObject:@"" forKey:BDSKPapersFolderPathKey];
 		[self valuesHaveChanged];
 	}

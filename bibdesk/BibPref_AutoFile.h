@@ -46,7 +46,7 @@
     IBOutlet NSPanel *formatSheet;
 	IBOutlet NSTextField* papersFolderLocationTextField;
 	IBOutlet NSButton* choosePapersFolderLocationButton;
-	IBOutlet NSButton* clearPapersFolderLocationButton;
+	IBOutlet NSMatrix *papersFolderLocationRadio;
 	IBOutlet NSButton* useRelativePathCheckButton;
 	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
 	IBOutlet NSButton* warnOnMoveFolderCheckButton;
@@ -61,6 +61,7 @@
 	IBOutlet NSMatrix *formatCleanRadio;
 	IBOutlet NSTextField *previewDisplay;
     
+    NSString *lastPapersFolderPath;
     BDSKFormatStringFieldEditor *coloringEditor;
 }
 
@@ -68,7 +69,7 @@
 - (IBAction)closeFormatSheet:(id)sender;
 - (IBAction)setPapersFolderPathFromTextField:(id)sender;
 - (IBAction)choosePapersFolderLocationAction:(id)sender;
-- (IBAction)clearPapersFolderLocationAction:(id)sender;
+- (IBAction)papersFolderLocationAction:(id)sender;
 - (IBAction)toggleUseRelativePathAction:(id)sender;
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender;
 - (IBAction)toggleWarnOnMoveFolderAction:(id)sender;

@@ -4,12 +4,12 @@
             ACTIONS = {
                 changeLocalUrlLowercase = id; 
                 choosePapersFolderLocationAction = id; 
-                clearPapersFolderLocationAction = id; 
                 closeFormatSheet = id; 
                 formatHelp = id; 
                 localUrlFormatAdd = id; 
                 localUrlFormatChanged = id; 
                 localUrlHelp = id; 
+                papersFolderLocationAction = id; 
                 setFormatCleanOption = id; 
                 setPapersFolderPathFromTextField = id; 
                 showFormatSheet = id; 
@@ -22,7 +22,6 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 choosePapersFolderLocationButton = NSButton; 
-                clearPapersFolderLocationButton = NSButton; 
                 filePapersAutomaticallyCheckButton = NSButton; 
                 formatCleanRadio = NSMatrix; 
                 formatField = NSTextField; 
@@ -33,6 +32,7 @@
                 formatSheet = NSPanel; 
                 formatSheetField = NSTextField; 
                 formatWarningButton = NSButton; 
+                papersFolderLocationRadio = NSMatrix; 
                 papersFolderLocationTextField = NSTextField; 
                 previewDisplay = NSTextField; 
                 previewTextField = NSTextField; 
