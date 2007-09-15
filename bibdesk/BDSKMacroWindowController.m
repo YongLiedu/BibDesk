@@ -276,7 +276,7 @@
 
 - (IBAction)removeSelectedMacros:(id)sender{
     OBASSERT(isEditable);
-    NSArray *macrosToRemove = [[arrayController selectedObjects] valueForKey:@"name"];
+    NSArray *macrosToRemove = [[[arrayController arrangedObjects] objectsAtIndexes:[tableView selectedRowIndexes]] valueForKey:@"name"];
     NSEnumerator *keyEnum = [macrosToRemove objectEnumerator];
     NSString *key;
     
