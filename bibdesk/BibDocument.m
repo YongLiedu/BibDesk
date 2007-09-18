@@ -261,6 +261,17 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
 - (void)showWindows{
     [super showWindows];
     
+    // some xattr setup has to be done after the window is on-screen
+    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
+    
+    NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
+    if ([groupData length])
+        [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
+
+    [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
+    NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
+    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
+    
     // Get the search string keyword if available (Spotlight passes this)
     NSAppleEventDescriptor *event = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
     NSString *searchString = [[event descriptorForKeyword:keyAESearchText] stringValue];
@@ -279,17 +290,6 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
             [self setSearchString:searchString];
         }
     }
-    
-    // some xattr setup has to be done after the window is on-screen
-    NSDictionary *xattrDefaults = [self mainWindowSetupDictionaryFromExtendedAttributes];
-    
-    NSData *groupData = [xattrDefaults objectForKey:BDSKSelectedGroupsKey];
-    if ([groupData length])
-        [self selectGroups:[NSKeyedUnarchiver unarchiveObjectWithData:groupData]];
-
-    [self selectItemsForCiteKeys:[xattrDefaults objectForKey:BDSKSelectedPublicationsKey defaultObject:[NSArray array]] selectLibrary:NO];
-    NSPoint scrollPoint = [xattrDefaults pointForKey:BDSKDocumentScrollPercentageKey defaultValue:NSZeroPoint];
-    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollPoint];
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
