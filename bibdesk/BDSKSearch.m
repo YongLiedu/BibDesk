@@ -107,7 +107,11 @@
     [self setSearchString:aString];
     [self setOptions:opts];
     [self updateSearchResults];
-    [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
+    // if indexing is complete, all results are available immediately after the call to updateSearchResults
+    if ([searchIndex isIndexing])
+        [[self delegate] search:self didUpdateWithResults:[searchResults allObjects]];
+    else
+        [[self delegate] search:self didFinishWithResults:[searchResults allObjects]];
 }
 
 - (void)searchIndexDidUpdate:(BDSKSearchIndex *)anIndex;
