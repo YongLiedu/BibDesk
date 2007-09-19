@@ -21,7 +21,10 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIDescribeDatabase : WSGeneratedObj
+@interface BDSKWSGeneratedObj : WSGeneratedObj
+@end
+
+@interface BDSKISIDescribeDatabase : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_format:(NSString*) in_format;
@@ -37,7 +40,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIPublisherLinks : WSGeneratedObj
+@interface BDSKISIPublisherLinks : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_query in_jsetList:(NSString*) in_jsetList;
@@ -53,7 +56,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISICitingArticlesByRecids : WSGeneratedObj
+@interface BDSKISICitingArticlesByRecids : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_recids:(NSString*) in_recids in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -69,7 +72,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIRetrieveRecid : WSGeneratedObj
+@interface BDSKISIRetrieveRecid : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_recid:(NSString*) in_recid in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields;
@@ -85,7 +88,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISISharedReferences : WSGeneratedObj
+@interface BDSKISISharedReferences : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys;
@@ -101,7 +104,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIBrowseDictionary : WSGeneratedObj
+@interface BDSKISIBrowseDictionary : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_term:(NSString*) in_term in_index:(NSString*) in_index in_linesBefore:(SInt32) in_linesBefore in_linesAfter:(SInt32) in_linesAfter in_pageNumber:(SInt32) in_pageNumber in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions;
@@ -117,7 +120,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIMapTerms : WSGeneratedObj
+@interface BDSKISIMapTerms : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_index:(NSString*) in_index in_terms:(NSString*) in_terms;
@@ -133,7 +136,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISISummary : WSGeneratedObj
+@interface BDSKISISummary : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs;
@@ -149,7 +152,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIRetrieve : WSGeneratedObj
+@interface BDSKISIRetrieve : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKeys:(NSString*) in_primaryKeys in_sort:(NSString*) in_sort in_fields:(NSString*) in_fields;
@@ -165,7 +168,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISISearchRetrieve : WSGeneratedObj
+@interface BDSKISISearchRetrieve : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -181,7 +184,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISISearch : WSGeneratedObj
+@interface BDSKISISearch : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_query:(NSString*) in_query in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs;
@@ -197,7 +200,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISICitingArticles : WSGeneratedObj
+@interface BDSKISICitingArticles : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -213,7 +216,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIRetrieveLinks : WSGeneratedObj
+@interface BDSKISIRetrieveLinks : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_query in_jsetList:(NSString*) in_jsetList in_include:(NSString*) in_include in_exclude:(NSString*) in_exclude in_options:(NSString*) in_options;
@@ -229,7 +232,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISIRelatedRecords : WSGeneratedObj
+@interface BDSKISIRelatedRecords : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey in_depth:(NSString*) in_depth in_editions:(NSString*) in_editions in_sort:(NSString*) in_sort in_firstRec:(SInt32) in_firstRec in_numRecs:(SInt32) in_numRecs in_fields:(NSString*) in_fields;
@@ -245,7 +248,7 @@
  * Documentation:  <no documentation>
  */
 
-@interface BDSKISICitedReferences : WSGeneratedObj
+@interface BDSKISICitedReferences : BDSKWSGeneratedObj
 
 // update the parameter list for the invocation.
 - (void) setParameters:(NSString*) in_databaseID in_primaryKey:(NSString*) in_primaryKey;

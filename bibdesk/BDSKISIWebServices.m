@@ -7,6 +7,24 @@
 
 #import "BDSKISIWebServices.h"
 
+static NSString *BDSKISINamespace = nil;
+static NSString *BDSKISIEndpoint = nil;
+
+@implementation BDSKWSGeneratedObj
+
++ (void)initialize
+{
+    OBINITIALIZE;
+    BDSKISIEndpoint = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISIEndpoint"] copy];
+    if (nil == BDSKISIEndpoint)
+        BDSKISIEndpoint = @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve";
+    BDSKISINamespace = [[[NSUserDefaults standardUserDefaults] objectForKey:@"BDSKISINamespace"] copy];
+    if (nil == BDSKISINamespace)
+        BDSKISINamespace = @"http://esti.isinet.com/soap/search";
+}
+
+@end
+
 /*-
  *   Method Name:  describeDatabase
  * Documentation:  <no documentation>
@@ -33,12 +51,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"describeDatabase"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"describeDatabase"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -71,12 +89,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"publisherLinks"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"publisherLinks"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -121,12 +139,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"citingArticlesByRecids"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"citingArticlesByRecids"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -163,12 +181,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"retrieveRecid"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"retrieveRecid"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -201,12 +219,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"sharedReferences"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"sharedReferences"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -251,12 +269,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"browseDictionary"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"browseDictionary"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -291,12 +309,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"mapTerms"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"mapTerms"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -339,12 +357,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"summary"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"summary"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -381,12 +399,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"retrieve"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"retrieve"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -431,12 +449,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"searchRetrieve"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"searchRetrieve"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -477,12 +495,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"search"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"search"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -527,12 +545,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"citingArticles"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"citingArticles"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -571,12 +589,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"retrieveLinks"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"retrieveLinks"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -621,12 +639,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"relatedRecords"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"relatedRecords"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
@@ -659,12 +677,12 @@
 - (WSMethodInvocationRef) genCreateInvocationRef
 {
     return [self createInvocationRef    
-               /*endpoint*/: @"http://wok-ws.isiknowledge.com/esti/soap/SearchRetrieve"            
+               /*endpoint*/: BDSKISIEndpoint            
                  methodName: @"citedReferences"            
                  protocol: (NSString*) kWSSOAP2001Protocol            
                       style: (NSString*) kWSSOAPStyleRPC            
                  soapAction: @"citedReferences"            
-            methodNamespace: @"http://esti.isinet.com/soap/search"            
+            methodNamespace: BDSKISINamespace            
         ];        
 }
 
