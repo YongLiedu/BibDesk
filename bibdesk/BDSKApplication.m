@@ -85,25 +85,12 @@
     return [super sendAction:anAction to:theTarget from:sender];
 }
 
-static int indexOfWindowsMenuItemWithTarget(id target)
-{
-    NSMenu *windowsMenu = [NSApp windowsMenu];
-    int idx = [windowsMenu numberOfItems];
-    while (idx--) {
-        id itemTarget = [[windowsMenu itemAtIndex:idx] target];
-        if ([itemTarget isEqual:target]) {
-            break;
-        }
-    }
-    return idx;
-}    
-
 - (void)reorganizeWindowsItem:(NSWindow *)aWindow {
     NSMenu *windowsMenu = [self windowsMenu];
     NSWindowController *windowController = [aWindow windowController];
     NSWindowController *mainWindowController = [[[windowController document] windowControllers] objectAtIndex:0];
     int numberOfItems = [windowsMenu numberOfItems];
-    int itemIndex = indexOfWindowsMenuItemWithTarget(aWindow);
+    int itemIndex = [windowsMenu indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
     
     if (itemIndex != -1) {
         NSMenuItem *item = [windowsMenu itemAtIndex:itemIndex];
@@ -146,7 +133,7 @@ static int indexOfWindowsMenuItemWithTarget(id target)
             if (idx < numberOfItems && [[windowsMenu itemAtIndex:idx] isSeparatorItem] == NO)
                 [windowsMenu insertItem:[NSMenuItem separatorItem] atIndex:idx];
         } else {
-            int mainIndex = indexOfWindowsMenuItemWithTarget([mainWindowController window]);
+            int mainIndex = [windowsMenu indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
             int idx = mainIndex;
             
             [item setIndentationLevel:1];
@@ -165,7 +152,7 @@ static int indexOfWindowsMenuItemWithTarget(id target)
 }
 
 - (void)addWindowsItem:(NSWindow *)aWindow title:(NSString *)aString filename:(BOOL)isFilename {
-    int itemIndex = indexOfWindowsMenuItemWithTarget(aWindow);
+    int itemIndex = [[self windowsMenu] indexOfItemWithTarget:aWindow andAction:@selector(makeKeyAndOrderFront:)];
     
     [super addWindowsItem:aWindow title:aString filename:isFilename];
     
