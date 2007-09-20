@@ -266,17 +266,18 @@ static float BDSKScaleMenuFontSize = 11.0;
         else
             [self setScaleFactor:[self scaleFactor] adjustPopup:YES];
 
-        // hook it up
-        [scalePopUpButton setTarget:self];
-        [scalePopUpButton setAction:@selector(scalePopUpAction:)];
-
         // Make sure the popup is big enough to fit the largest cell
-        [scalePopUpButton setTitle:[[scalePopUpButton itemAtIndex:maxIndex] title]];
+        cnt = [scalePopUpButton indexOfSelectedItem];
+        [scalePopUpButton selectItemAtIndex:maxIndex];
         [scalePopUpButton sizeToFit];
-        [scalePopUpButton synchronizeTitleAndSelectedItem];
+        [scalePopUpButton selectItemAtIndex:cnt];
 
 		// don't let it become first responder
 		[scalePopUpButton setRefusesFirstResponder:YES];
+
+        // hook it up
+        [scalePopUpButton setTarget:self];
+        [scalePopUpButton setAction:@selector(scalePopUpAction:)];
 
         // put it in the scrollview
         [scrollView addSubview:scalePopUpButton];
