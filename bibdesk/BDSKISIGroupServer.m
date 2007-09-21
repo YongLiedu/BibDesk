@@ -343,6 +343,8 @@ static BibItem *createBibItemWithRecord(NSXMLNode *record)
         sourceField = BDSKBooktitleString;
     }
     
+    addStringToDictionaryIfNotNil([[(NSXMLElement *)record attributeForName:@"timescited"] stringValue], @"Timescited", pubFields);
+        
     while (nil != child) {
         
         NSString *name = [child name];
