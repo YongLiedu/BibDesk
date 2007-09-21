@@ -777,7 +777,9 @@
         // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
         if(row == -1 || op == NSTableViewDropAbove){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-		}else if(([type isEqualToString:NSFilenamesPboardType] == NO || [[info draggingPasteboard] containsUnparseableFile] == NO) &&
+		}
+        // We were checking -containsUnparseableFile here as well, but I think it makes sense to allow the user to target a specific row with any file type (including BibTeX).  Further, checking -containsUnparseableFile can be unacceptably slow (see bug #1799630), which ruins the dragging experience.
+        else if(([type isEqualToString:NSFilenamesPboardType] == NO) &&
                  [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
         }
