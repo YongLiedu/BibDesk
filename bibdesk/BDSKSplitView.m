@@ -77,15 +77,6 @@
     return self;
 }
 
-- (void)drawBlendedJoinEndAtLeftInRect:(NSRect)rect {
-    // this blends us smoothly with the a vertical divider on our left
-    Class svClass = [self class];
-    [[NSBezierPath bezierPathWithRect:rect] fillPathWithColor:[svClass startColor]
-                                                 blendedAtRight:NO
-                                  ofVerticalGradientFromColor:[svClass startColor]
-                                                      toColor:[svClass endColor]];
-}
-
 - (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
     // this blends us smoothly with the status bar
     [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
@@ -105,7 +96,7 @@
             [self drawBlendedJoinEndAtBottomInRect:endRect];
         } else {
             NSDivideRect(aRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
-            [self drawBlendedJoinEndAtLeftInRect:endRect];
+            [[NSBezierPath bezierPathWithRect:endRect] fillPathVertically:[self isVertical] withStartColor:[CIColor clearColor] endColor:[[self class] startColor]];
         }
     }
     // Draw dimple
