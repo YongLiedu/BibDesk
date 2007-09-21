@@ -175,7 +175,7 @@ static inline BOOL dataHasUnicodeByteOrderMark(NSData *data)
 - (NSString *)initWithContentsOfFile:(NSString *)path encoding:(NSStringEncoding)encoding guessEncoding:(BOOL)try;
 {
     if(self = [self init]){
-        NSData *data = [[NSData alloc] initWithContentsOfFile:path];
+        NSData *data = [[NSData alloc] initWithContentsOfFile:path options:NSMappedRead error:NULL];
 
         NSString *string = nil;
         if(encoding > 0)
