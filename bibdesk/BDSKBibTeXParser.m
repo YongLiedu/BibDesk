@@ -105,14 +105,13 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
 
     AGRegex *btRegex = [[AGRegex alloc] initWithPattern:/* spaces       */ @"^[ \\t]*"
                                                         /* type of item */ @"@[[:alpha:]]+[ \\t]*[{(]" 
-                                                        /* spaces       */ @"[ \\n\\t]*" 
+                                                        /* spaces       */ @"[ \\n\\r\\t]*" 
                                                         /* cite key     */ @"[a-zA-Z0-9\\.,:/*!&$^_-]+?" 
-                                                        /* spaces       */ @"[ \\n\\t]*," 
+                                                        /* spaces       */ @"[ \\n\\r\\t]*," 
                                                 options:AGRegexMultiline];
     
-    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
-    NSString *normalizedString = [string stringByNormalizingSpacesAndLineBreaks];
-    BOOL found = ([btRegex findInString:normalizedString] != nil);
+    // AGRegex doesn't recognize \r as a $ (bug #1420791), but normalizing is slow; use \r\n in regex instead
+    BOOL found = ([btRegex findInString:string] != nil);
     [btRegex release];
     return found;
 }
@@ -121,10 +120,7 @@ static BOOL addValuesFromEntryToDictionary(AST *entry, NSMutableDictionary *dict
 	// ^(@[[:alpha:]]+{),?$ will grab either "@type{,eol" or "@type{eol", which is what we get from Bookends and EndNote, respectively.
     // same regex used in -[NSString stringWithPhoneyCiteKeys:]
 	AGRegex *theRegex = [[AGRegex alloc]  initWithPattern:@"^[ \\t]*@[[:alpha:]]+[ \\t]*{[ \\t]*,?$" options:AGRegexMultiline];
-    
-    // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
-    NSString *normalizedString = [string stringByNormalizingSpacesAndLineBreaks];
-    BOOL found = ([theRegex findInString:normalizedString] != nil);
+    BOOL found = ([theRegex findInString:string] != nil);
     [theRegex release];
 				
     return found;

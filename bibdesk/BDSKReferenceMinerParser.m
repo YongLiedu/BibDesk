@@ -56,7 +56,7 @@
 @implementation BDSKReferenceMinerParser
 
 + (BOOL)canParseString:(NSString *)string{
-    string = [string stringByNormalizingSpacesAndLineBreaks];
+    string = [[string substringToIndex:MIN([string length], (unsigned)100)] stringByNormalizingSpacesAndLineBreaks];
     return [string isRefMinerPubMedString] || [string isRefMinerLoCString] || [string isRefMinerAmazonString];
 }
 

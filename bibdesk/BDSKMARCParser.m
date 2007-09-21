@@ -402,14 +402,14 @@ static void addSubstringToDictionary(NSString *subValue, NSMutableDictionary *pu
 
 - (BOOL)isFormattedMARCString{
     AGRegex *regex = [AGRegex regexWithPattern:@"^[ \t]*LDR[ \t]+[ \\-0-9]{5}[a-z]{3}[ \\-a][ a\\-0-9]22[ \\-0-9]{5}[ \\-1-8uz][ \\-a-z][ \\-r]45[ 0A-Z]0\n{1,2}[ \t]*[0-9]{3}[ \t]+" options:AGRegexMultiline];
-    
-    return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
+    unsigned maxLen = MIN([self length], (unsigned)100);
+    return nil != [regex findInString:[[self substringToIndex:maxLen] stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (BOOL)isMARCXMLString{
     AGRegex *regex = [AGRegex regexWithPattern:@"<record( xmlns=\"[^<>\"]*\")?>\n *<leader>[ 0-9]{5}[a-z]{3}[ a]{2}22[ 0-9]{5}[ 1-8uz][ a-z][ r]45[ 0A-Z]0</leader>\n *<controlfield tag=\"00[0-9]\">"];
-    
-    return nil != [regex findInString:[self stringByNormalizingSpacesAndLineBreaks]];
+    unsigned maxLen = MIN([self length], (unsigned)100);
+    return nil != [regex findInString:[[self substringToIndex:maxLen] stringByNormalizingSpacesAndLineBreaks]];
 }
 
 - (NSString *)stringByFixingFormattedMARCStart{
