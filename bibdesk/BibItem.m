@@ -71,7 +71,6 @@
 #import "BDSKSkimReader.h"
 #import "BDSKCitationFormatter.h"
 
-
 static NSString *BDSKDefaultCiteKey = @"cite-key";
 static NSSet *fieldsToWriteIfEmpty = nil;
 
@@ -378,6 +377,7 @@ static CFDictionaryRef selectorTable = NULL;
     [dateModified release];
     [fileOrder release];
     [identifierURL release];
+    [allFilePaths release];
     [super dealloc];
 }
 
@@ -2390,6 +2390,35 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
 #pragma mark -
 #pragma mark URL handling
 
+static NSComparisonResult sortURLsByType(NSURL *first, NSURL *second, void *unused)
+{
+    BOOL firstIsFile = [first isFileURL];
+    BOOL secondIsFile = [second isFileURL];
+    
+    if (firstIsFile && secondIsFile)
+        return [[first lastPathComponent] caseInsensitiveCompare:[second lastPathComponent]];
+    else if (firstIsFile)
+        return NSOrderedAscending;
+    else return NSOrderedDescending;
+}
+
+- (NSArray *)allFilePaths
+{
+    if (nil == allFilePaths) {
+        NSEnumerator *fe = [[[BDSKTypeManager sharedManager] allURLFieldsSet] objectEnumerator];
+        allFilePaths = [NSMutableArray new];
+        NSString *field;
+        NSURL *aURL;
+        while (field = [fe nextObject]) {
+            aURL = [self URLForField:field];
+            if (aURL)
+                [allFilePaths addObject:aURL];
+        }
+        [allFilePaths sortUsingFunction:sortURLsByType context:NULL];
+    }
+    return allFilePaths;
+}
+
 - (NSURL *)remoteURL{
 	return [self remoteURLForField:BDSKUrlString];
 }
@@ -3138,12 +3167,17 @@ Boolean stringContainsLossySubstring(NSString *theString, NSString *stringToFind
         
         // the URL cache is certainly invalid now
         [cachedURLs removeAllObjects];
+        [allFilePaths release];
+        allFilePaths = nil;
 	}else if(key != nil){
 		[groups removeObjectForKey:key];
 	}
     
-    if([key isURLField])
+    if([key isURLField]) {
         [cachedURLs removeObjectForKey:key];
+        [allFilePaths release];
+        allFilePaths = nil;
+    }
 	
     NSCalendarDate *theDate = nil;
     

@@ -54,6 +54,7 @@
 @class BDSKAlert;
 @class BibAuthor;
 @class BDSKZoomablePDFView;
+@class FileView;
 
 /*!
     @class BibEditor
@@ -156,6 +157,9 @@
 	
     NSString *promisedDragFilename;
     NSURL *promisedDragURL;
+    
+    IBOutlet FileView *fileView;
+    NSMutableArray *_files;
 }
 
 /*!

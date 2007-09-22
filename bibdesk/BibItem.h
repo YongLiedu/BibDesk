@@ -79,6 +79,7 @@ enum {
     BOOL isImported;
     float searchScore;
     NSURL *identifierURL;
+    NSMutableArray *allFilePaths;
 }
 
 /*!

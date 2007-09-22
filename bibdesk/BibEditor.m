@@ -81,6 +81,7 @@
 #import "BDSKCitationFormatter.h"
 #import "BDSKNotesWindowController.h"
 #import "BDSKSkimReader.h"
+#import <FileView/FileView.h>
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -91,6 +92,71 @@ enum{
 	BDSKDrawerStateOpenMask = 4,
 	BDSKDrawerStateRightMask = 8,
 };
+
+@interface PosingSplitView : NSSplitView
+@end
+
+@implementation PosingSplitView
+/*
+ FileView uses mouseDragged: for dragging, but NSSplitView swallows those events in its own mini-event loop.  I consider this a bug, since NSSplitView is only useful as a container view, unlike NSButton.
+ */
++ (void)load
+{
+    NSAutoreleasePool *p = [NSAutoreleasePool new];
+    [self poseAsClass:NSClassFromString(@"NSSplitView")];
+    [p release];
+}
+
+- (void)mouseDown:(NSEvent *)event;
+{
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSRect f1, f2;
+    NSEnumerator *se = [[self subviews] objectEnumerator];
+    NSView *v1, *v2;
+    v1 = [se nextObject];
+    BOOL inDivider = NO;
+    while (v2 = [se nextObject]) {
+        
+        f1 = [v1 frame];
+        f2 = [v2 frame];
+        if ([self isVertical]) {
+            
+            NSRect left, right;
+            if (f1.origin.x > f2.origin.x) {
+                left = f2;
+                right = f1;
+            }
+            else {
+                left = f1;
+                right = f2;
+            }
+            
+            if (NSMinX(right) > p.x && p.x > NSMaxX(left))
+                inDivider = YES;
+        }
+        else {
+            NSRect top, bottom;
+            if (f1.origin.y > f2.origin.y) {
+                top = f1;
+                bottom = f2;
+            }
+            else {
+                bottom = f1;
+                top = f2;
+            }
+            
+            if (NSMinY(top) > p.y && p.y > NSMaxY(bottom))
+                inDivider = YES;
+        }
+    }
+    
+    if (inDivider)
+        [super mouseDown:event];
+    else
+        [[self nextResponder] mouseDown:event];
+}
+
+@end
 
 // offset of the form from the left window edge
 #define FORM_OFFSET 13.0
@@ -111,6 +177,37 @@ enum{
 
 @implementation BibEditor
 
+- (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView { return [_files count]; }
+- (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)idx;
+{
+    return [_files objectAtIndex:idx];
+}
+
+- (BOOL)allowsEditingFileView:(FileView *)aView { return YES; }
+
+- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
+{
+    if ([_files count] > [aSet count]) {
+        [_files replaceObjectsAtIndexes:aSet withObjects:newURLs];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+{
+    if ([_files count] >= [indexSet count]) {
+        [_files removeObjectsAtIndexes:indexSet];
+        return YES;
+    }
+    return NO;
+}
+
+- (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
+{
+    [_files insertObjects:absoluteURLs atIndexes:aSet];
+}
+
 - (NSString *)windowNibName{
     return @"BibEditor";
 }
@@ -129,6 +226,8 @@ enum{
         
         forceEndEditing = NO;
         didSetupForm = NO;
+        _files = [NSMutableArray new];
+        [_files addObjectsFromArray:[aBib valueForKey:@"allFilePaths"]];
     }
     return self;
 }
@@ -285,10 +384,11 @@ enum{
 		// we must be loading the drawer
 		[self setupDrawer];
 	}
-    
+    [fileView setDataSource:self];
 }
 
 - (void)dealloc{
+    [_files release];
     [publication release];
 	[authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];

@@ -118,6 +118,7 @@
 #import "BibItem_PubMedLookup.h"
 #import "BDSKItemSearchIndexes.h"
 #import "PDFDocument_BDSKExtensions.h"
+#import <FileView/FileView.h>
 
 // these are the same as in Info.plist
 NSString *BDSKBibTeXDocumentType = @"BibTeX Database";
@@ -251,6 +252,9 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     [webGroupViewController release];
     [searchIndexes release];
     [searchButtonController release];
+    [[[fileviewBox contentView] documentView] setDelegate:nil];
+    [fileviewBox release];
+    [fileviewSlider release];
     [super dealloc];
 }
 
@@ -1863,7 +1867,7 @@ originalContentsURL:(NSURL *)absoluteOriginalContentsURL
     // @@ BDSKStringParser doesn't handle any BibTeX types, so it's not really useful as a funnel point for any string type, since each usage requires special casing for BibTeX.
     if(BDSKUnknownStringType == type)
         type = [string contentStringType];
-    
+        
     if(type == BDSKBibTeXStringType){
         newPubs = [BDSKBibTeXParser itemsFromString:string document:self isPartialData:&isPartialData error:&parseError];
     }else if(type == BDSKNoKeyBibTeXStringType){
@@ -2614,6 +2618,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
         currentPreviewView = view;
         [[previewer progressOverlay] overlayView:currentPreviewView];
+        if ([fileviewSlider superview])
+            [fileviewSlider removeFromSuperview];
     }
     [self updatePreviewer:previewer];
     
@@ -2629,6 +2635,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [view setFrame:[currentPreviewView frame]];
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
         currentPreviewView = view;
+        if ([fileviewSlider superview])
+            [fileviewSlider removeFromSuperview];
     }
     NSFont *font = [NSFontManager bodyFontForFamily:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey]];
     NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:errorMessage attributeName:NSFontAttributeName attributeValue:font];
@@ -2636,10 +2644,123 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
     [attrString release];
 }
 
+static void addValueFromArrayToBag(const void *value, void *context)
+{
+    CFBagAddValue(context, value);
+}
+
+static void addAllURLsToBag(const void *value, void *context)
+{
+    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value allFilePaths];
+    CFArrayApplyFunction(fpaths, CFRangeMake(0, CFArrayGetCount(fpaths)), addValueFromArrayToBag, context);
+}
+
+// delegate must return an NSString path or nil for each index < numberOfFiles
+- (NSUInteger)countOfFileViewURLs;
+{
+    NSArray *selPubs = [self selectedPublications];
+    if (nil == selPubs) return 0;
+    CFMutableBagRef bag = CFBagCreateMutable(NULL, 0, NULL);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToBag, bag);
+    unsigned cnt = CFBagGetCount(bag);
+    CFRelease(bag);
+    return cnt;
+}
+
+static void addValueFromArrayToArray(const void *value, void *context)
+{
+    CFArrayAppendValue(context, value);
+}
+
+static void addAllURLsToArray(const void *value, void *context)
+{
+    CFArrayRef fpaths = (CFArrayRef)[(BibItem *)value allFilePaths];
+    CFArrayApplyFunction(fpaths, CFRangeMake(0, CFArrayGetCount(fpaths)), addValueFromArrayToArray, context);
+}
+
+- (NSURL *)objectInFileViewURLsAtIndex:(NSUInteger)idx;
+{
+    NSArray *selPubs = [self selectedPublications];
+    if (nil == selPubs) return nil;
+    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, NULL);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToArray, array);
+    NSString *path = [[(NSArray *)array objectAtIndex:idx] retain];    
+    CFRelease(array);
+    return [path autorelease];
+}
+
+- (NSArray *)allURLsForFileView
+{
+    NSArray *selPubs = [self selectedPublications];
+    if (nil == selPubs) return nil;
+    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    CFArrayApplyFunction((CFArrayRef)selPubs, CFRangeMake(0, [selPubs count]), addAllURLsToArray, array);
+    return [(id)array autorelease];    
+}
+
+- (void)getFileViewURL:(NSURL **)buffer range:(NSRange)aRange
+{
+    log_method();
+    [[self allURLsForFileView] getObjects:buffer range:aRange];
+}
+
 - (void)displayLocalURLInPreviewPane{
     NSView *view = [previewTextView enclosingScrollView];
     [[previewer progressOverlay] remove];
     [previewer updateWithBibTeXString:nil];
+    [fileviewArrayController rearrangeObjects];
+    
+    if (nil == fileviewBox) {
+        NSScrollView *sv = [[NSScrollView alloc] initWithFrame:[view frame]];
+        [sv setHasHorizontalScroller:NO];
+        [sv setHasVerticalScroller:YES];
+        [sv setAutohidesScrollers:YES];
+        FileView *fv = [[FileView alloc] initWithFrame:[view frame]];
+        [fv setDelegate:nil];
+        [fv setDataSource:nil];
+        [sv setDocumentView:fv];
+        [fv setBackgroundColor:[NSColor whiteColor]];
+        [fv release];
+        
+        fileviewArrayController = [[NSArrayController alloc] init];
+        [fileviewArrayController bind:@"content" toObject:self withKeyPath:@"self.fileViewURLs" options:nil];
+        [fv bind:@"iconURLs" toObject:fileviewArrayController withKeyPath:@"arrangedObjects" options:nil];
+        [fv bind:@"selectionIndexes" toObject:fileviewArrayController withKeyPath:@"selectionIndexes" options:nil];
+        
+        [sv setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+        fileviewBox = [[BDSKEdgeView alloc] initWithFrame:[view frame]];
+        [fileviewBox setEdges:BDSKEveryEdgeMask];
+        [fileviewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
+        [fileviewBox setContentView:sv];
+        [sv release];
+        NSRect sliderFrame = [statusBar frame];
+        sliderFrame.size.height = 21;
+        sliderFrame.size.width = 100;
+        sliderFrame.origin.x = NSMaxX([statusBar frame]) - 120;
+        fileviewSlider = [[NSSlider alloc] initWithFrame:sliderFrame];
+        [[fileviewSlider cell] setControlSize:NSSmallControlSize];
+        [fileviewSlider bind:@"value" toObject:fv withKeyPath:@"iconScale" options:nil];
+        [statusBar addSubview:fileviewSlider];
+        [fileviewSlider setMinValue:0.5];
+        [fileviewSlider setMaxValue:20];
+    }
+    view = fileviewBox;
+    if (currentPreviewView != view) {
+        [view setFrame:[currentPreviewView frame]];
+        [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
+        currentPreviewView = view;
+        if ([fileviewSlider superview] == nil) {
+            NSRect sliderFrame = [statusBar frame];
+            sliderFrame.size.height = 21;
+            sliderFrame.size.width = 100;
+            sliderFrame.origin.x = NSMaxX([statusBar frame]) - 120;
+            
+            [statusBar addSubview:fileviewSlider];
+            [fileviewSlider setFloatValue:[[[fileviewBox contentView] documentView] iconScale]];
+        }
+    }
+    //[[[fileviewBox contentView] documentView] reloadIcons];
+    return;
     
     NSURL *url = [[[self selectedPublications] firstObject] localURL];
     BOOL isDir;
@@ -2752,6 +2873,8 @@ static void applyChangesToCiteFieldsWithInfo(const void *citeField, void *contex
         [view setFrame:[currentPreviewView frame]];
         [[currentPreviewView superview] replaceSubview:currentPreviewView with:view];
         currentPreviewView = view;
+        if ([fileviewSlider superview])
+            [fileviewSlider removeFromSuperview];
     }
     
     if(NSIsEmptyRect([previewTextView visibleRect]))

@@ -408,6 +408,8 @@
 		F941B7EB08AA574200F04ECD /* BDSKOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F941B7E908AA574200F04ECD /* BDSKOverlay.m */; };
 		F945240C0B4B15A6000A5E12 /* searchDocIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = F945240B0B4B15A6000A5E12 /* searchDocIcon.icns */; };
 		F9463F4609436F7500CC4549 /* NSSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */; };
+		F94693F10CA5832300AC2772 /* FileView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F94693F00CA5832300AC2772 /* FileView.framework */; };
+		F94693F70CA5833D00AC2772 /* FileView.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F94693F00CA5832300AC2772 /* FileView.framework */; };
 		F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */; };
 		F9484D8E08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */; };
 		F9484D9008D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */; };
@@ -606,7 +608,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090 /* BibDesk */;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = BibDesk;
 		};
 		F9C7E5460BEA3C0500D65C7F /* PBXContainerItemProxy */ = {
@@ -749,6 +751,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				F94693F70CA5833D00AC2772 /* FileView.framework in CopyFiles */,
 				F9B801930B41E8D600A5A615 /* yaz.framework in CopyFiles */,
 				F9ABECC7086E12B700741FC5 /* BTParse.framework in CopyFiles */,
 				F9022FB107580A9600C3F701 /* AGRegex.framework in CopyFiles */,
@@ -873,7 +876,7 @@
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -1336,6 +1339,7 @@
 		F945240B0B4B15A6000A5E12 /* searchDocIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = searchDocIcon.icns; path = Images/searchDocIcon.icns; sourceTree = "<group>"; };
 		F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSSet_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSSet_BDSKExtensions.m; sourceTree = "<group>"; };
+		F94693F00CA5832300AC2772 /* FileView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FileView.framework; path = vendorsrc/amaxwell/FileView.framework; sourceTree = "<group>"; };
 		F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAsynchronousDOServer.h; sourceTree = "<group>"; };
 		F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAsynchronousDOServer.m; sourceTree = "<group>"; };
 		F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFDocument_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1577,6 +1581,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F94693F10CA5832300AC2772 /* FileView.framework in Frameworks */,
 				F9B801840B41E89500A5A615 /* yaz.framework in Frameworks */,
 				F9937E6C0AD82700001D1DFB /* QuartzCore.framework in Frameworks */,
 				F9937E4E0AD826EB001D1DFB /* Quartz.framework in Frameworks */,
@@ -1792,6 +1797,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F94693F00CA5832300AC2772 /* FileView.framework */,
 				F9B801830B41E89500A5A615 /* yaz.framework */,
 				F95ED6910B07BA4E00000BBF /* ExceptionHandling.framework */,
 				F92ECB6B09DEF86500A244D0 /* Security.framework */,
@@ -2743,6 +2749,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -4177,7 +4184,11 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 882;
 				DEBUG_INFORMATION_FORMAT = stabs;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../BuildProducts/Debug\"";
 				GCC_DEBUGGING_SYMBOLS = default;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -4226,7 +4237,11 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 882;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../BuildProducts/Debug\"";
 				GCC_AUTO_VECTORIZATION = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -4280,7 +4295,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 882;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../BuildProducts/Debug\"";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
