@@ -923,7 +923,7 @@
 		}
 	}
 	
-    if (foundUnique == NO && [fieldName isURLField]) {
+    if (errorMsg == nil && foundUnique == NO && [fieldName isURLField]) {
         errorMsg = NSLocalizedString(@"A unique specifier (%u, %U or %n) is required in format for URLs.", @"Error description");
     }
 	
