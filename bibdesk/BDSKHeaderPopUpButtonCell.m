@@ -132,6 +132,7 @@
     if ([self usesItemFromMenu])
         [headerCell setStringValue:[self title]];
 	[headerCell setState:[self isHighlighted]];
+	[headerCell setHighlighted:[self isHighlighted]];
 	[headerCell drawWithFrame:cellFrame inView:controlView];
 	
 	if (indicatorImage != nil) {
@@ -166,7 +167,7 @@
 	[path closePath];
     
     [NSGraphicsContext saveGraphicsState];
-	[[NSColor blackColor] set];
+	[[NSColor colorWithCalibratedWhite:0.0 alpha:0.85] set];
 	[path fill];
     [NSGraphicsContext restoreGraphicsState];
 
