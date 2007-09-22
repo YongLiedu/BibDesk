@@ -246,7 +246,10 @@
 
 + (CIColor *)clearColor;
 {
-    return [self colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.0];
+    static CIColor *color = nil;
+    if (nil == color)
+        color = [[self colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.0] retain];
+    return color;
 }
 
 @end
