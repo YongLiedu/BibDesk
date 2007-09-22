@@ -111,7 +111,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         shadowRect.size.width += 1.0;
         shadowRect.size.height += 1.0;
         if (NSIntersectsRect(rect, shadowRect)) {
-            [[NSColor lightGrayColor] set];
+            [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] set];
             NSRectFill(shadowRect);
         }
     }
