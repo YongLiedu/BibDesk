@@ -419,7 +419,7 @@
 					<key>File papers into the papers folder automatically</key>
 					<false/>
 					<key>Local-Url Clean Braces or TeX</key>
-					<integer>2</integer>
+					<integer>1</integer>
 					<key>Local-Url Format</key>
 					<string>%l%n0%e</string>
 					<key>Local-Url Format Preset</key>

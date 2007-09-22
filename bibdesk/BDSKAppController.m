@@ -260,8 +260,17 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         }
     }
     
+    int formatPreset = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatPresetKey];
+    NSArray *oldPresets = [NSArray arrayWithObjects:@"%L", @"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%e", nil];
+    NSArray *newPresets = [NSArray arrayWithObjects:@"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%n0%e", nil];
     formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
     error = nil;
+    
+    if (formatPreset > 0 && [[oldPresets objectAtIndex:formatPreset - 1] isEqualToString:formatString]) {
+        formatPreset = MAX(1, --formatPreset);
+        formatString = [newPresets objectAtIndex:formatPreset - 1];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatPreset forKey:BDSKLocalUrlFormatPresetKey];
+    }
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
