@@ -269,7 +269,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
     if (formatPreset > 0 && [[oldPresets objectAtIndex:formatPreset - 1] isEqualToString:formatString]) {
         formatPreset = MAX(1, --formatPreset);
         formatString = [newPresets objectAtIndex:formatPreset - 1];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatPreset forKey:BDSKLocalUrlFormatPresetKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:formatPreset forKey:BDSKLocalUrlFormatPresetKey];
     }
     
     if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
