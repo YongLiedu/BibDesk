@@ -122,4 +122,35 @@
     drawEnd = flag;
 }
 
+- (void)mouseDown:(NSEvent *)theEvent {
+    BOOL inDivider = NO;
+    NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSArray *subviews = [self subviews];
+    int i, count = [subviews count];
+    id view;
+    NSRect divRect;
+
+    for (i = 0; i < count - 1; i++) {
+        view = [subviews objectAtIndex:i];
+        divRect = [view frame];
+        if ([self isVertical]) {
+            divRect.origin.x = NSMaxX(divRect);
+            divRect.size.width = [self dividerThickness];
+        } else {
+            divRect.origin.y = NSMaxY(divRect);
+            divRect.size.height = [self dividerThickness];
+        }
+        
+        if (NSPointInRect(mouseLoc, divRect)) {
+            inDivider = YES;
+            break;
+        }
+    }
+    
+    if (inDivider)
+        [super mouseDown:theEvent];
+    else
+        [[self nextResponder] mouseDown:theEvent];
+}
+
 @end
