@@ -260,7 +260,7 @@ static NSArray *fixLegacyTableColumnIdentifiers(NSArray *tableColumnIdentifiers)
         }
     }
     
-    int formatPreset = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatPresetKey];
+    int formatPreset = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalUrlFormatPresetKey];
     NSArray *oldPresets = [NSArray arrayWithObjects:@"%L", @"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%e", nil];
     NSArray *newPresets = [NSArray arrayWithObjects:@"%l%n0%e", @"%a1/%Y%u0%e", @"%a1/%T5%n0%e", nil];
     formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
