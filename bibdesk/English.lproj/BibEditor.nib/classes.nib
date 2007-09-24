@@ -1,43 +1,29 @@
 {
     IBClasses = (
-        {
-            CLASS = BDSKContainerView; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {contentView = id; }; 
-            SUPERCLASS = NSView; 
-        }, 
+        {CLASS = BDSKContainerView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = BDSKContainerView; }, 
         {CLASS = BDSKEditorTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
-        {
-            CLASS = BDSKForm; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {dragSourceCell = id; }; 
-            SUPERCLASS = NSForm; 
-        }, 
+        {CLASS = BDSKForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
         {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
-            CLASS = BDSKImagePopUpButton; 
+            CLASS = BDSKImagePopUpButtonCell; 
             LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; }; 
-            SUPERCLASS = NSPopUpButton; 
+            SUPERCLASS = NSPopUpButtonCell; 
         }, 
+        {
+            CLASS = BDSKPreviewer; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {imagePreviewView = NSImageView; }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
         {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
-        {
-            ACTIONS = {startAnimation = id; stopAnimation = id; }; 
-            CLASS = BDSKStatusBar; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; textCell = id; }; 
-            SUPERCLASS = BDSKGradientView; 
-        }, 
+        {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
         {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
-        {
-            ACTIONS = {scalePopUpAction = id; }; 
-            CLASS = BDSKZoomablePDFView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = PDFView; 
-        }, 
+        {CLASS = BDSKUndoTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {
             ACTIONS = {
                 bibTypeDidChange = id; 
@@ -48,7 +34,6 @@
                 copyNotesForLinkedFile = id; 
                 createNewPubUsingCrossrefAction = id; 
                 deletePub = id; 
-                dismissChangeFieldNameSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 duplicateTitleToBooktitle = id; 
                 editNextPub = id; 
@@ -57,7 +42,6 @@
                 generateCiteKey = id; 
                 moveLinkedFile = id; 
                 openLinkedFile = id; 
-                openParentItem = id; 
                 openRemoteURL = id; 
                 raiseAddField = id; 
                 raiseChangeFieldName = id; 
@@ -65,8 +49,8 @@
                 revealLinkedFile = id; 
                 saveFileAsLocalUrl = id; 
                 selectCrossrefParentAction = id; 
-                setLocalURLPathFromMenuItem = NSMenuItem; 
-                setRemoteURLFromMenuItem = NSMenuItem; 
+                setLocalURLPathFromMenuItem = id; 
+                setRemoteURLFromMenuItem = id; 
                 showCiteKeyWarning = id; 
                 showNotesForLinkedFile = id; 
                 showPersonDetailCmd = id; 
@@ -85,27 +69,24 @@
                 authorTableView = NSTableView; 
                 bibFields = BDSKForm; 
                 bibTypeButton = NSPopUpButton; 
-                changeFieldNameSheet = NSPanel; 
                 citeKeyField = NSTextField; 
                 citeKeyTitle = NSTextField; 
                 citeKeyWarningButton = NSButton; 
                 documentSnoopButton = BDSKImagePopUpButton; 
                 documentSnoopDrawer = NSDrawer; 
-                documentSnoopImageView = PDFImageView; 
                 documentSnoopPDFView = BDSKZoomablePDFView; 
-                documentSnoopScrollView = NSScrollView; 
                 documentSnoopTextView = NSTextView; 
                 extraBibFields = NSMatrix; 
+                fieldSplitView = BDSKSplitView; 
                 fieldsAccessoryView = NSView; 
                 fieldsPopUpButton = NSPopUpButton; 
+                fileSplitView = BDSKSplitView; 
                 fileView = FileView; 
-                newFieldNameComboBox = NSComboBox; 
+                mainSplitView = BDSKSplitView; 
                 notesView = NSTextView; 
-                oldFieldNamePopUp = NSPopUpButton; 
                 pdfSnoopContainerView = NSView; 
                 remoteSnoopWebView = WebView; 
                 rssDescriptionView = NSTextView; 
-                splitView = OASplitView; 
                 statusBar = BDSKStatusBar; 
                 tabView = NSTabView; 
                 textSnoopContainerView = NSView; 
@@ -122,24 +103,7 @@
             SUPERCLASS = NSView; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSControl; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {CLASS = NSMenu; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSMenuItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {
-            ACTIONS = {changeFont = id; invertSelection = id; }; 
-            CLASS = NSTableView; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSControl; 
-        }, 
-        {CLASS = NSTextView; LANGUAGE = ObjC; SUPERCLASS = NSText; }, 
-        {CLASS = NSWindow; LANGUAGE = ObjC; SUPERCLASS = NSResponder; }, 
-        {
-            ACTIONS = {hideWindow = id; toggleShowingWindow = id; }; 
-            CLASS = NSWindowController; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSResponder; 
-        }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
         {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }
     ); 

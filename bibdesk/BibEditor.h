@@ -54,6 +54,7 @@
 @class BDSKAlert;
 @class BibAuthor;
 @class BDSKZoomablePDFView;
+@class BDSKSplitView;
 @class FileView;
 
 /*!
@@ -62,10 +63,12 @@
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
 @interface BibEditor : NSWindowController <BDSKFormDelegate> {
+	IBOutlet BDSKSplitView *mainSplitView;
+	IBOutlet BDSKSplitView *fileSplitView;
+	IBOutlet BDSKSplitView *fieldSplitView;
     IBOutlet NSPopUpButton *bibTypeButton;
     IBOutlet BDSKForm *bibFields;
     IBOutlet NSMatrix *extraBibFields;
-	IBOutlet OASplitView *splitView;
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
@@ -79,6 +82,8 @@
     BOOL ignoreFieldChange;
     // for the splitview double-click handling
     float lastMatrixHeight;
+    float lastFileViewWidth;
+    float lastAuthorsHeight;
 	
 	NSButtonCell *booleanButtonCell;
 	NSButtonCell *triStateButtonCell;
