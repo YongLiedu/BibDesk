@@ -44,6 +44,7 @@
 - (id)initWithFSRef:(FSRef *)aRef;
 - (id)initWithPath:(NSString *)aPath;
 - (id)initWithURL:(NSURL *)aURL;
+- (id)initWithBase64String:(NSString *)base64String relativeTo:(NSString *)basePath;
 + (id)fileWithURL:(NSURL *)aURL;
 
 - (NSURL *)fileURL;
@@ -52,5 +53,7 @@
 
 - (NSString *)path;
 - (NSString *)tildePath;
+
+- (NSString *)base64StringRelativeTo:(NSString *)basePath;
 
 @end

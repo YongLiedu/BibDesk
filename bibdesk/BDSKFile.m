@@ -38,7 +38,10 @@
 
 #import "BDSKFile.h"
 #import <OmniBase/assertions.h>
+#import <OmniFoundation/NSData-OFExtensions.h>
+#import <OmniFoundation/NSString-OFPathExtensions.h>
 #import "NSURL_BDSKExtensions.h"
+#import "BDAlias.h"
 
 // private subclasses returned by -[BDSKFile init...] methods
 
@@ -123,6 +126,25 @@ static Class BDSKFileClass = Nil;
     return [self initWithURL:[NSURL fileURLWithPath:aPath]];
 }
 
+- (id)initWithBase64String:(NSString *)base64String relativeTo:(NSString *)basePath;
+{
+    NSData *data = [[NSData alloc] initWithBase64String:base64String];
+	NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
+    NSString *error;
+	NSDictionary *dict = [NSPropertyListSerialization propertyListFromData:data
+												mutabilityOption:NSPropertyListImmutable
+														  format:&format 
+												errorDescription:&error];
+    NSData *aliasData = [dict objectForKey:@"aliasData"];
+    BDAlias *alias = [[[BDAlias alloc] initWithData:aliasData] autorelease];
+    NSString *relPath = [dict objectForKey:@"relativePath"];
+    NSString *fullPath = [alias fullPathNoUI];
+    [data release];
+    if (fullPath == nil || [[NSFileManager defaultManager] fileExistsAtPath:fullPath] == NO)
+        fullPath = [basePath stringByAppendingPathComponent:relPath];
+    return [self initWithPath:fullPath];
+}
+
 + (id)fileWithURL:(NSURL *)aURL { 
     return [[[self allocWithZone:NULL] initWithURL:aURL] autorelease]; 
 }
@@ -197,6 +219,26 @@ static Class BDSKFileClass = Nil;
 - (NSString *)tildePath;
 {
     return [[self path] stringByAbbreviatingWithTildeInPath];
+}
+
+- (NSString *)base64StringRelativeTo:(NSString *)basePath;
+{
+    NSString *fullPath = [self path];
+    NSString *relPath = [fullPath relativePathToFilename:basePath];
+    FSRef *fsRef = (FSRef *)[self fsRef];
+    
+    BDAlias *alias = nil;
+    if (fsRef)
+        alias = [[BDAlias alloc] initWithFSRef:fsRef];
+    else
+        alias = [[BDAlias alloc] initWithPath:fullPath];
+    NSDictionary *dict = [[NSDictionary alloc] initWithObjects:relPath, @"relativePath", [alias aliasData], @"aliasData", nil];
+    NSString *error;
+    NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict format:NSPropertyListBinaryFormat_v1_0 errorDescription:&error];
+    [alias release];
+    [dict release];
+    
+    return [data base64String];
 }
 
 @end
