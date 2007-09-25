@@ -257,12 +257,15 @@ enum{
     
     [self setWindowFrameAutosaveNameOrCascade:BDSKBibEditorFrameAutosaveName];
     
-    if ([self windowFrameAutosaveName]) {
-        // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
-        // Only do this when this window also autosaves the window frame
-        [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorMainSplitView"];
-        [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFieldSplitView"];
-        [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFileSplitView"];
+    // Setup the splitview autosave frames, should be done after the statusBar and splitViews are setup
+    [mainSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorMainSplitView"];
+    [fieldSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFieldSplitView"];
+    [fileSplitView setPositionAutosaveName:@"BDSKSplitView Frame BibEditorFileSplitView"];
+    if ([self windowFrameAutosaveName] == nil) {
+        // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
+        [mainSplitView setPositionAutosaveName:nil];
+        [fieldSplitView setPositionAutosaveName:nil];
+        [fileSplitView setPositionAutosaveName:nil];
     }
     
     formCellFormatter = [[BDSKComplexStringFormatter alloc] initWithDelegate:self macroResolver:[[publication owner] macroResolver]];

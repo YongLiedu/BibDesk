@@ -351,6 +351,11 @@ static NSString *BDSKSelectedGroupsKey = @"BDSKSelectedGroupsKey";
     // set autosave names first
 	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
     [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
+    if ([aController windowFrameAutosaveName] == nil) {
+        // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
+        [splitView setPositionAutosaveName:nil];
+        [groupSplitView setPositionAutosaveName:nil];
+    }
     
     // set previous splitview frames
     float fract;
