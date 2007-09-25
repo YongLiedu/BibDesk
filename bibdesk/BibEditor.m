@@ -191,7 +191,7 @@ enum{
     // Setup the splitview autosave frame, should be done after the statusBar is setup
     [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
     // Only autosave the frames when the window's autosavename is set to avoid inconsistencies
-    if ([self windowFrameAutosaveName] == nil) {
+    if ([self windowFrameAutosaveName] == nil)
         [splitView setPositionAutosaveName:nil];
     
     // Setup the form and the matrix
