@@ -1,0 +1,91 @@
+//
+//  BDSKCiteULikeParser.m
+//
+//  Created by Michael O. McCracken on 9/26/07.
+/*
+ This software is Copyright (c) 2007
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#import "BDSKCiteULikeParser.h"
+#import <WebKit/WebKit.h>
+#import "BibItem.h"
+#import "BDSKBibTeXParser.h"
+
+@implementation BDSKCiteULikeParser
+
++ (BOOL)canParseDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
+    
+    if (! [[url host] isEqualToString:@"www.citeulike.org"]){
+        return NO;
+    }
+    
+    
+    NSString *containsPreNode = @".//pre";
+   
+    NSError *error = nil;    
+
+    bool nodecountisok =  [[[xmlDocument rootElement] nodesForXPath:containsPreNode error:&error] count] > 0;
+
+    return nodecountisok;
+}
+
++ (NSArray *)itemsFromDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url error:(NSError **)outError{
+
+    NSMutableArray *items = [NSMutableArray arrayWithCapacity:0];
+    
+    
+    NSString *prePath = @".//pre";
+    
+    NSError *error = nil;    
+
+    NSArray *preNodes = [[xmlDocument rootElement] nodesForXPath:prePath
+                                                    error:&error];
+    
+    if ([preNodes count] < 1) return items;
+    
+    NSString *preString = [[preNodes objectAtIndex:0] stringValue];
+    
+    BOOL isPartialData = NO;
+    
+    NSArray* bibtexItems = [BDSKBibTeXParser itemsFromString:preString document:nil isPartialData:&isPartialData error:&error];
+    if (bibtexItems == nil){
+        if(outError) *outError = error;
+        return nil;
+    }
+    [items addObjectsFromArray:bibtexItems];
+
+    return items;  
+    
+}
+
+@end 
+
