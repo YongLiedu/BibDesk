@@ -11,6 +11,7 @@
 #import "BDSKHCiteParser.h"
 #import "BDSKCiteULikeParser.h"
 #import "BDSKACMDLParser.h"
+#import "BDSKHubmedParser.h"
 
 @implementation BDSKWebParser
 
@@ -24,6 +25,9 @@ static Class webParserClassForType(int stringType)
         case BDSKCiteULikeWebType:
             parserClass = [BDSKCiteULikeParser class];
             break;
+        case BDSKHubmedWebType:
+            parserClass = [BDSKHubmedParser class];
+            break;
 		case BDSKHCiteWebType: 
             parserClass = [BDSKHCiteParser class];
             break;
@@ -34,6 +38,8 @@ static Class webParserClassForType(int stringType)
 }
 
 + (int)webTypeOfDocument:(DOMDocument *)domDocument xmlDocument:(NSXMLDocument *)xmlDocument fromURL:(NSURL *)url{
+    if([BDSKHubmedParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
+        return BDSKHubmedWebType;
     if([BDSKCiteULikeParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
         return BDSKCiteULikeWebType;
     if([BDSKACMDLParser canParseDocument:domDocument xmlDocument:xmlDocument fromURL:url])
@@ -62,6 +68,7 @@ static Class webParserClassForType(int stringType)
         webType = [self webTypeOfDocument:domDocument xmlDocument:xmlDocument fromURL:url];
     
     parserClass = webParserClassForType(webType);
+    
     
     return [parserClass itemsFromDocument:domDocument xmlDocument:xmlDocument fromURL:url error:outError];
 }

@@ -121,6 +121,8 @@
 		45DB3E500CAADFC3001EACDA /* BDSKCiteULikeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */; };
 		45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */; };
 		45DB3E520CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */; };
+		45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */; };
+		45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -764,6 +766,7 @@
 				45DB3E4D0CAADFC3001EACDA /* BDSKACMDLParser.h in CopyFiles */,
 				45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */,
 				45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */,
+				45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -887,6 +890,8 @@
 		45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteULikeParser.m; sourceTree = "<group>"; };
 		45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSXMLNode_BDSKExtensions.h; sourceTree = "<group>"; };
 		45DB3E4C0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSXMLNode_BDSKExtensions.m; sourceTree = "<group>"; };
+		45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKHubmedParser.h; sourceTree = "<group>"; };
+		45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKHubmedParser.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
@@ -2102,6 +2107,8 @@
 		CE38FA8D091D267A00BCB69D /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
+				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
+				45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */,
 				45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */,
 				45DB3E4A0CAADFC3001EACDA /* BDSKCiteULikeParser.m */,
 				F9022C960758038000C3F701 /* BDSKBibTeXParser.m */,
@@ -3565,6 +3572,7 @@
 				45DB3E4E0CAADFC3001EACDA /* BDSKACMDLParser.m in Sources */,
 				45DB3E500CAADFC3001EACDA /* BDSKCiteULikeParser.m in Sources */,
 				45DB3E520CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m in Sources */,
+				45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,7 +13,8 @@ enum {
 	BDSKUnknownWebType = -1, 
     BDSKHCiteWebType,
     BDSKCiteULikeWebType,
-    BDSKACMDLWebType
+    BDSKACMDLWebType,
+    BDSKHubmedWebType
 };
 
 @interface BDSKWebParser : NSObject
