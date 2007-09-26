@@ -119,7 +119,16 @@ enum{
     return [_files objectAtIndex:idx];
 }
 
-- (BOOL)allowsEditingFileView:(FileView *)aView { return YES; }
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+{
+    NSArray *toMove = [[_files objectsAtIndexes:aSet] copy];
+    [_files removeObjectsAtArrangedObjectIndexes:aSet];
+    
+    aSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(anIndex, [aSet count])];
+    [_files insertObjects:toMove atArrangedObjectIndexes:aSet];
+    [toMove release];
+    return YES;
+}
 
 - (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
 {
