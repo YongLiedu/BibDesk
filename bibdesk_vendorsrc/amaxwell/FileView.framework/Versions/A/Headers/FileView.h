@@ -53,7 +53,7 @@
 - (NSIndexSet *)selectionIndexes;
 - (void)setSelectionIndexes:(NSIndexSet *)indexSet;
 
-// wrapper that calls bound array or datasource transparently
+// wrapper that calls bound array or datasource transparently; mainly for internal use
 - (NSURL *)iconURLAtIndex:(NSUInteger)anIndex;
 - (NSUInteger)numberOfIcons;
 
@@ -86,7 +86,7 @@
 // datasource must conform to this
 @interface NSObject (FileViewDataSource)
 
-// delegate must return an NSURL or nil for each index < numberOfFiles
+// delegate must return an NSURL or nil (a missing value) for each index < numberOfFiles
 - (NSUInteger)numberOfIconsInFileView:(FileView *)aFileView;
 - (NSURL *)fileView:(FileView *)aFileView URLAtIndex:(NSUInteger)index;
 
@@ -94,16 +94,18 @@
 
 @interface NSObject (FileViewDelegateDragAndDrop)
 
-// If the delegate implements allowsEditingFileView to return YES, all other methods in this informal protocol /must/ be implemented.  This method is only called when setting the delegate.
-- (BOOL)allowsEditingFileView:(FileView *)aView;
+// If a non-nil delegate is set, all methods in this informal protocol /must/ be implemented.
 
 // implement to do something (or nothing) with the dropped URLs
 - (void)fileView:(FileView *)aFileView insertURLs:(NSArray *)absoluteURLs atIndexes:(NSIndexSet *)aSet;
 
-// replaces the files at the given indexes; this may be a rearranging operation
-- (BOOL)fileView:(FileView *)fileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
+// the delegate may replace the files at the given indexes
+- (BOOL)fileView:(FileView *)aFileView replaceURLsAtIndexes:(NSIndexSet *)aSet withURLs:(NSArray *)newURLs;
 
-// does not delete the file from disk; just from the view
-- (BOOL)fileView:(FileView *)fileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
+// rearranging files in the view
+- (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
+
+// does not delete the file from disk; this is the delegate's responsibility
+- (BOOL)fileView:(FileView *)aFileView deleteURLsAtIndexes:(NSIndexSet *)indexSet;
 
 @end
