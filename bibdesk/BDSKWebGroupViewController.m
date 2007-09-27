@@ -114,10 +114,16 @@
 }
 
 - (IBAction)changeURL:(id)sender {
-	NSString *URLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
-    if ([NSString isEmptyString:[sender stringValue]] == NO
-        && [[sender stringValue] isEqualToString:URLString] == NO)
-        [webView takeStringURLFrom:sender];
+	NSString *currentURLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
+    NSString *newURLString = [sender stringValue];
+    
+    if ([NSString isEmptyString:newURLString]) return;
+    if ([newURLString isEqualToString:currentURLString]) return;
+    
+    if (! [newURLString hasPrefix:@"http://"]){
+        newURLString = [NSString stringWithFormat:@"http://%@", newURLString];
+    }
+    [[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:newURLString]]];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender {
