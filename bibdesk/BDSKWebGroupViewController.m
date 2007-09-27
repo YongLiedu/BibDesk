@@ -115,7 +115,8 @@
 
 - (IBAction)changeURL:(id)sender {
 	NSString *URLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
-    if ([NSString isEmptyString:[sender stringValue]] == NO && [[sender stringValue] isEqualToString:URLString] == NO)
+    if ([NSString isEmptyString:[sender stringValue]] == NO
+        && [[sender stringValue] isEqualToString:URLString] == NO)
         [webView takeStringURLFrom:sender];
 }
 
@@ -154,6 +155,9 @@
         [self setRetrieving:YES];
         [group setPublications:nil];
         loadingWebFrame = frame;
+        
+        NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
+        [[urlComboBox cell] setStringValue:url];
         
     } else if (loadingWebFrame == nil) {
         
@@ -195,6 +199,14 @@
         loadingWebFrame = nil;
     }
 }
+
+- (void)webView:(WebView *)sender didReceiveServerRedirectForProvisionalLoadForFrame:(WebFrame *)frame{
+    if (frame == loadingWebFrame){ 
+        NSString *url = [[[[frame provisionalDataSource] request] URL] absoluteString];
+        [[urlComboBox cell] setStringValue:url];
+    }
+}
+
 
 #pragma mark WebUIDelegate protocol
 
