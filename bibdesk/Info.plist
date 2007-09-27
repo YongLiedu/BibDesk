@@ -870,7 +870,7 @@
 					<key>BDSKSearchMenuTagKey</key>
 					<integer>0</integer>
 					<key>BDSKShouldShowWebGroup</key>
-					<false/>
+					<true/>
 					<key>BDSKShouldUsePDFMetadata</key>
 					<false/>
 					<key>BDSKShouldWritePDFMetadata</key>
