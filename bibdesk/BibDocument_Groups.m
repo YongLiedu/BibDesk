@@ -246,10 +246,15 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([self hasSearchGroupsSelected] == NO)
             [self hideSearchGroupView];            
             
-        if ([self hasWebGroupSelected] == NO)
+        if ([self hasWebGroupSelected] == NO){
             [self hideWebGroupView];
-        else
+        }else{
+            if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
+                newSortKey = BDSKImportOrderString;
+                docState.sortDescending = NO;
+            }  
             [self showWebGroupView];
+        }
         
         if ([self hasSearchGroupsSelected]) {
             if ([sortKey isEqualToString:BDSKImportOrderString] == NO) {
