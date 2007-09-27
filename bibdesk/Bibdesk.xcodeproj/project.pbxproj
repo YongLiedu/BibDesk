@@ -115,6 +115,8 @@
 		457538310B70170D00C0E49B /* BDSKWebGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382B0B70170D00C0E49B /* BDSKWebGroup.m */; };
 		457538330B70170D00C0E49B /* BDSKWebGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */; };
 		457538460B701ECD00C0E49B /* BDSKWebGroupView.nib in Resources */ = {isa = PBXBuildFile; fileRef = 457538400B701ECD00C0E49B /* BDSKWebGroupView.nib */; };
+		45BB77530CAC74AE00F6299B /* BDSKGoogleScholarParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */; };
+		45BB77540CAC74AE00F6299B /* BDSKGoogleScholarParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */; };
 		45DB3E4D0CAADFC3001EACDA /* BDSKACMDLParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */; };
 		45DB3E4E0CAADFC3001EACDA /* BDSKACMDLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */; };
 		45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */; };
@@ -767,6 +769,7 @@
 				45DB3E4F0CAADFC3001EACDA /* BDSKCiteULikeParser.h in CopyFiles */,
 				45DB3E510CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h in CopyFiles */,
 				45DB3E8E0CAAFED5001EACDA /* BDSKHubmedParser.h in CopyFiles */,
+				45BB77530CAC74AE00F6299B /* BDSKGoogleScholarParser.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -884,6 +887,8 @@
 		4575382C0B70170D00C0E49B /* BDSKWebGroupViewController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKWebGroupViewController.h; sourceTree = "<group>"; };
 		4575382D0B70170D00C0E49B /* BDSKWebGroupViewController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKWebGroupViewController.m; sourceTree = "<group>"; };
 		457538410B701ECD00C0E49B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKWebGroupView.nib; sourceTree = "<group>"; };
+		45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGoogleScholarParser.h; sourceTree = "<group>"; };
+		45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGoogleScholarParser.m; sourceTree = "<group>"; };
 		45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKACMDLParser.h; sourceTree = "<group>"; };
 		45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKACMDLParser.m; sourceTree = "<group>"; };
 		45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteULikeParser.h; sourceTree = "<group>"; };
@@ -893,7 +898,7 @@
 		45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKHubmedParser.h; sourceTree = "<group>"; };
 		45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKHubmedParser.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE11A6340AE6BB77008C47AC /* urlFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = urlFolderIcon.tiff; path = Images/urlFolderIcon.tiff; sourceTree = "<group>"; };
 		CE11AC080AE7E0DC008C47AC /* BDSKScriptGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScriptGroup.h; sourceTree = "<group>"; };
 		CE11AC090AE7E0DC008C47AC /* BDSKScriptGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScriptGroup.m; sourceTree = "<group>"; };
@@ -2107,6 +2112,7 @@
 		CE38FA8D091D267A00BCB69D /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
+				45BB77520CAC74AE00F6299B /* BDSKGoogleScholarParser.m */,
 				45DB3E8C0CAAFED5001EACDA /* BDSKHubmedParser.h */,
 				45DB3E8D0CAAFED5001EACDA /* BDSKHubmedParser.m */,
 				45DB3E480CAADFC3001EACDA /* BDSKACMDLParser.m */,
@@ -2265,6 +2271,7 @@
 		F918104307583A6E00CF822D /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				45BB77510CAC74AE00F6299B /* BDSKGoogleScholarParser.h */,
 				45DB3E470CAADFC3001EACDA /* BDSKACMDLParser.h */,
 				45DB3E490CAADFC3001EACDA /* BDSKCiteULikeParser.h */,
 				45DB3E4B0CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.h */,
@@ -3573,6 +3580,7 @@
 				45DB3E500CAADFC3001EACDA /* BDSKCiteULikeParser.m in Sources */,
 				45DB3E520CAADFC3001EACDA /* NSXMLNode_BDSKExtensions.m in Sources */,
 				45DB3E8F0CAAFED5001EACDA /* BDSKHubmedParser.m in Sources */,
+				45BB77540CAC74AE00F6299B /* BDSKGoogleScholarParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

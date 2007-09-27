@@ -14,7 +14,8 @@ enum {
     BDSKHCiteWebType,
     BDSKCiteULikeWebType,
     BDSKACMDLWebType,
-    BDSKHubmedWebType
+    BDSKHubmedWebType,
+    BDSKGoogleScholarWebType
 };
 
 @interface BDSKWebParser : NSObject
