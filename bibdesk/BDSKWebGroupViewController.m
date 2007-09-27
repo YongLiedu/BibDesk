@@ -118,7 +118,6 @@
     NSString *newURLString = [sender stringValue];
     
     if ([NSString isEmptyString:newURLString]) return;
-    if ([newURLString isEqualToString:currentURLString]) return;
     
     if (! [newURLString hasPrefix:@"http://"]){
         newURLString = [NSString stringWithFormat:@"http://%@", newURLString];
