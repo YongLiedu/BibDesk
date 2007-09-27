@@ -122,10 +122,10 @@ enum{
 - (BOOL)fileView:(FileView *)aFileView moveURLsAtIndexes:(NSIndexSet *)aSet toIndex:(NSUInteger)anIndex;
 {
     NSArray *toMove = [[_files objectsAtIndexes:aSet] copy];
-    [_files removeObjectsAtArrangedObjectIndexes:aSet];
+    [_files removeObjectsAtIndexes:aSet];
     
     aSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(anIndex, [aSet count])];
-    [_files insertObjects:toMove atArrangedObjectIndexes:aSet];
+    [_files insertObjects:toMove atIndexes:aSet];
     [toMove release];
     return YES;
 }
