@@ -218,7 +218,8 @@ error:(NSError **)outError{
     bt_initialize();
     bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
     bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
-    bt_set_stringopts(BTE_REGULAR, BTO_COLLAPSE);
+    // Passing BTO_COLLAPSE causes problems.  The comments on bt_postprocess_value indicate that BibTeX-style collapsing must take place /after/ pasting, but we do this with BDSKComplexString instead of BTO_PASTE.  See bug #1803091 for an example, although that case could be avoided by having bt_postprocess_string consider a single space " " as collapsed instead of deleting it.
+    bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
     
     NSString *tmpStr = nil;
     BOOL hadProblems = NO;
